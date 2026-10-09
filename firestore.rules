@@ -30,7 +30,7 @@ service cloud.firestore {
    let c = request.resource.data.character;
    return c.keys().hasOnly(['name','gender','classId'])
     && c.name is string && c.name.size() >= 2 && c.name.size() <= 32
-    && c.gender in ['male','female'] && c.classId == 'shaman';
+    && c.gender in ['male','female'] && c.classId in ['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
   }
   match /players/{uid}/saves/{slot} {
    function owner() { return request.auth != null && request.auth.uid == uid && slot in ['main','server-1','server-2']; }
@@ -39,7 +39,7 @@ service cloud.firestore {
     && (slot == 'main' || validCharacter());
    allow update: if owner() && validSave()
     && request.resource.data.revision == resource.data.revision + 1
-    && (slot == 'main' || (validCharacter() && request.resource.data.character == resource.data.character));
+    && (slot == 'main' || (validCharacter() && request.resource.data.character.name == resource.data.character.name && request.resource.data.character.gender == resource.data.character.gender));
   }
  }
 }

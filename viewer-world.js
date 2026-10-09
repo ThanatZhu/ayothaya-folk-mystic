@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {createAmbientMotion} from './ambient-motion.js';
-import {createGame} from './game-controls.js';
-import {createWorldUI} from './world-ui.js?v=08';
+import {createAmbientMotion} from './ambient-motion.js?v=09';
+import {createGame} from './game-controls.js?v=09';
+import {atlasPath,className} from './classes.js';
+import {atlasCell} from './sprite-motion.js';
+import {createWorldUI} from './world-ui.js?v=09';
 import {resolveMap} from './world-state.js';
 import {createLandscapeGuard} from './mobile-layout.js';
-import {prepareCloud} from './cloud-save.js?v=08';
+import {prepareCloud} from './cloud-save.js?v=09';
 import {captureSave,applySave} from './save-state.js';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
@@ -42,7 +44,7 @@ try {
  $('left').onclick=()=>turn(-1);$('right').onclick=()=>turn(1);$('in').onclick=()=>zoom(1.18);$('out').onclick=()=>zoom(1/1.18);
  $('reset').onclick=()=>{rotating=null;camera.position.copy(initial);camera.zoom=1;controls.target.copy(target);camera.updateProjectionMatrix();controls.update();};
  controls.addEventListener('start',()=>{rotating=null;});addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;if(e.code==='KeyQ')turn(-1);if(e.code==='KeyE')turn(1);});addEventListener('resize',resize);resize();
- const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas]=await Promise.all([new GLTFLoader().loadAsync('./'+map.model),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync('./assets/shaman-genders.png')]);
+ const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas]=await Promise.all([new GLTFLoader().loadAsync('./'+map.model),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId))]);
  const tiles={wood:frame(materials.image,[0,0,.5,.5],true),roof:frame(materials.image,[.5,0,.5,.5],true),sand:frame(materials.image,[0,.5,.5,.5],true),grass:frame(materials.image,[.5,.5,.5,.5],true)},cache=new Map();
  for(const [key,rect] of Object.entries({brick:[0,0,.5,.5],plaster:[.5,0,.5,.5],paving:[0,.5,.5,.5],meadow:[.5,.5,.5,.5]}))tiles[key]=frame(worldMaterials.image,rect,true);
  gltf.scene.traverse(o=>{if(o.isMesh){o.castShadow=!/Water|River water|Terrain|soil|fragment/.test(o.name);o.receiveShadow=true;const name=o.material.name.replace(/\.\d+$/,'');
@@ -61,8 +63,8 @@ try {
  const plants=[],characters=[];
  function plant(kind,x,y,w,h,flip=false){const s=sprite(botanic[kind],x,y,w,h);if(flip){s.material.map=botanic[kind].clone();s.material.map.repeat.x=-1;s.material.map.offset.x=1;}plants.push({sprite:s,kind});return s;}
  for(const [kind,x,z,w,h,flip] of map.plants){plant(kind,x,-z,w,h,flip);if(kind==='tree')shadow(x,-z,w*.3);}
- const heroHeight=1.8;
- characters.push({sprite:sprite(frame(heroAtlas.image,[account.character?.gender==='female'?.5:0,0,.5,1]),map.spawn.x,-map.spawn.z,heroHeight,heroHeight,.06),shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight});
+ const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(heroAtlas.image,atlasCell(account.character.gender,i)));
+ characters.push({sprite:sprite(heroFrames[0],map.spawn.x,-map.spawn.z,heroHeight,heroHeight,.06),shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  for(const n of map.npcs){const h=1.65;characters.push({sprite:sprite(personTextures[n.texture],n.x,-n.z,h,h,.06),shadow:shadow(n.x,-n.z,.4),height:h});}
  const flames=[];for(const [x,z] of [[-4,3.3],[4,3.3],[-7,-7],[7,-7]]){const l=new THREE.PointLight('#ffb53f',6,3.3,1.6);l.position.set(x,1.6,z);scene.add(l);flames.push(l);}
  const geo=new THREE.BufferGeometry(),positions=new Float32Array(90);let seed=2026;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
@@ -70,14 +72,17 @@ try {
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
  const motion=createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
- const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:map,isPaused:()=>landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
+ const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,gender:account.character.gender},isPaused:()=>landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
- const savedSettings=account.data?.settings;let motionPlaying=true;
+ document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
+ const portrait=document.querySelector('.portrait');portrait.style.backgroundImage='url('+atlasPath(account.character.classId)+')';portrait.style.backgroundSize='400% 200%';portrait.style.backgroundPosition='0% '+(account.character.gender==='female'?'100%':'0%');
+ portrait.style.imageRendering='pixelated';
+ const savedSettings=account.data?.settings;let motionPlaying=motion.running;
  if(savedSettings){
   camera.zoom=THREE.MathUtils.clamp(Number(savedSettings.zoom)||1,.65,2.7);
   if(Number.isFinite(savedSettings.azimuth))camera.position.setFromSphericalCoords(camera.position.distanceTo(controls.target),controls.getPolarAngle(),savedSettings.azimuth).add(controls.target);
-  if(savedSettings.motion===false){motion.toggle();motionPlaying=false;}
+  if(savedSettings.motion===false&&motionPlaying){motion.toggle();motionPlaying=false;}
   camera.updateProjectionMatrix();controls.update();
  }
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
@@ -91,6 +96,7 @@ try {
  addEventListener('keydown',e=>{if(e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey)toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
  worldUI=createWorldUI({catalog,map,game,scene,camera,account});
+ document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
  motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};
  $('load').remove();document.querySelectorAll('.camera-panel button,.attack-controls button').forEach(b=>b.disabled=false);

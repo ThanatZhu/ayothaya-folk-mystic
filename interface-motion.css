@@ -1,0 +1,11 @@
+/* UI motion never moves touch targets during combat. */
+.panel,.account-card,.world-dialog{animation:panel-arrive .32s ease-out both}
+button{transition:background-color .16s,border-color .16s,filter .16s,box-shadow .16s}button:hover{filter:brightness(1.12)}button:active{filter:brightness(.85)}
+.meter i,.target-meter i,.mob-label b{transition:width .12s linear}
+.skill.cooling strong{opacity:.45}.skill:not(.cooling):not(.no-mana):hover{box-shadow:inset 0 0 15px var(--skill-color)}
+#auto-attack.active{animation:auto-pulse 2s ease-in-out infinite}.portrait{animation:portrait-breathe 3s ease-in-out infinite;transform-origin:50% 90%}
+#npc-dialog:not([hidden]),#account-panel:not([hidden]) .account-card{animation:panel-arrive .3s ease-out both}
+#travel-loading:not([hidden]):after{content:' · · ·';display:inline-block;animation:travel-pulse 1.2s ease-in-out infinite}
+.world-card{transition:box-shadow .18s,border-color .18s}.world-card:hover{box-shadow:0 0 18px #dbbb692e}
+@keyframes panel-arrive{from{opacity:0}to{opacity:1}}@keyframes auto-pulse{50%{box-shadow:0 0 18px #94d9a94d}}@keyframes portrait-breathe{50%{filter:brightness(1.08)}}@keyframes travel-pulse{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}

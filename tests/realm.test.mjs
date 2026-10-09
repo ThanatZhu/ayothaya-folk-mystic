@@ -9,7 +9,7 @@ const hero={name:'มะลิ',gender:'female',classId:'shaman'};
 test('character validation accepts Thai and rejects markup and unavailable classes',()=>{
  assert.deepEqual(character({...hero,name:' มะลิ '}),hero);
  assert.throws(()=>character({...hero,name:'<script>'}));assert.throws(()=>character({...hero,name:' '}));
- assert.throws(()=>character({...hero,gender:'bad'}));assert.throws(()=>character({...hero,classId:'boxer'}));
+ assert.throws(()=>character({...hero,gender:'bad'}));assert.throws(()=>character({...hero,classId:'unknown'}));
 });
 test('entry belongs to both the selected server and account',()=>{
  const entry={owner:'alice',serverId:'server-1'};

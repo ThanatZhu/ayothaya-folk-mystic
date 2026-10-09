@@ -1,4 +1,4 @@
-import {guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js';
+import {guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=09';
 import {validateSave,nextRevision} from './save-state.js';
 import {deadline} from './firebase-client.js';
 export function createRealmStore({connection=null,owner='guest',catalog,storage}){
@@ -33,5 +33,10 @@ export function createRealmStore({connection=null,owner='guest',catalog,storage}
   const revision=await sdk.runTransaction(db,async tx=>{const old=await tx.get(r);const revision=nextRevision(old.exists()?old.data().revision:0,record.revision);tx.set(r,{character:record.character,state,revision,updatedAt:sdk.serverTimestamp()});return revision;});
   return {character:record.character,state,revision};
  }
- return {load,create,save,cloud,owner};
+ async function changeClass(server,record,classId){
+  const updated=character({...record.character,classId});
+  // Preserve identity, map and progress. Existing cooldowns carry over to prevent reset exploits.
+  return save(server,{...record,character:updated},record.state);
+ }
+ return {load,create,save,changeClass,cloud,owner};
 }

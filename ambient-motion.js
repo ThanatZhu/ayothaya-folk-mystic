@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 /** Deterministic, frame-rate-independent ambient animation. No timers or new assets. */
 export function createAmbientMotion({scene,world,waterMaterial,plants,characters,leafSources}){
- const clock={value:0};let running=true;
+ const clock={value:0};let running=!matchMedia('(prefers-reduced-motion:reduce)').matches;
  let seed=708;const random=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
  const nodes=[];world.traverse(o=>{if(o.isMesh)nodes.push(o);});
  const named=(o,prefix)=>o.name.replaceAll('_',' ').startsWith(prefix);
@@ -118,7 +118,7 @@ export function createAmbientMotion({scene,world,waterMaterial,plants,characters
   const rp=ropeGeometry.attributes.position;
   for(let i=0;i<9;i++){const f=i/8;rp.setXYZ(i,THREE.MathUtils.lerp(ropeStart.x,ropeEnd.x,f),THREE.MathUtils.lerp(ropeStart.y,ropeEnd.y,f)-Math.sin(f*Math.PI)*.13,THREE.MathUtils.lerp(ropeStart.z,ropeEnd.z,f));}rp.needsUpdate=true;
   floating.forEach((o,i)=>{o.position.y=.009*Math.sin(t*1.35+i*.7);});
-  characters.forEach(({sprite,height},i)=>{sprite.scale.y=height*(1+.008*Math.sin(t*1.65+i*1.3));});
+  characters.forEach(({sprite,height},i)=>{sprite.scale.y=height*(1+.016*Math.sin(t*1.65+i*1.3));sprite.material.rotation=.014*Math.sin(t*.85+i*1.7);sprite.position.y=.06+.01*(1+Math.sin(t*1.1+i));});
   leaves.forEach((leaf,i)=>{
    const age=(t+leaf.phase)%leaf.duration,f=age/leaf.duration;
    dummy.position.set(leaf.x+age*.32+Math.sin(age*1.9+i)*.23,.12+leaf.y*(1-f),leaf.z+age*.095+Math.sin(age*1.2+i)*.28);

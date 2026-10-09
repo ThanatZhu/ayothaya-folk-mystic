@@ -1,3 +1,4 @@
+import {getClass,classSkills} from './classes.js';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[
  {key:'1',name:'ลูกไฟวิญญาณ',short:'ลูกไฟ',icon:'✦',cost:8,cd:2,range:6,damage:24,type:'bolt',color:'#70ead9'},
@@ -71,6 +72,7 @@ export function lineClear(a,b,nav=DEFAULT_NAV){
 }
 export class CombatWorld{
  constructor(config={}){
+  this.profession=getClass(config.classId??'shaman');this.skills=classSkills(this.profession.id,SKILLS);
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
   this.mobs=(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]]).map(([x,z,type],id)=>({id,type,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
@@ -89,21 +91,21 @@ export class CombatWorld{
  }
  basicAttack(quiet=false){
   const p=this.player;if(p.hp<=0||p.attackCD>0)return false;
-  let m=this.target;if(!m){m=this.nearest(3.3);if(m)this.select(m.id);}
+  let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   if(!m){if(!quiet)this.notice('เลือกมอนสเตอร์ หรือเข้าใกล้ก่อนโจมตี');return false;}
-  if(distance(p,m)>3.3||!lineClear(p,m,this.nav)){if(!quiet)this.notice('เข้าใกล้เป้าหมายอีกนิด หรือเปิด AUTO');return false;}
-  p.attackCD=.78;p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:'#a8edda',kind:'bolt'});this.hurt(m,14);return true;
+  if(distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(!quiet)this.notice('เข้าใกล้เป้าหมายอีกนิด หรือเปิด AUTO');return false;}
+  p.attackCD=this.profession.delay;p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});this.hurt(m,this.profession.damage);return true;
  }
  skill(index){
-  const s=SKILLS[index],p=this.player;if(!s||p.hp<=0)return false;
+  const s=this.skills[index],p=this.player;if(!s||p.hp<=0)return false;
   if(this.cooldowns[index]>0){this.notice('สกิลยังไม่พร้อม');return false;}
   if(p.mp<s.cost){this.notice('มานาไม่พอ');return false;}
   let m=this.target;
   if(s.range){m=m??this.nearest(s.range);if(!m||distance(p,m)>s.range||!lineClear(p,m,this.nav)){this.notice('เลือกมอนสเตอร์ในระยะสกิล');return false;}this.select(m.id);p.face={x:m.x-p.x,z:m.z-p.z};}
   p.mp-=s.cost;this.cooldowns[index]=s.cd;
-  if(s.type==='heal'){p.hp=Math.min(p.maxHp,p.hp+48);this.emit('heal',{x:p.x,z:p.z,amount:48,color:s.color});}
-  else if(s.type==='shield'){p.shield=8;this.notice('เกราะอาคม · ลดความเสียหาย 8 วินาที');}
-  else if(s.type==='mana'){p.mp=Math.min(p.maxMp,p.mp+48);this.notice('รวมจิต · มานา +48');}
+  if(s.type==='heal'){p.hp=Math.min(p.maxHp,p.hp+(s.heal??48));this.emit('heal',{x:p.x,z:p.z,amount:s.heal??48,color:s.color});}
+  else if(s.type==='shield'){p.shield=s.duration??8;this.notice(s.name+' · ลดความเสียหาย '+p.shield+' วินาที');}
+  else if(s.type==='mana'){p.mp=Math.min(p.maxMp,p.mp+48);this.notice(s.name+' · มานา +48');}
   else if(s.type==='dash'){const n=Math.hypot(p.face.x,p.face.z)||1;moveBody(p,p.face.x/n*2.8,p.face.z/n*2.8,this.nav);this.manualGrace=.7;this.path=[];}
   else if(s.type==='nova'){this.mobs.filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,s.damage,s.color));}
   else if(s.type==='area'){this.mobs.filter(v=>v.hp>0&&distance(v,m)<=s.radius&&lineClear(m,v,this.nav)).forEach(v=>this.hurt(v,s.damage,s.color));}
@@ -117,16 +119,16 @@ export class CombatWorld{
   if(p.hp<=0){p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
   if(this.safe)p.hp=Math.min(p.maxHp,p.hp+8*dt);
   const ox=p.x,oz=p.z,manual=Math.hypot(input.x,input.z)>.08;
-  if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*3.4*dt,input.z/n*3.4*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
+  if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*this.profession.speed*dt,input.z/n*this.profession.speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);
   if(this.auto&&!manual&&this.manualGrace===0){
    let m=this.target;if(!m||distance(m,this.anchor)>9||distance(m,p)>10){m=this.nearest(8);this.targetId=m?.id??null;this.path=[];}
    if(m){
-    if(distance(p,m)<=3.05&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
+    if(distance(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      if(this.pathTimer<=0){this.path=findPath(p,m,this.nav);this.pathTimer=.65;}
      while(this.path.length&&distance(p,this.path[0])<.16)this.path.shift();
-     const next=this.path[0];if(next){const d=distance(p,next)||1;const step=Math.min(d,3.4*dt);p.face={x:(next.x-p.x)/d,z:(next.z-p.z)/d};moveBody(p,p.face.x*step,p.face.z*step,this.nav);}
+     const next=this.path[0];if(next){const d=distance(p,next)||1;const step=Math.min(d,this.profession.speed*dt);p.face={x:(next.x-p.x)/d,z:(next.z-p.z)/d};moveBody(p,p.face.x*step,p.face.z*step,this.nav);}
     }
    }
   }

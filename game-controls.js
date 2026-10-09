@@ -1,8 +1,11 @@
 import * as THREE from 'three';
-import {CombatWorld,SKILLS,MONSTER_TYPES,screenDirection} from './combat-core.js';
+import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=09';
+
+import {className} from './classes.js';
+import {poseFrame} from './sprite-motion.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false}){
- const world=new CombatWorld(config),$=id=>document.getElementById(id),keys=new Set();
+ const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0;
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
  const mobViews=world.mobs.map(m=>{
@@ -19,17 +22,19 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  const targetRing=new THREE.Mesh(ringGeometry,new THREE.MeshBasicMaterial({color:'#ffd476',side:THREE.DoubleSide,transparent:true,opacity:.85}));targetRing.rotation.x=-Math.PI/2;scene.add(targetRing);
  const playerRing=new THREE.Mesh(ringGeometry,new THREE.MeshBasicMaterial({color:'#8de8d0',side:THREE.DoubleSide,transparent:true,opacity:.55}));playerRing.rotation.x=-Math.PI/2;playerRing.scale.setScalar(.78);scene.add(playerRing);
  const shield=new THREE.Mesh(new THREE.RingGeometry(.7,.74,40),new THREE.MeshBasicMaterial({color:'#edd592',side:THREE.DoubleSide,transparent:true,opacity:.55}));shield.rotation.x=-Math.PI/2;scene.add(shield);
- const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · หมอผี';$('world-labels').append(playerLabel);
+ const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · '+className(world.profession.id,config.gender);$('world-labels').append(playerLabel);
+ const motionPreference=matchMedia('(prefers-reduced-motion:reduce)');
  const effects=[],floats=[],fxRing=new THREE.RingGeometry(.75,.83,32),fxBall=new THREE.IcosahedronGeometry(.10,0),projection=new THREE.Vector3();
+ const fxArrow=new THREE.ConeGeometry(.065,.65,4),fxArc=new THREE.RingGeometry(.4,.52,24,1,0,Math.PI*1.25);
  function toast(text){$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number';el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
  function effect(e){
   if(e.type==='cast'){
-   castUntil=world.time+.24;
-   const bolt=e.kind==='bolt',mat=new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(bolt?fxBall:fxRing,mat);scene.add(mesh);
+   castUntil=world.time+.42;
+   const bolt=['bolt','arrow','blessing'].includes(e.kind),mat=new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(e.kind==='arrow'?fxArrow:e.kind==='slash'?fxArc:bolt?fxBall:fxRing,mat);scene.add(mesh);
    if(!bolt)mesh.rotation.x=-Math.PI/2;
-   effects.push({mesh,age:0,life:bolt?.25:.55,bolt,from:e.from,to:e.to,radius:e.radius??1});
+   effects.push({mesh,age:0,life:bolt?.25:.55,bolt,kind:e.kind,from:e.from,to:e.to,radius:e.radius??1});
   }else if(e.type==='damage'){popup(e);}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='playerHit'){popup({...e,color:'#ff987e'});hero.sprite.material.color.set('#ff9b83');}
@@ -108,9 +113,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const x=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joy.x,y=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)+joy.y;
   const direction=screenDirection(x,y,controls.getAzimuthalAngle());if(!paused)world.update(dt,{...direction,attack:input.attack||keys.has('Space')});
   world.events.splice(0).forEach(effect);
-  const p=world.player,t=world.time;
-  hero.sprite.position.set(p.x,p.z>4.25?.41:.06,p.z);if(p.moving)hero.sprite.position.y+=Math.abs(Math.sin(t*12))*.055;
-  hero.sprite.scale.set(1.8,1.8*(1+.006*Math.sin(t*2)),1);hero.sprite.material.rotation=p.moving?Math.sin(t*12)*.025:0;
+  const p=world.player,t=world.time,reduced=motionPreference.matches;
+  hero.sprite.position.set(p.x,p.z>4.25?.41:.06,p.z);if(p.moving&&!reduced)hero.sprite.position.y+=Math.abs(Math.sin(t*12))*.055;
+  const heroSize=hero.height??1.8;hero.sprite.scale.set(heroSize,heroSize*(1+(reduced?0:.012*Math.sin(t*2))),1);
+  if(hero.frames)hero.sprite.material.map=hero.frames[poseFrame({time:t,moving:p.moving,casting:t<castUntil,reduced})];hero.sprite.material.rotation=p.moving?(reduced?0:Math.sin(t*12)*.025):0;
   if(t<castUntil){hero.sprite.material.rotation=-.10;hero.sprite.scale.y*=1.04;}
   const facing=p.face.x*Math.cos(controls.getAzimuthalAngle())-p.face.z*Math.sin(controls.getAzimuthalAngle());hero.sprite.material.map.repeat.x=facing<0?-1:1;hero.sprite.material.map.offset.x=facing<0?1:0;
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
@@ -123,14 +129,17 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
    const m=world.mobs[i];v.sprite.visible=v.shadow.visible=m.hp>0;v.label.hidden=m.hp<=0;
    if(m.hp<=0)return;
    v.sprite.position.set(m.x,.06+Math.abs(Math.sin(t*2+m.id))*.025,m.z);v.shadow.position.set(m.x,.073,m.z);
-   v.sprite.scale.y=v.height*(1+.02*Math.sin(t*3+i));v.sprite.material.color.set(m.hit>0?'#fffbd1':m.root>0?'#9ddacc':'#fff1da');v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
+   const lunge=m.attackCD>1.05?Math.sin((1.4-m.attackCD)/.35*Math.PI):0;
+   v.sprite.scale.y=v.height*(1+(reduced?0:.035*Math.sin(t*3+i))-.10*lunge);v.sprite.scale.x=v.height*1.1*(1+.12*lunge);v.sprite.material.rotation=reduced?0:Math.sin(m.step*2)*.04+lunge*.12;
+   if(m.hit>0&&!reduced)v.sprite.position.x+=Math.sin(t*70)*.045;v.sprite.material.color.set(m.hit>0?'#fffbd1':m.root>0?'#9ddacc':'#fff1da');v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
    if(m.aggro){const side=(p.x-m.x)*Math.cos(controls.getAzimuthalAngle())-(p.z-m.z)*Math.sin(controls.getAzimuthalAngle());v.sprite.material.map.repeat.x=side>0?-1:1;v.sprite.material.map.offset.x=side>0?1:0;}
    project(v.label,m.x,v.height+.08,m.z);
   });
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}
   for(let i=effects.length-1;i>=0;i--){const e=effects[i];e.age+=dt;const f=e.age/e.life;
    if(f>=1){scene.remove(e.mesh);e.mesh.material.dispose();effects.splice(i,1);continue;}
-   if(e.bolt)e.mesh.position.set(THREE.MathUtils.lerp(e.from.x,e.to.x,f),.85+Math.sin(f*Math.PI)*.25,THREE.MathUtils.lerp(e.from.z,e.to.z,f));
+   if(e.bolt){e.mesh.position.set(THREE.MathUtils.lerp(e.from.x,e.to.x,f),.85+Math.sin(f*Math.PI)*.25,THREE.MathUtils.lerp(e.from.z,e.to.z,f));if(e.kind==='arrow'){const aim=new THREE.Vector3(e.to.x-e.from.x,0,e.to.z-e.from.z).normalize();e.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),aim);}}
+   else if(['slash','punch','thrust'].includes(e.kind)){e.mesh.position.set(e.to.x,.8,e.to.z);e.mesh.rotation.x=0;e.mesh.quaternion.copy(camera.quaternion);e.mesh.scale.set(.25+f*.6,e.kind==='thrust'?.12:.25+f*.5,1);}
    else{e.mesh.position.set(e.to.x,.15,e.to.z);e.mesh.scale.setScalar(e.radius*(.35+f));}e.mesh.material.opacity=1-f;
   }
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>1){f.el.remove();floats.splice(i,1);}else{project(f.el,f.x,1.6+f.age*.8,f.z);f.el.style.opacity=String(1-f.age*.8);}}

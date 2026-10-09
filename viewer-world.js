@@ -6,6 +6,8 @@ import {createGame} from './game-controls.js';
 import {createWorldUI} from './world-ui.js';
 import {resolveMap} from './world-state.js';
 import {createLandscapeGuard} from './mobile-layout.js';
+import {prepareCloud} from './cloud-save.js';
+import {captureSave,applySave} from './save-state.js';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
 function frame(image,rect,repeat=false){
@@ -18,7 +20,9 @@ let gameHandle=null;
 const landscape=createLandscapeGuard({onChange:()=>gameHandle?.clearInput()});
 try {
  const response=await fetch('./maps/world.json');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
- const catalog=await response.json(),map=resolveMap(catalog,new URLSearchParams(location.search).get('map'));
+ const catalog=await response.json(),account=await prepareCloud(catalog);
+ const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
+ history.replaceState(null,'','?map='+encodeURIComponent(map.id));
  let worldUI=null,overview=false;
 
  const renderer=new THREE.WebGLRenderer({antialias:false,alpha:false});renderer.setPixelRatio(1);
@@ -66,7 +70,16 @@ try {
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
  const motion=createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
- const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:map,isPaused:()=>landscape.blocked||overview||(worldUI?.paused??false)});gameHandle=game;
+ const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:map,isPaused:()=>landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
+ applySave(game.world,map,account.data);
+ const savedSettings=account.data?.settings;let motionPlaying=true;
+ if(savedSettings){
+  camera.zoom=THREE.MathUtils.clamp(Number(savedSettings.zoom)||1,.65,2.7);
+  if(Number.isFinite(savedSettings.azimuth))camera.position.setFromSphericalCoords(camera.position.distanceTo(controls.target),controls.getPolarAngle(),savedSettings.azimuth).add(controls.target);
+  if(savedSettings.motion===false){motion.toggle();motionPlaying=false;}
+  camera.updateProjectionMatrix();controls.update();
+ }
+ account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
  function toggleOverview(){
   overview=!overview;game.clearInput();rotating=null;
   const offset=camera.position.clone().sub(controls.target);
@@ -76,8 +89,9 @@ try {
  $('overview').onclick=toggleOverview;
  addEventListener('keydown',e=>{if(e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey)toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
- worldUI=createWorldUI({catalog,map,game,scene,camera});
- $('motion').onclick=()=>{const playing=motion.toggle();$('motion').textContent=playing?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!playing));};
+ worldUI=createWorldUI({catalog,map,game,scene,camera,account});
+ function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
+ motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};
  $('load').remove();document.querySelectorAll('.camera-panel button,.attack-controls button').forEach(b=>b.disabled=false);
  let lastMs=null;
  renderer.setAnimationLoop(ms=>{

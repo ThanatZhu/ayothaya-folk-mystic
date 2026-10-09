@@ -1,24 +1,27 @@
 import * as THREE from 'three';
 import {destinations,restoreTraveler,serializeTraveler} from './world-state.js';
 
-export function createWorldUI({catalog,map,game,scene,camera}){
+export function createWorldUI({catalog,map,game,scene,camera,account}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
  const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0;
- try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}
+ if(!account)try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}
  document.title=map.name+' · อโยธยา Folk Mystic';$('status').textContent=map.name+(map.safe?' · เมืองหลวง':'');
  document.querySelector('.player-heading small').textContent=map.safe?'เขตสงบ · พักฟื้นในเมืองหลวง':map.subtitle.split(' · ')[0];
  if(map.safe){$('target-name').textContent='เขตสงบ · เมืองหลวง';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
  $('mini-title').textContent=map.name;document.body.dataset.map=map.id;
- function travel(id){
+ async function travel(id){
   if(traveling||!reachable.has(id)||world.player.hp<=0)return;
   traveling=true;game.clearInput();
-  try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
+  $('travel-loading').hidden=false;$('travel-loading').textContent='กำลังเซฟและเดินทางไป '+lookup(id).name+'…';
+  if(account){
+   if(!await account.travel(lookup(id))){traveling=false;$('travel-loading').hidden=true;world.notice('เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return;}
+  }else try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
   $('travel-loading').hidden=false;$('travel-loading').textContent='กำลังเดินทางไป '+lookup(id).name+'…';
   location.assign('?map='+encodeURIComponent(id));
  }
- function openMap(){game.clearInput();conversation=null;$('npc-dialog').hidden=true;dialog.showModal();}
+ function openMap(){if(account?.paused)return;game.clearInput();conversation=null;$('npc-dialog').hidden=true;dialog.showModal();}
  $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{game.clearInput();$('open-world').focus();});
  $('world-grid').replaceChildren();

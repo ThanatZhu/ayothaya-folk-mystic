@@ -3,7 +3,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js';
 import {createGame} from './game-controls.js';
-import {createWorldUI} from './world-ui.js';
+import {createWorldUI} from './world-ui.js?v=08';
 import {resolveMap} from './world-state.js';
 import {createLandscapeGuard} from './mobile-layout.js';
 import {prepareCloud} from './cloud-save.js?v=08';

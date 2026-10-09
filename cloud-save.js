@@ -59,7 +59,9 @@ export async function prepareCloud(catalog){
  $('guest-play').onclick=()=>{mode='guest';blocked=false;data=readGuest();try{sessionStorage.setItem('ayothaya-guest-chosen','1');}catch{}close();};
  $('google-login').onclick=async()=>{
   if(busy||!auth)return;busy=true;$('google-login').disabled=true;
-  try{await save();const provider=new sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});await sdk.signInWithPopup(auth,provider);location.reload();}
+  // Open the popup directly in the tap handler (Safari loses activation across awaits).
+  try{if(bound)localStorage.setItem(guestKey,JSON.stringify(bound.capture()));}catch{}
+  try{const provider=new sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});await sdk.signInWithPopup(auth,provider);location.reload();}
   catch(error){say(errorText(error));}finally{busy=false;$('google-login').disabled=false;}
  };
  if(auth)sdk.onAuthStateChanged(auth,current=>{

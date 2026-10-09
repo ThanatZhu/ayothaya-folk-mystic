@@ -21,13 +21,21 @@
 
 เว็บเปิดเล่นได้ผ่านอินเทอร์เน็ต เกมรุ่นนี้เป็น **single-player prototype** พร้อม Google Login และเซฟผ่าน Firebase ไม่มีเซิร์ฟเวอร์ผู้เล่นร่วมโลกเดียวกัน
 
+## หน้าเข้าเกม
+
+หน้าแรกเป็นล็อบบีแยกจากฉากเกม: **Google Login / ทดลองเล่น → เซิร์ฟ 1 หรือ 2 → สร้างหรือเลือกตัวละคร → เข้าเกม** แต่ละบัญชีมีหนึ่งตัวละครต่อเซิร์ฟเวอร์ ตั้งชื่อ 2–16 ตัวและเลือกรูปลักษณ์ชาย/หญิงได้ อาชีพที่เล่นได้ตอนนี้คือหมอผี อาชีพอื่นยังอยู่ระหว่างพัฒนา
+
+ภาพหน้าเข้าเกมเป็น Ayutthaya Pixel Folk Mystic พร้อมโมชั่นละอองแสงและตัวละคร ปิดโมชั่นได้และเคารพ prefers-reduced-motion ตัวเกมโหลด 3D หลังเลือกตัวละครแล้วเท่านั้น `index.html` / `lobby.js` คือหน้าเข้าเกม และ `game.html` คือฉากเล่น
+
+เซิร์ฟ 1/2 เป็นพื้นที่แยกตัวละครและเซฟ ยังไม่ใช่เซิร์ฟเวอร์มัลติเพลเยอร์ เซฟต้นแบบเดิมถูกคัดลอกไปยังตัวละครแรกในเซิร์ฟ 1 โดยยังเก็บต้นฉบับไว้
+
 ## บัญชีและเซฟ
 
 กด **บัญชี / เซฟ → เข้าสู่ระบบด้วย Google** เพื่อเล่นต่อข้ามเครื่อง เซฟ HP/MP จำนวนมอนที่ปราบ คูลดาวน์ เมือง ตำแหน่ง ซูม มุมกล้อง และสถานะโมชั่น ทุก 30 วินาทีเมื่อมีข้อมูลเปลี่ยน ก่อนเปลี่ยนเมือง และก่อนออกจากระบบ มีปุ่มเซฟทันที และพยายามเซฟเมื่อสลับแท็บ การปิดแอปทันทีอาจทำให้ข้อมูลหลังเซฟครั้งล่าสุดยังไม่ส่งถึงคลาวด์
 
 โหมดเล่นบนเครื่องนี้เก็บใน localStorage แยกจากบัญชี Google ไม่ย้ายหรือเขียนทับตัวละครคลาวด์อัตโนมัติ ระบบเลเวล/EXP กระเป๋า อุปกรณ์ เงิน และเควสต์ยังไม่ถูกสร้าง จึงยังไม่มีข้อมูลเหล่านั้นให้บันทึก
 
-Firebase project: `ayothaya-folk-mystic`, Firestore Standard `(default)` ที่ `asia-southeast3` (Bangkok), Spark plan. เซฟอยู่ที่ `players/{uid}/saves/main`; กฎอนุญาตเฉพาะเจ้าของและตรวจรูปแบบข้อมูล ใช้ transaction/revision ป้องกันแท็บเก่าทับเซฟใหม่ เมื่อเกิดข้อขัดแย้งต้องโหลดเซฟล่าสุดก่อนเล่นต่อ
+Firebase project: `ayothaya-folk-mystic`, Firestore Standard `(default)` ที่ `asia-southeast3` (Bangkok), Spark plan. เซฟอยู่ที่ `players/{uid}/saves/server-1` และ `server-2`; `main` เก็บเซฟเก่าก่อนมีล็อบบี; กฎอนุญาตเฉพาะเจ้าของและตรวจรูปแบบข้อมูล ใช้ transaction/revision ป้องกันแท็บเก่าทับเซฟใหม่ เมื่อเกิดข้อขัดแย้งต้องโหลดเซฟล่าสุดก่อนเล่นต่อ
 
 นี่เป็นระบบเซฟต้นแบบฝั่ง client; กฎป้องกันการแก้เซฟคนอื่น แต่ยังไม่ตรวจผลการต่อสู้บนเซิร์ฟเวอร์ ก่อนเพิ่มการซื้อขาย อันดับ หรือเงินจริง ต้องย้ายการคำนวณรางวัลไปเซิร์ฟเวอร์
 
@@ -45,12 +53,14 @@ Firebase project: `ayothaya-folk-mystic`, Firestore Standard `(default)` ที�
 
 Blender เก็บ geometry/UV; ตัวละคร พืช พื้นผิว แสง และโมชั่นประกอบใน `viewer-world.js` กับ `ambient-motion.js` ภาพ PNG และพรอมป์จาก built-in ImageGen อยู่ใน `assets/`
 
-ส่วนเกม: `combat-core.js`, `game-controls.js`; การเดินทาง: `world-ui.js`, `world-state.js`; แนวนอนมือถือ: `mobile-layout.js`, `mobile-layout.css`
+ล็อบบีและเซิร์ฟ: `lobby.js`, `realm-state.js`, `realm-store.js`; ส่วนเกม: `combat-core.js`, `game-controls.js`; การเดินทาง: `world-ui.js`, `world-state.js`; แนวนอนมือถือ: `mobile-layout.js`, `mobile-layout.css`
 
 ## ตรวจสอบ
 
-32 automated tests ครอบคลุมการเดิน การชน ทางอ้อม ต่อสู้ จุดเกิดทุกเมือง ข้ามเมือง กฎแนวนอน การคืนค่าเซฟ และ revision conflict; ยังไม่ได้ยืนยัน hardware orientation lock หรือ multitouch ด้วยมือถือจริง
+38 automated tests ครอบคลุมการเดิน การชน ทางอ้อม ต่อสู้ จุดเกิดทุกเมือง ข้ามเมือง กฎแนวนอน การคืนค่าเซฟ และ revision conflict; ยังไม่ได้ยืนยัน hardware orientation lock หรือ multitouch ด้วยมือถือจริง
 
 ## เผยแพร่
 
 GitHub Pages ใช้ branch `main` ที่ root โฟลเดอร์นี้มี `.nojekyll` และใช้เส้นทาง relative เพื่อรองรับชื่อ repository ใน URL ผลัก commit ใหม่เพื่ออัปเดตเว็บ
+
+ภาพล็อบบีและตัวละครชาย/หญิงสร้างด้วย built-in ImageGen เก็บใน `assets/login-ayutthaya.png` และ `assets/shaman-genders.png` พรอมป์อยู่ใน `assets/lobby-prompts.json`

@@ -19,7 +19,7 @@ export function createWorldUI({catalog,map,game,scene,camera,account}){
    if(!await account.travel(lookup(id))){traveling=false;$('travel-loading').hidden=true;world.notice('เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return;}
   }else try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
   $('travel-loading').hidden=false;$('travel-loading').textContent='กำลังเดินทางไป '+lookup(id).name+'…';
-  location.assign('?map='+encodeURIComponent(id));
+  location.assign('?server='+account.serverId+'&map='+encodeURIComponent(id));
  }
  function openMap(){if(account?.paused)return;game.clearInput();conversation=null;$('npc-dialog').hidden=true;dialog.showModal();}
  $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();

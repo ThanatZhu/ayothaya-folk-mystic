@@ -6,7 +6,7 @@ service cloud.firestore {
    let d = request.resource.data;
    let s = d.state;
    let t = s.traveler;
-   return d.keys().hasOnly(['revision','updatedAt','state'])
+   return d.keys().hasOnly(['revision','updatedAt','state','character'])
     && d.revision is int && d.revision > 0 && d.updatedAt == request.time
     && s.keys().hasOnly(['schema','mapId','traveler','position','settings'])
     && s.schema == 1
@@ -26,12 +26,20 @@ service cloud.firestore {
     && numberIn(s.settings.zoom,0.65,2.7) && numberIn(s.settings.azimuth,-7,7)
     && s.settings.motion is bool;
   }
-  match /players/{uid}/saves/main {
-   allow get: if request.auth != null && request.auth.uid == uid;
-   allow create: if request.auth != null && request.auth.uid == uid
-    && validSave() && request.resource.data.revision == 1;
-   allow update: if request.auth != null && request.auth.uid == uid
-    && validSave() && request.resource.data.revision == resource.data.revision + 1;
+  function validCharacter() {
+   let c = request.resource.data.character;
+   return c.keys().hasOnly(['name','gender','classId'])
+    && c.name is string && c.name.size() >= 2 && c.name.size() <= 32
+    && c.gender in ['male','female'] && c.classId == 'shaman';
+  }
+  match /players/{uid}/saves/{slot} {
+   function owner() { return request.auth != null && request.auth.uid == uid && slot in ['main','server-1','server-2']; }
+   allow get: if owner();
+   allow create: if owner() && validSave() && request.resource.data.revision == 1
+    && (slot == 'main' || validCharacter());
+   allow update: if owner() && validSave()
+    && request.resource.data.revision == resource.data.revision + 1
+    && (slot == 'main' || (validCharacter() && request.resource.data.character == resource.data.character));
   }
  }
 }

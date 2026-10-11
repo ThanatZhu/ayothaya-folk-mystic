@@ -7,7 +7,7 @@ import {atlasPath,className} from './classes.js';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=09';
 import {resolveMap} from './world-state.js';
-import {createLandscapeGuard} from './mobile-layout.js';
+import {createLandscapeGuard} from './mobile-layout.js?v=11';
 import {prepareCloud} from './cloud-save.js?v=09';
 import {captureSave,applySave} from './save-state.js';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();

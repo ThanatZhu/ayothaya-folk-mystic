@@ -1,6 +1,6 @@
 import {CLASSES,getClass,className,atlasPath} from './classes.js';
 import {previewPose} from './sprite-motion.js';
-import {createLandscapeGuard} from './mobile-layout.js';
+import {createLandscapeGuard} from './mobile-layout.js?v=11';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY} from './realm-state.js?v=09';
 import {createRealmStore} from './realm-store.js?v=09';

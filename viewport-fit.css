@@ -1,0 +1,33 @@
+:root{--safe-bottom:env(safe-area-inset-bottom,0px)}
+/* The page is a fixed game viewport; only long dialogs may scroll internally. */
+html.mobile-viewport,html.mobile-viewport body{position:fixed;inset:0;width:100%;height:100%;min-height:0;overflow:hidden;overscroll-behavior:none}
+.mobile-viewport body{touch-action:none}
+.mobile-viewport #game-shell{height:var(--visible-height,100dvh)!important;min-height:0;overflow:hidden}
+.mobile-viewport .lobby-header{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+.mobile-viewport .lobby-layout{position:absolute;top:var(--lobby-top,44px);left:50%;width:calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));min-height:0!important;height:auto;margin:0;transform:translateX(-50%) scale(var(--lobby-scale,1));transform-origin:top center;overflow:visible}
+.mobile-viewport .lobby-footer{display:none}
+.mobile-viewport .scenery,.mobile-viewport .shade,.mobile-viewport #embers{position:absolute}
+.mobile-viewport input,.mobile-viewport button{touch-action:manipulation}
+.mobile-viewport #hero-name{font-size:16px;line-height:1.3}
+.mobile-viewport .world-dialog,.mobile-viewport .account-card{overscroll-behavior:contain;touch-action:pan-y}
+.mobile-viewport #orientation-gate{width:100%;height:var(--visible-height,100dvh);overflow:hidden}
+/* Keep the name field and submit action visible while the on-screen keyboard is open. */
+.mobile-viewport.keyboard-open .lobby-header,.mobile-viewport.keyboard-open .story,
+.mobile-viewport.keyboard-open .steps,.mobile-viewport.keyboard-open .character-stage,
+.mobile-viewport.keyboard-open #profession-options,.mobile-viewport.keyboard-open .class-summary,
+.mobile-viewport.keyboard-open .character-heading,.mobile-viewport.keyboard-open #back-servers{display:none}
+.mobile-viewport.keyboard-open .character-body{display:block}
+.mobile-viewport.keyboard-open .lobby-layout{padding-top:4px!important;padding-bottom:4px!important}
+.mobile-viewport.keyboard-open .lobby-card{padding:10px 16px!important}
+@media(orientation:landscape) and (max-height:360px){
+ .mobile-viewport .mini-panel{display:none}
+ .mobile-viewport .lobby-header{min-height:30px;padding-top:3px;padding-bottom:3px}
+ .mobile-viewport .lobby-layout{padding-top:0;padding-bottom:0}
+ .mobile-viewport .story{padding-bottom:10px}
+ .mobile-viewport .lobby-card{padding:10px 16px}
+ .mobile-viewport .steps{margin-bottom:6px}
+ .mobile-viewport .character-stage{min-height:160px}
+ .mobile-viewport .hero-art{max-width:145px}
+ .mobile-viewport .class-summary{margin:3px 0}
+ .mobile-viewport .class-summary p{margin:0}
+}

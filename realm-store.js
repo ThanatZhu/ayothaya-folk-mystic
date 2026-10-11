@@ -1,5 +1,5 @@
 import {guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=09';
-import {validateSave,nextRevision} from './save-state.js';
+import {validateSave,nextRevision} from './save-state.js?v=12a';
 import {deadline} from './firebase-client.js';
 export function createRealmStore({connection=null,owner='guest',catalog,storage}){
  const cloud=owner!=='guest';

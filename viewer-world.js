@@ -2,14 +2,14 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=09';
-import {createGame} from './game-controls.js?v=09';
+import {createGame} from './game-controls.js?v=12a';
 import {atlasPath,className} from './classes.js';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=09';
+import {createWorldUI} from './world-ui.js?v=12a';
 import {resolveMap} from './world-state.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
-import {prepareCloud} from './cloud-save.js?v=09';
-import {captureSave,applySave} from './save-state.js';
+import {prepareCloud} from './cloud-save.js?v=12a';
+import {captureSave,applySave} from './save-state.js?v=12a';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
 function frame(image,rect,repeat=false){
@@ -21,7 +21,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=12a');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json(),account=await prepareCloud(catalog);
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
  history.replaceState(null,'','?server='+account.serverId+'&map='+encodeURIComponent(map.id));
@@ -31,20 +31,20 @@ try {
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
  renderer.domElement.setAttribute('aria-label',map.name+' · ฉากเมืองหมุนกล้องได้ เดินด้วย WASD หรือจอยสัมผัส');document.getElementById('game-shell').prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color(map.id==='phitsanulok'?'#424e43':map.id==='nakhon'?'#485752':'#494b3d');
- const camera=new THREE.OrthographicCamera(-20,20,15,-15,.1,140),initial=new THREE.Vector3(25,27,31),target=new THREE.Vector3(0,1,-1.3);camera.position.copy(initial);
+ const camera=new THREE.OrthographicCamera(-20,20,15,-15,.1,700),initial=new THREE.Vector3(25,27,31),target=new THREE.Vector3(0,1,-1.3);camera.position.copy(initial);
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.copy(target);controls.enableDamping=true;controls.dampingFactor=.1;controls.enablePan=false;
  controls.minPolarAngle=controls.maxPolarAngle=Math.atan2(Math.hypot(23,28),24);controls.minZoom=.65;controls.maxZoom=2.7;controls.rotateSpeed=.6;controls.update();
  scene.add(new THREE.HemisphereLight('#f0eddc','#6b7557',1.8));
- const sun=new THREE.DirectionalLight('#fff0d7',1.25);sun.position.set(-8,20,9);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
- Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;scene.add(sun);
+ const sun=new THREE.DirectionalLight('#fff0d7',1.25);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
+ Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;scene.add(sun);scene.add(sun.target);
  let rotating=null;
  function resize(){const a=innerWidth/innerHeight,h=Math.max(12.8,18.2/a);camera.left=-h*a;camera.right=h*a;camera.top=h;camera.bottom=-h;camera.updateProjectionMatrix();renderer.setSize(Math.round(innerWidth/.95),Math.round(innerHeight/.95),false);}
  function turn(direction){rotating={from:controls.getAzimuthalAngle(),delta:direction*Math.PI/4,start:performance.now(),radius:camera.position.distanceTo(controls.target),polar:controls.getPolarAngle()};}
- function zoom(factor){camera.zoom=THREE.MathUtils.clamp(camera.zoom*factor,.65,2.7);camera.updateProjectionMatrix();}
+ function zoom(factor){camera.zoom=THREE.MathUtils.clamp(camera.zoom*factor,overview?.08:.65,2.7);camera.updateProjectionMatrix();}
  $('left').onclick=()=>turn(-1);$('right').onclick=()=>turn(1);$('in').onclick=()=>zoom(1.18);$('out').onclick=()=>zoom(1/1.18);
  $('reset').onclick=()=>{rotating=null;camera.position.copy(initial);camera.zoom=1;controls.target.copy(target);camera.updateProjectionMatrix();controls.update();};
  controls.addEventListener('start',()=>{rotating=null;});addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;if(e.code==='KeyQ')turn(-1);if(e.code==='KeyE')turn(1);});addEventListener('resize',resize);resize();
- const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas]=await Promise.all([new GLTFLoader().loadAsync('./'+map.model),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId))]);
+ const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas]=await Promise.all([new GLTFLoader().loadAsync('./'+map.model+'?v=12a'),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId))]);
  const tiles={wood:frame(materials.image,[0,0,.5,.5],true),roof:frame(materials.image,[.5,0,.5,.5],true),sand:frame(materials.image,[0,.5,.5,.5],true),grass:frame(materials.image,[.5,.5,.5,.5],true)},cache=new Map();
  for(const [key,rect] of Object.entries({brick:[0,0,.5,.5],plaster:[.5,0,.5,.5],paving:[0,.5,.5,.5],meadow:[.5,.5,.5,.5]}))tiles[key]=frame(worldMaterials.image,rect,true);
  gltf.scene.traverse(o=>{if(o.isMesh){o.castShadow=!/Water|River water|Terrain|soil|fragment/.test(o.name);o.receiveShadow=true;const name=o.material.name.replace(/\.\d+$/,'');
@@ -87,15 +87,15 @@ try {
  }
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
  function toggleOverview(){
-  overview=!overview;game.clearInput();rotating=null;
-  const offset=camera.position.clone().sub(controls.target);
-  controls.target.set(overview?0:game.world.player.x,1,overview?-8:game.world.player.z);camera.position.copy(controls.target).add(offset);camera.zoom=overview?.75:(innerWidth<700?1.6:1.05);camera.updateProjectionMatrix();controls.update();
+  overview=!overview;controls.minZoom=overview?.08:.65;game.clearInput();rotating=null;
+  const offset=camera.position.clone().sub(controls.target).multiplyScalar(overview?6:1/6);
+  const bounds=map.bounds;controls.target.set(overview&&bounds?bounds.x+bounds.w/2:game.world.player.x,1,overview&&bounds?bounds.z+bounds.d/2:game.world.player.z);camera.position.copy(controls.target).add(offset);camera.zoom=overview?(map.bounds?.14:.75):(innerWidth<700?1.6:1.05);camera.updateProjectionMatrix();controls.update();
   $('overview').textContent=overview?'V · กลับหาผู้เล่น':'V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed',String(overview));
  }
  $('overview').onclick=toggleOverview;
  addEventListener('keydown',e=>{if(e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey)toggleOverview();});
- const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
- worldUI=createWorldUI({catalog,map,game,scene,camera,account});
+ const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
+ worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,onLocalTravel:()=>{if(overview)toggleOverview();}});
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
  motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};
@@ -104,6 +104,6 @@ try {
  renderer.setAnimationLoop(ms=>{
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
   const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);game.update(dt);worldUI.update(t);
-  flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;renderer.render(scene,camera);
+  flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;sun.position.set(game.world.player.x-8,20,game.world.player.z+9);sun.target.position.set(game.world.player.x,0,game.world.player.z);renderer.render(scene,camera);
  });
 }catch(error){console.error(error);$('status').textContent='เปิดฉากไม่สำเร็จ';let failure=$('load');if(!failure){failure=document.createElement('div');failure.id='load';document.body.append(failure);}failure.classList.add('error');failure.textContent='เปิดฉากไม่ได้: '+error.message;}

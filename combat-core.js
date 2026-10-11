@@ -50,7 +50,7 @@ export function screenDirection(horizontal,vertical,azimuth){
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 // Grid A* routes auto-chase around houses. Manual movement always overrides it.
 export function findPath(start,goal,nav=DEFAULT_NAV){
- const cell=.5,key=(x,z)=>`${x},${z}`,startX=Math.round(start.x/cell),startZ=Math.round(start.z/cell);
+ const cell=distance(start,goal)>30?1:.5,key=(x,z)=>`${x},${z}`,startX=Math.round(start.x/cell),startZ=Math.round(start.z/cell);
  const open=[{x:startX,z:startZ,g:0,f:0,parent:null}],best=new Map([[key(startX,startZ),0]]);let end=null;
  for(let iterations=0;open.length&&iterations<6000;iterations++){
   open.sort((a,b)=>b.f-a.f);const cur=open.pop();
@@ -59,6 +59,7 @@ export function findPath(start,goal,nav=DEFAULT_NAV){
   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
    const x=cur.x+dx,z=cur.z+dz;
    if(!walkable(x*cell,z*cell,.32,nav))continue;
+   if(cell===1&&!lineClear({x:cur.x*cell,z:cur.z*cell},{x:x*cell,z:z*cell},nav))continue;
    if(dx&&dz&&(!walkable((cur.x+dx)*cell,cur.z*cell,.32,nav)||!walkable(cur.x*cell,(cur.z+dz)*cell,.32,nav)))continue;
    const g=cur.g+Math.hypot(dx,dz),k=key(x,z);if(g>=(best.get(k)??Infinity))continue;
    best.set(k,g);open.push({x,z,g,f:g+Math.hypot(x-goal.x/cell,z-goal.z/cell),parent:cur});
@@ -75,7 +76,7 @@ export class CombatWorld{
   this.profession=getClass(config.classId??'shaman');this.skills=classSkills(this.profession.id,SKILLS);
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
-  this.mobs=(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]]).map(([x,z,type],id)=>({id,type,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
+  this.mobs=(this.safe?[]:(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]])).map(([x,z,type],id)=>({id,type,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
   this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.time=0;
  }
  get target(){return this.mobs.find(m=>m.id===this.targetId&&m.hp>0)??null;}
@@ -83,7 +84,7 @@ export class CombatWorld{
  notice(text){this.emit('notice',{text});}
  select(id){const mob=this.mobs.find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
  nearest(range=8){return this.mobs.filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=8)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
- toggleAuto(){if(this.safe){this.notice('เมืองหลวงเป็นเขตสงบ');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
+ toggleAuto(){if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);mob.hit=.16;mob.aggro=true;
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});

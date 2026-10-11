@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=09';
+import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=12a';
 
 import {className} from './classes.js';
 import {poseFrame} from './sprite-motion.js';
@@ -147,7 +147,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   if(t-lastHUD>.08){lastHUD=t;
    $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`ปราบมอน ${world.kills} ตัว`;
    $('auto-attack').classList.toggle('active',world.auto);$('auto-attack').setAttribute('aria-pressed',String(world.auto));$('auto-state').textContent=world.auto?'เปิด':'ปิด';
-   $('target-name').textContent=target?MONSTER_TYPES[target.type].name:world.safe?'เขตสงบ · เมืองหลวง':'ยังไม่เลือกเป้าหมาย';$('target-hp').textContent=target?`${target.hp} / ${target.maxHp}`:world.safe?'พักฟื้น · พูดคุย · เดินทาง':'คลิก / แตะมอนสเตอร์';$('target-fill').style.width=target?`${target.hp/target.maxHp*100}%`:'0%';
+   $('target-name').textContent=target?MONSTER_TYPES[target.type].name:world.safe?'เขตปลอดภัย':'ยังไม่เลือกเป้าหมาย';$('target-hp').textContent=target?`${target.hp} / ${target.maxHp}`:world.safe?'พักฟื้น · พูดคุย · เดินทาง':'คลิก / แตะมอนสเตอร์';$('target-fill').style.width=target?`${target.hp/target.maxHp*100}%`:'0%';
    skillButtons.forEach((b,i)=>{const cd=world.cooldowns[i];b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<SKILLS[i].cost);b.style.setProperty('--cooldown',`${cd/SKILLS[i].cd*100}%`);});
   }
  }

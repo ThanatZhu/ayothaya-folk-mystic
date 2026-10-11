@@ -6,6 +6,13 @@ import {captureSave,applySave,validateSave,nextRevision} from '../save-state.js'
 const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 const map=catalog.maps[1];
 const capture=world=>captureSave(world,map,{zoom:1.3},{getAzimuthalAngle:()=>.7},false);
+test('expanded district saves restore far coordinates and overview does not save invalid zoom',()=>{
+ const a=new CombatWorld(map);a.player.x=72;a.player.z=-112;
+ const data=captureSave(a,map,{zoom:.14},{getAzimuthalAngle:()=>.7},true);
+ const b=new CombatWorld(map);applySave(b,map,validateSave(data,catalog));
+ assert.equal(b.player.x,72);assert.equal(b.player.z,-112);assert.equal(data.settings.zoom,.65);
+ for(const m of catalog.maps.filter(m=>!m.safe))assert.equal(validateSave({...data,mapId:m.id},catalog).mapId,m.id);
+});
 test('cloud snapshot round-trips resources, cooldowns, map and walkable position',()=>{
  const a=new CombatWorld(map);a.player.hp=81;a.player.mp=35;a.kills=7;a.cooldowns[0]=1.5;
  a.player.x=map.portals[0].x;a.player.z=map.portals[0].z;

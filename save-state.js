@@ -1,10 +1,10 @@
-import {walkable} from './combat-core.js?v=09';
+import {walkable} from './combat-core.js?v=12a';
 import {serializeTraveler,restoreTraveler} from './world-state.js';
 
 export function captureSave(world,map,camera,controls,motion){
  return {schema:1,mapId:map.id,traveler:serializeTraveler(world),
   position:{x:world.player.x,z:world.player.z},
-  settings:{zoom:camera.zoom,azimuth:controls.getAzimuthalAngle(),motion}};
+  settings:{zoom:Math.max(.65,Math.min(2.7,camera.zoom)),azimuth:controls.getAzimuthalAngle(),motion}};
 }
 export function validateSave(data,catalog){
  if(!data||data.schema!==1)throw new Error('save-version');

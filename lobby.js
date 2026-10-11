@@ -3,7 +3,7 @@ import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY} from './realm-state.js?v=09';
-import {createRealmStore} from './realm-store.js?v=09';
+import {createRealmStore} from './realm-store.js?v=12a';
 const $=id=>document.getElementById(id);
 createLandscapeGuard();
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='shaman',previewGender='male',poseMode='cycle',previewTime=0;
@@ -14,7 +14,7 @@ function report(error){
  const code=error.code||error.message;
  say(code==='character-exists'?'มีตัวละครในเซิร์ฟเวอร์นี้แล้ว กดเปลี่ยนเซิร์ฟเวอร์แล้วเลือกอีกครั้ง':code==='auth/popup-blocked'?'กรุณาอนุญาตป๊อปอัป แล้วกด Google อีกครั้ง':code==='auth/popup-closed-by-user'?'ยังไม่ได้ล็อกอิน ลองใหม่ได้ครับ':code==='permission-denied'?'ยังเข้าถึงเซฟไม่ได้ กรุณาลองอีกครั้ง':String(code).startsWith('ชื่อ')||String(code).startsWith('กรุณา')?code:'เชื่อมต่อไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง');
 }
-const catalogReady=fetch('./maps/world.json').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
+const catalogReady=fetch('./maps/world.json?v=12a').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
 catalogReady.catch(()=>say('โหลดข้อมูลโลกไม่ได้ กรุณาโหลดหน้าใหม่'));
 async function selectIdentity(id){
  lock(true);say('กำลังเตรียมรายชื่อเซิร์ฟเวอร์…');

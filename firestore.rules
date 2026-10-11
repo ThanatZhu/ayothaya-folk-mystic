@@ -10,7 +10,7 @@ service cloud.firestore {
     && d.revision is int && d.revision > 0 && d.updatedAt == request.time
     && s.keys().hasOnly(['schema','mapId','traveler','position','settings'])
     && s.schema == 1
-    && s.mapId in ['ayutthaya','bangsai','lavo','suphan','phitsanulok','nakhon']
+    && s.mapId in ['ayutthaya','bangsai','lavo','suphan','phitsanulok','nakhon','ayutthaya-wilds','bangsai-wilds','lavo-wilds','suphan-wilds','phitsanulok-wilds','nakhon-wilds']
     && t.keys().hasOnly(['version','hp','mp','kills','cooldowns']) && t.version == 5
     && numberIn(t.hp,0,140) && numberIn(t.mp,0,100)
     && t.kills is int && numberIn(t.kills,0,10000000)
@@ -21,7 +21,7 @@ service cloud.firestore {
     && numberIn(t.cooldowns[6],0,60) && numberIn(t.cooldowns[7],0,60)
     && numberIn(t.cooldowns[8],0,60) && numberIn(t.cooldowns[9],0,60)
     && s.position.keys().hasOnly(['x','z'])
-    && numberIn(s.position.x,-30,30) && numberIn(s.position.z,-30,30)
+    && numberIn(s.position.x,-125,125) && numberIn(s.position.z,-200,15)
     && s.settings.keys().hasOnly(['zoom','azimuth','motion'])
     && numberIn(s.settings.zoom,0.65,2.7) && numberIn(s.settings.azimuth,-7,7)
     && s.settings.motion is bool;

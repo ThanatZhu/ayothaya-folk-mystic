@@ -2,7 +2,7 @@
 
 เกมแฟนตาซีไทยแบบ Chibi Pixel 2.5D หมุนกล้องได้ เดินทางระหว่าง 6 เมือง โดยมี **อยุธยาเป็นเมืองหลวง**
 
-**[เปิดเล่นออนไลน์](https://thanatzhu.github.io/ayothaya-folk-mystic/)** · **[ภาพทั้ง 6 เมือง](https://thanatzhu.github.io/ayothaya-folk-mystic/world-gallery.html)**
+**[เปิดเล่นออนไลน์](https://ayothaya-folk-mystic.vercel.app/)** · **[ภาพทั้ง 6 เมือง](https://ayothaya-folk-mystic.vercel.app/world-gallery.html)**
 
 ![อยุธยา](maps/ayutthaya-preview.png)
 
@@ -69,6 +69,10 @@ Blender เก็บ geometry/UV; ตัวละคร พืช พื้น�
 38 automated tests ครอบคลุมการเดิน การชน ทางอ้อม ต่อสู้ จุดเกิดทุกเมือง ข้ามเมือง กฎแนวนอน การคืนค่าเซฟ และ revision conflict; ยังไม่ได้ยืนยัน hardware orientation lock หรือ multitouch ด้วยมือถือจริง
 
 ## เผยแพร่
+
+Vercel เชื่อม repository นี้กับ branch `main` และเผยแพร่ที่ https://ayothaya-folk-mystic.vercel.app/ อัตโนมัติเมื่อ push ใช้ `npm run build` เพื่อคัดลอกไฟล์เล่นเกมไป `dist/` โดยไม่ส่งไฟล์ Blender ต้นฉบับ ชุดทดสอบ หรือกฎ Firestore ขึ้นเว็บ การตั้งค่าอยู่ใน `vercel.json`
+
+โดเมน Vercel เพิ่มใน Firebase Authentication Authorized domains แล้ว ใช้ Firebase project เดิม บัญชี Google เดิมจึงอ้างอิงข้อมูลคลาวด์ชุดเดิม ส่วนเซฟทดลองใน localStorage แยกตามโดเมนและไม่ย้ายจาก GitHub Pages อัตโนมัติ การทดสอบล็อกอิน Google และเซฟคลาวด์ด้วยบัญชีจริงยังต้องยืนยันเพิ่มเติม
 
 GitHub Pages ใช้ branch `main` ที่ root โฟลเดอร์นี้มี `.nojekyll` และใช้เส้นทาง relative เพื่อรองรับชื่อ repository ใน URL ผลัก commit ใหม่เพื่ออัปเดตเว็บ
 

@@ -1,14 +1,14 @@
-import {characterMotion} from './character-motion.js';
+import {characterMotion,attackDuration} from './character-motion.js?v=15';
 import {progression,jobFor} from './advancement.js';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=14';
 
 import {className} from './classes.js';
-import {poseFrame} from './sprite-motion.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
- const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitUntil=0,emoteUntil=0,emote='idle';
+ let gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
+ const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
  addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
  const mobViews=world.mobs.map(m=>{
@@ -34,13 +34,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number';el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
  function effect(e){
   if(e.type==='cast'){
-   castUntil=world.time+.6;actionStart=world.time;emoteUntil=0;actionMode=e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
+   castUntil=world.time+(['slash','punch','thrust','arrow'].includes(e.kind)?attackDuration(world.profession.id):.8);actionStart=world.time;emoteUntil=0;actionMode=e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    const bolt=['bolt','arrow','blessing'].includes(e.kind),mat=new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(e.kind==='arrow'?fxArrow:e.kind==='slash'?fxArc:bolt?fxBall:fxRing,mat);scene.add(mesh);
    if(!bolt)mesh.rotation.x=-Math.PI/2;
    effects.push({mesh,age:0,life:bolt?.25:.55,bolt,kind:e.kind,from:e.from,to:e.to,radius:e.radius??1});
   }else if(e.type==='damage'){popup(e);}
   else if(e.type==='heal'){popup(e,true);}
-  else if(e.type==='playerHit'){popup({...e,color:'#ff987e'});hero.sprite.material.color.set('#ff9b83');}
+  else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});hero.sprite.material.color.set('#ff9b83');}
   else if(e.type==='notice')toast(e.text);
   else if(e.type==='defeat')toast('ปราบ '+MONSTER_TYPES[world.mobs[e.id].type].name+' แล้ว');
  }
@@ -119,12 +119,16 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving)emoteUntil=0;
   const mode=t<hitUntil?'hit':t<castUntil?actionMode:t<emoteUntil?emote:p.moving?'walk':p.shield>0?'guard':'idle';
-  const pose=characterMotion({time:mode==='walk'||mode==='idle'?t:t-actionStart,mode,classId:world.profession.id,reduced});
+  const distanceMoved=Math.hypot(p.x-lastX,p.z-lastZ);lastX=p.x;lastZ=p.z;
+  if(distanceMoved<1)gait+=distanceMoved/2.1; // No steps while blocked; teleports do not advance the gait.
+  const pose=characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced});
+  if(!visualPose||reduced)visualPose={...pose};
+  else for(const key of Object.keys(pose))visualPose[key]=key==='frame'?pose[key]:visualPose[key]+(pose[key]-visualPose[key])*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
-  hero.sprite.position.set(p.x+pose.x,p.z>4.25?.41+pose.y:.06+pose.y,p.z);
-  hero.sprite.scale.set(heroSize*pose.sx,heroSize*pose.sy,1);hero.sprite.material.rotation=pose.rotation;
+  hero.sprite.position.set(p.x,(p.z>4.25?.41:.06)+visualPose.y,p.z);
+  hero.sprite.scale.set(heroSize,heroSize,1);
   if(hero.frames)hero.sprite.material.map=hero.frames[pose.frame];
-  const facing=p.face.x*Math.cos(controls.getAzimuthalAngle())-p.face.z*Math.sin(controls.getAzimuthalAngle());hero.sprite.material.map.repeat.x=facing<0?-1:1;hero.sprite.material.map.offset.x=facing<0?1:0;
+  const facing=p.face.x*Math.cos(controls.getAzimuthalAngle())-p.face.z*Math.sin(controls.getAzimuthalAngle());hero.sprite.userData.pose?.(visualPose,facing<0);
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   hero.shadow.position.set(p.x,p.z>4.25?.46:.072,p.z);playerRing.position.set(p.x,p.z>4.25?.47:.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
   // Camera follows the player while preserving user-controlled azimuth and zoom.

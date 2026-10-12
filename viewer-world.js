@@ -1,10 +1,11 @@
+import {createRiggedSprite} from './rigged-sprite.js?v=15';
 import {customizeAtlas} from './character-appearance.js';
 import {jobFor} from './advancement.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=09';
-import {createGame} from './game-controls.js?v=14';
+import {createGame} from './game-controls.js?v=15';
 import {atlasPath,className} from './classes.js';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=13';
@@ -67,7 +68,8 @@ try {
  for(const [kind,x,z,w,h,flip] of map.plants){plant(kind,x,-z,w,h,flip);if(kind==='tree')shadow(x,-z,w*.3);}
  const customized=customizeAtlas(heroAtlas.image,account.character.appearance,account.character.classId);
  const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
- characters.push({sprite:sprite(heroFrames[0],map.spawn.x,-map.spawn.z,heroHeight,heroHeight,.06),shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
+ const heroMesh=createRiggedSprite(heroFrames[0]);scene.add(heroMesh);
+ characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  for(const n of map.npcs){const h=1.65;characters.push({sprite:sprite(personTextures[n.texture],n.x,-n.z,h,h,.06),shadow:shadow(n.x,-n.z,.4),height:h});}
  const flames=[];for(const [x,z] of [[-4,3.3],[4,3.3],[-7,-7],[7,-7]]){const l=new THREE.PointLight('#ffb53f',6,3.3,1.6);l.position.set(x,1.6,z);scene.add(l);flames.push(l);}
  const geo=new THREE.BufferGeometry(),positions=new Float32Array(90);let seed=2026;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}

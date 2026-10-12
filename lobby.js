@@ -1,4 +1,6 @@
-import {createWardrobe} from './wardrobe.js?v=14';
+import {createMotionPreview} from './motion-preview.js?v=15';
+import {characterMotion} from './character-motion.js?v=15';
+import {createWardrobe} from './wardrobe.js?v=15';
 import {progression,jobFor} from './advancement.js';
 import {CLASSES,getClass,className,atlasPath} from './classes.js';
 import {previewPose} from './sprite-motion.js';
@@ -10,7 +12,8 @@ const $=id=>document.getElementById(id);
 createLandscapeGuard();
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='shaman',previewGender='male',poseMode='cycle',previewTime=0;
 const say=text=>$('lobby-status').textContent=text;
-const wardrobe=createWardrobe({getClass:()=>selectedClass,getGender:()=>previewGender,getRecord:()=>record,onTexture:url=>{$('hero-preview').style.backgroundImage='url("'+url+'")';},onNotice:say,onApply:async(appearance,jobId)=>{
+const lobbyMotion=createMotionPreview($('hero-preview'));
+const wardrobe=createWardrobe({getClass:()=>selectedClass,getGender:()=>previewGender,getRecord:()=>record,onTexture:(url,atlas,gender)=>{lobbyMotion.setSource(atlas,gender);},onNotice:say,onApply:async(appearance,jobId)=>{
  if(busy)throw new Error('busy');if(record){if(selectedClass!==record.character.classId)throw new Error('class-first');lock(true);try{record=await store.customize(selected,record,appearance,jobId);displayCharacter();}finally{lock(false);}}
 }});
 $('open-wardrobe').onclick=()=>{if(!busy)wardrobe.open();};
@@ -47,7 +50,7 @@ $('back-login').onclick=()=>{if(!busy){owner=null;show('login');setup();}};
 $('back-servers').onclick=()=>{if(!busy)show('servers');};
 function preview(gender=previewGender){
  previewGender=gender;const c=getClass(selectedClass),art=$('hero-preview');
- art.className='hero-art '+gender;art.style.backgroundImage='url("'+atlasPath(c.id)+'")';art.style.setProperty('--row',gender==='female'?'100%':'0%');art.setAttribute('aria-label',className(c.id,gender)+' · '+(gender==='female'?'หญิง':'ชาย'));
+ art.className='hero-art rig-preview '+gender;art.style.backgroundImage='url("'+atlasPath(c.id)+'")';art.style.setProperty('--row',gender==='female'?'100%':'0%');art.setAttribute('aria-label',className(c.id,gender)+' · '+(gender==='female'?'หญิง':'ชาย'));
  $('class-name').textContent=c.icon+' '+className(c.id,gender);$('class-description').textContent=c.description;$('class-badge').textContent=c.role;
  $('change-class').hidden=!record||selectedClass===record.character.classId;$('enter-world').hidden=!!record&&selectedClass!==record.character.classId;
  document.querySelectorAll('[name=profession]').forEach(el=>el.checked=el.value===selectedClass);
@@ -56,10 +59,12 @@ function preview(gender=previewGender){
 for(const c of CLASSES){const label=document.createElement('label');label.className='class-option';const radio=document.createElement('input');radio.type='radio';radio.name='profession';radio.value=c.id;radio.checked=c.id===selectedClass;radio.addEventListener('change',()=>{selectedClass=c.id;preview();});const text=document.createElement('span');text.textContent=c.name;const icon=document.createElement('b');icon.textContent=c.icon;label.append(radio,icon,text);$('class-options').append(label);}
 document.querySelectorAll('[data-pose]').forEach(b=>b.onclick=()=>{poseMode=b.dataset.pose;previewTime=0;document.querySelectorAll('[data-pose]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));});
 let previewLast=0;const reduced=matchMedia('(prefers-reduced-motion:reduce)');
+let lastRigDraw=0;
 function animatePreview(ms){const dt=Math.min(.05,(ms-previewLast)/1000);previewLast=ms;
- if(!document.hidden&&screen==='character'){
+ if(!document.hidden&&screen==='character'&&!document.getElementById('wardrobe')?.open){
  const stopped=document.body.classList.contains('motion-off')||reduced.matches;if(!stopped)previewTime+=dt;
- const state=previewPose(previewTime,poseMode,stopped);$('hero-preview').style.backgroundPosition=(stopped?0:state.frame/3*100)+'% '+(previewGender==='female'?100:0)+'%';
+ const state=previewPose(previewTime,poseMode,stopped);
+ if(ms-lastRigDraw>=1000/30){lastRigDraw=ms;const mode=poseMode==='attack'?'attack':state.casting?'attack':state.moving?'walk':'idle';lobbyMotion.draw(characterMotion({time:mode==='attack'?previewTime%.95:previewTime,mode,classId:selectedClass,reduced:stopped}));}
  $('hero-preview').dataset.pose=stopped?'idle':state.casting?'attack':state.moving?'walk':'idle';
  }requestAnimationFrame(animatePreview);
 }requestAnimationFrame(animatePreview);

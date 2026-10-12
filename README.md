@@ -105,3 +105,11 @@ GitHub Pages ใช้ branch `main` ที่ root โฟลเดอร์น�
 - Each of seven base classes has two advanced branches with combat stat/skill modifiers. Unlock at level 10 (90 total defeats); prototype XP = defeats x 10. No advancement quest or separate advanced-class sprite atlas yet.
 - Wardrobe has touch-sized controls and internal scrolling. Closing without applying discards the draft. Existing character edits use revision-checked saves.
 - Validation: 65 automated tests; production build; local save/reload, appearance in game, emote and mobile wardrobe/cancel checks. Live authenticated cloud roundtrip still requires verification.
+
+
+## Character motion (0.15)
+- Replaced full-image bounce/stretch with a softly weighted mesh: alternating legs, opposite arm swing, torso/head counter-motion and grounded idle soles. Gait advances from actual traveled distance, stops against obstacles and ignores teleport jumps.
+- Attack timing has one anticipation/strike/recovery sequence per event, with profession-specific duration. Hit reactions now trigger correctly, with an independent hit timer. Monk, rogue, boxer and staff-user gait amplitudes differ.
+- Same deformation model in lobby/wardrobe Canvas previews and the camera-facing Three.js world mesh. Preview renders at 30 FPS and pauses when hidden or covered; no extra WebGL context. Reduced motion remains static.
+- Uses existing front-facing artwork. Does not add rear-facing or eight-direction sprites, independently drawn limb frames, true skeletal joints, or exact foot locking. NPC and monster art remains unchanged.
+- 69 tests passed; final focused motion tests passed after class gait tuning. Browser checked local wardrobe walk, game render, emote and mobile844x390 joystick movement without console errors. Physical mobile frame rate unmeasured.

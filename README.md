@@ -52,9 +52,9 @@ NPC หลัก 30 คน มีชื่อและบทสนทนาเ�
 
 ## บัญชีและเซฟ
 
-กด **เข้าสู่ระบบด้วย Google** ที่หน้าแรก แล้วเลือกเซิร์ฟและตัวละคร เพื่อเล่นต่อข้ามเครื่อง เซฟ HP/MP จำนวนมอนที่ปราบ คูลดาวน์ เมือง ตำแหน่ง ซูม มุมกล้อง และสถานะโมชั่น ทุก 30 วินาทีเมื่อมีข้อมูลเปลี่ยน ก่อนเปลี่ยนเมือง และก่อนออกจากระบบ มีปุ่มเซฟทันที และพยายามเซฟเมื่อสลับแท็บ การปิดแอปทันทีอาจทำให้ข้อมูลหลังเซฟครั้งล่าสุดยังไม่ส่งถึงคลาวด์
+กด **เข้าสู่ระบบด้วย Google** ที่หน้าแรก แล้วเลือกเซิร์ฟและตัวละคร เพื่อเล่นต่อข้ามเครื่อง เซฟ HP/MP จำนวนมอนที่ปราบ คูลดาวน์ เมือง ตำแหน่ง ซูม มุมกล้อง และสถานะโมชั่น ทุก 10 วินาทีเมื่อมีข้อมูลเปลี่ยน ก่อนเปลี่ยนเมือง และก่อนออกจากระบบ มีปุ่มเซฟทันที และพยายามเซฟเมื่อสลับแท็บ การปิดแอปทันทีอาจทำให้ข้อมูลหลังเซฟครั้งล่าสุดยังไม่ส่งถึงคลาวด์
 
-โหมดเล่นบนเครื่องนี้เก็บใน localStorage แยกจากบัญชี Google ไม่ย้ายหรือเขียนทับตัวละครคลาวด์อัตโนมัติ ระบบเลเวล/EXP กระเป๋า อุปกรณ์ เงิน และเควสต์ยังไม่ถูกสร้าง จึงยังไม่มีข้อมูลเหล่านั้นให้บันทึก
+โหมดเล่นบนเครื่องนี้เก็บใน localStorage แยกจากบัญชี Google ไม่ย้ายหรือเขียนทับตัวละครคลาวด์อัตโนมัติ กระเป๋า อุปกรณ์ เงิน และเควสต์ยังไม่ถูกสร้าง จึงยังไม่มีข้อมูลเหล่านั้นให้บันทึก
 
 Firebase project: `ayothaya-folk-mystic`, Firestore Standard `(default)` ที่ `asia-southeast3` (Bangkok), Spark plan. เซฟอยู่ที่ `players/{uid}/saves/server-1` และ `server-2`; `main` เก็บเซฟเก่าก่อนมีล็อบบี; กฎอนุญาตเฉพาะเจ้าของและตรวจรูปแบบข้อมูล ใช้ transaction/revision ป้องกันแท็บเก่าทับเซฟใหม่ เมื่อเกิดข้อขัดแย้งต้องโหลดเซฟล่าสุดก่อนเล่นต่อ
 
@@ -78,7 +78,7 @@ Blender เก็บ geometry/UV; ตัวละคร พืช พื้น�
 
 ## ตรวจสอบ
 
-59 automated tests ครอบคลุมการเดิน การชน ทางอ้อม ต่อสู้ จุดเกิดทุกเมือง ข้ามเมือง กฎแนวนอน การคืนค่าเซฟ และ revision conflict; ยังไม่ได้ยืนยัน hardware orientation lock หรือ multitouch ด้วยมือถือจริง
+65 automated tests ครอบคลุมการเดิน การชน ทางอ้อม ต่อสู้ จุดเกิดทุกเมือง ข้ามเมือง กฎแนวนอน การคืนค่าเซฟ และ revision conflict; ยังไม่ได้ยืนยัน hardware orientation lock หรือ multitouch ด้วยมือถือจริง
 
 ## เผยแพร่
 
@@ -96,3 +96,12 @@ GitHub Pages ใช้ branch `main` ที่ root โฟลเดอร์น�
 - Top-right minimap opens travel; camera controls moved to a modal menu. Town target banner hidden.
 - Mobile: five visible skill buttons per bank, all ten available through a 44px switch; 44px+ main controls, safe-area positioning and compact status panel. Desktop retains all ten skills.
 - Local regression: 59 tests pass, static production build passes. Responsive browser checks at 844x390 and 568x320; physical-device FPS and multitouch not measured.
+
+
+## Character customization and progression (0.14)
+- Appearance and advanced profession persist per UID and server alongside existing game state; legacy characters remain compatible. Active-account checks prevent a stale session from saving to another account. Autosave every 10 seconds when dirty.
+- Wardrobe supports garment overlays, outfit/hair/eye palettes, hair additions, facial hair and yantra marks. Preview and in-game atlas share the same compositor. Original baked-in hair/facial hair is retained; monastic classes retain shaved heads.
+- Ten motion states reuse the existing four illustrated frames with class-sensitive transforms. Four emotes are available in the game menu. These are not ten newly drawn sprite animations.
+- Each of seven base classes has two advanced branches with combat stat/skill modifiers. Unlock at level 10 (90 total defeats); prototype XP = defeats x 10. No advancement quest or separate advanced-class sprite atlas yet.
+- Wardrobe has touch-sized controls and internal scrolling. Closing without applying discards the draft. Existing character edits use revision-checked saves.
+- Validation: 65 automated tests; production build; local save/reload, appearance in game, emote and mobile wardrobe/cancel checks. Live authenticated cloud roundtrip still requires verification.

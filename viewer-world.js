@@ -1,15 +1,17 @@
+import {customizeAtlas} from './character-appearance.js';
+import {jobFor} from './advancement.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=09';
-import {createGame} from './game-controls.js?v=12a';
+import {createGame} from './game-controls.js?v=14';
 import {atlasPath,className} from './classes.js';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=13';
 import {resolveMap} from './world-state.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
-import {prepareCloud} from './cloud-save.js?v=12a';
-import {captureSave,applySave} from './save-state.js?v=12a';
+import {prepareCloud} from './cloud-save.js?v=14';
+import {captureSave,applySave} from './save-state.js?v=14';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
 function frame(image,rect,repeat=false){
@@ -63,7 +65,8 @@ try {
  const plants=[],characters=[];
  function plant(kind,x,y,w,h,flip=false){const s=sprite(botanic[kind],x,y,w,h);if(flip){s.material.map=botanic[kind].clone();s.material.map.repeat.x=-1;s.material.map.offset.x=1;}plants.push({sprite:s,kind});return s;}
  for(const [kind,x,z,w,h,flip] of map.plants){plant(kind,x,-z,w,h,flip);if(kind==='tree')shadow(x,-z,w*.3);}
- const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(heroAtlas.image,atlasCell(account.character.gender,i)));
+ const customized=customizeAtlas(heroAtlas.image,account.character.appearance,account.character.classId);
+ const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
  characters.push({sprite:sprite(heroFrames[0],map.spawn.x,-map.spawn.z,heroHeight,heroHeight,.06),shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  for(const n of map.npcs){const h=1.65;characters.push({sprite:sprite(personTextures[n.texture],n.x,-n.z,h,h,.06),shadow:shadow(n.x,-n.z,.4),height:h});}
  const flames=[];for(const [x,z] of [[-4,3.3],[4,3.3],[-7,-7],[7,-7]]){const l=new THREE.PointLight('#ffb53f',6,3.3,1.6);l.position.set(x,1.6,z);scene.add(l);flames.push(l);}
@@ -72,11 +75,11 @@ try {
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
  const motion=createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
- const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,gender:account.character.gender},isPaused:()=>$('settings-panel').open||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
+ const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>$('settings-panel').open||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
- const portrait=document.querySelector('.portrait');portrait.style.backgroundImage='url('+atlasPath(account.character.classId)+')';portrait.style.backgroundSize='400% 200%';portrait.style.backgroundPosition='0% '+(account.character.gender==='female'?'100%':'0%');
+ const portrait=document.querySelector('.portrait');portrait.style.backgroundImage='url('+customized.toDataURL()+')';portrait.style.backgroundSize='400% 200%';portrait.style.backgroundPosition='0% '+(account.character.gender==='female'?'100%':'0%');
  portrait.style.imageRendering='pixelated';
  const savedSettings=account.data?.settings;let motionPlaying=motion.running;
  if(savedSettings){
@@ -96,7 +99,7 @@ try {
  addEventListener('keydown',e=>{if(e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey)toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
  worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,onLocalTravel:()=>{if(overview)toggleOverview();}});
- document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+(map.safe?'เขตสงบ':map.name);
+ document.querySelector('.player-heading small').textContent=(jobFor(account.character.classId,account.character.jobId)?.name??className(account.character.classId,account.character.gender))+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
  motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};
  $('load').remove();document.querySelectorAll('.camera-panel button,.attack-controls button').forEach(b=>b.disabled=false);

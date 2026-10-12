@@ -1,15 +1,21 @@
+import {createWardrobe} from './wardrobe.js?v=14';
+import {progression,jobFor} from './advancement.js';
 import {CLASSES,getClass,className,atlasPath} from './classes.js';
 import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
 import {connectFirebase,deadline} from './firebase-client.js';
-import {SERVERS,ENTRY_KEY} from './realm-state.js?v=09';
-import {createRealmStore} from './realm-store.js?v=12a';
+import {SERVERS,ENTRY_KEY} from './realm-state.js?v=14';
+import {createRealmStore} from './realm-store.js?v=14';
 const $=id=>document.getElementById(id);
 createLandscapeGuard();
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='shaman',previewGender='male',poseMode='cycle',previewTime=0;
 const say=text=>$('lobby-status').textContent=text;
+const wardrobe=createWardrobe({getClass:()=>selectedClass,getGender:()=>previewGender,getRecord:()=>record,onTexture:url=>{$('hero-preview').style.backgroundImage='url("'+url+'")';},onNotice:say,onApply:async(appearance,jobId)=>{
+ if(busy)throw new Error('busy');if(record){if(selectedClass!==record.character.classId)throw new Error('class-first');lock(true);try{record=await store.customize(selected,record,appearance,jobId);displayCharacter();}finally{lock(false);}}
+}});
+$('open-wardrobe').onclick=()=>{if(!busy)wardrobe.open();};
 function show(next){screen=next;document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
-function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#switch-account,#continue-account,#change-class').forEach(b=>b.disabled=value);}
+function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#switch-account,#continue-account,#change-class,#open-wardrobe').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
  say(code==='character-exists'?'มีตัวละครในเซิร์ฟเวอร์นี้แล้ว กดเปลี่ยนเซิร์ฟเวอร์แล้วเลือกอีกครั้ง':code==='auth/popup-blocked'?'กรุณาอนุญาตป๊อปอัป แล้วกด Google อีกครั้ง':code==='auth/popup-closed-by-user'?'ยังไม่ได้ล็อกอิน ลองใหม่ได้ครับ':code==='permission-denied'?'ยังเข้าถึงเซฟไม่ได้ กรุณาลองอีกครั้ง':String(code).startsWith('ชื่อ')||String(code).startsWith('กรุณา')?code:'เชื่อมต่อไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง');
@@ -45,7 +51,7 @@ function preview(gender=previewGender){
  $('class-name').textContent=c.icon+' '+className(c.id,gender);$('class-description').textContent=c.description;$('class-badge').textContent=c.role;
  $('change-class').hidden=!record||selectedClass===record.character.classId;$('enter-world').hidden=!!record&&selectedClass!==record.character.classId;
  document.querySelectorAll('[name=profession]').forEach(el=>el.checked=el.value===selectedClass);
- previewTime=0;
+ wardrobe.render();previewTime=0;
 }
 for(const c of CLASSES){const label=document.createElement('label');label.className='class-option';const radio=document.createElement('input');radio.type='radio';radio.name='profession';radio.value=c.id;radio.checked=c.id===selectedClass;radio.addEventListener('change',()=>{selectedClass=c.id;preview();});const text=document.createElement('span');text.textContent=c.name;const icon=document.createElement('b');icon.textContent=c.icon;label.append(radio,icon,text);$('class-options').append(label);}
 document.querySelectorAll('[data-pose]').forEach(b=>b.onclick=()=>{poseMode=b.dataset.pose;previewTime=0;document.querySelectorAll('[data-pose]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));});
@@ -62,8 +68,8 @@ document.querySelectorAll('[name=gender]').forEach(input=>input.addEventListener
 function displayCharacter(){
  const realm=SERVERS.find(s=>s.id===selected);$('realm-caption').textContent=realm.name+' · '+realm.subtitle;
  $('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างตัวละคร';
- if(record){selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name;$('existing-detail').textContent=className(record.character.classId,record.character.gender)+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+catalog.maps.find(m=>m.id===record.state.mapId).name;}
- else{$('character-form').reset();selectedClass='shaman';preview('male');}
+ if(record){wardrobe.reset(record.character.appearance,record.character.jobId??'');selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler.kills).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+catalog.maps.find(m=>m.id===record.state.mapId).name;}
+ else{wardrobe.reset();$('character-form').reset();selectedClass='shaman';preview('male');}
  show('character');
 }
 document.querySelectorAll('[data-server]').forEach(button=>button.onclick=async()=>{
@@ -72,7 +78,7 @@ document.querySelectorAll('[data-server]').forEach(button=>button.onclick=async(
 });
 $('character-form').onsubmit=async event=>{
  event.preventDefault();if(busy)return;lock(true);say('กำลังสร้างตัวละคร…');
- try{record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:selectedClass});displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}
+ try{record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:selectedClass,appearance:wardrobe.appearance,jobId:''});displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}
 };
 $('change-class').onclick=async()=>{
  if(!record||busy||selectedClass===record.character.classId)return;lock(true);say('กำลังบันทึกอาชีพ…');

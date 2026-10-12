@@ -1,4 +1,4 @@
-import {walkable} from './combat-core.js?v=12a';
+import {walkable} from './combat-core.js?v=14';
 import {serializeTraveler,restoreTraveler} from './world-state.js';
 
 export function captureSave(world,map,camera,controls,motion){

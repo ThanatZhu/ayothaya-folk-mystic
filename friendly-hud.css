@@ -43,3 +43,5 @@ body[data-safe=true] .target-panel{display:none}
  .mini-panel,.mobile-viewport .mini-panel{width:126px}#mini-open canvas{height:45px}.mini-heading{margin-bottom:0}#mini-area{display:none}
  .joystick{width:94px;height:94px;bottom:22px}.combat-controls{gap:4px}.skill{height:44px}.skills{padding:4px}#attack{width:54px;height:54px}.account-bar{top:94px}
 }
+
+.emote-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}.emote-actions button{min-height:44px;border-radius:10px;font-size:11px}.level-badge{position:absolute;right:7px;top:-8px;border:1px solid #beaa69;border-radius:7px;padding:1px 6px;background:#394d35;font-size:9px;color:#f2dfaf}

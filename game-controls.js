@@ -1,12 +1,15 @@
+import {characterMotion} from './character-motion.js';
+import {progression,jobFor} from './advancement.js';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=12a';
+import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=14';
 
 import {className} from './classes.js';
 import {poseFrame} from './sprite-motion.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
- const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0;
+ const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitUntil=0,emoteUntil=0,emote='idle';
+ addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
  const mobViews=world.mobs.map(m=>{
   const h=m.type===0?1.3:1.45,tex=monsterTextures[m.type].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
@@ -22,7 +25,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  const targetRing=new THREE.Mesh(ringGeometry,new THREE.MeshBasicMaterial({color:'#ffd476',side:THREE.DoubleSide,transparent:true,opacity:.85}));targetRing.rotation.x=-Math.PI/2;scene.add(targetRing);
  const playerRing=new THREE.Mesh(ringGeometry,new THREE.MeshBasicMaterial({color:'#8de8d0',side:THREE.DoubleSide,transparent:true,opacity:.55}));playerRing.rotation.x=-Math.PI/2;playerRing.scale.setScalar(.78);scene.add(playerRing);
  const shield=new THREE.Mesh(new THREE.RingGeometry(.7,.74,40),new THREE.MeshBasicMaterial({color:'#edd592',side:THREE.DoubleSide,transparent:true,opacity:.55}));shield.rotation.x=-Math.PI/2;scene.add(shield);
- const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · '+className(world.profession.id,config.gender);$('world-labels').append(playerLabel);
+ const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · '+(jobFor(world.profession.id,config.jobId)?.name??className(world.profession.id,config.gender));$('world-labels').append(playerLabel);
  const motionPreference=matchMedia('(prefers-reduced-motion:reduce)');
  const effects=[],floats=[],fxRing=new THREE.RingGeometry(.75,.83,32),fxBall=new THREE.IcosahedronGeometry(.10,0),projection=new THREE.Vector3();
  const fxArrow=new THREE.ConeGeometry(.065,.65,4),fxArc=new THREE.RingGeometry(.4,.52,24,1,0,Math.PI*1.25);
@@ -31,7 +34,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number';el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
  function effect(e){
   if(e.type==='cast'){
-   castUntil=world.time+.42;
+   castUntil=world.time+.6;actionStart=world.time;emoteUntil=0;actionMode=e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    const bolt=['bolt','arrow','blessing'].includes(e.kind),mat=new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(e.kind==='arrow'?fxArrow:e.kind==='slash'?fxArc:bolt?fxBall:fxRing,mat);scene.add(mesh);
    if(!bolt)mesh.rotation.x=-Math.PI/2;
    effects.push({mesh,age:0,life:bolt?.25:.55,bolt,kind:e.kind,from:e.from,to:e.to,radius:e.radius??1});
@@ -114,10 +117,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const direction=screenDirection(x,y,controls.getAzimuthalAngle());if(!paused)world.update(dt,{...direction,attack:input.attack||keys.has('Space')});
   world.events.splice(0).forEach(effect);
   const p=world.player,t=world.time,reduced=motionPreference.matches;
-  hero.sprite.position.set(p.x,p.z>4.25?.41:.06,p.z);if(p.moving&&!reduced)hero.sprite.position.y+=Math.abs(Math.sin(t*12))*.055;
-  const heroSize=hero.height??1.8;hero.sprite.scale.set(heroSize,heroSize*(1+(reduced?0:.012*Math.sin(t*2))),1);
-  if(hero.frames)hero.sprite.material.map=hero.frames[poseFrame({time:t,moving:p.moving,casting:t<castUntil,reduced})];hero.sprite.material.rotation=p.moving?(reduced?0:Math.sin(t*12)*.025):0;
-  if(t<castUntil){hero.sprite.material.rotation=-.10;hero.sprite.scale.y*=1.04;}
+  if(p.moving)emoteUntil=0;
+  const mode=t<hitUntil?'hit':t<castUntil?actionMode:t<emoteUntil?emote:p.moving?'walk':p.shield>0?'guard':'idle';
+  const pose=characterMotion({time:mode==='walk'||mode==='idle'?t:t-actionStart,mode,classId:world.profession.id,reduced});
+  const heroSize=hero.height??1.8;
+  hero.sprite.position.set(p.x+pose.x,p.z>4.25?.41+pose.y:.06+pose.y,p.z);
+  hero.sprite.scale.set(heroSize*pose.sx,heroSize*pose.sy,1);hero.sprite.material.rotation=pose.rotation;
+  if(hero.frames)hero.sprite.material.map=hero.frames[pose.frame];
   const facing=p.face.x*Math.cos(controls.getAzimuthalAngle())-p.face.z*Math.sin(controls.getAzimuthalAngle());hero.sprite.material.map.repeat.x=facing<0?-1:1;hero.sprite.material.map.offset.x=facing<0?1:0;
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   hero.shadow.position.set(p.x,p.z>4.25?.46:.072,p.z);playerRing.position.set(p.x,p.z>4.25?.47:.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
@@ -145,7 +151,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>1){f.el.remove();floats.splice(i,1);}else{project(f.el,f.x,1.6+f.age*.8,f.z);f.el.style.opacity=String(1-f.age*.8);}}
   if(performance.now()>noticeUntil)$('notice').classList.remove('visible');
   if(t-lastHUD>.08){lastHUD=t;
-   $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`ปราบมอน ${world.kills} ตัว`;
+   $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`Lv. ${progression(world.kills).level} · ปราบมอน ${world.kills} ตัว`;if($('hero-level'))$('hero-level').textContent='Lv. '+progression(world.kills).level;
    $('auto-attack').classList.toggle('active',world.auto);$('auto-attack').setAttribute('aria-pressed',String(world.auto));$('auto-state').textContent=world.auto?'เปิด':'ปิด';
    $('target-name').textContent=target?MONSTER_TYPES[target.type].name:world.safe?'เขตปลอดภัย':'ยังไม่เลือกเป้าหมาย';$('target-hp').textContent=target?`${target.hp} / ${target.maxHp}`:world.safe?'พักฟื้น · พูดคุย · เดินทาง':'คลิก / แตะมอนสเตอร์';$('target-fill').style.width=target?`${target.hp/target.maxHp*100}%`:'0%';
    skillButtons.forEach((b,i)=>{const cd=world.cooldowns[i];b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<SKILLS[i].cost);b.style.setProperty('--cooldown',`${cd/SKILLS[i].cd*100}%`);});

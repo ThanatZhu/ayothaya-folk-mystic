@@ -13,3 +13,5 @@ $('skill-bank').onclick=()=>{
 };
 // Keep the selected bank predictable after a resize, while desktop retains all ten slots.
 document.body.dataset.skillBank='0';
+
+for(const b of document.querySelectorAll('[data-emote]'))b.onclick=()=>{settings.close();dispatchEvent(new CustomEvent('hero-emote',{detail:b.dataset.emote}));};

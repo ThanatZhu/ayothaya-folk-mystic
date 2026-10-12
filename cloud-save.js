@@ -1,6 +1,6 @@
 import {connectFirebase,deadline} from './firebase-client.js';
-import {ENTRY_KEY,validEntry} from './realm-state.js?v=09';
-import {createRealmStore} from './realm-store.js?v=12a';
+import {ENTRY_KEY,validEntry} from './realm-state.js?v=14';
+import {createRealmStore} from './realm-store.js?v=14';
 const $=id=>document.getElementById(id);
 function toLobby(){location.replace('./');return new Promise(()=>{});}
 export async function prepareCloud(catalog){
@@ -39,7 +39,7 @@ export async function prepareCloud(catalog){
  $('save-now').onclick=()=>save().catch(open);
  $('return-lobby').onclick=async()=>{if(busy)return;busy=true;try{if(!blocked)await save();sessionStorage.removeItem(ENTRY_KEY);location.assign('./');}catch{open();}finally{busy=false;}};
  $('logout-account').onclick=async()=>{if(busy)return;busy=true;try{await save();await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.assign('./');}catch{open();}finally{busy=false;}};
- const tick=()=>{if(bound&&!blocked&&!busy&&!traveling&&!document.hidden)save().catch(()=>{});};setInterval(tick,30000);addEventListener('online',tick);
+ const tick=()=>{if(bound&&!blocked&&!busy&&!traveling&&!document.hidden)save().catch(()=>{});};setInterval(tick,10000);addEventListener('online',tick);
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&bound&&!blocked&&!busy&&!traveling)save().catch(()=>{});});
  return {data:record?.state,character:record?.character,serverId,get paused(){return blocked||busy||!panel.hidden;},get cloud(){return store?.cloud;},save,
   bind(value){bound=value;inert(!panel.hidden);},

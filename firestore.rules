@@ -26,9 +26,33 @@ service cloud.firestore {
     && numberIn(s.settings.zoom,0.65,2.7) && numberIn(s.settings.azimuth,-7,7)
     && s.settings.motion is bool;
   }
+  function validAppearance(a) {
+   return a.keys().hasAll(['outfit','hair','hairColor','eyes','beard','tattoo','garment'])
+    && a.keys().hasOnly(['outfit','hair','hairColor','eyes','beard','tattoo','garment'])
+    && a.garment in ['original','shouldercloth','cloak']
+    && a.outfit in ['original','indigo','crimson','ivory']
+    && a.hair in ['original','topknot','braid']
+    && a.hairColor in ['original','black','brown','silver']
+    && a.eyes in ['original','brown','green','blue']
+    && a.beard in ['none','mustache','goatee']
+    && a.tattoo in ['none','forehead','arms'];
+  }
+  function validJob(c) {
+   return c.jobId == '' || (request.resource.data.state.traveler.kills >= 90 && (
+    (c.classId == 'swordsman' && c.jobId in ['guardian','duelist']) ||
+    (c.classId == 'lancer' && c.jobId in ['vanguard','war-lancer']) ||
+    (c.classId == 'hunter' && c.jobId in ['ranger','spirit-hunter']) ||
+    (c.classId == 'boxer' && c.jobId in ['master-boxer','iron-boxer']) ||
+    (c.classId == 'rogue' && c.jobId in ['shadow','assassin']) ||
+    (c.classId == 'shaman' && c.jobId in ['spirit-master','yantra-master']) ||
+    (c.classId == 'acolyte' && c.jobId in ['healer','warder'])
+   ));
+  }
   function validCharacter() {
    let c = request.resource.data.character;
-   return c.keys().hasOnly(['name','gender','classId'])
+   return c.keys().hasOnly(['name','gender','classId','appearance','jobId'])
+    && (!('appearance' in c) || validAppearance(c.appearance))
+    && (!('jobId' in c) || validJob(c))
     && c.name is string && c.name.size() >= 2 && c.name.size() <= 32
     && c.gender in ['male','female'] && c.classId in ['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
   }

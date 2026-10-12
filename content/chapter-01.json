@@ -1,0 +1,927 @@
+{
+  "schemaVersion": 1,
+  "id": "chapter-01",
+  "status": "design-only-not-loaded-by-game",
+  "title": "ประทีปที่ดับพร้อมกัน",
+  "setting": "อโยธยาแฟนตาซี ได้แรงบันดาลใจจากวัฒนธรรมไทย ไม่ระบุปีหรืออ้างเป็นเหตุการณ์ประวัติศาสตร์",
+  "theme": "สายใยขวัญเชื่อมความทรงจำของผู้คนเข้ากับสถานที่",
+  "targetMinutes": 31,
+  "maps": [
+    {
+      "id": "ayutthaya",
+      "existing": true,
+      "safe": true
+    },
+    {
+      "id": "ayutthaya-wilds",
+      "existing": true,
+      "safe": false
+    },
+    {
+      "id": "lamp-shrine",
+      "name": "ศาลาประทีปร้าง",
+      "existing": false,
+      "safe": false,
+      "layout": "โถงแรก → ลานไหดิน → ลานประทีป; ทางกลับเมืองเปิดเสมอ"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "ayutthaya-rueang",
+      "name": "ลุงเรือง",
+      "mapId": "ayutthaya",
+      "role": "travel",
+      "existingName": "ลุงเรือง",
+      "storyHook": "ประทีปดับพร้อมกันและสายใยขวัญแรกขาด",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "ayutthaya-khun-in",
+      "name": "ขุนอินทร์",
+      "mapId": "ayutthaya",
+      "role": "quest",
+      "existingName": "ขุนอินทร์",
+      "storyHook": "ประทีปดับพร้อมกันและสายใยขวัญแรกขาด",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "ayutthaya-bua",
+      "name": "แม่บัว",
+      "mapId": "ayutthaya",
+      "role": "shop",
+      "existingName": "แม่บัว",
+      "storyHook": "ประทีปดับพร้อมกันและสายใยขวัญแรกขาด",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "ayutthaya-saen-dap",
+      "name": "ครูแสนดาบ",
+      "mapId": "ayutthaya",
+      "role": "training",
+      "existingName": "ครูแสนดาบ",
+      "storyHook": "ประทีปดับพร้อมกันและสายใยขวัญแรกขาด",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "ayutthaya-chuk",
+      "name": "เจ้าจุก",
+      "mapId": "ayutthaya",
+      "role": "scout",
+      "existingName": "เจ้าจุก",
+      "storyHook": "ประทีปดับพร้อมกันและสายใยขวัญแรกขาด",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "bangsai-phuk",
+      "name": "ตาผูก",
+      "mapId": "bangsai",
+      "role": "shaman-training",
+      "existingName": "ตาผูก",
+      "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "bangsai-chaba",
+      "name": "แม่ชบา",
+      "mapId": "bangsai",
+      "role": "herbs",
+      "existingName": "แม่ชบา",
+      "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "bangsai-yaem",
+      "name": "ยายแย้ม",
+      "mapId": "bangsai",
+      "role": "folk-history",
+      "existingName": "ยายแย้ม",
+      "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "bangsai-noi",
+      "name": "น้อยเรือจ้าง",
+      "mapId": "bangsai",
+      "role": "boat-travel",
+      "existingName": "น้อยเรือจ้าง",
+      "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "bangsai-choi",
+      "name": "ภูตจ้อย",
+      "mapId": "bangsai",
+      "role": "spirit-guide",
+      "existingName": "ภูตจ้อย",
+      "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "lavo-pan",
+      "name": "ลุงปั้น",
+      "mapId": "lavo",
+      "role": "archaeology",
+      "existingName": "ลุงปั้น",
+      "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "lavo-kaeo-lai",
+      "name": "แม่แก้วลาย",
+      "mapId": "lavo",
+      "role": "textiles",
+      "existingName": "แม่แก้วลาย",
+      "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "lavo-ming",
+      "name": "มิ่ง",
+      "mapId": "lavo",
+      "role": "scout",
+      "existingName": "มิ่ง",
+      "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "lavo-khru-ngao",
+      "name": "ครูเงา",
+      "mapId": "lavo",
+      "role": "rogue-training",
+      "existingName": "ครูเงา",
+      "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "lavo-stone-watch",
+      "name": "ยามศิลา",
+      "mapId": "lavo",
+      "role": "ruin-guide",
+      "existingName": "ยามศิลา",
+      "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "suphan-thong-mat",
+      "name": "ครูทองหมัด",
+      "mapId": "suphan",
+      "role": "boxer-training",
+      "existingName": "ครูทองหมัด",
+      "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "suphan-sai",
+      "name": "แม่สาย",
+      "mapId": "suphan",
+      "role": "supplies",
+      "existingName": "แม่สาย",
+      "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "suphan-phet",
+      "name": "ช่างเพชร",
+      "mapId": "suphan",
+      "role": "smith",
+      "existingName": "ช่างเพชร",
+      "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "suphan-thuan-lek",
+      "name": "ครูทวนเหล็ก",
+      "mapId": "suphan",
+      "role": "lancer-training",
+      "existingName": "ครูทวนเหล็ก",
+      "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "suphan-kla",
+      "name": "กล้า",
+      "mapId": "suphan",
+      "role": "arena-guide",
+      "existingName": "กล้า",
+      "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "phitsanulok-kham",
+      "name": "พรานคำ",
+      "mapId": "phitsanulok",
+      "role": "hunter-training",
+      "existingName": "พรานคำ",
+      "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "phitsanulok-fueang",
+      "name": "แม่เฟื่อง",
+      "mapId": "phitsanulok",
+      "role": "field-medicine",
+      "existingName": "แม่เฟื่อง",
+      "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "phitsanulok-mek",
+      "name": "ตาเมฆ",
+      "mapId": "phitsanulok",
+      "role": "weather-lore",
+      "existingName": "ตาเมฆ",
+      "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "phitsanulok-khao",
+      "name": "น้องข้าว",
+      "mapId": "phitsanulok",
+      "role": "rice-market",
+      "existingName": "น้องข้าว",
+      "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "phitsanulok-khiri",
+      "name": "เจ้าคีรี",
+      "mapId": "phitsanulok",
+      "role": "forest-guide",
+      "existingName": "เจ้าคีรี",
+      "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "nakhon-panya",
+      "name": "พระปัญญา",
+      "mapId": "nakhon",
+      "role": "acolyte-training",
+      "existingName": "พระปัญญา",
+      "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "nakhon-musa",
+      "name": "บังมูซา",
+      "mapId": "nakhon",
+      "role": "spice-market",
+      "existingName": "บังมูซา",
+      "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "nakhon-muk",
+      "name": "ช่างมุก",
+      "mapId": "nakhon",
+      "role": "accessory-crafting",
+      "existingName": "ช่างมุก",
+      "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "nakhon-chan",
+      "name": "แม่ชีจันทร์",
+      "mapId": "nakhon",
+      "role": "healing",
+      "existingName": "แม่ชีจันทร์",
+      "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "nakhon-nawin",
+      "name": "นาวิน",
+      "mapId": "nakhon",
+      "role": "sea-travel",
+      "existingName": "นาวิน",
+      "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
+      "implementation": "existing-dialogue-only"
+    },
+    {
+      "id": "ayutthaya-thian",
+      "name": "ช่างเทียน",
+      "mapId": "ayutthaya",
+      "role": "smith",
+      "storyHook": "เคยซ่อมฐานประทีปให้ศาลาร้าง จึงจำรอยแตกได้",
+      "implementation": "planned"
+    }
+  ],
+  "items": [
+    {
+      "id": "training-swordsman",
+      "name": "ดาบฝึกไม้",
+      "kind": "equipment",
+      "slot": "weapon",
+      "classId": "swordsman",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "training-lancer",
+      "name": "ทวนฝึก",
+      "kind": "equipment",
+      "slot": "weapon",
+      "classId": "lancer",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "training-hunter",
+      "name": "ธนูฝึก",
+      "kind": "equipment",
+      "slot": "weapon",
+      "classId": "hunter",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "training-boxer",
+      "name": "ผ้าพันหมัดฝึก",
+      "kind": "equipment",
+      "slot": "weapon",
+      "classId": "boxer",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "training-rogue",
+      "name": "มีดฝึกคู่",
+      "kind": "equipment",
+      "slot": "weapon",
+      "classId": "rogue",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "training-shaman",
+      "name": "ไม้เท้าครู",
+      "kind": "equipment",
+      "slot": "weapon",
+      "classId": "shaman",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "training-acolyte",
+      "name": "ประคำภาวนา",
+      "kind": "equipment",
+      "slot": "weapon",
+      "classId": "acolyte",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "cloth-vest",
+      "name": "เสื้อผ้าฝ้าย",
+      "kind": "equipment",
+      "buyPrice": 25,
+      "sellPrice": 5,
+      "tradeable": true,
+      "slot": "body"
+    },
+    {
+      "id": "herb-tonic",
+      "name": "ยาสมุนไพร",
+      "kind": "consumable",
+      "buyPrice": 6,
+      "sellPrice": 1,
+      "tradeable": true
+    },
+    {
+      "id": "dry-rice",
+      "name": "ข้าวห่อ",
+      "kind": "consumable",
+      "buyPrice": 4,
+      "sellPrice": 1,
+      "tradeable": true
+    },
+    {
+      "id": "wild-hide",
+      "name": "หนังหมูป่า",
+      "kind": "material",
+      "buyPrice": 0,
+      "sellPrice": 3,
+      "tradeable": true
+    },
+    {
+      "id": "moss-fiber",
+      "name": "ใยมอส",
+      "kind": "material",
+      "buyPrice": 0,
+      "sellPrice": 2,
+      "tradeable": true
+    },
+    {
+      "id": "clay-shard",
+      "name": "เศษดินเผา",
+      "kind": "material",
+      "buyPrice": 0,
+      "sellPrice": 4,
+      "tradeable": true
+    },
+    {
+      "id": "moon-leaf",
+      "name": "ใบจันทร์",
+      "kind": "quest",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "lamp-fragment",
+      "name": "เศษประทีป",
+      "kind": "quest",
+      "sellPrice": 0,
+      "tradeable": false
+    },
+    {
+      "id": "memory-thread",
+      "name": "ด้ายขวัญ",
+      "kind": "quest",
+      "sellPrice": 0,
+      "tradeable": false
+    }
+  ],
+  "selectors": {
+    "class-starter": {
+      "swordsman": "training-swordsman",
+      "lancer": "training-lancer",
+      "hunter": "training-hunter",
+      "boxer": "training-boxer",
+      "rogue": "training-rogue",
+      "shaman": "training-shaman",
+      "acolyte": "training-acolyte"
+    }
+  },
+  "interactions": [
+    "training-chest",
+    "broken-cart",
+    "shrine-inscription",
+    "restore-lamp"
+  ],
+  "recipes": [
+    {
+      "id": "herb-tonic",
+      "inputs": [
+        {
+          "itemId": "moon-leaf",
+          "count": 3
+        }
+      ],
+      "output": {
+        "itemId": "herb-tonic",
+        "count": 1
+      },
+      "fee": 0
+    }
+  ],
+  "monsters": [
+    {
+      "id": "lost-boar",
+      "name": "หมูป่าหลงทาง",
+      "xp": 15,
+      "mapId": "ayutthaya-wilds",
+      "existingType": 0
+    },
+    {
+      "id": "moss-spirit",
+      "name": "ภูตมอส",
+      "xp": 15,
+      "mapId": "ayutthaya-wilds",
+      "existingType": 1
+    },
+    {
+      "id": "lotus-toad",
+      "name": "คางคกใบบัว",
+      "xp": 20,
+      "mapId": "ayutthaya-wilds",
+      "existingType": 2
+    },
+    {
+      "id": "playful-jar",
+      "name": "ไหผีจอมซน",
+      "xp": 25,
+      "mapId": "lamp-shrine",
+      "existingType": 3
+    },
+    {
+      "id": "lamp-guardian",
+      "name": "ผู้เฝ้าประทีปดับ",
+      "xp": 100,
+      "mapId": "lamp-shrine",
+      "existingType": null,
+      "boss": true,
+      "phases": [
+        {
+          "hpAbovePercent": 50,
+          "attack": "กวาดไฟเป็นแนว",
+          "telegraphSeconds": 1.2,
+          "recoverySeconds": 1.5
+        },
+        {
+          "hpAbovePercent": 0,
+          "attack": "วงไฟเว้นช่องปลอดภัย",
+          "telegraphSeconds": 1.5,
+          "recoverySeconds": 2
+        }
+      ],
+      "rule": "หลบด้วยการเดินได้ทุกอาชีพ; AUTO ไม่หลบแทน; ปิดบทด้วยการคืนขวัญ"
+    }
+  ],
+  "quests": [
+    {
+      "id": "ch01-arrival",
+      "title": "คืนที่ประทีปดับ",
+      "giverId": "ayutthaya-rueang",
+      "turnInId": "ayutthaya-rueang",
+      "mapId": "ayutthaya",
+      "requires": [],
+      "minutesTarget": 2,
+      "objectives": [
+        {
+          "type": "talk",
+          "targetId": "ayutthaya-khun-in",
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "xp": 20,
+        "coins": 0,
+        "items": []
+      },
+      "dialogue": "เจ้าก็มาถึงในคืนแปลกเสียด้วย ประทีปดับทั้งท่า ทั้งที่ลมยังนิ่ง ลองไปถามขุนอินทร์ดูเถิด",
+      "repeatable": false,
+      "offerLocation": "giver",
+      "turnInLocation": "turnIn",
+      "remoteTracking": true
+    },
+    {
+      "id": "ch01-ready",
+      "title": "เตรียมตัวออกประตูเหนือ",
+      "giverId": "ayutthaya-saen-dap",
+      "turnInId": "ayutthaya-saen-dap",
+      "mapId": "ayutthaya",
+      "requires": [
+        "ch01-arrival"
+      ],
+      "minutesTarget": 2,
+      "objectives": [
+        {
+          "type": "interact",
+          "targetId": "training-chest",
+          "count": 1
+        },
+        {
+          "type": "equip",
+          "targetId": "class-starter",
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "xp": 30,
+        "coins": 30,
+        "items": []
+      },
+      "dialogue": "เลือกเครื่องมือที่เข้ามือก่อน ออกไปแล้วจำไว้ว่าแรงมีเท่าไรไม่สำคัญเท่าใช้ให้ถูกจังหวะ",
+      "repeatable": false,
+      "offerLocation": "giver",
+      "turnInLocation": "turnIn",
+      "remoteTracking": true,
+      "onAcceptItems": [
+        {
+          "selector": "class-starter",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "ch01-boars",
+      "title": "ทางเกวียนที่เงียบลง",
+      "giverId": "ayutthaya-khun-in",
+      "turnInId": "ayutthaya-khun-in",
+      "mapId": "ayutthaya-wilds",
+      "requires": [
+        "ch01-ready"
+      ],
+      "minutesTarget": 4,
+      "objectives": [
+        {
+          "type": "defeat",
+          "targetId": "lost-boar",
+          "count": 3
+        }
+      ],
+      "rewards": {
+        "xp": 45,
+        "coins": 30,
+        "items": []
+      },
+      "dialogue": "หมูป่ามาขวางทางเกวียน เจ้าช่วยไล่ให้พ้นทาง แล้วดูทีว่ามันหนีอะไรมาหรือไม่",
+      "repeatable": false,
+      "offerLocation": "giver",
+      "turnInLocation": "turnIn",
+      "remoteTracking": true
+    },
+    {
+      "id": "ch01-leaves",
+      "title": "กลิ่นสมุนไพรในหมอก",
+      "giverId": "ayutthaya-bua",
+      "turnInId": "ayutthaya-bua",
+      "mapId": "ayutthaya-wilds",
+      "requires": [
+        "ch01-boars"
+      ],
+      "minutesTarget": 3,
+      "objectives": [
+        {
+          "type": "defeat",
+          "targetId": "moss-spirit",
+          "count": 3
+        },
+        {
+          "type": "collect",
+          "targetId": "moon-leaf",
+          "count": 3
+        }
+      ],
+      "rewards": {
+        "xp": 55,
+        "coins": 35,
+        "items": []
+      },
+      "dialogue": "ใบจันทร์ช่วยให้คนตกใจได้พักหายใจ เก็บมาสามใบเถิด ข้าจะสอนเจ้าต้มยา",
+      "repeatable": false,
+      "offerLocation": "giver",
+      "turnInLocation": "turnIn",
+      "remoteTracking": true
+    },
+    {
+      "id": "ch01-provisions",
+      "title": "เตรียมพร้อมอีกครั้ง",
+      "giverId": "ayutthaya-bua",
+      "turnInId": "ayutthaya-bua",
+      "mapId": "ayutthaya",
+      "requires": [
+        "ch01-leaves"
+      ],
+      "minutesTarget": 3,
+      "objectives": [
+        {
+          "type": "craft",
+          "targetId": "herb-tonic",
+          "count": 1
+        },
+        {
+          "type": "buy",
+          "targetId": "cloth-vest",
+          "count": 1
+        },
+        {
+          "type": "equip",
+          "targetId": "cloth-vest",
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "xp": 50,
+        "coins": 0,
+        "items": []
+      },
+      "dialogue": "ต้มยานี้เก็บไว้ แล้วแวะหาช่างเทียน เสื้อผ้าฝ้ายสักตัวช่วยรับรอยขีดข่วนได้",
+      "repeatable": false,
+      "offerLocation": "giver",
+      "turnInLocation": "turnIn",
+      "remoteTracking": true
+    },
+    {
+      "id": "ch01-trail",
+      "title": "รอยเล็กข้างคันนา",
+      "giverId": "ayutthaya-chuk",
+      "turnInId": "ayutthaya-chuk",
+      "mapId": "ayutthaya-wilds",
+      "requires": [
+        "ch01-provisions"
+      ],
+      "minutesTarget": 4,
+      "objectives": [
+        {
+          "type": "defeat",
+          "targetId": "lotus-toad",
+          "count": 4
+        },
+        {
+          "type": "interact",
+          "targetId": "broken-cart",
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "xp": 80,
+        "coins": 40,
+        "items": []
+      },
+      "dialogue": "ข้าเห็นแสงลอดใต้เกวียน แล้วมันก็หายไปทางศาลา ข้าไม่กล้าไปคนเดียวหรอก",
+      "repeatable": false,
+      "offerLocation": "giver",
+      "turnInLocation": "turnIn",
+      "remoteTracking": true
+    },
+    {
+      "id": "ch01-threshold",
+      "title": "ชื่อที่เหลือบนฐานประทีป",
+      "giverId": "ayutthaya-thian",
+      "turnInId": "ayutthaya-thian",
+      "mapId": "ayutthaya-wilds",
+      "requires": [
+        "ch01-trail"
+      ],
+      "minutesTarget": 2,
+      "objectives": [
+        {
+          "type": "interact",
+          "targetId": "shrine-inscription",
+          "count": 1
+        },
+        {
+          "type": "enter",
+          "targetId": "lamp-shrine",
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "xp": 80,
+        "coins": 0,
+        "items": []
+      },
+      "dialogue": "ข้าจำรอยซ่อมนี้ได้ ศาลานั้นเคยรับประทีปจากคนทั้งตลาด แต่ชื่อบนฐานกลับถูกขูดออก",
+      "repeatable": false,
+      "offerLocation": "giver",
+      "turnInLocation": "journal-on-enter",
+      "remoteTracking": true
+    },
+    {
+      "id": "ch01-jars",
+      "title": "เสียงในไหดิน",
+      "giverId": "ayutthaya-thian",
+      "turnInId": "ayutthaya-thian",
+      "mapId": "lamp-shrine",
+      "requires": [
+        "ch01-threshold"
+      ],
+      "minutesTarget": 4,
+      "objectives": [
+        {
+          "type": "defeat",
+          "targetId": "playful-jar",
+          "count": 4
+        },
+        {
+          "type": "collect",
+          "targetId": "lamp-fragment",
+          "count": 3
+        }
+      ],
+      "rewards": {
+        "xp": 70,
+        "coins": 55,
+        "items": []
+      },
+      "dialogue": "อย่าทุบฐานประทีปตามไปด้วย เก็บเศษที่ยังมีแสงไว้ เราอาจคืนมันได้",
+      "repeatable": false,
+      "offerLocation": "journal-after-prerequisite",
+      "turnInLocation": "journal-after-objectives",
+      "remoteTracking": true
+    },
+    {
+      "id": "ch01-guardian",
+      "title": "ผู้เฝ้าประทีปดับ",
+      "giverId": "ayutthaya-khun-in",
+      "turnInId": "ayutthaya-khun-in",
+      "mapId": "lamp-shrine",
+      "requires": [
+        "ch01-jars"
+      ],
+      "minutesTarget": 5,
+      "objectives": [
+        {
+          "type": "defeat",
+          "targetId": "lamp-guardian",
+          "count": 1
+        },
+        {
+          "type": "interact",
+          "targetId": "restore-lamp",
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "xp": 50,
+        "coins": 80,
+        "items": [
+          {
+            "itemId": "memory-thread",
+            "count": 1
+          }
+        ]
+      },
+      "dialogue": "ผู้เฝ้าไม่ได้อยากทำร้ายใคร มันเพียงจำไม่ได้ว่ากำลังรอใครอยู่ คืนแสงให้มันเถิด",
+      "repeatable": false,
+      "offerLocation": "journal-after-prerequisite",
+      "turnInLocation": "journal-after-objectives",
+      "remoteTracking": true
+    },
+    {
+      "id": "ch01-return",
+      "title": "ด้ายเส้นแรกของผู้เดินทาง",
+      "giverId": "ayutthaya-khun-in",
+      "turnInId": "ayutthaya-khun-in",
+      "mapId": "ayutthaya",
+      "requires": [
+        "ch01-guardian"
+      ],
+      "minutesTarget": 2,
+      "objectives": [
+        {
+          "type": "talk",
+          "targetId": "ayutthaya-khun-in",
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "xp": 50,
+        "coins": 50,
+        "items": []
+      },
+      "dialogue": "แสงกลับมาแล้ว แต่สายใยอีกหลายเส้นยังขาด หากเจ้าพร้อม ครูแสนดาบจะช่วยเปิดเส้นทางฝึกขั้นต่อไปให้",
+      "repeatable": false,
+      "offerLocation": "giver",
+      "turnInLocation": "turnIn",
+      "remoteTracking": true
+    }
+  ],
+  "progression": {
+    "levelXpTotal": [
+      0,
+      40,
+      100,
+      180,
+      280,
+      400,
+      540,
+      690,
+      790,
+      900
+    ],
+    "questXp": 530,
+    "requiredCombatXp": 370,
+    "jobUnlock": {
+      "level": 10,
+      "questId": "ch01-return",
+      "trainerId": "ayutthaya-saen-dap",
+      "branchesSource": "advancement.js",
+      "preservePreviouslyUnlockedJobs": true
+    }
+  },
+  "economy": {
+    "currency": "เบี้ย",
+    "questCoins": 320,
+    "mandatoryPurchases": [
+      {
+        "itemId": "cloth-vest",
+        "count": 1
+      }
+    ],
+    "requiredQuestDrops": "guaranteed; never depend on random loot",
+    "questInventory": "separate and non-tradeable",
+    "death": "return to safe checkpoint; no permanent quest or item loss; boss encounter resets without resetting quest claims"
+  },
+  "shops": [
+    {
+      "npcId": "ayutthaya-bua",
+      "itemIds": [
+        "herb-tonic",
+        "dry-rice"
+      ]
+    },
+    {
+      "npcId": "ayutthaya-thian",
+      "itemIds": [
+        "cloth-vest"
+      ]
+    }
+  ],
+  "questItemSources": [
+    {
+      "itemId": "moon-leaf",
+      "questId": "ch01-leaves",
+      "mapId": "ayutthaya-wilds",
+      "source": "gather-node",
+      "count": 3
+    },
+    {
+      "itemId": "lamp-fragment",
+      "questId": "ch01-jars",
+      "mapId": "lamp-shrine",
+      "source": "playful-jar",
+      "count": 3
+    }
+  ]
+}

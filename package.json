@@ -1,1 +1,10 @@
-{"name":"ayothaya-folk-mystic-prototype","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","build":"node build-vercel.mjs"}}
+{
+  "name": "ayothaya-folk-mystic-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build": "node build-vercel.mjs",
+    "check:content": "node scripts/validate-content.mjs"
+  }
+}

@@ -113,3 +113,13 @@ GitHub Pages ใช้ branch `main` ที่ root โฟลเดอร์น�
 - Same deformation model in lobby/wardrobe Canvas previews and the camera-facing Three.js world mesh. Preview renders at 30 FPS and pauses when hidden or covered; no extra WebGL context. Reduced motion remains static.
 - Uses existing front-facing artwork. Does not add rear-facing or eight-direction sprites, independently drawn limb frames, true skeletal joints, or exact foot locking. NPC and monster art remains unchanged.
 - 69 tests passed; final focused motion tests passed after class gait tuning. Browser checked local wardrobe walk, game render, emote and mobile844x390 joystick movement without console errors. Physical mobile frame rate unmeasured.
+
+
+## แผนพัฒนาเกมเต็ม — Phase 1
+
+จัดทำแบบบทแรก “ประทีปที่ดับพร้อมกัน” แล้ว: เควสต์ 10 ตอน, NPC หลัก 6 คน, มอน 4 ชนิดและบอสใหม่ 1 ตัว พร้อมแผน EXP/เงิน ข้อมูลนี้ยังไม่ถูกโหลดเป็นเควสต์ในเกมจริง
+
+- [แบบเกมและเนื้อเรื่อง](docs/GAME-DESIGN.md)
+- [ข้อกำหนดสไปรต์และ Asset](docs/ASSET-SPEC.md)
+- [รายการงาน Phase 2–10 และเกณฑ์ตรวจรับ](docs/PRODUCTION-PLAN.md)
+- [ข้อมูลบทแรก](content/chapter-01.json) — ตรวจด้วย `npm run check:content`

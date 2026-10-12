@@ -1,4 +1,4 @@
-import {loadDirectionalArt} from './directional-sprite.js?v=16';
+import {loadDirectionalArt} from './directional-sprite.js?v=17';
 import {createRiggedSprite} from './rigged-sprite.js?v=16';
 import {customizeAtlas} from './character-appearance.js';
 import {jobFor} from './advancement.js';
@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=09';
-import {createGame} from './game-controls.js?v=16';
+import {createGame} from './game-controls.js?v=17';
 import {atlasPath,className} from './classes.js';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=13';
@@ -73,14 +73,16 @@ try {
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  // A01 is opt-in: standard costume turnaround; original wardrobe/action frames remain default.
  const pilotToggle=$('directional-pilot'),pilotStatus=$('directional-pilot-status');
- $('directional-pilot-option').hidden=account.character.classId!=='shaman';
+ $('directional-pilot-option').hidden=false;
+ $('directional-pilot-name').textContent='ลอง '+className(account.character.classId,account.character.gender)+' 8 ทิศ · ชุดมาตรฐาน';
+ $('directional-lab-link').href='./sprite-lab.html?class='+account.character.classId;
  pilotToggle.onchange=async()=>{
   const hero=characters[0];
   if(!pilotToggle.checked){hero.directionalEnabled=false;pilotStatus.textContent='กลับมาใช้ภาพและชุดเดิมแล้ว';return;}
-  pilotToggle.disabled=true;pilotStatus.textContent='กำลังโหลดภาพหมอผี 8 ทิศ…';
+  pilotToggle.disabled=true;pilotStatus.textContent='กำลังโหลดภาพตัวละคร 8 ทิศ…';
   try{
    if(!hero.directionalFrames){
-    const art=await loadDirectionalArt();hero.directionalFrames={};hero.directionalFootV=art.footV;
+    const art=await loadDirectionalArt(account.character.classId);hero.directionalFrames={};hero.directionalFootV=art.footV;
     for(const [d,canvas] of Object.entries(art.frames[account.character.gender]))hero.directionalFrames[d]=frame(canvas,[0,0,1,1]);
    }
    hero.directionalEnabled=true;pilotStatus.textContent='ชุดมาตรฐาน 8 ทิศ · ใช้การขยับเดิมชั่วคราว · ยังไม่มีคลิปเดิน/โจมตีใหม่';

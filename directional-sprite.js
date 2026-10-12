@@ -1,3 +1,9 @@
+import {CLASSES,isClass} from './classes.js';
+export const DIRECTIONAL_CLASSES=CLASSES.map(c=>c.id);
+export function directionalManifestPath(classId='shaman'){
+ if(!isClass(classId))throw new Error('invalid-class');
+ return './assets/directional/'+classId+(classId==='shaman'?'-16.json':'-17.json');
+}
 // Directions are relative to the camera, not fixed world compass points.
 export const DIRECTIONS=['S','SE','E','NE','N','NW','W','SW'];
 export function viewDirection(face,azimuth=0,previous='S'){
@@ -12,8 +18,8 @@ export function placement(frame,cell=192,anchor=[96,180]){
  const scale=Math.min((anchor[1]-8)/fy,(anchor[0]-8)/Math.max(1,fx),(cell-anchor[0]-8)/Math.max(1,w-fx));
  return {x:anchor[0]-fx*scale,y:anchor[1]-fy*scale,w:w*scale,h:h*scale};
 }
-export async function loadDirectionalArt(){
- const response=await fetch('./assets/directional/shaman-16.json');
+export async function loadDirectionalArt(classId='shaman'){
+ const response=await fetch(directionalManifestPath(classId));
  if(!response.ok)throw new Error('โหลดข้อมูลภาพหลายทิศไม่สำเร็จ');
  const manifest=await response.json(),images={};
  await Promise.all(Object.entries(manifest.sources).map(async([key,source])=>{

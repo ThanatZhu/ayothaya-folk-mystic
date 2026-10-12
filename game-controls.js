@@ -1,4 +1,4 @@
-import {viewDirection} from './directional-sprite.js?v=16';
+import {viewDirection} from './directional-sprite.js?v=17';
 import {characterMotion,attackDuration} from './character-motion.js?v=15';
 import {progression,jobFor} from './advancement.js';
 import * as THREE from 'three';

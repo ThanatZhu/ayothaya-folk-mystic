@@ -9,7 +9,7 @@ export function createRiggedSprite(texture){
   const positions=geometry.attributes.position;
   for(let i=0;i<positions.count;i++){
    const u=base[i*3]+.5,v=.5-base[i*3+1],q=deformPoint(u,v,pose);
-   positions.setXYZ(i,(q.x-.5)*(flip?-1:1),1-q.y,0);
+   positions.setXYZ(i,(q.x-.5)*(flip?-1:1),(mesh.userData.footV??1)-q.y,0);
   }
   positions.needsUpdate=true;
  };

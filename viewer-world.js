@@ -1,11 +1,12 @@
-import {createRiggedSprite} from './rigged-sprite.js?v=15';
+import {loadDirectionalArt} from './directional-sprite.js?v=16';
+import {createRiggedSprite} from './rigged-sprite.js?v=16';
 import {customizeAtlas} from './character-appearance.js';
 import {jobFor} from './advancement.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=09';
-import {createGame} from './game-controls.js?v=15';
+import {createGame} from './game-controls.js?v=16';
 import {atlasPath,className} from './classes.js';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=13';
@@ -70,6 +71,23 @@ try {
  const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
  const heroMesh=createRiggedSprite(heroFrames[0]);scene.add(heroMesh);
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
+ // A01 is opt-in: standard costume turnaround; original wardrobe/action frames remain default.
+ const pilotToggle=$('directional-pilot'),pilotStatus=$('directional-pilot-status');
+ $('directional-pilot-option').hidden=account.character.classId!=='shaman';
+ pilotToggle.onchange=async()=>{
+  const hero=characters[0];
+  if(!pilotToggle.checked){hero.directionalEnabled=false;pilotStatus.textContent='กลับมาใช้ภาพและชุดเดิมแล้ว';return;}
+  pilotToggle.disabled=true;pilotStatus.textContent='กำลังโหลดภาพหมอผี 8 ทิศ…';
+  try{
+   if(!hero.directionalFrames){
+    const art=await loadDirectionalArt();hero.directionalFrames={};hero.directionalFootV=art.footV;
+    for(const [d,canvas] of Object.entries(art.frames[account.character.gender]))hero.directionalFrames[d]=frame(canvas,[0,0,1,1]);
+   }
+   hero.directionalEnabled=true;pilotStatus.textContent='ชุดมาตรฐาน 8 ทิศ · ใช้การขยับเดิมชั่วคราว · ยังไม่มีคลิปเดิน/โจมตีใหม่';
+  }catch(error){console.error(error);pilotToggle.checked=false;hero.directionalEnabled=false;pilotStatus.textContent='โหลดไม่สำเร็จ ใช้ภาพเดิมต่อได้ ลองเปิดอีกครั้ง';}
+  finally{pilotToggle.disabled=false;}
+ };
+
  for(const n of map.npcs){const h=1.65;characters.push({sprite:sprite(personTextures[n.texture],n.x,-n.z,h,h,.06),shadow:shadow(n.x,-n.z,.4),height:h});}
  const flames=[];for(const [x,z] of [[-4,3.3],[4,3.3],[-7,-7],[7,-7]]){const l=new THREE.PointLight('#ffb53f',6,3.3,1.6);l.position.set(x,1.6,z);scene.add(l);flames.push(l);}
  const geo=new THREE.BufferGeometry(),positions=new Float32Array(90);let seed=2026;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}

@@ -1,3 +1,4 @@
+import {viewDirection} from './directional-sprite.js?v=16';
 import {characterMotion,attackDuration} from './character-motion.js?v=15';
 import {progression,jobFor} from './advancement.js';
 import * as THREE from 'three';
@@ -127,8 +128,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const heroSize=hero.height??1.8;
   hero.sprite.position.set(p.x,(p.z>4.25?.41:.06)+visualPose.y,p.z);
   hero.sprite.scale.set(heroSize,heroSize,1);
-  if(hero.frames)hero.sprite.material.map=hero.frames[pose.frame];
-  const facing=p.face.x*Math.cos(controls.getAzimuthalAngle())-p.face.z*Math.sin(controls.getAzimuthalAngle());hero.sprite.userData.pose?.(visualPose,facing<0);
+  const azimuth=controls.getAzimuthalAngle(),directional=hero.directionalEnabled&&hero.directionalFrames;
+  if(directional){
+   hero.viewDirection=viewDirection(p.face,azimuth,hero.viewDirection);
+   hero.sprite.material.map=hero.directionalFrames[hero.viewDirection];hero.sprite.userData.footV=hero.directionalFootV;
+  }else{if(hero.frames)hero.sprite.material.map=hero.frames[pose.frame];hero.sprite.userData.footV=1;}
+  const facing=p.face.x*Math.cos(azimuth)-p.face.z*Math.sin(azimuth);
+  hero.sprite.userData.pose?.(visualPose,directional?false:facing<0);
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   hero.shadow.position.set(p.x,p.z>4.25?.46:.072,p.z);playerRing.position.set(p.x,p.z>4.25?.47:.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
   // Camera follows the player while preserving user-controlled azimuth and zoom.

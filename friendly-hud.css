@@ -1,0 +1,45 @@
+/* Map-first HUD. Older layout files remain shared with the lobby. */
+.mini-panel{top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));width:188px;padding:9px;border-radius:16px;background:#21392ee8}
+.mini-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.mini-heading strong{margin:0;font-size:13px}
+#open-settings{width:44px;height:44px;border-radius:12px;font-size:23px;flex:none}
+#mini-open{width:100%;padding:0;border:0;background:transparent;text-align:left;border-radius:8px;overflow:hidden}
+#mini-open canvas{width:100%;height:auto;aspect-ratio:190/170}
+.map-caption{display:block;font-size:10px;text-align:center;padding:7px;color:#ebd49a}
+#mini-area{font-size:10px;margin-top:5px;display:block;color:#d2ddc7}
+.world-tools{display:none}.mini-panel small{display:none}
+.account-bar{top:164px;left:16px;max-width:234px}.account-bar button{min-height:44px;border-radius:12px;padding:6px 12px}.account-bar small{display:none}
+body[data-safe=true] .target-panel{display:none}
+#skill-bank{display:none}
+#settings-panel{width:min(400px,92vw);max-height:90dvh;padding:20px;border:1px solid #b9a16c;border-radius:20px;background:#23372f;color:#f5e4b9;overflow:auto;overscroll-behavior:contain}
+#settings-panel::backdrop{background:#101d19a6;backdrop-filter:blur(4px)}
+#settings-panel{touch-action:pan-y}
+.settings-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.settings-heading h2{font-size:19px;margin:0}.settings-heading button{width:44px;height:44px;border-radius:50%;font-size:23px}
+#settings-panel .camera-panel{position:static;width:100%;padding:0;border:0;box-shadow:none;background:none;text-align:center;margin-top:12px;backdrop-filter:none}
+#settings-panel #status{display:none}#settings-panel #angle{display:block;font-size:11px;margin:8px}
+#settings-panel .camera-buttons{gap:8px}#settings-panel .camera-buttons button{height:48px;font-size:24px;border-radius:12px}
+#settings-panel #overview,#settings-panel #motion{display:inline-block;min-height:44px;width:calc(50% - 4px);font-size:12px;padding:8px 4px;border-radius:12px}
+#settings-panel #enter-fullscreen{display:block;width:100%;min-height:44px;margin-top:12px;border-radius:12px;font-size:13px}
+.touch-guide{font-size:12px;line-height:1.9;color:#c6d5bf;margin-bottom:0}
+.world-dialog header{position:sticky;top:-26px;z-index:2;background:#233128;padding:8px 0}.world-dialog header button{width:44px;height:44px}.world-card{min-height:64px}
+#npc-dialog button{min-height:44px}#npc-dialog{max-height:65dvh;overflow:auto}
+@media(max-width:900px),(pointer:coarse),(max-height:600px){
+ .player-panel{top:max(8px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));width:174px;padding:7px;border-radius:13px}.player-heading{gap:7px;margin-bottom:3px}.player-heading strong{font-size:11px;max-width:122px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player-heading small{font-size:8px}.portrait{width:26px;height:30px}.player-foot{display:none}.meter{height:12px;margin-top:4px}.meter span{font-size:9px;line-height:10px}
+ .account-bar{top:101px;left:max(10px,env(safe-area-inset-left));max-width:174px}.account-bar button{font-size:11px;min-height:44px;background:#23392ccc}
+ .mini-panel,.mobile-viewport .mini-panel{display:block;top:max(8px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));width:138px;padding:6px;border-radius:13px}.mini-heading{margin:0 0 4px;gap:3px}.mini-heading strong{font-size:11px}#open-settings{width:44px;height:44px;font-size:21px;background:transparent;border-color:#a9956355}
+ #mini-open canvas{height:72px;aspect-ratio:auto;object-fit:fill}.map-caption{padding:4px;font-size:9px}#mini-area{font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+ .combat-controls{left:auto;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));transform:none;gap:6px;align-items:flex-end;flex-direction:column}
+ .skills{grid-template-columns:repeat(5,46px);gap:4px;padding:5px;border-radius:14px;background:#1d3029bc}.skill{width:46px;height:48px;border-radius:10px;padding:5px 0 0}.skill strong{font-size:22px;line-height:24px}.skill span{font-size:8px;line-height:12px}.skill kbd{font-size:8px}
+ body[data-skill-bank="0"] .skill:nth-child(n+6),body[data-skill-bank="1"] .skill:nth-child(-n+5){display:none}
+ #skill-bank{display:block;min-height:44px;min-width:94px;border-radius:12px;font-size:11px;background:#344b3bed}
+ .attack-controls{gap:8px;padding:0}#attack{width:62px;height:62px;font-size:13px}#attack small,#auto-attack small{display:none}#auto-attack{height:48px;width:60px;border-radius:12px;font-size:11px}
+ .joystick{display:flex;left:max(22px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));width:110px;height:110px;border-color:#e7ddbd66;background:radial-gradient(#a5b49c30,#263f3255)}.joystick:before{font-size:10px;bottom:-17px}
+ .target-panel{top:8px;left:50%;transform:translateX(-50%);width:156px;padding:7px;text-align:center}.target-panel strong{font-size:10px}.target-panel small{font-size:9px}
+ .control-hint{display:none}#notice{top:64px;max-width:36vw;font-size:10px;padding:6px 10px}
+ #interact{left:43%;bottom:max(18px,env(safe-area-inset-bottom));max-width:26vw;min-height:48px;padding:8px 12px;font-size:11px;white-space:normal}
+ #npc-dialog{left:50%;bottom:16px;width:min(390px,68vw);padding:14px;z-index:9}#npc-text{font-size:12px}
+ .world-dialog{width:94vw;max-height:94dvh;padding:12px}.world-dialog header{top:-12px}.world-dialog h1{font-size:17px}.world-dialog p{font-size:10px}.world-grid{grid-template-columns:repeat(3,1fr);gap:9px}.world-card strong{font-size:12px}.world-card small{font-size:10px}.city-picture{height:60px}
+}
+@media(orientation:landscape) and (max-height:360px){
+ .mini-panel,.mobile-viewport .mini-panel{width:126px}#mini-open canvas{height:45px}.mini-heading{margin-bottom:0}#mini-area{display:none}
+ .joystick{width:94px;height:94px;bottom:22px}.combat-controls{gap:4px}.skill{height:44px}.skills{padding:4px}#attack{width:54px;height:54px}.account-bar{top:94px}
+}

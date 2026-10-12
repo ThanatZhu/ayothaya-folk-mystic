@@ -10,7 +10,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  document.querySelector('.player-heading small').textContent=map.safe?'เขตสงบ · พักฟื้นในเมืองหลวง':map.subtitle.split(' · ')[0];
  if(map.safe){$('target-name').textContent='เขตปลอดภัย';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
- $('mini-title').textContent=map.name;document.body.dataset.map=map.id;
+ $('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
  async function travel(id){
   if(traveling||!reachable.has(id)||world.player.hp<=0)return;
   traveling=true;game.clearInput();
@@ -23,7 +23,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  }
  function openMap(){if(account?.paused)return;game.clearInput();conversation=null;$('npc-dialog').hidden=true;dialog.showModal();}
  $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();
- dialog.addEventListener('close',()=>{game.clearInput();$('open-world').focus();});
+ dialog.addEventListener('close',()=>{game.clearInput();$('mini-open').focus();});
  $('world-grid').replaceChildren();
  if(map.safe)for(const stop of map.districts??[]){
   const card=document.createElement('button');card.className='world-card district-stop';card.type='button';
@@ -69,7 +69,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  $('close-npc').onclick=()=>{conversation=null;$('npc-dialog').hidden=true;game.clearInput();};
  $('interact').onclick=()=>{if(nearest)travel(nearest.to);else if(nearNPC)talk(nearNPC);};
  addEventListener('keydown',e=>{
-  if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||e.target.closest?.('input,textarea,select'))return;
+  if($('settings-panel')?.open||e.repeat||e.ctrlKey||e.altKey||e.metaKey||e.target.closest?.('input,textarea,select'))return;
   if(e.code==='KeyM'){e.preventDefault();dialog.open?dialog.close():openMap();}
   if(e.code==='Escape'&&conversation){conversation=null;$('npc-dialog').hidden=true;game.clearInput();}
   if(e.code==='KeyR'&&!dialog.open&&!conversation){e.preventDefault();$('interact').click();}
@@ -79,23 +79,29 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  const mx=x=>(x-bounds.x)/bounds.w*190,mz=z=>(z-bounds.z)/bounds.d*170;
  function minimap(){
   ctx.fillStyle='#20392f';ctx.fillRect(0,0,190,170);ctx.fillStyle=map.safe?'#b7a074':'#738955';for(const b of map.nav.zones)ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170);
+  ctx.fillStyle='#ddc594';
+  for(const x of [-72,0,72])ctx.fillRect(mx(x-4.5),mz(-189),9/bounds.w*190,190/bounds.d*170);
+  for(const z of [0,-48,-112,-176])ctx.fillRect(mx(-116),mz(z-4.5),232/bounds.w*190,9/bounds.d*170);
+  if(map.safe){ctx.fillStyle='#47766c';ctx.fillRect(mx(-39),mz(-192),6/bounds.w*190,192/bounds.d*170);ctx.fillStyle='#a67b52';for(const z of [0,-48,-112,-176])ctx.fillRect(mx(-40.5),mz(z-4),9/bounds.w*190,8/bounds.d*170);}
   ctx.fillStyle='#47766c';ctx.fillRect(0,mz(5.4),190,4/bounds.d*170);
   ctx.fillStyle='#634b36';map.nav.obstacles.forEach(b=>ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170));
   ctx.fillStyle='#e0c896';for(const d of map.districts??[])ctx.fillRect(mx(d.x)-2,mz(d.z)-2,4,4);
   ctx.fillStyle='#91af72';map.plants.filter(p=>p[0]==='tree').forEach(p=>{ctx.beginPath();ctx.arc(mx(p[1]),mz(p[2]),3,0,Math.PI*2);ctx.fill();});
   ctx.fillStyle='#eaca78';map.portals.forEach(p=>ctx.fillRect(mx(p.x)-2,mz(p.z)-2,4,4));
   ctx.fillStyle='#c77a5b';world.mobs.filter(m=>m.hp>0).forEach(m=>ctx.fillRect(mx(m.x)-1.5,mz(m.z)-1.5,3,3));
+  ctx.fillStyle='#f1d88e';map.npcs.forEach(n=>{ctx.beginPath();ctx.arc(mx(n.x),mz(n.z),2,0,Math.PI*2);ctx.fill();});
   ctx.fillStyle='#b9ffdf';ctx.beginPath();ctx.arc(mx(world.player.x),mz(world.player.z),3.5,0,Math.PI*2);ctx.fill();
  }
  function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function update(t){
   const p=world.player;nearest=null;nearNPC=null;let best=2;
   const area=(map.districts??[]).find(d=>Math.hypot(p.x-d.x,p.z-d.z)<24);$('district-description').textContent=area?area.name+' · '+(map.safe?'เขตปลอดภัย':'นอกเมือง'):map.subtitle;
+  $('mini-area').textContent=(area?.name??'ระหว่างทาง')+' · '+(map.safe?'ปลอดภัย':'นอกเมือง');
   for(const v of views){const d=Math.hypot(p.x-v.p.x,p.z-v.p.z);if(d<best){best=d;nearest=v.p;}v.ring.material.opacity=.52+Math.sin(t*2)*.2;position(v.label,v.p.x,v.p.z,.36);v.label.classList.toggle('near',d<2);}
   for(const v of npcViews){position(v.label,v.n.x,v.n.z,1.85);if(Math.hypot(p.x-v.n.x,p.z-v.n.z)>28)v.label.style.visibility='hidden';if(Math.hypot(p.x-v.n.x,p.z-v.n.z)<2.3)nearNPC=v.n;}
   const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open;
   $('interact').hidden=!canInteract;
-  if(canInteract)$('interact').textContent=nearest?'R · เดินทางไป '+lookup(nearest.to).name:'R · คุยกับ '+nearNPC.name;
+  if(canInteract)$('interact').textContent=nearest?'เดินทางไป '+lookup(nearest.to).name:'คุยกับ '+nearNPC.name;
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
   if(t-lastMini>.1){lastMini=t;minimap();}
  }

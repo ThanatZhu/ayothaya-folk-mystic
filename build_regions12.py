@@ -10,6 +10,7 @@ end=prefix.index(" bpy.ops.object.select_all",start)
 prefix=prefix[:start]+prefix[end:]
 exec(compile(prefix,__file__,'exec'))
 export_map=finish
+exec(compile(Path(__file__).with_name('region_details.py').read_text(encoding='utf8'),__file__,'exec'))
 rosters={
  'ayutthaya':['ลุงเรือง','ขุนอินทร์','แม่บัว','ครูแสนดาบ','เจ้าจุก'],
  'bangsai':['ตาผูก','แม่ชบา','ยายแย้ม','น้อยเรือจ้าง','ภูตจ้อย'],
@@ -77,6 +78,8 @@ def finish():
    for dy in [-10,10]:plant('pots',x+dx,y+dy,1.5,1.8)
   for dx in [-24,24]:plant('tree',x+dx,y+7,7,8)
   flag(x-5,y-6)
+  district_details(x,y,i)
+ add_region_details()
  # Keep exactly five story NPCs in each town, expanding existing roles to the new districts.
  roster=rosters[cfg['id']]
  while len(cfg['npcs'])<3:npc('ชาวเมือง',6+len(cfg['npcs'])*2,0,2)
@@ -113,8 +116,9 @@ for town in towns:
   else:stall(x+16,y+16,'sail');plant('palm',x+22,y+22,6,8)
   cfg['landmarks'].append(['พื้นที่สำรวจ '+str(i+1),x,-y])
   for dx,dz in [(-5,-5),(5,-5),(-5,5),(5,5)]:cfg['mobs'].append([x+dx,-y+dz,(i+len(cfg['mobs']))%4])
+ add_region_details(True)
  cfg['mobs'] += [[5,-5,0],[-5,-6,1],[7,-16,2],[-8,-19,3]]
  cfg['leafSources']=[[p[1],p[4]*.8,p[2]] for p in cfg['plants'] if p[0] in ['tree','forest','palm','bamboo']]
  export_map()
-(WORLD/'world.json').write_text(json.dumps({'version':12,'capital':'ayutthaya','maps':catalog},ensure_ascii=False,indent=2),encoding='utf8')
+(WORLD/'world.json').write_text(json.dumps({'version':13,'capital':'ayutthaya','maps':catalog},ensure_ascii=False,indent=2),encoding='utf8')
 print('REGIONS12_COMPLETE',len(catalog),flush=True)

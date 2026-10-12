@@ -89,3 +89,10 @@ Vercel เชื่อม repository นี้กับ branch `main` และ�
 GitHub Pages ใช้ branch `main` ที่ root โฟลเดอร์นี้มี `.nojekyll` และใช้เส้นทาง relative เพื่อรองรับชื่อ repository ใน URL ผลัก commit ใหม่เพื่ออัปเดตเว็บ
 
 ภาพล็อบบีและตัวละครชาย/หญิงสร้างด้วย built-in ImageGen เก็บใน `assets/login-ayutthaya.png` และ `assets/shaman-genders.png` พรอมป์อยู่ใน `assets/lobby-prompts.json`
+
+
+## Detail and mobile HUD update (0.13)
+- Added district benches, lanterns, herb beds, handcarts, merchandise, laundry, temple offerings and garden pools; wilderness rock clearings and rest stops. Collision remains authored with scenery.
+- Top-right minimap opens travel; camera controls moved to a modal menu. Town target banner hidden.
+- Mobile: five visible skill buttons per bank, all ten available through a 44px switch; 44px+ main controls, safe-area positioning and compact status panel. Desktop retains all ten skills.
+- Local regression: 59 tests pass, static production build passes. Responsive browser checks at 844x390 and 568x320; physical-device FPS and multitouch not measured.

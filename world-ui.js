@@ -78,7 +78,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  const bounds=map.bounds??{x:-19,z:-23,w:38,d:34};
  const mx=x=>(x-bounds.x)/bounds.w*190,mz=z=>(z-bounds.z)/bounds.d*170;
  function minimap(){
-  ctx.fillStyle='#20392f';ctx.fillRect(0,0,190,170);ctx.fillStyle=map.safe?'#b7a074':'#738955';for(const b of map.nav.zones)ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170);
+  ctx.fillStyle='#718c6c';ctx.fillRect(0,0,190,170);ctx.fillStyle=map.safe?'#b5bd87':'#738955';for(const b of map.nav.zones)ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170);
   ctx.fillStyle='#ddc594';
   ctx.strokeStyle='#e2d3a7';ctx.lineCap='round';for(const r of map.roads??[]){ctx.lineWidth=r.width/bounds.w*190;ctx.beginPath();ctx.moveTo(mx(r.a[0]),mz(r.a[1]));ctx.lineTo(mx(r.b[0]),mz(r.b[1]));ctx.stroke();}
   ctx.fillStyle='#e2d3a7';for(const [x,z,rx,rz] of map.plazas??[]){ctx.beginPath();ctx.ellipse(mx(x),mz(z),rx/bounds.w*190,rz/bounds.d*170,0,0,Math.PI*2);ctx.fill();}
@@ -86,7 +86,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
   ctx.fillStyle='#c4a676';for(const z of [0,-32,-70])ctx.fillRect(mx(-32),mz(z-5.5),8/bounds.w*190,11/bounds.d*170);
   ctx.fillStyle='#634b36';map.nav.obstacles.forEach(b=>ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170));
   ctx.fillStyle='#e0c896';for(const d of map.districts??[])ctx.fillRect(mx(d.x)-2,mz(d.z)-2,4,4);
-  ctx.fillStyle='#91af72';map.plants.filter(p=>['tree','canopy19'].includes(p[0])).forEach(p=>{ctx.beginPath();ctx.arc(mx(p[1]),mz(p[2]),3,0,Math.PI*2);ctx.fill();});
+  ctx.fillStyle='#60825a';map.plants.filter(p=>['tree','canopy19'].includes(p[0])).forEach(p=>{ctx.beginPath();ctx.arc(mx(p[1]),mz(p[2]),3,0,Math.PI*2);ctx.fill();});
   ctx.fillStyle='#eaca78';map.portals.forEach(p=>ctx.fillRect(mx(p.x)-2,mz(p.z)-2,4,4));
   ctx.fillStyle='#c77a5b';world.mobs.filter(m=>m.hp>0).forEach(m=>ctx.fillRect(mx(m.x)-1.5,mz(m.z)-1.5,3,3));
   ctx.fillStyle='#f1d88e';map.npcs.forEach(n=>{ctx.beginPath();ctx.arc(mx(n.x),mz(n.z),2,0,Math.PI*2);ctx.fill();});

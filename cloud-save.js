@@ -1,6 +1,6 @@
 import {connectFirebase,deadline} from './firebase-client.js';
-import {ENTRY_KEY,validEntry} from './realm-state.js?v=18';
-import {createRealmStore} from './realm-store.js?v=19';
+import {ENTRY_KEY,validEntry} from './realm-state.js?v=21';
+import {createRealmStore} from './realm-store.js?v=21';
 const $=id=>document.getElementById(id);
 function toLobby(){location.replace('./');return new Promise(()=>{});}
 export async function prepareCloud(catalog){

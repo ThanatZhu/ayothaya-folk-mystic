@@ -1,4 +1,5 @@
-import {advanceStats,advanceSkills} from './advancement.js?v=18';
+import {awardExperience} from './experience.js?v=21';
+import {advanceStats,advanceSkills} from './advancement.js?v=21';
 import {getClass,classSkills} from './classes.js?v=18';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[
@@ -14,10 +15,10 @@ export const SKILLS=[
  {key:'0',name:'วงอาคมพิทักษ์',short:'วงอาคม',icon:'✺',cost:35,cd:15,damage:62,type:'nova',radius:4,color:'#d8adf4'}
 ];
 export const MONSTER_TYPES=[
- {name:'หมูป่าหลงทาง',hp:78,speed:1.1,damage:7},
- {name:'ภูตมอส',hp:60,speed:.9,damage:6},
- {name:'คางคกใบบัว',hp:65,speed:1,damage:6},
- {name:'ไหผีจอมซน',hp:90,speed:.8,damage:8}
+ {name:'หมูป่าหลงทาง',hp:78,speed:1.1,damage:7,baseXp:10,jobXp:6},
+ {name:'ภูตมอส',hp:60,speed:.9,damage:6,baseXp:12,jobXp:8},
+ {name:'คางคกใบบัว',hp:65,speed:1,damage:6,baseXp:14,jobXp:7},
+ {name:'ไหผีจอมซน',hp:90,speed:.8,damage:8,baseXp:18,jobXp:12}
 ];
 export const OBSTACLES=[
  {x:-7.2,z:-11.5,w:6.4,d:7.3}, // north house, veranda and staircase
@@ -78,7 +79,7 @@ export class CombatWorld{
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
   this.mobs=(this.safe?[]:(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]])).map(([x,z,type],id)=>({id,type,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
-  this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.time=0;
+  this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;
  }
  get target(){return this.mobs.find(m=>m.id===this.targetId&&m.hp>0)??null;}
  emit(type,extra={}){this.events.push({type,...extra});}
@@ -89,7 +90,7 @@ export class CombatWorld{
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);mob.hit=.16;mob.aggro=true;
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
-  if(mob.hp===0){mob.dead=8;mob.aggro=false;this.kills++;this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
+  if(mob.hp===0){mob.dead=8;mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];this.emit('experience',awardExperience(this,reward.baseXp,reward.jobXp));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  basicAttack(quiet=false){
   const p=this.player;if(p.hp<=0||p.attackCD>0)return false;

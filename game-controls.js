@@ -1,8 +1,10 @@
+import {jobProgress} from './experience.js?v=21';
+import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
 import {characterMotion,attackDuration} from './character-motion.js?v=15';
-import {progression,jobFor} from './advancement.js?v=18';
+import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=14';
+import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=21';
 
 import {className} from './classes.js?v=18';
 
@@ -34,6 +36,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number';el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
  function effect(e){
+  if(e.type==='experience'){
+   toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');
+  }
   if(e.type==='cast'){
    castUntil=world.time+(['slash','punch','thrust','arrow'].includes(e.kind)?attackDuration(world.profession.id):.8);actionStart=world.time;emoteUntil=0;actionMode=e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    const bolt=['bolt','arrow','blessing'].includes(e.kind),mat=new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(e.kind==='arrow'?fxArrow:e.kind==='slash'?fxArc:bolt?fxBall:fxRing,mat);scene.add(mesh);
@@ -49,6 +54,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const b=document.createElement('button');b.type='button';b.className='skill';b.setAttribute('aria-label',`สกิล ${s.key} ${s.name}`);b.title=`${s.key} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;
   b.innerHTML=`<kbd>${s.key}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em>`;b.style.setProperty('--skill-color',s.color);b.addEventListener('click',()=>{if(!isPaused())world.skill(i);});$('skills').append(b);return b;
  });
+ applySkillArt(skillButtons,world.profession.id);
+
  $('auto-attack').addEventListener('click',()=>{if(!isPaused())world.toggleAuto();});
  $('attack').addEventListener('pointerdown',e=>{if(isPaused())return;e.preventDefault();attackPointer=e.pointerId;input.attack=true;$('attack').setPointerCapture(e.pointerId);world.basicAttack();});
  function releaseAttack(e){if(e.pointerId===attackPointer){input.attack=false;attackPointer=null;}}
@@ -161,7 +168,14 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>1){f.el.remove();floats.splice(i,1);}else{project(f.el,f.x,1.6+f.age*.8,f.z);f.el.style.opacity=String(1-f.age*.8);}}
   if(performance.now()>noticeUntil)$('notice').classList.remove('visible');
   if(t-lastHUD>.08){lastHUD=t;
-   $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`Lv. ${progression(world.kills).level} · ปราบมอน ${world.kills} ตัว`;if($('hero-level'))$('hero-level').textContent='Lv. '+progression(world.kills).level;
+   $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`Lv. ${progression(world).level} · ปราบมอน ${world.kills} ตัว`;if($('hero-level'))$('hero-level').textContent='Lv. '+progression(world).level;
+   const base=progression(world),job=jobProgress(world,world.profession.id,world.jobId);
+   for(const [id,stats,label] of [['base-exp',base,'Base'],['job-exp',job,'Job']]){
+    const track=$(id);if(!track)continue;
+    track.querySelector('i').style.width=stats.percent+'%';
+    track.querySelector('span').textContent=label+' Lv.'+stats.level+' · '+(stats.maxed?'MAX':stats.current+'/'+stats.required);
+    track.setAttribute('aria-valuenow',String(Math.round(stats.percent)));track.setAttribute('aria-valuetext',label+' Level '+stats.level+', '+(stats.maxed?'สูงสุด':stats.current+' จาก '+stats.required+' EXP'));
+   }
    $('auto-attack').classList.toggle('active',world.auto);$('auto-attack').setAttribute('aria-pressed',String(world.auto));$('auto-state').textContent=world.auto?'เปิด':'ปิด';
    $('target-name').textContent=target?MONSTER_TYPES[target.type].name:world.safe?'เขตปลอดภัย':'ยังไม่เลือกเป้าหมาย';$('target-hp').textContent=target?`${target.hp} / ${target.maxHp}`:world.safe?'พักฟื้น · พูดคุย · เดินทาง':'คลิก / แตะมอนสเตอร์';$('target-fill').style.width=target?`${target.hp/target.maxHp*100}%`:'0%';
    skillButtons.forEach((b,i)=>{const cd=world.cooldowns[i];b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<SKILLS[i].cost);b.style.setProperty('--cooldown',`${cd/SKILLS[i].cd*100}%`);});

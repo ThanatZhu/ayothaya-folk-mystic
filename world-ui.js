@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {destinations,restoreTraveler,serializeTraveler} from './world-state.js';
+import {destinations,restoreTraveler,serializeTraveler} from './world-state.js?v=21';
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');

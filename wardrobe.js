@@ -1,7 +1,7 @@
 import {createMotionPreview} from './motion-preview.js?v=15';
 import {APPEARANCE_OPTIONS,validateAppearance} from './appearance-state.js';
 import {customizeAtlas} from './character-appearance.js?v=18';
-import {JOBS,progression,JOB_LEVEL} from './advancement.js?v=18';
+import {JOBS,progression,JOB_LEVEL} from './advancement.js?v=21';
 import {atlasPath} from './classes.js?v=18';
 import {characterMotion,MOTION_MODES} from './character-motion.js?v=15';
 const labels={garment:'แบบเครื่องแต่งกาย',outfit:'สีเครื่องแต่งกาย',hair:'ทรงผม',hairColor:'สีผม',eyes:'สีตา',beard:'หนวดและเครา',tattoo:'รอยยันต์'};
@@ -33,7 +33,7 @@ export function createWardrobe({getClass,getGender,getRecord,onApply,onTexture,o
  dialog.addEventListener('close',()=>{if(!committed&&beforeOpen){reset(beforeOpen.appearance,beforeOpen.jobId);render();}document.getElementById('open-wardrobe')?.focus();});
  function open(){
   beforeOpen={appearance:{...appearance},jobId};committed=false;
-  const record=getRecord(),kills=record?.state.traveler.kills??0,level=progression(kills).level;
+  const record=getRecord(),kills=record?.state.traveler??0,level=progression(kills).level;
   $('wardrobe-level').textContent=`Lv. ${level} · EXP ${progression(kills).xp}`;
   const select=$('advanced-job');select.replaceChildren();const base=document.createElement('option');base.value='';base.textContent='ยังไม่เป็น Master';base.disabled=!!record?.character.jobId;select.append(base);
   for(const job of JOBS[getClass()]){const option=document.createElement('option');option.value=job.id;option.textContent=job.name+' · '+job.style;option.disabled=!record||(level<JOB_LEVEL&&job.id!==record.character.jobId)||!!record?.character.jobId&&job.id!==record.character.jobId;select.append(option);}

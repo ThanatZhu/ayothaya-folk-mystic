@@ -1,3 +1,4 @@
+import {experienceOf} from './experience.js?v=21';
 // Only transient player resources cross map boundaries; positions and targets never do.
 export function resolveMap(catalog,id){return catalog.maps.find(m=>m.id===id)??catalog.maps.find(m=>m.id===catalog.capital);}
 export function destinations(catalog,map){return new Set(map.portals.map(p=>p.to));}
@@ -7,6 +8,7 @@ export function restoreTraveler(world,saved){
  world.player.hp=bounded(saved.hp,world.player.maxHp,world.player.maxHp)||world.player.maxHp;
  world.player.mp=bounded(saved.mp,world.player.maxMp,world.player.maxMp);
  world.kills=Math.floor(bounded(saved.kills,1e7,0));
+ Object.assign(world,experienceOf(saved));
  if(Array.isArray(saved.cooldowns)&&saved.cooldowns.length===world.cooldowns.length)world.cooldowns=saved.cooldowns.map(v=>bounded(v,60,0));
 }
-export function serializeTraveler(world){return {version:5,hp:world.player.hp,mp:world.player.mp,kills:world.kills,cooldowns:[...world.cooldowns]};}
+export function serializeTraveler(world){return {version:5,hp:world.player.hp,mp:world.player.mp,kills:world.kills,...experienceOf(world),cooldowns:[...world.cooldowns]};}

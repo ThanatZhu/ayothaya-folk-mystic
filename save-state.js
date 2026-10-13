@@ -1,5 +1,6 @@
-import {walkable} from './combat-core.js?v=14';
-import {serializeTraveler,restoreTraveler} from './world-state.js';
+import {validExperience} from './experience.js?v=21';
+import {walkable} from './combat-core.js?v=21';
+import {serializeTraveler,restoreTraveler} from './world-state.js?v=21';
 
 export function captureSave(world,map,camera,controls,motion){
  return {schema:1,mapId:map.id,traveler:serializeTraveler(world),
@@ -10,7 +11,7 @@ export function validateSave(data,catalog){
  if(!data||data.schema!==1)throw new Error('save-version');
  if(!catalog.maps.some(m=>m.id===data.mapId)&&!catalog.retiredMaps?.includes(data.mapId))throw new Error('save-map');
  const t=data.traveler;
- if(!t||t.version!==5||!['hp','mp','kills'].every(k=>Number.isFinite(t[k]))||
+ if(!t||!validExperience(t)||t.version!==5||!['hp','mp','kills'].every(k=>Number.isFinite(t[k]))||
   !Array.isArray(t.cooldowns)||t.cooldowns.length!==10||!t.cooldowns.every(Number.isFinite))throw new Error('save-data');
  return data;
 }

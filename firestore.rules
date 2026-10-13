@@ -10,9 +10,12 @@ service cloud.firestore {
     && s.keys().hasOnly(['schema','mapId','traveler','position','settings'])
     && s.schema == 1
     && s.mapId in ['ayutthaya','bangsai','lavo','suphan','phitsanulok','nakhon','ayutthaya-wilds','bangsai-wilds','lavo-wilds','suphan-wilds','phitsanulok-wilds','nakhon-wilds']
-    && t.keys().hasOnly(['version','hp','mp','kills','cooldowns']) && t.version == 5
+    && t.keys().hasOnly(['version','hp','mp','kills','cooldowns','baseXp','jobXp']) && t.version == 5
     && numberIn(t.hp,0,140) && numberIn(t.mp,0,100)
     && t.kills is int && numberIn(t.kills,0,10000000)
+    && ((!('baseXp' in t) && !('jobXp' in t)) || (t.keys().hasAll(['baseXp','jobXp'])
+     && t.baseXp is int && numberIn(t.baseXp,0,100000000)
+     && t.jobXp is int && numberIn(t.jobXp,0,100000000)))
     && t.cooldowns is list && t.cooldowns.size() == 10
     && numberIn(t.cooldowns[0],0,60) && numberIn(t.cooldowns[1],0,60)
     && numberIn(t.cooldowns[2],0,60) && numberIn(t.cooldowns[3],0,60)
@@ -82,12 +85,22 @@ service cloud.firestore {
    function transitions() {
     let before = resource.data.character;
     let after = request.resource.data.character;
-    let kills = resource.data.state.traveler.kills;
+    let baseXp = resource.data.state.traveler.get('baseXp', resource.data.state.traveler.kills * 10);
     let oldJob = before.get('jobId','');
     let newJob = after.get('jobId','');
     return after.name == before.name && after.gender == before.gender
-     && (after.classId == before.classId || (before.classId == 'novice' && after.classId != 'novice' && kills >= 240 && newJob == ''))
-     && (newJob == oldJob || (oldJob == '' && newJob != '' && after.classId == before.classId && kills >= 590));
+     && (after.classId == before.classId || (before.classId == 'novice' && after.classId != 'novice' && baseXp >= 2400 && newJob == ''))
+     && (newJob == oldJob || (oldJob == '' && newJob != '' && after.classId == before.classId && baseXp >= 5900));
+   }
+   function experienceTransition() {
+    let old = resource.data.state.traveler;
+    let next = request.resource.data.state.traveler;
+    let before = resource.data.character;
+    let after = request.resource.data.character;
+    let changed = before.classId != after.classId || before.get('jobId','') != after.get('jobId','');
+    return (!('baseXp' in old) || next.keys().hasAll(['baseXp','jobXp']))
+     && next.get('baseXp',next.kills * 10) >= old.get('baseXp',old.kills * 10)
+     && (changed ? next.get('jobXp',0) == 0 : next.get('jobXp',next.kills * 6) >= old.get('jobXp',old.kills * 6));
    }
    allow get: if owner();
    allow create: if owner() && validSave(request.resource.data) && validCharacter()
@@ -95,10 +108,12 @@ service cloud.firestore {
     && ((legacyExists() && migration()) || (!legacyExists()
      && request.resource.data.revision == 1 && request.resource.data.character.classId == 'novice'
      && request.resource.data.character.get('jobId','') == ''
-     && request.resource.data.state.traveler.kills == 0));
+     && request.resource.data.state.traveler.kills == 0
+     && request.resource.data.state.traveler.get('baseXp',0) == 0
+     && request.resource.data.state.traveler.get('jobXp',0) == 0));
    allow update: if owner() && validSave(request.resource.data) && validCharacter()
     && request.resource.data.serverId == resource.data.serverId
-    && request.resource.data.revision == resource.data.revision + 1 && transitions();
+    && request.resource.data.revision == resource.data.revision + 1 && transitions() && experienceTransition();
   }
 
  }

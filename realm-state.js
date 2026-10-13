@@ -1,5 +1,5 @@
 import {validateAppearance} from './appearance-state.js';
-import {jobFor,validateJob} from './advancement.js?v=18';
+import {jobFor,validateJob} from './advancement.js?v=21';
 import {isClass} from './classes.js?v=18';
 export const SERVERS=[{id:'server-1',name:'เซิร์ฟ 1',subtitle:'อยุธยา · ริมเจ้าพระยา'},{id:'server-2',name:'เซิร์ฟ 2',subtitle:'อยุธยา · แสงจันทร์'}];
 export const CHARACTER_SLOTS=['slot-1','slot-2','slot-3','slot-4','slot-5'];
@@ -18,7 +18,7 @@ export function character(input){
  return result;
 }
 export function validEntry(entry,owner,server){return !!entry&&entry.owner===owner&&entry.serverId===server&&isServer(server)&&(!entry.slotId||isSlot(entry.slotId));}
-export function initialSave(){return {schema:1,mapId:'ayutthaya',traveler:{version:5,hp:140,mp:100,kills:0,cooldowns:Array(10).fill(0)},position:{x:0,z:0},settings:{zoom:1.05,azimuth:.68,motion:true}};}
+export function initialSave(){return {schema:1,mapId:'ayutthaya',traveler:{version:5,hp:140,mp:100,kills:0,baseXp:0,jobXp:0,cooldowns:Array(10).fill(0)},position:{x:0,z:0},settings:{zoom:1.05,azimuth:.68,motion:true}};}
 export function validateRecord(record,validateState){
  if(!record||!Number.isSafeInteger(record.revision)||record.revision<1)throw new Error('save-data');
  character(record.character);validateState(record.state);return record;

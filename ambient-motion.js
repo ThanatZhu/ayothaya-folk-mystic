@@ -7,22 +7,40 @@ export function createAmbientMotion({scene,world,waterMaterial,plants,characters
  const nodes=[];world.traverse(o=>{if(o.isMesh)nodes.push(o);});
  const named=(o,prefix)=>o.name.replaceAll('_',' ').startsWith(prefix);
 
- // Water highlights are advected through world-space pixel cells, so they continue
- // downstream when the camera turns instead of moving with the screen.
+ // Continuous world-space current, depth at banks, and view-dependent sky sheen.
+ // No screen-space noise or tiled pixel sparkle; the river remains calm at every zoom.
  waterMaterial.onBeforeCompile=shader=>{
   shader.uniforms.uAmbientTime=clock;
   shader.vertexShader='varying vec2 vRiverXZ;\n'+shader.vertexShader;
   shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRiverXZ = (modelMatrix * vec4(transformed, 1.0)).xz;');
-  shader.fragmentShader='uniform float uAmbientTime;\nvarying vec2 vRiverXZ;\n'+shader.fragmentShader;
+  shader.fragmentShader=`uniform float uAmbientTime;varying vec2 vRiverXZ;
+   float riverHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+   float riverNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(riverHash(i),riverHash(i+vec2(1.,0.)),f.x),mix(riverHash(i+vec2(0.,1.)),riverHash(i+1.),f.x),f.y);}
+   float waterHeight(vec2 p,float t){return sin(p.x*.82+p.y*1.35-t*.85)*.045+sin(p.x*1.73-p.y*.54-t*.64)*.025+sin(p.x*3.7+p.y*2.1-t*1.25)*.009;}
+  `+shader.fragmentShader;
   shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
-   vec2 cell = floor(vec2((vRiverXZ.x - uAmbientTime * .38) * 6., vRiverXZ.y * 19.));
-   float fleck = fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
-   float ripple = sin(floor(vRiverXZ.y * 22.) * .41 + floor((vRiverXZ.x - uAmbientTime*.23)*15.)*.15);
-   diffuseColor.rgb *= .91 + .12 * ripple;
-   diffuseColor.rgb += vec3(.12,.19,.15) * step(.943, fleck) * (.65 + .35*sin(uAmbientTime + cell.y));
+   vec2 p=vRiverXZ;float t=uAmbientTime;
+   float bank=p.y>5.3?p.y-5.3:2.5-abs(p.x+28.);
+   float depth=smoothstep(.0,5.,bank);
+   float h=waterHeight(p,t),hx=waterHeight(p+vec2(.09,0.),t),hz=waterHeight(p+vec2(0.,.09),t);
+   vec3 n=normalize(vec3((h-hx)*9.,1.,(h-hz)*9.));
+   vec3 view=normalize(cameraPosition-vec3(p.x,-.1,p.y));
+   float fresnel=pow(1.-max(dot(view,n),0.),3.);
+   vec3 water=mix(vec3(.29,.46,.38),vec3(.12,.32,.34),depth);
+   float broad=riverNoise(p*.19+vec2(-t*.025,t*.014));
+   water+=vec3(.03,.055,.045)*(broad-.5);
+   vec3 reflectedSky=mix(vec3(.43,.60,.56),vec3(.67,.75,.68),broad);
+   water=mix(water,reflectedSky,.20+fresnel*.48);
+   float ripple=sin(p.x*.74+p.y*2.6-t*.75+riverNoise(p*.63)*3.5);
+   float streak=smoothstep(.81,.98,ripple)*smoothstep(.39,.74,riverNoise(p*vec2(.8,2.1)+vec2(-t*.08,0.)));
+   float specular=pow(max(dot(reflect(-normalize(vec3(-.4,1.,.45)),n),view),0.),85.);
+   water+=vec3(.24,.27,.22)*(streak*.35+specular*.5);
+   float shore=(1.-smoothstep(.03,.38,bank))*smoothstep(.45,.72,riverNoise(p*2.1+vec2(t*.07,0.)));
+   water=mix(water,vec3(.69,.73,.57),shore*.35);
+   diffuseColor.rgb=water;
   `);
  };
- waterMaterial.customProgramCacheKey=()=> 'folk-water-current-v1';waterMaterial.needsUpdate=true;
+ waterMaterial.customProgramCacheKey=()=> 'folk-water-current-v21';waterMaterial.needsUpdate=true;
  nodes.filter(o=>named(o,'Waterfall')).forEach(o=>{
   o.material=new THREE.MeshLambertMaterial({color:'#72aaa5',side:THREE.DoubleSide});
   o.material.onBeforeCompile=shader=>{

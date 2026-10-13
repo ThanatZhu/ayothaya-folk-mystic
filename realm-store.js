@@ -1,17 +1,18 @@
-import {CLASS_LEVEL,progression,validateJob} from './advancement.js?v=18';
-import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=18';
-import {validateSave,nextRevision} from './save-state.js?v=19';
+import {experienceOf} from './experience.js?v=21';
+import {CLASS_LEVEL,progression,validateJob} from './advancement.js?v=21';
+import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=21';
+import {validateSave,nextRevision} from './save-state.js?v=21';
 
 export function validateCharacterChange(before,after,state){
  if(before.name!==after.name||before.gender!==after.gender)throw new Error('character-identity');
  if(before.classId!==after.classId){
   if(before.classId!=='novice'||after.classId==='novice')throw new Error('class-final');
-  if(progression(state.traveler.kills).level<CLASS_LEVEL)throw new Error('class-locked');
+  if(progression(state.traveler).level<CLASS_LEVEL)throw new Error('class-locked');
   if(after.jobId)throw new Error('job-locked');
  }
  if((before.jobId??'')!==(after.jobId??'')){
   if(before.jobId)throw new Error('job-final');
-  validateJob(after.classId,after.jobId,state.traveler.kills);
+  validateJob(after.classId,after.jobId,state.traveler);
  }
 }
 export function createRealmStore({connection=null,owner='guest',catalog,storage}){
@@ -66,7 +67,11 @@ export function createRealmStore({connection=null,owner='guest',catalog,storage}
    const revision=nextRevision(current.revision,record.revision);
    // Eligibility uses saved progress, so a class change cannot also invent its own XP.
    validateCharacterChange(current.character,hero,current.state);
-   return {slotId:record.slotId,serverId:server,character:hero,state,revision};
+   const changed=current.character.classId!==hero.classId||(current.character.jobId??'')!==(hero.jobId??'');
+   const xp=experienceOf(state.traveler),previous=experienceOf(current.state.traveler);
+   if(xp.baseXp<previous.baseXp||(!changed&&xp.jobXp<previous.jobXp))throw new Error('experience-regression');
+   const nextState={...state,traveler:{...state.traveler,...xp,jobXp:changed?0:xp.jobXp}};
+   return {slotId:record.slotId,serverId:server,character:hero,state:nextState,revision};
   };
   if(!cloud){const row=next(localList().find(r=>r.slotId===record.slotId));storage.setItem(localKey(row.slotId),JSON.stringify(payload(row)));return row;}
   guard();const {sdk,db}=connection,r=ref(record.slotId);

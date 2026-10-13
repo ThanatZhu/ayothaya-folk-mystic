@@ -1,3 +1,4 @@
+import {baseProgress} from './experience.js?v=21';
 export const JOBS={
  novice:[],
  swordsman:[{id:'guardian',name:'ขุนดาบพิทักษ์',style:'ป้องกัน',damage:1.12,shield:1.5},{id:'duelist',name:'ขุนดาบทะลวง',style:'โจมตี',damage:1.3,delay:.9}],
@@ -10,7 +11,7 @@ export const JOBS={
 };
 export const CLASS_LEVEL=25;
 export const JOB_LEVEL=60;
-export function progression(kills=0){const k=Number.isFinite(kills)?Math.max(0,Math.floor(kills)):0;return {level:Math.min(99,1+Math.floor(k/10)),xp:k*10,next:100-(k%10)*10};}
+export const progression=(saved=0)=>baseProgress(saved);
 export function jobFor(classId,jobId){if(!jobId)return null;const j=JOBS[classId]?.find(j=>j.id===jobId);if(!j)throw new Error('invalid-job');return j;}
 export function validateJob(classId,jobId,kills){const j=jobFor(classId,jobId);if(j&&progression(kills).level<JOB_LEVEL)throw new Error('job-locked');return j;}
 export function advanceStats(base,jobId){const j=jobFor(base.id,jobId);return !j?base:{...base,damage:Math.round(base.damage*j.damage),delay:base.delay*(j.delay??1),range:base.range+(j.range??0),speed:base.speed+(j.speed??0)};}

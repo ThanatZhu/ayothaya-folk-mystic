@@ -1,20 +1,21 @@
-import {createCapitalLook,createCapitalTrees,createCapitalProps} from './capital-look.js?v=20';
+import {createLandscapeDetails} from './landscape-details.js?v=21';
+import {createCapitalLook,createCapitalTrees,createCapitalProps} from './capital-look.js?v=21';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
 import {createRiggedSprite} from './rigged-sprite.js?v=16';
 import {customizeAtlas} from './character-appearance.js?v=18';
-import {jobFor} from './advancement.js?v=18';
+import {jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {createAmbientMotion} from './ambient-motion.js?v=09';
-import {createGame} from './game-controls.js?v=17';
+import {createAmbientMotion} from './ambient-motion.js?v=21';
+import {createGame} from './game-controls.js?v=21';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=20';
-import {resolveMap} from './world-state.js';
+import {resolveMap} from './world-state.js?v=21';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
-import {prepareCloud} from './cloud-save.js?v=19';
-import {captureSave,applySave} from './save-state.js?v=19';
+import {prepareCloud} from './cloud-save.js?v=21';
+import {captureSave,applySave} from './save-state.js?v=21';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
 function frame(image,rect,repeat=false){
@@ -61,6 +62,7 @@ try {
   }o.material=cache.get(name);
  }});scene.add(gltf.scene);
  createCapitalProps({scene,map});
+ const landscapeDetails=createLandscapeDetails({scene,map});
  const cityTrees=createCapitalTrees({scene,map,texture:leafAtlas,crownTexture:capitalLook.crownTexture});
  const botanic={tree:frame(flora.image,[0,0,.558,.612]),banana:frame(flora.image,[.56,0,.44,.602]),hedge:frame(flora.image,[0,.68,.55,.30]),pots:frame(flora.image,[.587,.608,.409,.386])};
  for(const [i,kind] of ['forest','palm','bamboo','rice'].entries())botanic[kind]=frame(regionalFlora.image,[(i%2)*.5,Math.floor(i/2)*.5,.5,.5]);
@@ -132,7 +134,7 @@ try {
  let lastMs=null;
  renderer.setAnimationLoop(ms=>{
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
-  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);game.update(dt);worldUI.update(t);
+  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);game.update(dt);worldUI.update(t);
   flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;sun.position.set(game.world.player.x-14,25,game.world.player.z+12);sun.target.position.set(game.world.player.x,0,game.world.player.z);renderer.render(scene,camera);
  });
 }catch(error){console.error(error);$('status').textContent='เปิดฉากไม่สำเร็จ';let failure=$('load');if(!failure){failure=document.createElement('div');failure.id='load';document.body.append(failure);}failure.classList.add('error');failure.textContent='เปิดฉากไม่ได้: '+error.message;}

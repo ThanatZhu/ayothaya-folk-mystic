@@ -34,8 +34,8 @@ test('all fourteen advanced jobs unlock at level sixty, alter combat, and reject
  assert.throws(()=>validateJob('boxer','guardian',100),/invalid-job/);
 });
 test('job and appearance persist through save; chosen class and Master remain fixed',async()=>{
- const store=createRealmStore({catalog,storage:storage()});let a=await store.create('server-1',hero);a.state.traveler.kills=240;a=await store.save('server-1',a,a.state);a=await store.changeClass('server-1',a,'boxer');await assert.rejects(store.customize('server-1',a,hero.appearance,'master-boxer'),/job-locked/);
- a.state.traveler.kills=590;a=await store.save('server-1',a,a.state);a=await store.customize('server-1',a,hero.appearance,'master-boxer');assert.equal((await store.load('server-1')).character.jobId,'master-boxer');
+ const store=createRealmStore({catalog,storage:storage()});let a=await store.create('server-1',hero);a.state.traveler.kills=240;a.state.traveler.baseXp=2400;a=await store.save('server-1',a,a.state);a=await store.changeClass('server-1',a,'boxer');await assert.rejects(store.customize('server-1',a,hero.appearance,'master-boxer'),/job-locked/);
+ a.state.traveler.kills=590;a.state.traveler.baseXp=5900;a=await store.save('server-1',a,a.state);a=await store.customize('server-1',a,hero.appearance,'master-boxer');assert.equal((await store.load('server-1')).character.jobId,'master-boxer');
  await assert.rejects(store.changeClass('server-1',a,'hunter'),/class-final/);assert.deepEqual(a.character.appearance,hero.appearance);assert.equal(a.state.traveler.kills,590);
 });
 test('motion states stay finite and bounded and respect reduced motion',()=>{

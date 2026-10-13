@@ -26,9 +26,15 @@ export function createCapitalLook({map,atlas,frame}){
    vec3 g=texture2D(capitalGrass,p/8.).rgb;
    g=mix(g,texture2D(capitalGrass,vec2(-p.y,p.x)/13.+.17).rgb,.30);
    vec3 e=texture2D(capitalEarth,p/7.).rgb*vec3(.98,1.04,1.14);e=mix(e,vec3(.76,.74,.62),.12);
+   float grain=noise19(p*17.);float patches=noise19(p*.7);
+   e*=.95+.10*grain;
+   e=mix(e,e*vec3(.80,.82,.79),smoothstep(.62,.84,patches)*.28);
+   // Fine embedded aggregate and broken dirt edges, never a tiled checkerboard.
+   float pebble=smoothstep(.82,.95,noise19(p*8.5));
+   e=mix(e,vec3(.70,.66,.55),pebble*.21);
    diffuseColor.rgb*=mix(e,g,meadow)*( .92+.13*noise19(p*.13));
   `);
- };ground.customProgramCacheKey=()=> 'capital-ground19';
+ };ground.customProgramCacheKey=()=> 'capital-ground21';
  function canopy(name){
   const m=new THREE.MeshLambertMaterial({map:leaves,color:name.endsWith('dark')?'#b6c897':name.endsWith('light')?'#f1f5c3':'#dce9ae'});m.name=name;
   m.onBeforeCompile=s=>{s.uniforms.capitalTime=time;s.vertexShader='uniform float capitalTime;\n'+s.vertexShader;s.vertexShader=s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed.x+=.055*max(0.,transformed.y-2.)*sin(capitalTime*.85+transformed.z*.27+transformed.x*.13);');};

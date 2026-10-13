@@ -1,0 +1,19 @@
+/* Profile owns account actions; the corner map is solely a map. */
+#open-account.portrait{padding:0;border:0;border-radius:50%;background-color:transparent;background-repeat:no-repeat;cursor:pointer;min-width:44px;min-height:44px;overflow:visible}
+#open-account:focus-visible{outline:3px solid #baffdd;outline-offset:9px}
+#open-account.sync-error:before{content:'!';position:absolute;right:-5px;top:0;background:#b04d37;color:white;border-radius:50%;width:18px;height:18px;z-index:4;font-size:12px}
+.city-guide{top:190px}
+.mini-panel,.mobile-viewport .mini-panel{background:transparent;border:0;box-shadow:none;padding:0;width:180px}
+#mini-open{padding:16px 13px}#mini-open canvas{height:auto;aspect-ratio:190/170}
+#mini-area[hidden],#mini-title[hidden],#position-readout[hidden]{display:none}
+.account-card button{min-height:44px}.account-card .autosave-note{color:#b3dfc2;margin-bottom:0}#account-message{min-height:24px;font-size:11px}#profile-profession{color:#f3d397}#open-settings{width:100%;height:auto;border-radius:8px;font-size:13px}
+#world-map.world-dialog{width:fit-content;max-width:96vw;max-height:96dvh;padding:10px;overflow:hidden;border-radius:14px;touch-action:manipulation}
+#world-map header{position:static;background:transparent;padding:0 0 8px;align-items:center}#world-map h1{margin:0;font-size:19px}#world-map header button{width:44px;height:44px}
+#city-map{display:block;width:auto;height:min(76dvh,740px);max-width:calc(96vw - 28px);object-fit:contain;border-radius:5px;aspect-ratio:1200/1164}
+@media(max-width:900px),(pointer:coarse),(max-height:600px){.mini-panel,.mobile-viewport .mini-panel{width:126px}#mini-open{padding:11px 9px}#mini-open canvas{height:auto;aspect-ratio:190/170}.account-card{max-height:94dvh;padding:14px 20px}.account-card h1{font-size:18px}.account-card button{min-height:44px}#world-map.world-dialog{padding:7px}#world-map header{padding-bottom:3px}#world-map h1{font-size:16px}#city-map{height:calc(94dvh - 66px)}}
+@media(orientation:landscape) and (max-height:360px){.mini-panel,.mobile-viewport .mini-panel{width:110px}#mini-open canvas{height:auto}}
+
+#world-map .map-actions{display:flex;gap:4px;flex:none}#world-map .map-actions button{font-size:20px}#world-map .map-actions button:disabled{opacity:.35}
+#city-map-viewport{width:min(78.35dvh,763px,calc(96vw - 28px));height:min(76dvh,740px);overflow:auto;touch-action:pan-x pan-y;overscroll-behavior:contain;border-radius:5px}
+#city-map{width:calc(100% * var(--map-zoom,1));height:calc(100% * var(--map-zoom,1));max-width:none;object-fit:fill}
+@media(max-width:900px),(pointer:coarse),(max-height:600px){#city-map-viewport{height:calc(94dvh - 66px);width:min(calc((94dvh - 66px) * 1.031),calc(96vw - 28px))}#city-map{height:calc(100% * var(--map-zoom,1))}#world-map h1{font-size:14px}}

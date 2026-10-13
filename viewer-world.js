@@ -11,10 +11,10 @@ import {createAmbientMotion} from './ambient-motion.js?v=21';
 import {createGame} from './game-controls.js?v=21';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=20';
+import {createWorldUI} from './world-ui.js?v=22';
 import {resolveMap} from './world-state.js?v=21';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
-import {prepareCloud} from './cloud-save.js?v=21';
+import {prepareCloud} from './cloud-save.js?v=22';
 import {captureSave,applySave} from './save-state.js?v=21';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
@@ -108,7 +108,7 @@ try {
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
  const portrait=document.querySelector('.portrait');portrait.style.backgroundImage='url('+customized.toDataURL()+')';portrait.style.backgroundSize='400% 200%';portrait.style.backgroundPosition='0% '+(account.character.gender==='female'?'100%':'0%');
- portrait.style.imageRendering='pixelated';
+ portrait.style.imageRendering='pixelated';$('profile-profession').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
  const savedSettings=account.data?.settings;let motionPlaying=motion.running;
  if(savedSettings){
   camera.zoom=THREE.MathUtils.clamp(Number(savedSettings.zoom)||1,.65,2.7);

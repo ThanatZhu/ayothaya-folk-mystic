@@ -1,8 +1,7 @@
 const $=id=>document.getElementById(id);
 const settings=$('settings-panel');
-$('open-settings').onclick=()=>settings.showModal();
 $('close-settings').onclick=()=>settings.close();
-settings.addEventListener('close',()=>$('open-settings').focus());
+settings.addEventListener('close',()=>$('open-account').focus());
 $('overview').addEventListener('click',()=>settings.close());
 $('mini-open').onclick=()=>$('open-world').click();
 let bank=0;

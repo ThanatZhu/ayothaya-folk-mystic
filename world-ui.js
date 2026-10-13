@@ -1,3 +1,4 @@
+import {drawMap} from './city-map.js?v=22';
 import * as THREE from 'three';
 import {destinations,restoreTraveler,serializeTraveler} from './world-state.js?v=21';
 
@@ -10,7 +11,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  document.querySelector('.player-heading small').textContent=map.safe?'เขตสงบ · พักฟื้นในเมืองหลวง':map.subtitle.split(' · ')[0];
  if(map.safe){$('target-name').textContent='เขตปลอดภัย';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
- $('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
+ $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
  async function travel(id){
   if(traveling||!reachable.has(id)||world.player.hp<=0)return;
   traveling=true;game.clearInput();
@@ -21,35 +22,9 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
   $('travel-loading').hidden=false;$('travel-loading').textContent='กำลังเดินทางไป '+lookup(id).name+'…';
   location.assign('?server='+account.serverId+'&map='+encodeURIComponent(id));
  }
- function openMap(){if(account?.paused)return;game.clearInput();conversation=null;$('npc-dialog').hidden=true;dialog.showModal();}
+ function openMap(){if(account?.paused)return;game.clearInput();conversation=null;$('npc-dialog').hidden=true;dialog.showModal();drawCityMap();}
  $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{game.clearInput();$('mini-open').focus();});
- $('world-grid').replaceChildren();
- if(map.safe)for(const stop of map.districts??[]){
-  const card=document.createElement('button');card.className='world-card district-stop';card.type='button';
-  const heading=document.createElement('strong');heading.textContent='รถเกวียน · '+stop.name;
-  const desc=document.createElement('small');desc.textContent='เดินทางภายในเมือง · ฟรี';card.append(heading,desc);
-  card.onclick=()=>{onLocalTravel();game.clearInput();world.auto=false;world.targetId=null;world.path=[];world.player.x=stop.x;world.player.z=stop.z;if(controls){const offset=camera.position.clone().sub(controls.target);controls.target.set(stop.x,1,stop.z);camera.position.copy(controls.target).add(offset);controls.update();}dialog.close();world.notice('ถึง'+stop.name+' · เขตปลอดภัย');};
-  $('world-grid').append(card);
- }
- for(const destination of catalog.maps){
-  const card=document.createElement('button');card.className='world-card';card.type='button';card.style.setProperty('--city',destination.color);
-  const selected=destination.id===map.id;card.disabled=selected||!reachable.has(destination.id);
-  const via=destination.kind==='wilderness'?lookup(destination.region)?.name:'อยุธยา';
-  card.setAttribute('aria-label',(selected?'อยู่ที่ ':reachable.has(destination.id)?'เดินทางไป ':'ผ่าน'+via+'ไป ')+destination.name);
-  const illustration=document.createElement('div');illustration.className='city-picture';
-  // A miniature of the actual footprint layout, not a fixed screenshot of a different map.
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),bounds=destination.bounds??{x:-19,z:-23,w:38,d:34};svg.setAttribute('viewBox',`${bounds.x} ${bounds.z} ${bounds.w} ${bounds.d}`);
-  function rect(x,z,w,d,color){const n=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x,y:z,width:w,height:d,fill:color}))n.setAttribute(k,String(v));svg.append(n);}
-  for(const z of destination.nav.zones)rect(z.x,z.z,z.w,z.d,destination.safe?'#c3ad7c':'#738955');
-  for(const b of destination.nav.obstacles)rect(b.x,b.z,b.w,b.d,destination.id==='lavo'?'#9b563c':'#76523c');
-  for(const p of destination.portals)rect(p.x-.65,p.z-.65,1.3,1.3,'#ffe0a0');
-  illustration.append(svg);card.append(illustration);
-  const heading=document.createElement('strong');heading.textContent=destination.name+(destination.id===catalog.capital?' · เมืองหลวง':destination.safe?' · เมืองปลอดภัย':' · มอนสเตอร์');
-  const description=document.createElement('span');description.textContent=destination.subtitle.split(' · ')[1];
-  const action=document.createElement('small');action.textContent=selected?'คุณอยู่ที่นี่':reachable.has(destination.id)?'เดินทาง →':'เชื่อมผ่าน'+via;
-  card.append(heading,description,action);card.onclick=()=>travel(destination.id);$('world-grid').append(card);
- }
  const views=map.portals.map(p=>{
   const name=lookup(p.to).name;
   const ring=new THREE.Mesh(new THREE.RingGeometry(.72,.84,40),new THREE.MeshBasicMaterial({color:'#edcf83',side:THREE.DoubleSide,transparent:true,opacity:.7,depthWrite:false}));
@@ -74,24 +49,12 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
   if(e.code==='Escape'&&conversation){conversation=null;$('npc-dialog').hidden=true;game.clearInput();}
   if(e.code==='KeyR'&&!dialog.open&&!conversation){e.preventDefault();$('interact').click();}
  });
- const mini=$('mini-map'),ctx=mini.getContext('2d');
- const bounds=map.bounds??{x:-19,z:-23,w:38,d:34};
- const mx=x=>(x-bounds.x)/bounds.w*190,mz=z=>(z-bounds.z)/bounds.d*170;
- function minimap(){
-  ctx.fillStyle='#718c6c';ctx.fillRect(0,0,190,170);ctx.fillStyle=map.safe?'#b5bd87':'#738955';for(const b of map.nav.zones)ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170);
-  ctx.fillStyle='#ddc594';
-  ctx.strokeStyle='#e2d3a7';ctx.lineCap='round';for(const r of map.roads??[]){ctx.lineWidth=r.width/bounds.w*190;ctx.beginPath();ctx.moveTo(mx(r.a[0]),mz(r.a[1]));ctx.lineTo(mx(r.b[0]),mz(r.b[1]));ctx.stroke();}
-  ctx.fillStyle='#e2d3a7';for(const [x,z,rx,rz] of map.plazas??[]){ctx.beginPath();ctx.ellipse(mx(x),mz(z),rx/bounds.w*190,rz/bounds.d*170,0,0,Math.PI*2);ctx.fill();}
-  ctx.fillStyle='#65938d';for(const r of map.waterAreas??[])ctx.fillRect(mx(r.x),mz(r.z),r.w/bounds.w*190,r.d/bounds.d*170);
-  ctx.fillStyle='#c4a676';for(const z of [0,-32,-70])ctx.fillRect(mx(-32),mz(z-5.5),8/bounds.w*190,11/bounds.d*170);
-  ctx.fillStyle='#634b36';map.nav.obstacles.forEach(b=>ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170));
-  ctx.fillStyle='#e0c896';for(const d of map.districts??[])ctx.fillRect(mx(d.x)-2,mz(d.z)-2,4,4);
-  ctx.fillStyle='#60825a';map.plants.filter(p=>['tree','canopy19'].includes(p[0])).forEach(p=>{ctx.beginPath();ctx.arc(mx(p[1]),mz(p[2]),3,0,Math.PI*2);ctx.fill();});
-  ctx.fillStyle='#eaca78';map.portals.forEach(p=>ctx.fillRect(mx(p.x)-2,mz(p.z)-2,4,4));
-  ctx.fillStyle='#c77a5b';world.mobs.filter(m=>m.hp>0).forEach(m=>ctx.fillRect(mx(m.x)-1.5,mz(m.z)-1.5,3,3));
-  ctx.fillStyle='#f1d88e';map.npcs.forEach(n=>{ctx.beginPath();ctx.arc(mx(n.x),mz(n.z),2,0,Math.PI*2);ctx.fill();});
-  ctx.fillStyle='#b9ffdf';ctx.beginPath();ctx.arc(mx(world.player.x),mz(world.player.z),3.5,0,Math.PI*2);ctx.fill();
- }
+ const mini=$('mini-map');
+ const drawCityMap=()=>drawMap($('city-map'),map,world.player,{detailed:true});
+ let mapZoom=1;const viewport=$('city-map-viewport');
+ function zoomMap(step){const old=mapZoom;mapZoom=Math.max(1,Math.min(3,mapZoom+step));const x=(viewport.scrollLeft+viewport.clientWidth/2)*mapZoom/old-viewport.clientWidth/2,y=(viewport.scrollTop+viewport.clientHeight/2)*mapZoom/old-viewport.clientHeight/2;viewport.style.setProperty('--map-zoom',mapZoom);viewport.scrollTo(x,y);$('map-minus').disabled=mapZoom===1;$('map-plus').disabled=mapZoom===3;}
+ $('map-plus').onclick=()=>zoomMap(.5);$('map-minus').onclick=()=>zoomMap(-.5);
+ function minimap(){drawMap(mini,map,world.player);}
  function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function update(t){
   const p=world.player;nearest=null;nearNPC=null;let best=2;
@@ -103,7 +66,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
   $('interact').hidden=!canInteract;
   if(canInteract)$('interact').textContent=nearest?'เดินทางไป '+lookup(nearest.to).name:'คุยกับ '+nearNPC.name;
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
-  if(t-lastMini>.1){lastMini=t;minimap();}
+  const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}
  }
  minimap();return {update,get paused(){return dialog.open||!!conversation||traveling;}};
 }

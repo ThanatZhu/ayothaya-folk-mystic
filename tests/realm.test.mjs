@@ -22,14 +22,14 @@ test('guest realms remain separate across creation, save and reload',async()=>{
  const state=initialSave();state.traveler.kills=8;state.mapId='lavo';await store.save('server-1',one,state);
  const reloaded=createRealmStore({catalog,storage});assert.equal((await reloaded.load('server-1')).state.traveler.kills,8);
  assert.equal((await reloaded.load('server-2')).state.traveler.kills,0);assert.equal((await reloaded.load('server-2')).character.name,'ขุนไกร');
- await assert.rejects(store.create('server-1',hero),/character-exists/);
+ assert.notEqual((await store.create('server-1',hero)).slotId,one.slotId);
  await assert.rejects(store.save('server-1',one,state),/save-conflict/);assert.equal(two.revision,1);
 });
-test('legacy progress migrates only to first realm and original stays intact',async()=>{
- const storage=memory(),legacy=initialSave();legacy.traveler.kills=21;storage.setItem('ayothaya-guest-v1',JSON.stringify(legacy));
- const store=createRealmStore({catalog,storage});assert.equal((await store.create('server-1',hero)).state.traveler.kills,21);
+test('legacy character migrates once with identity and progress intact',async()=>{
+ const storage=memory(),legacy=initialSave();legacy.traveler.kills=21;storage.setItem(guestKey('server-1'),JSON.stringify({character:hero,state:legacy,revision:3}));
+ const store=createRealmStore({catalog,storage});assert.equal((await store.load('server-1')).state.traveler.kills,21);
  assert.equal((await store.create('server-2',hero)).state.traveler.kills,0);
- assert.equal(JSON.parse(storage.getItem('ayothaya-guest-v1')).traveler.kills,21);
+ assert.equal(JSON.parse(storage.getItem(guestKey('server-1'))).state.traveler.kills,21);
 });
 test('broken save and storage failures do not silently create a new character',async()=>{
  const storage=memory();storage.setItem(guestKey('server-1'),'{broken');
@@ -45,5 +45,5 @@ test('cloud adapter scopes saves by UID and realm and rejects stale revisions',a
  await a.save('server-1',first,state);await assert.rejects(a.save('server-1',first,state),/save-conflict/);
  assert.equal((await a.load('server-1')).state.traveler.kills,4);assert.equal((await a.load('server-2')).state.traveler.kills,0);
  assert.ok(reads.every(r=>r.startsWith('players/alice/saves/')));
- connection.sdk.getDocFromServer=async()=>{throw new Error('offline');};await assert.rejects(a.load('server-1'),/offline/);
+ connection.sdk.runTransaction=async()=>{throw new Error('offline');};await assert.rejects(a.load('server-1'),/offline/);
 });

@@ -1,10 +1,10 @@
 import {viewDirection} from './directional-sprite.js?v=17';
 import {characterMotion,attackDuration} from './character-motion.js?v=15';
-import {progression,jobFor} from './advancement.js';
+import {progression,jobFor} from './advancement.js?v=18';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=14';
 
-import {className} from './classes.js';
+import {className} from './classes.js?v=18';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();

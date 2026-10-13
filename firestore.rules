@@ -2,11 +2,10 @@ rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
   function numberIn(n, lo, hi) { return n is number && n >= lo && n <= hi; }
-  function validSave() {
-   let d = request.resource.data;
+  function validSave(d) {
    let s = d.state;
    let t = s.traveler;
-   return d.keys().hasOnly(['revision','updatedAt','state','character'])
+   return d.keys().hasOnly(['revision','updatedAt','state','character','serverId'])
     && d.revision is int && d.revision > 0 && d.updatedAt == request.time
     && s.keys().hasOnly(['schema','mapId','traveler','position','settings'])
     && s.schema == 1
@@ -38,7 +37,7 @@ service cloud.firestore {
     && a.tattoo in ['none','forehead','arms'];
   }
   function validJob(c) {
-   return c.jobId == '' || (request.resource.data.state.traveler.kills >= 90 && (
+   return c.jobId == '' || (
     (c.classId == 'swordsman' && c.jobId in ['guardian','duelist']) ||
     (c.classId == 'lancer' && c.jobId in ['vanguard','war-lancer']) ||
     (c.classId == 'hunter' && c.jobId in ['ranger','spirit-hunter']) ||
@@ -46,7 +45,7 @@ service cloud.firestore {
     (c.classId == 'rogue' && c.jobId in ['shadow','assassin']) ||
     (c.classId == 'shaman' && c.jobId in ['spirit-master','yantra-master']) ||
     (c.classId == 'acolyte' && c.jobId in ['healer','warder'])
-   ));
+   );
   }
   function validCharacter() {
    let c = request.resource.data.character;
@@ -54,16 +53,53 @@ service cloud.firestore {
     && (!('appearance' in c) || validAppearance(c.appearance))
     && (!('jobId' in c) || validJob(c))
     && c.name is string && c.name.size() >= 2 && c.name.size() <= 32
-    && c.gender in ['male','female'] && c.classId in ['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
+    && c.gender in ['male','female'] && c.classId in ['novice','swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
   }
   match /players/{uid}/saves/{slot} {
    function owner() { return request.auth != null && request.auth.uid == uid && slot in ['main','server-1','server-2']; }
+   function migrated() {
+    return (slot == 'server-1' && exists(/databases/$(database)/documents/players/$(uid)/characters/slot-1))
+     || (slot == 'server-2' && exists(/databases/$(database)/documents/players/$(uid)/characters/slot-2));
+   }
    allow get: if owner();
-   allow create: if owner() && validSave() && request.resource.data.revision == 1
-    && (slot == 'main' || validCharacter());
-   allow update: if owner() && validSave()
+   allow create: if false;
+   allow update: if owner() && !migrated() && slot != 'main'
+    && validSave(request.resource.data) && validCharacter()
     && request.resource.data.revision == resource.data.revision + 1
-    && (slot == 'main' || (validCharacter() && request.resource.data.character.name == resource.data.character.name && request.resource.data.character.gender == resource.data.character.gender));
+    && request.resource.data.character == resource.data.character;
+
   }
+  match /players/{uid}/characters/{slot} {
+   function owner() { return request.auth != null && request.auth.uid == uid && slot in ['slot-1','slot-2','slot-3','slot-4','slot-5']; }
+   function legacyServer() { return slot == 'slot-1' ? 'server-1' : 'server-2'; }
+   function legacyExists() { return slot in ['slot-1','slot-2'] && exists(/databases/$(database)/documents/players/$(uid)/saves/$(legacyServer())); }
+   function migration() {
+    let old = get(/databases/$(database)/documents/players/$(uid)/saves/$(legacyServer())).data;
+    let d = request.resource.data;
+    return slot in ['slot-1','slot-2'] && d.serverId == legacyServer()
+     && d.character == old.character && d.state == old.state && d.revision == old.revision;
+   }
+   function transitions() {
+    let before = resource.data.character;
+    let after = request.resource.data.character;
+    let kills = resource.data.state.traveler.kills;
+    let oldJob = before.get('jobId','');
+    let newJob = after.get('jobId','');
+    return after.name == before.name && after.gender == before.gender
+     && (after.classId == before.classId || (before.classId == 'novice' && after.classId != 'novice' && kills >= 240 && newJob == ''))
+     && (newJob == oldJob || (oldJob == '' && newJob != '' && after.classId == before.classId && kills >= 590));
+   }
+   allow get: if owner();
+   allow create: if owner() && validSave(request.resource.data) && validCharacter()
+    && request.resource.data.serverId in ['server-1','server-2']
+    && ((legacyExists() && migration()) || (!legacyExists()
+     && request.resource.data.revision == 1 && request.resource.data.character.classId == 'novice'
+     && request.resource.data.character.get('jobId','') == ''
+     && request.resource.data.state.traveler.kills == 0));
+   allow update: if owner() && validSave(request.resource.data) && validCharacter()
+    && request.resource.data.serverId == resource.data.serverId
+    && request.resource.data.revision == resource.data.revision + 1 && transitions();
+  }
+
  }
 }

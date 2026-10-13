@@ -3,7 +3,7 @@ import {validateAppearance} from './appearance-state.js';
 export function customizeAtlas(image,input={},classId='shaman'){
  const a=validateAppearance(input),c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
  if(Object.values(a).every(v=>v==='original'||v==='none'))return c;
- const anchors={shaman:[[64,42],[57,42],[49,43],[51,44]],swordsman:[[57,41],[56,41],[51,42],[61,48]],lancer:[[52,44],[51,45],[48,47],[39,55]],hunter:[[57,38],[55,39],[50,40],[45,43]],boxer:[[55,40],[54,41],[51,42],[46,42]],rogue:[[53,42],[51,42],[49,42],[62,56]],acolyte:[[53,36],[51,36],[50,37],[49,39]]};
+ const anchors={novice:[[53,35],[51,35],[49,35],[54,34]],shaman:[[64,42],[57,42],[49,43],[51,44]],swordsman:[[57,41],[56,41],[51,42],[61,48]],lancer:[[52,44],[51,45],[48,47],[39,55]],hunter:[[57,38],[55,39],[50,40],[45,43]],boxer:[[55,40],[54,41],[51,42],[46,42]],rogue:[[53,42],[51,42],[49,42],[62,56]],acolyte:[[53,36],[51,36],[50,37],[49,39]]};
  const colors={indigo:[73,108,169],crimson:[165,59,68],ivory:[215,200,159],black:[38,34,39],brown:[100,65,45],silver:[163,174,178],green:[60,139,98],blue:[63,122,181]};
  const data=ctx.getImageData(0,0,c.width,c.height),p=data.data,w=c.width/4,h=c.height/2;
  for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){

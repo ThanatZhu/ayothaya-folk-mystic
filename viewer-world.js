@@ -1,18 +1,18 @@
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
 import {createRiggedSprite} from './rigged-sprite.js?v=16';
-import {customizeAtlas} from './character-appearance.js';
-import {jobFor} from './advancement.js';
+import {customizeAtlas} from './character-appearance.js?v=18';
+import {jobFor} from './advancement.js?v=18';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=09';
 import {createGame} from './game-controls.js?v=17';
-import {atlasPath,className} from './classes.js';
+import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=13';
 import {resolveMap} from './world-state.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
-import {prepareCloud} from './cloud-save.js?v=14';
+import {prepareCloud} from './cloud-save.js?v=18';
 import {captureSave,applySave} from './save-state.js?v=14';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
@@ -73,7 +73,7 @@ try {
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  // A01 is opt-in: standard costume turnaround; original wardrobe/action frames remain default.
  const pilotToggle=$('directional-pilot'),pilotStatus=$('directional-pilot-status');
- $('directional-pilot-option').hidden=false;
+ $('directional-pilot-option').hidden=account.character.classId==='novice';
  $('directional-pilot-name').textContent='ลอง '+className(account.character.classId,account.character.gender)+' 8 ทิศ · ชุดมาตรฐาน';
  $('directional-lab-link').href='./sprite-lab.html?class='+account.character.classId;
  pilotToggle.onchange=async()=>{

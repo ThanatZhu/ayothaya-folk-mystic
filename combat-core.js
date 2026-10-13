@@ -1,5 +1,5 @@
-import {advanceStats,advanceSkills} from './advancement.js';
-import {getClass,classSkills} from './classes.js';
+import {advanceStats,advanceSkills} from './advancement.js?v=18';
+import {getClass,classSkills} from './classes.js?v=18';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[
  {key:'1',name:'ลูกไฟวิญญาณ',short:'ลูกไฟ',icon:'✦',cost:8,cd:2,range:6,damage:24,type:'bolt',color:'#70ead9'},

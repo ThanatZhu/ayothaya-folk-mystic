@@ -1,4 +1,4 @@
-import {CLASSES,isClass,className} from './classes.js';
+import {CLASSES,isClass,className} from './classes.js?v=18';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {DIRECTIONS,viewDirection,loadDirectionalArt} from './directional-sprite.js?v=17';
@@ -8,7 +8,7 @@ import {characterMotion} from './character-motion.js?v=15';
 const $=id=>document.getElementById(id),labels={S:'หน้า',SE:'หน้าขวา',E:'ขวา',NE:'หลังขวา',N:'หลัง',NW:'หลังซ้าย',W:'ซ้าย',SW:'หน้าซ้าย'};
 try{
  const requested=new URLSearchParams(location.search).get('class');
- let classId=isClass(requested)?requested:'shaman',art=await loadDirectionalArt(classId),selectionVersion=0;
+ let classId=CLASSES.some(c=>c.id===requested)?requested:'shaman',art=await loadDirectionalArt(classId),selectionVersion=0;
  for(const c of CLASSES){const o=document.createElement('option');o.value=c.id;o.textContent=c.icon+' '+c.name;$('profession').append(o);}
  $('profession').value=classId;
  const scene=new THREE.Scene();scene.fog=new THREE.Fog('#30432f',10,28);

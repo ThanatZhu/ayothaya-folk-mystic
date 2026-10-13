@@ -1,7 +1,9 @@
 import {validateAppearance} from './appearance-state.js';
-import {jobFor,validateJob} from './advancement.js';
-import {isClass} from './classes.js';
+import {jobFor,validateJob} from './advancement.js?v=18';
+import {isClass} from './classes.js?v=18';
 export const SERVERS=[{id:'server-1',name:'เซิร์ฟ 1',subtitle:'อยุธยา · ริมเจ้าพระยา'},{id:'server-2',name:'เซิร์ฟ 2',subtitle:'อยุธยา · แสงจันทร์'}];
+export const CHARACTER_SLOTS=['slot-1','slot-2','slot-3','slot-4','slot-5'];
+export const isSlot=id=>CHARACTER_SLOTS.includes(id);
 export const ENTRY_KEY='ayothaya-entry-v1';
 export const isServer=id=>SERVERS.some(s=>s.id===id);
 export function guestKey(server){if(!isServer(server))throw new Error('invalid-server');return 'ayothaya-character-v1:'+server;}
@@ -15,9 +17,9 @@ export function character(input){
  if(input.jobId!==undefined){if(typeof input.jobId!=='string')throw new Error('invalid-job');jobFor(input.classId,input.jobId);result.jobId=input.jobId;}
  return result;
 }
-export function validEntry(entry,owner,server){return !!entry&&entry.owner===owner&&entry.serverId===server&&isServer(server);}
+export function validEntry(entry,owner,server){return !!entry&&entry.owner===owner&&entry.serverId===server&&isServer(server)&&(!entry.slotId||isSlot(entry.slotId));}
 export function initialSave(){return {schema:1,mapId:'ayutthaya',traveler:{version:5,hp:140,mp:100,kills:0,cooldowns:Array(10).fill(0)},position:{x:0,z:0},settings:{zoom:1.05,azimuth:.68,motion:true}};}
 export function validateRecord(record,validateState){
  if(!record||!Number.isSafeInteger(record.revision)||record.revision<1)throw new Error('save-data');
- character(record.character);validateState(record.state);validateJob(record.character.classId,record.character.jobId,record.state.traveler.kills);return record;
+ character(record.character);validateState(record.state);return record;
 }

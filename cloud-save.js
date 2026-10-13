@@ -1,6 +1,6 @@
 import {connectFirebase,deadline} from './firebase-client.js';
-import {ENTRY_KEY,validEntry} from './realm-state.js?v=14';
-import {createRealmStore} from './realm-store.js?v=14';
+import {ENTRY_KEY,validEntry} from './realm-state.js?v=18';
+import {createRealmStore} from './realm-store.js?v=18';
 const $=id=>document.getElementById(id);
 function toLobby(){location.replace('./');return new Promise(()=>{});}
 export async function prepareCloud(catalog){
@@ -22,7 +22,7 @@ export async function prepareCloud(catalog){
    connection=await deadline(connectFirebase());
    if(!validEntry(entry,connection.auth.currentUser?.uid,serverId))return toLobby();
   }
-  store=createRealmStore({connection,owner:entry.owner,catalog});record=await store.load(serverId);
+  store=createRealmStore({connection,owner:entry.owner,catalog});record=await store.load(serverId,entry.slotId);
   if(!record)return toLobby();
   lastJSON=JSON.stringify(record.state);$('account-name').textContent=record.character.name+' · เซิร์ฟ '+serverId.slice(-1);
   say(store.cloud?'โหลดเซฟคลาวด์แล้ว':'โหมดทดลอง · เซฟบนเครื่องนี้');

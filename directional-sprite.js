@@ -1,7 +1,7 @@
-import {CLASSES,isClass} from './classes.js';
+import {CLASSES,isClass} from './classes.js?v=18';
 export const DIRECTIONAL_CLASSES=CLASSES.map(c=>c.id);
 export function directionalManifestPath(classId='shaman'){
- if(!isClass(classId))throw new Error('invalid-class');
+ if(!DIRECTIONAL_CLASSES.includes(classId))throw new Error('invalid-class');
  return './assets/directional/'+classId+(classId==='shaman'?'-16.json':'-17.json');
 }
 // Directions are relative to the camera, not fixed world compass points.

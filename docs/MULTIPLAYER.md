@@ -1,0 +1,61 @@
+# Multiplayer 0.24 — implementation and release gate
+
+## What is implemented
+
+- Real WebSocket connections, separate `server-1:map` and `server-2:map` rooms, 20 Hz authoritative simulation and 10 Hz snapshots. Configured capacity is 50, not a measured production concurrency guarantee.
+- Input-only movement with server collision/speed, server-owned HP/MP/cooldowns/skill validation, shared monster state, single death rewards, distance-limited party Base/Job EXP splits. Existing game balance is retained.
+- Nearby player sprites and appearance, interpolated movement, skill FX and emotes. Full appearance only on entering interest range; compact position snapshots thereafter.
+- Five-person parties: invite, decline, expiring invitation, transfer leader, kick, leave. Room/party chat with text limits and per-player rate limits; rendered with text nodes. Party membership survives a short (20 second) disconnect while this process remains alive.
+- Token verification through Firebase Admin, including revocation check. One online character per Google UID, Firestore session leases, fenced writes, and a global authority lease prevent two runtime processes from running divergent rooms.
+- Automatic checkpoints every 10 seconds, save acknowledgement before leaving, heartbeat, bounded reconnection, stale-input stop. Chat and parties are session data, not permanently saved.
+- Local mode with separate test identities and file-backed server saves, exclusively bound to `127.0.0.1`. Public Firebase mode rejects local identities and has no `/dev/session` endpoint.
+
+## What is not live / not included
+
+`MULTIPLAYER_URL` remains empty on the public site. The backend, Firebase deployment permissions, updated Firestore rules and billing approval are still needed before public users can enter a shared room. A local proof is not a public multiplayer deployment.
+
+The only shipped map is the safe capital. Co-op combat and reward sharing are exercised in server tests with a fixture field; there is no playable public wilderness yet. This change does not implement the Phase 4 inventory/equipment/crafting/economy, Phase 5 quests, guilds, player trade, PvP, raids, auction house, reports/moderation tools, or production backup/restore operations. There is no misleading placeholder shop/trade system. Phase 7 cannot be declared fully accepted until its Phase 3–6 dependencies and real cloud checks pass.
+
+The first online join imports the owner's existing saved character/progress once. Those prototype saves were historically client-writable; they are not proof of fair earned XP. Subsequent joins use private `multiplayerProfiles` state, not client XP claims. Legal appearance/class upgrades in the lobby are checked against the server-owned progress. Class changes reset Job EXP. The server mirrors checkpoints into the existing character document so the lobby can show current levels. Offline progress after the import is not merged into the authoritative online profile. This migration policy must be accepted before enabling competitive play; do not claim retroactive anti-cheat.
+
+## Run locally
+
+From repository root (Node 22+):
+
+```powershell
+npm ci
+npm run build
+$env:AUTH_MODE='local'
+$env:PORT='8787'
+npm run server
+```
+
+Open `http://127.0.0.1:8787/`. Create two different guest Novice characters in two tabs, enter the city, press **ผู้เล่นออนไลน์ → เข้าร่วมโลกออนไลน์** in each. Local online test characters are separate server-owned Novices and are not a migration of local single-player saves. Their bearer token is sessionStorage-scoped and usable only on this loopback development server. Never expose this mode through a tunnel or bind it publicly.
+
+`npm run test:multiplayer` runs real two-client socket tests (needs localhost networking). `npm test` includes all regression suites. Local persisted test records are in the ignored `.local-multiplayer/` directory. Do not publish that directory.
+
+## Production checklist (not executed)
+
+1. Authenticate a Google Cloud identity with access to **ayothaya-folk-mystic**, confirm billing/project/region and budget with the owner. Current machine CLI identity was denied project access. Do not silently deploy to a different project.
+2. Attach a dedicated runtime service account with Firebase Auth user-read permission (revocation check) and Firestore read/write access. Do not create/download a long-lived key into the repository. IAM grants require owner review.
+3. Deploy and verify `firestore.rules`. Existing client character updates are denied while the owner's `multiplayerLeases` lease is live. `multiplayerProfiles`, `multiplayerLeases`, `multiplayerRuntime` remain private under default deny. Test owner/other-user/unauthenticated/online-lock/lease-expiry cases in the emulator and the selected project before launch.
+4. Build `server/Dockerfile` from the repository root. Deploy one service, one instance, no traffic split, exact HTTPS origins, `AUTH_MODE=firebase`, project ID and room capacity. For Cloud Run, use WebSocket timeout/reconnect support. Public ingress is required for browser sockets, but no game session is accepted without a verified Firebase token and owned slot. Review the exact service/IAM/billing changes before applying.
+5. Verify `/health`, two distinct Google accounts on separate devices, same-room visibility, movement/skills, private party chat, wrong-token/wrong-slot/wrong-origin rejection, duplicate-login refusal, disconnect/reconnect, server restart, stale lease rejection, and cloud save roundtrip. Confirm saves after forced network failure. A clean shutdown attempts final saves; a sudden process crash can lose at most the last checkpoint interval and resets world mobs/parties/chat.
+6. Set `MULTIPLAYER_URL` in `multiplayer-config.js` to the verified `wss://.../realtime` endpoint, deploy the frontend, and rerun mobile/desktop checks. Until then the public button must honestly say the backend is not enabled.
+
+Global authority ownership is a fail-closed single-authority design. It is not horizontal scaling. During deployment/restart, players reconnect; a replacement process must wait for the old authority lease or clean release. A 100+ player rollout requires load/soak/bandwidth tests and further room partitioning, not merely raising a config number.
+
+## Current service references
+
+- [Firebase ID token verification](https://firebase.google.com/docs/auth/admin/verify-id-tokens)
+- [Cloud Run WebSocket limits and instance coordination](https://docs.cloud.google.com/run/docs/triggering/websockets)
+- [Cloud Run pricing](https://cloud.google.com/run/pricing)
+- [Vercel WebSockets](https://vercel.com/docs/functions/websockets): now supported in Beta; new connections are not guaranteed to reach the same instance and connections have maximum duration. This authoritative room implementation is packaged as a dedicated service; do not deploy an in-memory room per arbitrary Vercel function instance.
+
+## Verification recorded on 2026-10-14
+
+- 84 regression tests; 13 multiplayer tests include two actual loopback WebSockets, persistent local saves, rejected origins/tokens, reconnect, lease fences and server reward checks. Firebase transactions use a mock adapter; this is not a rules emulator or cloud test.
+- Two browser tabs in the real capital: separate male/female Novices, movement, visible remote avatar, invitation/accept, party chat received, explicit leave, browser reload and rejoin retaining the party within 20 seconds. No browser console errors in the final run.
+- Landscape viewport 844 × 390: online dialog 321 px high, no dialog overflow or page horizontal overflow. This is viewport testing, not a physical phone performance result.
+- 50 real local sockets for 3 seconds: 1,250 snapshots, 10.14 MiB received total, approximately 68.9 KiB/s per client and 2.2 ms local p95 roundtrip. A short smoke test only; no cloud capacity/latency guarantee.
+- Camera zoom, heading and motion preference are the only optional client-owned settings in save requests. Progress and positions are captured by the server. Consecutive save requests receive acknowledgements instead of silently timing out.

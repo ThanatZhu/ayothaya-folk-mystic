@@ -1,0 +1,93 @@
+import http from 'node:http';
+import {randomUUID} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {WebSocketServer,WebSocket} from 'ws';
+import {RealmServer} from './realm.js';
+import {LocalStore,FirebaseStore} from './storage.js';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
+ if(!['local','firebase'].includes(mode))throw new Error('invalid-auth-mode');
+ if(!catalog)catalog=JSON.parse(await readFile(path.join(root,'maps/world.json'),'utf8'));
+ if(mode==='firebase')await store.renewAuthority();
+ if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
+ const realm=new RealmServer({catalog,capacity}),sessions=new Map(),joinPending=new Set();let closing=false;
+ const allowedOrigin=origin=>origins.includes(origin);
+ const server=http.createServer(async(req,res)=>{
+  const origin=req.headers.origin;if(origin&&allowedOrigin(origin))res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');
+  res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
+  if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
+  const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
+  if(url.pathname==='/health'){reply(200,{ok:!closing,protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity});return;}
+  if(mode==='local'&&url.pathname==='/dev/session'&&req.method==='POST'){
+   if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
+   let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>1024){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
+   try{if(store.rows.size>=1000)throw new Error('local-session-limit');const result=await store.createLocal(JSON.parse(data));reply(201,{token:result.token,slotId:'slot-1',serverId:'server-1',character:result.record.character});}catch{reply(400,{error:'invalid-character'});}return;
+  }
+  if(serveStatic&&mode==='local'&&req.method==='GET'){
+   try{const decoded=decodeURIComponent(url.pathname),relative=decoded==='/'?'index.html':decoded.slice(1),base=path.join(root,'dist'),file=path.resolve(base,relative);
+    if(!file.startsWith(base+path.sep)||relative.includes('..'))throw new Error('path');const body=await readFile(file),ext=path.extname(file);const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.glb':'model/gltf-binary','.woff2':'font/woff2'}[ext]??'application/octet-stream';res.writeHead(200,{'Content-Type':mime});res.end(body);
+   }catch{res.writeHead(404).end();}return;
+  }
+  reply(404,{error:'not-found'});
+ });
+ const wss=new WebSocketServer({noServer:true,maxPayload:4096,perMessageDeflate:false});
+ server.on('upgrade',(req,socket,head)=>{
+  if(closing||req.url!=='/realtime'||!allowedOrigin(req.headers.origin)||wss.clients.size>=capacity*4+20){socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');socket.destroy();return;}
+  wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req));
+ });
+ const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;await store.checkpoint(s.lease,realm.record(s.peer,s.lease.record),{release});if(release)s.released=true;});return s.queue;};
+ wss.on('connection',ws=>{
+  let session=null,authenticating=false;ws.alive=true;
+  const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}ws.send(JSON.stringify(data));}};
+  const timer=setTimeout(()=>{if(!session)ws.close(4001,'authentication-required');},8000);
+  ws.on('pong',()=>{ws.alive=true;});
+  ws.on('message',async raw=>{
+   let message;try{message=JSON.parse(raw.toString());}catch{ws.close(4002,'invalid-json');return;}
+   if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
+   if(session){if(session.closing)return;if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(message.type==='save'){if(typeof message.id!=='string'||message.id.length>50)return;
+     const settings=message.settings;if(settings&&Number.isFinite(settings.zoom)&&Number.isFinite(settings.azimuth)&&typeof settings.motion==='boolean')session.peer.settings={zoom:Math.max(.65,Math.min(2.7,settings.zoom)),azimuth:settings.azimuth%(Math.PI*2),motion:settings.motion};
+     const recent=Date.now()-(session.savedAt??0)<2500;session.savedAt=Date.now();try{if(recent)await session.queue;else await checkpoint(session);send({type:'saved',id:message.id});}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
+    if(message.type==='leave'){session.closing=true;session.explicitLeave=true;session.peer.suspended=true;try{await checkpoint(session,true);send({type:'left'});ws.close(1000,'left');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
+    realm.receive(session.peer.id,message);return;
+   }
+   if(authenticating)return;authenticating=true;let lease,identity,claimed=false;
+   try{
+    if(message.type!=='join'||typeof message.token!=='string'||message.token.length>4000)throw new Error('authentication-required');
+    let verified;if(mode==='local'){const uid=store.verifyLocal(message.token);if(!uid)throw new Error('invalid-token');verified={uid,exp:Math.floor(Date.now()/1000)+3600};}else verified=await authenticate(message.token);
+    identity={uid:verified.uid,serverId:message.serverId,slotId:message.slotId};
+    if(!['server-1','server-2'].includes(identity.serverId)||!/^slot-[1-5]$/.test(identity.slotId??''))throw new Error('invalid-identity');
+    if(joinPending.has(identity.uid))throw new Error('already-online');joinPending.add(identity.uid);claimed=true;
+    lease=await store.acquire(identity,randomUUID());if(ws.readyState!==WebSocket.OPEN)throw new Error('connection-closed');
+    // Send welcome after the full authenticated session exists.
+    const queued=[],peer=realm.join({...identity,record:lease.record,send:data=>queued.push(data)});
+    session={peer,lease,ws,queue:Promise.resolve(),expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);queued.forEach(send);
+   }catch(e){if(lease)await store.checkpoint(lease,lease.record,{release:true}).catch(()=>{});send({type:'error',code:['already-online','room-full','character-not-found','character-server'].includes(e.message)?e.message:'authentication-failed'});ws.close(4003,'join-rejected');}
+   finally{if(claimed)joinPending.delete(identity.uid);}
+  });
+  ws.on('close',()=>{clearTimeout(timer);if(session){session.closing=true;realm.suspend(session.peer.id);checkpoint(session,true).catch(()=>{}).finally(()=>{if(sessions.get(session.peer.id)===session){if(session.explicitLeave)realm.leave(session.peer.id);sessions.delete(session.peer.id);}});}});
+  ws.on('error',()=>{});
+ });
+ const tick=setInterval(()=>{if(mode==='firebase'&&Date.now()>store.authorityUntil){for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}realm.step(.05);},50);
+ let renewing=false;const authority=setInterval(async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();}catch{}finally{renewing=false;}},5000);
+ const autosave=setInterval(()=>{for(const s of sessions.values())if(!s.closing)checkpoint(s).catch(()=>{s.closing=true;s.peer.send({type:'error',code:'save-failed'});s.ws.close(4010,'save-failed');});},10000);
+ const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
+ return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
+}
+export async function start(){
+ const mode=process.env.AUTH_MODE??'firebase',port=Number(process.env.PORT??8787),host=mode==='local'?'127.0.0.1':(process.env.HOST??'0.0.0.0');
+ const origins=(process.env.ALLOWED_ORIGINS??(mode==='local'?`http://127.0.0.1:${port},http://localhost:${port},http://127.0.0.1:8870`:'' )).split(',').filter(Boolean);
+ if(!origins.length)throw new Error('Set ALLOWED_ORIGINS to the exact game origins');
+ let store,authenticate;
+ if(mode==='local')store=await new LocalStore(path.join(root,'.local-multiplayer')).init();
+ else{const {initializeApp,applicationDefault}=await import('firebase-admin/app'),{getAuth}=await import('firebase-admin/auth'),{getFirestore}=await import('firebase-admin/firestore');
+  const projectId=process.env.FIREBASE_PROJECT_ID;if(!projectId)throw new Error('FIREBASE_PROJECT_ID is required');
+  const app=initializeApp({credential:applicationDefault(),projectId});store=new FirebaseStore(getFirestore(app));authenticate=token=>getAuth(app).verifyIdToken(token,true);
+ }
+ const service=await createHost({mode,store,authenticate,origins,capacity:Number(process.env.ROOM_CAPACITY??50),serveStatic:mode==='local'});
+ await new Promise(resolve=>service.server.listen(port,host,resolve));console.log(`Multiplayer ${mode} listening on ${host}:${port}`);
+ for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>{const timer=setTimeout(()=>process.exit(1),9000);service.close().finally(()=>{clearTimeout(timer);process.exit(0);});});return service;
+}
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))start().catch(e=>{console.error(e.message);process.exitCode=1;});

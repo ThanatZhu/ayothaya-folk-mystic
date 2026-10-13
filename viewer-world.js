@@ -1,3 +1,4 @@
+import {createMultiplayer} from './multiplayer-ui.js?v=24';
 import {createLandscapeDetails} from './landscape-details.js?v=21';
 import {createCapitalLook,createCapitalTrees,createCapitalProps} from './capital-look.js?v=21';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
@@ -8,13 +9,13 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=23';
+import {createGame} from './game-controls.js?v=24';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=22';
 import {resolveMap} from './world-state.js?v=21';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
-import {prepareCloud} from './cloud-save.js?v=22';
+import {prepareCloud} from './cloud-save.js?v=24';
 import {captureSave,applySave} from './save-state.js?v=21';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
@@ -31,7 +32,7 @@ try {
  const catalog=await response.json(),account=await prepareCloud(catalog);
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
  history.replaceState(null,'','?server='+account.serverId+'&map='+encodeURIComponent(map.id));
- let worldUI=null,overview=false;
+ let worldUI=null,multiplayer=null,overview=false;
 
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
@@ -103,7 +104,7 @@ try {
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
  const motion=createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
- const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>$('settings-panel').open||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
+ const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>multiplayer?.paused||$('settings-panel').open||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
@@ -117,6 +118,7 @@ try {
   camera.updateProjectionMatrix();controls.update();
  }
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
+ multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});
  function toggleOverview(){
   overview=!overview;controls.minZoom=overview?.08:.65;game.clearInput();rotating=null;
   const offset=camera.position.clone().sub(controls.target).multiplyScalar(overview?6:1/6);
@@ -134,7 +136,7 @@ try {
  let lastMs=null;
  renderer.setAnimationLoop(ms=>{
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
-  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);game.update(dt);worldUI.update(t);
+  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);game.update(dt);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
   flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;sun.position.set(game.world.player.x-14,25,game.world.player.z+12);sun.target.position.set(game.world.player.x,0,game.world.player.z);renderer.render(scene,camera);
  });
 }catch(error){console.error(error);$('status').textContent='เปิดฉากไม่สำเร็จ';let failure=$('load');if(!failure){failure=document.createElement('div');failure.id='load';document.body.append(failure);}failure.classList.add('error');failure.textContent='เปิดฉากไม่ได้: '+error.message;}

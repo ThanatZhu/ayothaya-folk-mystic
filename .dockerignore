@@ -1,0 +1,11 @@
+.git
+node_modules
+dist
+.local-multiplayer
+.env
+.env.*
+.vercel
+assets
+work
+outputs
+tests

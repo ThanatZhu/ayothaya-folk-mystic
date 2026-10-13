@@ -74,6 +74,10 @@ service cloud.firestore {
   }
   match /players/{uid}/characters/{slot} {
    function owner() { return request.auth != null && request.auth.uid == uid && slot in ['slot-1','slot-2','slot-3','slot-4','slot-5']; }
+   function offline() {
+    return !exists(/databases/$(database)/documents/multiplayerLeases/$(uid))
+     || get(/databases/$(database)/documents/multiplayerLeases/$(uid)).data.expires <= request.time.toMillis();
+   }
    function legacyServer() { return slot == 'slot-1' ? 'server-1' : 'server-2'; }
    function legacyExists() { return slot in ['slot-1','slot-2'] && exists(/databases/$(database)/documents/players/$(uid)/saves/$(legacyServer())); }
    function migration() {
@@ -111,7 +115,7 @@ service cloud.firestore {
      && request.resource.data.state.traveler.kills == 0
      && request.resource.data.state.traveler.get('baseXp',0) == 0
      && request.resource.data.state.traveler.get('jobXp',0) == 0));
-   allow update: if owner() && validSave(request.resource.data) && validCharacter()
+   allow update: if owner() && offline() && validSave(request.resource.data) && validCharacter()
     && request.resource.data.serverId == resource.data.serverId
     && request.resource.data.revision == resource.data.revision + 1 && transitions() && experienceTransition();
   }

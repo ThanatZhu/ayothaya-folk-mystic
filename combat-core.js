@@ -116,7 +116,7 @@ export class CombatWorld{
   else{this.hurt(m,s.damage,s.color);if(s.type==='root')m.root=3.5;if(s.type==='push'){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
   this.emit('cast',{skillIndex:index,from,to:m&&s.type!=='dash'?{x:m.x,z:m.z}:{x:p.x,z:p.z},color:s.color,kind:s.type,radius:s.radius??1});return true;
  }
- update(dt,input={x:0,z:0,attack:false}){
+ update(dt,input={x:0,z:0,attack:false},{monsters=true}={}){
   dt=Math.min(.05,Math.max(0,dt));this.time+=dt;const p=this.player;
   p.attackCD=Math.max(0,p.attackCD-dt);p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt);
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;
@@ -137,6 +137,7 @@ export class CombatWorld{
    }
   }
   p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;
+  if(!monsters)return; // Shared-room servers advance each monster exactly once per tick.
   for(const m of this.mobs){
    m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);
    if(m.hp<=0){m.dead-=dt;if(m.dead<=0){Object.assign(m,{x:m.home.x,z:m.home.z,hp:m.maxHp,aggro:false,root:0,attackCD:1});this.emit('respawn',{id:m.id});}continue;}

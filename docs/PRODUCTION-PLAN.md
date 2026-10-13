@@ -73,3 +73,15 @@ Phase 1 จัดทำแล้วในเอกสาร/ข้อมูล�
 - PNG ต้นฉบับและ crop/foot metadata อยู่ใน `assets/directional/`; พรอมป์สร้างและแก้ภาพด้วย built-in image_gen อยู่ใน `prompts-17.json` นักทวนมีภาพแก้ด้านหลังแยกต่างหาก
 - เป็น neutral turnaround และชุดมาตรฐาน ใช้ mesh deformation เดิมชั่วคราว ยังไม่มีคลิปเดิน/โจมตีวาดแยกหรือเสื้อผ้าหลายชั้น ความต่อเนื่องของมือ อาวุธและเครื่องประดับยังต้องเก็บก่อนทำคลิปจริง
 - ตรวจรับ: 80 automated tests ผ่าน, content validator และ production build ผ่าน; สลับครบ 7 อาชีพในเบราว์เซอร์ ไม่มี console errors; หน้าแม่ชีด้านหลังแสดงถูกต้อง และจอ 844×390 / 568×320 ไม่ล้น document ยังไม่ได้วัด FPS บนมือถือจริง
+
+## Phase 7 เริ่มแล้วใน 0.24 (ยังไม่ผ่านเกณฑ์เปิดจริง)
+
+- [x] authoritative simulation, server/map rooms, ownership/token adapter และการจำกัดคำสั่ง
+- [x] ผู้เล่นสอง WebSocket จริงเห็นกัน เดิน/ท่า ปาร์ตี้ 5 คน แชตห้อง/ปาร์ตี้ reconnect และ local persistence
+- [x] ทดสอบ shared monster damage และ Base/Job EXP ไม่แจกซ้ำใน fixture; เมืองจริงยังปลอดภัย
+- [x] เตรียม Docker backend, private profiles, account/runtime leases และเอกสารเปิดบริการ
+- [ ] สิทธิ์ Firebase เจ้าของ, ยืนยันโฮสติ้ง/ค่าใช้จ่าย, deploy rules พร้อม emulator และ cloud roundtrip สอง Google accounts
+- [ ] ตั้ง public WebSocket endpoint และทดสอบ Android/iPhone จริง พร้อม soak/load บนโฮสต์เป้าหมาย
+- [ ] ระบบ Phase 4–6 และ validation เงิน/ไอเทม/เควสต์ก่อนประกาศ Phase 7 เสร็จ
+
+ขอบเขตและข้อจำกัดโดยละเอียด: [MULTIPLAYER.md](MULTIPLAYER.md)

@@ -1,0 +1,140 @@
+import {randomUUID} from 'node:crypto';
+import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable} from '../combat-core.js';
+import {awardExperience} from '../experience.js';
+import {restoreTraveler,serializeTraveler} from '../world-state.js';
+import {character,isServer,isSlot} from '../realm-state.js';
+const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
+const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
+const copy=v=>structuredClone(v);
+const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping']);
+export class RealmServer{
+ constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.clock=0;this.tickId=0;}
+ join({uid,serverId,slotId,record,send}){
+  if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
+  const existing=[...this.peers.values()].find(p=>p.uid===uid);
+  if(existing){
+   if(!existing.suspended||existing.resumeUntil<this.now()||existing.serverId!==serverId||existing.slotId!==slotId)throw new Error('already-online');
+   existing.suspended=false;existing.resumeUntil=0;existing.send=send;existing.seq=0;existing.known=new Set();existing.input={x:0,z:0,attack:false};existing.inputAt=this.now();
+   send({type:'welcome',id:existing.id,room:existing.room.id,capacity:this.capacity,history:copy(existing.room.history),snapshot:this.snapshot(existing)});this.social(existing.room);return existing;
+  }
+  const hero=character(record.character),map=this.catalog.maps.find(m=>m.id===record.state.mapId)??this.catalog.maps.find(m=>m.id===this.catalog.capital);
+  const roomId=serverId+':'+map.id;
+  let room=this.rooms.get(roomId);if(room&&room.peers.size>=this.capacity)throw new Error('room-full');
+  if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);}
+  const world=new CombatWorld({...map,classId:hero.classId,jobId:hero.jobId});restoreTraveler(world,record.state.traveler);world.mobs=room.mobs;
+  const position=record.state.position;if(position&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
+  const peer={id:randomUUID(),uid,serverId,slotId,character:hero,settings:copy(record.state.settings??{}),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
+  world.hurt=(mob,damage,color)=>this.hurt(peer,mob,damage,color);
+  this.peers.set(peer.id,peer);room.peers.add(peer.id);
+  send({type:'welcome',id:peer.id,room:roomId,capacity:this.capacity,history:copy(room.history),snapshot:this.snapshot(peer)});this.social(room);return peer;
+ }
+ leave(id){
+  const p=this.peers.get(id);if(!p)return;
+  this.leaveParty(p);this.peers.delete(id);p.room.peers.delete(id);
+  for(const [key,v] of this.invites)if(v.from===id||v.to===id)this.invites.delete(key);
+  p.room.contributors.forEach(set=>set.delete(id));this.social(p.room);
+  if(!p.room.peers.size)this.rooms.delete(p.room.id);
+ }
+ suspend(id){const p=this.peers.get(id);if(!p)return;p.suspended=true;p.resumeUntil=this.now()+20000;p.input={x:0,z:0,attack:false};p.world.auto=false;p.world.player.moving=false;this.social(p.room);}
+ error(p,code){p.send({type:'error',code});return false;}
+ receive(id,m){
+  const p=this.peers.get(id);if(!p||p.suspended)return false;
+  if(!m||typeof m!=='object'||Array.isArray(m)||!allowed.has(m.type)||!integer(m.seq,1,Number.MAX_SAFE_INTEGER))return this.error(p,'invalid-message');
+  if(m.seq<=p.seq)return false;p.seq=m.seq;
+  if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
+  const w=p.world,now=this.now();
+  if(m.type==='ping'){p.send({type:'pong',stamp:typeof m.stamp==='number'?m.stamp:0});return true;}
+  if(m.type==='input'){
+   if(!Number.isFinite(m.x)||!Number.isFinite(m.z)||Math.abs(m.x)>1||Math.abs(m.z)>1||typeof m.attack!=='boolean')return this.error(p,'invalid-input');
+   const n=Math.max(1,Math.hypot(m.x,m.z));p.input={x:m.x/n,z:m.z/n,attack:m.attack};p.inputAt=now;return true;
+  }
+  if(['skill','attack','select','auto','emote'].includes(m.type)){
+   if(now-p.actionAt<70)return this.error(p,'action-rate');p.actionAt=now;
+   if(m.type==='select'){if(!integer(m.target,0,9999))return this.error(p,'invalid-target');w.select(m.target);return true;}
+   if(m.type==='skill'){if(!integer(m.index,0,9))return this.error(p,'invalid-skill');return w.skill(m.index);}
+   if(m.type==='attack')return w.basicAttack();
+   if(m.type==='auto'){w.toggleAuto();return true;}
+   if(!['bow','celebrate','rest','guard'].includes(m.name))return this.error(p,'invalid-emote');
+   p.emote={name:m.name,time:this.clock};p.room.events.push({type:'emote',actor:p.id,name:m.name});return true;
+  }
+  if(m.type==='chat'){
+   if(now-p.chatAt<1200)return this.error(p,'chat-rate');
+   if(typeof m.text!=='string'||!['room','party'].includes(m.channel))return this.error(p,'invalid-chat');
+   const text=m.text.normalize('NFC').replace(/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/g,'').trim();
+   if(!text||text.length>240)return this.error(p,'invalid-chat');
+   const party=this.parties.get(p.partyId);if(m.channel==='party'&&!party)return this.error(p,'no-party');p.chatAt=now;
+   const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,text,channel:m.channel,time:now};
+   for(const pid of party&&m.channel==='party'?party.members:p.room.peers)this.peers.get(pid)?.send(message);
+   if(m.channel==='room'){p.room.history.push(message);if(p.room.history.length>40)p.room.history.shift();}return true;
+  }
+  if(m.type==='invite'){
+   const target=this.peers.get(m.target);if(!target||target===p||target.room!==p.room||target.partyId)return this.error(p,'invalid-invite');
+   const party=this.parties.get(p.partyId);if(party&&(party.leader!==p.id||party.members.size>=5))return this.error(p,'party-full-or-leader');
+   if(now-p.inviteAt<2000)return this.error(p,'invite-rate');p.inviteAt=now;
+   const invitation={id:randomUUID(),from:p.id,to:target.id,expires:now+30000};this.invites.set(invitation.id,invitation);
+   target.send({type:'invite',id:invitation.id,from:p.id,name:p.character.name,expires:invitation.expires});return true;
+  }
+  if(m.type==='answer'){
+   const invite=this.invites.get(m.invite),leader=this.peers.get(invite?.from);
+   if(!invite||invite.to!==p.id||invite.expires<now||!leader||leader.room!==p.room||typeof m.accept!=='boolean')return this.error(p,'expired-invite');
+   this.invites.delete(invite.id);if(!m.accept)return true;if(p.partyId)return this.error(p,'already-in-party');
+   let party=this.parties.get(leader.partyId);
+   if(party&&(party.leader!==leader.id||party.members.size>=5))return this.error(p,'party-full-or-leader');
+   if(!party){party={id:randomUUID(),leader:leader.id,members:new Set([leader.id])};this.parties.set(party.id,party);leader.partyId=party.id;}
+   p.partyId=party.id;party.members.add(p.id);this.social(p.room);return true;
+  }
+  if(m.type==='leaveParty'){this.leaveParty(p);this.social(p.room);return true;}
+  const party=this.parties.get(p.partyId);
+  if(!party||party.leader!==p.id||!party.members.has(m.target)||m.target===p.id)return this.error(p,'not-party-leader');
+  if(m.type==='kick')this.leaveParty(this.peers.get(m.target));else if(m.type==='leader')party.leader=m.target;
+  this.social(p.room);return true;
+ }
+ leaveParty(p){
+  const party=this.parties.get(p?.partyId);if(!party)return;p.partyId=null;party.members.delete(p.id);
+  if(party.members.size<2){for(const id of party.members)this.peers.get(id).partyId=null;this.parties.delete(party.id);}
+  else if(party.leader===p.id)party.leader=party.members.values().next().value;
+ }
+ social(room){for(const id of room.peers){const p=this.peers.get(id),party=this.parties.get(p.partyId);p.send({type:'social',players:[...room.peers].map(id=>{const a=this.peers.get(id);return {id,name:a.character.name,classId:a.character.classId,partyId:a.partyId};}),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
+ hurt(p,mob,damage,color='#fff0a6'){
+  if(!mob||mob.hp<=0||p.room.map.safe)return;
+  const amount=Math.min(mob.hp,damage);mob.hp-=amount;mob.hit=.16;mob.aggro=true;
+  let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
+  p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color});
+  if(mob.hp>0)return;mob.dead=8;mob.aggro=false;
+  const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
+  for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
+  const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort();
+  ids.forEach((id,i)=>{const a=this.peers.get(id);a.world.kills++;const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,split(reward.baseXp),split(reward.jobXp)));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});});
+  p.room.contributors.delete(mob.id);
+  for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id){a.world.targetId=null;a.world.path=[];}}
+ }
+ step(dt=.05){
+  dt=Math.max(0,Math.min(.05,dt));this.clock+=dt;this.tickId++;
+  for(const p of this.peers.values())if(p.suspended&&p.resumeUntil&&p.resumeUntil<this.now())this.leave(p.id);
+  for(const [id,v] of this.invites)if(v.expires<this.now())this.invites.delete(id);
+  for(const p of this.peers.values()){if(p.suspended)continue;p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};p.world.update(dt,p.input,{monsters:false});}
+  for(const room of this.rooms.values()){
+   for(const m of room.mobs){
+    m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);
+    if(m.hp<=0){m.dead-=dt;if(m.dead<=0){Object.assign(m,{...m.home,hp:m.maxHp,aggro:false,root:0,attackCD:1});room.contributors.delete(m.id);}continue;}
+    const candidates=[...room.peers].map(id=>this.peers.get(id)).filter(p=>!p.suspended&&p.world.player.hp>0).sort((a,b)=>distance(a.world.player,m)-distance(b.world.player,m));
+    const target=candidates[0];if(!target||distance(m,m.home)>6)m.aggro=false;
+    const goal=m.aggro?target.world.player:m.home,d=distance(m,goal),type=MONSTER_TYPES[m.type];
+    if(m.root===0&&d>(m.aggro?1.05:.12)){const step=Math.min(d,type.speed*dt);moveBody(m,(goal.x-m.x)/d*step,(goal.z-m.z)/d*step,room.map.nav);m.step+=dt*7;}
+    if(m.aggro&&target&&distance(m,target.world.player)<1.35&&m.attackCD===0&&lineClear(m,target.world.player,room.map.nav)){
+     const w=target.world,p=w.player,amount=p.shield>0?Math.ceil(type.damage*.35):type.damage;m.attackCD=1.4;p.hp=Math.max(0,p.hp-amount);w.emit('playerHit',{x:p.x,z:p.z,amount});
+     if(p.hp===0){p.down=3;w.auto=false;w.targetId=null;w.path=[];p.moving=false;w.notice('หมดแรง · กลับลานใน 3 วินาที');}
+    }
+   }
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(['notice','experience','defeat','select'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
+   if(this.tickId%2===0){for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p),events:copy(room.events)});}room.events=[];}
+  }
+ }
+ snapshot(p){
+  const publicPlayer=a=>({id:a.id,character:a.character,player:a.world.player,emote:a.emote,partyId:a.partyId});
+  const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
+  const players=visible.map(a=>{const v=a.world.player,result={id:a.id,player:{x:round(v.x),z:round(v.z),hp:v.hp,moving:v.moving,face:{x:round(v.face.x),z:round(v.face.z)}},partyId:a.partyId,connected:!a.suspended};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
+  return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto},players,mobs:p.room.mobs});
+ }
+ record(p,original){return {...copy(original),character:copy(p.character),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
+}

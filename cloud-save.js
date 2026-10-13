@@ -7,6 +7,7 @@ export async function prepareCloud(catalog){
  let entry;try{entry=JSON.parse(sessionStorage.getItem(ENTRY_KEY));}catch{}
  const serverId=new URLSearchParams(location.search).get('server');
  if(!entry||!validEntry(entry,entry.owner,serverId))return toLobby();
+ let online=null,onlineStarting=false;
  let connection=null,store=null,record=null,bound=null,blocked=false,busy=false,traveling=false,lastJSON='',queue=Promise.resolve();
  const panel=$('account-panel'),say=text=>{$('account-message').textContent=text;};
  const inert=active=>{for(const el of $('game-shell').children)if(el!==panel)el.inert=active;};
@@ -29,6 +30,8 @@ export async function prepareCloud(catalog){
  }catch(e){blocked=true;report(e);$('retry-sync').hidden=true;$('reload-save').hidden=false;open();}
  if(connection)connection.sdk.onAuthStateChanged(connection.auth,u=>{if(u?.uid!==entry.owner){blocked=true;location.replace('./');}});
  function save(override){
+  if(online)return online.flush(bound?.capture().settings);
+  if(onlineStarting)return Promise.resolve(true);
   const operation=queue.catch(()=>{}).then(async()=>{
    if(blocked||!record)throw new Error('save-blocked');if(!bound)return true;
    const state=override||bound.capture(),json=JSON.stringify(state);if(lastJSON===json)return true;
@@ -41,7 +44,7 @@ export async function prepareCloud(catalog){
  $('logout-account').onclick=async()=>{if(busy)return;busy=true;try{await save();await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.assign('./');}catch{open();}finally{busy=false;}};
  const tick=()=>{if(bound&&!blocked&&!busy&&!traveling&&!document.hidden)save().catch(()=>{});};setInterval(tick,10000);addEventListener('online',tick);
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&bound&&!blocked&&!busy&&!traveling)save().catch(()=>{});});
- return {data:record?.state,character:record?.character,serverId,get paused(){return blocked||busy||!panel.hidden;},get cloud(){return store?.cloud;},save,
+ return {slotId:entry.slotId??record?.slotId,async token(){if(!connection?.auth.currentUser||connection.auth.currentUser.uid!==entry.owner)throw new Error('account-changed');return connection.auth.currentUser.getIdToken();},async beginOnline(){await save();await queue;onlineStarting=true;},setOnline(value){online=value;onlineStarting=false;say('บันทึกอัตโนมัติโดยเซิร์ฟเวอร์ออนไลน์');},data:record?.state,character:record?.character,serverId,get paused(){return blocked||busy||!panel.hidden;},get cloud(){return store?.cloud;},save,
   bind(value){bound=value;inert(!panel.hidden);},
   async travel(destination){traveling=true;const state=bound.capture();state.mapId=destination.id;state.position={...destination.spawn};try{await save(state);return true;}catch{traveling=false;return false;}}
  };

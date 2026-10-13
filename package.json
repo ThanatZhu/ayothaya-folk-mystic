@@ -5,6 +5,12 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "build": "node build-vercel.mjs",
-    "check:content": "node scripts/validate-content.mjs"
+    "check:content": "node scripts/validate-content.mjs",
+    "server": "node server/host.js",
+    "test:multiplayer": "node --test tests/multiplayer*.test.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "ws": "^8.22.0"
   }
 }

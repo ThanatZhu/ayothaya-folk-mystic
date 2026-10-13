@@ -12,10 +12,10 @@ import {className} from './classes.js?v=18';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
- const skillEffects=createSkillEffects(scene);let activeSkill=null;
+ const skillEffects=createSkillEffects(scene);let activeSkill=null,network=null;
  let gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
- addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
+ addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){network?.command('emote',{name:e.detail});castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
  const mobViews=world.mobs.map(m=>{
   const h=m.type===0?1.3:1.45,tex=monsterTextures[m.type].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
@@ -131,7 +131,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const paused=isPaused();if(paused)clearInput();
   dt=document.hidden||paused?0:Math.min(.05,Math.max(0,dt));
   const x=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joy.x,y=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)+joy.y;
-  const direction=screenDirection(x,y,controls.getAzimuthalAngle());if(!paused)world.update(dt,{...direction,attack:input.attack||keys.has('Space')});
+  const direction=screenDirection(x,y,controls.getAzimuthalAngle());if(network){network.setInput(paused?{x:0,z:0,attack:false}:{...direction,attack:input.attack||keys.has('Space')});world.time+=dt;}else if(!paused)world.update(dt,{...direction,attack:input.attack||keys.has('Space')});
   world.events.splice(0).forEach(effect);
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving)emoteUntil=0;
@@ -200,5 +200,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  }
  updateHelp();addEventListener('resize',updateHelp);
  toast(mobileLayout()?'ลากจอยเดิน · แตะมอนและสกิลด้านขวา':'WASD เดิน · คลิกมอนเลือกเป้า · Space โจมตี · F ออโต้');
- return {update,world,clearInput};
+ function setNetwork(client){network=client;clearInput();world.auto=false;
+  world.skill=i=>client.command('skill',{index:i});world.basicAttack=()=>client.command('attack');world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto');
+ }
+ function applyNetworkSnapshot(snapshot){const s=snapshot.self;Object.assign(world.player,s.player);world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.time=snapshot.time;
+  for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);}
+ }
+ return {update,world,clearInput,setNetwork,applyNetworkSnapshot};
 }

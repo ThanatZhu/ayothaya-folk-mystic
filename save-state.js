@@ -8,7 +8,7 @@ export function captureSave(world,map,camera,controls,motion){
 }
 export function validateSave(data,catalog){
  if(!data||data.schema!==1)throw new Error('save-version');
- if(!catalog.maps.some(m=>m.id===data.mapId))throw new Error('save-map');
+ if(!catalog.maps.some(m=>m.id===data.mapId)&&!catalog.retiredMaps?.includes(data.mapId))throw new Error('save-map');
  const t=data.traveler;
  if(!t||t.version!==5||!['hp','mp','kills'].every(k=>Number.isFinite(t[k]))||
   !Array.isArray(t.cooldowns)||t.cooldowns.length!==10||!t.cooldowns.every(Number.isFinite))throw new Error('save-data');

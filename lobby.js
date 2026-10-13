@@ -7,7 +7,7 @@ import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=18';
-import {createRealmStore} from './realm-store.js?v=18';
+import {createRealmStore} from './realm-store.js?v=19';
 const $=id=>document.getElementById(id);
 createLandscapeGuard();
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',poseMode='cycle',previewTime=0;
@@ -25,7 +25,7 @@ function report(error){
  const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องถึง Lv. 25 ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องถึง Lv. 60 ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
  say(code==='character-exists'?'มีตัวละครในเซิร์ฟเวอร์นี้แล้ว กดเปลี่ยนเซิร์ฟเวอร์แล้วเลือกอีกครั้ง':code==='auth/popup-blocked'?'กรุณาอนุญาตป๊อปอัป แล้วกด Google อีกครั้ง':code==='auth/popup-closed-by-user'?'ยังไม่ได้ล็อกอิน ลองใหม่ได้ครับ':code==='permission-denied'?'ยังเข้าถึงเซฟไม่ได้ กรุณาลองอีกครั้ง':String(code).startsWith('ชื่อ')||String(code).startsWith('กรุณา')?code:'เชื่อมต่อไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง');
 }
-const catalogReady=fetch('./maps/world.json?v=12a').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
+const catalogReady=fetch('./maps/world.json?v=19c').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
 catalogReady.catch(()=>say('โหลดข้อมูลโลกไม่ได้ กรุณาโหลดหน้าใหม่'));
 async function selectIdentity(id){
  lock(true);say('กำลังเตรียมรายชื่อเซิร์ฟเวอร์…');
@@ -88,7 +88,7 @@ function displayCharacter(){
  $('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
  $('character-form').hidden=!!record||roster.length>=5;
  $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · เลือกอาชีพ Lv. 25 · Master Lv. 60':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(progression(record.state.traveler.kills).level>=25?'พร้อมเลือกอาชีพแล้ว · เลือกได้ครั้งเดียว':'ผู้ฝึกตน → เลือกอาชีพที่ Lv. 25'):'อาชีพ '+className(record.character.classId,record.character.gender)+' → Master ที่ Lv. 60';
- if(record){wardrobe.reset(record.character.appearance,record.character.jobId??'');selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler.kills).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+catalog.maps.find(m=>m.id===record.state.mapId).name;}
+ if(record){wardrobe.reset(record.character.appearance,record.character.jobId??'');selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler.kills).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
  else{wardrobe.reset();$('character-form').reset();selectedClass='novice';preview('male');}
  show('character');
 }

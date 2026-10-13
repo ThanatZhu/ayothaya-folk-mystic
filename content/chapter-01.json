@@ -14,7 +14,7 @@
     },
     {
       "id": "ayutthaya-wilds",
-      "existing": true,
+      "existing": false,
       "safe": false
     },
     {
@@ -23,6 +23,31 @@
       "existing": false,
       "safe": false,
       "layout": "โถงแรก → ลานไหดิน → ลานประทีป; ทางกลับเมืองเปิดเสมอ"
+    },
+    {
+      "id": "bangsai",
+      "existing": false,
+      "safe": true
+    },
+    {
+      "id": "lavo",
+      "existing": false,
+      "safe": true
+    },
+    {
+      "id": "suphan",
+      "existing": false,
+      "safe": true
+    },
+    {
+      "id": "phitsanulok",
+      "existing": false,
+      "safe": true
+    },
+    {
+      "id": "nakhon",
+      "existing": false,
+      "safe": true
     }
   ],
   "npcs": [
@@ -76,225 +101,200 @@
       "name": "ตาผูก",
       "mapId": "bangsai",
       "role": "shaman-training",
-      "existingName": "ตาผูก",
       "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "bangsai-chaba",
       "name": "แม่ชบา",
       "mapId": "bangsai",
       "role": "herbs",
-      "existingName": "แม่ชบา",
       "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "bangsai-yaem",
       "name": "ยายแย้ม",
       "mapId": "bangsai",
       "role": "folk-history",
-      "existingName": "ยายแย้ม",
       "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "bangsai-noi",
       "name": "น้อยเรือจ้าง",
       "mapId": "bangsai",
       "role": "boat-travel",
-      "existingName": "น้อยเรือจ้าง",
       "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "bangsai-choi",
       "name": "ภูตจ้อย",
       "mapId": "bangsai",
       "role": "spirit-guide",
-      "existingName": "ภูตจ้อย",
       "storyHook": "รากไทรกักเสียงคำสัญญาที่ผู้คนลืม",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "lavo-pan",
       "name": "ลุงปั้น",
       "mapId": "lavo",
       "role": "archaeology",
-      "existingName": "ลุงปั้น",
       "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "lavo-kaeo-lai",
       "name": "แม่แก้วลาย",
       "mapId": "lavo",
       "role": "textiles",
-      "existingName": "แม่แก้วลาย",
       "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "lavo-ming",
       "name": "มิ่ง",
       "mapId": "lavo",
       "role": "scout",
-      "existingName": "มิ่ง",
       "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "lavo-khru-ngao",
       "name": "ครูเงา",
       "mapId": "lavo",
       "role": "rogue-training",
-      "existingName": "ครูเงา",
       "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "lavo-stone-watch",
       "name": "ยามศิลา",
       "mapId": "lavo",
       "role": "ruin-guide",
-      "existingName": "ยามศิลา",
       "storyHook": "รอยสลักในศิลาเล่าเหตุการณ์ไม่ตรงกับบันทึก",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "suphan-thong-mat",
       "name": "ครูทองหมัด",
       "mapId": "suphan",
       "role": "boxer-training",
-      "existingName": "ครูทองหมัด",
       "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "suphan-sai",
       "name": "แม่สาย",
       "mapId": "suphan",
       "role": "supplies",
-      "existingName": "แม่สาย",
       "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "suphan-phet",
       "name": "ช่างเพชร",
       "mapId": "suphan",
       "role": "smith",
-      "existingName": "ช่างเพชร",
       "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "suphan-thuan-lek",
       "name": "ครูทวนเหล็ก",
       "mapId": "suphan",
       "role": "lancer-training",
-      "existingName": "ครูทวนเหล็ก",
       "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "suphan-kla",
       "name": "กล้า",
       "mapId": "suphan",
       "role": "arena-guide",
-      "existingName": "กล้า",
       "storyHook": "อาวุธฝึกตอบสนองต่อความกลัวของผู้ถือ",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "phitsanulok-kham",
       "name": "พรานคำ",
       "mapId": "phitsanulok",
       "role": "hunter-training",
-      "existingName": "พรานคำ",
       "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "phitsanulok-fueang",
       "name": "แม่เฟื่อง",
       "mapId": "phitsanulok",
       "role": "field-medicine",
-      "existingName": "แม่เฟื่อง",
       "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "phitsanulok-mek",
       "name": "ตาเมฆ",
       "mapId": "phitsanulok",
       "role": "weather-lore",
-      "existingName": "ตาเมฆ",
       "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "phitsanulok-khao",
       "name": "น้องข้าว",
       "mapId": "phitsanulok",
       "role": "rice-market",
-      "existingName": "น้องข้าว",
       "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "phitsanulok-khiri",
       "name": "เจ้าคีรี",
       "mapId": "phitsanulok",
       "role": "forest-guide",
-      "existingName": "เจ้าคีรี",
       "storyHook": "สัตว์ป่าอพยพหนีเสียงระฆังที่ไม่มีผู้ตี",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "nakhon-panya",
       "name": "พระปัญญา",
       "mapId": "nakhon",
       "role": "acolyte-training",
-      "existingName": "พระปัญญา",
       "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "nakhon-musa",
       "name": "บังมูซา",
       "mapId": "nakhon",
       "role": "spice-market",
-      "existingName": "บังมูซา",
       "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "nakhon-muk",
       "name": "ช่างมุก",
       "mapId": "nakhon",
       "role": "accessory-crafting",
-      "existingName": "ช่างมุก",
       "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "nakhon-chan",
       "name": "แม่ชีจันทร์",
       "mapId": "nakhon",
       "role": "healing",
-      "existingName": "แม่ชีจันทร์",
       "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "nakhon-nawin",
       "name": "นาวิน",
       "mapId": "nakhon",
       "role": "sea-travel",
-      "existingName": "นาวิน",
       "storyHook": "เครื่องรางจากเรือสินค้าพาความทรงจำข้ามทะเล",
-      "implementation": "existing-dialogue-only"
+      "implementation": "planned-after-capital-rebuild"
     },
     {
       "id": "ayutthaya-thian",

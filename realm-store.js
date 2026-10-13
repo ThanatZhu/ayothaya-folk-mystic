@@ -1,6 +1,6 @@
 import {CLASS_LEVEL,progression,validateJob} from './advancement.js?v=18';
 import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=18';
-import {validateSave,nextRevision} from './save-state.js?v=14';
+import {validateSave,nextRevision} from './save-state.js?v=19';
 
 export function validateCharacterChange(before,after,state){
  if(before.name!==after.name||before.gender!==after.gender)throw new Error('character-identity');

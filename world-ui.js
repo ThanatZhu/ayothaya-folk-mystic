@@ -80,13 +80,13 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  function minimap(){
   ctx.fillStyle='#20392f';ctx.fillRect(0,0,190,170);ctx.fillStyle=map.safe?'#b7a074':'#738955';for(const b of map.nav.zones)ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170);
   ctx.fillStyle='#ddc594';
-  for(const x of [-72,0,72])ctx.fillRect(mx(x-4.5),mz(-189),9/bounds.w*190,190/bounds.d*170);
-  for(const z of [0,-48,-112,-176])ctx.fillRect(mx(-116),mz(z-4.5),232/bounds.w*190,9/bounds.d*170);
-  if(map.safe){ctx.fillStyle='#47766c';ctx.fillRect(mx(-39),mz(-192),6/bounds.w*190,192/bounds.d*170);ctx.fillStyle='#a67b52';for(const z of [0,-48,-112,-176])ctx.fillRect(mx(-40.5),mz(z-4),9/bounds.w*190,8/bounds.d*170);}
-  ctx.fillStyle='#47766c';ctx.fillRect(0,mz(5.4),190,4/bounds.d*170);
+  ctx.strokeStyle='#e2d3a7';ctx.lineCap='round';for(const r of map.roads??[]){ctx.lineWidth=r.width/bounds.w*190;ctx.beginPath();ctx.moveTo(mx(r.a[0]),mz(r.a[1]));ctx.lineTo(mx(r.b[0]),mz(r.b[1]));ctx.stroke();}
+  ctx.fillStyle='#e2d3a7';for(const [x,z,rx,rz] of map.plazas??[]){ctx.beginPath();ctx.ellipse(mx(x),mz(z),rx/bounds.w*190,rz/bounds.d*170,0,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle='#65938d';for(const r of map.waterAreas??[])ctx.fillRect(mx(r.x),mz(r.z),r.w/bounds.w*190,r.d/bounds.d*170);
+  ctx.fillStyle='#c4a676';for(const z of [0,-32,-70])ctx.fillRect(mx(-32),mz(z-5.5),8/bounds.w*190,11/bounds.d*170);
   ctx.fillStyle='#634b36';map.nav.obstacles.forEach(b=>ctx.fillRect(mx(b.x),mz(b.z),b.w/bounds.w*190,b.d/bounds.d*170));
   ctx.fillStyle='#e0c896';for(const d of map.districts??[])ctx.fillRect(mx(d.x)-2,mz(d.z)-2,4,4);
-  ctx.fillStyle='#91af72';map.plants.filter(p=>p[0]==='tree').forEach(p=>{ctx.beginPath();ctx.arc(mx(p[1]),mz(p[2]),3,0,Math.PI*2);ctx.fill();});
+  ctx.fillStyle='#91af72';map.plants.filter(p=>['tree','canopy19'].includes(p[0])).forEach(p=>{ctx.beginPath();ctx.arc(mx(p[1]),mz(p[2]),3,0,Math.PI*2);ctx.fill();});
   ctx.fillStyle='#eaca78';map.portals.forEach(p=>ctx.fillRect(mx(p.x)-2,mz(p.z)-2,4,4));
   ctx.fillStyle='#c77a5b';world.mobs.filter(m=>m.hp>0).forEach(m=>ctx.fillRect(mx(m.x)-1.5,mz(m.z)-1.5,3,3));
   ctx.fillStyle='#f1d88e';map.npcs.forEach(n=>{ctx.beginPath();ctx.arc(mx(n.x),mz(n.z),2,0,Math.PI*2);ctx.fill();});
@@ -95,7 +95,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function update(t){
   const p=world.player;nearest=null;nearNPC=null;let best=2;
-  const area=(map.districts??[]).find(d=>Math.hypot(p.x-d.x,p.z-d.z)<24);$('district-description').textContent=area?area.name+' · '+(map.safe?'เขตปลอดภัย':'นอกเมือง'):map.subtitle;
+  const area=(map.districts??[]).find(d=>Math.hypot(p.x-d.x,p.z-d.z)<14);$('district-description').textContent=area?area.name+' · '+(map.safe?'เขตปลอดภัย':'นอกเมือง'):map.subtitle;
   $('mini-area').textContent=(area?.name??'ระหว่างทาง')+' · '+(map.safe?'ปลอดภัย':'นอกเมือง');
   for(const v of views){const d=Math.hypot(p.x-v.p.x,p.z-v.p.z);if(d<best){best=d;nearest=v.p;}v.ring.material.opacity=.52+Math.sin(t*2)*.2;position(v.label,v.p.x,v.p.z,.36);v.label.classList.toggle('near',d<2);}
   for(const v of npcViews){position(v.label,v.n.x,v.n.z,1.85);if(Math.hypot(p.x-v.n.x,p.z-v.n.z)>28)v.label.style.visibility='hidden';if(Math.hypot(p.x-v.n.x,p.z-v.n.z)<2.3)nearNPC=v.n;}

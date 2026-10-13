@@ -1,4 +1,4 @@
-import {deformPoint} from './character-motion.js?v=15';
+import {deformPoint} from './character-motion.js?v=23';
 // Canvas preview uses the same mesh weights as the in-world billboard.
 export function createMotionPreview(host){
  const canvas=document.createElement('canvas');canvas.width=320;canvas.height=320;canvas.style.cssText='display:block;width:100%;height:100%;image-rendering:pixelated';host.append(canvas);host.classList.add('rig-preview');

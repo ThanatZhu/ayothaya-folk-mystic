@@ -170,3 +170,12 @@ HUD ใช้กรอบไม้สัก ทองเก่า และห�
 แตะรูปตัวละครมุมซ้ายบนเพื่อเปิดโปรไฟล์: บัญชี, เลือกตัวละคร/เซิร์ฟเวอร์, ออกจากระบบ และตั้งค่ากล้อง/ท่าทาง ระบบบันทึกอัตโนมัติทุก 10 วินาทีและก่อนออกจากเกมผ่านเมนู ไม่มีปุ่มเซฟด้วยตัวเองบน HUD หรือในโปรไฟล์ หากการเชื่อมต่อมีปัญหาจะแสดงการลองเชื่อมต่อใหม่/โหลดข้อมูลล่าสุดตามเหตุการณ์
 
 มุมขวาบนเหลือมินิแมพ ไม่มีปุ่มสามขีด แตะแล้วเปิดแผนที่ที่วาดจากพิกัดจริงของเมือง แสดงถนน คลอง สะพาน อาคาร ชื่อย่านและตำแหน่งผู้เล่น พร้อมปุ่มขยาย/ย่อ 1–3 เท่าและเลื่อนแผนที่บนมือถือ ถอดรายการรถเกวียนและตารางเลือกเมืองจากหน้าต่างแผนที่แล้ว มินิแมพอัปเดตตำแหน่งแม้ปิดโมชั่น
+
+
+## กระบวนท่ารายสกิล (0.23)
+- 80 timed tracks: Novice + 7 professions, 10 skills each, shared between male/female artwork. Master retains its base profession tracks.
+- `skill-choreography.js` authors preparation, strike/combo, and recovery beats; `character-motion.js` safely deforms the existing continuous sprite mesh. This is procedural animation using existing 4-pose atlases, not 80 newly drawn frame-by-frame sheets. Directional pilot art receives the mesh motion but has no dedicated per-direction attack frames.
+- `skill-effects.js` samples each track's release beats, caps concurrent casts at 16, and disposes cast materials. Valid skill events carry the exact slot and pre-dash origin. Auto basic attacks cannot overwrite an active skill pose; a hit can interrupt the presentation.
+- Damage, cooldowns, MP costs, targeting and saving retain existing combat rules. Combat effects are still resolved immediately, not delayed to the visual strike. Animation-only lunges do not move collision bodies.
+- Open `skill-lab.html` from profile → settings or the skill gallery. All 80 skills can be previewed without login, mana or account changes, with genders, facing, replay, speed and fixed-beat inspection. Landscape/mobile layout keeps the stage visible while the skill catalogue scrolls.
+- Reduced-motion uses a static skill cue and reduced FX. The capital remains monster-free. New characters remain Novice; Base/Job EXP persistence is unchanged.

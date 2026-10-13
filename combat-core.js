@@ -97,7 +97,7 @@ export class CombatWorld{
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   if(!m){if(!quiet)this.notice('เลือกมอนสเตอร์ หรือเข้าใกล้ก่อนโจมตี');return false;}
   if(distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(!quiet)this.notice('เข้าใกล้เป้าหมายอีกนิด หรือเปิด AUTO');return false;}
-  p.attackCD=this.profession.delay;p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});this.hurt(m,this.profession.damage);return true;
+  p.attackCD=this.profession.delay;p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});this.hurt(m,this.profession.damage);return true;
  }
  skill(index){
   const s=this.skills[index],p=this.player;if(!s||p.hp<=0)return false;
@@ -105,6 +105,7 @@ export class CombatWorld{
   if(p.mp<s.cost){this.notice('มานาไม่พอ');return false;}
   let m=this.target;
   if(s.range){m=m??this.nearest(s.range);if(!m||distance(p,m)>s.range||!lineClear(p,m,this.nav)){this.notice('เลือกมอนสเตอร์ในระยะสกิล');return false;}this.select(m.id);p.face={x:m.x-p.x,z:m.z-p.z};}
+  const from={x:p.x,z:p.z};
   p.mp-=s.cost;this.cooldowns[index]=s.cd;
   if(s.type==='heal'){p.hp=Math.min(p.maxHp,p.hp+(s.heal??48));this.emit('heal',{x:p.x,z:p.z,amount:s.heal??48,color:s.color});}
   else if(s.type==='shield'){p.shield=s.duration??8;this.notice(s.name+' · ลดความเสียหาย '+p.shield+' วินาที');}
@@ -113,7 +114,7 @@ export class CombatWorld{
   else if(s.type==='nova'){this.mobs.filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,s.damage,s.color));}
   else if(s.type==='area'){this.mobs.filter(v=>v.hp>0&&distance(v,m)<=s.radius&&lineClear(m,v,this.nav)).forEach(v=>this.hurt(v,s.damage,s.color));}
   else{this.hurt(m,s.damage,s.color);if(s.type==='root')m.root=3.5;if(s.type==='push'){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
-  this.emit('cast',{from:{x:p.x,z:p.z},to:m?{x:m.x,z:m.z}:{x:p.x,z:p.z},color:s.color,kind:s.type,radius:s.radius??1});return true;
+  this.emit('cast',{skillIndex:index,from,to:m&&s.type!=='dash'?{x:m.x,z:m.z}:{x:p.x,z:p.z},color:s.color,kind:s.type,radius:s.radius??1});return true;
  }
  update(dt,input={x:0,z:0,attack:false}){
   dt=Math.min(.05,Math.max(0,dt));this.time+=dt;const p=this.player;

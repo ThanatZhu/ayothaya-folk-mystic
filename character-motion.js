@@ -4,7 +4,7 @@ const clamp=v=>Math.max(0,Math.min(1,v));
 const ease=v=>{v=clamp(v);return v*v*(3-2*v);};
 export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null}={}){
- const t=Math.max(0,Number.isFinite(time)?time:0),p={frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0};
+ const t=Math.max(0,Number.isFinite(time)?time:0),p={frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0};
  if(reduced)return p;
  if(mode==='walk'){
   const a=(phase??t*1.65)*Math.PI*2,s=Math.sin(a),c=Math.cos(a);
@@ -37,5 +37,9 @@ export function deformPoint(u,v,p){
  const side=smooth(.08,.21,Math.abs(u-.5));
  let x=u+p.lean*torso+p.head*head+(p.armL*left+p.armR*right)*arms*side+(p.legL*left+p.legR*right)*legs;
  let y=v-p.body*torso+p.crouch*torso-(p.liftL*left+p.liftR*right)*legs;
+ y-=((p.armLY??0)*left+(p.armRY??0)*right)*arms*side;
+ // Rotate around planted feet, not the centre of the texture.
+ const r=p.rotation??0,c=Math.cos(r),s=Math.sin(r),dx=x-.5,dy=y-1;
+ x=.5+dx*c-dy*s;y=1+dx*s+dy*c;
  return {x,y};
 }

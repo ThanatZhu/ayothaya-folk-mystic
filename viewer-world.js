@@ -1,14 +1,14 @@
 import {createLandscapeDetails} from './landscape-details.js?v=21';
 import {createCapitalLook,createCapitalTrees,createCapitalProps} from './capital-look.js?v=21';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
-import {createRiggedSprite} from './rigged-sprite.js?v=16';
+import {createRiggedSprite} from './rigged-sprite.js?v=23';
 import {customizeAtlas} from './character-appearance.js?v=18';
 import {jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=21';
+import {createGame} from './game-controls.js?v=23';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=22';

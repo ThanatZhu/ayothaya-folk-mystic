@@ -1,18 +1,21 @@
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
-import {characterMotion,attackDuration} from './character-motion.js?v=15';
+import {characterMotion,attackDuration} from './character-motion.js?v=23';
+import {skillTrack,skillPose} from './skill-choreography.js?v=23';
+import {createSkillEffects} from './skill-effects.js?v=23';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=21';
+import {CombatWorld,MONSTER_TYPES,screenDirection} from './combat-core.js?v=23';
 
 import {className} from './classes.js?v=18';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
+ const skillEffects=createSkillEffects(scene);let activeSkill=null;
  let gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
- addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
+ addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
  const mobViews=world.mobs.map(m=>{
   const h=m.type===0?1.3:1.45,tex=monsterTextures[m.type].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
@@ -40,7 +43,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
    toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');
   }
   if(e.type==='cast'){
-   castUntil=world.time+(['slash','punch','thrust','arrow'].includes(e.kind)?attackDuration(world.profession.id):.8);actionStart=world.time;emoteUntil=0;actionMode=e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
+   const track=Number.isInteger(e.skillIndex)?skillTrack(world.profession.id,e.skillIndex):null;
+   // Basic auto-attacks must not replace a skill's active pose mid-animation.
+   if(track||world.time>=castUntil||activeSkill===null){
+    activeSkill=track?e.skillIndex:null;castUntil=world.time+(track?.duration??(['slash','punch','thrust','arrow'].includes(e.kind)?attackDuration(world.profession.id):.8));
+    actionStart=world.time;emoteUntil=0;actionMode=e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
+   }
+   if(track){skillEffects.create(track,{...e,reduced:motionPreference.matches});return;}
    const bolt=['bolt','arrow','blessing'].includes(e.kind),mat=new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(e.kind==='arrow'?fxArrow:e.kind==='slash'?fxArc:bolt?fxBall:fxRing,mat);scene.add(mesh);
    if(!bolt)mesh.rotation.x=-Math.PI/2;
    effects.push({mesh,age:0,life:bolt?.25:.55,bolt,kind:e.kind,from:e.from,to:e.to,radius:e.radius??1});
@@ -129,11 +138,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const mode=t<hitUntil?'hit':t<castUntil?actionMode:t<emoteUntil?emote:p.moving?'walk':p.shield>0?'guard':'idle';
   const distanceMoved=Math.hypot(p.x-lastX,p.z-lastZ);lastX=p.x;lastZ=p.z;
   if(distanceMoved<1)gait+=distanceMoved/2.1; // No steps while blocked; teleports do not advance the gait.
-  const pose=characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced});
+  const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
+  const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced});
   if(!visualPose||reduced)visualPose={...pose};
-  else for(const key of Object.keys(pose))visualPose[key]=key==='frame'?pose[key]:visualPose[key]+(pose[key]-visualPose[key])*(1-Math.exp(-dt*24));
+  else for(const key of Object.keys(pose))visualPose[key]=key==='frame'?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
-  hero.sprite.position.set(p.x,(p.z>4.25?.41:.06)+visualPose.y,p.z);
+  const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,(p.z>4.25?.41:.06)+visualPose.y,p.z+p.face.z/faceLength*rootOffset);
   hero.sprite.scale.set(heroSize,heroSize,1);
   const azimuth=controls.getAzimuthalAngle(),directional=hero.directionalEnabled&&hero.directionalFrames;
   if(directional){
@@ -159,6 +170,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
    project(v.label,m.x,v.height+.08,m.z);
   });
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}
+  skillEffects.update(dt,camera);
   for(let i=effects.length-1;i>=0;i--){const e=effects[i];e.age+=dt;const f=e.age/e.life;
    if(f>=1){scene.remove(e.mesh);e.mesh.material.dispose();effects.splice(i,1);continue;}
    if(e.bolt){e.mesh.position.set(THREE.MathUtils.lerp(e.from.x,e.to.x,f),.85+Math.sin(f*Math.PI)*.25,THREE.MathUtils.lerp(e.from.z,e.to.z,f));if(e.kind==='arrow'){const aim=new THREE.Vector3(e.to.x-e.from.x,0,e.to.z-e.from.z).normalize();e.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),aim);}}

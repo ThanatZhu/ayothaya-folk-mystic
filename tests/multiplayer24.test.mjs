@@ -127,3 +127,15 @@ test('real WebSocket clients join, exchange chat, reconnect and reject unauthori
   const bad=new WebSocket(`ws://127.0.0.1:${port}/realtime`,{origin:'https://untrusted.example'});await new Promise(resolve=>bad.once('error',resolve));assert.notEqual(bad.readyState,WebSocket.OPEN);
  }finally{for(const ws of clients)ws.terminate();await host.close();await cleanup(directory);}
 });
+test('replacement firebase host waits for the old authority instead of crashing, then takes over',async()=>{
+ const db=transactionDB(),old=new FirebaseStore(db),next=new FirebaseStore(db),origin='https://ayothaya-folk-mystic.vercel.app';await old.renewAuthority();
+ const host=await createHost({mode:'firebase',store:next,catalog,origins:[origin],authenticate:async()=>{throw new Error('unused');}});await new Promise(r=>host.server.listen(0,'127.0.0.1',r));const port=host.server.address().port;
+ const health=async()=>(await fetch(`http://127.0.0.1:${port}/health`)).json();
+ try{
+  assert.equal((await health()).authority,false);
+  const status=await new Promise(resolve=>{const ws=new WebSocket(`ws://127.0.0.1:${port}/realtime`,{origin});ws.on('unexpected-response',(req,res)=>resolve(res.statusCode));ws.on('open',()=>{ws.terminate();resolve(101);});ws.on('error',()=>{});});
+  assert.equal(status,503);
+  await old.releaseAuthority();let taken=false;for(let i=0;i<70&&!taken;i++){await new Promise(r=>setTimeout(r,100));taken=(await health()).authority;}
+  assert.equal(taken,true);
+ }finally{await host.close();}
+});

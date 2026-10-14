@@ -10,7 +10,11 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
  if(!['local','firebase'].includes(mode))throw new Error('invalid-auth-mode');
  if(!catalog)catalog=JSON.parse(await readFile(path.join(root,'maps/world.json'),'utf8'));
- if(mode==='firebase')await store.renewAuthority();
+ // A replacement instance (zero-downtime redeploy) starts while the old one still owns the world.
+ // It serves /health and answers sockets with 503 until the old lease is released or expires, then takes over.
+ const authoritative=()=>mode!=='firebase'||Date.now()<=store.authorityUntil;
+ let renewing=false,authorityError='';
+ const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
  const realm=new RealmServer({catalog,capacity}),sessions=new Map(),joinPending=new Set();let closing=false;
  const allowedOrigin=origin=>origins.includes(origin);
@@ -19,7 +23,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
-  if(url.pathname==='/health'){reply(200,{ok:!closing,protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity});return;}
+  if(url.pathname==='/health'){reply(200,{ok:!closing,authority:authoritative(),protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity});return;}
   if(mode==='local'&&url.pathname==='/dev/session'&&req.method==='POST'){
    if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>1024){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
@@ -35,6 +39,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const wss=new WebSocketServer({noServer:true,maxPayload:4096,perMessageDeflate:false});
  server.on('upgrade',(req,socket,head)=>{
   if(closing||req.url!=='/realtime'||!allowedOrigin(req.headers.origin)||wss.clients.size>=capacity*4+20){socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');socket.destroy();return;}
+  if(!authoritative()){socket.write('HTTP/1.1 503 Service Unavailable\r\nRetry-After: 5\r\n\r\n');socket.destroy();return;}
   wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req));
  });
  const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;await store.checkpoint(s.lease,realm.record(s.peer,s.lease.record),{release});if(release)s.released=true;});return s.queue;};
@@ -71,7 +76,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   ws.on('error',()=>{});
  });
  const tick=setInterval(()=>{if(mode==='firebase'&&Date.now()>store.authorityUntil){for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}realm.step(.05);},50);
- let renewing=false;const authority=setInterval(async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();}catch{}finally{renewing=false;}},5000);
+ const authority=setInterval(renew,5000);await renew();
  const autosave=setInterval(()=>{for(const s of sessions.values())if(!s.closing)checkpoint(s).catch(()=>{s.closing=true;s.peer.send({type:'error',code:'save-failed'});s.ws.close(4010,'save-failed');});},10000);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
  return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};

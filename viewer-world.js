@@ -1,4 +1,4 @@
-import {createMultiplayer} from './multiplayer-ui.js?v=25';
+import {createMultiplayer} from './multiplayer-ui.js?v=26';
 import {createLandscapeDetails} from './landscape-details.js?v=21';
 import {createCapitalLook,createCapitalTrees,createCapitalProps} from './capital-look.js?v=21';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';

@@ -22,7 +22,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const chip=text=>{button.querySelector('#online-label').textContent=text;};
  // Roster dialog (modal, pauses play) for joining, inviting and party management.
  const dialog=el('dialog');dialog.id='online-panel';dialog.dataset.state='offline';dialog.setAttribute('aria-labelledby','online-title');
- dialog.innerHTML='<header><div><small>AYOTHAYA ONLINE</small><h2 id="online-title">เพื่อนร่วมอโยธยา</h2></div><button id="online-close" class="mp-icon" aria-label="ปิดหน้าผู้เล่นออนไลน์">×</button></header><p id="online-status" class="mp-status" role="status"><i class="mp-dot" aria-hidden="true"></i><span></span></p><div class="online-actions"><button id="online-join" class="mp-primary">เข้าร่วมโลกออนไลน์</button><button id="online-leave" hidden>ออกจากออนไลน์</button><button id="online-reload" hidden>โหลดเกมใหม่</button><button id="online-party-leave" hidden>ออกจากปาร์ตี้</button></div><section class="mp-roster"><h3>ผู้เล่นในห้อง <small id="online-count"></small></h3><ul id="online-players"></ul></section><p class="online-note">ปาร์ตี้สูงสุด 5 คน · อยู่เซิร์ฟเวอร์และแมพเดียวกันจึงพบกัน · เมืองเป็นเขตปลอดภัย · กด Enter เพื่อแชตระหว่างเล่น</p>';
+ dialog.innerHTML='<header><div><small>AYOTHAYA ONLINE</small><h2 id="online-title">เพื่อนร่วมอโยธยา</h2></div><button id="online-close" class="mp-icon" aria-label="ปิดหน้าผู้เล่นออนไลน์">×</button></header><p id="online-status" class="mp-status" role="status"><i class="mp-dot" aria-hidden="true"></i><span></span></p><div class="online-actions"><button id="online-reload" class="mp-primary" hidden>เชื่อมต่อใหม่</button><button id="online-party-leave" hidden>ออกจากปาร์ตี้</button></div><section class="mp-roster"><h3>ผู้เล่นในห้อง <small id="online-count"></small></h3><ul id="online-players"></ul></section><p class="online-note">ปาร์ตี้สูงสุด 5 คน · อยู่เซิร์ฟเวอร์และแมพเดียวกันจึงพบกัน · เมืองเป็นเขตปลอดภัย · กด Enter เพื่อแชตระหว่างเล่น</p>';
  shell.append(dialog);const $=id=>shell.querySelector('#'+id),status=text=>{$('online-status').lastChild.textContent=text;};
  // Chat dock: always visible while online and never pauses the game.
  const dock=el('section');dock.id='online-dock';dock.hidden=true;dock.dataset.channel='room';dock.setAttribute('aria-label','แชตออนไลน์');
@@ -30,7 +30,9 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  shell.append(dock);
  const partyFrame=el('section');partyFrame.id='party-frame';partyFrame.hidden=true;partyFrame.setAttribute('aria-label','สมาชิกปาร์ตี้');partyFrame.innerHTML='<h3>ปาร์ตี้ <small id="party-count"></small></h3><ol id="party-members"></ol>';shell.append(partyFrame);
  const invites=el('div');invites.id='online-invites';invites.setAttribute('aria-live','assertive');shell.append(invites);
- if(!url){status('กำลังเตรียมเซิร์ฟเวอร์ออนไลน์ · ขณะนี้ยังเป็นโหมดเล่นคนเดียว');$('online-join').disabled=true;button.dataset.state=dialog.dataset.state='unavailable';}else if(!account.cloud&&!local){status('เข้าเกมด้วย Google เพื่อเล่นออนไลน์');$('online-join').disabled=true;}else status(local?'เซิร์ฟเวอร์ทดสอบบนเครื่อง · ข้อมูลแยกจากเซฟจริง':'พร้อมเชื่อมต่อเซิร์ฟเวอร์');
+ // Online is automatic: whenever a backend exists and the account can authenticate, entering the game joins the shared world.
+ const canJoin=!!url&&(account.cloud||local);
+ if(!url){status('กำลังเตรียมเซิร์ฟเวอร์ออนไลน์ · ขณะนี้ยังเป็นโหมดเล่นคนเดียว');button.dataset.state=dialog.dataset.state='unavailable';}else if(!canJoin)status('เข้าเกมด้วย Google เพื่อเล่นออนไลน์');else{status('กำลังเข้าห้อง…');chip('กำลังเข้าห้อง…');}
  button.onclick=()=>{game.clearInput();dialog.showModal();};$('online-close').onclick=()=>dialog.close();dialog.addEventListener('close',()=>button.focus());
  $('online-reload').onclick=()=>location.reload();
  // Chat dock behaviour.
@@ -117,21 +119,21 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   const actions=el('div','mp-invite-actions');for(const [label,accept] of [['รับคำเชิญ',true],['ปฏิเสธ',false]]){const b=el('button',accept?'mp-primary':'',label);b.onclick=()=>{client.command('answer',{invite:m.id,accept});row.remove();};actions.append(b);}
   row.append(actions,timer);invites.append(row);setTimeout(()=>row.remove(),remaining);
  }
- $('online-join').onclick=async()=>{
-  if(active)return;$('online-join').disabled=true;
+ async function join(){
+  if(active)return;
   try{await account.beginOnline();active=true;client=new MultiplayerClient({url,identity});game.setNetwork(client);account.setOnline(client);
-   client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':detail==='connecting'?'กำลังเข้าห้อง…':'ผู้เล่นออนไลน์');status(statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-join').hidden=detail==='online';$('online-leave').hidden=detail!=='online';$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();});
+   client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':detail==='connecting'?'กำลังเข้าห้อง…':detail==='error'?'เชื่อมต่อไม่ได้':'ผู้เล่นออนไลน์');status(statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();if(detail==='error'&&!dialog.open){game.clearInput();dialog.showModal();}});
    client.addEventListener('welcome',({detail})=>{for(const m of detail.history)log(m);});
    client.addEventListener('snapshot',({detail})=>acceptSnapshot(detail));
    client.addEventListener('events',({detail})=>game.world.events.push(...detail.events));
    client.addEventListener('chat',({detail})=>log(detail,true));
    client.addEventListener('social',({detail})=>{roster=detail.players;party=detail.party;drawRoster();chip('ออนไลน์ · '+roster.length+' คน');});
-   client.addEventListener('error',({detail})=>{const text=messages[detail.code]??'ไม่สามารถทำรายการนี้ได้ · '+detail.code;status(text);if(chatErrors.has(detail.code)||!dialog.open)dockNote(text);});
+   client.addEventListener('error',({detail})=>{const text=messages[detail.code]??(client.status==='error'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ · กดเชื่อมต่อใหม่อีกครั้ง':'ไม่สามารถทำรายการนี้ได้ · '+detail.code);status(text);if(chatErrors.has(detail.code)||!dialog.open)dockNote(text);});
    client.addEventListener('invite',({detail})=>showInvite(detail));
    await client.connect();
-  }catch{active=false;$('online-join').disabled=false;status('เปิดออนไลน์ไม่สำเร็จ กรุณาตรวจการเชื่อมต่อ');}
- };
- $('online-leave').onclick=async()=>{try{await client.leave();location.reload();}catch{status('ยังยืนยันการบันทึกไม่ได้ กรุณารอเชื่อมต่อใหม่');}};
+  }catch{active=false;button.dataset.state=dialog.dataset.state='error';chip('เชื่อมต่อไม่ได้');status('เปิดออนไลน์ไม่สำเร็จ กรุณาตรวจการเชื่อมต่อ');$('online-reload').hidden=false;if(!dialog.open)dialog.showModal();}
+ }
+ if(canJoin)join();
  $('online-party-leave').onclick=()=>client?.command('leaveParty');
  $('online-chat').onsubmit=e=>{
   e.preventDefault();const input=$('online-text'),text=input.value.trim();if(!text){input.blur();return;}

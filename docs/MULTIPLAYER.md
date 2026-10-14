@@ -12,7 +12,8 @@
 
 ## In-game multiplayer UI (0.25)
 
-- HUD chip with a connection dot (grey unavailable/offline, amber connecting, green online) and room head-count; it opens the roster dialog for join/leave, invite, leader transfer and kick.
+- Online is automatic: when `MULTIPLAYER_URL` is set (or on the loopback dev server) and the account can authenticate, entering the game joins the shared room with no button. There is no "leave online" action; returning to the lobby or logging out closes the session and the server saves it. If the connection fails, the roster dialog opens with the reason and a reconnect button instead of leaving the player frozen. Until a public backend exists the public site stays single player, and guest/trial characters stay single player because the production server only accepts Google tokens.
+- HUD chip with a connection dot (grey unavailable/offline, amber connecting, green online) and room head-count; it opens the roster dialog for invite, leader transfer, kick and leaving the party.
 - Non-modal chat dock with Room/Party tabs. It never pauses play. Enter focuses the input, Esc leaves it, an empty Enter leaves it, and sending on desktop returns focus to the game. Q/E camera and V overview keys are ignored while typing. On touch screens the dock starts collapsed at bottom-centre, showing the latest line and an unread count.
 - Speech bubbles above the speaker for about 5.5 seconds (party messages tinted blue). Party allies get a ✦ blue nameplate; disconnected players fade.
 - Party frame (desktop under the minimap, touch under the portrait) with leader crown, HP bars from server snapshots, and far/disconnected/down states.
@@ -39,7 +40,7 @@ $env:PORT='8787'
 npm run server
 ```
 
-Open `http://127.0.0.1:8787/`. Create two different guest Novice characters in two tabs, enter the city, press **ผู้เล่นออนไลน์ → เข้าร่วมโลกออนไลน์** in each. Local online test characters are separate server-owned Novices and are not a migration of local single-player saves. Their bearer token is sessionStorage-scoped and usable only on this loopback development server. Never expose this mode through a tunnel or bind it publicly.
+Open `http://127.0.0.1:8787/`. Create two different guest Novice characters in two tabs, enter the city; each tab joins the shared room automatically. Local online test characters are separate server-owned Novices and are not a migration of local single-player saves. Their bearer token is sessionStorage-scoped and usable only on this loopback development server. Never expose this mode through a tunnel or bind it publicly.
 
 `npm run test:multiplayer` runs real two-client socket tests (needs localhost networking). `npm test` includes all regression suites. Local persisted test records are in the ignored `.local-multiplayer/` directory. Do not publish that directory.
 

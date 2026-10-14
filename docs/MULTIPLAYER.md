@@ -10,6 +10,15 @@
 - Automatic checkpoints every 10 seconds, save acknowledgement before leaving, heartbeat, bounded reconnection, stale-input stop. Chat and parties are session data, not permanently saved.
 - Local mode with separate test identities and file-backed server saves, exclusively bound to `127.0.0.1`. Public Firebase mode rejects local identities and has no `/dev/session` endpoint.
 
+## In-game multiplayer UI (0.25)
+
+- HUD chip with a connection dot (grey unavailable/offline, amber connecting, green online) and room head-count; it opens the roster dialog for join/leave, invite, leader transfer and kick.
+- Non-modal chat dock with Room/Party tabs. It never pauses play. Enter focuses the input, Esc leaves it, an empty Enter leaves it, and sending on desktop returns focus to the game. Q/E camera and V overview keys are ignored while typing. On touch screens the dock starts collapsed at bottom-centre, showing the latest line and an unread count.
+- Speech bubbles above the speaker for about 5.5 seconds (party messages tinted blue). Party allies get a ✦ blue nameplate; disconnected players fade.
+- Party frame (desktop under the minimap, touch under the portrait) with leader crown, HP bars from server snapshots, and far/disconnected/down states.
+- Party invitations appear as a top-centre toast with a countdown bar and accept/decline, so they no longer require the roster dialog to be open.
+- Text is always inserted as text nodes. Snapshot players now include `maxHp` for the party HP bars.
+
 ## What is not live / not included
 
 `MULTIPLAYER_URL` remains empty on the public site. The backend, Firebase deployment permissions, updated Firestore rules and billing approval are still needed before public users can enter a shared room. A local proof is not a public multiplayer deployment.
@@ -53,6 +62,8 @@ Global authority ownership is a fail-closed single-authority design. It is not h
 - [Vercel WebSockets](https://vercel.com/docs/functions/websockets): now supported in Beta; new connections are not guaranteed to reach the same instance and connections have maximum duration. This authoritative room implementation is packaged as a dedicated service; do not deploy an in-memory room per arbitrary Vercel function instance.
 
 ## Verification recorded on 2026-10-14
+
+- 0.25 UI, local server, two browser tabs: room chat bubble over the remote player, invite toast accepted from the second tab, party frame and Party tab on both, party message tinted, reload kept the party, closing one tab showed it as disconnected on the other. Typing `eee vvv` in chat left the camera unchanged while E outside chat rotated it. 1280×720 and 844×390: no element overlap with skills/joystick/minimap and no page overflow; roster dialog fits 844×390 without scrolling. Viewport emulation only, not a physical phone.
 
 - Firestore rules emulator (`npm run test:rules`, 7 tests, offline `demo-ayothaya` project): owner-only reads; fresh-Novice creation at revision 1; next-revision and no-XP-loss saves with server timestamps; client writes refused while a live `multiplayerLeases` lease exists and accepted after expiry; Base Lv.25 class / Lv.60 job thresholds with Job EXP reset; `multiplayerProfiles`/`multiplayerLeases`/`multiplayerRuntime` unreadable and unwritable by clients, including clearing one's own lock; legacy saves frozen after migration. Mutation check: disabling the lease lock or opening character reads each makes one test fail. This is emulator evidence only; the rules are not deployed and no cloud project was touched.
 

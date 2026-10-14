@@ -9,24 +9,81 @@ import {characterMotion,attackDuration} from './character-motion.js?v=23';
 import {skillPose,skillTrack} from './skill-choreography.js?v=23';
 import {createSkillEffects} from './skill-effects.js?v=23';
 const messages={'already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร'};
+const chatErrors=new Set(['chat-rate','no-party','invalid-chat']);
+const statusText={connecting:'กำลังเข้าห้อง…',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
+const editable=e=>e.target instanceof Element&&!!e.target.closest('input,textarea,select,button,a,[contenteditable=true]');
+function el(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const url=multiplayerURL(),local=['127.0.0.1','localhost'].includes(location.hostname),views=new Map(),fx=createSkillEffects(scene),projection=new THREE.Vector3(),reduced=matchMedia('(prefers-reduced-motion:reduce)');
- let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0;const seenMessages=new Set();
- const button=document.createElement('button');button.id='online-button';button.textContent='ผู้เล่นออนไลน์';document.getElementById('game-shell').append(button);
- const dialog=document.createElement('dialog');dialog.id='online-panel';dialog.setAttribute('aria-labelledby','online-title');
- dialog.innerHTML='<header><h2 id="online-title">เพื่อนร่วมอโยธยา</h2><button id="online-close" aria-label="ปิดหน้าผู้เล่นออนไลน์">×</button></header><p id="online-status" role="status"></p><div class="online-actions"><button id="online-join">เข้าร่วมโลกออนไลน์</button><button id="online-leave" hidden>ออกจากออนไลน์</button><button id="online-reload" hidden>โหลดเกมใหม่</button><button id="online-party-leave" hidden>ออกจากปาร์ตี้</button></div><div id="online-invites"></div><div class="online-columns"><section><b>ผู้เล่นในห้อง</b><ul id="online-players"></ul></section><section><b>สนทนา</b><div id="online-messages" role="log" aria-label="ข้อความสนทนา" aria-live="polite"></div><form id="online-chat"><input id="online-text" aria-label="ข้อความแชต" maxlength="240" autocomplete="off" placeholder="พิมพ์ข้อความ…"><select id="online-channel" aria-label="ช่องสนทนา"><option value="room">ห้องนี้</option><option value="party">ปาร์ตี้</option></select><button type="submit">ส่ง</button></form></section></div><p class="online-note">ปาร์ตี้สูงสุด 5 คน · อยู่เซิร์ฟเวอร์และแมพเดียวกันจึงพบกัน · เมืองเป็นเขตปลอดภัย</p>';
- document.getElementById('game-shell').append(dialog);const $=id=>dialog.querySelector('#'+id),status=text=>{$('online-status').textContent=text;};
- if(!url){status('กำลังเตรียมเซิร์ฟเวอร์ออนไลน์ · ขณะนี้ยังเป็นโหมดเล่นคนเดียว');$('online-join').disabled=true;}else if(!account.cloud&&!local){status('เข้าเกมด้วย Google เพื่อเล่นออนไลน์');$('online-join').disabled=true;}else status(local?'เซิร์ฟเวอร์ทดสอบบนเครื่อง · ข้อมูลแยกจากเซฟจริง':'พร้อมเชื่อมต่อเซิร์ฟเวอร์');
+ const shell=document.getElementById('game-shell'),labels=document.getElementById('world-labels'),compact=matchMedia('(pointer:coarse),(max-width:900px)');
+ let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0;const seenMessages=new Set(),bubbles=new Map();
+ // HUD chip: connection state dot + label. Opens the room/party roster.
+ const button=el('button');button.id='online-button';button.dataset.state='offline';button.innerHTML='<i class="mp-dot" aria-hidden="true"></i><span id="online-label">ผู้เล่นออนไลน์</span>';shell.append(button);
+ const chip=text=>{button.querySelector('#online-label').textContent=text;};
+ // Roster dialog (modal, pauses play) for joining, inviting and party management.
+ const dialog=el('dialog');dialog.id='online-panel';dialog.dataset.state='offline';dialog.setAttribute('aria-labelledby','online-title');
+ dialog.innerHTML='<header><div><small>AYOTHAYA ONLINE</small><h2 id="online-title">เพื่อนร่วมอโยธยา</h2></div><button id="online-close" class="mp-icon" aria-label="ปิดหน้าผู้เล่นออนไลน์">×</button></header><p id="online-status" class="mp-status" role="status"><i class="mp-dot" aria-hidden="true"></i><span></span></p><div class="online-actions"><button id="online-join" class="mp-primary">เข้าร่วมโลกออนไลน์</button><button id="online-leave" hidden>ออกจากออนไลน์</button><button id="online-reload" hidden>โหลดเกมใหม่</button><button id="online-party-leave" hidden>ออกจากปาร์ตี้</button></div><section class="mp-roster"><h3>ผู้เล่นในห้อง <small id="online-count"></small></h3><ul id="online-players"></ul></section><p class="online-note">ปาร์ตี้สูงสุด 5 คน · อยู่เซิร์ฟเวอร์และแมพเดียวกันจึงพบกัน · เมืองเป็นเขตปลอดภัย · กด Enter เพื่อแชตระหว่างเล่น</p>';
+ shell.append(dialog);const $=id=>shell.querySelector('#'+id),status=text=>{$('online-status').lastChild.textContent=text;};
+ // Chat dock: always visible while online and never pauses the game.
+ const dock=el('section');dock.id='online-dock';dock.hidden=true;dock.dataset.channel='room';dock.setAttribute('aria-label','แชตออนไลน์');
+ dock.innerHTML='<header><div class="mp-tabs" role="tablist" aria-label="ช่องสนทนา"><button role="tab" data-channel="room" aria-selected="true">ห้องนี้</button><button role="tab" data-channel="party" aria-selected="false" disabled>ปาร์ตี้</button></div><button id="dock-toggle" class="mp-dock-bar" aria-expanded="true"><span id="dock-preview"></span><b id="dock-unread" hidden></b><i aria-hidden="true">▾</i></button></header><div id="online-messages" role="log" aria-label="ข้อความสนทนา" aria-live="polite"></div><p id="dock-note" role="status"></p><form id="online-chat"><input id="online-text" aria-label="ข้อความแชต" maxlength="240" autocomplete="off" enterkeyhint="send" placeholder=""><button type="submit">ส่ง</button></form>';
+ shell.append(dock);
+ const partyFrame=el('section');partyFrame.id='party-frame';partyFrame.hidden=true;partyFrame.setAttribute('aria-label','สมาชิกปาร์ตี้');partyFrame.innerHTML='<h3>ปาร์ตี้ <small id="party-count"></small></h3><ol id="party-members"></ol>';shell.append(partyFrame);
+ const invites=el('div');invites.id='online-invites';invites.setAttribute('aria-live','assertive');shell.append(invites);
+ if(!url){status('กำลังเตรียมเซิร์ฟเวอร์ออนไลน์ · ขณะนี้ยังเป็นโหมดเล่นคนเดียว');$('online-join').disabled=true;button.dataset.state=dialog.dataset.state='unavailable';}else if(!account.cloud&&!local){status('เข้าเกมด้วย Google เพื่อเล่นออนไลน์');$('online-join').disabled=true;}else status(local?'เซิร์ฟเวอร์ทดสอบบนเครื่อง · ข้อมูลแยกจากเซฟจริง':'พร้อมเชื่อมต่อเซิร์ฟเวอร์');
  button.onclick=()=>{game.clearInput();dialog.showModal();};$('online-close').onclick=()=>dialog.close();dialog.addEventListener('close',()=>button.focus());
  $('online-reload').onclick=()=>location.reload();
- const log=m=>{if(seenMessages.has(m.id))return;seenMessages.add(m.id);if(seenMessages.size>160)seenMessages.delete(seenMessages.values().next().value);const p=document.createElement('p'),name=document.createElement('b');name.textContent=(m.channel==='party'?'[ปาร์ตี้] ':'')+m.name+': ';p.append(name,document.createTextNode(m.text));$('online-messages').append(p);while($('online-messages').children.length>80)$('online-messages').firstChild.remove();$('online-messages').scrollTop=$('online-messages').scrollHeight;};
+ // Chat dock behaviour.
+ function setCollapsed(value){dock.classList.toggle('collapsed',value);$('dock-toggle').setAttribute('aria-expanded',String(!value));$('dock-toggle').setAttribute('aria-label',value?'เปิดแชต':'ย่อแชต');if(!value){unread=0;$('dock-unread').hidden=true;$('online-messages').scrollTop=$('online-messages').scrollHeight;}}
+ setCollapsed(compact.matches);
+ $('dock-toggle').onclick=()=>setCollapsed(!dock.classList.contains('collapsed'));
+ function setChannel(channel){dock.dataset.channel=channel;for(const tab of dock.querySelectorAll('[role=tab]'))tab.setAttribute('aria-selected',String(tab.dataset.channel===channel));$('online-text').placeholder=(compact.matches?'':'Enter · ')+(channel==='party'?'พิมพ์ถึงปาร์ตี้…':'พิมพ์ถึงทุกคนในห้อง…');$('online-messages').scrollTop=$('online-messages').scrollHeight;}
+ for(const tab of dock.querySelectorAll('[role=tab]'))tab.onclick=()=>setChannel(tab.dataset.channel);
+ setChannel('room');
+ let noteTimer;const dockNote=text=>{$('dock-note').textContent=text;clearTimeout(noteTimer);noteTimer=setTimeout(()=>{$('dock-note').textContent='';},3500);};
+ $('online-text').addEventListener('focus',()=>{game.clearInput();setCollapsed(false);});
+ $('online-text').addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();e.stopPropagation();e.target.blur();}});
+ addEventListener('keydown',e=>{if(e.code!=='Enter'||e.repeat||!active||dock.hidden||editable(e)||document.querySelector('dialog[open]'))return;e.preventDefault();$('online-text').focus();});
+ function log(m,live=false){
+  if(seenMessages.has(m.id))return;seenMessages.add(m.id);if(seenMessages.size>160)seenMessages.delete(seenMessages.values().next().value);
+  const p=el('p',m.channel==='party'?'party':''),name=el('b','',m.name),time=el('time','',new Date(m.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.actor===client?.id)p.classList.add('mine');p.append(name,document.createTextNode(' '+m.text),time);
+  const box=$('online-messages'),atEnd=box.scrollHeight-box.scrollTop-box.clientHeight<40;box.append(p);while(box.children.length>80)box.firstChild.remove();if(atEnd)box.scrollTop=box.scrollHeight;
+  $('dock-preview').textContent=m.name+': '+m.text;
+  if(live){if(dock.classList.contains('collapsed')){unread++;$('dock-unread').textContent=unread>9?'9+':String(unread);$('dock-unread').hidden=false;}bubble(m);}
+ }
+ // Speech bubbles over the speaker; positioned every frame in update().
+ function bubble(m){let b=bubbles.get(m.actor);if(!b){b={node:el('span','chat-bubble')};labels.append(b.node);bubbles.set(m.actor,b);}b.node.textContent=m.text.length>70?m.text.slice(0,69)+'…':m.text;b.node.classList.toggle('party',m.channel==='party');b.until=performance.now()+5500;}
+ function place(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;return Math.abs(projection.x)<=1.1&&Math.abs(projection.y)<=1.1&&projection.z<1;}
  function drawRoster(){
-  $('online-players').replaceChildren();for(const p of roster){const li=document.createElement('li'),name=document.createElement('span');name.textContent=p.name+(p.id===client?.id?' (คุณ)':'')+(p.partyId?' · ปาร์ตี้':'');li.append(name);
-   const action=(text,type,data)=>{const b=document.createElement('button');b.textContent=text;b.onclick=()=>client?.command(type,data);li.append(b);};
-   if(p.id!==client?.id&&!p.partyId&&(!party||party.leader===client.id))action('เชิญ','invite',{target:p.id});
+  $('online-players').replaceChildren();$('online-count').textContent=roster.length+' คน';
+  for(const p of roster){
+   const li=el('li',p.id===client?.id?'me':''),who=el('div','mp-who'),name=el('b','',p.name);who.append(name,el('small','',className(p.classId)+(p.id===client?.id?' · คุณ':'')+(p.partyId&&p.partyId===party?.id?' · ปาร์ตี้เรา':p.partyId?' · มีปาร์ตี้':'')));
+   if(party?.leader===p.id)name.prepend(el('span','mp-crown','♛ '));li.append(el('span','mp-avatar',className(p.classId).slice(0,1)),who);
+   const action=(text,type,data,primary)=>{const b=el('button',primary?'mp-primary':'',text);b.onclick=()=>client?.command(type,data);li.append(b);};
+   if(p.id!==client?.id&&!p.partyId&&(!party||party.leader===client.id))action('เชิญ','invite',{target:p.id},true);
    if(p.id!==client?.id&&party?.leader===client?.id&&party.members.includes(p.id)){action('หัวหน้า','leader',{target:p.id});action('นำออก','kick',{target:p.id});}
    $('online-players').append(li);
-  }$('online-party-leave').hidden=!party;
+  }
+  $('online-party-leave').hidden=!party;
+  const partyTab=dock.querySelector('[data-channel=party]');partyTab.disabled=!party;if(!party&&dock.dataset.channel==='party')setChannel('room');
+  drawParty();
+ }
+ function drawParty(){
+  partyFrame.hidden=!party;if(!party)return;$('party-count').textContent=party.members.length+'/5';
+  $('party-members').replaceChildren(...party.members.map(id=>{
+   const info=roster.find(p=>p.id===id),li=el('li',id===client?.id?'me':'');li.dataset.id=id;
+   const name=el('b','',(party.leader===id?'♛ ':'')+(info?.name??'…')+(id===client?.id?' (คุณ)':''));
+   const bar=el('span','mp-hp');bar.append(el('i'));li.append(name,el('small','mp-state'),bar);return li;
+  }));updateParty();
+ }
+ function updateParty(){
+  if(!party)return;
+  for(const li of $('party-members').children){
+   const state=li.dataset.id===client?.id?self:players.get(li.dataset.id),hp=state?.hp??0,max=state?.maxHp??140,away=!state,offline=state&&state.connected===false;
+   li.querySelector('.mp-hp i').style.width=Math.max(0,Math.min(100,hp/max*100))+'%';
+   li.classList.toggle('low',!away&&hp/max<.3);li.classList.toggle('away',away||!!offline);li.querySelector('.mp-state').textContent=offline?'หลุด':away?'ไกล':hp<=0?'หมดแรง':'';
+  }
  }
  async function identity(){
   if(account.cloud)return {token:await account.token(),serverId:account.serverId,slotId:account.slotId};
@@ -39,12 +96,12 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   const id=state.id,generation=loadingGeneration,placeholder={loading:true,state};views.set(id,placeholder);
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
    const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createRiggedSprite(frames[0]);sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
-   const label=document.createElement('span');label.className='remote-player-label';label.textContent=state.character.name;document.getElementById('world-labels').append(label);
+   const label=el('span','remote-player-label',state.character.name);labels.append(label);
    views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null});
   }catch{if(views.get(id)===placeholder)placeholder.retryAt=performance.now()+5000;}
  }
  function acceptSnapshot(s){
-  clock=s.time;game.applyNetworkSnapshot(s);
+  clock=s.time;game.applyNetworkSnapshot(s);self={...s.self.player,connected:true};players=new Map(s.players.map(p=>[p.id,p.player&&{...p.player,connected:p.connected}]));
   const ids=new Set(s.players.map(p=>p.id));for(const [id,v] of views)if(!ids.has(id)){if(!v.loading)remove(v);views.delete(id);}
   for(const p of s.players){const v=views.get(p.id);if(v){v.state={...v.state,...p};if(v.retryAt&&performance.now()>v.retryAt)addRemote(v.state);}else if(p.character)addRemote(p);}
   for(const e of s.events??[]){if(e.actor===client.id){game.world.events.push(e);continue;}
@@ -52,24 +109,35 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(e.type==='cast'){v.action={index:e.skillIndex,start:clock};const track=skillTrack(v.state.character.classId,e.skillIndex);if(track)fx.create(track,{...e,reduced:reduced.matches});}
    if(e.type==='emote')v.emote={name:e.name,start:clock};
   }
+  updateParty();
+ }
+ function showInvite(m){
+  const row=el('div','mp-invite'),text=el('p'),remaining=Math.max(0,m.expires-Date.now()),timer=el('i','mp-timer');
+  text.append(el('b','',m.name),document.createTextNode(' ชวนคุณเข้าปาร์ตี้'));timer.style.animationDuration=remaining+'ms';row.append(el('span','mp-invite-icon','♛'),text);
+  const actions=el('div','mp-invite-actions');for(const [label,accept] of [['รับคำเชิญ',true],['ปฏิเสธ',false]]){const b=el('button',accept?'mp-primary':'',label);b.onclick=()=>{client.command('answer',{invite:m.id,accept});row.remove();};actions.append(b);}
+  row.append(actions,timer);invites.append(row);setTimeout(()=>row.remove(),remaining);
  }
  $('online-join').onclick=async()=>{
   if(active)return;$('online-join').disabled=true;
   try{await account.beginOnline();active=true;client=new MultiplayerClient({url,identity});game.setNetwork(client);account.setOnline(client);
-   client.addEventListener('status',({detail})=>{button.dataset.connected=String(detail==='online');button.textContent=detail==='online'?'ออนไลน์ · '+roster.length+' คน':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':'ผู้เล่นออนไลน์';status(({connecting:'กำลังเข้าห้อง…',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'})[detail]);$('online-leave').hidden=detail!=='online';$('online-reload').hidden=!['error','reconnecting'].includes(detail);});
+   client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':detail==='connecting'?'กำลังเข้าห้อง…':'ผู้เล่นออนไลน์');status(statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-join').hidden=detail==='online';$('online-leave').hidden=detail!=='online';$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();});
    client.addEventListener('welcome',({detail})=>{for(const m of detail.history)log(m);});
    client.addEventListener('snapshot',({detail})=>acceptSnapshot(detail));
    client.addEventListener('events',({detail})=>game.world.events.push(...detail.events));
-   client.addEventListener('chat',({detail})=>log(detail));
-   client.addEventListener('social',({detail})=>{roster=detail.players;party=detail.party;drawRoster();button.textContent='ออนไลน์ · '+roster.length+' คน';});
-   client.addEventListener('error',({detail})=>status(messages[detail.code]??'ไม่สามารถทำรายการนี้ได้ · '+detail.code));
-   client.addEventListener('invite',({detail:m})=>{const row=document.createElement('div'),text=document.createElement('span');text.textContent=m.name+' ชวนเข้าปาร์ตี้';row.append(text);for(const [label,accept] of [['รับคำเชิญ',true],['ปฏิเสธ',false]]){const b=document.createElement('button');b.textContent=label;b.onclick=()=>{client.command('answer',{invite:m.id,accept});row.remove();};row.append(b);}$('online-invites').append(row);setTimeout(()=>row.remove(),Math.max(0,m.expires-Date.now()));});
+   client.addEventListener('chat',({detail})=>log(detail,true));
+   client.addEventListener('social',({detail})=>{roster=detail.players;party=detail.party;drawRoster();chip('ออนไลน์ · '+roster.length+' คน');});
+   client.addEventListener('error',({detail})=>{const text=messages[detail.code]??'ไม่สามารถทำรายการนี้ได้ · '+detail.code;status(text);if(chatErrors.has(detail.code)||!dialog.open)dockNote(text);});
+   client.addEventListener('invite',({detail})=>showInvite(detail));
    await client.connect();
   }catch{active=false;$('online-join').disabled=false;status('เปิดออนไลน์ไม่สำเร็จ กรุณาตรวจการเชื่อมต่อ');}
  };
  $('online-leave').onclick=async()=>{try{await client.leave();location.reload();}catch{status('ยังยืนยันการบันทึกไม่ได้ กรุณารอเชื่อมต่อใหม่');}};
  $('online-party-leave').onclick=()=>client?.command('leaveParty');
- $('online-chat').onsubmit=e=>{e.preventDefault();if(!client?.command('chat',{channel:$('online-channel').value,text:$('online-text').value})){status('ต้องเชื่อมต่อออนไลน์ก่อนส่งข้อความ');return;}$('online-text').value='';};
+ $('online-chat').onsubmit=e=>{
+  e.preventDefault();const input=$('online-text'),text=input.value.trim();if(!text){input.blur();return;}
+  if(!client?.command('chat',{channel:dock.dataset.channel,text})){dockNote('ต้องเชื่อมต่อออนไลน์ก่อนส่งข้อความ');return;}
+  input.value='';if(!compact.matches)input.blur();
+ };
  addEventListener('pagehide',()=>client?.stop());
  return {get paused(){return dialog.open;},update(dt){
   if(!active)return;clock+=Math.min(.05,dt);fx.update(Math.min(.05,dt),camera);
@@ -78,7 +146,15 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    const elapsed=clock-(v.action?.start??-100),track=skillTrack(state.character.classId,v.action?.index),emote=clock-(v.emote?.start??-100)<4;
    const pose=track&&elapsed<track.duration?skillPose(state.character.classId,v.action.index,elapsed,{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?'attack':emote?v.emote.name:p.moving?'walk':'idle',time:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?elapsed:emote?clock-v.emote.start:clock,phase:v.gait,reduced:reduced.matches});
    v.sprite.material.map=v.frames[pose.frame];v.sprite.position.y=(p.z>4.25?.41:.06)+pose.y;const angle=controls.getAzimuthalAngle();v.sprite.userData.pose(pose,p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle)<0);v.sprite.visible=p.hp>0;
-   projection.set(v.sprite.position.x,v.sprite.position.y+2.1,v.sprite.position.z).project(camera);v.label.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;v.label.hidden=p.hp<=0||Math.abs(projection.x)>1.1||Math.abs(projection.y)>1.1;
+   const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);
+   v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x,v.sprite.position.y+2.1,v.sprite.position.z);
+  }
+  const now=performance.now();
+  for(const [id,b] of bubbles){
+   if(now>b.until){b.node.remove();bubbles.delete(id);continue;}
+   const v=views.get(id),hero=game.world.player;
+   if(id===client?.id)b.node.hidden=!place(b.node,hero.x,2.75,hero.z);
+   else b.node.hidden=!v||v.loading||!v.sprite.visible||!place(b.node,v.sprite.position.x,v.sprite.position.y+2.6,v.sprite.position.z);
   }
  }};
 }

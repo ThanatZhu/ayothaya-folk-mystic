@@ -23,7 +23,7 @@ function fixture({safe=true,capacity=50}={}){
 }
 test('rooms isolate realms; snapshots never expose UID, auth or another server',()=>{
  const {realm,add,step}=fixture();const a=add('userAlpha'),b=add('userBeta'),c=add('userGamma','novice','server-2');step(2);
- assert.equal(realm.snapshot(a.peer).players.length,1);assert.equal(realm.snapshot(c.peer).players.length,0);assert.equal(realm.snapshot(a.peer).players[0].id,b.peer.id);
+ assert.equal(realm.snapshot(a.peer).players.length,1);assert.equal(realm.snapshot(c.peer).players.length,0);assert.equal(realm.snapshot(a.peer).players[0].id,b.peer.id);assert.equal(realm.snapshot(a.peer).players[0].player.maxHp,140);
  for(const p of realm.snapshot(a.peer).players){assert.equal(p.uid,undefined);assert.equal(p.token,undefined);assert.equal(p.slotId,undefined);}
  assert.throws(()=>add('userAlpha'),/already-online/);realm.leave(b.peer.id);assert.equal(realm.snapshot(a.peer).players.length,0);
 });

@@ -44,6 +44,13 @@ Open `http://127.0.0.1:8787/`. Create two different guest Novice characters in t
 
 `npm run test:multiplayer` runs real two-client socket tests (needs localhost networking). `npm test` includes all regression suites. Local persisted test records are in the ignored `.local-multiplayer/` directory. Do not publish that directory.
 
+## Test hosting (2026-10-14)
+
+- Owner chose a no-cost test before paying for hosting. The backend runs on Render's free web service `ayothaya-folk-mystic` in Singapore: build `npm ci --omit=dev`, start `node server/host.js`, health check `/health`, `AUTH_MODE=firebase`, `FIREBASE_PROJECT_ID=ayothaya-folk-mystic`, `ALLOWED_ORIGINS` set to the Vercel and GitHub Pages origins, `NODE_VERSION=22`.
+- Credentials come from a Render secret file for service account `ayothaya-realtime`, which only has `roles/datastore.user` and `roles/firebaseauth.viewer`. This is a long-lived key, accepted by the owner for the free test. Delete it with `gcloud iam service-accounts keys delete` when moving to Cloud Run with an attached service account. The local copy sits outside the repo.
+- Free-tier limits: the service sleeps after 15 minutes without traffic and needs about a minute to wake; Firestore stays on the Spark plan, so exceeding the daily write quota blocks saves instead of billing.
+- Render starts a new instance before stopping the old one. The host serves `/health` with an `authority` flag and answers sockets with 503 until it owns the world lease, so redeploys hand over instead of failing.
+
 ## Production checklist (not executed)
 
 1. Owner identity is verified (gcloud can read **ayothaya-folk-mystic**). Remaining gate: billing is not enabled on the project; hosting choice and budget need owner approval. Do not silently deploy to a different project, and pass `--project=ayothaya-folk-mystic` explicitly.

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {MultiplayerClient} from './multiplayer-client.js?v=24';
-import {multiplayerURL} from './multiplayer-config.js?v=24';
+import {multiplayerURL} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=18';
 import {customizeAtlas} from './character-appearance.js?v=18';
 import {atlasCell} from './sprite-motion.js';

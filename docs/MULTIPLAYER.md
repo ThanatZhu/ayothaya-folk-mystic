@@ -20,6 +20,12 @@
 - Party invitations appear as a top-centre toast with a countdown bar and accept/decline, so they no longer require the roster dialog to be open.
 - Text is always inserted as text nodes. Snapshot players now include `maxHp` for the party HP bars.
 
+## Movement smoothness and HUD layout (0.28)
+
+- Own character uses client prediction (`predictMove` in combat-core.js): it moves every frame with the server's own rule (moveBody plus class speed). The 10 Hz server snapshots only correct drift: snap above 2.5 units (dash, respawn), ease in when the player is not steering. Stop input is sent immediately; steering stays throttled to about 15 per second.
+- The server now steps the world by real elapsed time in 50 ms slices. Before, Node timers firing late made it run about 20% slow (measured 1.2 s simulated per 1.5 s real on Windows), so stopping pulled the player back.
+- HUD: a menu bar at the top-right above the minimap (Character, Map, Players, Chat while online, Settings). Each item opens an existing screen; inventory, quests and shop are not shown until those systems exist. On desktop the skills are a 5x2 grid with AUTO and Attack in the bottom-right corner, and the chat sits above the online chip at the bottom-left.
+
 ## What is not live / not included
 
 `MULTIPLAYER_URL` remains empty on the public site. The backend, Firebase deployment permissions, updated Firestore rules and billing approval are still needed before public users can enter a shared room. A local proof is not a public multiplayer deployment.

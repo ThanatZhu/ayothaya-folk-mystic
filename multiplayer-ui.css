@@ -45,7 +45,7 @@
 .online-note{margin:12px 18px 16px;font-size:11px;color:#b8c9ad;line-height:1.7}
 
 /* Chat dock (non-modal). */
-#online-dock{position:fixed;z-index:19;left:max(18px,env(safe-area-inset-left));bottom:120px;width:340px;display:flex;flex-direction:column;border:1px solid var(--mp-rim);border-radius:14px;background:linear-gradient(135deg,#3c2d20d9,#1d3029d1);box-shadow:0 5px 16px #1c211a55,var(--mp-ring);overflow:hidden;font-size:12px}
+#online-dock{position:fixed;z-index:19;left:max(18px,env(safe-area-inset-left));bottom:76px;width:340px;display:flex;flex-direction:column;border:1px solid var(--mp-rim);border-radius:14px;background:linear-gradient(135deg,#3c2d20d9,#1d3029d1);box-shadow:0 5px 16px #1c211a55,var(--mp-ring);overflow:hidden;font-size:12px}
 #online-dock>header{display:flex;align-items:center;gap:6px;padding:6px 6px 4px 8px;border-bottom:1px solid #af884f44}
 .mp-tabs{display:flex;gap:4px}
 .mp-tabs button{min-height:32px;padding:3px 12px;border:1px solid transparent;border-radius:16px;background:none;color:var(--mp-soft);font-size:12px}
@@ -112,7 +112,6 @@
 .chat-bubble.party{background:#e3f6fff2;color:#123447}
 .chat-bubble.party:after{border-top-color:#e3f6fff2}
 
-@media(min-width:1500px){#online-dock{bottom:76px}}
 @media(prefers-reduced-motion:reduce){.mp-dot,.mp-invite{animation:none!important}.mp-timer{animation-name:none}}
 
 /* Touch / small screens: chat sits bottom-centre between joystick and skills. */

@@ -139,3 +139,10 @@ test('replacement firebase host waits for the old authority instead of crashing,
   assert.equal(taken,true);
  }finally{await host.close();}
 });
+test('server simulation keeps pace with real time even when timers fire late',async()=>{
+ const directory=await mkdtemp(path.join(tempRoot,'test-clock-')),store=await new LocalStore(directory).init();
+ const host=await createHost({mode:'local',store,catalog,origins:['http://127.0.0.1:8870']});
+ try{const start=host.realm.clock,began=performance.now();await new Promise(r=>setTimeout(r,1500));const real=(performance.now()-began)/1000,simulated=host.realm.clock-start;
+  assert.ok(Math.abs(simulated-real)<.12,`simulated ${simulated.toFixed(3)}s vs real ${real.toFixed(3)}s`);
+ }finally{await host.close();await cleanup(directory);}
+});

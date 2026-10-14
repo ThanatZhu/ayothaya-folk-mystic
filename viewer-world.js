@@ -1,4 +1,5 @@
-import {createMultiplayer} from './multiplayer-ui.js?v=27';
+import {createMultiplayer} from './multiplayer-ui.js?v=28';
+import {createGameMenu} from './game-menu.js?v=28';
 import {createLandscapeDetails} from './landscape-details.js?v=21';
 import {createCapitalLook,createCapitalTrees,createCapitalProps} from './capital-look.js?v=21';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
@@ -9,7 +10,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=24';
+import {createGame} from './game-controls.js?v=28';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=22';
@@ -118,7 +119,7 @@ try {
   camera.updateProjectionMatrix();controls.update();
  }
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
- multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});
+ multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu();
  function toggleOverview(){
   overview=!overview;controls.minZoom=overview?.08:.65;game.clearInput();rotating=null;
   const offset=camera.position.clone().sub(controls.target).multiplyScalar(overview?6:1/6);

@@ -75,7 +75,10 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   ws.on('close',()=>{clearTimeout(timer);if(session){session.closing=true;realm.suspend(session.peer.id);checkpoint(session,true).catch(()=>{}).finally(()=>{if(sessions.get(session.peer.id)===session){if(session.explicitLeave)realm.leave(session.peer.id);sessions.delete(session.peer.id);}});}});
   ws.on('error',()=>{});
  });
- const tick=setInterval(()=>{if(mode==='firebase'&&Date.now()>store.authorityUntil){for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}realm.step(.05);},50);
+ // Step by real elapsed time in fixed 50 ms slices: timers fire late (especially on Windows), and a fixed
+ // step per callback ran the world ~20% slow, so predicted clients were pulled back when they stopped.
+ let lastTick=performance.now(),carry=0;
+ const tick=setInterval(()=>{const now=performance.now();carry=Math.min(.25,carry+(now-lastTick)/1000);lastTick=now;if(mode==='firebase'&&Date.now()>store.authorityUntil){carry=0;for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}while(carry>=.05){carry-=.05;realm.step(.05);}},50);
  const authority=setInterval(renew,5000);await renew();
  const autosave=setInterval(()=>{for(const s of sessions.values())if(!s.closing)checkpoint(s).catch(()=>{s.closing=true;s.peer.send({type:'error',code:'save-failed'});s.ws.close(4010,'save-failed');});},10000);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);

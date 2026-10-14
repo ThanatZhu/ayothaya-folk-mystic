@@ -21,7 +21,9 @@ export class MultiplayerClient extends EventTarget{
   }catch(error){this.stopped=true;this.state('error');this.emit('error',{code:error.message});}
  }
  command(type,data={}){if(this.status!=='online'||this.socket?.readyState!==1)return false;this.socket.send(JSON.stringify({type,...data,seq:++this.seq}));return true;}
- setInput(input){this.input={x:Math.max(-1,Math.min(1,input.x)),z:Math.max(-1,Math.min(1,input.z)),attack:!!input.attack};const now=performance.now();if(now-this.lastInput>=65){this.lastInput=now;this.command('input',this.input);}}
+ setInput(input){const moving=this.input.x||this.input.z;this.input={x:Math.max(-1,Math.min(1,input.x)),z:Math.max(-1,Math.min(1,input.z)),attack:!!input.attack};const now=performance.now(),stopped=moving&&!this.input.x&&!this.input.z;
+  // Throttle steering to ~15/s, but send a stop at once so the server does not keep walking past where the player let go.
+  if(stopped||now-this.lastInput>=65){this.lastInput=now;this.command('input',this.input);}}
  request(type,id,data={}){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('server-timeout'));},12000);this.pending.set(id,{resolve:()=>{clearTimeout(timer);resolve();},reject:e=>{clearTimeout(timer);reject(e);}});if(!this.command(type,{id,...data})){this.pending.get(id).reject(new Error('not-connected'));this.pending.delete(id);}});}
  flush(settings){if(this.saving)return this.saving;this.saving=this.request('save',crypto.randomUUID(),{settings}).finally(()=>{this.saving=null;});return this.saving;}
  async leave(){if(this.status!=='online')throw new Error('not-connected');await this.request('leave','leave');this.stopped=true;this.socket?.close();}

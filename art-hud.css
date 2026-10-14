@@ -34,3 +34,27 @@
  .player-panel{width:213px;padding-right:17px}.player-heading strong,.player-heading small{max-width:121px}.mini-panel,.mobile-viewport .mini-panel{width:114px}#mini-open canvas{height:43px}#mini-area{display:none}.joystick{width:92px;height:92px;bottom:24px}.skills{grid-template-columns:repeat(5,44px);padding:4px 6px}.skill{width:44px;height:44px}#attack{width:62px;height:62px}.account-bar{top:96px}#interact{min-width:100px;padding:6px 12px;left:40%}
 }
 @media(prefers-reduced-motion:reduce){.portrait,#auto-attack.active{animation:none}.meter i{transition:none}}
+
+/* 0.28 HUD layout: desktop combat cluster bottom-right; long menu bar across the top-right with the minimap below it. */
+:root{--menu-h:78px}
+@media (min-width:901px) and (pointer:fine){
+ .combat-controls{left:auto;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));transform:none;flex-direction:row;align-items:center;gap:10px}
+ .skills{grid-template-columns:repeat(5,54px)}
+ .attack-controls{flex-direction:column;align-items:center;gap:8px;padding:0}
+ #game-shell .control-hint{left:auto;right:max(16px,env(safe-area-inset-right));bottom:184px;transform:none}
+ #party-frame{top:calc(196px + var(--menu-h))}
+}
+.mini-panel,.mobile-viewport .mini-panel{top:calc(max(12px,env(safe-area-inset-top)) + var(--menu-h))}
+#game-menu{position:fixed;z-index:12;top:max(12px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));display:flex;gap:5px;padding:5px 6px;border:1px solid #af884f;border-radius:14px;background:linear-gradient(135deg,#3c2d20f2,#1d3029ed);box-shadow:0 5px 16px #1c211a55,inset 0 0 0 3px #d1a75b22}
+#game-menu button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:60px;min-height:52px;padding:4px 8px;border:1px solid transparent;border-radius:10px;background:none;color:#fff0ce;font:12px Mali,Tahoma,system-ui,sans-serif;cursor:pointer;text-shadow:0 1px #241d14}
+#game-menu button:hover{border-color:#e2c27e88;background:#ffffff12}
+#game-menu button:focus-visible{outline:3px solid #b6eee1;outline-offset:2px}
+#game-menu i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:radial-gradient(#5b4429,#2c2116);border:2px solid #dab775;font-style:normal;font-size:15px;line-height:1;color:#f5d58a}
+#game-menu [hidden]{display:none}
+@media (max-width:900px),(pointer:coarse){
+ :root{--menu-h:60px}
+ #game-menu{gap:2px;padding:3px 4px}
+ #game-menu button{min-width:46px;min-height:46px;padding:2px 4px;font-size:9px}
+ #game-menu i{width:24px;height:24px;font-size:13px}
+}
+@media (max-width:640px){#game-menu span{display:none}#game-menu button{min-width:44px;min-height:44px}}

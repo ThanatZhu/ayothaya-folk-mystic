@@ -7,11 +7,14 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
  const t=Math.max(0,Number.isFinite(time)?time:0),p={frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0};
  if(reduced)return p;
  if(mode==='walk'){
-  const a=(phase??t*1.65)*Math.PI*2,s=Math.sin(a),c=Math.cos(a);
-  p.legL=s*.050;p.legR=-s*.050;p.liftL=Math.max(0,c)*.045;p.liftR=Math.max(0,-c)*.045;
+  // 0.29: livelier gait. Bigger stride and arm swing, a forward lean, a rise while the feet pass,
+  // and a small squash at each footfall (step=1 when the feet are furthest apart, 0 while passing).
+  const a=(phase??t*1.65)*Math.PI*2,s=Math.sin(a),c=Math.cos(a),step=Math.max(0,-Math.cos(a*2))**2;
+  p.legL=s*.075;p.legR=-s*.075;p.liftL=Math.max(0,c)*.07;p.liftR=Math.max(0,-c)*.07;
   const stride=classId==='acolyte'?.65:classId==='rogue'?1.12:1,arms=['lancer','shaman'].includes(classId)?.45:classId==='boxer'?.65:1;
   p.legL*=stride;p.legR*=stride;p.liftL*=stride;p.liftR*=stride;
-  p.armL=-s*.027*arms;p.armR=s*.027*arms;p.body=Math.cos(a*2)*.006;p.lean=s*.007+(classId==='rogue'?.008:0);p.head=-s*.004;
+  p.armL=-s*.042*arms;p.armR=s*.042*arms;p.body=Math.cos(a*2)*.008;p.lean=.022+s*.008+(classId==='rogue'?.012:0);p.head=-s*.005;
+  p.y=.07*Math.max(0,Math.cos(a*2));p.sy=1-.05*step;p.sx=1+.03*step;
  }else if(mode==='attack'){
   const q=t/attackDuration(classId);if(q>=1)return p;
   const wind=ease(q/.28),strike=ease((q-.28)/.16),recover=ease((q-.55)/.45),power=strike*(1-recover);
@@ -38,6 +41,8 @@ export function deformPoint(u,v,p){
  let x=u+p.lean*torso+p.head*head+(p.armL*left+p.armR*right)*arms*side+(p.legL*left+p.legR*right)*legs;
  let y=v-p.body*torso+p.crouch*torso-(p.liftL*left+p.liftR*right)*legs;
  y-=((p.armLY??0)*left+(p.armRY??0)*right)*arms*side;
+ // Squash and stretch around the planted feet.
+ x=.5+(x-.5)*(p.sx??1);y=1+(y-1)*(p.sy??1);
  // Rotate around planted feet, not the centre of the texture.
  const r=p.rotation??0,c=Math.cos(r),s=Math.sin(r),dx=x-.5,dy=y-1;
  x=.5+dx*c-dy*s;y=1+dx*s+dy*c;

@@ -6,15 +6,19 @@ export function createCapitalLook({map,atlas,frame}){
  const grass=tile([0,0,.5,.5]),earth=tile([.5,0,.5,.5]),leaves=tile([0,.5,.5,.5]),roof=tile([.5,.5,.5,.5]);
  const time={value:0};
  const f=v=>Number(v).toFixed(3);
+ // Baked in Blender by bake_ground_ao.py: soft contact shadows around houses, posts, walls and the quay.
+ // White until loaded so the ground never flashes dark; covers x -66..66, z -111..5.
+ const ao={value:new THREE.DataTexture(new Uint8Array([255,255,255,255]),1,1)};ao.value.needsUpdate=true;
+ new THREE.TextureLoader().load('./assets/ground-ao.png?v=29',t=>{t.colorSpace=THREE.NoColorSpace;t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.anisotropy=4;ao.value=t;});
  const ground=new THREE.MeshLambertMaterial({color:'#fffef1'});ground.name='ground19';
  const roads=map.roads.map(r=>`d=min(d,segment19(p,vec2(${r.a.map(f)}),vec2(${r.b.map(f)}))-${f(r.width/2)});`).join('\n');
  const plazas=map.plazas.map(([x,z,rx,rz])=>`d=min(d,(length((p-vec2(${f(x)},${f(z)}))/vec2(${f(rx)},${f(rz)}))-1.)*${f(Math.min(rx,rz))});`).join('\n');
  ground.onBeforeCompile=s=>{
-  s.uniforms.capitalGrass={value:grass};s.uniforms.capitalEarth={value:earth};
+  s.uniforms.capitalGrass={value:grass};s.uniforms.capitalEarth={value:earth};s.uniforms.capitalAO=ao;
   s.vertexShader='varying vec2 vCapitalXZ;\n'+s.vertexShader;
   s.vertexShader=s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvCapitalXZ=(modelMatrix*vec4(transformed,1.)).xz;');
   s.fragmentShader=`varying vec2 vCapitalXZ;
-   uniform sampler2D capitalGrass;uniform sampler2D capitalEarth;
+   uniform sampler2D capitalGrass;uniform sampler2D capitalEarth;uniform sampler2D capitalAO;
    float hash19(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
    float noise19(vec2 p){vec2 i=floor(p),q=fract(p);q=q*q*(3.-2.*q);return mix(mix(hash19(i),hash19(i+vec2(1.,0.)),q.x),mix(hash19(i+vec2(0.,1.)),hash19(i+1.),q.x),q.y);}
    float segment19(vec2 p,vec2 a,vec2 b){vec2 q=p-a,v=b-a;return length(q-v*clamp(dot(q,v)/dot(v,v),0.,1.));}
@@ -33,8 +37,10 @@ export function createCapitalLook({map,atlas,frame}){
    float pebble=smoothstep(.82,.95,noise19(p*8.5));
    e=mix(e,vec3(.70,.66,.55),pebble*.21);
    diffuseColor.rgb*=mix(e,g,meadow)*( .92+.13*noise19(p*.13));
+   float occlusion=texture2D(capitalAO,vec2((p.x+66.)/132.,(5.-p.y)/116.)).r;
+   diffuseColor.rgb*=mix(1.,occlusion,.72)*mix(vec3(1.),vec3(.93,.95,1.04),1.-occlusion); // cool, soft contact shade
   `);
- };ground.customProgramCacheKey=()=> 'capital-ground21';
+ };ground.customProgramCacheKey=()=> 'capital-ground29';
  function canopy(name){
   const m=new THREE.MeshLambertMaterial({map:leaves,color:name.endsWith('dark')?'#b6c897':name.endsWith('light')?'#f1f5c3':'#dce9ae'});m.name=name;
   m.onBeforeCompile=s=>{s.uniforms.capitalTime=time;s.vertexShader='uniform float capitalTime;\n'+s.vertexShader;s.vertexShader=s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed.x+=.055*max(0.,transformed.y-2.)*sin(capitalTime*.85+transformed.z*.27+transformed.x*.13);');};

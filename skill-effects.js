@@ -7,21 +7,32 @@ export function createSkillEffects(scene){
   ring:new THREE.RingGeometry(.7,.74,40),
   spark:new THREE.IcosahedronGeometry(.11,0),
   lance:new THREE.ConeGeometry(.045,.9,4),
-  paper:new THREE.PlaneGeometry(.18,.38)
+  paper:new THREE.PlaneGeometry(.18,.38),
+  glyph:new THREE.RingGeometry(.34,.62,48),
+  flash:new THREE.PlaneGeometry(1,1)
  },active=[];
- function remove(e){scene.remove(e.group);e.material.dispose();const i=active.indexOf(e);if(i>=0)active.splice(i,1);}
+ // Soft radial falloff for the strike flash; built from data so it also works in Node tests (no canvas).
+ const soft=(()=>{const n=64,d=new Uint8Array(n*n*4);for(let y=0;y<n;y++)for(let x=0;x<n;x++){const r=Math.hypot(x-n/2+.5,y-n/2+.5)/(n/2),v=Math.round(255*Math.max(0,1-r)**2);d.set([v,v,v,v],(y*n+x)*4);}const t=new THREE.DataTexture(d,n,n);t.needsUpdate=true;return t;})();
+ function remove(e){scene.remove(e.group);e.material.dispose();e.glyphMaterial.dispose();e.flashMaterial.dispose();const i=active.indexOf(e);if(i>=0)active.splice(i,1);}
  function create(track,{from={x:0,z:0},to={x:1.8,z:0},color='#e6cb92',reduced=false}={}){
   while(active.length>=16)remove(active[0]);
-  const material=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false});
-  const group=new THREE.Group();scene.add(group);
+  // 0.29: additive and over-bright so the bloom pass makes skills glow; a ground glyph flashes under the caster.
+  const material=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});material.color.multiplyScalar(reduced?1:1.7);
+  const glyphMaterial=material.clone();const group=new THREE.Group();scene.add(group);
+  const glyph=new THREE.Mesh(geometry.glyph,glyphMaterial);glyph.rotation.x=-Math.PI/2;group.add(glyph);
+  const flashMaterial=material.clone();flashMaterial.map=soft;const flash=new THREE.Mesh(geometry.flash,flashMaterial);group.add(flash);
   const kind=track.fx,projectile=['arrow','lance','spirit','light','talisman'].includes(kind);
   const shape=['slash','arc'].includes(kind)?'arc':['arrow','lance','rain'].includes(kind)?'lance':kind==='talisman'?'paper':['impact','spirit','motes','flame'].includes(kind)?'spark':'ring';
   const count=['rain','flame','motes','orbit','burst'].includes(kind)?8:kind==='trail'?5:3;
   const parts=Array.from({length:count},()=>{const m=new THREE.Mesh(geometry[shape],material);group.add(m);return m;});
-  const e={group,material,track,age:0,life:track.duration+.45,dispose:()=>remove(e)};active.push(e);
+  const e={group,material,glyphMaterial,flashMaterial,track,age:0,life:track.duration+.45,dispose:()=>remove(e)};active.push(e);
   e.sample=(time,camera)=>{
    const q=time/track.duration,dx=to.x-from.x,dz=to.z-from.z,n=Math.hypot(dx,dz)||1,aim=new THREE.Vector3(dx/n,0,dz/n);
    material.opacity=reduced?.4:.8;
+   const g=Math.min(1,time/.5);glyph.visible=!reduced&&g<1;glyph.position.set(from.x,.08,from.z);glyph.scale.setScalar(.6+g*2.6);glyphMaterial.opacity=.85*(1-g)*(1-g);
+   // Bright pop at the target on every strike beat.
+   let k=1;for(const beat of track.strikes){const d=(q-beat)*track.duration;if(d>=0&&d<.22)k=Math.min(k,d/.22);}
+   flash.visible=!reduced&&k<1;flash.position.set(to.x,.9,to.z);flash.quaternion.copy(camera.quaternion);flash.scale.setScalar(.8+k*2.6);flashMaterial.opacity=.95*(1-k);
    parts.forEach((m,i)=>{
     const beat=track.strikes[i%track.strikes.length],f=(q-beat)/.27;
     m.visible=f>=0&&f<1;if(!m.visible)return;
@@ -54,5 +65,16 @@ export function createSkillEffects(scene){
   };
   return e;
  }
- return {create,update(dt,camera){for(const e of [...active]){e.age+=dt;if(e.age>e.life)remove(e);else e.sample(e.age,camera);}},clear(){for(const e of [...active])remove(e);},dispose(){this.clear();Object.values(geometry).forEach(g=>g.dispose());},get count(){return active.length;}};
+ return {create,update(dt,camera){for(const e of [...active]){e.age+=dt;if(e.age>e.life)remove(e);else e.sample(e.age,camera);}},clear(){for(const e of [...active])remove(e);},dispose(){this.clear();Object.values(geometry).forEach(g=>g.dispose());soft.dispose();},get count(){return active.length;}};
+}
+
+// Soft dust puffs at each footfall; at most 10 alive, each fades in 0.45 s.
+export function createFootDust(scene){
+ const geometry=new THREE.CircleGeometry(.2,14),puffs=[];
+ const remove=p=>{scene.remove(p.mesh);p.mesh.material.dispose();puffs.splice(puffs.indexOf(p),1);};
+ return {
+  puff(x,y,z){if(puffs.length>=10)remove(puffs[0]);const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color:'#efe2c4',transparent:true,opacity:.4,depthWrite:false}));mesh.rotation.x=-Math.PI/2;mesh.position.set(x,y,z);scene.add(mesh);puffs.push({mesh,age:0});},
+  update(dt){for(const p of [...puffs]){p.age+=dt;const f=p.age/.45;if(f>=1){remove(p);continue;}p.mesh.scale.set(.6+f*1.2,.6+f*1.2,1);p.mesh.position.y+=dt*.12;p.mesh.material.opacity=.4*(1-f);}},
+  get count(){return puffs.length;}
+ };
 }

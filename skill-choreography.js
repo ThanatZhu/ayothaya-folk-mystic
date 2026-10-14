@@ -1,5 +1,5 @@
 // Authored skill tracks over the existing sprite rig. Timing is visual, not combat balance.
-import {characterMotion} from './character-motion.js?v=23';
+import {characterMotion} from './character-motion.js?v=29';
 const gestures={
  ready:{lean:-.032,crouch:.027,armL:.016,armR:-.025},
  jab:{lean:.055,armR:.065,armL:-.014,legR:.025,x:.16},
@@ -156,5 +156,8 @@ export function skillPose(classId,index,time,{reduced=false}={}){
  // A kick, guard or recovery must not borrow the extended-punch illustration.
  const nearest=track.times.reduce((best,t,n)=>Math.abs(t-q)<Math.abs(track.times[best]-q)?n:best,0);
  p.frame=q>=.22&&q<.85&&attackArt.has(track.sequence[nearest])?3:0;
+ // 0.29 punch: a short crouch-squash just before each strike, then a stretch on the hit.
+ let hit=0,load=0;for(const beat of track.strikes){const d=q-beat;if(d>=0)hit=Math.max(hit,Math.exp(-((d/.07)**2)));else if(d>-.14)load=Math.max(load,Math.sin((1+d/.14)*Math.PI));}
+ p.sy=1+.07*hit-.045*load;p.sx=1-.04*hit+.035*load;
  return p;
 }

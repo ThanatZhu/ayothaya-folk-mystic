@@ -1,5 +1,5 @@
 import {createMotionPreview} from './motion-preview.js?v=15';
-import {characterMotion} from './character-motion.js?v=15';
+import {characterMotion} from './character-motion.js?v=29';
 import {createWardrobe} from './wardrobe.js?v=21';
 import {progression,jobFor,CLASS_LEVEL} from './advancement.js?v=21';
 import {CLASSES,getClass,className,atlasPath} from './classes.js?v=18';

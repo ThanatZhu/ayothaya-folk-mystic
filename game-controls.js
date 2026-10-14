@@ -1,9 +1,9 @@
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
-import {characterMotion,attackDuration} from './character-motion.js?v=23';
-import {skillTrack,skillPose} from './skill-choreography.js?v=23';
-import {createSkillEffects} from './skill-effects.js?v=23';
+import {characterMotion,attackDuration} from './character-motion.js?v=29';
+import {skillTrack,skillPose} from './skill-choreography.js?v=29';
+import {createSkillEffects,createFootDust} from './skill-effects.js?v=29';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=28';
@@ -13,6 +13,10 @@ import {className} from './classes.js?v=18';
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
  const skillEffects=createSkillEffects(scene);let activeSkill=null,network=null,serverSelf=null;
+ // 0.29 feedback: one permanent light (constant light count, so no shader recompiles) pulses on each strike,
+ // the camera shakes briefly, and dust puffs at every footfall.
+ const castLight=new THREE.PointLight('#ffd9a0',0,9,1.6);scene.add(castLight);const footDust=createFootDust(scene);
+ let strikes=[],shakeAmount=0,lastStep=0;
  let gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
  addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){network?.command('emote',{name:e.detail});castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
@@ -49,6 +53,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
     activeSkill=track?e.skillIndex:null;castUntil=world.time+(track?.duration??(['slash','punch','thrust','arrow'].includes(e.kind)?attackDuration(world.profession.id):.8));
     actionStart=world.time;emoteUntil=0;actionMode=e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    }
+   const beats=track?track.strikes.map(b=>world.time+b*track.duration):[world.time+.12];strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    if(track){skillEffects.create(track,{...e,reduced:motionPreference.matches});return;}
    const bolt=['bolt','arrow','blessing'].includes(e.kind),mat=new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(e.kind==='arrow'?fxArrow:e.kind==='slash'?fxArc:bolt?fxBall:fxRing,mat);scene.add(mesh);
    if(!bolt)mesh.rotation.x=-Math.PI/2;
@@ -154,6 +159,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const facing=p.face.x*Math.cos(azimuth)-p.face.z*Math.sin(azimuth);
   hero.sprite.userData.pose?.(visualPose,directional?false:facing<0);
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
+  footDust.update(dt);
+  if(mode==='walk'&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,p.z>4.25?.44:.09,p.z-p.face.z/faceLength*.25);}}
+  let flash=0,shake=0;for(const s of strikes){const d=t-s.at;if(d>=0&&d<.45){flash=Math.max(flash,s.power*Math.exp(-d*9));if(d<.25)shake=Math.max(shake,s.power*Math.exp(-d*16));}}strikes=strikes.filter(s=>t-s.at<.5);
+  castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,1.3,p.z);shakeAmount=reduced?0:shake*.11;
   hero.shadow.position.set(p.x,p.z>4.25?.46:.072,p.z);playerRing.position.set(p.x,p.z>4.25?.47:.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
   // Camera follows the player while preserving user-controlled azimuth and zoom.
   const follow=new THREE.Vector3(p.x,1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
@@ -206,5 +215,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  function applyNetworkSnapshot(snapshot){const s=snapshot.self,{x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
   for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);}
  }
- return {update,world,clearInput,setNetwork,applyNetworkSnapshot};
+ // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
+ function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
+ return {update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset};
 }

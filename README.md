@@ -93,6 +93,8 @@ Firebase project: `ayothaya-folk-mystic`, Firestore Standard `(default)` ที�
 
 ## แก้แมพและภาพ
 
+ภาพละมุน (0.29): tone mapping แบบนุ่ม เงานุ่ม หมอกจาง ๆ ด้านไกล แสงเรืองจากโคม/สกิล และ tilt-shift แบบโมเดลจำลอง ปิดได้ในตั้งค่าเกม ("ภาพละมุน") ค่าเก็บเฉพาะเครื่อง เงาสัมผัสบนพื้นมาจาก `assets/ground-ao.png` ที่ bake ด้วย Blender: `blender -b maps/ayutthaya.blend --python bake_ground_ao.py -- 1024 64` (ไม่แก้ไฟล์ .blend) ต้อง bake ใหม่เมื่อย้ายบ้านหรือวัตถุในเมือง
+
 `maps/world.json` คือข้อมูลฉากและเส้นทาง `maps/*.blend` และ `maps/*.glb` คือโครงสร้างเมืองหลวงใหม่ สร้างด้วย Blender: `blender --background --python build_capital19.py`
 
 Blender เก็บ geometry/UV; ตัวละคร พืช พื้นผิว แสง และโมชั่นประกอบใน `viewer-world.js` กับ `ambient-motion.js` ภาพ PNG และพรอมป์จาก built-in ImageGen อยู่ใน `assets/`

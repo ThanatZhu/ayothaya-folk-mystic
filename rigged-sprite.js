@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {deformPoint} from './character-motion.js?v=23';
+import {deformPoint} from './character-motion.js?v=29';
 export function createRiggedSprite(texture){
  const geometry=new THREE.PlaneGeometry(1,1,16,24),base=geometry.attributes.position.array.slice();
  const material=new THREE.MeshBasicMaterial({map:texture,alphaTest:.45,transparent:false,depthWrite:true,side:THREE.DoubleSide,color:'#fff1da'});

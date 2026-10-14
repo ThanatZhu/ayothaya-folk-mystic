@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import {CLASSES,NOVICE,atlasPath,classSkills,className} from './classes.js?v=18';
 import {SKILLS} from './combat-core.js?v=23';
-import {skillTrack,skillPose} from './skill-choreography.js?v=23';
-import {createRiggedSprite} from './rigged-sprite.js?v=23';
-import {createSkillEffects} from './skill-effects.js?v=23';
+import {skillTrack,skillPose} from './skill-choreography.js?v=29';
+import {createRiggedSprite} from './rigged-sprite.js?v=29';
+import {createSkillEffects} from './skill-effects.js?v=29';
 import {applySkillArt} from './skill-art.js?v=21';
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion:reduce)');
 try{

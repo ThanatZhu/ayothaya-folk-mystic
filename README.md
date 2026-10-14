@@ -87,6 +87,8 @@ Firebase project: `ayothaya-folk-mystic`, Firestore Standard `(default)` ที�
 
 ทดสอบด้วย Node.js: `npm test` (ไม่ต้องติดตั้งแพ็กเกจ)
 
+ทดสอบ Firestore rules ใน emulator: `npm ci` แล้ว `npm run test:rules` (ต้องมี Java 11+ บน PATH/JAVA_HOME หรือ portable JRE ใน `%LOCALAPPDATA%/ayothaya-tools/jre/`; ใช้ demo project ออฟไลน์ ไม่แตะคลาวด์)
+
 ไลบรารี Three.js อยู่ใน `vendor/` พร้อมไฟล์ลิขสิทธิ์ Firebase SDK 13 โหลดจาก CDN ของ Google ค่าใน `firebase-config.js` เป็น public web configuration; ห้ามใส่ service account หรือ admin credential ในหน้าเว็บ
 
 ## แก้แมพและภาพ

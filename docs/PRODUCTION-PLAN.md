@@ -80,7 +80,8 @@ Phase 1 จัดทำแล้วในเอกสาร/ข้อมูล�
 - [x] ผู้เล่นสอง WebSocket จริงเห็นกัน เดิน/ท่า ปาร์ตี้ 5 คน แชตห้อง/ปาร์ตี้ reconnect และ local persistence
 - [x] ทดสอบ shared monster damage และ Base/Job EXP ไม่แจกซ้ำใน fixture; เมืองจริงยังปลอดภัย
 - [x] เตรียม Docker backend, private profiles, account/runtime leases และเอกสารเปิดบริการ
-- [ ] สิทธิ์ Firebase เจ้าของ, ยืนยันโฮสติ้ง/ค่าใช้จ่าย, deploy rules พร้อม emulator และ cloud roundtrip สอง Google accounts
+- [x] Firestore rules ผ่าน emulator ในเครื่อง (`npm run test:rules` 7 ข้อ) — ยังไม่ได้ deploy
+- [ ] ยืนยันโฮสติ้ง/ค่าใช้จ่าย (Billing ยังปิด), deploy rules และ cloud roundtrip สอง Google accounts
 - [ ] ตั้ง public WebSocket endpoint และทดสอบ Android/iPhone จริง พร้อม soak/load บนโฮสต์เป้าหมาย
 - [ ] ระบบ Phase 4–6 และ validation เงิน/ไอเทม/เควสต์ก่อนประกาศ Phase 7 เสร็จ
 

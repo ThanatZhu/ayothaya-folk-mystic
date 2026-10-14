@@ -10,3 +10,4 @@ dist/
 Thumbs.db
 
 .local-multiplayer/
+*-debug.log

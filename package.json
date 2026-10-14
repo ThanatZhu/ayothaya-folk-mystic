@@ -7,10 +7,15 @@
     "build": "node build-vercel.mjs",
     "check:content": "node scripts/validate-content.mjs",
     "server": "node server/host.js",
-    "test:multiplayer": "node --test tests/multiplayer*.test.mjs"
+    "test:multiplayer": "node --test tests/multiplayer*.test.mjs",
+    "test:rules": "node scripts/test-rules.mjs"
   },
   "dependencies": {
     "firebase-admin": "^14.5.0",
     "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase": "^13.0.0"
   }
 }

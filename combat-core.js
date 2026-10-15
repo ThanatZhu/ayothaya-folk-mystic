@@ -1,6 +1,7 @@
 import {awardExperience} from './experience.js?v=21';
 import {advanceStats,advanceSkills} from './advancement.js?v=21';
 import {getClass,classSkills} from './classes.js?v=18';
+import {scaledSkill} from './skill-progress.js?v=31';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[
  {key:'1',name:'ลูกไฟวิญญาณ',short:'ลูกไฟ',icon:'✦',cost:8,cd:2,range:6,damage:24,type:'bolt',color:'#70ead9'},
@@ -79,7 +80,7 @@ export class CombatWorld{
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
   this.mobs=(this.safe?[]:(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]])).map(([x,z,type],id)=>({id,type,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
-  this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;
+  this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;
  }
  get target(){return this.mobs.find(m=>m.id===this.targetId&&m.hp>0)??null;}
  emit(type,extra={}){this.events.push({type,...extra});}
@@ -100,7 +101,8 @@ export class CombatWorld{
   p.attackCD=this.profession.delay;p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});this.hurt(m,this.profession.damage);return true;
  }
  skill(index){
-  const s=this.skills[index],p=this.player;if(!s||p.hp<=0)return false;
+  const level=this.skillLevels[index]??1;if(this.skills[index]&&level<1){this.notice('ยังไม่ได้เรียนสกิลนี้');return false;}
+  const s=scaledSkill(this.skills[index],level),p=this.player;if(!s||p.hp<=0)return false;
   if(this.cooldowns[index]>0){this.notice('สกิลยังไม่พร้อม');return false;}
   if(p.mp<s.cost){this.notice('มานาไม่พอ');return false;}
   let m=this.target;

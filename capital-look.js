@@ -123,3 +123,28 @@ export function createCapitalProps({scene,map}){
  }
  for(const object of [pottery,inside,blades,flowers]){object.computeBoundingSphere();scene.add(object);}
 }
+
+// 0.31 hand-painted finish for building materials: broad brush patches, faint directional strokes,
+// a warm/cool hue drift and a painter's vertical gradient (darker near the ground, lighter up high).
+// World-space, so every house, temple and prop gets its own variation without new textures.
+export function paintify(material){
+ material.onBeforeCompile=s=>{
+  s.vertexShader='varying vec3 vPaint;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvPaint=(modelMatrix*vec4(transformed,1.)).xyz;');
+  s.fragmentShader=`varying vec3 vPaint;
+   float hash29(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+   float noise29(vec2 p){vec2 i=floor(p),q=fract(p);q=q*q*(3.-2.*q);return mix(mix(hash29(i),hash29(i+vec2(1.,0.)),q.x),mix(hash29(i+vec2(0.,1.)),hash29(i+1.),q.x),q.y);}
+   `+s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+   vec3 p=vPaint;
+   float brush=noise29(p.xz*.42+p.y*.27)*.65+noise29(p.xz*1.3-p.y*.8)*.35;
+   float stroke=noise29(vec2(dot(p.xz,vec2(.8,.6))*4.2+p.y*.6,p.y*.55-dot(p.xz,vec2(-.6,.8))*.35));
+   vec3 c=diffuseColor.rgb;
+   c*=.92+.15*brush;
+   c=mix(c,c*vec3(1.06,.99,.9),smoothstep(.45,.85,brush)*.5);
+   c=mix(c,c*vec3(.93,.98,1.06),smoothstep(.55,.15,brush)*.35);
+   c*=.965+.07*stroke;
+   c*=mix(.9,1.08,smoothstep(.2,5.5,p.y));
+   diffuseColor.rgb=c;`);
+ };
+ material.customProgramCacheKey=()=> 'painted31';
+ return material;
+}

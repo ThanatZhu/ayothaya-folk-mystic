@@ -1,6 +1,7 @@
 // Top-right menu bar above the minimap (MMO style). Every item opens an existing screen; nothing is a placeholder.
 const items=[
  {id:'menu-profile',icon:'☺',label:'ตัวละคร',open:()=>click('open-account')},
+ {id:'menu-skills',icon:'✦',label:'สกิล',key:'K',open:()=>dispatchEvent(new CustomEvent('open-skill-window'))},
  {id:'menu-map',icon:'⌖',label:'แผนที่',key:'M',open:()=>click('mini-open')},
  {id:'menu-players',icon:'♛',label:'ผู้เล่น',open:()=>click('online-button')},
  {id:'menu-chat',icon:'✉',label:'แชต',key:'Enter',open:()=>document.getElementById('online-text')?.focus(),online:true},

@@ -6,13 +6,23 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=29';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=29';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=28';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=31';
+import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=31';
 
 import {className} from './classes.js?v=18';
 
-export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false}){
+export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
  const skillEffects=createSkillEffects(scene);let activeSkill=null,network=null,serverSelf=null;
+ // Skill levels: the server owns them online; guests keep them in their local save.
+ const progress=()=>({classId:world.profession.id,jobId:world.jobId??'',jobXp:world.jobXp});
+ let localSkills=normalizeSkills(skillState.skills,world.profession.id);world.skillLevels=[...localSkills[world.profession.id]];world.skillPoints=availablePoints(localSkills,progress());
+ function upgradeSkill(index){
+  if(network)return network.command('upgradeSkill',{index})?true:'not-connected';
+  if(!skillState.offline)return 'online-required';
+  try{localSkills=levelUpSkill(localSkills,world.profession.id,index,progress());}catch(e){return e.message;}
+  world.skillLevels=[...localSkills[world.profession.id]];world.skillPoints=availablePoints(localSkills,progress());skillState.onChange?.(localSkills);return true;
+ }
  // 0.29 feedback: one permanent light (constant light count, so no shader recompiles) pulses on each strike,
  // the camera shakes briefly, and dust puffs at every footfall.
  const castLight=new THREE.PointLight('#ffd9a0',0,9,1.6);scene.add(castLight);const footDust=createFootDust(scene);
@@ -66,7 +76,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  }
  const skillButtons=SKILLS.map((s,i)=>{
   const b=document.createElement('button');b.type='button';b.className='skill';b.setAttribute('aria-label',`สกิล ${s.key} ${s.name}`);b.title=`${s.key} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;
-  b.innerHTML=`<kbd>${s.key}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em>`;b.style.setProperty('--skill-color',s.color);b.addEventListener('click',()=>{if(!isPaused())world.skill(i);});$('skills').append(b);return b;
+  b.innerHTML=`<kbd>${s.key}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.style.setProperty('--skill-color',s.color);b.addEventListener('click',()=>{if(!isPaused())world.skill(i);});$('skills').append(b);return b;
  });
  applySkillArt(skillButtons,world.profession.id);
 
@@ -199,7 +209,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
    }
    $('auto-attack').classList.toggle('active',world.auto);$('auto-attack').setAttribute('aria-pressed',String(world.auto));$('auto-state').textContent=world.auto?'เปิด':'ปิด';
    $('target-name').textContent=target?MONSTER_TYPES[target.type].name:world.safe?'เขตปลอดภัย':'ยังไม่เลือกเป้าหมาย';$('target-hp').textContent=target?`${target.hp} / ${target.maxHp}`:world.safe?'พักฟื้น · พูดคุย · เดินทาง':'คลิก / แตะมอนสเตอร์';$('target-fill').style.width=target?`${target.hp/target.maxHp*100}%`:'0%';
-   skillButtons.forEach((b,i)=>{const cd=world.cooldowns[i];b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<SKILLS[i].cost);b.style.setProperty('--cooldown',`${cd/SKILLS[i].cd*100}%`);});
+   if(!network)world.skillPoints=availablePoints(localSkills,progress());
+   skillButtons.forEach((b,i)=>{const cd=world.cooldowns[i],lv=world.skillLevels[i]??1;b.querySelector('.skill-level').textContent=lv?'Lv'+lv:'—';b.classList.toggle('locked',!lv);b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<SKILLS[i].cost);b.style.setProperty('--cooldown',`${cd/SKILLS[i].cd*100}%`);});
   }
  }
  function mobileLayout(){return innerWidth<=800||matchMedia('(pointer:coarse)').matches;}
@@ -212,10 +223,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  function setNetwork(client){network=client;clearInput();world.auto=false;
   world.skill=i=>client.command('skill',{index:i});world.basicAttack=()=>client.command('attack');world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto');
  }
- function applyNetworkSnapshot(snapshot){const s=snapshot.self,{x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
+ function applyNetworkSnapshot(snapshot){const s=snapshot.self;if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
   for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);}
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
- return {update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset};
+ return {update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill};
 }

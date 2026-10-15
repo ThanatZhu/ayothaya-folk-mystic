@@ -3,10 +3,11 @@ import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable} from '../combat-c
 import {awardExperience} from '../experience.js';
 import {restoreTraveler,serializeTraveler} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
+import {normalizeSkills,upgradeSkill,availablePoints} from '../skill-progress.js';
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
-const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping']);
+const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill']);
 export class RealmServer{
  constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
@@ -22,8 +23,9 @@ export class RealmServer{
   let room=this.rooms.get(roomId);if(room&&room.peers.size>=this.capacity)throw new Error('room-full');
   if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);}
   const world=new CombatWorld({...map,classId:hero.classId,jobId:hero.jobId});restoreTraveler(world,record.state.traveler);world.mobs=room.mobs;
+  const skills=normalizeSkills(record.skills,hero.classId);world.skillLevels=[...skills[hero.classId]];
   const position=record.state.position;if(position&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
-  const peer={id:randomUUID(),uid,serverId,slotId,character:hero,settings:copy(record.state.settings??{}),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
+  const peer={id:randomUUID(),uid,serverId,slotId,character:hero,skills,settings:copy(record.state.settings??{}),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
   world.hurt=(mob,damage,color)=>this.hurt(peer,mob,damage,color);
   this.peers.set(peer.id,peer);room.peers.add(peer.id);
   send({type:'welcome',id:peer.id,room:roomId,capacity:this.capacity,history:copy(room.history),snapshot:this.snapshot(peer)});this.social(room);return peer;
@@ -44,6 +46,10 @@ export class RealmServer{
   if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
   const w=p.world,now=this.now();
   if(m.type==='ping'){p.send({type:'pong',stamp:typeof m.stamp==='number'?m.stamp:0});return true;}
+  if(m.type==='upgradeSkill'){
+   try{p.skills=upgradeSkill(p.skills,p.character.classId,m.index,this.progress(p));}catch(e){return this.error(p,e.message);}
+   w.skillLevels=[...p.skills[p.character.classId]];return true;
+  }
   if(m.type==='input'){
    if(!Number.isFinite(m.x)||!Number.isFinite(m.z)||Math.abs(m.x)>1||Math.abs(m.z)>1||typeof m.attack!=='boolean')return this.error(p,'invalid-input');
    const n=Math.max(1,Math.hypot(m.x,m.z));p.input={x:m.x/n,z:m.z/n,attack:m.attack};p.inputAt=now;return true;
@@ -130,11 +136,12 @@ export class RealmServer{
    if(this.tickId%2===0){for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p),events:copy(room.events)});}room.events=[];}
   }
  }
+ progress(p){return {classId:p.character.classId,jobId:p.character.jobId??'',jobXp:p.world.jobXp};}
  snapshot(p){
   const publicPlayer=a=>({id:a.id,character:a.character,player:a.world.player,emote:a.emote,partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
   const players=visible.map(a=>{const v=a.world.player,result={id:a.id,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,face:{x:round(v.face.x),z:round(v.face.z)}},partyId:a.partyId,connected:!a.suspended};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
-  return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto},players,mobs:p.room.mobs});
+  return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p))},players,mobs:p.room.mobs});
  }
- record(p,original){return {...copy(original),character:copy(p.character),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
+ record(p,original){return {...copy(original),character:copy(p.character),skills:copy(p.skills),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
 }

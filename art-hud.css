@@ -58,3 +58,27 @@
  #game-menu i{width:24px;height:24px;font-size:13px}
 }
 @media (max-width:640px){#game-menu span{display:none}#game-menu button{min-width:44px;min-height:44px}}
+
+/* 0.31 skill levels: badge on each slot, skill window. */
+.skill{position:relative}
+.skill .skill-level{position:absolute;right:4px;top:3px;font:700 8px Mali,Tahoma,sans-serif;color:#ffe7a6;text-shadow:0 1px 2px #000}
+.skill.locked{filter:grayscale(1) brightness(.6)}
+#skill-window{width:min(560px,94vw);max-height:90dvh;padding:0;border:2px solid #b28c4d;border-radius:18px;background:linear-gradient(135deg,#3e2f21,#1c3029);color:#fff0ce;font:13px Mali,Tahoma,system-ui,sans-serif;box-shadow:0 16px 60px #0008,inset 0 0 0 3px #d1a75b22;overflow:hidden}
+#skill-window[open]{display:flex;flex-direction:column}
+#skill-window::backdrop{background:#071510aa}
+#skill-window>header{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;border-bottom:1px solid #af884f55}
+#skill-window header>div{flex:1}#skill-window header small{font-size:10px;letter-spacing:.18em;color:#dab775}#skill-window h2{margin:2px 0 0;font-size:20px}
+#skill-points{padding:6px 12px;border-radius:14px;background:#e6c78433;border:1px solid #dab77599;color:#ffe7b0;white-space:nowrap}
+#skill-window .mp-icon{width:44px;min-height:44px;border:1px solid #8c7350;border-radius:50%;background:#21392ee6;color:#fff0ce;font-size:22px;cursor:pointer}
+.skill-hint{margin:8px 18px 0;font-size:11px;color:#cfe6d4}
+#skill-list{list-style:none;margin:8px 0 0;padding:0 18px;overflow:auto;display:grid;gap:6px}
+#skill-list li{display:grid;grid-template-columns:40px 1fr auto 44px;align-items:center;gap:10px;padding:6px 8px;border:1px solid #6b5a3d88;border-radius:12px;background:#11231cb3}
+#skill-list li.locked{opacity:.55}
+.skill-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:radial-gradient(#4a3a26,#22190f);border:2px solid var(--skill-color,#dab775);font-size:20px}
+#skill-list strong{display:block;font-size:13px}#skill-list small{display:block;font-size:10px;color:#d9c8a2;margin-top:2px}
+#skill-list b{font-size:12px;color:#ffd98f;white-space:nowrap}
+#skill-list button{min-height:44px;border:1px solid #f2d99a;border-radius:10px;background:linear-gradient(#e6c784,#b98c45);color:#2d2114;font:700 20px Mali,Tahoma,sans-serif;cursor:pointer}
+#skill-list button:disabled{opacity:.35;cursor:not-allowed}
+#skill-list button:focus-visible{outline:3px solid #b6eee1;outline-offset:2px}
+#skill-note{margin:8px 18px 14px;min-height:1.4em;font-size:12px;color:#bfe9cf}
+@media(max-height:520px){#skill-window>header{padding:8px 14px 6px}#skill-window h2{font-size:16px}#skill-list{gap:4px}#skill-list li{padding:3px 6px}}

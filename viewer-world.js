@@ -1,8 +1,9 @@
 import {createMultiplayer} from './multiplayer-ui.js?v=28';
-import {createGameMenu} from './game-menu.js?v=28';
+import {createGameMenu} from './game-menu.js?v=31';
+import {createSkillWindow} from './skill-window.js?v=31';
 import {createSoftLook} from './soft-look.js?v=29';
 import {createLandscapeDetails} from './landscape-details.js?v=21';
-import {createCapitalLook,createCapitalTrees,createCapitalProps} from './capital-look.js?v=29';
+import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=31';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
 import {createRiggedSprite} from './rigged-sprite.js?v=29';
 import {customizeAtlas} from './character-appearance.js?v=18';
@@ -12,7 +13,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=29';
+import {createGame} from './game-controls.js?v=31';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=22';
@@ -59,13 +60,15 @@ try {
  const tiles={wood:frame(materials.image,[0,0,.5,.5],true),roof:frame(materials.image,[.5,0,.5,.5],true),sand:frame(materials.image,[0,.5,.5,.5],true),grass:frame(materials.image,[.5,.5,.5,.5],true)},cache=new Map();
  for(const [key,rect] of Object.entries({brick:[0,0,.5,.5],plaster:[.5,0,.5,.5],paving:[0,.5,.5,.5],meadow:[.5,.5,.5,.5]}))tiles[key]=frame(worldMaterials.image,rect,true);
  const capitalLook=createCapitalLook({map,atlas:capitalAtlas,frame});tiles.roof=capitalLook.roof;
+ // Painted look: smooth the tiled building textures instead of hard pixel edges.
+ for(const t of Object.values(tiles)){t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.anisotropy=4;t.needsUpdate=true;}
  gltf.scene.traverse(o=>{if(o.isMesh){if(o.name.startsWith('Living_canopy')||o.name.startsWith('Living canopy')||o.name.startsWith('Market_pottery')||o.name.startsWith('Market pottery'))o.visible=false;o.castShadow=!/Water|River$|River_|Terrain|terrain|ground19|soil|fragment|Garden_canal/.test(o.name);o.receiveShadow=true;const name=o.material.name.replace(/\.\d+$/,''),colors=o.geometry.attributes.color,cacheKey=name+(colors?'|ao':'');
   // Blender-baked ambient occlusion (bake_building_ao.py) arrives as vertex colours; ease it so under-floor areas stay readable.
   if(colors&&!o.geometry.userData.aoEased){for(let i=0;i<colors.count;i++)for(let c=0;c<3;c++)colors.setComponent(i,c,1-(1-colors.getComponent(i,c))*.78);colors.needsUpdate=true;o.geometry.userData.aoEased=true;}
   if(!cache.has(cacheKey)){const key=name.startsWith('wood')?'wood':name.startsWith('roof')?'roof':name==='sand'?'sand':name==='grass'?'grass':tiles[name]?name:null;
    const m=key?new THREE.MeshLambertMaterial({map:tiles[key],color:name==='wood_dark'?'#a89b83':name==='wood_gold'?'#f4d7a1':name==='roof_dark'?'#e2ceb2':key==='sand'?'#e0ded2':key==='plaster'?'#d6d0bd':key==='brick'?'#c7a184':'#eee0c7',side:THREE.DoubleSide}):new THREE.MeshLambertMaterial({color:o.material.color,side:THREE.DoubleSide});
    m.name=name;if(key){m.emissiveMap=tiles[key];m.emissive.set('#ffffff');m.emissiveIntensity=key==='roof'?.17:key==='wood'?.09:0;}
-   if(name==='amber'||name==='flame'){m.color.set('#ffbc5d');m.emissive.set('#ff7c12');m.emissiveIntensity=name==='flame'?1.3:.7;}if(name==='water')m.color.set('#68a5a1');if(name==='bark19'){m.map=tiles.wood;m.color.set('#a58a62');}if(name==='stone19')m.color.set('#b8b9a0');m.vertexColors=!!colors;cache.set(cacheKey,name==='ground19'?capitalLook.ground:name.startsWith('canopy')?capitalLook.canopy(name):m);
+   if(name==='amber'||name==='flame'){m.color.set('#ffbc5d');m.emissive.set('#ff7c12');m.emissiveIntensity=name==='flame'?1.3:.7;}if(name==='water')m.color.set('#68a5a1');if(name==='bark19'){m.map=tiles.wood;m.color.set('#a58a62');}if(name==='stone19')m.color.set('#b8b9a0');m.vertexColors=!!colors;cache.set(cacheKey,name==='ground19'?capitalLook.ground:name.startsWith('canopy')?capitalLook.canopy(name):['water','amber','flame'].includes(name)?m:paintify(m));
   }o.material=cache.get(cacheKey);
  }});scene.add(gltf.scene);
  createCapitalProps({scene,map});
@@ -110,7 +113,7 @@ try {
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
  const motion=createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
- const game=createGame({scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>multiplayer?.paused||$('settings-panel').open||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
+ const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>multiplayer?.paused||$('settings-panel').open||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
@@ -124,7 +127,7 @@ try {
   camera.updateProjectionMatrix();controls.update();
  }
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
- multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu();
+ multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu();createSkillWindow({game});
  function toggleOverview(){
   overview=!overview;controls.minZoom=overview?.08:.65;game.clearInput();rotating=null;
   const offset=camera.position.clone().sub(controls.target).multiplyScalar(overview?6:1/6);

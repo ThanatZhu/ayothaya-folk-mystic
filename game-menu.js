@@ -18,59 +18,15 @@ const paths={
  fullscreen:'M6 18V6h12m12 0h12v12m0 12v12H30m-12 0H6V30'
 };
 function icon(name){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 48 48');svg.setAttribute('aria-hidden','true');const p=document.createElementNS(svg.namespaceURI,'path');p.setAttribute('d',paths[name]||paths.lotus);svg.append(p);return svg;}
-const groups=[
- {id:'character',label:'ตัวละคร',icon:'hero',note:'ทุกก้าว คือเรื่องราวของคุณ',items:[
-  {id:'menu-profile',icon:'hero',label:'โปรไฟล์',description:'ตัวละคร · บัญชี · การบันทึก',run:()=>click('open-account')},
-  {id:'menu-skills',icon:'skill',label:'วิชาและสกิล',description:'ดูวิชาและใช้แต้มอัปสกิล',key:'K',run:()=>dispatchEvent(new CustomEvent('open-skill-window'))},
-  {icon:'door',label:'เลือกตัวละคร',description:'กลับหน้าตัวละครและเซิร์ฟเวอร์',run:()=>click('return-lobby')}
- ]},
- {id:'world',label:'โลกอโยธยา',icon:'map',note:'ออกเดินทาง ผ่านเมืองและสายน้ำ',items:[
-  {id:'menu-map',icon:'map',label:'แผนที่เมือง',description:'ย่านต่าง ๆ และตำแหน่งของคุณ',key:'M',run:()=>click('mini-open')},
-  {icon:'eye',label:'มองเมืองจากฟ้า',description:'สลับภาพรวมเมือง / กลับหาตัวละคร',key:'V',run:()=>click('overview')}
- ]},
- {id:'social',label:'เพื่อนร่วมทาง',icon:'people',note:'พบกันในโลกใบเดียวกัน',items:[
-  {id:'menu-players',icon:'people',label:'ผู้เล่นและปาร์ตี้',description:'ดูผู้เล่นในห้อง · ชวนเข้าปาร์ตี้',run:()=>click('online-button')},
-  {id:'menu-chat',icon:'chat',label:'สนทนา',description:'เปิดช่องแชตกับเพื่อนในห้อง',key:'Enter',run:()=>{if($('dock-toggle')?.getAttribute('aria-expanded')==='false')click('dock-toggle');document.querySelector('#online-dock [data-channel="room"]')?.click();$('online-text')?.focus();}}
- ]},
- {id:'emotes',label:'ท่าทาง',icon:'emote',note:'ให้ท่าทาง บอกความรู้สึก',items:[
-  ...[['bow','คำนับ','ทักทายอย่างชาวอโยธยา'],['celebrate','ดีใจ','ฉลองให้กับการเดินทาง'],['rest','พักสักครู่','นั่งพักระหว่างทาง'],['guard','ตั้งรับ','เตรียมพร้อมรับการต่อสู้']].map(([name,label,description])=>({icon:name,label,description,run:()=>dispatchEvent(new CustomEvent('hero-emote',{detail:name}))}))
- ]},
- {id:'settings',label:'ตั้งค่า',icon:'settings',note:'จัดมุมมอง ให้เป็นการผจญภัยของคุณ',items:[
-  {id:'menu-settings',icon:'settings',label:'ภาพและการควบคุม',description:'มุมกล้อง · ภาพละมุน · ลมและน้ำ',run:()=>click('open-settings')},
-  {icon:'fullscreen',label:'เล่นเต็มจอ',description:'ขยายพื้นที่ผจญภัยบนอุปกรณ์นี้',run:()=>click('enter-fullscreen')}
- ]}
-];
 export function createGameMenu({game,account}){
- const shell=$('game-shell'),nav=document.createElement('nav');nav.id='game-menu';nav.setAttribute('aria-label','เมนูเกม');
- const trigger=document.createElement('button');trigger.id='open-game-menu';trigger.type='button';trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','game-menu-dialog');trigger.append(icon('lotus'));
- const title=document.createElement('span');title.textContent='เมนู';trigger.append(title);nav.append(trigger);shell.append(nav);
- const dialog=document.createElement('dialog');dialog.id='game-menu-dialog';dialog.setAttribute('aria-labelledby','journal-title');
- // Static markup only; player data is assigned through textContent.
- dialog.innerHTML='<header class="journal-header"><div class="journal-seal" aria-hidden="true"></div><div><small>AYOTHAYA · FOLK MYSTIC</small><h2 id="journal-title">บันทึกนักเดินทาง</h2></div><button type="button" class="journal-close" aria-label="ปิดเมนูเกม">×</button></header><div class="journal-body"><nav class="journal-tabs" aria-label="หมวดเมนู"></nav><section class="journal-content"><div class="journal-heading"><small>การเดินทางของคุณ</small><h3 id="journal-section"></h3><p id="journal-note"></p></div><div class="journal-pages"></div><p class="journal-online-note" hidden>เข้าเกมด้วย Google และเชื่อมต่อออนไลน์เพื่อใช้แชต</p></section></div><footer class="journal-footer"><div><span class="journal-save-light" aria-hidden="true"></span><span class="journal-identity"></span><small>บันทึกอัตโนมัติ</small></div><button type="button" class="journal-return">กลับเข้าเกม <span aria-hidden="true">↗</span></button></footer>';
- dialog.querySelector('.journal-seal').append(icon('lotus'));shell.append(dialog);
- const tabs=[],pages=[];let selected='character';
- function select(id){selected=id;const group=groups.find(g=>g.id===id);$('journal-section').textContent=group.label;$('journal-note').textContent=group.note;tabs.forEach((b,i)=>b.setAttribute('aria-pressed',String(groups[i].id===id)));pages.forEach((p,i)=>p.hidden=groups[i].id!==id);updateOnline();}
- for(const group of groups){
-  const tab=document.createElement('button');tab.type='button';tab.id='journal-tab-'+group.id;tab.setAttribute('aria-controls','journal-page-'+group.id);tab.append(icon(group.icon));
-  const label=document.createElement('span');label.textContent=group.label;tab.append(label);tab.onclick=()=>select(group.id);dialog.querySelector('.journal-tabs').append(tab);tabs.push(tab);
-  const page=document.createElement('div');page.id='journal-page-'+group.id;page.className='journal-page';page.setAttribute('role','group');page.setAttribute('aria-label',group.label);dialog.querySelector('.journal-pages').append(page);pages.push(page);
-  for(const item of group.items){
-   const b=document.createElement('button');b.type='button';b.className='journal-action';if(item.id)b.id=item.id;
-   const art=document.createElement('span');art.className='journal-action-art';art.append(icon(item.icon));
-   const text=document.createElement('span');text.className='journal-action-text';const name=document.createElement('strong'),description=document.createElement('small');name.textContent=item.label;description.textContent=item.description;text.append(name,description);b.append(art,text);
-   if(item.key){const key=document.createElement('kbd');key.textContent=item.key;b.append(key);}
-   b.onclick=()=>{dialog.close();game.clearInput();item.run();};page.append(b);
-  }
- }
- function updateOnline(){const dock=$('online-dock'),available=!!dock&&!dock.hidden;$('menu-chat').hidden=!available;dialog.querySelector('.journal-online-note').hidden=selected!=='social'||available;}
- const dock=$('online-dock');if(dock)new MutationObserver(updateOnline).observe(dock,{attributes:true,attributeFilter:['hidden']});
- // Carry existing unread/invite/skill dots up to the category and main menu button.
- new MutationObserver(()=>{let any=false;pages.forEach((page,i)=>{const has=[...page.querySelectorAll('.menu-dot')].some(d=>!d.hidden&&!d.parentElement.hidden);tabs[i].classList.toggle('has-notice',has);any||=has;});trigger.classList.toggle('has-notice',any);}).observe(dialog.querySelector('.journal-pages'),{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
- trigger.onclick=()=>{game.clearInput();updateOnline();dialog.querySelector('.journal-identity').textContent=account.character.name+' · เซิร์ฟ '+account.serverId.slice(-1);dialog.showModal();trigger.setAttribute('aria-expanded','true');tabs[groups.findIndex(g=>g.id===selected)].focus();};
- dialog.querySelector('.journal-close').onclick=()=>dialog.close();dialog.querySelector('.journal-return').onclick=()=>dialog.close();
- dialog.addEventListener('close',()=>{trigger.setAttribute('aria-expanded','false');game.clearInput();});
- // Keep gameplay shortcuts (including M) from opening another screen behind the menu.
- dialog.addEventListener('keydown',e=>e.stopPropagation());
- // Native dialog supplies Escape, focus trapping and focus restoration.
- select(selected);return nav;
+ const shell=$('game-shell');document.body.classList.add('field-hud');
+ const nav=document.createElement('nav');nav.id='game-menu';nav.setAttribute('aria-label','เมนูเกม');
+ const items=[['menu-profile','hero','ตัวละคร',()=>click('open-account')],['menu-skills','skill','สกิล',()=>dispatchEvent(new CustomEvent('open-skill-window'))],['menu-players','people','ผู้เล่น',()=>click('online-button')],['menu-chat','chat','แชต',()=>{if($('dock-toggle')?.getAttribute('aria-expanded')==='false')click('dock-toggle');document.querySelector('#online-dock [data-channel="room"]')?.click();$('online-text')?.focus();}],['menu-settings','settings','ตั้งค่า',()=>click('open-settings')]];
+ for(const [id,art,label,run] of items){const b=document.createElement('button');b.id=id;b.type='button';b.setAttribute('aria-label',label);b.title=label;const emblem=document.createElement('i');emblem.append(icon(art));const text=document.createElement('span');text.textContent=label;b.append(emblem,text);b.onclick=()=>{game.clearInput();run();};nav.append(b);}
+ shell.append(nav);
+ const dock=$('online-dock'),chat=$('menu-chat');const sync=()=>{chat.hidden=!dock||dock.hidden;};if(dock)new MutationObserver(sync).observe(dock,{attributes:true,attributeFilter:['hidden']});sync();
+ const exp=document.querySelector('.experience-bars');exp.setAttribute('aria-label','ค่าประสบการณ์ตัวละครและอาชีพ');shell.append(exp);
+ const attack=$('attack');attack.replaceChildren();const blade=document.createElement('img');blade.src='./assets/attack-sword34.svg';blade.alt='';blade.draggable=false;attack.append(blade);const key=document.createElement('small');key.textContent='Space';attack.append(key);
+ const title=document.createElement('span');title.className='field-map-title';title.textContent='อยุธยา · CH '+account.serverId.slice(-1);document.querySelector('.mini-panel').prepend(title);
+ return nav;
 }

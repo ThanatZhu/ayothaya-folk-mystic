@@ -89,6 +89,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  function editable(e){return e.target instanceof Element&&!!e.target.closest('input,textarea,select,[contenteditable=true]');}
  addEventListener('keydown',e=>{
   if(isPaused()||editable(e)||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.code==='Space'&&e.target.closest?.('[data-hud-panel] button,#account-panel button'))return;
   if(['KeyW','KeyA','KeyS','KeyD','Space','KeyF'].includes(e.code)||/^Digit[0-9]$/.test(e.code))e.preventDefault();
   if(['KeyW','KeyA','KeyS','KeyD','Space'].includes(e.code))keys.add(e.code);
   if(e.repeat)return;

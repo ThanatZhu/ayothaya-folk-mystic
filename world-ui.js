@@ -1,3 +1,4 @@
+import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=22';
 import * as THREE from 'three';
 import {destinations,restoreTraveler,serializeTraveler} from './world-state.js?v=21';
@@ -22,7 +23,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
   $('travel-loading').hidden=false;$('travel-loading').textContent='กำลังเดินทางไป '+lookup(id).name+'…';
   location.assign('?server='+account.serverId+'&map='+encodeURIComponent(id));
  }
- function openMap(){if(account?.paused)return;game.clearInput();conversation=null;$('npc-dialog').hidden=true;dialog.showModal();drawCityMap();}
+ function openMap(){if(account?.paused)return;game.clearInput();conversation=null;$('npc-dialog').hidden=true;openHudPanel(dialog);drawCityMap();}
  $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{game.clearInput();$('mini-open').focus();});
  const views=map.portals.map(p=>{
@@ -68,5 +69,5 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
   const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}
  }
- minimap();return {update,get paused(){return dialog.open||!!conversation||traveling;}};
+ minimap();return {update,get paused(){return !!conversation||traveling;}};
 }

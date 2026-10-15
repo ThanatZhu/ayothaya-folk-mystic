@@ -1,15 +1,16 @@
 import {validateAppearance} from './appearance-state.js';
 // Runtime layers keep the original illustrated sprite and are shared by lobby and game.
-export function customizeAtlas(image,input={},classId='shaman'){
- const a=validateAppearance(input),c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
+export function customizeAtlas(image,input={},classId='shaman',layout=null){
+ const a=validateAppearance(input),c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);c.appearance=a;
  if(Object.values(a).every(v=>v==='original'||v==='none'))return c;
  const anchors={novice:[[53,35],[51,35],[49,35],[54,34]],shaman:[[64,42],[57,42],[49,43],[51,44]],swordsman:[[57,41],[56,41],[51,42],[61,48]],lancer:[[52,44],[51,45],[48,47],[39,55]],hunter:[[57,38],[55,39],[50,40],[45,43]],boxer:[[55,40],[54,41],[51,42],[46,42]],rogue:[[53,42],[51,42],[49,42],[62,56]],acolyte:[[53,36],[51,36],[50,37],[49,39]]};
  const colors={indigo:[73,108,169],crimson:[165,59,68],ivory:[215,200,159],black:[38,34,39],brown:[100,65,45],silver:[163,174,178],green:[60,139,98],blue:[63,122,181]};
- const data=ctx.getImageData(0,0,c.width,c.height),p=data.data,w=c.width/4,h=c.height/2;
+ const columns=layout?.columns??4,rows=layout?.rows??2,faceAnchors=layout?.anchors??anchors[classId];
+ const data=ctx.getImageData(0,0,c.width,c.height),p=data.data,w=c.width/columns,h=c.height/rows;
  for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){
   const i=(y*c.width+x)*4;if(p[i+3]<100)continue;
   const u=(x%w)/w,v=(y%h)/h,r=p[i],g=p[i+1],b=p[i+2],lum=(r+g+b)/3;
-  const [faceX,eyeY]=anchors[classId][Math.floor(x/w)];
+  const [faceX,eyeY]=faceAnchors[Math.floor(x/w)];
   const hair=classId!=='acolyte'&&((u-faceX/100)/.23)**2+((v-(eyeY/100-.19))/.23)**2<1&&v<eyeY/100-.035&&lum<115&&r<g*1.7;
   const cloth=v>.53&&v<.87&&u>.25&&u<.76&&(b>r*.9||r>g*1.6||Math.max(r,g,b)-Math.min(r,g,b)<28);
   const iris=Math.abs(v-eyeY/100)<.018&&(Math.abs(u-(faceX/100-.065))<.035||Math.abs(u-(faceX/100+.065))<.035)&&lum<65;
@@ -17,9 +18,9 @@ export function customizeAtlas(image,input={},classId='shaman'){
   if(tint)for(let k=0;k<3;k++)p[i+k]=Math.min(255,tint[k]*(.4+lum/150));
  }
  ctx.putImageData(data,0,0);
- for(let row=0;row<2;row++)for(let col=0;col<4;col++){
+ for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){
   ctx.save();ctx.translate(col*w,row*h);ctx.scale(w/100,h/100);ctx.imageSmoothingEnabled=false;
-  const [fx,ey]=anchors[classId][col],hair=colors[a.hairColor]??[49,38,38];
+  const [fx,ey]=faceAnchors[col],hair=colors[a.hairColor]??[49,38,38];
   const paint=(k=1)=>`rgb(${hair.map(v=>Math.min(255,Math.round(v*k))).join(',')})`;
   if(a.garment==='cloak'){
    ctx.save();ctx.globalCompositeOperation='destination-over';ctx.fillStyle=a.outfit==='crimson'?'#843d48':a.outfit==='ivory'?'#c4b895':'#384d70';ctx.strokeStyle='#302f32';ctx.lineWidth=1;

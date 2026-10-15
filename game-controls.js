@@ -1,9 +1,9 @@
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
-import {characterMotion,attackDuration} from './character-motion.js?v=36';
-import {skillTrack,skillPose} from './skill-choreography.js?v=36';
-import {createSkillEffects,createFootDust} from './skill-effects.js?v=36';
+import {characterMotion,attackDuration} from './character-motion.js?v=37';
+import {skillTrack,skillPose} from './skill-choreography.js?v=37';
+import {createSkillEffects,createFootDust} from './skill-effects.js?v=37';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=31';
@@ -154,7 +154,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
   const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced});
   if(!visualPose||reduced)visualPose={...pose};
-  else for(const key of Object.keys(pose))visualPose[key]=key==='frame'?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
+  else for(const key of Object.keys(pose))visualPose[key]=['frame','artFrame'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,(p.z>4.25?.41:.06)+visualPose.y,p.z+p.face.z/faceLength*rootOffset);

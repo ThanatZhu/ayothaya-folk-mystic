@@ -25,19 +25,17 @@ test('all 160 class/gender skill tracks preserve bone lengths and attached joint
  }
 });
 
-test('rendered cutout triangles keep area and edge lengths during kicks, casts and slashes',()=>{
+test('painted silhouettes stay on one intact quad during kicks, casts, flips and slashes',()=>{
  for(const id of ids){
   const mesh=createRiggedSprite(null,{classId:id}),position=mesh.geometry.attributes.position;
-  mesh.userData.pose(characterMotion({reduced:true}));const rest=position.array.slice();
+  mesh.userData.pose(characterMotion({reduced:true}));const rest=position.array.slice();assert.equal(position.count,4);assert.equal(mesh.children.length,0);assert.equal(mesh.userData.rigType,'painted-frames');
   for(const slot of [0,3,9])for(const q of [.14,.47,.65,.79]){
    mesh.userData.pose(skillPose(id,slot,skillTrack(id,slot).duration*q));
-   for(let i=0;i<position.count;i+=3){
-    const a={x:position.getX(i),y:position.getY(i)},b={x:position.getX(i+1),y:position.getY(i+1)},c={x:position.getX(i+2),y:position.getY(i+2)};
-    const ar={x:rest[i*3],y:rest[i*3+1]},br={x:rest[(i+1)*3],y:rest[(i+1)*3+1]},cr={x:rest[(i+2)*3],y:rest[(i+2)*3+1]};
-    near(length(a,b),length(ar,br),3e-7);near(length(b,c),length(br,cr),3e-7);
-   }
+   assert.deepEqual(position.array,rest);
+   mesh.userData.pose(skillPose(id,slot,skillTrack(id,slot).duration*q),true);
+   for(let i=0;i<4;i++){near(position.getX(i),-rest[i*3]);near(position.getY(i),rest[i*3+1]);}
   }
-  let released=0;mesh.children[0].geometry.addEventListener('dispose',()=>released++);mesh.userData.dispose();assert.equal(released,1);
+  let released=0;mesh.geometry.addEventListener('dispose',()=>released++);mesh.material.addEventListener('dispose',()=>released++);mesh.userData.dispose();assert.equal(released,2);
  }
 });
 

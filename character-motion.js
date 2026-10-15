@@ -1,11 +1,12 @@
-import {neutralJoints} from './character-rig.js?v=36';
+import {motionFrame} from './animation-frames.js?v=37';
+import {neutralJoints} from './character-rig.js?v=37';
 // Joint targets drive fixed-length arms/legs. Root motion is translation, not scale.
 export const MOTION_MODES=['idle','walk','attack','cast','guard','hit','dash','bow','celebrate','rest'];
 const clamp=v=>Math.max(0,Math.min(1,v));
 const ease=v=>{v=clamp(v);return v*v*(3-2*v);};
 export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null}={}){
- const t=Math.max(0,Number.isFinite(time)?time:0),p={frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
+ const t=Math.max(0,Number.isFinite(time)?time:0),p={artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
  if(reduced)return p;
  if(mode==='walk'){
   // 0.29: livelier gait. Bigger stride and arm swing, a forward lean, a rise while the feet pass,
@@ -50,6 +51,7 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
   p.handLX=p.armL;p.handRX=p.armR;p.handLY=-(p.armLY??0)-p.armL*.5;p.handRY=-(p.armRY??0)-p.armR*.5;
   p.footLX=p.legL;p.footRX=p.legR;p.footLY=-p.liftL;p.footRY=-p.liftR;
  }
+ p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId);
  return p;
 }
 // Continuous soft weights avoid cutting a sprite into disconnected rectangles.

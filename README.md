@@ -197,6 +197,8 @@ HUD ใช้กรอบไม้สัก ทองเก่า และห�
 
 ## Character articulation and class effects (0.35)
 
+Historical implementation, superseded by the intact painted frames in 0.36 below.
+
 Player characters now use a 15-part 2D cutout rig with two-bone IK for shoulders/elbows and hips/knees. Arms, legs, heads and weapons rotate as rigid pieces; the renderer no longer stretches a single character card. Walking is distance-driven with a stance/swing cycle. The existing 80 skill timelines now drive joint targets, anticipation, release and recovery. Local players, remote players and character previews use the same rig. Master jobs currently share the base profession's motion set.
 
 Class effects use distinct geometry and small procedural textures: sword arcs, lance thrusts, arrows/feathers, fist impacts, twin violet slashes, talismans/spirits, lotus light and novice dust. Each release beat has travel/contact timing. Effects are deterministic, seekable and capped at 16 active casts; reduced-motion mode suppresses large flashes and movement. Combat damage and save schemas are unchanged.
@@ -206,3 +208,17 @@ Try `skill-lab.html`: select profession/gender, choose a skill or walk/idle/basi
 Art limitation: these are articulated pieces of the existing neutral illustration, with joint backing underneath. Some cutout seams remain in extreme poses. This is not a newly painted frame-by-frame animation set, and the optional eight-direction turnaround art remains a separate static pilot. A production art pass should supply separated overlapping limbs/garments and authored hand/foot/face variants for each direction.
 
 Validation: 102 tests pass, including bone lengths/joint continuity for 160 class/gender skill combinations, triangle shape preservation, grounded gait, distinct joint trajectories, unreachable IK, reduced motion, multi-hit effect releases and resource disposal. Build and content validation pass. Browser previews checked on desktop and at 844 x 390; this does not replace physical-phone performance testing.
+
+## Painted character animation (0.36)
+
+New transparent artwork covers Novice and all seven professions, with male/female variants. Each variant has 12 main poses, 8 walking samples and 6 separate body-part references: 320 playable frames and 96 modular parts overall. Full silhouettes replace the 0.35 cutout renderer, so shoulders, elbows, knees and garments are no longer split into moving image fragments. The modular parts are available for art iteration; runtime animation uses the complete painted frames.
+
+The existing 80 skill timelines select class-specific poses and retain timed class effects. Local/remote characters and lobby/wardrobe previews share the new loader. Distance-driven walking advances through eight samples. Novice progression, combat, saves and multiplayer authority are unchanged.
+
+Open [the all-profession gallery](https://ayothaya-folk-mystic.vercel.app/animation-gallery.html) to compare walking, attacks, skills and parts. Use [the skill lab](https://ayothaya-folk-mystic.vercel.app/skill-lab.html?class=boxer) for effects, gender, facing, slow playback and timeline inspection.
+
+Assets and crop/scale/anchor metadata: `assets/animation37/`. Generated using built-in image_gen in default mode; exact main prompts in `prompts.json`, walking prompts and targeted corrections in `walk-prompts.json`. Connected-component metadata preserves complete silhouettes rather than assuming uniform atlas rows. Source sprites retain transparency and are normalized at load time into 256-pixel canvases.
+
+Scope: these are shared class pose libraries, not 80 independently drawn animation clips. Master jobs share their base class. Artwork faces three-quarter front with horizontal flipping; the optional eight-direction turnaround remains a separate static pilot. Some transitions still show proportion/pose variation between generated frames; further in-between drawing and per-pose cosmetic anchors would improve continuity. Physical-phone performance has not been measured.
+
+Validation: 105 tests pass, including frame bounds for all 320 samples, gait progression, 80 skill frame selections and intact sprite geometry. Content validation and production build pass. Browser gallery loads all eight professions; the boxer kick can be inspected with an intact leg/body silhouette.

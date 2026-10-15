@@ -1,7 +1,8 @@
+import {skillFrame} from './animation-frames.js?v=37';
 // Authored skill tracks over the existing sprite rig. Timing is visual, not combat balance.
-import {characterMotion} from './character-motion.js?v=36';
-import {JOINT_CHANNELS} from './character-rig.js?v=36';
-import {gestureJoints} from './joint-gestures.js?v=36';
+import {characterMotion} from './character-motion.js?v=37';
+import {JOINT_CHANNELS} from './character-rig.js?v=37';
+import {gestureJoints} from './joint-gestures.js?v=37';
 const gestures={
  ready:{lean:-.032,crouch:.027,armL:.016,armR:-.025},
  jab:{lean:.055,armR:.065,armL:-.014,legR:.025,x:.16},
@@ -154,10 +155,11 @@ export function skillPose(classId,index,time,{reduced=false}={}){
  if(reduced){p.frame=q>.25&&q<.8?3:0;return p;}
  const times=[0,...track.times,1],poses=[{},...track.sequence.map(g=>({...gestures[g],...gestureJoints(g,classId)})),{}];
  const j=times.findIndex(t=>t>q),a=poses[j-1],b=poses[j];let f=(q-times[j-1])/(times[j]-times[j-1]);f=f*f*(3-2*f);
- for(const key of Object.keys(p))if(!['frame','sx','sy'].includes(key))p[key]=((a[key]??0)*(1-f)+(b[key]??0)*f)*(JOINT_CHANNELS.includes(key)?1:track.weight);
+ for(const key of Object.keys(p))if(!['frame','artFrame','sx','sy'].includes(key))p[key]=((a[key]??0)*(1-f)+(b[key]??0)*f)*(JOINT_CHANNELS.includes(key)?1:track.weight);
  // A kick, guard or recovery must not borrow the extended-punch illustration.
  const nearest=track.times.reduce((best,t,n)=>Math.abs(t-q)<Math.abs(track.times[best]-q)?n:best,0);
  p.frame=q>=.22&&q<.85&&attackArt.has(track.sequence[nearest])?3:0;
+ p.artFrame=skillFrame(track,time,reduced);
  // Weight transfer comes from bent knees and hips, never scaling the artwork.
  return p;
 }

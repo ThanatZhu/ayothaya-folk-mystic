@@ -5,10 +5,10 @@ import {multiplayerURL} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=18';
 import {customizeAtlas} from './character-appearance.js?v=18';
 import {atlasCell} from './sprite-motion.js';
-import {createRiggedSprite} from './rigged-sprite.js?v=36';
-import {characterMotion,attackDuration} from './character-motion.js?v=36';
-import {skillPose,skillTrack} from './skill-choreography.js?v=36';
-import {createSkillEffects} from './skill-effects.js?v=36';
+import {createRiggedSprite} from './rigged-sprite.js?v=37';
+import {characterMotion,attackDuration} from './character-motion.js?v=37';
+import {skillPose,skillTrack} from './skill-choreography.js?v=37';
+import {createSkillEffects} from './skill-effects.js?v=37';
 const messages={'already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
 const chatErrors=new Set(['chat-rate','no-party','invalid-chat']);
 const statusText={connecting:'กำลังเข้าห้อง…',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
@@ -98,7 +98,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  async function addRemote(state){
   const id=state.id,generation=loadingGeneration,placeholder={loading:true,state};views.set(id,placeholder);
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
-   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createRiggedSprite(frames[0],{classId:state.character.classId,gender:state.character.gender});sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
+   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createRiggedSprite(frames[0],{classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance});sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
    const label=el('span','remote-player-label',state.character.name);labels.append(label);
    views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null});
   }catch{if(views.get(id)===placeholder)placeholder.retryAt=performance.now()+5000;}

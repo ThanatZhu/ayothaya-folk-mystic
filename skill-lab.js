@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import {CLASSES,NOVICE,atlasPath,classSkills,className} from './classes.js?v=18';
 import {SKILLS} from './combat-core.js?v=23';
-import {skillTrack,skillPose} from './skill-choreography.js?v=36';
-import {createRiggedSprite} from './rigged-sprite.js?v=36';
-import {createSkillEffects} from './skill-effects.js?v=36';
-import {characterMotion,attackDuration} from './character-motion.js?v=36';
+import {skillTrack,skillPose} from './skill-choreography.js?v=37';
+import {createRiggedSprite} from './rigged-sprite.js?v=37';
+import {createSkillEffects} from './skill-effects.js?v=37';
+import {characterMotion,attackDuration} from './character-motion.js?v=37';
 import {applySkillArt} from './skill-art.js?v=21';
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion:reduce)');
 try{
@@ -24,7 +24,7 @@ try{
   try{
    const image=new Image();image.src=atlasPath(id);await image.decode();if(version!==loadVersion)return;
    const next={};for(const [g,row] of [['male',0],['female',1]])next[g]=Array.from({length:4},(_,col)=>{const c=document.createElement('canvas');c.width=Math.round(image.width/4);c.height=Math.round(image.height/2);c.getContext('2d').drawImage(image,col*image.width/4,row*image.height/2,image.width/4,image.height/2,0,0,c.width,c.height);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;return t;});
-   if(textures)Object.values(textures).flat().forEach(t=>t.dispose());textures=next;classId=id;hero.userData.setRig(classId,gender);loading=false;redraw();replay();
+   if(textures)Object.values(textures).flat().forEach(t=>t.dispose());textures=next;classId=id;await hero.userData.setRig(classId,gender);if(version!==loadVersion)return;if(hero.userData.artError)throw new Error(hero.userData.artError);loading=false;redraw();replay();
    $('status').textContent='พร้อมลอง · เลือกสกิล หรือกด 1–9 / 0';history.replaceState(null,'','?class='+id);
   }catch(error){console.error(error);if(version===loadVersion){loading=!textures;$('profession').value=classId;$('status').textContent='โหลดภาพไม่สำเร็จ ลองเลือกอาชีพอีกครั้ง';}}
   finally{if(version===loadVersion)$('stage').removeAttribute('aria-busy');}
@@ -37,7 +37,7 @@ try{
   for(const b of document.querySelectorAll('[data-gender]')){b.textContent=classId==='acolyte'?(b.dataset.gender==='male'?'พระ':'แม่ชี'):(b.dataset.gender==='male'?'ชาย':'หญิง');b.setAttribute('aria-pressed',String(b.dataset.gender===gender));}
  }
  $('scrub').oninput=()=>{playing=false;const d=demoMode==='skill'?skillTrack(classId,index).duration:demoMode==='attack'?attackDuration(classId):1.5;time=d*Number($('scrub').value)/1000;$('replay').textContent='▶ เล่นท่า';};
- $('motion-mode').onchange=()=>{demoMode=$('motion-mode').value;info();if(demoMode!=='skill'){$('title').textContent=$('motion-mode').selectedOptions[0].textContent;$('description').textContent='ข้อต่อหมุนตามท่า · แขนขาคงความยาว';}replay();};
+ $('motion-mode').onchange=()=>{demoMode=$('motion-mode').value;info();if(demoMode!=='skill'){$('title').textContent=$('motion-mode').selectedOptions[0].textContent;$('description').textContent='ภาพท่าเต็มตัวชุดใหม่ · จังหวะเดิน 8 เฟรม';}replay();};
  $('profession').onchange=()=>load($('profession').value);
  for(const b of document.querySelectorAll('[data-gender]'))b.onclick=()=>{gender=b.dataset.gender;hero.userData.setRig(classId,gender);if(!loading){redraw();replay();}};
  $('replay').onclick=()=>{if(loading)return;if(playing){playing=false;$('replay').textContent='▶ เล่นท่า';}else{replay();playing=true;$('replay').textContent='Ⅱ หยุด';}};

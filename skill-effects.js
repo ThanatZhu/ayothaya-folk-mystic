@@ -1,5 +1,5 @@
 import * as THREE from './vendor/build/three.module.js';
-import {FX_STYLES,createFxArt} from './skill-fx-art.js?v=36';
+import {FX_STYLES,createFxArt} from './skill-fx-art.js?v=37';
 // Seekable releases, travel and impact stages shared by local/remote players.
 export function createSkillEffects(scene){
  const art=createFxArt(),active=[],up=new THREE.Vector3(0,1,0);

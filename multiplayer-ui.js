@@ -5,10 +5,10 @@ import {multiplayerURL} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=18';
 import {customizeAtlas} from './character-appearance.js?v=18';
 import {atlasCell} from './sprite-motion.js';
-import {createRiggedSprite} from './rigged-sprite.js?v=29';
-import {characterMotion,attackDuration} from './character-motion.js?v=29';
-import {skillPose,skillTrack} from './skill-choreography.js?v=29';
-import {createSkillEffects} from './skill-effects.js?v=29';
+import {createRiggedSprite} from './rigged-sprite.js?v=36';
+import {characterMotion,attackDuration} from './character-motion.js?v=36';
+import {skillPose,skillTrack} from './skill-choreography.js?v=36';
+import {createSkillEffects} from './skill-effects.js?v=36';
 const messages={'already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
 const chatErrors=new Set(['chat-rate','no-party','invalid-chat']);
 const statusText={connecting:'กำลังเข้าห้อง…',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
@@ -94,11 +94,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   if(!data){const endpoint=new URL(url.replace(/^ws/,'http'));endpoint.pathname='/dev/session';const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:account.character.name,gender:account.character.gender})});if(!response.ok)throw new Error('local-server-unavailable');data=await response.json();sessionStorage.setItem(key,JSON.stringify(data));}
   return {token:data.token,serverId:data.serverId,slotId:data.slotId};
  }
- function remove(view){scene.remove(view.sprite);view.sprite.geometry.dispose();view.sprite.material.dispose();for(const t of view.frames)t.dispose();view.label.remove();}
+ function remove(view){scene.remove(view.sprite);view.sprite.userData.dispose();for(const t of view.frames)t.dispose();view.label.remove();}
  async function addRemote(state){
   const id=state.id,generation=loadingGeneration,placeholder={loading:true,state};views.set(id,placeholder);
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
-   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createRiggedSprite(frames[0]);sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
+   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createRiggedSprite(frames[0],{classId:state.character.classId,gender:state.character.gender});sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
    const label=el('span','remote-player-label',state.character.name);labels.append(label);
    views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null});
   }catch{if(views.get(id)===placeholder)placeholder.retryAt=performance.now()+5000;}
@@ -109,7 +109,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   for(const p of s.players){const v=views.get(p.id);if(v){v.state={...v.state,...p};if(v.retryAt&&performance.now()>v.retryAt)addRemote(v.state);}else if(p.character)addRemote(p);}
   for(const e of s.events??[]){if(e.actor===client.id){game.world.events.push(e);continue;}
    const v=views.get(e.actor);if(!v||v.loading)continue;
-   if(e.type==='cast'){v.action={index:e.skillIndex,start:clock};const track=skillTrack(v.state.character.classId,e.skillIndex);if(track)fx.create(track,{...e,reduced:reduced.matches});}
+   if(e.type==='cast'){
+    const id=v.state.character.classId,skill=skillTrack(id,e.skillIndex),current=skillTrack(id,v.action?.index);
+    if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock};
+    const track=skill??{...skillTrack(id,0),duration:attackDuration(id),strikes:[.42]};fx.create(track,{...e,reduced:reduced.matches});
+   }
    if(e.type==='emote')v.emote={name:e.name,start:clock};
   }
   updateParty();
@@ -153,7 +157,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(v.loading)continue;const state=v.state,p=state.player,old=v.sprite.position.clone(),f=1-Math.exp(-Math.min(.05,dt)*14);v.sprite.position.x+=(p.x-v.sprite.position.x)*f;v.sprite.position.z+=(p.z-v.sprite.position.z)*f;v.gait+=Math.hypot(v.sprite.position.x-old.x,v.sprite.position.z-old.z)/2.1;
    const elapsed=clock-(v.action?.start??-100),track=skillTrack(state.character.classId,v.action?.index),emote=clock-(v.emote?.start??-100)<4;
    const pose=track&&elapsed<track.duration?skillPose(state.character.classId,v.action.index,elapsed,{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?'attack':emote?v.emote.name:p.moving?'walk':'idle',time:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?elapsed:emote?clock-v.emote.start:clock,phase:v.gait,reduced:reduced.matches});
-   v.sprite.material.map=v.frames[pose.frame];v.sprite.position.y=(p.z>4.25?.41:.06)+pose.y;const angle=controls.getAzimuthalAngle();v.sprite.userData.pose(pose,p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle)<0);v.sprite.visible=p.hp>0;
+   v.sprite.material.map=v.frames[0];v.sprite.position.y=(p.z>4.25?.41:.06)+pose.y;const angle=controls.getAzimuthalAngle();v.sprite.userData.pose(pose,p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle)<0);v.sprite.visible=p.hp>0;
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);
    v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x,v.sprite.position.y+2.1,v.sprite.position.z);
   }

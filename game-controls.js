@@ -1,9 +1,9 @@
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
-import {characterMotion,attackDuration} from './character-motion.js?v=29';
-import {skillTrack,skillPose} from './skill-choreography.js?v=29';
-import {createSkillEffects,createFootDust} from './skill-effects.js?v=29';
+import {characterMotion,attackDuration} from './character-motion.js?v=36';
+import {skillTrack,skillPose} from './skill-choreography.js?v=36';
+import {createSkillEffects,createFootDust} from './skill-effects.js?v=36';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=31';
@@ -47,8 +47,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  const shield=new THREE.Mesh(new THREE.RingGeometry(.7,.74,40),new THREE.MeshBasicMaterial({color:'#edd592',side:THREE.DoubleSide,transparent:true,opacity:.55}));shield.rotation.x=-Math.PI/2;scene.add(shield);
  const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · '+(jobFor(world.profession.id,config.jobId)?.name??className(world.profession.id,config.gender));$('world-labels').append(playerLabel);
  const motionPreference=matchMedia('(prefers-reduced-motion:reduce)');
- const effects=[],floats=[],fxRing=new THREE.RingGeometry(.75,.83,32),fxBall=new THREE.IcosahedronGeometry(.10,0),projection=new THREE.Vector3();
- const fxArrow=new THREE.ConeGeometry(.065,.65,4),fxArc=new THREE.RingGeometry(.4,.52,24,1,0,Math.PI*1.25);
+ const floats=[],projection=new THREE.Vector3();
  function toast(text){$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number';el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
@@ -60,14 +59,12 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
    const track=Number.isInteger(e.skillIndex)?skillTrack(world.profession.id,e.skillIndex):null;
    // Basic auto-attacks must not replace a skill's active pose mid-animation.
    if(track||world.time>=castUntil||activeSkill===null){
-    activeSkill=track?e.skillIndex:null;castUntil=world.time+(track?.duration??(['slash','punch','thrust','arrow'].includes(e.kind)?attackDuration(world.profession.id):.8));
-    actionStart=world.time;emoteUntil=0;actionMode=e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
+    activeSkill=track?e.skillIndex:null;castUntil=world.time+(track?.duration??attackDuration(world.profession.id));
+    actionStart=world.time;emoteUntil=0;actionMode=!track?'attack':e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    }
    const beats=track?track.strikes.map(b=>world.time+b*track.duration):[world.time+.12];strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
-   if(track){skillEffects.create(track,{...e,reduced:motionPreference.matches});return;}
-   const bolt=['bolt','arrow','blessing'].includes(e.kind),mat=new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(e.kind==='arrow'?fxArrow:e.kind==='slash'?fxArc:bolt?fxBall:fxRing,mat);scene.add(mesh);
-   if(!bolt)mesh.rotation.x=-Math.PI/2;
-   effects.push({mesh,age:0,life:bolt?.25:.55,bolt,kind:e.kind,from:e.from,to:e.to,radius:e.radius??1});
+   const presentation=track??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
+   skillEffects.create(presentation,{...e,reduced:motionPreference.matches});
   }else if(e.type==='damage'){popup(e);}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});hero.sprite.material.color.set('#ff9b83');}
@@ -166,8 +163,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   if(directional){
    hero.viewDirection=viewDirection(p.face,azimuth,hero.viewDirection);
    hero.sprite.material.map=hero.directionalFrames[hero.viewDirection];hero.sprite.userData.footV=hero.directionalFootV;
-  }else{if(hero.frames)hero.sprite.material.map=hero.frames[pose.frame];hero.sprite.userData.footV=1;}
+  }else{if(hero.frames)hero.sprite.material.map=hero.frames[0];hero.sprite.userData.footV=1;}
   const facing=p.face.x*Math.cos(azimuth)-p.face.z*Math.sin(azimuth);
+  hero.sprite.userData.directional=!!directional;
   hero.sprite.userData.pose?.(visualPose,directional?false:facing<0);
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   footDust.update(dt);
@@ -191,12 +189,6 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   });
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}
   skillEffects.update(dt,camera);
-  for(let i=effects.length-1;i>=0;i--){const e=effects[i];e.age+=dt;const f=e.age/e.life;
-   if(f>=1){scene.remove(e.mesh);e.mesh.material.dispose();effects.splice(i,1);continue;}
-   if(e.bolt){e.mesh.position.set(THREE.MathUtils.lerp(e.from.x,e.to.x,f),.85+Math.sin(f*Math.PI)*.25,THREE.MathUtils.lerp(e.from.z,e.to.z,f));if(e.kind==='arrow'){const aim=new THREE.Vector3(e.to.x-e.from.x,0,e.to.z-e.from.z).normalize();e.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),aim);}}
-   else if(['slash','punch','thrust'].includes(e.kind)){e.mesh.position.set(e.to.x,.8,e.to.z);e.mesh.rotation.x=0;e.mesh.quaternion.copy(camera.quaternion);e.mesh.scale.set(.25+f*.6,e.kind==='thrust'?.12:.25+f*.5,1);}
-   else{e.mesh.position.set(e.to.x,.15,e.to.z);e.mesh.scale.setScalar(e.radius*(.35+f));}e.mesh.material.opacity=1-f;
-  }
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>1){f.el.remove();floats.splice(i,1);}else{project(f.el,f.x,1.6+f.age*.8,f.z);f.el.style.opacity=String(1-f.age*.8);}}
   if(performance.now()>noticeUntil)$('notice').classList.remove('visible');
   if(t-lastHUD>.08){lastHUD=t;

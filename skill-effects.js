@@ -1,71 +1,93 @@
 import * as THREE from './vendor/build/three.module.js';
-// Deterministic, seekable presentation shared by the game and the rehearsal room.
-// One material per cast, shared geometry, at most 16 live casts.
+import {FX_STYLES,createFxArt} from './skill-fx-art.js?v=36';
+// Seekable releases, travel and impact stages shared by local/remote players.
 export function createSkillEffects(scene){
- const geometry={
-  arc:new THREE.RingGeometry(.65,.72,28,1,0,Math.PI*1.25),
-  ring:new THREE.RingGeometry(.7,.74,40),
-  spark:new THREE.IcosahedronGeometry(.11,0),
-  lance:new THREE.ConeGeometry(.045,.9,4),
-  paper:new THREE.PlaneGeometry(.18,.38),
-  glyph:new THREE.RingGeometry(.34,.62,48),
-  flash:new THREE.PlaneGeometry(1,1)
- },active=[];
- // Soft radial falloff for the strike flash; built from data so it also works in Node tests (no canvas).
- const soft=(()=>{const n=64,d=new Uint8Array(n*n*4);for(let y=0;y<n;y++)for(let x=0;x<n;x++){const r=Math.hypot(x-n/2+.5,y-n/2+.5)/(n/2),v=Math.round(255*Math.max(0,1-r)**2);d.set([v,v,v,v],(y*n+x)*4);}const t=new THREE.DataTexture(d,n,n);t.needsUpdate=true;return t;})();
- function remove(e){scene.remove(e.group);e.material.dispose();e.glyphMaterial.dispose();e.flashMaterial.dispose();const i=active.indexOf(e);if(i>=0)active.splice(i,1);}
- function create(track,{from={x:0,z:0},to={x:1.8,z:0},color='#e6cb92',reduced=false}={}){
+ const art=createFxArt(),active=[],up=new THREE.Vector3(0,1,0);
+ function remove(e){scene.remove(e.group);for(const m of e.materials)m.dispose();const i=active.indexOf(e);if(i>=0)active.splice(i,1);}
+ function create(track,{from={x:0,z:0},to={x:1.8,z:0},color,reduced=false}={}){
   while(active.length>=16)remove(active[0]);
-  // 0.29: additive and over-bright so the bloom pass makes skills glow; a ground glyph flashes under the caster.
-  const material=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});material.color.multiplyScalar(reduced?1:1.7);
-  const glyphMaterial=material.clone();const group=new THREE.Group();scene.add(group);
-  const glyph=new THREE.Mesh(geometry.glyph,glyphMaterial);glyph.rotation.x=-Math.PI/2;group.add(glyph);
-  const flashMaterial=material.clone();flashMaterial.map=soft;const flash=new THREE.Mesh(geometry.flash,flashMaterial);group.add(flash);
-  const kind=track.fx,projectile=['arrow','lance','spirit','light','talisman'].includes(kind);
-  const shape=['slash','arc'].includes(kind)?'arc':['arrow','lance','rain'].includes(kind)?'lance':kind==='talisman'?'paper':['impact','spirit','motes','flame'].includes(kind)?'spark':'ring';
-  const count=['rain','flame','motes','orbit','burst'].includes(kind)?8:kind==='trail'?5:3;
-  const parts=Array.from({length:count},()=>{const m=new THREE.Mesh(geometry[shape],material);group.add(m);return m;});
-  const e={group,material,glyphMaterial,flashMaterial,track,age:0,life:track.duration+.45,dispose:()=>remove(e)};active.push(e);
+  const style=FX_STYLES[track.classId]??FX_STYLES.novice,kind=track.fx,group=new THREE.Group();group.userData.motif=style.motif;scene.add(group);
+  const material=new THREE.MeshBasicMaterial({color:style.main,transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});
+  const accent=material.clone();accent.color.set(style.accent);
+  const glyphMaterial=material.clone();glyphMaterial.map=art.seal;
+  const flashMaterial=accent.clone();flashMaterial.map=art.soft;
+  const paperMaterial=new THREE.MeshBasicMaterial({map:art.paper,color:'#ffffff',transparent:true,side:THREE.DoubleSide,depthWrite:false});
+  const spiritMaterial=material.clone();spiritMaterial.map=art.spirit;spiritMaterial.blending=THREE.NormalBlending;
+  const materials=[material,accent,glyphMaterial,flashMaterial,paperMaterial,spiritMaterial];
+  const add=(geometry,mat=material)=>{const mesh=new THREE.Mesh(art.geometry[geometry],mat);group.add(mesh);return mesh;};
+  const magical=['shaman','acolyte'].includes(track.classId),self=['heal','shield','motes','orbit'].includes(kind),origin=self?from:to;
+  const projectile=['arrow','lance','spirit','light','talisman'].includes(kind),duration=track.duration,beats=track.strikes;
+  const glyph=add('plane',glyphMaterial),flash=add('plane',flashMaterial),dome=add('shield');
+  const shape=projectile?(kind==='arrow'||kind==='lance'?'arrow':kind==='talisman'?'plane':kind==='spirit'?'plane':'petal'):
+    kind==='rain'?'arrow':['slash','arc','orbit'].includes(kind)?'crescent':kind==='flame'?'plane':
+    ['heal','motes'].includes(kind)?(track.classId==='acolyte'?'petal':track.classId==='hunter'?'feather':'star'):
+    kind==='trail'?(track.classId==='rogue'?'crescent':'streak'):['shield','bind','wave'].includes(kind)?'ring':'star';
+  const count=reduced?1:['rain','flame','heal','motes','orbit','burst'].includes(kind)?8:projectile?3:5;
+  const parts=[];
+  for(const [b,beat] of beats.entries())for(let i=0;i<count;i++){
+   const mat=kind==='talisman'?paperMaterial:kind==='spirit'||kind==='flame'?spiritMaterial:i%2?accent:material;
+   const mesh=add(shape,mat);mesh.userData.beat=b;parts.push({mesh,i,b,beat});
+  }
+  const accents=Array.from({length:reduced?0:8},(_,i)=>add(style.motif==='lotus'?'petal':style.motif==='talisman'?'plane':style.motif==='feather'?'feather':style.motif==='blade'||style.motif==='twin'?'crescent':'streak',style.motif==='talisman'?paperMaterial:accent));
+  const e={group,material,glyphMaterial,flashMaterial,materials,track,age:0,life:duration+.7,dispose:()=>remove(e)};active.push(e);
   e.sample=(time,camera)=>{
-   const q=time/track.duration,dx=to.x-from.x,dz=to.z-from.z,n=Math.hypot(dx,dz)||1,aim=new THREE.Vector3(dx/n,0,dz/n);
-   material.opacity=reduced?.4:.8;
-   const g=Math.min(1,time/.5);glyph.visible=!reduced&&g<1;glyph.position.set(from.x,.08,from.z);glyph.scale.setScalar(.6+g*2.6);glyphMaterial.opacity=.85*(1-g)*(1-g);
-   // Bright pop at the target on every strike beat.
-   let k=1;for(const beat of track.strikes){const d=(q-beat)*track.duration;if(d>=0&&d<.22)k=Math.min(k,d/.22);}
-   flash.visible=!reduced&&k<1;flash.position.set(to.x,.9,to.z);flash.quaternion.copy(camera.quaternion);flash.scale.setScalar(.8+k*2.6);flashMaterial.opacity=.95*(1-k);
-   parts.forEach((m,i)=>{
-    const beat=track.strikes[i%track.strikes.length],f=(q-beat)/.27;
+   const dx=to.x-from.x,dz=to.z-from.z,dist=Math.hypot(dx,dz),aim=new THREE.Vector3(dist?dx/dist:1,0,dist?dz/dist:0),q=time/duration;
+   material.opacity=reduced?.25:.7;accent.opacity=reduced?.3:.9;paperMaterial.opacity=.95;spiritMaterial.opacity=.85;
+   const first=beats[0]*duration,charge=Math.max(0,Math.min(1,time/Math.max(.1,first)));
+   const remaining=Math.max(0,1-(time-first)/.28);
+   glyph.visible=!reduced&&magical&&time>=0&&remaining>0;glyph.position.set(from.x,.08,from.z);glyph.rotation.set(-Math.PI/2,0,time*.5);glyph.scale.setScalar(1.1+charge*.7);glyphMaterial.opacity=.52*Math.min(charge*2,remaining);
+   let impact=Infinity,release=Infinity;
+   for(const beat of beats){const d=time-beat*duration;if(d>=0)release=Math.min(release,d);const h=d-(projectile?.27:0);if(h>=0)impact=Math.min(impact,h);}
+   const pop=Math.min(1,impact/.24);
+   flash.visible=!reduced&&pop>=0&&pop<1;flash.position.set(origin.x,self?.4:1.0,origin.z);flash.quaternion.copy(camera.quaternion);flash.scale.setScalar(.6+pop*1.4);flashMaterial.opacity=Math.max(0,.7*(1-pop));
+   const shieldAge=release/.55;
+   dome.visible=!reduced&&kind==='shield'&&shieldAge<1;dome.position.set(from.x,.04,from.z);dome.scale.setScalar(.8+Math.min(1,shieldAge)*.3);dome.material.opacity=kind==='shield'?Math.max(0,.2*(1-shieldAge)):.7;
+   parts.forEach(({mesh:m,i,beat,b})=>{
+    const age=time-beat*duration-i*(projectile?.035:kind==='rain'?.035:.012),life=projectile?.36:kind==='rain'?.55:kind==='heal'||kind==='motes'?.8:.48,f=age/life;
     m.visible=f>=0&&f<1;if(!m.visible)return;
-    m.quaternion.identity();m.scale.setScalar(1);const fade=Math.sin(f*Math.PI);
-    const angle=i/count*Math.PI*2+f*.8;
-    const self=['heal','shield','motes','orbit','burst'].includes(kind),origin=self?from:to;
-    m.position.set(origin.x,.1,origin.z);
-    if(reduced){m.rotation.x=-Math.PI/2;m.scale.setScalar(.45);return;}
+    m.quaternion.identity();m.scale.setScalar(1);const fade=Math.sin(Math.PI*f),theta=i/count*Math.PI*2+b*.7;
+    m.position.set(origin.x,.12,origin.z);
+    if(reduced){m.rotation.x=-Math.PI/2;m.scale.setScalar(.3);return;}
     if(projectile){
-     m.position.set(from.x+dx*f,.9+Math.sin(f*Math.PI)*.15,from.z+dz*f);
-     if(shape==='lance')m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),aim);
-     else m.quaternion.copy(camera.quaternion);
-     m.scale.setScalar((kind==='light'?2:1)*fade);
-     if(i>0)m.position.y+=(i-1)*.14;
-    }else if(['arc','slash','impact','wave'].includes(kind)){
-     m.position.y=.8+(i-1)*.16;m.quaternion.copy(camera.quaternion);m.rotateZ((kind==='slash'?-1:1)*f*2.5+i*1.2);
-     m.scale.setScalar((kind==='impact'?(2+i*.7):(.5+i*.16))*fade);
+     const travel=Math.min(1,age/.27),offset=(i-1)*.09;
+     m.position.set(from.x+dx*travel-aim.z*offset,1.02+Math.sin(travel*Math.PI)*.16+offset,from.z+dz*travel+aim.x*offset);
+     if(shape==='arrow'){m.quaternion.setFromUnitVectors(up,aim);m.scale.set(.65,kind==='lance'?1.8:1,1);}
+     else{m.quaternion.copy(camera.quaternion);m.rotateZ(kind==='talisman'?Math.sin(f*9+i)*.45:Math.sin(f*4)*.12);m.scale.set(kind==='spirit'?.45:.25,kind==='spirit'?.65:.48,1);}
+     m.scale.multiplyScalar(Math.min(1,fade*2));
     }else if(kind==='rain'){
-     m.position.set(to.x+Math.cos(angle)*.8,2.5*(1-f)+.12,to.z+Math.sin(angle)*.8);m.rotation.z=Math.PI;m.scale.setScalar(fade);
+     m.position.set(to.x+Math.cos(theta)*.85,3.3*(1-f)+.05,to.z+Math.sin(theta)*.85);m.rotation.z=Math.PI;m.scale.setScalar(.8*fade);
+    }else if(['slash','arc','orbit'].includes(kind)){
+     const around=kind==='orbit',radius=around?.8:.35;
+     m.position.set(origin.x+Math.cos(theta+f*2)*radius,.85+(i%3)*.16,origin.z+Math.sin(theta+f*2)*radius*.4);
+     m.quaternion.copy(camera.quaternion);m.rotateZ((style.motif==='twin'&&i%2?-1:1)*(f*2.7+theta));m.scale.setScalar((.65+i*.08)*fade);
+    }else if(['heal','motes','flame'].includes(kind)){
+     const r=.32+f*.38,a=theta+f*1.6;m.position.set(origin.x+Math.cos(a)*r,.15+f*(kind==='flame'?2:1.65),origin.z+Math.sin(a)*r);
+     m.quaternion.copy(camera.quaternion);m.rotateZ(Math.sin(a)*.3);m.scale.setScalar((kind==='flame'?.65:kind==='heal'?.38:.22)*fade);
     }else if(kind==='trail'){
-     m.position.set(from.x+dx*i/count,.16,from.z+dz*i/count);m.rotation.x=-Math.PI/2;m.scale.setScalar((.3+f*.4)*fade);
-    }else if(['flame','motes','heal'].includes(kind)){
-     m.position.set(origin.x+Math.cos(angle)*(.35+f*.35),.15+f*1.8,origin.z+Math.sin(angle)*(.35+f*.35));
-     m.quaternion.copy(camera.quaternion);m.scale.setScalar((kind==='heal'?.2:1)*fade);
+     m.position.set(from.x+dx*i/count,.22+Math.sin(theta)*.12,from.z+dz*i/count);m.quaternion.setFromUnitVectors(up,aim);m.scale.set(.4,.8,1).multiplyScalar(fade);
+    }else if(['bind','shield','wave'].includes(kind)){
+     m.position.y=kind==='bind'?.25+i*.24:.06+i*.025;m.rotation.x=-Math.PI/2;m.rotation.z=theta+f;const r=kind==='bind'?.5:kind==='shield'?.9:.6+f*1.2;m.scale.setScalar(r*fade);
     }else{
-     m.rotation.x=-Math.PI/2;m.position.y=.06+i*(kind==='bind'?.3:.03);
-     m.rotation.z=angle;m.scale.setScalar((kind==='shield'?.65:kind==='bind'?.4:1.1)*(1+f)*(1-i*.13)*fade);
+     // Punches/novice hits have a brief directional contact star, then debris.
+     const spread=.12+f*.65;m.position.set(to.x+Math.cos(theta)*spread,1+Math.sin(theta)*spread-f*f*.35,to.z+Math.sin(theta*2)*spread*.3);
+     m.quaternion.copy(camera.quaternion);m.rotateZ(theta+f);m.scale.setScalar((i===0?.65:.2)*fade);
+    }
+   });
+   accents.forEach((m,i)=>{
+    const f=release/.6;m.visible=Number.isFinite(f)&&f>=0&&f<1;if(!m.visible)return;
+    const a=i/accents.length*Math.PI*2+f*.6,r=.35+f*.8;m.quaternion.identity();m.scale.setScalar(1);
+    if(magical){
+     m.position.set(origin.x+Math.cos(a)*r,.08+(style.motif==='lotus'?.1:f*.9),origin.z+Math.sin(a)*r);
+     if(style.motif==='lotus'){m.rotation.set(-Math.PI/3,0,-a);m.scale.setScalar(.6*Math.sin(f*Math.PI));}
+     else{m.quaternion.copy(camera.quaternion);m.rotateZ(Math.sin(a)*.5);m.scale.set(.16,.28,1).multiplyScalar(Math.sin(f*Math.PI));}
+    }else{
+     m.position.set(origin.x+Math.cos(a)*r,.25+Math.sin(f*Math.PI)*.45,origin.z+Math.sin(a)*r);m.quaternion.copy(camera.quaternion);m.rotateZ(-a);m.scale.set(.1,.25,1).multiplyScalar(1-f);
     }
    });
   };
   return e;
  }
- return {create,update(dt,camera){for(const e of [...active]){e.age+=dt;if(e.age>e.life)remove(e);else e.sample(e.age,camera);}},clear(){for(const e of [...active])remove(e);},dispose(){this.clear();Object.values(geometry).forEach(g=>g.dispose());soft.dispose();},get count(){return active.length;}};
+ return {create,update(dt,camera){for(const e of [...active]){e.age+=dt;if(e.age>e.life)remove(e);else e.sample(e.age,camera);}},clear(){for(const e of [...active])remove(e);},dispose(){this.clear();art.dispose();},get count(){return active.length;}};
 }
 
 // Soft dust puffs at each footfall; at most 10 alive, each fades in 0.45 s.

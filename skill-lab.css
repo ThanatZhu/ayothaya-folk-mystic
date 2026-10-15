@@ -3,3 +3,5 @@
 /* Keep the stage and transport visible; only the catalogue scrolls on short screens. */
 @media(min-width:901px),(orientation:landscape){main{height:calc(100dvh - 68px);min-height:0;overflow:hidden}.rehearsal{min-height:0}#stage{height:auto;min-height:0}aside{overflow-y:auto;min-height:0}.heading{flex-shrink:0}.playback{flex-shrink:0}}
 @media(max-width:900px) and (orientation:landscape){main{height:calc(100dvh - 44px)}.heading p{min-height:16px}.playback{padding:6px 10px}.timeline{margin-bottom:3px}.beats{margin-top:4px}.heading{padding:7px 12px 0}}
+
+.scrub-label{display:flex;align-items:center;gap:12px;font-size:11px;margin:0 0 10px}.scrub-label input{flex:1;min-width:0;accent-color:#e7bf72}#motion-mode{width:100%;font-size:13px}

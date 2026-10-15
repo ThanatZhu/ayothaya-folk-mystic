@@ -1,9 +1,9 @@
-import {createMotionPreview} from './motion-preview.js?v=15';
+import {createMotionPreview} from './motion-preview.js?v=36';
 import {APPEARANCE_OPTIONS,validateAppearance} from './appearance-state.js';
 import {customizeAtlas} from './character-appearance.js?v=18';
 import {JOBS,progression,JOB_LEVEL} from './advancement.js?v=21';
 import {atlasPath} from './classes.js?v=18';
-import {characterMotion,MOTION_MODES} from './character-motion.js?v=29';
+import {characterMotion,MOTION_MODES} from './character-motion.js?v=36';
 const labels={garment:'แบบเครื่องแต่งกาย',outfit:'สีเครื่องแต่งกาย',hair:'ทรงผม',hairColor:'สีผม',eyes:'สีตา',beard:'หนวดและเครา',tattoo:'รอยยันต์'};
 const names={shouldercloth:'ผ้าพาดไหล่',cloak:'ผ้าคลุมเดินทาง',original:'แบบประจำอาชีพ',indigo:'คราม',crimson:'แดงชาด',ivory:'งาช้าง',topknot:'มวยสูง',braid:'เปียข้าง',black:'ดำ',brown:'น้ำตาล',silver:'เงิน',green:'เขียว',blue:'ฟ้า',none:'แบบเดิม / ไม่เพิ่ม',mustache:'หนวด',goatee:'หนวดและเครา',forehead:'ยันต์หน้าผาก',arms:'ยันต์ช่วงไหล่'};
 const motions={idle:'ยืนหายใจ',walk:'เดิน',attack:'โจมตี',cast:'ร่ายอาคม',guard:'ตั้งรับ',hit:'ถูกโจมตี',dash:'ก้าวพุ่ง',bow:'คำนับ',celebrate:'ดีใจ',rest:'พัก'};
@@ -25,7 +25,7 @@ export function createWardrobe({getClass,getGender,getRecord,onApply,onTexture,o
   try{
    if(!images.has(path))images.set(path,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=path;}));
    const img=await images.get(path);if(token!==renderToken)return;
-   const atlas=customizeAtlas(img,appearance,id);sourceURL=atlas.toDataURL();preview.setSource(atlas,gender);onTexture(sourceURL,atlas,gender);
+   const atlas=customizeAtlas(img,appearance,id);sourceURL=atlas.toDataURL();preview.setSource(atlas,gender,id);onTexture(sourceURL,atlas,gender);
   }catch{images.delete(path);$('wardrobe-message').textContent='โหลดรูปลักษณ์ไม่ได้ ลองเปิดหน้านี้อีกครั้ง';}
  }
  function reset(next={},job=''){appearance=validateAppearance(next);jobId=job;for(const key of Object.keys(labels))$('appearance-'+key).value=appearance[key];}

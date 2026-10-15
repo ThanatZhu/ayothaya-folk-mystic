@@ -1,25 +1,22 @@
-import {deformPoint} from './character-motion.js?v=29';
-// Canvas preview uses the same mesh weights as the in-world billboard.
+import {rigDefinition,skinWeights,sampleRig,jointBackings,boneLayer} from './character-rig.js?v=36';
+// Same rigid cutouts/IK as the world; one cached clip path per body part.
 export function createMotionPreview(host){
  const canvas=document.createElement('canvas');canvas.width=320;canvas.height=320;canvas.style.cssText='display:block;width:100%;height:100%;image-rendering:pixelated';host.append(canvas);host.classList.add('rig-preview');
- const ctx=canvas.getContext('2d'),cell=document.createElement('canvas');let atlas=null,row=0,lastFrame=-1,lastRow=-1;
- const tex=cell.getContext('2d');
- function setSource(image,gender){atlas=image;row=gender==='female'?1:0;lastFrame=-1;}
- function draw(p){
-  if(!atlas)return;
-  if(p.frame!==lastFrame||row!==lastRow){cell.width=atlas.width/4;cell.height=atlas.height/2;tex.drawImage(atlas,p.frame*cell.width,row*cell.height,cell.width,cell.height,0,0,cell.width,cell.height);lastFrame=p.frame;lastRow=row;}
-  ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;
-  const cols=10,rows=16,points=[];
-  for(let j=0;j<=rows;j++)for(let i=0;i<=cols;i++){const u=i/cols,v=j/rows,q=deformPoint(u,v,p);points.push({sx:u*cell.width,sy:v*cell.height,x:20+q.x*280,y:8+q.y*280-p.y*130});}
-  function tri(a,b,c){
-   const det=(b.sx-a.sx)*(c.sy-a.sy)-(c.sx-a.sx)*(b.sy-a.sy);if(!det)return;
-   const A=((b.x-a.x)*(c.sy-a.sy)-(c.x-a.x)*(b.sy-a.sy))/det,B=((b.y-a.y)*(c.sy-a.sy)-(c.y-a.y)*(b.sy-a.sy))/det;
-   const C=((c.x-a.x)*(b.sx-a.sx)-(b.x-a.x)*(c.sx-a.sx))/det,D=((c.y-a.y)*(b.sx-a.sx)-(b.y-a.y)*(c.sx-a.sx))/det;
-   ctx.save();ctx.beginPath();const mx=(a.x+b.x+c.x)/3,my=(a.y+b.y+c.y)/3;
-   for(const [k,q] of [a,b,c].entries()){const dx=q.x-mx,dy=q.y-my,n=Math.hypot(dx,dy)||1;ctx[k?'lineTo':'moveTo'](q.x+dx/n*.45,q.y+dy/n*.45);}ctx.closePath();ctx.clip();
-   ctx.setTransform(A,B,C,D,a.x-A*a.sx-C*a.sy,a.y-B*a.sx-D*a.sy);ctx.drawImage(cell,0,0);ctx.restore();
+ const ctx=canvas.getContext('2d'),cell=document.createElement('canvas');let rig,paths,backings;
+ function setSource(image,gender,classId='novice'){
+  rig=rigDefinition(classId,gender);cell.width=image.width/4;cell.height=image.height/2;
+  cell.getContext('2d').drawImage(image,0,(gender==='female'?1:0)*cell.height,cell.width,cell.height,0,0,cell.width,cell.height);
+  paths=new Map();backings=jointBackings(rig);const cols=48,rows=56;
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++)for(const tri of [[[x,y],[x,y+1],[x+1,y]],[[x,y+1],[x+1,y+1],[x+1,y]]]){
+   const u=tri.reduce((sum,p)=>sum+p[0]/cols,0)/3,v=tri.reduce((sum,p)=>sum+p[1]/rows,0)/3,name=skinWeights(rig,u,v).sort((a,b)=>b[1]-a[1])[0][0];
+   if(!paths.has(name))paths.set(name,new Path2D());const path=paths.get(name);tri.forEach(([a,b],i)=>path[i?'lineTo':'moveTo'](a/cols,b/rows));path.closePath();
   }
-  for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){const n=j*(cols+1)+i;tri(points[n],points[n+1],points[n+cols+1]);tri(points[n+1],points[n+cols+2],points[n+cols+1]);}
+ }
+ function draw(p){
+  if(!rig)return;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;const matrices=sampleRig(rig,p);
+  function transform(m){ctx.setTransform(m[0]*280,m[1]*280,m[2]*280,m[3]*280,20+m[4]*280,8+m[5]*280-p.y*130);}
+  for(const s of backings){transform(matrices[s.bone]);ctx.strokeStyle=s.skin?'#bd8356':'#8e714c';ctx.lineWidth=s.r*2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(s.a.x,s.a.y);ctx.lineTo(s.b.x,s.b.y);ctx.stroke();}
+  for(const [name,path] of [...paths].sort((a,b)=>boneLayer(a[0])-boneLayer(b[0]))){ctx.save();transform(matrices[name]);ctx.clip(path);ctx.drawImage(cell,0,0,1,1);ctx.restore();}
  }
  return {setSource,draw};
 }

@@ -193,3 +193,16 @@ HUD ใช้กรอบไม้สัก ทองเก่า และห�
 - Damage, cooldowns, MP costs, targeting and saving retain existing combat rules. Combat effects are still resolved immediately, not delayed to the visual strike. Animation-only lunges do not move collision bodies.
 - Open `skill-lab.html` from profile → settings or the skill gallery. All 80 skills can be previewed without login, mana or account changes, with genders, facing, replay, speed and fixed-beat inspection. Landscape/mobile layout keeps the stage visible while the skill catalogue scrolls.
 - Reduced-motion uses a static skill cue and reduced FX. The capital remains monster-free. New characters remain Novice; Base/Job EXP persistence is unchanged.
+
+
+## Character articulation and class effects (0.35)
+
+Player characters now use a 15-part 2D cutout rig with two-bone IK for shoulders/elbows and hips/knees. Arms, legs, heads and weapons rotate as rigid pieces; the renderer no longer stretches a single character card. Walking is distance-driven with a stance/swing cycle. The existing 80 skill timelines now drive joint targets, anticipation, release and recovery. Local players, remote players and character previews use the same rig. Master jobs currently share the base profession's motion set.
+
+Class effects use distinct geometry and small procedural textures: sword arcs, lance thrusts, arrows/feathers, fist impacts, twin violet slashes, talismans/spirits, lotus light and novice dust. Each release beat has travel/contact timing. Effects are deterministic, seekable and capped at 16 active casts; reduced-motion mode suppresses large flashes and movement. Combat damage and save schemas are unchanged.
+
+Try `skill-lab.html`: select profession/gender, choose a skill or walk/idle/basic attack/guard, change playback speed and scrub the timeline. The stage stays visible while the catalogue scrolls on landscape mobile screens.
+
+Art limitation: these are articulated pieces of the existing neutral illustration, with joint backing underneath. Some cutout seams remain in extreme poses. This is not a newly painted frame-by-frame animation set, and the optional eight-direction turnaround art remains a separate static pilot. A production art pass should supply separated overlapping limbs/garments and authored hand/foot/face variants for each direction.
+
+Validation: 102 tests pass, including bone lengths/joint continuity for 160 class/gender skill combinations, triangle shape preservation, grounded gait, distinct joint trajectories, unreachable IK, reduced motion, multi-hit effect releases and resource disposal. Build and content validation pass. Browser previews checked on desktop and at 844 x 390; this does not replace physical-phone performance testing.

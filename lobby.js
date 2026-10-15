@@ -1,6 +1,6 @@
-import {createMotionPreview} from './motion-preview.js?v=15';
-import {characterMotion} from './character-motion.js?v=29';
-import {createWardrobe} from './wardrobe.js?v=21';
+import {createMotionPreview} from './motion-preview.js?v=36';
+import {characterMotion} from './character-motion.js?v=36';
+import {createWardrobe} from './wardrobe.js?v=36';
 import {progression,jobFor,CLASS_LEVEL} from './advancement.js?v=21';
 import {CLASSES,getClass,className,atlasPath} from './classes.js?v=18';
 import {previewPose} from './sprite-motion.js';
@@ -14,7 +14,7 @@ let connection=null,catalog=null,owner=null,store=null,selected=null,record=null
 let roster=[];
 const say=text=>$('lobby-status').textContent=text;
 const lobbyMotion=createMotionPreview($('hero-preview'));
-const wardrobe=createWardrobe({getClass:()=>selectedClass,getGender:()=>previewGender,getRecord:()=>record,onTexture:(url,atlas,gender)=>{lobbyMotion.setSource(atlas,gender);},onNotice:say,onApply:async(appearance,jobId)=>{
+const wardrobe=createWardrobe({getClass:()=>selectedClass,getGender:()=>previewGender,getRecord:()=>record,onTexture:(url,atlas,gender)=>{lobbyMotion.setSource(atlas,gender,selectedClass);},onNotice:say,onApply:async(appearance,jobId)=>{
  if(busy)throw new Error('busy');if(record){if(selectedClass!==record.character.classId)throw new Error('class-first');lock(true);try{record=await store.customize(selected,record,appearance,jobId);roster=await store.list();displayCharacter();}finally{lock(false);}}
 }});
 $('open-wardrobe').onclick=()=>{if(!busy)wardrobe.open();};

@@ -1,4 +1,4 @@
-import {createMultiplayer} from './multiplayer-ui.js?v=34';
+import {createMultiplayer} from './multiplayer-ui.js?v=36';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=34';
 import {createMmoHud} from './mmo-hud.js?v=32';
@@ -6,7 +6,7 @@ import {createSoftLook} from './soft-look.js?v=29';
 import {createLandscapeDetails} from './landscape-details.js?v=21';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=31';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
-import {createRiggedSprite} from './rigged-sprite.js?v=29';
+import {createRiggedSprite} from './rigged-sprite.js?v=36';
 import {customizeAtlas} from './character-appearance.js?v=18';
 import {jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
@@ -14,7 +14,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=34';
+import {createGame} from './game-controls.js?v=36';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=34';
@@ -86,7 +86,7 @@ try {
  for(const [kind,x,z,w,h,flip] of map.plants){if(['canopy19','shrub19'].includes(kind))continue;plant(kind,x,-z,w,h,flip);if(kind==='tree')shadow(x,-z,w*.3);}
  const customized=customizeAtlas(heroAtlas.image,account.character.appearance,account.character.classId);
  const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
- const heroMesh=createRiggedSprite(heroFrames[0]);scene.add(heroMesh);
+ const heroMesh=createRiggedSprite(heroFrames[0],{classId:account.character.classId,gender:account.character.gender});scene.add(heroMesh);
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  // A01 is opt-in: standard costume turnaround; original wardrobe/action frames remain default.
  const pilotToggle=$('directional-pilot'),pilotStatus=$('directional-pilot-status');

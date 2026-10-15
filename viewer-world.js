@@ -118,7 +118,11 @@ try {
  applySave(game.world,map,account.data);
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
- const portrait=document.querySelector('.portrait');portrait.style.backgroundImage='url('+customized.toDataURL()+')';portrait.style.backgroundSize='400% 200%';portrait.style.backgroundPosition='0% '+(account.character.gender==='female'?'100%':'0%');
+ // Extract one atlas cell so a circular portrait can preserve the sprite's natural aspect ratio.
+ const portrait=document.querySelector('.portrait'),portraitFrame=document.createElement('canvas');
+ portraitFrame.width=customized.width/4;portraitFrame.height=customized.height/2;
+ portraitFrame.getContext('2d').drawImage(customized,0,account.character.gender==='female'?portraitFrame.height:0,portraitFrame.width,portraitFrame.height,0,0,portraitFrame.width,portraitFrame.height);
+ portrait.style.backgroundImage='url('+portraitFrame.toDataURL()+')';portrait.style.backgroundSize='contain';portrait.style.backgroundPosition='center';
  portrait.style.imageRendering='pixelated';$('profile-profession').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
  const savedSettings=account.data?.settings;let motionPlaying=motion.running;
  if(savedSettings){

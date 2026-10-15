@@ -6,7 +6,7 @@ body.field-hud #game-menu i{width:32px;height:32px;border-radius:7px;background:
 #game-menu svg{width:25px;height:25px;fill:none;stroke:#f2d49a;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 body.field-hud #game-menu button:hover{background:#536449;border-color:#efd18b}
 body.field-hud .player-panel{width:250px;min-height:104px;padding:12px 12px 12px 78px;border:1px solid var(--hud-rim);border-radius:8px;background:var(--hud-surface);box-shadow:inset 0 0 0 3px #dec58712,0 3px 10px #0004}
-body.field-hud .portrait{left:13px;top:23px;width:52px;height:62px}body.field-hud .portrait:after{inset:-4px -6px}
+body.field-hud .portrait{left:13px;top:26px;width:52px;height:52px;aspect-ratio:1}body.field-hud .portrait:after{inset:-5px;background-size:contain}
 body.field-hud .player-heading strong{max-width:155px;font-size:13px}body.field-hud .player-heading small{max-width:155px;font-size:9px}body.field-hud .player-heading{margin-bottom:7px}
 body.field-hud .level-badge{left:15px;top:3px}body.field-hud .meter{height:14px;border-radius:4px}body.field-hud .meter span{line-height:12px;font-size:9px}
 body.field-hud .experience-bars{position:fixed;z-index:15;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:max(2px,env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0;pointer-events:none}
@@ -36,7 +36,7 @@ body.field-hud #account-panel[hidden]{display:none}body.field-hud #account-panel
 body.field-hud .account-card h1{font-size:17px;margin:8px 0}body.field-hud .account-card .brand{font-size:9px;letter-spacing:1px}
 @media(max-width:900px),(pointer:coarse){
  body.field-hud .player-panel{left:max(8px,env(safe-area-inset-left));top:6px;width:212px;min-height:90px;padding:10px 10px 10px 64px}
- body.field-hud .portrait{left:13px;top:23px;width:40px;height:48px}body.field-hud .player-heading strong{font-size:11px;max-width:133px}body.field-hud .player-heading small{font-size:8px;max-width:133px}body.field-hud .meter{height:12px}body.field-hud .meter span{font-size:8px;line-height:10px}
+ body.field-hud .portrait{left:13px;top:23px;width:44px;height:44px;aspect-ratio:1}body.field-hud .player-heading strong{font-size:11px;max-width:133px}body.field-hud .player-heading small{font-size:8px;max-width:133px}body.field-hud .meter{height:12px}body.field-hud .meter span{font-size:8px;line-height:10px}
  body.field-hud #game-menu{right:max(140px,calc(env(safe-area-inset-right) + 132px));top:6px;gap:3px}body.field-hud #game-menu button{min-width:44px;width:44px;min-height:48px;font-size:8px;padding:2px}body.field-hud #game-menu i{width:25px;height:25px}body.field-hud #game-menu svg{width:21px;height:21px}body.field-hud #game-menu span{display:block}
  body.field-hud .mini-panel{width:118px;right:max(8px,env(safe-area-inset-right));top:6px;padding:3px}.field-map-title{font-size:9px;padding-bottom:2px}
  body.field-hud #online-button{top:102px;left:max(8px,env(safe-area-inset-left));right:auto;width:auto;max-width:212px;min-height:24px;font-size:9px;padding:2px 6px}body.field-hud #online-meta{font-size:8px;padding-left:4px;margin-left:0}

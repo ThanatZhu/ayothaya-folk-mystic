@@ -14,7 +14,14 @@ export async function createFrontierScene({scene,map,ground,tiles}){
  const b=map.bounds;box(b.x+b.w/2,-.48,b.z+b.d/2,b.w+160,.9,b.d+160,soil);
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(b.w+160,b.d+160),ground);floor.rotation.x=-Math.PI/2;floor.position.set(b.x+b.w/2,.005,b.z+b.d/2);floor.receiveShadow=true;root.add(floor);
  // Dark shoreline + translucent wave highlights give depth without a flat blue strip.
- const waveMaterial=new THREE.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{time:clock},vertexShader:'varying vec2 p;void main(){vec4 w=modelMatrix*vec4(position,1.);p=w.xz;gl_Position=projectionMatrix*viewMatrix*w;}',fragmentShader:'uniform float time;varying vec2 p;void main(){float a=sin(p.y*4.+sin(p.x*1.8)-time*1.5);float b=sin(p.y*2.1+p.x*.8-time*.7);float foam=smoothstep(.93,1.,a)*smoothstep(.4,.9,b);gl_FragColor=vec4(.76,.86,.71,foam*.3);}' });
+ const waveMaterial=new THREE.ShaderMaterial({depthWrite:false,uniforms:{time:clock,night:{value:night?1:0}},vertexShader:'varying vec2 p;varying vec2 v;void main(){v=uv;vec4 w=modelMatrix*vec4(position,1.);p=w.xz;gl_Position=projectionMatrix*viewMatrix*w;}',fragmentShader:`
+ uniform float time;uniform float night;varying vec2 p;varying vec2 v;
+ float hash(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}
+ float noise(vec2 q){vec2 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1)),f.x),f.y);}
+ void main(){float shore=smoothstep(0.,.23,min(v.x,1.-v.x));float cloud=noise(p*.31+vec2(time*.025,time*.06));float grain=noise(p*1.9+vec2(0,time*.17));
+ vec3 shallow=vec3(.34,.43,.27),deep=vec3(.12,.29,.27);vec3 c=mix(shallow,deep,shore)+vec3(.08,.11,.08)*(cloud-.4);
+ float crest=pow(max(0.,sin(p.y*5.+sin(p.x*2.)+grain*2.-time*1.1)),18.);c+=vec3(.43,.56,.49)*crest*.10*smoothstep(.52,.8,grain);
+ c+=vec3(.10,.14,.10)*pow(1.-shore,3.)*(.5+.5*sin(p.y*2.8-time));c=mix(c,c*vec3(.63,.78,.92),night*.65);gl_FragColor=vec4(c,1.);}` });
  for(const a of map.waterAreas){box(a.x+a.w/2,.025,a.z+a.d/2,a.w,.02,a.d,water);const ripples=new THREE.Mesh(new THREE.PlaneGeometry(a.w,a.d),waveMaterial);ripples.rotation.x=-Math.PI/2;ripples.position.set(a.x+a.w/2,.047,a.z+a.d/2);root.add(ripples);for(const x of [a.x-.2,a.x+a.w+.2])box(x,.12,a.z+a.d/2,.5,.25,a.d,stone);}
  for(const a of map.bridges){
   for(let x=a.x;x<a.x+a.w;x+=.55)box(x,.18,a.z+a.d/2,.5,.26,a.d,wood);
@@ -26,6 +33,8 @@ export async function createFrontierScene({scene,map,ground,tiles}){
  const shadows=new THREE.MeshBasicMaterial({color:'#344a31',transparent:true,opacity:.2,depthWrite:false});
  function prop(asset,x,z,w,h){const s=new THREE.Sprite(mats[asset]);s.center.set(.5,0);s.position.set(x,.07,z);s.scale.set(w,h,1);root.add(s);const sh=new THREE.Mesh(new THREE.CircleGeometry(w*.29,20),shadows);sh.rotation.x=-Math.PI/2;sh.position.set(x,.06,z);root.add(sh);return s;}
  const breeze=[];
+ // Irregular bank rocks soften the straight canal edge while keeping bridge approaches clear.
+ for(const a of map.waterAreas)for(let z=a.z+3;z<a.z+a.d-2;z+=4.6){if(map.bridges.some(b=>z>b.z-2&&z<b.z+b.d+2))continue;for(const x of [a.x-.35,a.x+a.w+.35]){const s=1.2+random()*.9;prop(7,x+(random()-.5)*.6,z,s,s*.63);}}
  for(const [kind,x,z,w]of map.plants)if(kind==='canopy19'){const s=w/6;const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.17*s,.34*s,4.8*s,9),wood);trunk.position.set(x,2.4*s,z);trunk.castShadow=true;root.add(trunk);}
  for(const d of map.decor)prop(d.asset,d.x,d.z,d.w,d.h);
  // Dense agricultural pockets, broad walkable roads, never a screen-wide repeating carpet.

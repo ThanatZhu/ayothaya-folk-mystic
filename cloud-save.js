@@ -1,4 +1,3 @@
-import {openHudPanel} from './hud-panels.js?v=34';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {ENTRY_KEY,validEntry} from './realm-state.js?v=21';
 import {createRealmStore} from './realm-store.js?v=21';
@@ -19,7 +18,7 @@ export async function prepareCloud(catalog){
  function report(error){const conflict=error.message==='save-conflict';say(conflict?'พบเซฟใหม่จากอีกหน้าต่าง กรุณาโหลดเซฟล่าสุด':'เชื่อมต่อเซฟไม่สำเร็จ กรุณาลองอีกครั้ง');$('open-account').classList.add('sync-error');$('retry-sync').hidden=conflict;if(conflict){blocked=true;$('reload-save').hidden=false;}open();}
  $('open-account').onclick=()=>panel.hidden?open():close();$('close-account').onclick=close;$('reload-save').onclick=()=>location.reload();
  $('logout-account').hidden=entry.owner==='guest';
- $('open-settings').onclick=()=>{if(blocked)return;close();openHudPanel($('settings-panel'));};
+
  addEventListener('keydown',e=>{if(!panel.hidden&&blocked){if(e.code==='Escape'){e.preventDefault();close();}if(e.code==='Tab'){const buttons=[...panel.querySelectorAll('button')].filter(b=>!b.hidden&&!b.disabled);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}if(!e.target.closest('button,input'))e.preventDefault();e.stopImmediatePropagation();}},true);
  try{
   if(entry.owner!=='guest'){

@@ -50,3 +50,6 @@ body.field-hud .account-card h1{font-size:17px;margin:8px 0}body.field-hud .acco
 @media(prefers-reduced-motion:reduce){body.field-hud #attack:active{transform:none}}
 
 body.field-hud .skill-icon.skill-art{display:block;width:38px;height:38px;min-width:38px;background-repeat:no-repeat;border:1px solid #b49a62;border-radius:6px;color:transparent;font-size:0!important;box-shadow:0 2px 4px #0005}
+
+/* Camera/how-to panel retired from the player-facing UI by owner request. */
+body.field-hud #settings-panel,body.field-hud #open-settings{display:none!important}

@@ -1,6 +1,7 @@
-import {createMultiplayer} from './multiplayer-ui.js?v=28';
+import {createMultiplayer} from './multiplayer-ui.js?v=32';
 import {createGameMenu} from './game-menu.js?v=31';
 import {createSkillWindow} from './skill-window.js?v=31';
+import {createMmoHud} from './mmo-hud.js?v=32';
 import {createSoftLook} from './soft-look.js?v=29';
 import {createLandscapeDetails} from './landscape-details.js?v=21';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=31';
@@ -13,7 +14,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=31';
+import {createGame} from './game-controls.js?v=32';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=22';
@@ -127,7 +128,7 @@ try {
   camera.updateProjectionMatrix();controls.update();
  }
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
- multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu();createSkillWindow({game});
+ multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu();createSkillWindow({game});createMmoHud({game,account});
  function toggleOverview(){
   overview=!overview;controls.minZoom=overview?.08:.65;game.clearInput();rotating=null;
   const offset=camera.position.clone().sub(controls.target).multiplyScalar(overview?6:1/6);

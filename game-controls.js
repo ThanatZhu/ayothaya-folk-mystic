@@ -49,7 +49,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  const motionPreference=matchMedia('(prefers-reduced-motion:reduce)');
  const effects=[],floats=[],fxRing=new THREE.RingGeometry(.75,.83,32),fxBall=new THREE.IcosahedronGeometry(.10,0),projection=new THREE.Vector3();
  const fxArrow=new THREE.ConeGeometry(.065,.65,4),fxArc=new THREE.RingGeometry(.4,.52,24,1,0,Math.PI*1.25);
- function toast(text){$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;}
+ function toast(text){$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number';el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
  function effect(e){

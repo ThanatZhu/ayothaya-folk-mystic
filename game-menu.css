@@ -1,0 +1,62 @@
+/* 0.33: teak and jade travel journal; responsive, touch-sized navigation. */
+#game-menu{padding:0;border-radius:12px}
+#game-menu #open-game-menu{flex-direction:row;gap:9px;min-width:118px;min-height:50px;padding:6px 16px;font-size:16px;font-weight:700;background:linear-gradient(120deg,#69503566,#172c27);border:1px solid #dfb97588}
+#game-menu #open-game-menu svg{width:31px;height:31px;fill:none;stroke:#edca81;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#game-menu #open-game-menu span{display:block}
+#game-menu .has-notice:after,.journal-tabs .has-notice:after{content:'';width:9px;height:9px;border-radius:50%;background:#f27d61;box-shadow:0 0 0 2px #34291e;position:absolute;right:7px;top:7px}
+#game-menu-dialog{--journal-gold:#d7b878;width:min(860px,calc(100vw - 40px));height:min(580px,calc(100dvh - 40px));max-width:none;max-height:none;padding:0;border:1px solid #c9a466;border-radius:18px;color:#f7ebd4;background:radial-gradient(ellipse at 80% 10%,#6c6a3a25,transparent 70%),repeating-linear-gradient(4deg,#ffffff02 0 1px,transparent 1px 7px),#192e28;box-shadow:0 24px 90px #0009,0 0 0 4px #26291e,0 0 0 5px #a67a4566,inset 0 0 0 5px #d9bb7633;overflow:hidden;font-family:Mali,Tahoma,sans-serif}
+#game-menu-dialog[open]{display:flex;flex-direction:column;animation:journal-enter .2s ease-out}
+#game-menu-dialog::backdrop{background:#091911b8;backdrop-filter:blur(3px)}
+#game-menu-dialog [hidden]{display:none!important}
+#game-menu-dialog button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulation;min-height:44px}
+#game-menu-dialog button:focus-visible{outline:3px solid #a9ead4;outline-offset:-4px}
+#game-menu-dialog svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.journal-header{display:flex;align-items:center;gap:15px;padding:19px 26px;border-bottom:1px solid #b18d4e7a;background:repeating-linear-gradient(2deg,#daa36305 0 2px,transparent 2px 8px),linear-gradient(110deg,#55402d,#30271e 60%,#473824);box-shadow:inset 0 -4px #171d1844;flex-shrink:0}
+.journal-header small{font-size:9px;letter-spacing:.24em;color:#d5b67a}
+.journal-header h2{margin:2px 0;font-size:26px;line-height:1.5;color:#ffe4a9;text-shadow:0 2px 2px #0009}
+.journal-seal{display:grid;place-items:center;width:56px;height:56px;border:1px solid #c9a568;border-radius:50%;box-shadow:inset 0 0 0 4px #b6893a22,0 0 0 3px #b6893a22;color:#f1cd80}
+#game-menu-dialog .journal-seal svg{width:38px;height:38px}
+.journal-close{margin-left:auto;width:44px;flex-shrink:0;border:1px solid #9e8055;border-radius:50%;background:#211e1980;font-size:26px}
+.journal-close:hover{background:#825333}
+.journal-body{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:0;flex:1}
+.journal-tabs{display:flex;flex-direction:column;gap:8px;padding:22px 13px;background:linear-gradient(90deg,#30291fee,#443522bb);border-right:1px solid #b18d4e66;overflow-y:auto;scrollbar-width:thin}
+.journal-tabs button{position:relative;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #95734666;border-radius:7px;background:linear-gradient(110deg,#61462c80,#302820);text-align:left;font-size:14px;box-shadow:inset 0 1px #f9d99b15,0 2px 4px #0002}
+.journal-tabs button svg{width:24px!important;height:24px!important;flex-shrink:0;color:#d4b87f}
+.journal-tabs button[aria-pressed=true]{background:linear-gradient(120deg,#b9904a,#e0bf7b 50%,#b58b46);color:#302418!important;border-color:#f7d892;box-shadow:inset 0 0 0 3px #5b3e3326,0 3px 12px #070d0933;font-weight:700}
+.journal-tabs button[aria-pressed=true] svg{color:#5e4121}
+.journal-tabs button:hover:not([aria-pressed=true]){background:#73543880;border-color:#cca766}
+.journal-content{position:relative;padding:18px 26px;overflow-y:auto;min-width:0;scrollbar-width:thin;scrollbar-color:#ac8e55 #1c3028}
+.journal-heading{padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid #d4b87f30;position:relative}
+.journal-heading:after{content:'◆';position:absolute;bottom:-9px;right:0;color:#b89757;font-size:13px;background:#23352b;padding-left:12px}
+.journal-heading>small{font-size:10px;letter-spacing:.08em;color:#b6bea0}
+.journal-heading h3{margin:3px 0 4px;font-size:23px;color:#f1d79d}
+.journal-heading p{margin:0;font-size:12px;color:#bac5ad}
+.journal-page{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.journal-action{position:relative;min-height:120px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px 9px;border:1px solid #a3895680;border-radius:10px;background:radial-gradient(ellipse at 50% 0,#c9a16b1c,transparent 80%),linear-gradient(135deg,#35493b,#26362e);box-shadow:inset 0 0 0 3px #a389560e,0 3px 8px #0002;transition:transform .16s,background .16s,border-color .16s}
+.journal-action:before{content:'';position:absolute;inset:5px;border:1px solid #b9a06a14;border-radius:6px;pointer-events:none}
+.journal-action:hover{transform:translateY(-2px);background:linear-gradient(135deg,#536044,#374733);border-color:#ddba76}
+.journal-action:active{transform:translateY(1px)}
+.journal-action-art{display:grid;place-items:center;width:48px;height:48px;flex-shrink:0;border:1px solid #b8996166;border-radius:50%;color:#eed498;background:radial-gradient(#795f3d,#392d20);box-shadow:0 0 0 4px #d2aa5a09,inset 0 1px #ffe0a333}
+.journal-action-text{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.journal-action strong{font-size:14px}.journal-action small{font-size:10px;color:#bdc9b1;line-height:1.5}
+.journal-action kbd{position:absolute;right:9px;top:8px;padding:2px 5px;border:1px solid #e8c58c30;border-radius:4px;color:#c9b788;background:#0e211540;font:9px Mali,sans-serif}
+.journal-online-note{font-size:12px;color:#c8ba95;line-height:1.7}
+.journal-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 24px;background:linear-gradient(110deg,#322d22,#262c23);border-top:1px solid #b18d4e66;flex-shrink:0}
+.journal-footer>div{display:grid;grid-template-columns:8px 1fr;align-items:center;gap:3px 8px;min-width:0}
+.journal-identity{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.journal-footer small{grid-column:2;color:#a7baa0;font-size:10px}
+.journal-save-light{width:6px;height:6px;border-radius:50%;background:#b6c295}
+.journal-return{border:1px solid #efd597;border-radius:7px;padding:10px 24px;background:linear-gradient(#d9b66e,#ab7f3f);color:#302419!important;font-size:14px;font-weight:700;white-space:nowrap;box-shadow:inset 0 0 0 3px #ffedb51c,0 3px 8px #0003}
+.journal-return:hover{filter:brightness(1.12)}.journal-return span{margin-left:12px}
+@keyframes journal-enter{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+@media(max-width:900px),(max-height:540px){
+ #game-menu #open-game-menu{min-height:46px;min-width:105px;padding:4px 12px;font-size:13px}
+ #game-menu-dialog{width:calc(100vw - max(24px,env(safe-area-inset-left)) - max(24px,env(safe-area-inset-right)));height:calc(100dvh - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)));border-radius:12px}
+ .journal-header{padding:6px 15px;gap:10px}.journal-header h2{font-size:19px}.journal-header small{font-size:8px;letter-spacing:.15em}.journal-seal{width:40px;height:40px}#game-menu-dialog .journal-seal svg{width:28px;height:28px}
+ .journal-body{grid-template-columns:155px minmax(0,1fr)}.journal-tabs{padding:4px 9px;gap:2px}.journal-tabs button{padding:6px 8px;font-size:11px;gap:8px;flex-shrink:0}
+ .journal-content{padding:8px 16px}.journal-heading{padding-bottom:7px;margin-bottom:6px}.journal-heading>small{display:none}.journal-heading h3{font-size:17px;margin:0 0 2px}.journal-heading p{font-size:10px}
+ .journal-page{gap:8px}.journal-action{min-height:79px!important;flex-direction:row;justify-content:flex-start;gap:10px;padding:12px 9px}.journal-action-art{width:38px;height:38px}#game-menu-dialog .journal-action-art svg{width:26px;height:26px}.journal-action-text{align-items:flex-start;text-align:left}.journal-action strong{font-size:12px}.journal-action small{font-size:9px}.journal-action kbd{display:none}
+ .journal-footer{padding:6px 15px}.journal-return{padding:6px 16px;font-size:12px}.journal-footer small{font-size:9px}.journal-identity{font-size:10px}
+}
+@media(max-width:640px){.journal-body{grid-template-columns:125px minmax(0,1fr)}.journal-tabs button{font-size:10px;gap:5px}.journal-content{padding:8px 10px}.journal-page{grid-template-columns:1fr}.journal-action{min-height:66px!important}.journal-header h2{font-size:16px}.journal-footer small{display:none}}
+@media(prefers-reduced-motion:reduce){#game-menu-dialog[open]{animation:none}.journal-action{transition:none}.journal-action:hover{transform:none}}

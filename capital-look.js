@@ -9,7 +9,7 @@ export function createCapitalLook({map,atlas,frame}){
  // Baked in Blender by bake_ground_ao.py: soft contact shadows around houses, posts, walls and the quay.
  // White until loaded so the ground never flashes dark; covers x -66..66, z -111..5.
  const ao={value:new THREE.DataTexture(new Uint8Array([255,255,255,255]),1,1)};ao.value.needsUpdate=true;
- new THREE.TextureLoader().load('./assets/ground-ao.png?v=29',t=>{t.colorSpace=THREE.NoColorSpace;t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.anisotropy=4;ao.value=t;});
+ if(!map.procedural)new THREE.TextureLoader().load('./assets/ground-ao.png?v=29',t=>{t.colorSpace=THREE.NoColorSpace;t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.anisotropy=4;ao.value=t;});
  const ground=new THREE.MeshLambertMaterial({color:'#fffef1'});ground.name='ground19';
  const roads=map.roads.map(r=>`d=min(d,segment19(p,vec2(${r.a.map(f)}),vec2(${r.b.map(f)}))-${f(r.width/2)});`).join('\n');
  const plazas=map.plazas.map(([x,z,rx,rz])=>`d=min(d,(length((p-vec2(${f(x)},${f(z)}))/vec2(${f(rx)},${f(rz)}))-1.)*${f(Math.min(rx,rz))});`).join('\n');
@@ -40,7 +40,7 @@ export function createCapitalLook({map,atlas,frame}){
    float occlusion=texture2D(capitalAO,vec2((p.x+66.)/132.,(5.-p.y)/116.)).r;
    diffuseColor.rgb*=mix(1.,occlusion,.72)*mix(vec3(1.),vec3(.93,.95,1.04),1.-occlusion); // cool, soft contact shade
   `);
- };ground.customProgramCacheKey=()=> 'capital-ground29';
+ };ground.customProgramCacheKey=()=> 'capital-ground38-'+map.id;
  function canopy(name){
   const m=new THREE.MeshLambertMaterial({map:leaves,color:name.endsWith('dark')?'#b6c897':name.endsWith('light')?'#f1f5c3':'#dce9ae'});m.name=name;
   m.onBeforeCompile=s=>{s.uniforms.capitalTime=time;s.vertexShader='uniform float capitalTime;\n'+s.vertexShader;s.vertexShader=s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed.x+=.055*max(0.,transformed.y-2.)*sin(capitalTime*.85+transformed.z*.27+transformed.x*.13);');};

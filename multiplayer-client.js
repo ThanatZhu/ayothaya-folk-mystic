@@ -12,6 +12,8 @@ export class MultiplayerClient extends EventTarget{
    socket.addEventListener('message',e=>{if(generation!==this.generation)return;let m;try{m=JSON.parse(e.data);}catch{return;}
     if(m.type==='welcome'){this.seq=0;this.id=m.id;this.retries=0;this.state('online');this.emit('welcome',m);this.emit('snapshot',m.snapshot);}
     else if(m.type==='saved'){this.pending.get(m.id)?.resolve();this.pending.delete(m.id);this.emit('saved',m);}
+    else if(m.type==='traveled'){this.stopped=true;this.pending.get(m.id)?.resolve();this.pending.delete(m.id);}
+    else if(m.type==='travel-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
     else if(m.type==='left'){this.pending.get('leave')?.resolve();this.pending.delete('leave');this.stopped=true;this.state('offline');}
     else{if(m.type==='error'&&['authentication-failed','character-not-found','character-server','save-failed','save-conflict'].includes(m.code)){this.stopped=true;this.state('error');}this.emit(m.type,m);}
    });
@@ -26,6 +28,7 @@ export class MultiplayerClient extends EventTarget{
   if(stopped||now-this.lastInput>=65){this.lastInput=now;this.command('input',this.input);}}
  request(type,id,data={}){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('server-timeout'));},12000);this.pending.set(id,{resolve:()=>{clearTimeout(timer);resolve();},reject:e=>{clearTimeout(timer);reject(e);}});if(!this.command(type,{id,...data})){this.pending.get(id).reject(new Error('not-connected'));this.pending.delete(id);}});}
  flush(settings){if(this.saving)return this.saving;this.saving=this.request('save',crypto.randomUUID(),{settings}).finally(()=>{this.saving=null;});return this.saving;}
+ async travel(destination){await this.request('travel',crypto.randomUUID(),{destination});this.stopped=true;}
  async leave(){if(this.status!=='online')throw new Error('not-connected');await this.request('leave','leave');this.stopped=true;this.socket?.close();}
  stop(){this.stopped=true;this.generation++;clearTimeout(this.timer);this.socket?.close();for(const task of this.pending.values())task.reject(new Error('stopped'));this.pending.clear();this.state('offline');}
 }

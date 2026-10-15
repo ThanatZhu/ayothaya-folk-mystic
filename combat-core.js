@@ -1,3 +1,4 @@
+import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster} from './monster-catalog.js?v=38';
 import {awardExperience} from './experience.js?v=21';
 import {advanceStats,advanceSkills} from './advancement.js?v=21';
 import {getClass,classSkills} from './classes.js?v=18';
@@ -21,6 +22,7 @@ export const MONSTER_TYPES=[
  {name:'คางคกใบบัว',hp:65,speed:1,damage:6,baseXp:14,jobXp:7},
  {name:'ไหผีจอมซน',hp:90,speed:.8,damage:8,baseXp:18,jobXp:12}
 ];
+MONSTER_TYPES.push(...FRONTIER_MONSTERS);
 export const OBSTACLES=[
  {x:-7.2,z:-11.5,w:6.4,d:7.3}, // north house, veranda and staircase
  {x:7.2,z:-8.2,w:5.8,d:7.4}, // east house and steps
@@ -89,9 +91,9 @@ export class CombatWorld{
  nearest(range=8){return this.mobs.filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=8)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
  toggleAuto(){if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);mob.hit=.16;mob.aggro=true;
+  if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
-  if(mob.hp===0){mob.dead=8;mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];this.emit('experience',awardExperience(this,reward.baseXp,reward.jobXp));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
+  if(mob.hp===0){mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];this.emit('experience',awardExperience(this,reward.baseXp,reward.jobXp));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  basicAttack(quiet=false){
   const p=this.player;if(p.hp<=0||p.attackCD>0)return false;
@@ -141,14 +143,10 @@ export class CombatWorld{
   p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;
   if(!monsters)return; // Shared-room servers advance each monster exactly once per tick.
   for(const m of this.mobs){
-   m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);
-   if(m.hp<=0){m.dead-=dt;if(m.dead<=0){Object.assign(m,{x:m.home.x,z:m.home.z,hp:m.maxHp,aggro:false,root:0,attackCD:1});this.emit('respawn',{id:m.id});}continue;}
-   const type=MONSTER_TYPES[m.type];
-   if(m.aggro&&distance(m,m.home)>6){m.aggro=false;}
-   const goal=m.aggro?p:m.home,d=distance(m,goal);
-   if(m.root===0&&d>(m.aggro?1.05:.12)){const speed=type.speed*dt;moveBody(m,(goal.x-m.x)/d*speed,(goal.z-m.z)/d*speed,this.nav);m.step+=dt*7;}
-   if(m.aggro&&distance(m,p)<1.35&&lineClear(m,p,this.nav)&&m.attackCD===0){
-    m.attackCD=1.4;const damage=p.shield>0?Math.ceil(type.damage*.35):type.damage;p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});
+   const type=MONSTER_TYPES[m.type],outcome=advanceMonster(m,p,type,dt,this.nav,{moveBody,lineClear});
+   if(outcome==='respawn')this.emit('respawn',{id:m.id});
+   if(outcome==='hit'){
+    const damage=p.shield>0?Math.ceil(type.damage*.35):type.damage;p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});
     if(p.hp===0){p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;this.mobs.forEach(v=>v.aggro=false);this.notice('หมดแรง · กลับลานใน 3 วินาที');break;}
    }
   }

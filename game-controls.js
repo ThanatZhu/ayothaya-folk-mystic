@@ -1,3 +1,4 @@
+import {monsterFrame} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
@@ -6,12 +7,12 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=37';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=31';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=38';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=31';
 
 import {className} from './classes.js?v=18';
 
-export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
+export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
  const skillEffects=createSkillEffects(scene);let activeSkill=null,network=null,serverSelf=null;
  // Skill levels: the server owns them online; guests keep them in their local save.
@@ -32,13 +33,14 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
  addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){network?.command('emote',{name:e.detail});castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
  const mobViews=world.mobs.map(m=>{
-  const h=m.type===0?1.3:1.45,tex=monsterTextures[m.type].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
+  const h=MONSTER_TYPES[m.type].height??1.45,frames=monsterArt[m.type]?.map(t=>t.clone()),tex=frames?.[0]??monsterTextures[m.type%4].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
   s.userData.monsterId=m.id;
   const label=document.createElement('button');label.className='mob-label';label.type='button';label.setAttribute('aria-label','เลือกเป้า '+MONSTER_TYPES[m.type].name+' '+(m.id+1));
   const text=document.createElement('span');text.textContent=MONSTER_TYPES[m.type].name;label.append(text);
   const bar=document.createElement('i'),fill=document.createElement('b');bar.append(fill);label.append(bar);$('world-labels').append(label);
   label.addEventListener('click',()=>world.select(m.id));
-  return {sprite:s,shadow:sh,height:h,label,fill};
+  const warning=new THREE.Mesh(new THREE.RingGeometry(.15,MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:'#ed9b59',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));warning.rotation.x=-Math.PI/2;scene.add(warning);
+  return {sprite:s,shadow:sh,height:h,label,fill,frames,frame:-1,warning,deathStart:null};
  });
  hero.sprite.material.map=hero.sprite.material.map.clone();
  const ringGeometry=new THREE.RingGeometry(.47,.51,40);
@@ -178,13 +180,19 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,sp
   controls.update();camera.updateMatrixWorld();
   project(playerLabel,p.x,2.0+hero.sprite.position.y,p.z);
   mobViews.forEach((v,i)=>{
-   const m=world.mobs[i];v.sprite.visible=v.shadow.visible=m.hp>0;v.label.hidden=m.hp<=0;
-   if(m.hp<=0)return;
-   v.sprite.position.set(m.x,.06+Math.abs(Math.sin(t*2+m.id))*.025,m.z);v.shadow.position.set(m.x,.073,m.z);
-   const lunge=m.attackCD>1.05?Math.sin((1.4-m.attackCD)/.35*Math.PI):0;
-   v.sprite.scale.y=v.height*(1+(reduced?0:.035*Math.sin(t*3+i))-.10*lunge);v.sprite.scale.x=v.height*1.1*(1+.12*lunge);v.sprite.material.rotation=reduced?0:Math.sin(m.step*2)*.04+lunge*.12;
-   if(m.hit>0&&!reduced)v.sprite.position.x+=Math.sin(t*70)*.045;v.sprite.material.color.set(m.hit>0?'#fffbd1':m.root>0?'#9ddacc':'#fff1da');v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
-   if(m.aggro){const side=(p.x-m.x)*Math.cos(controls.getAzimuthalAngle())-(p.z-m.z)*Math.sin(controls.getAzimuthalAngle());v.sprite.material.map.repeat.x=side>0?-1:1;v.sprite.material.map.offset.x=side>0?1:0;}
+   const m=world.mobs[i],type=MONSTER_TYPES[m.type];
+   if(m.hp<=0&&v.deathStart===null)v.deathStart=t;if(m.hp>0)v.deathStart=null;
+   const deadAge=v.deathStart===null?0:t-v.deathStart,visible=m.hp>0||deadAge<1.25;
+   v.sprite.visible=v.shadow.visible=visible;v.label.hidden=m.hp<=0;v.warning.visible=m.hp>0&&m.windup>0;
+   v.warning.position.set(m.x,.09,m.z);v.warning.material.opacity=.12+.25*(1-(m.windup??0)/(type.windup??.45));
+   if(!visible)return;
+   const f=monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
+   const recoil=reduced?0:Math.sin(Math.PI*Math.min(1,m.hit/.34))*.18;
+   v.sprite.position.set(m.x+(m.recoil?.x??0)*recoil,.06,m.z+(m.recoil?.z??0)*recoil);v.shadow.position.set(m.x,.073,m.z);
+   v.sprite.scale.set(v.height*1.1,v.height,1);v.sprite.material.rotation=0;
+   v.sprite.material.transparent=m.hp<=0;v.sprite.material.opacity=m.hp<=0?Math.max(0,1-(deadAge-.5)/.75):1;
+   v.sprite.material.color.set(m.hit>.25&&!reduced?'#ffe8c8':m.root>0?'#9ddacc':'#fff1da');v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
+   if(m.aggro){const side=(p.x-m.x)*Math.cos(controls.getAzimuthalAngle())-(p.z-m.z)*Math.sin(controls.getAzimuthalAngle());v.sprite.material.map.repeat.x=side<0?-1:1;v.sprite.material.map.offset.x=side<0?1:0;}
    project(v.label,m.x,v.height+.08,m.z);
   });
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}

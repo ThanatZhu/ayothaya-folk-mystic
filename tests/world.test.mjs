@@ -5,9 +5,9 @@ import {CombatWorld,walkable,findPath,moveBody} from '../combat-core.js';
 import {resolveMap,destinations,restoreTraveler,serializeTraveler} from '../world-state.js';
 const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 const map=catalog.maps[0];
-test('only the rebuilt capital ships, with no portals or monsters from retired maps',()=>{
- assert.equal(catalog.maps.length,1);assert.equal(map.id,'ayutthaya');assert.equal(map.safe,true);
- assert.deepEqual(map.portals,[]);assert.deepEqual(map.mobs,[]);assert.equal(map.districts.length,8);
+test('rebuilt capital retains its districts and safe boundary while opening the starter route',()=>{
+ assert.equal(catalog.maps.length,4);assert.equal(map.id,'ayutthaya');assert.equal(map.safe,true);
+ assert.deepEqual(map.portals.map(p=>p.to),['rice-fields']);assert.deepEqual(map.mobs,[]);assert.equal(map.districts.length,8);
  assert.equal(resolveMap(catalog,'bangsai').id,'ayutthaya');assert.equal(resolveMap(catalog,'bad-url').id,'ayutthaya');
  const files=fs.readdirSync(new URL('../maps/',import.meta.url)).filter(n=>n.endsWith('.glb'));
  assert.deepEqual(files,['ayutthaya.glb']);assert.ok(fs.statSync(new URL('../maps/ayutthaya.glb',import.meta.url)).size>10000);

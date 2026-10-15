@@ -1,5 +1,5 @@
 import {openHudPanel} from './hud-panels.js?v=34';
-import {drawMap} from './city-map.js?v=22';
+import {drawMap} from './city-map.js?v=38';
 import * as THREE from 'three';
 import {destinations,restoreTraveler,serializeTraveler} from './world-state.js?v=21';
 
@@ -9,6 +9,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0;
  if(!account)try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}
  document.title=map.name+' · อโยธยา Folk Mystic';$('status').textContent=map.name+(map.safe?' · เขตปลอดภัย':' · นอกเมือง');
+ const mapHeading=document.querySelector('.field-map-title');if(mapHeading)mapHeading.textContent=map.name+' · CH '+(account?.serverId?.slice(-1)||'1');
  document.querySelector('.player-heading small').textContent=map.safe?'เขตสงบ · พักฟื้นในเมืองหลวง':map.subtitle.split(' · ')[0];
  if(map.safe){$('target-name').textContent='เขตปลอดภัย';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;

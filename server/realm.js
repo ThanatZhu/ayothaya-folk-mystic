@@ -1,3 +1,4 @@
+import {markMonsterHit,advanceMonster} from '../monster-catalog.js';
 import {randomUUID} from 'node:crypto';
 import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable} from '../combat-core.js';
 import {awardExperience} from '../experience.js';
@@ -103,10 +104,10 @@ export class RealmServer{
  social(room){for(const id of room.peers){const p=this.peers.get(id),party=this.parties.get(p.partyId);p.send({type:'social',players:[...room.peers].map(id=>{const a=this.peers.get(id);return {id,name:a.character.name,classId:a.character.classId,partyId:a.partyId};}),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
  hurt(p,mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0||p.room.map.safe)return;
-  const amount=Math.min(mob.hp,damage);mob.hp-=amount;mob.hit=.16;mob.aggro=true;
+  const amount=Math.min(mob.hp,damage);mob.hp-=amount;markMonsterHit(mob,p.world.player);
   let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
   p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color});
-  if(mob.hp>0)return;mob.dead=8;mob.aggro=false;
+  if(mob.hp>0)return;mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
   const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort();
@@ -121,14 +122,12 @@ export class RealmServer{
   for(const p of this.peers.values()){if(p.suspended)continue;p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};p.world.update(dt,p.input,{monsters:false});}
   for(const room of this.rooms.values()){
    for(const m of room.mobs){
-    m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);
-    if(m.hp<=0){m.dead-=dt;if(m.dead<=0){Object.assign(m,{...m.home,hp:m.maxHp,aggro:false,root:0,attackCD:1});room.contributors.delete(m.id);}continue;}
     const candidates=[...room.peers].map(id=>this.peers.get(id)).filter(p=>!p.suspended&&p.world.player.hp>0).sort((a,b)=>distance(a.world.player,m)-distance(b.world.player,m));
-    const target=candidates[0];if(!target||distance(m,m.home)>6)m.aggro=false;
-    const goal=m.aggro?target.world.player:m.home,d=distance(m,goal),type=MONSTER_TYPES[m.type];
-    if(m.root===0&&d>(m.aggro?1.05:.12)){const step=Math.min(d,type.speed*dt);moveBody(m,(goal.x-m.x)/d*step,(goal.z-m.z)/d*step,room.map.nav);m.step+=dt*7;}
-    if(m.aggro&&target&&distance(m,target.world.player)<1.35&&m.attackCD===0&&lineClear(m,target.world.player,room.map.nav)){
-     const w=target.world,p=w.player,amount=p.shield>0?Math.ceil(type.damage*.35):type.damage;m.attackCD=1.4;p.hp=Math.max(0,p.hp-amount);w.emit('playerHit',{x:p.x,z:p.z,amount});
+    const target=candidates[0],type=MONSTER_TYPES[m.type];
+    const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
+    if(result==='respawn')room.contributors.delete(m.id);
+    if(result==='hit'&&target){
+     const w=target.world,p=w.player,amount=p.shield>0?Math.ceil(type.damage*.35):type.damage;p.hp=Math.max(0,p.hp-amount);w.emit('playerHit',{x:p.x,z:p.z,amount});
      if(p.hp===0){p.down=3;w.auto=false;w.targetId=null;w.path=[];p.moving=false;w.notice('หมดแรง · กลับลานใน 3 วินาที');}
     }
    }
@@ -142,6 +141,13 @@ export class RealmServer{
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
   const players=visible.map(a=>{const v=a.world.player,result={id:a.id,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,face:{x:round(v.face.x),z:round(v.face.z)}},partyId:a.partyId,connected:!a.suspended};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
   return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p))},players,mobs:p.room.mobs});
+ }
+ travelDestination(p,id){
+  const portal=p.room.map.portals?.find(v=>v.to===id&&distance(v,p.world.player)<2.6);
+  const destination=this.catalog.maps.find(m=>m.id===id);
+  if(!portal||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
+  if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
+  return destination;
  }
  record(p,original){return {...copy(original),character:copy(p.character),skills:copy(p.skills),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
 }

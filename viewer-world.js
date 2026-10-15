@@ -1,10 +1,12 @@
-import {createMultiplayer} from './multiplayer-ui.js?v=37';
+import {createFrontierScene} from './frontier-scene.js?v=38';
+import {loadMonsterFrames} from './monster-art.js?v=38';
+import {createMultiplayer} from './multiplayer-ui.js?v=38';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=34';
 import {createMmoHud} from './mmo-hud.js?v=32';
 import {createSoftLook} from './soft-look.js?v=29';
-import {createLandscapeDetails} from './landscape-details.js?v=21';
-import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=31';
+import {createLandscapeDetails} from './landscape-details.js?v=38';
+import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
 import {createRiggedSprite} from './rigged-sprite.js?v=37';
 import {customizeAtlas} from './character-appearance.js?v=18';
@@ -14,13 +16,13 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=37';
+import {createGame} from './game-controls.js?v=38';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=34';
+import {createWorldUI} from './world-ui.js?v=38';
 import {resolveMap} from './world-state.js?v=21';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
-import {prepareCloud} from './cloud-save.js?v=34';
+import {prepareCloud} from './cloud-save.js?v=38';
 import {captureSave,applySave} from './save-state.js?v=21';
 const $=id=>document.getElementById(id),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
@@ -33,7 +35,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=29');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=38');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json(),account=await prepareCloud(catalog);
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
  history.replaceState(null,'','?server='+account.serverId+'&map='+encodeURIComponent(map.id));
@@ -47,8 +49,8 @@ try {
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.copy(target);controls.enableDamping=true;controls.dampingFactor=.1;controls.enablePan=false;
  controls.minPolarAngle=controls.maxPolarAngle=Math.atan2(Math.hypot(23,28),24);controls.minZoom=.65;controls.maxZoom=2.7;controls.rotateSpeed=.6;controls.update();
  const softLook=createSoftLook({renderer,scene,camera});
- scene.add(new THREE.HemisphereLight('#fffdf4','#a3af84',1.35));
- const sun=new THREE.DirectionalLight('#ffefd2',1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
+ const night=map.procedural==='mill';scene.add(new THREE.HemisphereLight(night?'#b4d5dd':'#fffdf4',night?'#4e6260':'#a3af84',night?.85:1.35));
+ const sun=new THREE.DirectionalLight(night?'#bed9ed':'#ffefd2',night?.7:1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
  Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;sun.shadow.radius=5;sun.shadow.intensity=.74;scene.add(sun);scene.add(sun.target);
  let rotating=null;
  function resize(){const a=innerWidth/innerHeight,h=Math.max(12.8,18.2/a);camera.left=-h*a;camera.right=h*a;camera.top=h;camera.bottom=-h;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false);softLook.setSize(innerWidth,innerHeight);}
@@ -57,7 +59,7 @@ try {
  $('left').onclick=()=>turn(-1);$('right').onclick=()=>turn(1);$('in').onclick=()=>zoom(1.18);$('out').onclick=()=>zoom(1/1.18);
  $('reset').onclick=()=>{rotating=null;camera.position.copy(initial);camera.zoom=1;controls.target.copy(target);camera.updateProjectionMatrix();controls.update();};
  controls.addEventListener('start',()=>{rotating=null;});addEventListener('keydown',e=>{if(document.querySelector('dialog:modal')||$('account-panel').dataset.blocking==='true'||e.ctrlKey||e.metaKey||e.altKey||e.repeat||e.target.closest?.('input,textarea,select'))return;if(e.code==='KeyQ')turn(-1);if(e.code==='KeyE')turn(1);});addEventListener('resize',resize);resize();
- const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas,capitalAtlas,leafAtlas]=await Promise.all([new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./'+map.model+'?v=29'),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId)),loader.loadAsync('./assets/capital-materials19.png'),loader.loadAsync('./assets/capital-leaves19.png')]);
+ const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas,capitalAtlas,leafAtlas]=await Promise.all([map.procedural?Promise.resolve({scene:new THREE.Group()}):new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./'+map.model+'?v=29'),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId)),loader.loadAsync('./assets/capital-materials19.png'),loader.loadAsync('./assets/capital-leaves19.png')]);
  const tiles={wood:frame(materials.image,[0,0,.5,.5],true),roof:frame(materials.image,[.5,0,.5,.5],true),sand:frame(materials.image,[0,.5,.5,.5],true),grass:frame(materials.image,[.5,.5,.5,.5],true)},cache=new Map();
  for(const [key,rect] of Object.entries({brick:[0,0,.5,.5],plaster:[.5,0,.5,.5],paving:[0,.5,.5,.5],meadow:[.5,.5,.5,.5]}))tiles[key]=frame(worldMaterials.image,rect,true);
  const capitalLook=createCapitalLook({map,atlas:capitalAtlas,frame});tiles.roof=capitalLook.roof;
@@ -112,9 +114,11 @@ try {
  const geo=new THREE.BufferGeometry(),positions=new Float32Array(90);let seed=2026;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
  for(let i=0;i<30;i++){positions[i*3]=-16+rnd()*32;positions[i*3+1]=.4+rnd()*4;positions[i*3+2]=-20+rnd()*20;}geo.setAttribute('position',new THREE.BufferAttribute(positions,3));
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
- const motion=createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
+ const frontier=map.procedural?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
+ const motion=frontier??createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
- const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
+ const monsterArt=await loadMonsterFrames(map);
+ const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,monsterArt,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;

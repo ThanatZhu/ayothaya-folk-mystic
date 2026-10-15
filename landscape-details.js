@@ -11,7 +11,7 @@ export function createLandscapeDetails({scene,map}){
  const spots=[];const {x:bx,z:bz,w,d}=map.bounds;
  for(let tries=0;tries<22000&&spots.length<720;tries++){
   const x=bx+random()*w,z=bz+random()*d,edge=roadDistance(x,z,map);
-  if(z>4.2||z<-104||x<-61||x>61||edge<.15||edge>2.5)continue;
+  if(edge<.15||edge>2.5)continue;
   if(map.waterAreas.some(a=>x>a.x-.8&&x<a.x+a.w+.8&&z>a.z-.8&&z<a.z+a.d+.8))continue;
   if(map.nav.obstacles.some(a=>x>a.x-.5&&x<a.x+a.w+.5&&z>a.z-.5&&z<a.z+a.d+.5))continue;
   spots.push({x,z,size:.5+random()*.6});

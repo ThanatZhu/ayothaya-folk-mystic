@@ -23,7 +23,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
-  if(url.pathname==='/health'){reply(200,{ok:!closing,authority:authoritative(),protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,ok:!closing,authority:authoritative(),protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity});return;}
   if(mode==='local'&&url.pathname==='/dev/session'&&req.method==='POST'){
    if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>1024){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
@@ -42,7 +42,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   if(!authoritative()){socket.write('HTTP/1.1 503 Service Unavailable\r\nRetry-After: 5\r\n\r\n');socket.destroy();return;}
   wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req));
  });
- const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;await store.checkpoint(s.lease,realm.record(s.peer,s.lease.record),{release});if(release)s.released=true;});return s.queue;};
+ const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;await store.checkpoint(s.lease,s.travelRecord??realm.record(s.peer,s.lease.record),{release});if(release)s.released=true;});return s.queue;};
  wss.on('connection',ws=>{
   let session=null,authenticating=false;ws.alive=true;
   const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}ws.send(JSON.stringify(data));}};
@@ -55,6 +55,13 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(message.type==='save'){if(typeof message.id!=='string'||message.id.length>50)return;
      const settings=message.settings;if(settings&&Number.isFinite(settings.zoom)&&Number.isFinite(settings.azimuth)&&typeof settings.motion==='boolean')session.peer.settings={zoom:Math.max(.65,Math.min(2.7,settings.zoom)),azimuth:settings.azimuth%(Math.PI*2),motion:settings.motion};
      const recent=Date.now()-(session.savedAt??0)<2500;session.savedAt=Date.now();try{if(recent)await session.queue;else await checkpoint(session);send({type:'saved',id:message.id});}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
+    if(message.type==='travel'){
+     if(typeof message.id!=='string'||message.id.length>50||typeof message.destination!=='string')return;
+     let destination;try{destination=realm.travelDestination(session.peer,message.destination);}catch(e){send({type:'travel-error',id:message.id,code:e.message});return;}
+     session.closing=true;session.explicitLeave=true;session.peer.suspended=true;
+     const record=realm.record(session.peer,session.lease.record);record.state.mapId=destination.id;record.state.position={...destination.spawn};session.travelRecord=record;
+     try{await checkpoint(session,true);realm.leave(session.peer.id);send({type:'traveled',id:message.id});ws.close(1000,'traveled');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;
+    }
     if(message.type==='leave'){session.closing=true;session.explicitLeave=true;session.peer.suspended=true;try{await checkpoint(session,true);send({type:'left'});ws.close(1000,'left');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
     realm.receive(session.peer.id,message);return;
    }

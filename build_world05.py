@@ -36,9 +36,13 @@ def shrine(x,y):
 def stupa(x,y,s=1,white=True):
  g='Sacred chedi';mat='plaster' if white else 'brick'
  for i in range(4):box(g,mat,(x,y,(.18+i*.27)*s),((5-i*.6)*s,(5-i*.6)*s,.28*s))
- beam(g,mat,(x,y,1.2*s),(x,y,2.8*s),1.7*s,24,r2=1.15*s)
- beam(g,mat,(x,y,2.8*s),(x,y,3.4*s),1.15*s,24,r2=.65*s)
- for i in range(9):beam(g,'gold',(x,y,(3.4+i*.22)*s),(x,y,(3.56+i*.22)*s),(.7-i*.065)*s,16,r2=(.64-i*.065)*s)
+ # v29: a rounder bell built from stacked bands, a lotus-petal ring at its foot, gold mouldings.
+ bell=[(1.2,1.7),(1.55,1.78),(1.95,1.72),(2.35,1.55),(2.8,1.15),(3.1,.9),(3.4,.65)]
+ for (z1,r1),(z2,r2) in zip(bell,bell[1:]):beam(g,mat,(x,y,z1*s),(x,y,z2*s),r1*s,40,r2=r2*s)
+ for z,r in [(1.2,1.76),(2.8,1.2),(3.4,.7)]:beam(g,'gold',(x,y,(z-.04)*s),(x,y,(z+.04)*s),r*s,40)
+ for k in range(18):
+  a=k*math.tau/18;crown(g,mat,x+math.cos(a)*1.78*s,y+math.sin(a)*1.78*s,1.28*s,.2*s,.2*s,.24*s)
+ for i in range(9):beam(g,'gold',(x,y,(3.4+i*.22)*s),(x,y,(3.56+i*.22)*s),(.7-i*.065)*s,24,r2=(.64-i*.065)*s)
  beam(g,'gold',(x,y,5.35*s),(x,y,6.5*s),.14*s,8,r2=.01)
  obstacle(x,y,5.1*s,5.1*s)
 

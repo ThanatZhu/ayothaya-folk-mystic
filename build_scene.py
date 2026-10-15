@@ -57,11 +57,25 @@ def roof(g,cx,cy,eave,width,depth,rise):
     x1=cx+side*t1*width/2;x2=cx+side*t2*width/2
     material=['roof','roof_light','roof','roof_dark'][row%4]
     mesh(g,material,[(x1,y1,eave+z1*rise),(x2,y1,eave+z2*rise),(x2,y2,eave+z2*rise),(x1,y2,eave+z1*rise)],[(0,1,2,3),(3,2,1,0)])
+    # v29 detail: a raised tile rib down the slope between tile courses.
+    if row:beam(g,'roof_dark',(x1,y1-.012,eave+z1*rise+.03),(x2,y1-.012,eave+z2*rise+.03),.032,4)
   beam(g,'wood_gold',(cx+side*width/2,cy-depth/2,eave),(cx+side*width/2,cy+depth/2,eave),.08)
  for y in [cy-depth/2,cy+depth/2]:
   for side in [-1,1]:
    for (t1,z1),(t2,z2) in zip(profile,profile[1:]):beam(g,'wood_gold',(cx+side*t1*width/2,y,eave+z1*rise+.04),(cx+side*t2*width/2,y,eave+z2*rise+.04),.075)
-  beam(g,'gold',(cx,y,eave+rise-.1),(cx,y,eave+rise+.55),.065,r2=.012)
+  out=-1 if y<cy else 1
+  # v29 Thai gable ornaments. Chofa: a curled bird-head finial at the ridge end.
+  hook=[(0,-.1),(.05,.3),(.16,.6),(.3,.78),(.42,.72),(.44,.6)]
+  for (a1,z1),(a2,z2),r in zip(hook,hook[1:],[.07,.06,.05,.04,.03]):beam(g,'gold',(cx,y+out*a1,eave+rise+z1),(cx,y+out*a2,eave+rise+z2),r,6,r2=r*.8)
+  for side in [-1,1]:
+   # Hang hong: upturned hooks where the gable trim meets the eave.
+   ex=cx+side*width/2
+   for (a1,z1),(a2,z2) in zip([(0,0),(.12,.2),(.16,.38)],[(.12,.2),(.16,.38),(.1,.5)]):beam(g,'gold',(ex+side*a1,y+out*.03,eave+z1),(ex+side*a2,y+out*.03,eave+z2),.045,5,r2=.035)
+   # Bai raka: saw-tooth blades along the gable trim.
+   for (t1,z1),(t2,z2) in zip(profile,profile[1:]):
+    for k in range(3):
+     f=(k+.5)/3;t=t1+(t2-t1)*f;z=z1+(z2-z1)*f;px=cx+side*t*width/2;pz=eave+z*rise+.1
+     mesh(g,'gold',[(px-.09,y+out*.04,pz),(px+.09,y+out*.04,pz),(px+side*.05,y+out*.04,pz+.26)],[(0,1,2),(2,1,0)])
  beam(g,'roof_dark',(cx,cy-depth/2,eave+rise),(cx,cy+depth/2,eave+rise),.09)
 def jar(g,x,y,z,s=1):
  beam(g,'jar',(x,y,z),(x,y,z+.13*s),.24*s,n=10,r2=.33*s)
@@ -107,6 +121,13 @@ def house(cx,cy,g):
   beam(g,'wood_dark',(cx+side*.8,front-1.0,2.05),(cx+side*2.7,front-1.0,2.05),.065)
   for t in range(8):box(g,'wood_light',(cx+side*(.85+t*.26),front-1,1.7),(.055,.07,.62))
  jar(g,cx-2.2,front-.5,1.39,.9);jar(g,cx+2.25,front-.5,1.39,.65)
+ # v29 detail: carved eave brackets from the wall posts, and two hanging veranda lanterns.
+ for side in [-1,1]:
+  for y in [front,cy,cy+d/2-.2]:beam(g,'wood_gold',(cx+side*(w/2-.05),y,2.75),(cx+side*(w/2+.55),y,3.48),.05,5)
+  lx=cx+side*2.2;ly=front-1.35
+  beam(g,'wood_dark',(lx,ly,3.0),(lx,ly,2.72),.012,4)
+  beam(g,'amber',(lx,ly,2.42),(lx,ly,2.7),.13,8,r2=.09)
+  beam(g,'gold',(lx,ly,2.7),(lx,ly,2.74),.1,8)
 
 # An isolated test district, not a reconstruction of a historical location.
 box('Terrain','earth',(0,0,-.65),(22,18,.8))

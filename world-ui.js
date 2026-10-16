@@ -18,8 +18,8 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
  if(map.safe){$('target-name').textContent='เขตปลอดภัย';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
- async function travel(id){
-  if(traveling||!reachable.has(id)||world.player.hp<=0)return;
+ async function travel(id,recall=false){
+  if(traveling||!(reachable.has(id)||recall)||world.player.hp<=0)return;
   traveling=true;game.clearInput();
   getLoadingScreen().show(id,{travel:true});
   if(account){
@@ -78,6 +78,8 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
  const api={update,get paused(){return !!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),
+  // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
+  recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},
   talkTo:name=>{const n=npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.n;if(n)talk(n);return !!n;},
   npcLabel:name=>npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.label??null};
  minimap();return api;

@@ -1,0 +1,33 @@
+/* Storage / trade / stall / market window (market-ui.js, 0.46). Same frame as the bag window. */
+#market-window[data-hud-panel]{position:fixed;inset:auto;top:85px;right:200px;left:auto;bottom:auto;margin:0;width:420px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 160px);padding:0;border:1px solid #c6a16488;border-radius:8px;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;box-shadow:0 6px 24px #0006;z-index:40;overflow:auto;overscroll-behavior:contain;font-family:Mali,Tahoma,sans-serif}
+#market-window>header{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:8px;padding:8px 10px;background:#22382cf0;border-bottom:1px solid #af884f44}
+#market-window h2{margin:0;font-size:16px;color:#f4cf7a;flex:1}
+#market-window h3{margin:8px 10px 4px;font-size:13px;color:#f4cf7a}#market-window h3 small{color:#c9b98f;font-weight:400}
+#market-body{padding-bottom:10px}
+.market-cols{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.market-cols section.locked{background:#f4cf7a14;border-radius:6px}
+.market-cols p{margin:0 10px;font-size:12px}
+.market-list{list-style:none;margin:0;padding:0 8px;display:grid;gap:5px}
+.market-list li{display:flex;align-items:center;gap:6px;padding:5px 7px;border:1px solid #af884f44;border-radius:7px;background:#0e292688;font-size:12px}
+.market-list li>div{flex:1;min-width:0}.market-list li strong{display:block;color:#fff0ce;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.market-list li small{color:#c9b98f;font-size:10px}
+.market-list li>b{color:#f4cf7a;white-space:nowrap}
+.market-list .empty{justify-content:center;color:#c9b98f;font-size:11px}
+.market-list .item-icon{width:32px;height:32px}
+.market-list button,.market-actions button,.market-bar button,#npc-storage{padding:4px 10px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer;white-space:nowrap}
+.market-list button:disabled,.market-actions button:disabled{opacity:.45;cursor:default}
+.market-list [data-d],.market-list .qty button{width:24px;height:24px;padding:0;border-radius:50%;background:#24382b;color:#f4dfac;border-color:#af884f88}
+.market-list output{min-width:20px;text-align:center}
+.market-list .qty{display:flex;align-items:center;gap:3px}
+.market-list input[type=number]{width:58px;padding:3px;border:1px solid #af884f88;border-radius:5px;background:#0d1f1b;color:#fff0ce;font:12px Mali,Tahoma,sans-serif}
+.market-list .stall-count{width:44px}
+.market-coin{display:flex;align-items:center;gap:6px;margin:6px 10px;font-size:12px}
+.market-coin input{flex:1;padding:4px 6px;border:1px solid #af884f88;border-radius:5px;background:#0d1f1b;color:#fff0ce;font:12px Mali,Tahoma,sans-serif}
+.market-note{margin:8px 10px;font-size:12px;color:#d9cba4}
+.market-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;padding:8px 10px 0}
+.market-actions .mp-primary{background:linear-gradient(180deg,#bdf0c0,#6fbf78);border-color:#bdf0c0}
+.market-stall{margin-bottom:6px}
+.market-bar{display:flex;gap:6px;justify-content:flex-end;padding:0 10px 10px}
+/* Vending sign above a player whose stall is open (RO style), fed by data-stall from multiplayer-ui.js */
+.remote-player-label[data-stall]:not([data-stall=""])::after{content:attr(data-stall);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);padding:2px 9px;border:2px solid #8a5a2b;border-radius:4px;background:#f4e3b8;color:#4a2a10;font:700 11px Mali,Tahoma,sans-serif;text-shadow:none;white-space:nowrap}
+@media (orientation:landscape) and (max-height:520px){#market-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(420px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}}
+@media (max-width:520px){.market-cols{grid-template-columns:1fr}}

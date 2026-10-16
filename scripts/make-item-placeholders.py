@@ -7,7 +7,7 @@ root = Path(__file__).resolve().parent.parent
 src = (root / 'items.js').read_text(encoding='utf8')
 import sys
 # Pick exactly one sheet; never default, so a typo cannot overwrite painted art.
-SHEETS = {'--items': (None, 'assets/items42/items.png'), '--gear': ('gear', 'assets/gear43/gear.png'), '--refine': ('refine', 'assets/refine44/refine.png'), '--cards': ('cards', 'assets/cards45/cards.png')}
+SHEETS = {'--items': (None, 'assets/items42/items.png'), '--gear': ('gear', 'assets/gear43/gear.png'), '--refine': ('refine', 'assets/refine44/refine.png'), '--cards': ('cards', 'assets/cards45/cards.png'), '--social': ('social', 'assets/social46/social.png')}
 picked = [a for a in sys.argv[1:] if a in SHEETS]
 FORCE = '--force' in sys.argv
 if len(picked) != 1 or len(sys.argv) != 2 + FORCE: sys.exit('usage: make-item-placeholders.py ' + ' | '.join(SHEETS) + ' [--force]')

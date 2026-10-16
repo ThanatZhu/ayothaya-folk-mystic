@@ -162,7 +162,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    const elapsed=clock-(v.action?.start??-100),track=skillTrack(state.character.classId,v.action?.index),emote=clock-(v.emote?.start??-100)<4;
    const pose=track&&elapsed<track.duration?skillPose(state.character.classId,v.action.index,elapsed,{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?'attack':emote?v.emote.name:p.moving?'walk':'idle',time:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?elapsed:emote?clock-v.emote.start:clock,phase:v.gait,reduced:reduced.matches});
    v.sprite.material.map=v.frames[0];v.sprite.position.y=(p.z>4.25?.41:.06)+pose.y;const angle=controls.getAzimuthalAngle();v.sprite.userData.pose(pose,p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle)<0);v.sprite.visible=p.hp>0;
-   const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);
+   const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
    v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x,v.sprite.position.y+2.1,v.sprite.position.z);
   }
   const now=performance.now();

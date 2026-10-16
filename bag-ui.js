@@ -1,6 +1,6 @@
 // Bag (กระเป๋า · B), NPC shops, two quick-use slots (Q / E) and loot notices.
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
-import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,useItem,itemLabel,itemDef} from './items.js?v=03';
+import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,useItem,itemLabel,itemDef} from './items.js?v=04';
 import {MONSTER_TYPES} from './combat-core.js?v=38';
 import {openHudPanel} from './hud-panels.js?v=34';
 
@@ -102,8 +102,8 @@ export function createBagUI({game,worldUI,map,account}){
    $('bag-grid').innerHTML=Array.from({length:BAG_SLOTS},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot${id===selected?' on':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
    $('bag-grid').querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{selected=el.dataset.id;render(true);});
    const it=selected&&itemDef(selected);
-   $('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong>${it.name} ×${b.items[selected]}</strong><p>${it.text??''}</p><small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'?'<button type="button" data-act="use">ใช้</button><button type="button" data-act="q0">ปุ่มลัด Q</button><button type="button" data-act="q1">ปุ่มลัด E</button>':''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}</div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
-   $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='use')use(selected);else if(a==='wear')api.onWear?.(selected);else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
+   $('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong>${it.name} ×${b.items[selected]}</strong><p>${it.text??''}</p><small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'?'<button type="button" data-act="use">ใช้</button><button type="button" data-act="q0">ปุ่มลัด Q</button><button type="button" data-act="q1">ปุ่มลัด E</button>':''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}</div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
+   $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='use')use(selected);else if(a==='wear')api.onWear?.(selected);else if(a==='recall'){if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[selected]--;if(!b.items[selected])delete b.items[selected];local=b;save();}}else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
   }
   if(shopDialog.open&&shopNpc){
    const shop=SHOPS[shopNpc.name];$('shop-title').textContent=shop.title;$('shop-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');

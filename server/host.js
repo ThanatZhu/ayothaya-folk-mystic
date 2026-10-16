@@ -111,7 +111,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  // Waiting for authority: retry every 5 s (a read while another host holds it). Holding it: renew every 40 s.
  let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();
  // Save only what changed, at most once a minute; an idle player just keeps the lease alive (see storage.js budget).
- const dueForSave=s=>{const age=Date.now()-(s.autoSavedAt??0);if(age<SAVE_MIN_GAP)return false;return age>=SAVE_MAX_GAP||JSON.stringify(realm.record(s.peer,s.lease.record))!==s.savedJson;};
+ const dueForSave=s=>{if(s.peer.saveNow){s.peer.saveNow=false;return true;} // trades / stall sales save at once
+  const age=Date.now()-(s.autoSavedAt??0);if(age<SAVE_MIN_GAP)return false;return age>=SAVE_MAX_GAP||JSON.stringify(realm.record(s.peer,s.lease.record))!==s.savedJson;};
  const autosave=setInterval(()=>{for(const s of sessions.values())if(!s.closing&&dueForSave(s))checkpoint(s).catch(()=>{s.closing=true;s.peer.send({type:'error',code:'save-failed'});s.ws.close(4010,'save-failed');});},10000);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
  return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};

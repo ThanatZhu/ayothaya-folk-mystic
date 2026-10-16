@@ -120,7 +120,7 @@ export class CombatWorld{
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
-  if(mob.hp===0){mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];this.emit('experience',awardExperience(this,reward.baseXp,reward.jobXp));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
+  if(mob.hp===0){mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=this.expRate??1;this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  basicAttack(quiet=false){
   const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;

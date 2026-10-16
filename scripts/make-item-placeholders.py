@@ -20,7 +20,7 @@ items = re.findall(pat, src)
 if ATLAS == 'emblems': items = [('emblem-%d' % (i + 1), str(i), str(i + 1), 'emblem') for i in range(24)]  # generated in items.js
 if ATLAS == 'emotes': items = [('emote-%d' % (i + 1), str(i), str(i + 1), 'emote') for i in range(24)]
 font = ImageFont.truetype(str(root / 'assets/fonts/Mali-Bold.ttf'), 34)
-colors = {'loot': (198, 161, 100), 'potion': (205, 80, 70), 'ui': (244, 207, 122), 'reserved': (120, 130, 120), 'gear': (150, 170, 190), 'card': (200, 120, 200), 'emblem': (0, 0, 0), 'emote': (0, 0, 0)}
+colors = {'loot': (198, 161, 100), 'potion': (205, 80, 70), 'ui': (244, 207, 122), 'reserved': (120, 130, 120), 'gear': (150, 170, 190), 'card': (200, 120, 200), 'emblem': (0, 0, 0), 'emote': (0, 0, 0), 'lure': (230, 220, 180), 'petfood': (200, 150, 90), 'egg': (235, 225, 200), 'scroll': (200, 120, 60)}
 atlas = Image.new('RGBA', (1536, 1024), (0, 0, 0, 0))
 for item_id, icon, name, kind in items:
     i = int(icon); x, y = i % 6 * 256, i // 6 * 256

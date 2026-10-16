@@ -7,7 +7,7 @@ import {MONSTER_TYPES} from '../combat-core.js';
 const world=JSON.parse(readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 
 test('atlas cells are unique and every drop, shop and monster reference is real', () => {
- for(const atlas of [undefined,'gear']){const icons=Object.values(ITEMS).filter(i=>i.atlas===atlas).map(i=>i.icon);
+ for(const atlas of [undefined,'gear','refine','cards','social','emblems','emotes','items48']){const icons=Object.values(ITEMS).filter(i=>i.atlas===atlas).map(i=>i.icon);
   assert.equal(new Set(icons).size,icons.length,'unique cells in '+(atlas??'items'));assert.ok(icons.every(i=>i>=0&&i<24));}
  for(const [monster,d] of Object.entries(DROPS)){
   assert.ok(MONSTER_TYPES.some(t=>t.id===monster),monster);
@@ -16,7 +16,7 @@ test('atlas cells are unique and every drop, shop and monster reference is real'
  for(const map of world.maps)for(const [,,type] of map.mobs??[]){const id=MONSTER_TYPES[type]?.id;if(id)assert.ok(DROPS[id],`${id} spawns in ${map.id} but has no drops`);}
  for(const [npc,shop] of Object.entries(SHOPS)){
   assert.ok(world.maps.find(m=>m.id===shop.mapId)?.npcs.some(n=>n.name===npc),`${npc} in ${shop.mapId}`);
-  for(const id of shop.stock){assert.ok(ITEMS[id].buy>ITEMS[id].sell,`${id} sells for less than it costs`);}
+  for(const id of shop.stock){if(shop.currency)assert.ok(ITEMS[id].tokens>0,`${id} has no token price`);else assert.ok(ITEMS[id].buy>ITEMS[id].sell,`${id} sells for less than it costs`);}
  }
 });
 

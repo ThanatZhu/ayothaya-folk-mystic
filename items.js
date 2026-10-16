@@ -21,11 +21,20 @@ export const ITEMS={
  'spirit-rope':{icon:10,name:'เชือกขวัญพันเกลียว',kind:'loot',sell:1200,text:'เชือกที่พันเจ้าหุ่นฟางไว้กับการรอคอย'},
  'palm-leaf':{icon:11,name:'ใบลานจารึก',kind:'loot',sell:90,text:'ใบลานจารึกชื่อคนที่ประทีปเคยส่องทางให้'},
  'hp-small':{icon:12,name:'ยาสมุนไพรแดง',kind:'potion',buy:25,sell:6,hp:60,text:'ฟื้น HP 60'},
- 'hp-large':{icon:13,name:'ยาสมุนไพรแดงขวดใหญ่',kind:'potion',buy:90,sell:22,hp:180,text:'ฟื้น HP 180'},
+ 'hp-large':{icon:13,tokens:3,name:'ยาสมุนไพรแดงขวดใหญ่',kind:'potion',buy:90,sell:22,hp:180,text:'ฟื้น HP 180'},
  'ember-amulet':{atlas:'items48',icon:1,name:'จี้ถ่านเพลิงราชา',kind:'gear',slot:'accessory',atk:10,matk:10,bonus:{str:2,int:2},level:20,sell:3000,text:'ATK +10 · MATK +10 · STR/INT +2 · Lv.20 · ของ MVP'},
  'spirit-lamp':{atlas:'items48',icon:2,name:'ตะเกียงวิญญาณ',kind:'gear',slot:'accessory',matk:8,bonus:{int:3,dex:2},level:18,sell:1500,text:'MATK +8 · INT +3 · DEX +2 · Lv.18 · ของดันเจี้ยน'},
  'king-ember':{atlas:'items48',icon:3,name:'ถ่านเพลิงราชาหุ่นฟาง',kind:'loot',sell:1500,text:'รางวัลผู้ได้ MVP · ขายได้ราคาดี'},
- 'green-herb':{atlas:'items48',icon:0,name:'ยาเขียว',kind:'potion',buy:40,sell:10,cure:true,text:'แก้ทุกอาการ: พิษ ใบ้ ตาพร่า คำสาป'},
+ // 0.50 pets and the festival
+ 'pet-lure':{atlas:'items48',icon:4,name:'ข้าวเหนียวล่อสัตว์',kind:'lure',buy:300,tokens:6,sell:75,text:'เลือก หนู/หุ่นฟาง/ตั๊กแตน/ลูกลิง แล้วใช้ · ยิ่งมอนเลือดน้อยยิ่งจับง่าย'},
+ 'pet-food':{atlas:'social',icon:20,name:'ข้าวคลุกปลา',kind:'petfood',buy:20,sell:5,text:'อาหารสัตว์เลี้ยง · ให้ตอนหิวจะสนิทขึ้น'},
+ 'egg-rat':{atlas:'items48',icon:5,name:'ไข่หนูยุ้งข้าว',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ LUK +2'},
+ 'egg-straw':{atlas:'items48',icon:6,name:'ไข่หุ่นฟางหลง',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ STR +1 DEX +1'},
+ 'egg-hopper':{atlas:'items48',icon:7,name:'ไข่ตั๊กแตนเกราะ',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ VIT +2'},
+ 'egg-monkey':{atlas:'items48',icon:8,name:'ไข่ลูกลิงฉกของ',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ AGI +2'},
+ 'event-token':{atlas:'social',icon:23,name:'เหรียญงานวัด',kind:'loot',text:'ได้จากมอนช่วงเทศกาล · แลกของที่เจ้าจุก'},
+ 'krathong':{atlas:'social',icon:22,name:'กระทงใบตอง',kind:'potion',tokens:4,hp:300,mp:150,sell:10,text:'อธิษฐานแล้วฟื้น HP 300 · MP 150'},
+ 'green-herb':{atlas:'items48',icon:0,tokens:2,name:'ยาเขียว',kind:'potion',buy:40,sell:10,cure:true,text:'แก้ทุกอาการ: พิษ ใบ้ ตาพร่า คำสาป'},
  'mp-small':{icon:14,name:'น้ำมนต์ใส',kind:'potion',buy:30,sell:7,mp:40,text:'ฟื้น MP 40'},
  'mp-large':{icon:15,name:'น้ำมนต์ทองคำ',kind:'potion',buy:110,sell:27,mp:120,text:'ฟื้น MP 120'},
  'sticky-rice':{icon:16,name:'ข้าวเหนียวห่อใบตอง',kind:'potion',buy:40,sell:10,hp:45,mp:20,text:'ฟื้น HP 45 และ MP 20'},
@@ -41,6 +50,7 @@ export const ITEMS={
  'st-poison':{atlas:'social',icon:8,name:'พิษ',kind:'ui'},'st-stun':{atlas:'social',icon:9,name:'มึนงง',kind:'ui'},'st-sleep':{atlas:'social',icon:10,name:'หลับ',kind:'ui'},
  'st-silence':{atlas:'social',icon:11,name:'ใบ้',kind:'ui'},'st-blind':{atlas:'social',icon:12,name:'ตาพร่า',kind:'ui'},'st-curse':{atlas:'social',icon:13,name:'คำสาป',kind:'ui'},
  'mvp-crown':{atlas:'social',icon:16,name:'MVP',kind:'ui'},'boss-timer':{atlas:'social',icon:17,name:'เวลาบอส',kind:'ui'},'dungeon-gate':{atlas:'social',icon:18,name:'ดันเจี้ยน',kind:'ui'},
+ 'pet-egg':{atlas:'social',icon:19,name:'ไข่สัตว์เลี้ยง',kind:'ui'},'pet-bell':{atlas:'social',icon:21,name:'กระดิ่งสัตว์เลี้ยง',kind:'ui'},
  'daily-gift':{atlas:'social',icon:14,name:'ของขวัญรายวัน',kind:'ui'},'death-soul':{atlas:'social',icon:15,name:'วิญญาณหลุด',kind:'ui'},'treasure-chest':{icon:23,name:'หีบสมบัติ',kind:'reserved',sell:0},
  // 0.43 stat gear (atlas assets/gear43/gear.png): class weapons tier 1 / tier 2, armor, accessories.
  'wrap-novice':{atlas:'gear',icon:0,name:'ผ้าพันหมัดเชือกป่าน',kind:'gear',slot:'weapon',classes:['novice'],atk:6,buy:120,sell:30,text:'ATK +6 · ผู้ฝึกตน'},
@@ -70,7 +80,7 @@ export const ITEMS={
  // 0.44 refine materials and UI cells (atlas assets/refine44/refine.png); cells 6-11 reserved for element stones.
  'iron-ore':{atlas:'refine',icon:0,name:'เศษเหล็กน้ำพี้',kind:'loot',buy:250,sell:60,text:'ใช้ตีบวกอาวุธที่โรงตีครูแสนดาบ'},
  'laterite':{atlas:'refine',icon:1,name:'ก้อนศิลาแลง',kind:'loot',buy:250,sell:60,text:'ใช้ตีบวกเสื้อเกราะที่โรงตีครูแสนดาบ'},
- 'lek-lai':{atlas:'refine',icon:2,name:'เหล็กไหล',kind:'loot',sell:500,text:'ของวิเศษ ใช้ร่วมตอนตีบวก เพิ่มโอกาสสำเร็จ 20%'},
+ 'lek-lai':{atlas:'refine',icon:2,tokens:30,name:'เหล็กไหล',kind:'loot',sell:500,text:'ของวิเศษ ใช้ร่วมตอนตีบวก เพิ่มโอกาสสำเร็จ 20%'},
 
  // 0.45 monster cards (atlas assets/cards45/cards.png): one per monster, slot into worn gear (1 slot, permanent).
  'card-straw':{atlas:'cards',icon:0,name:'การ์ดหุ่นฟางหลง',kind:'card',slot:'armor',effect:{bonus:{vit:2},hpPct:.05},sell:200,text:'ใส่ในเสื้อเกราะ · VIT +2 · HP +5%'},
@@ -106,7 +116,7 @@ export function itemDef(id){
  return {...it,id,base:m[1],refine:n,card:m[3]??null,name:it.name+(n?' +'+n:'')+(card?' ['+card.name+']':''),sell:Math.round(it.sell*(1+n*.25))+(card?.sell??0)};
 }
 export const composeId=(base,refine,card)=>base+(refine>0?'+'+refine:'')+(card?'~'+card:'');
-const BAGGABLE=id=>['loot','potion','gear','card','scroll'].includes(itemDef(id)?.kind);
+const BAGGABLE=id=>['loot','potion','gear','card','scroll','lure','petfood','egg'].includes(itemDef(id)?.kind);
 
 // Per monster id (MONSTER_TYPES[].id): coins [min,max] and independent item rolls [id, chance, count=1].
 export const DROPS={
@@ -125,7 +135,9 @@ export const DROPS={
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
 export const SHOPS={
- 'แม่บัว':{mapId:'ayutthaya',title:'แผงยาแม่บัว',stock:['hp-small','hp-large','mp-small','mp-large','green-herb','sticky-rice','return-incense']},
+ 'แม่บัว':{mapId:'ayutthaya',title:'แผงยาแม่บัว',stock:['hp-small','hp-large','mp-small','mp-large','green-herb','sticky-rice','return-incense','pet-food','pet-lure']},
+ // 0.50 festival exchange: paid in event tokens instead of cowries.
+ 'เจ้าจุก':{mapId:'ayutthaya',title:'ซุ้มงานวัดเจ้าจุก',currency:'event-token',stock:['krathong','green-herb','hp-large','pet-lure','lek-lai']},
  'ป้าละไม':{mapId:'rice-fields',title:'ยุ้งป้าละไม',stock:['hp-small','mp-small','sticky-rice']},
  'ครูแสนดาบ':{mapId:'ayutthaya',title:'โรงตีอาวุธครูแสนดาบ',refine:true,stock:['iron-ore','laterite','wrap-novice','sword-iron','spear-bamboo','bow-bamboo','gloves-hemp','daggers-twin','staff-wan','beads-wood','knuckle-brass','sword-silver','spear-steel','bow-horn','gloves-leather','daggers-ivory','staff-candle','beads-sandal','vest-cotton','vest-buffalo','takrut-silver','ring-ruby','anklet-silver','cloth-yant']},
 };
@@ -153,20 +165,22 @@ export function addLoot(bag,{coins=0,items=[]}={}){
  return {bag:b,coins:gained,added,lost};
 }
 
-export function rollLoot(monsterId,rand=Math.random){
+export function rollLoot(monsterId,rand=Math.random,event=null){
  const d=DROPS[monsterId];if(!d)return {coins:0,items:[]};
  const [lo,hi]=d.coins,coins=lo+Math.floor(rand()*(hi-lo+1)),items=[];
  for(const [id,chance,n=1] of d.items)if(rand()<chance)items.push({id,count:n});
+ if(event&&rand()<event.drop)items.push({id:event.token,count:1});
  return {coins,items};
 }
 
 export function buy(bag,shopNpc,id,qty=1){
- const shop=SHOPS[shopNpc],item=ITEMS[id];
- if(!shop||!shop.stock.includes(id)||!item?.buy)throw new Error('not-sold');
+ const shop=SHOPS[shopNpc],item=ITEMS[id],price=shop?.currency?item?.tokens:item?.buy;
+ if(!shop||!shop.stock.includes(id)||!price)throw new Error('not-sold');
  if(!Number.isSafeInteger(qty)||qty<1||qty>99)throw new Error('bad-count');
- const b=normalizeBag(bag),cost=item.buy*qty;
- if(b.coins<cost)throw new Error('no-coins');
- const r=addLoot({...b,coins:b.coins-cost},{items:[{id,count:qty}]});
+ const b=normalizeBag(bag),cost=price*qty;
+ if(shop.currency){if((b.items[shop.currency]??0)<cost)throw new Error('no-tokens');b.items[shop.currency]-=cost;if(!b.items[shop.currency])delete b.items[shop.currency];}
+ else if(b.coins<cost)throw new Error('no-coins');
+ const r=addLoot({...b,coins:b.coins-(shop.currency?0:cost)},{items:[{id,count:qty}]});
  if(r.lost.length)throw new Error('bag-full');
  return r.bag;
 }
@@ -195,4 +209,4 @@ export function useItem(bag,id,player,status={}){
 export function itemLabel(list){return list.map(({id,count:n})=>(itemDef(id)?.name??id)+(n>1?' ×'+n:'')).join(', ');}
 
 // Player-facing reasons (shown as a notice) for the error codes above.
-export const ITEM_ERRORS={'not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่','not-refinable':'ตีบวกได้เฉพาะอาวุธและเสื้อเกราะที่สวมอยู่','refine-max':'ตีบวกสูงสุด +10 แล้ว','no-ore':'แร่ตีบวกไม่พอ','no-lek-lai':'ไม่มีเหล็กไหล','refine-far':'ต้องตีบวกที่โรงตีครูแสนดาบ','not-card':'ไม่ใช่การ์ด','card-slot':'การ์ดนี้ใส่ช่องนี้ไม่ได้','slot-full':'อุปกรณ์นี้มีการ์ดแล้ว','no-card-slot':'อุปกรณ์นี้ไม่มีช่องการ์ด','storage-far':'คุยกับลุงเรืองที่ท่าน้ำเพื่อเปิดคลัง','coin-cap':'เบี้ยเต็มแล้ว','trade-far':'อยู่ไกลกันเกินไป','trade-busy':'อีกฝ่ายกำลังแลกของอยู่','trade-none':'ไม่ได้แลกของอยู่','trade-locked':'ล็อกข้อเสนอแล้ว แก้ไขไม่ได้','trade-wait':'รออีกฝ่ายล็อกก่อน','stall-city':'ตั้งแผงได้เฉพาะในเมือง','stall-none':'แผงนี้ปิดแล้ว','stall-self':'ซื้อจากแผงตัวเองไม่ได้','recall-here':'อยู่ในเมืองหลวงแล้ว','held':'ขยับตัวไม่ได้','no-ailment':'ไม่มีอาการผิดปกติ'};
+export const ITEM_ERRORS={'not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่','not-refinable':'ตีบวกได้เฉพาะอาวุธและเสื้อเกราะที่สวมอยู่','refine-max':'ตีบวกสูงสุด +10 แล้ว','no-ore':'แร่ตีบวกไม่พอ','no-lek-lai':'ไม่มีเหล็กไหล','refine-far':'ต้องตีบวกที่โรงตีครูแสนดาบ','not-card':'ไม่ใช่การ์ด','card-slot':'การ์ดนี้ใส่ช่องนี้ไม่ได้','slot-full':'อุปกรณ์นี้มีการ์ดแล้ว','no-card-slot':'อุปกรณ์นี้ไม่มีช่องการ์ด','storage-far':'คุยกับลุงเรืองที่ท่าน้ำเพื่อเปิดคลัง','coin-cap':'เบี้ยเต็มแล้ว','trade-far':'อยู่ไกลกันเกินไป','trade-busy':'อีกฝ่ายกำลังแลกของอยู่','trade-none':'ไม่ได้แลกของอยู่','trade-locked':'ล็อกข้อเสนอแล้ว แก้ไขไม่ได้','trade-wait':'รออีกฝ่ายล็อกก่อน','stall-city':'ตั้งแผงได้เฉพาะในเมือง','stall-none':'แผงนี้ปิดแล้ว','stall-self':'ซื้อจากแผงตัวเองไม่ได้','recall-here':'อยู่ในเมืองหลวงแล้ว','held':'ขยับตัวไม่ได้','no-ailment':'ไม่มีอาการผิดปกติ','not-tameable':'ล่อได้เฉพาะ หนู หุ่นฟาง ตั๊กแตน ลูกลิง ที่เลือกเป็นเป้าไว้','pet-active':'มีสัตว์เลี้ยงออกมาอยู่แล้ว (คืนเป็นไข่ก่อน)','no-pet':'ยังไม่มีสัตว์เลี้ยง','no-tokens':'เหรียญงานวัดไม่พอ'};

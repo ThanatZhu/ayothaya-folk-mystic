@@ -1,5 +1,6 @@
 // Bag (กระเป๋า · B), NPC shops, two quick-use slots (Q / E) and loot notices.
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
+import {activeEvent} from './events.js?v=01';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,useItem,itemLabel,itemDef} from './items.js?v=04';
 import {MONSTER_TYPES} from './combat-core.js?v=38';
 import {openHudPanel} from './hud-panels.js?v=34';
@@ -33,7 +34,7 @@ export function createBagUI({game,worldUI,map,account}){
    if(e.type==='trade')world.notice((e.kind==='buy'?'ซื้อ ':'ขาย ')+itemLabel([{id:e.item,count:e.count}])+' · เหลือเบี้ย '+e.coins);
    return;
   }
-  if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const loot=rollLoot(id);loot.coins=Math.round(loot.coins*(1+(world.derived?.coinPct??0)));grantLocal(loot);}}
+  if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const loot=rollLoot(id,Math.random,activeEvent(Date.now()));loot.coins=Math.round(loot.coins*(1+(world.derived?.coinPct??0)));grantLocal(loot);}}
   if(e.type==='reward')grantLocal(e);
  });
 
@@ -102,15 +103,15 @@ export function createBagUI({game,worldUI,map,account}){
    $('bag-grid').innerHTML=Array.from({length:BAG_SLOTS},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot${id===selected?' on':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
    $('bag-grid').querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{selected=el.dataset.id;render(true);});
    const it=selected&&itemDef(selected);
-   $('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong>${it.name} ×${b.items[selected]}</strong><p>${it.text??''}</p><small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'?'<button type="button" data-act="use">ใช้</button><button type="button" data-act="q0">ปุ่มลัด Q</button><button type="button" data-act="q1">ปุ่มลัด E</button>':''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}</div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
-   $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='use')use(selected);else if(a==='wear')api.onWear?.(selected);else if(a==='recall'){if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[selected]--;if(!b.items[selected])delete b.items[selected];local=b;save();}}else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
+   $('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong>${it.name} ×${b.items[selected]}</strong><p>${it.text??''}</p><small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'?'<button type="button" data-act="use">ใช้</button><button type="button" data-act="q0">ปุ่มลัด Q</button><button type="button" data-act="q1">ปุ่มลัด E</button>':''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='lure'?'<button type="button" data-act="tame">ล่อสัตว์ (เป้าที่เลือก)</button>':''}${it.kind==='egg'?'<button type="button" data-act="hatch">ฟักไข่</button>':''}${it.kind==='petfood'?'<button type="button" data-act="petFeed">ให้อาหารสัตว์เลี้ยง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}</div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
+   $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='use')use(selected);else if(a==='wear')api.onWear?.(selected);else if(['tame','hatch','petFeed'].includes(a))api.onPet?.(a,selected);else if(a==='recall'){if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[selected]--;if(!b.items[selected])delete b.items[selected];local=b;save();}}else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
   }
   if(shopDialog.open&&shopNpc){
    const shop=SHOPS[shopNpc.name];$('shop-title').textContent=shop.title;$('shop-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');
    shopDialog.querySelectorAll('[data-tab]').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===tab)));
    const myClass=account?.character?.classId??world.profession.id;
-   const rows=tab==='buy'?shop.stock.filter(id=>!itemDef(id).classes||itemDef(id).classes.includes(myClass)).map(id=>({id,price:itemDef(id).buy,have:b.items[id]??0})):Object.keys(b.items).filter(id=>itemDef(id).sell).map(id=>({id,price:itemDef(id).sell,have:b.items[id]}));
-   $('shop-list').innerHTML=rows.length?rows.map(r=>`<li data-id="${r.id}">${icon(r.id)}<div><strong>${itemDef(r.id).name}</strong><small>${tab==='buy'?itemDef(r.id).text+' · มี '+r.have:'มี '+r.have+' ชิ้น'}</small></div><b>${r.price} เบี้ย</b><span class="qty"><button type="button" data-q="-1" aria-label="ลด">−</button><output>1</output><button type="button" data-q="1" aria-label="เพิ่ม">+</button></span><button type="button" class="deal">${tab==='buy'?'ซื้อ':'ขาย'}</button></li>`).join(''):'<li class="empty">ยังไม่มีของที่ขายได้</li>';
+   const rows=tab==='buy'?shop.stock.filter(id=>!itemDef(id).classes||itemDef(id).classes.includes(myClass)).map(id=>({id,price:shop.currency?itemDef(id).tokens:itemDef(id).buy,have:b.items[id]??0})):Object.keys(b.items).filter(id=>itemDef(id).sell).map(id=>({id,price:itemDef(id).sell,have:b.items[id]}));
+   $('shop-list').innerHTML=rows.length?rows.map(r=>`<li data-id="${r.id}">${icon(r.id)}<div><strong>${itemDef(r.id).name}</strong><small>${tab==='buy'?itemDef(r.id).text+' · มี '+r.have:'มี '+r.have+' ชิ้น'}</small></div><b>${r.price} ${tab==='buy'&&shop.currency?'เหรียญ':'เบี้ย'}</b><span class="qty"><button type="button" data-q="-1" aria-label="ลด">−</button><output>1</output><button type="button" data-q="1" aria-label="เพิ่ม">+</button></span><button type="button" class="deal">${tab==='buy'?'ซื้อ':'ขาย'}</button></li>`).join(''):'<li class="empty">ยังไม่มีของที่ขายได้</li>';
    $('shop-list').querySelectorAll('li[data-id]').forEach(li=>{
     const out=li.querySelector('output'),id=li.dataset.id,max=tab==='buy'?99:b.items[id];
     li.querySelectorAll('[data-q]').forEach(q=>q.onclick=()=>{out.value=String(Math.min(max,Math.max(1,+out.value+ +q.dataset.q)));});

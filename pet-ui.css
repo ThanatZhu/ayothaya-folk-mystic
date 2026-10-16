@@ -1,0 +1,13 @@
+/* Pet window (pet-ui.js, 0.50). Same frame as the bag window. */
+#pet-window[data-hud-panel]{position:fixed;inset:auto;top:85px;right:200px;left:auto;bottom:auto;margin:0;width:360px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 160px);padding:0 0 12px;border:1px solid #c6a16488;border-radius:8px;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;box-shadow:0 6px 24px #0006;z-index:40;overflow:auto;font-family:Mali,Tahoma,sans-serif}
+#pet-window>header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#b5924520;border-bottom:1px solid #af884f44}
+#pet-window h2{margin:0;font-size:16px;color:#f4cf7a;flex:1}
+.pet-head{display:flex;align-items:center;gap:10px;margin:10px}.pet-head strong{display:block;font-size:15px;color:#f4cf7a}.pet-head small{font-size:11px;color:#d9cba4}
+.pet-bar{display:grid;grid-template-columns:64px 1fr 36px;align-items:center;gap:6px;margin:6px 10px;font-size:12px}
+.pet-bar span{height:10px;border-radius:5px;background:#0d1f1b;border:1px solid #af884f55;overflow:hidden}.pet-bar i{display:block;height:100%;background:linear-gradient(90deg,#f39ab8,#ffd0e0)}
+.pet-bar.hunger i{background:linear-gradient(90deg,#e8b25a,#f8dd95)}.pet-bar b{text-align:right}
+.pet-note{margin:8px 10px;font-size:11px;color:#d9cba4}.pet-how{margin:0 10px 0 28px;padding:0;font-size:12px;line-height:1.7}
+.pet-actions{display:flex;gap:6px;justify-content:flex-end;padding:4px 10px 0}
+.pet-actions button{padding:5px 12px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
+.pet-actions button:disabled{opacity:.45}
+@media (orientation:landscape) and (max-height:520px){#pet-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(360px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}}

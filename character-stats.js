@@ -63,12 +63,13 @@ export function dropInvalidGear(bag,gear,who){
 
 // Everything combat needs, from level + class + stats + worn gear. At Lv1 with no stats/gear it equals the
 // pre-0.43 numbers (140 HP, 100 MP, class damage, no defence), so existing balance is the floor.
-export function deriveStats({level=1,classId='novice',stats,gear}){
+export function deriveStats({level=1,classId='novice',stats,gear,pet=null}){
  const s=normalizeStats(stats),g=normalizeGear(gear),worn=GEAR_SLOTS.map(k=>g[k]&&itemDef(g[k])).filter(Boolean);
  // Refine: weapons +max(2, 8% of base) ATK/MATK per level, armor +1 DEF per level.
  const up=(it,k)=>(it[k]??0)?(it[k]+it.refine*Math.max(2,Math.round(it[k]*.08))):0;
  const cards=worn.map(it=>it.card&&ITEMS[it.card]?.effect).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
- const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k]),S={};for(const k of STATS)S[k]=s[k]+add(k);
+ const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0),S={}; // pet: loyal pet bonus (0.50)
+ for(const k of STATS)S[k]=s[k]+add(k);
  const atkStat=RANGED.has(classId)?S.dex:S.str;
  const weaponAtk=worn.reduce((n,it)=>n+up(it,'atk'),0),weaponMatk=worn.reduce((n,it)=>n+up(it,'matk'),0);
  const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+weaponAtk)*(1+sum(e=>e.atkPct))),matk=Math.round((S.int-1)*1.5)+Math.floor(S.int/7)**2+weaponMatk;

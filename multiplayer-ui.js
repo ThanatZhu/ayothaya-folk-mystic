@@ -1,6 +1,7 @@
 import {openHudPanel} from './hud-panels.js?v=34';
 import {iconStyle} from './bag-ui.js?v=03';
 import {emblemId,emoteId} from './items.js?v=04';
+import {createPetView} from './pet-ui.js?v=01';
 import * as THREE from 'three';
 import {MultiplayerClient} from './multiplayer-client.js?v=41';
 import {multiplayerURL} from './multiplayer-config.js?v=27';
@@ -96,7 +97,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   if(!data){const endpoint=new URL(url.replace(/^ws/,'http'));endpoint.pathname='/dev/session';const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:account.character.name,gender:account.character.gender})});if(!response.ok)throw new Error('local-server-unavailable');data=await response.json();sessionStorage.setItem(key,JSON.stringify(data));}
   return {token:data.token,serverId:data.serverId,slotId:data.slotId};
  }
- function remove(view){view.emoteBubble?.remove();scene.remove(view.sprite);view.sprite.userData.dispose();for(const t of view.frames)t.dispose();view.label.remove();}
+ function remove(view){view.emoteBubble?.remove();view.pet?.dispose();scene.remove(view.sprite);view.sprite.userData.dispose();for(const t of view.frames)t.dispose();view.label.remove();}
  async function addRemote(state){
   const id=state.id,generation=loadingGeneration,placeholder={loading:true,state};views.set(id,placeholder);
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
@@ -171,6 +172,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
    const tag=state.guild?state.guild.emblem+':'+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append(state.guild.name);v.label.append(g);}}
    v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x,v.sprite.position.y+2.1,v.sprite.position.z);
+   if((state.pet??null)!==(v.pet?.id??null)){v.pet?.dispose();v.pet=state.pet?createPetView(scene,state.pet):null;}v.pet?.follow(v.sprite.position,Math.min(.05,dt));
    if(v.emoteBubble)v.emoteBubble.hidden=performance.now()>v.emoteUntil||!v.sprite.visible||!place(v.emoteBubble,v.sprite.position.x,v.sprite.position.y+2.9,v.sprite.position.z);
   }
   const now=performance.now();

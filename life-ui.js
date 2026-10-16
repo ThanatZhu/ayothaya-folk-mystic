@@ -3,6 +3,7 @@
 import {emoteId,itemDef} from './items.js?v=04';
 import {AILMENTS} from './ailments.js?v=01';
 import {claimDaily,DAILY} from './daily.js?v=01';
+import {activeEvent,expRate} from './events.js?v=01';
 import {iconStyle} from './bag-ui.js?v=03';
 import {openHudPanel} from './hud-panels.js?v=34';
 import * as THREE from 'three';
@@ -60,7 +61,8 @@ export function createLifeUI({game,account,camera}){
   if(r){try{localStorage.setItem(key,JSON.stringify(r.daily));}catch{}world.emit('reward',{coins:r.reward.coins,items:r.reward.items});showDaily(r.streak);}
  },4000);
  // 0.49 MVP timer chip (online) + MVP / dungeon-clear banners.
- const chip=document.createElement('button');chip.type='button';chip.id='mvp-chip';chip.hidden=true;document.body.append(chip);let chipSig='';
+ const chips=document.createElement('div');chips.id='hud-chips';document.body.append(chips); // MVP + festival chips share one row under the minimap
+ const chip=document.createElement('button');chip.type='button';chip.id='mvp-chip';chip.hidden=true;chips.append(chip);let chipSig='';
  chip.onclick=()=>world.notice(world.mvp?`MVP ${world.mvp.name} เกิดที่ ${world.mvp.map} ทุก 60 นาที · คนตีแรงสุดได้รางวัล MVP`:'');
  const clock=s=>s>=3600?Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+' ชม.':Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
  function drawChip(){const m=game.online?world.mvp:null,sig=m?m.name+(m.in>0?clock(m.in):'up'):'';if(sig===chipSig)return;chipSig=sig;chip.hidden=!m;
@@ -70,5 +72,12 @@ export function createLifeUI({game,account,camera}){
   if(e.type==='mvp')banner(`${icon('mvp-crown','item-icon big')}<strong>MVP!</strong><span>${e.name}</span>`,'mvp');
   if(e.type==='dungeonClear')banner(`${icon('dungeon-gate','item-icon big')}<strong>ล้างดันเจี้ยนสำเร็จ</strong><span>${e.map} · ${label(e.reward)}</span>`,'clear');
  });
- return {update(){drawAilments();placeBubble();drawChip();}};
+ // 0.50 festival chip + the EXP rate the offline world uses (the server applies its own online).
+ const fest=document.createElement('button');fest.type='button';fest.id='event-chip';fest.hidden=true;chips.append(fest);let festId=null,rateAt=0;
+ function drawEvent(){const e=activeEvent(Date.now());if(performance.now()>rateAt){rateAt=performance.now()+30000;world.expRate=expRate(Date.now());}
+  if((e?.id??null)===festId)return;festId=e?.id??null;fest.hidden=!e;if(!e)return;
+  const end=new Date(e.end+'T00:00:00+07:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  fest.innerHTML=`${icon('krathong','item-icon small')}<span>${e.name}</span><b>ถึง ${end}</b>`;fest.onclick=()=>world.notice(e.name+' · '+e.text);
+  setTimeout(()=>world.notice('🏮 '+e.name+' · '+e.text),6000);}
+ return {update(){drawAilments();placeBubble();drawChip();drawEvent();}};
 }

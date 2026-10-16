@@ -17,7 +17,7 @@ export function createStatusUI({game,account,bagUI}){
  const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};
  const who=()=>({classId,level:baseProgress(world).level});
  const view=()=>game.online?{stats:normalizeStats(world.stats),gear:normalizeGear(world.gear),points:world.statPoints??0,derived:world.derivedView??deriveStats({...who()})}
-  :{...local,points:statPoints(local.stats,who().level),derived:deriveStats({...who(),...local})};
+  :{...local,points:statPoints(local.stats,who().level),derived:deriveStats({...who(),...local,pet:world.petBonus})};
  const fail=code=>world.notice(ITEM_ERRORS[code]??code);
 
  // Offline: keep the local world's combat numbers in step with level / stats / gear.
@@ -26,8 +26,8 @@ export function createStatusUI({game,account,bagUI}){
   if(game.online)return;
   const fit=dropInvalidGear(bagUI.bag(),local.gear,who());
   if(JSON.stringify(fit.gear)!==JSON.stringify(local.gear)){local.gear=fit.gear;bagUI.setLocal(fit.bag);save();}
-  const sig=JSON.stringify([who(),local]);if(sig===appliedSig)return;appliedSig=sig;
-  world.applyDerived(deriveStats({...who(),...local}));
+  const sig=JSON.stringify([who(),local,world.petBonus]);if(sig===appliedSig)return;appliedSig=sig;
+  world.applyDerived(deriveStats({...who(),...local,pet:world.petBonus}));
  }
  function raise(stat){
   if(game.online){world.statUp?.(stat);return;}

@@ -1,8 +1,9 @@
 import {markMonsterHit,advanceMonster} from '../monster-catalog.js';
 import {normalizeEquipment} from '../equipment.js';
 import {randomUUID} from 'node:crypto';
-import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable} from '../combat-core.js';
-import {awardExperience} from '../experience.js';
+import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable,monsterHit} from '../combat-core.js';
+import {awardExperience,baseProgress} from '../experience.js';
+import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
 import {normalizeSkills,upgradeSkill,availablePoints} from '../skill-progress.js';
@@ -11,7 +12,7 @@ import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,SHOPS,ITEM_ERRORS} from '
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
-const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell']);
+const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip']);
 export class RealmServer{
  constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
@@ -32,6 +33,7 @@ export class RealmServer{
   const peer={id:randomUUID(),uid,serverId,slotId,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
   peer.equipment=normalizeEquipment(record.equipment,hero.classId);
   peer.bag=normalizeBag(record.bag);peer.bagVersion=1;peer.bagSent=0;peer.itemAt=-Infinity;
+  peer.stats=normalizeStats(record.stats);peer.gear=normalizeGear(record.gear);peer.statSig='';peer.gearAt=-Infinity;this.refreshStats(peer);
   world.hurt=(mob,damage,color)=>this.hurt(peer,mob,damage,color);
   this.peers.set(peer.id,peer);room.peers.add(peer.id);
   this.storyProgress(peer,{type:'enter',mapId:map.id});
@@ -53,6 +55,15 @@ export class RealmServer{
   if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
   const w=p.world,now=this.now();
   if(m.type==='ping'){p.send({type:'pong',stamp:typeof m.stamp==='number'?m.stamp:0});return true;}
+  if(m.type==='statUp'||m.type==='equip'||m.type==='unequip'){
+   if(now-p.gearAt<200)return this.itemFail(p,'gear-rate');p.gearAt=now;
+   const who=this.who(p);
+   try{
+    if(m.type==='statUp')p.stats=raiseStat(p.stats,m.stat,who.level);
+    else{const r=m.type==='equip'?equipGear(p.bag,p.gear,m.item,who):unequipGear(p.bag,p.gear,m.slot);p.gear=r.gear;this.setBag(p,r.bag);}
+   }catch(e){return this.itemFail(p,e.message);}
+   this.refreshStats(p);return true;
+  }
   if(m.type==='useItem'){
    if(now-p.itemAt<800)return this.itemFail(p,'item-rate');
    let r;try{r=useItem(p.bag,m.item,w.player);}catch(e){return this.itemFail(p,e.message);}
@@ -152,7 +163,7 @@ export class RealmServer{
     const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
     if(result==='respawn')room.contributors.delete(m.id);
     if(result==='hit'&&target){
-     const w=target.world,p=w.player,amount=p.shield>0?Math.ceil(type.damage*.35):type.damage;p.hp=Math.max(0,p.hp-amount);w.emit('playerHit',{x:p.x,z:p.z,amount});
+     const w=target.world,p=w.player,amount=monsterHit(w,type.damage);if(!amount){w.emit('dodge',{x:p.x,z:p.z});continue;}p.hp=Math.max(0,p.hp-amount);w.emit('playerHit',{x:p.x,z:p.z,amount});
      if(p.hp===0){p.down=3;w.auto=false;w.targetId=null;w.path=[];p.moving=false;w.notice('หมดแรง · กลับลานใน 3 วินาที');}
     }
    }
@@ -167,6 +178,13 @@ export class RealmServer{
   return true;
  }
  setBag(p,bag){p.bag=bag;p.bagVersion++;}
+ who(p){return {classId:p.character.classId,level:baseProgress(p.world).level};}
+ // Status + worn gear → combat numbers; cheap no-op unless level, class, stats or gear changed.
+ refreshStats(p){
+  const who=this.who(p),sig=JSON.stringify([who,p.stats,p.gear]);if(sig===p.statSig)return;
+  const fit=dropInvalidGear(p.bag,p.gear,who);if(JSON.stringify(fit.gear)!==JSON.stringify(p.gear)){p.gear=fit.gear;this.setBag(p,fit.bag);}
+  p.statSig=JSON.stringify([who,p.stats,p.gear]);p.derived=deriveStats({...who,stats:p.stats,gear:p.gear});p.world.applyDerived(p.derived);
+ }
  itemFail(p,code){p.world.emit('notice',{text:ITEM_ERRORS[code]??code});return false;}
  // Auto-loot: coins and items go straight into the bag; anything that does not fit is reported, not dropped.
  grantLoot(p,loot,at=null){
@@ -176,10 +194,11 @@ export class RealmServer{
  }
  progress(p){return {classId:p.character.classId,jobId:p.character.jobId??'',jobXp:p.world.jobXp};}
  snapshot(p){
+  this.refreshStats(p);
   const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:a.emote,partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
   const players=visible.map(a=>{const v=a.world.player,result={id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,face:{x:round(v.face.x),z:round(v.face.z)}},partyId:a.partyId,connected:!a.suspended};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
-  return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})},players,mobs:p.room.mobs});
+  return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})},players,mobs:p.room.mobs});
  }
  travelDestination(p,id){
   const portal=p.room.map.portals?.find(v=>v.to===id&&distance(v,p.world.player)<2.6);
@@ -188,5 +207,5 @@ export class RealmServer{
   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
   return destination;
  }
- record(p,original){return {...copy(original),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),bag:copy(p.bag),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
+ record(p,original){return {...copy(original),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),bag:copy(p.bag),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
 }

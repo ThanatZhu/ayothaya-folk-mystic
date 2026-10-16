@@ -53,6 +53,12 @@ export function screenDirection(horizontal,vertical,azimuth){
  return {x:(Math.cos(azimuth)*horizontal-Math.sin(azimuth)*vertical)*scale,z:(-Math.sin(azimuth)*horizontal-Math.cos(azimuth)*vertical)*scale};
 }
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
+// 0.43: a monster hit after guard, AGI/LUK dodge and DEF (world.derived from character-stats.js). 0 = dodged.
+export function monsterHit(world,raw,rand=Math.random){
+ const p=world.player,d=world.derived;if(d&&rand()<d.flee)return 0;
+ const base=p.shield>0?Math.ceil(raw*.35):raw;
+ return d?Math.max(1,Math.round(base*100/(100+d.def*4))):base;
+}
 // Grid A* routes auto-chase around houses. Manual movement always overrides it.
 export function findPath(start,goal,nav=DEFAULT_NAV){
  const cell=distance(start,goal)>30?1:.5,key=(x,z)=>`${x},${z}`,startX=Math.round(start.x/cell),startZ=Math.round(start.z/cell);
@@ -86,6 +92,9 @@ export class CombatWorld{
  }
  get target(){return this.mobs.find(m=>m.id===this.targetId&&m.hp>0)??null;}
  emit(type,extra={}){this.events.push({type,...extra});}
+ power(n){return Math.round(n*(this.derived?.skillPower??1));}
+ // 0.43 status/gear: max HP/MP and the multipliers above. null keeps the pre-0.43 numbers.
+ applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=d.maxHp;p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
  notice(text){this.emit('notice',{text});}
  select(id){const mob=this.mobs.find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
  nearest(range=8){return this.mobs.filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=8)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
@@ -100,7 +109,7 @@ export class CombatWorld{
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   if(!m){if(!quiet)this.notice('เลือกมอนสเตอร์ หรือเข้าใกล้ก่อนโจมตี');return false;}
   if(distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(!quiet)this.notice('เข้าใกล้เป้าหมายอีกนิด หรือเปิด AUTO');return false;}
-  p.attackCD=this.profession.delay;p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});this.hurt(m,this.profession.damage);return true;
+  p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;this.hurt(m,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?1.5:1)),crit?'#ffd27a':undefined);}return true;
  }
  skill(index){
   const level=this.skillLevels[index]??1;if(this.skills[index]&&level<1){this.notice('ยังไม่ได้เรียนสกิลนี้');return false;}
@@ -115,14 +124,14 @@ export class CombatWorld{
   else if(s.type==='shield'){p.shield=s.duration??8;this.notice(s.name+' · ลดความเสียหาย '+p.shield+' วินาที');}
   else if(s.type==='mana'){p.mp=Math.min(p.maxMp,p.mp+48);this.notice(s.name+' · มานา +48');}
   else if(s.type==='dash'){const n=Math.hypot(p.face.x,p.face.z)||1;moveBody(p,p.face.x/n*2.8,p.face.z/n*2.8,this.nav);this.manualGrace=.7;this.path=[];}
-  else if(s.type==='nova'){this.mobs.filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,s.damage,s.color));}
-  else if(s.type==='area'){this.mobs.filter(v=>v.hp>0&&distance(v,m)<=s.radius&&lineClear(m,v,this.nav)).forEach(v=>this.hurt(v,s.damage,s.color));}
-  else{this.hurt(m,s.damage,s.color);if(s.type==='root')m.root=3.5;if(s.type==='push'){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
+  else if(s.type==='nova'){this.mobs.filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage),s.color));}
+  else if(s.type==='area'){this.mobs.filter(v=>v.hp>0&&distance(v,m)<=s.radius&&lineClear(m,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage),s.color));}
+  else{this.hurt(m,this.power(s.damage),s.color);if(s.type==='root')m.root=3.5;if(s.type==='push'){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
   this.emit('cast',{skillIndex:index,from,to:m&&s.type!=='dash'?{x:m.x,z:m.z}:{x:p.x,z:p.z},color:s.color,kind:s.type,radius:s.radius??1});return true;
  }
  update(dt,input={x:0,z:0,attack:false},{monsters=true}={}){
   dt=Math.min(.05,Math.max(0,dt));this.time+=dt;const p=this.player;
-  p.attackCD=Math.max(0,p.attackCD-dt);p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt);
+  p.attackCD=Math.max(0,p.attackCD-dt);p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt*(this.derived?.mpRegen??1));
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;
   if(p.hp<=0){p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
   if(this.safe)p.hp=Math.min(p.maxHp,p.hp+8*dt);
@@ -146,7 +155,7 @@ export class CombatWorld{
    const type=MONSTER_TYPES[m.type],outcome=advanceMonster(m,p,type,dt,this.nav,{moveBody,lineClear});
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
    if(outcome==='hit'){
-    const damage=p.shield>0?Math.ceil(type.damage*.35):type.damage;p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});
+    const damage=monsterHit(this,type.damage);if(!damage){this.emit('dodge',{x:p.x,z:p.z});continue;}p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});
     if(p.hp===0){p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;this.mobs.forEach(v=>v.aggro=false);this.notice('หมดแรง · กลับลานใน 3 วินาที');break;}
    }
   }

@@ -7,8 +7,8 @@ import {MONSTER_TYPES} from '../combat-core.js';
 const world=JSON.parse(readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 
 test('atlas cells are unique and every drop, shop and monster reference is real', () => {
- const icons=Object.values(ITEMS).map(i=>i.icon);
- assert.equal(new Set(icons).size,icons.length);assert.ok(icons.every(i=>i>=0&&i<24));
+ for(const atlas of [undefined,'gear']){const icons=Object.values(ITEMS).filter(i=>i.atlas===atlas).map(i=>i.icon);
+  assert.equal(new Set(icons).size,icons.length,'unique cells in '+(atlas??'items'));assert.ok(icons.every(i=>i>=0&&i<24));}
  for(const [monster,d] of Object.entries(DROPS)){
   assert.ok(MONSTER_TYPES.some(t=>t.id===monster),monster);
   for(const [id,chance] of d.items){assert.ok(ITEMS[id],id);assert.ok(chance>0&&chance<=1);}

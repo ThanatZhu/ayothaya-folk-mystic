@@ -1,7 +1,7 @@
 // Items, loot, coins (เบี้ย) and NPC shops. Pure rules shared by the client (offline guests + UI) and the realm
 // server (authoritative online bag). Bag state: {coins, items:{[id]:count}}.
 // Art: one atlas, 6x4 cells of 256 px (1536x1024, transparent). Drop a finished file over the same path to re-skin.
-export const ITEM_ATLAS='assets/items42/items.png';
+export const ITEM_ATLAS='assets/items42/items.png',GEAR_ATLAS='assets/gear43/gear.png'; // gear items set atlas:'gear'
 export const BAG_SLOTS=40,MAX_STACK=999,MAX_COINS=9999999;
 
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
@@ -27,8 +27,33 @@ export const ITEMS={
  'cowrie':{icon:18,name:'เบี้ย',kind:'ui'},'cowrie-pile':{icon:19,name:'กองเบี้ย',kind:'ui'},
  'cloth-bag':{icon:20,name:'ถุงย่าม',kind:'ui'},'shop-sign':{icon:21,name:'ป้ายร้านค้า',kind:'ui'},
  'loot-bundle':{icon:22,name:'ห่อผ้า',kind:'ui'},'treasure-chest':{icon:23,name:'หีบสมบัติ',kind:'reserved',sell:0},
+ // 0.43 stat gear (atlas assets/gear43/gear.png): class weapons tier 1 / tier 2, armor, accessories.
+ 'wrap-novice':{atlas:'gear',icon:0,name:'ผ้าพันหมัดเชือกป่าน',kind:'gear',slot:'weapon',classes:['novice'],atk:6,buy:120,sell:30,text:'ATK +6 · ผู้ฝึกตน'},
+ 'sword-iron':{atlas:'gear',icon:1,name:'ดาบเหล็กกล้า',kind:'gear',slot:'weapon',classes:['swordsman'],atk:14,buy:300,sell:75,text:'ATK +14 · นักดาบ'},
+ 'spear-bamboo':{atlas:'gear',icon:2,name:'ทวนไม้ไผ่หัวเหล็ก',kind:'gear',slot:'weapon',classes:['lancer'],atk:15,buy:320,sell:80,text:'ATK +15 · นักทวน'},
+ 'bow-bamboo':{atlas:'gear',icon:3,name:'ธนูไม้ไผ่',kind:'gear',slot:'weapon',classes:['hunter'],atk:13,buy:300,sell:75,text:'ATK +13 · นายพราน'},
+ 'gloves-hemp':{atlas:'gear',icon:4,name:'นวมผ้าดิบ',kind:'gear',slot:'weapon',classes:['boxer'],atk:13,buy:280,sell:70,text:'ATK +13 · นักมวย'},
+ 'daggers-twin':{atlas:'gear',icon:5,name:'มีดคู่ด้ามไม้',kind:'gear',slot:'weapon',classes:['rogue'],atk:12,buy:280,sell:70,text:'ATK +12 · จอมโจร'},
+ 'staff-wan':{atlas:'gear',icon:6,name:'ไม้เท้าว่านยา',kind:'gear',slot:'weapon',classes:['shaman'],matk:14,buy:320,sell:80,text:'MATK +14 · หมอผี'},
+ 'beads-wood':{atlas:'gear',icon:7,name:'ประคำไม้มะเกลือ',kind:'gear',slot:'weapon',classes:['acolyte'],matk:12,buy:300,sell:75,text:'MATK +12 · พระ / แม่ชี'},
+ 'knuckle-brass':{atlas:'gear',icon:8,name:'สนับมือทองเหลือง',kind:'gear',slot:'weapon',classes:['novice'],atk:12,level:8,buy:600,sell:150,text:'ATK +12 · ผู้ฝึกตน · Lv.8'},
+ 'sword-silver':{atlas:'gear',icon:9,name:'ดาบคร่ำเงิน',kind:'gear',slot:'weapon',classes:['swordsman'],atk:30,level:15,buy:1500,sell:375,text:'ATK +30 · นักดาบ · Lv.15'},
+ 'spear-steel':{atlas:'gear',icon:10,name:'ทวนเหล็กน้ำพี้',kind:'gear',slot:'weapon',classes:['lancer'],atk:32,level:15,buy:1600,sell:400,text:'ATK +32 · นักทวน · Lv.15'},
+ 'bow-horn':{atlas:'gear',icon:11,name:'ธนูเขาควาย',kind:'gear',slot:'weapon',classes:['hunter'],atk:28,level:15,buy:1500,sell:375,text:'ATK +28 · นายพราน · Lv.15'},
+ 'gloves-leather':{atlas:'gear',icon:12,name:'นวมหนังควายคาดเชือก',kind:'gear',slot:'weapon',classes:['boxer'],atk:28,level:15,buy:1400,sell:350,text:'ATK +28 · นักมวย · Lv.15'},
+ 'daggers-ivory':{atlas:'gear',icon:13,name:'มีดคู่ด้ามงา',kind:'gear',slot:'weapon',classes:['rogue'],atk:26,level:15,buy:1400,sell:350,text:'ATK +26 · จอมโจร · Lv.15'},
+ 'staff-candle':{atlas:'gear',icon:14,name:'ไม้เท้ายันต์เทียนชัย',kind:'gear',slot:'weapon',classes:['shaman'],matk:30,level:15,buy:1600,sell:400,text:'MATK +30 · หมอผี · Lv.15'},
+ 'beads-sandal':{atlas:'gear',icon:15,name:'ประคำไม้จันทน์หอม',kind:'gear',slot:'weapon',classes:['acolyte'],matk:27,level:15,buy:1500,sell:375,text:'MATK +27 · พระ / แม่ชี · Lv.15'},
+ 'vest-cotton':{atlas:'gear',icon:16,name:'เสื้อผ้าฝ้ายทอหนา',kind:'gear',slot:'armor',def:3,buy:150,sell:37,text:'DEF +3'},
+ 'vest-buffalo':{atlas:'gear',icon:17,name:'เสื้อเกราะหนังควาย',kind:'gear',slot:'armor',def:7,level:12,buy:900,sell:225,text:'DEF +7 · Lv.12'},
+ 'vest-lacquer':{atlas:'gear',icon:18,name:'เสื้อเกราะลงรักปิดทอง',kind:'gear',slot:'armor',def:12,level:25,sell:900,text:'DEF +12 · Lv.25 · ดรอปจากบอสโรงสี'},
+ 'takrut-silver':{atlas:'gear',icon:19,name:'ตะกรุดเงิน',kind:'gear',slot:'accessory',bonus:{vit:2},level:5,buy:500,sell:125,text:'VIT +2 · Lv.5'},
+ 'ring-ruby':{atlas:'gear',icon:20,name:'แหวนพลอยแดง',kind:'gear',slot:'accessory',bonus:{str:2},level:5,buy:500,sell:125,text:'STR +2 · Lv.5'},
+ 'anklet-silver':{atlas:'gear',icon:21,name:'กำไลข้อเท้าเงิน',kind:'gear',slot:'accessory',bonus:{agi:2},level:5,buy:500,sell:125,text:'AGI +2 · Lv.5'},
+ 'cloth-yant':{atlas:'gear',icon:22,name:'ผ้ายันต์',kind:'gear',slot:'accessory',bonus:{int:2},level:5,buy:500,sell:125,text:'INT +2 · Lv.5'},
+ 'bia-gae':{atlas:'gear',icon:23,name:'เบี้ยแก้',kind:'gear',slot:'accessory',bonus:{luk:2,dex:1},level:10,sell:400,text:'LUK +2 · DEX +1 · Lv.10 · ของหายาก'},
 };
-const BAGGABLE=id=>['loot','potion'].includes(ITEMS[id]?.kind);
+const BAGGABLE=id=>['loot','potion','gear'].includes(ITEMS[id]?.kind);
 
 // Per monster id (MONSTER_TYPES[].id): coins [min,max] and independent item rolls [id, chance, count=1].
 export const DROPS={
@@ -37,16 +62,17 @@ export const DROPS={
  hopper:{coins:[5,10],items:[['hopper-wing',.5],['hp-small',.08]]},
  monkey:{coins:[9,16],items:[['betel-nut',.5],['hp-small',.1],['spirit-thread',.04]]},
  vine:{coins:[11,19],items:[['tough-vine',.5],['mp-small',.08]]},
- lantern:{coins:[14,24],items:[['lantern-paper',.5],['palm-leaf',.05],['spirit-thread',.05]]},
- 'rat-chief':{coins:[80,140],items:[['rat-crown',.3],['spirit-thread',.5],['hp-large',.5,2]]},
- 'monkey-chief':{coins:[120,200],items:[['monkey-bangle',.3],['spirit-thread',.6],['mp-large',.5,2]]},
- 'mill-keeper':{coins:[400,600],items:[['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3]]},
+ lantern:{coins:[14,24],items:[['lantern-paper',.5],['palm-leaf',.05],['spirit-thread',.05],['cloth-yant',.01]]},
+ 'rat-chief':{coins:[80,140],items:[['rat-crown',.3],['spirit-thread',.5],['hp-large',.5,2],['vest-buffalo',.08],['ring-ruby',.1]]},
+ 'monkey-chief':{coins:[120,200],items:[['monkey-bangle',.3],['spirit-thread',.6],['mp-large',.5,2],['anklet-silver',.12],['cloth-yant',.12],['bia-gae',.04]]},
+ 'mill-keeper':{coins:[400,600],items:[['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3]]},
 };
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
 export const SHOPS={
  'แม่บัว':{mapId:'ayutthaya',title:'แผงยาแม่บัว',stock:['hp-small','hp-large','mp-small','mp-large','sticky-rice']},
  'ป้าละไม':{mapId:'rice-fields',title:'ยุ้งป้าละไม',stock:['hp-small','mp-small','sticky-rice']},
+ 'ครูแสนดาบ':{mapId:'ayutthaya',title:'โรงตีอาวุธครูแสนดาบ',stock:['wrap-novice','sword-iron','spear-bamboo','bow-bamboo','gloves-hemp','daggers-twin','staff-wan','beads-wood','knuckle-brass','sword-silver','spear-steel','bow-horn','gloves-leather','daggers-ivory','staff-candle','beads-sandal','vest-cotton','vest-buffalo','takrut-silver','ring-ruby','anklet-silver','cloth-yant']},
 };
 
 const int=(v,min,max)=>Number.isSafeInteger(v)?Math.min(Math.max(v,min),max):min;
@@ -113,4 +139,4 @@ export function useItem(bag,id,player){
 export function itemLabel(list){return list.map(({id,count:n})=>(ITEMS[id]?.name??id)+(n>1?' ×'+n:'')).join(', ');}
 
 // Player-facing reasons (shown as a notice) for the error codes above.
-export const ITEM_ERRORS={'not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน'};
+export const ITEM_ERRORS={'not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่'};

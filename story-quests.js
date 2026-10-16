@@ -7,35 +7,35 @@ export const STORY_TITLE='บทที่ 1 · ประทีปที่ดั
 // Step types: talk {npc, mapId} · defeat {monster (MONSTER_TYPES id), count, mapId} · enter {mapId}.
 // `say` is what the NPC says when that talk step completes; `hint` is the tracker line.
 export const STORY=[
- {id:'s1',title:'คืนที่ประทีปดับ',reward:{baseXp:20,jobXp:10},steps:[
+ {id:'s1',title:'คืนที่ประทีปดับ',reward:{baseXp:20,jobXp:10,coins:50,items:[{id:'hp-small',count:3}]},steps:[
   {type:'talk',npc:'ลุงเรือง',mapId:'ayutthaya',hint:'คุยกับลุงเรืองที่ท่าน้ำ',say:'เจ้ามาถึงในคืนแปลกเสียด้วย ประทีปทั้งเมืองดับพร้อมกัน ทั้งที่ลมยังนิ่ง ลองไปถามขุนอินทร์ดูเถิด'},
   {type:'talk',npc:'ขุนอินทร์',mapId:'ayutthaya',hint:'ไปพบขุนอินทร์',say:'ประทีปไม่ได้ดับเพราะลม สายใยขวัญที่ผูกเมืองไว้ขาดไปเส้นหนึ่ง ไปกราบพระปัญญาก่อน ท่านรู้เรื่องสายใยดีที่สุด'},
  ]},
- {id:'s2',title:'สายใยขวัญเส้นแรก',reward:{baseXp:30,jobXp:15},steps:[
+ {id:'s2',title:'สายใยขวัญเส้นแรก',reward:{baseXp:30,jobXp:15,coins:60,items:[{id:'mp-small',count:2}]},steps:[
   {type:'talk',npc:'พระปัญญา',mapId:'ayutthaya',hint:'ไปกราบพระปัญญา',say:'สายใยขวัญผูกความทรงจำของผู้คนไว้กับที่ทาง เส้นที่ขาดลากยาวออกไปทางทุ่งเหนือ เด็กน้อยเจ้าจุกเห็นแสงลอยไปทางนั้น'},
   {type:'talk',npc:'เจ้าจุก',mapId:'ayutthaya',hint:'ถามเจ้าจุกเรื่องแสงลอย',say:'แสงเล็ก ๆ ลอยข้ามประตูเมืองไปทางทุ่งข้าว! พี่ตามไปสิ ป้าละไมอยู่ที่ยุ้งข้าวนั่นแหละ'},
  ]},
- {id:'s3',title:'ทุ่งขวัญข้าว',reward:{baseXp:40,jobXp:20},steps:[
+ {id:'s3',title:'ทุ่งขวัญข้าว',reward:{baseXp:40,jobXp:20,coins:80,items:[{id:'sticky-rice',count:2}]},steps:[
   {type:'enter',mapId:'rice-fields',hint:'ออกประตูเมืองไปทุ่งขวัญข้าว'},
   {type:'talk',npc:'ป้าละไม',mapId:'rice-fields',hint:'คุยกับป้าละไมที่ยุ้งข้าว',say:'มาถึงก็ดีแล้ว หุ่นฟางขยับเองตั้งแต่ประทีปดับ ช่วยป้าล้มมันให้นิ่งทีเถิด'},
  ]},
- {id:'s4',title:'หุ่นฟางขยับเอง',reward:{baseXp:90,jobXp:50},steps:[
+ {id:'s4',title:'หุ่นฟางขยับเอง',reward:{baseXp:90,jobXp:50,coins:120,items:[{id:'hp-small',count:5}]},steps:[
   {type:'defeat',monster:'straw',count:5,mapId:'rice-fields',hint:'ล้มหุ่นฟางหลง'},
   {type:'talk',npc:'ป้าละไม',mapId:'rice-fields',hint:'กลับไปหาป้าละไม',say:'ข้างในหุ่นฟางมีเส้นด้ายเรืองแสงพันอยู่… เป็นเศษสายใยขวัญแน่ ๆ หนูในยุ้งก็กัดกินมันไปด้วย'},
  ]},
- {id:'s5',title:'หนูในยุ้งข้าว',reward:{baseXp:110,jobXp:60},steps:[
+ {id:'s5',title:'หนูในยุ้งข้าว',reward:{baseXp:110,jobXp:60,coins:150,items:[{id:'mp-small',count:3}]},steps:[
   {type:'defeat',monster:'rat',count:4,mapId:'rice-fields',hint:'ไล่หนูยุ้งข้าว'},
   {type:'talk',npc:'ป้าละไม',mapId:'rice-fields',hint:'เอาเศษสายใยไปให้ป้าละไม',say:'เส้นด้ายพวกนี้ชี้ไปทางสวนหมากคลองเก่า ยายสายเฝ้าสวนอยู่ ไปหาแกเถิด'},
  ]},
- {id:'s6',title:'สวนหมากคลองเก่า',reward:{baseXp:160,jobXp:90},steps:[
+ {id:'s6',title:'สวนหมากคลองเก่า',reward:{baseXp:160,jobXp:90,coins:200,items:[{id:'hp-large',count:3}]},steps:[
   {type:'enter',mapId:'old-orchard',hint:'เดินทางไปสวนหมากคลองเก่า'},
   {type:'talk',npc:'ยายสาย',mapId:'old-orchard',hint:'คุยกับยายสาย',say:'โคมที่ลอยอยู่ในสวนคือประทีปที่หลงชื่อตัวเอง ดับมันให้สงบ แล้วสายใยจะคลายออก'},
  ]},
- {id:'s7',title:'โคมหลงทาง',reward:{baseXp:260,jobXp:150},steps:[
+ {id:'s7',title:'โคมหลงทาง',reward:{baseXp:260,jobXp:150,coins:300,items:[{id:'mp-large',count:3}]},steps:[
   {type:'defeat',monster:'lantern',count:3,mapId:'old-orchard',hint:'ปลอบโคมหลงทาง'},
   {type:'talk',npc:'ยายสาย',mapId:'old-orchard',hint:'กลับไปหายายสาย',say:'สายใยเส้นสุดท้ายพันอยู่ที่โรงสีใต้เงาจันทร์ จ้อยเฝ้าทางเข้าอยู่ ระวังเจ้าหุ่นฟางพันเชือกให้ดี'},
  ]},
- {id:'s8',title:'โรงสีใต้เงาจันทร์',reward:{baseXp:700,jobXp:400},steps:[
+ {id:'s8',title:'โรงสีใต้เงาจันทร์',reward:{baseXp:700,jobXp:400,coins:1000,items:[{id:'hp-large',count:5},{id:'palm-leaf',count:1}]},steps:[
   {type:'enter',mapId:'moonlit-mill',hint:'เดินทางไปโรงสีใต้เงาจันทร์'},
   {type:'talk',npc:'จ้อย',mapId:'moonlit-mill',hint:'คุยกับจ้อยที่ทางเข้า',say:'เขาพันเชือกไว้กับตัวจนจำไม่ได้ว่ารอใคร… ช่วยปลดเขาที'},
   {type:'defeat',monster:'mill-keeper',count:1,mapId:'moonlit-mill',hint:'ปลดเชือกเจ้าหุ่นฟางพันเชือก'},

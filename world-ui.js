@@ -46,7 +46,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
  function talk(n){
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
   if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
-  endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;$('npc-text').textContent=api.onTalk?.(n)??n.text;$('npc-dialog').hidden=false;$('close-npc').focus();
+  endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;$('npc-text').textContent=api.onTalk?.(n)??n.text;$('npc-dialog').hidden=false;$('close-npc').focus();api.afterTalk?.(n);
  }
  $('close-npc').onclick=endTalk;
  $('interact').onclick=()=>{if(nearest)travel(nearest.to);else if(nearNPC)talk(nearNPC);};
@@ -76,7 +76,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
   const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
- const api={update,get paused(){return !!conversation||traveling||mentors.paused;},onTalk:null,travelTo:id=>travel(id),
+ const api={update,get paused(){return !!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),
   talkTo:name=>{const n=npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.n;if(n)talk(n);return !!n;},
   npcLabel:name=>npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.label??null};
  minimap();return api;

@@ -19,7 +19,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(game.online)return null;
   const r=storyEvent(local,event);if(!r.changed)return r;
   local=r.state;save();
-  if(r.reward)world.emit('experience',awardExperience(world,r.reward.baseXp,r.reward.jobXp));
+  if(r.reward){world.emit('experience',awardExperience(world,r.reward.baseXp,r.reward.jobXp));world.emit('reward',{coins:r.reward.coins??0,items:r.reward.items??[]});}
   if(r.completed)world.notice('เควสสำเร็จ · '+r.completed.title);
   render();return r;
  }

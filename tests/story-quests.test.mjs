@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {STORY,normalizeStory,storyEvent,currentObjective,nextHop} from '../story-quests.js';
 import {MONSTER_TYPES} from '../combat-core.js';
+import {ITEMS} from '../items.js';
 
 const world=JSON.parse(readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 
@@ -18,6 +19,7 @@ test('every story step points at an NPC, monster and map that exist in the world
   }
   assert.ok(s.hint);if(s.type==='talk')assert.ok(s.say);
  }
+ for(const q of STORY)for(const it of q.reward.items??[])assert.ok(ITEMS[it.id]&&['loot','potion'].includes(ITEMS[it.id].kind),`${q.id} rewards ${it.id}`);
 });
 
 test('the whole chapter can be played through in order and pays each reward once', () => {

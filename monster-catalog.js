@@ -8,7 +8,11 @@ export const FRONTIER_MONSTERS=[
  {id:'lantern',name:'โคมหลงทาง',hp:145,speed:1.1,damage:11,baseXp:52,jobXp:31,level:17,sheet:'orchard-monsters',row:2,height:1.6},
  {id:'rat-chief',name:'พญาหนูยุ้งข้าว',hp:420,speed:1.2,damage:15,baseXp:170,jobXp:95,level:12,sheet:'elite-monsters',row:0,height:2.15,elite:true,respawn:40},
  {id:'monkey-chief',name:'วานรเจ้าเล่ห์',hp:650,speed:1.65,damage:18,baseXp:260,jobXp:150,level:22,sheet:'elite-monsters',row:1,height:2.2,elite:true,respawn:45},
- {id:'mill-keeper',name:'เจ้าหุ่นฟางพันเชือก',hp:1500,speed:.75,damage:24,baseXp:700,jobXp:420,level:25,sheet:'elite-monsters',row:2,height:3.3,boss:true,respawn:70,reach:2.6,windup:.85}
+ {id:'mill-keeper',name:'เจ้าหุ่นฟางพันเชือก',hp:1500,speed:.75,damage:24,baseXp:700,jobXp:420,level:25,sheet:'elite-monsters',row:2,height:3.3,boss:true,respawn:70,reach:2.6,windup:.85},
+ // 0.49: party-dungeon boss (ใต้ถุนโรงสีต้องสาป, never respawns inside the instance) and the timed MVP of โรงสีใต้เงาจันทร์.
+ // Both reuse existing sprite rows at a larger size until their own art lands.
+ {id:'lantern-lord',name:'เจ้าโคมวิญญาณ',hp:3200,speed:.9,damage:26,baseXp:1200,jobXp:700,level:26,sheet:'orchard-monsters',row:2,height:3.2,boss:true,respawn:70,reach:2.4,windup:.8},
+ {id:'straw-king',name:'ราชาหุ่นฟางเพลิง',hp:7000,speed:.8,damage:34,baseXp:2600,jobXp:1500,level:30,sheet:'elite-monsters',row:2,height:4.4,boss:true,mvp:true,respawn:3600,reach:3,windup:.9}
 ];
 // Presentation timing is independent of frame rate and authoritative world position.
 export function monsterFrame(m,time){

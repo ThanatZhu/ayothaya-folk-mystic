@@ -46,7 +46,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=41');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=42');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
@@ -62,7 +62,7 @@ try {
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.copy(target);controls.enableDamping=true;controls.dampingFactor=.1;controls.enablePan=false;
  controls.minPolarAngle=controls.maxPolarAngle=Math.atan2(Math.hypot(23,28),24);controls.minZoom=.65;controls.maxZoom=2.7;controls.rotateSpeed=.6;controls.update();
  const softLook=createSoftLook({renderer,scene,camera});
- const night=map.procedural==='mill';scene.add(new THREE.HemisphereLight(night?'#b4d5dd':'#fffdf4',night?'#4e6260':'#a3af84',night?.85:1.35));
+ const night=map.procedural==='mill';scene.add(new THREE.HemisphereLight(night?'#b4d5dd':'#fffdf4',night?'#4e6260':'#a3af84',night?(map.instance?.5:.85):1.35));
  const sun=new THREE.DirectionalLight(night?'#bed9ed':'#ffefd2',night?.7:1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
  Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;sun.shadow.radius=5;sun.shadow.intensity=.74;scene.add(sun);scene.add(sun.target);
  let rotating=null;

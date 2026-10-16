@@ -6,7 +6,7 @@ export const SIZE_NAME={small:'เล็ก',medium:'กลาง',large:'ให
 export const MONSTER_AFFINITY={
  straw:{element:'earth',size:'medium'},rat:{element:'neutral',size:'small'},hopper:{element:'wind',size:'small'},
  monkey:{element:'earth',size:'medium'},vine:{element:'earth',size:'medium'},lantern:{element:'ghost',size:'small'},
- 'rat-chief':{element:'neutral',size:'medium'},'monkey-chief':{element:'earth',size:'large'},'mill-keeper':{element:'ghost',size:'large'},
+ 'rat-chief':{element:'neutral',size:'medium'},'monkey-chief':{element:'earth',size:'large'},'mill-keeper':{element:'ghost',size:'large'},'lantern-lord':{element:'ghost',size:'large'},'straw-king':{element:'fire',size:'large'},
 };
 export const affinityOf=id=>MONSTER_AFFINITY[id]??{element:'neutral',size:'medium'};
 

@@ -84,7 +84,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      let destination;try{destination=realm.travelDestination(session.peer,message.destination);}catch(e){send({type:'travel-error',id:message.id,code:e.message});return;}
      session.closing=true;session.explicitLeave=true;session.peer.suspended=true;
      const record=realm.record(session.peer,session.lease.record);record.state.mapId=destination.id;record.state.position={...destination.spawn};session.travelRecord=record;
-     try{await checkpoint(session,true);realm.leave(session.peer.id);send({type:'traveled',id:message.id});ws.close(1000,'traveled');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;
+     try{await checkpoint(session,true);realm.leave(session.peer.id,{travel:true});send({type:'traveled',id:message.id});ws.close(1000,'traveled');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;
     }
     if(message.type==='leave'){session.closing=true;session.explicitLeave=true;session.peer.suspended=true;try{await checkpoint(session,true);send({type:'left'});ws.close(1000,'left');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
     realm.receive(session.peer.id,message);return;

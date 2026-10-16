@@ -20,6 +20,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
  async function travel(id,recall=false){
   if(traveling||!(reachable.has(id)||recall)||world.player.hp<=0)return;
+  if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return;}
   traveling=true;game.clearInput();
   getLoadingScreen().show(id,{travel:true});
   if(account){

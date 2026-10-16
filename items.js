@@ -22,6 +22,9 @@ export const ITEMS={
  'palm-leaf':{icon:11,name:'ใบลานจารึก',kind:'loot',sell:90,text:'ใบลานจารึกชื่อคนที่ประทีปเคยส่องทางให้'},
  'hp-small':{icon:12,name:'ยาสมุนไพรแดง',kind:'potion',buy:25,sell:6,hp:60,text:'ฟื้น HP 60'},
  'hp-large':{icon:13,name:'ยาสมุนไพรแดงขวดใหญ่',kind:'potion',buy:90,sell:22,hp:180,text:'ฟื้น HP 180'},
+ 'ember-amulet':{atlas:'items48',icon:1,name:'จี้ถ่านเพลิงราชา',kind:'gear',slot:'accessory',atk:10,matk:10,bonus:{str:2,int:2},level:20,sell:3000,text:'ATK +10 · MATK +10 · STR/INT +2 · Lv.20 · ของ MVP'},
+ 'spirit-lamp':{atlas:'items48',icon:2,name:'ตะเกียงวิญญาณ',kind:'gear',slot:'accessory',matk:8,bonus:{int:3,dex:2},level:18,sell:1500,text:'MATK +8 · INT +3 · DEX +2 · Lv.18 · ของดันเจี้ยน'},
+ 'king-ember':{atlas:'items48',icon:3,name:'ถ่านเพลิงราชาหุ่นฟาง',kind:'loot',sell:1500,text:'รางวัลผู้ได้ MVP · ขายได้ราคาดี'},
  'green-herb':{atlas:'items48',icon:0,name:'ยาเขียว',kind:'potion',buy:40,sell:10,cure:true,text:'แก้ทุกอาการ: พิษ ใบ้ ตาพร่า คำสาป'},
  'mp-small':{icon:14,name:'น้ำมนต์ใส',kind:'potion',buy:30,sell:7,mp:40,text:'ฟื้น MP 40'},
  'mp-large':{icon:15,name:'น้ำมนต์ทองคำ',kind:'potion',buy:110,sell:27,mp:120,text:'ฟื้น MP 120'},
@@ -37,6 +40,7 @@ export const ITEMS={
  'guild-flag':{atlas:'social',icon:6,name:'กิลด์',kind:'ui'},'guild-seal':{atlas:'social',icon:7,name:'ตรากิลด์',kind:'ui'},
  'st-poison':{atlas:'social',icon:8,name:'พิษ',kind:'ui'},'st-stun':{atlas:'social',icon:9,name:'มึนงง',kind:'ui'},'st-sleep':{atlas:'social',icon:10,name:'หลับ',kind:'ui'},
  'st-silence':{atlas:'social',icon:11,name:'ใบ้',kind:'ui'},'st-blind':{atlas:'social',icon:12,name:'ตาพร่า',kind:'ui'},'st-curse':{atlas:'social',icon:13,name:'คำสาป',kind:'ui'},
+ 'mvp-crown':{atlas:'social',icon:16,name:'MVP',kind:'ui'},'boss-timer':{atlas:'social',icon:17,name:'เวลาบอส',kind:'ui'},'dungeon-gate':{atlas:'social',icon:18,name:'ดันเจี้ยน',kind:'ui'},
  'daily-gift':{atlas:'social',icon:14,name:'ของขวัญรายวัน',kind:'ui'},'death-soul':{atlas:'social',icon:15,name:'วิญญาณหลุด',kind:'ui'},'treasure-chest':{icon:23,name:'หีบสมบัติ',kind:'reserved',sell:0},
  // 0.43 stat gear (atlas assets/gear43/gear.png): class weapons tier 1 / tier 2, armor, accessories.
  'wrap-novice':{atlas:'gear',icon:0,name:'ผ้าพันหมัดเชือกป่าน',kind:'gear',slot:'weapon',classes:['novice'],atk:6,buy:120,sell:30,text:'ATK +6 · ผู้ฝึกตน'},
@@ -77,6 +81,8 @@ export const ITEMS={
  'card-lantern':{atlas:'cards',icon:5,name:'การ์ดโคมหลงทาง',kind:'card',slot:'weapon',effect:{vsElement:{ghost:.2}},sell:200,text:'ใส่ในอาวุธ · แรงขึ้น 20% กับมอนธาตุผี'},
  'card-rat-chief':{atlas:'cards',icon:6,name:'การ์ดพญาหนูยุ้งข้าว',kind:'card',slot:'accessory',effect:{coinPct:.25,bonus:{luk:2}},sell:800,text:'ใส่ในเครื่องประดับ · เบี้ยจากมอน +25% · LUK +2'},
  'card-monkey-chief':{atlas:'cards',icon:7,name:'การ์ดวานรเจ้าเล่ห์',kind:'card',slot:'weapon',effect:{atkPct:.1,delay:.05},sell:800,text:'ใส่ในอาวุธ · ATK +10% · ความเร็วโจมตี +5%'},
+ 'card-lantern-lord':{atlas:'cards',icon:9,name:'การ์ดเจ้าโคมวิญญาณ',kind:'card',slot:'armor',effect:{resist:{ghost:.2},flee:.05},sell:2500,text:'ใส่ในเสื้อเกราะ · ต้านผี 20% · หลบ +5%'},
+ 'card-straw-king':{atlas:'cards',icon:10,name:'การ์ดราชาหุ่นฟางเพลิง',kind:'card',slot:'weapon',effect:{vsSize:{large:.2},atkPct:.05},sell:5000,text:'ใส่ในอาวุธ · ตีตัวใหญ่ +20% · ATK +5%'},
  'card-mill-keeper':{atlas:'cards',icon:8,name:'การ์ดเจ้าหุ่นฟางพันเชือก',kind:'card',slot:'armor',effect:{resist:{ghost:.3},hpPct:.1},sell:2000,text:'ใส่ในเสื้อเกราะ · รับดาเมจจากผีลด 30% · HP +10%'},
  'refine-hammer':{atlas:'refine',icon:3,name:'ค้อนตีบวก',kind:'ui'},'refine-success':{atlas:'refine',icon:4,name:'ตีบวกสำเร็จ',kind:'ui'},'refine-broken':{atlas:'refine',icon:5,name:'อุปกรณ์แตก',kind:'ui'},
 };
@@ -112,6 +118,8 @@ export const DROPS={
  lantern:{coins:[14,24],items:[['lantern-paper',.5],['palm-leaf',.05],['spirit-thread',.05],['cloth-yant',.01],['lek-lai',.01],['card-lantern',0.004]]},
  'rat-chief':{coins:[80,140],items:[['rat-crown',.3],['spirit-thread',.5],['hp-large',.5,2],['vest-buffalo',.08],['ring-ruby',.1],['iron-ore',.5],['card-rat-chief',0.04]]},
  'monkey-chief':{coins:[120,200],items:[['monkey-bangle',.3],['spirit-thread',.6],['mp-large',.5,2],['anklet-silver',.12],['cloth-yant',.12],['bia-gae',.04],['laterite',.5],['card-monkey-chief',0.04]]},
+ 'lantern-lord':{coins:[500,800],items:[['spirit-lamp',.2],['hp-large',1,3],['mp-large',1,2],['lek-lai',.4],['green-herb',1,3],['card-lantern-lord',0.1]]},
+ 'straw-king':{coins:[1500,2500],items:[['ember-amulet',.25],['lek-lai',1,2],['hp-large',1,5],['iron-ore',1,4],['laterite',1,4],['card-straw-king',0.1]]},
  'mill-keeper':{coins:[400,600],items:[['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3],['card-mill-keeper',0.15]]},
 };
 

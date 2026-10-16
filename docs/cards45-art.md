@@ -4,7 +4,7 @@ The game reads `assets/cards45/cards.png` (placeholder now). Same file rules as 
 PNG, transparent, 1536 × 1024, 6 × 4 cells of 256 px, no gaps, no text or numbers.
 Each cell holds ONE upright card (~170 × 230 px, centered): an aged palm-leaf / parchment card with a thin gold
 Thai ornamental border, and the monster illustrated inside in the game's painted pixel style (like Ragnarok
-Online monster cards). Cells 10–24 stay empty (future cards).
+Online monster cards). Cells 12–24 stay empty (future cards).
 
 | # | id | Thai name | Monster to illustrate |
 |---|---|---|---|
@@ -17,3 +17,5 @@ Online monster cards). Cells 10–24 stay empty (future cards).
 | 7 | card-rat-chief | การ์ดพญาหนูยุ้งข้าว | a big rat king wearing a straw crown (elite, gold border) |
 | 8 | card-monkey-chief | การ์ดวานรเจ้าเล่ห์ | a sly monkey chief with a gold bangle (elite, gold border) |
 | 9 | card-mill-keeper | การ์ดเจ้าหุ่นฟางพันเชือก | a huge straw golem bound in glowing rope (boss, ornate gold border) |
+| 10 | card-lantern-lord | การ์ดเจ้าโคมวิญญาณ | a giant haunted paper lantern with a blue ghost flame and trailing spirit ribbons (dungeon boss, ornate silver border) |
+| 11 | card-straw-king | การ์ดราชาหุ่นฟางเพลิง | a towering straw king wearing a burning crown, embers in its chest (MVP, ornate red-gold border with a crown motif) |

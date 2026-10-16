@@ -1,5 +1,5 @@
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster} from './monster-catalog.js?v=38';
-import {affinityMultiplier,CLASS_SKILL_ELEMENT} from './affinity.js?v=01';
+import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
 import {awardExperience} from './experience.js?v=21';
 import {advanceStats,advanceSkills} from './advancement.js?v=21';
 import {getClass,classSkills} from './classes.js?v=18';
@@ -55,10 +55,10 @@ export function screenDirection(horizontal,vertical,azimuth){
 }
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 // 0.43: a monster hit after guard, AGI/LUK dodge and DEF (world.derived from character-stats.js). 0 = dodged.
-export function monsterHit(world,raw,rand=Math.random){
+export function monsterHit(world,raw,rand=Math.random,monsterId=null){
  const p=world.player,d=world.derived;if(d&&rand()<d.flee)return 0;
- const base=p.shield>0?Math.ceil(raw*.35):raw;
- return d?Math.max(1,Math.round(base*100/(100+d.def*4))):base;
+ const base=p.shield>0?Math.ceil(raw*.35):raw,resist=d&&monsterId?1-Math.min(.8,d.resist?.[affinityOf(monsterId).element]??0):1;
+ return d?Math.max(1,Math.round(base*resist*100/(100+d.def*4))):base;
 }
 // Grid A* routes auto-chase around houses. Manual movement always overrides it.
 export function findPath(start,goal,nav=DEFAULT_NAV){
@@ -97,7 +97,8 @@ export class CombatWorld{
  // 0.44 element + size (affinity.js). Basic attacks: weapon element, physical. Skills: class element; magic classes ignore size.
  affinity(mob,basic){const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
   const element=basic?(d?.weaponElement??'neutral'):(CLASS_SKILL_ELEMENT[cls]??d?.weaponElement??'neutral');
-  return affinityMultiplier({element,physical:basic||!magic,classId:cls},MONSTER_TYPES[mob.type]?.id);}
+  const id=MONSTER_TYPES[mob.type]?.id,a=affinityOf(id),card=1+(d?.vsSize?.[a.size]??0)+(d?.vsElement?.[a.element]??0);
+  return affinityMultiplier({element,physical:basic||!magic,classId:cls},id)*card;}
  // 0.43 status/gear: max HP/MP and the multipliers above. null keeps the pre-0.43 numbers.
  applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=d.maxHp;p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
  notice(text){this.emit('notice',{text});}
@@ -160,7 +161,7 @@ export class CombatWorld{
    const type=MONSTER_TYPES[m.type],outcome=advanceMonster(m,p,type,dt,this.nav,{moveBody,lineClear});
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
    if(outcome==='hit'){
-    const damage=monsterHit(this,type.damage);if(!damage){this.emit('dodge',{x:p.x,z:p.z});continue;}p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});
+    const damage=monsterHit(this,type.damage,Math.random,type.id);if(!damage){this.emit('dodge',{x:p.x,z:p.z});continue;}p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});
     if(p.hp===0){p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;this.mobs.forEach(v=>v.aggro=false);this.notice('หมดแรง · กลับลานใน 3 วินาที');break;}
    }
   }

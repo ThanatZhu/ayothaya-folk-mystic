@@ -1,6 +1,6 @@
 // Status window (สถานะ · C): STR AGI VIT INT DEX LUK with status points, combat numbers, and the three
 // stat-gear slots. Online the server validates and owns everything; offline guests keep it in this browser.
-import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats} from './character-stats.js?v=02';
+import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=02';
 import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=03';
 import {baseProgress} from './experience.js?v=21';
 import {iconStyle} from './bag-ui.js?v=03';
@@ -37,6 +37,12 @@ export function createStatusUI({game,account,bagUI}){
   if(game.online){world.equipGear?.(id);return;}
   try{const r=equipGear(bagUI.bag(),local.gear,id,who());local.gear=r.gear;bagUI.setLocal(r.bag);save();applyOffline();world.notice('สวมใส่ '+itemDef(id).name);render(true);}catch(e){fail(e.message);}
  }
+ // 0.45: slot a card from the bag into a worn piece (permanent).
+ function slotCard(slot,card){
+  if(!card)return;if(!confirm('ใส่ '+itemDef(card).name+' ถาวร? ใส่แล้วถอดไม่ได้'))return;
+  if(game.online){world.insertCard?.(slot,card);return;}
+  try{const r=insertCard(bagUI.bag(),local.gear,slot,card);local.gear=r.gear;bagUI.setLocal(r.bag);save();applyOffline();world.notice('ใส่การ์ดแล้ว · '+itemDef(r.gear[slot]).name);render(true);}catch(e){fail(e.message);}
+ }
  function takeOff(slot){
   if(game.online){world.unequipGear?.(slot);return;}
   try{const r=unequipGear(bagUI.bag(),local.gear,slot);local.gear=r.gear;bagUI.setLocal(r.bag);save();applyOffline();render(true);}catch(e){fail(e.message);}
@@ -66,8 +72,12 @@ export function createStatusUI({game,account,bagUI}){
   $('status-stats').querySelectorAll('[data-stat]').forEach(b=>b.onclick=()=>raise(b.dataset.stat));
   const d=v.derived,pct=n=>Math.round(n*100)+'%';
   $('status-derived').innerHTML=[['HP สูงสุด',d.maxHp],['MP สูงสุด',d.maxMp],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)],['ความเร็วโจมตี',Math.round(100/d.delay)+'%']].map(([k,n])=>`<div><dt>${k}</dt><dd>${n}</dd></div>`).join('');
+  const bagItems=bagUI.bag().items??{};
   $('status-gear').innerHTML=GEAR_SLOTS.map(slot=>{const id=v.gear[slot],it=id&&itemDef(id);
-   return `<li><i class="item-icon" style="${it?iconStyle(id):''}"></i><div><small>${SLOT_LABEL[slot]}</small><strong>${it?it.name:'— ว่าง —'}</strong><em>${it?it.text:'แตะอุปกรณ์ในกระเป๋าแล้วกด สวมใส่'}</em></div>${it?`<button type="button" data-off="${slot}">ถอด</button>`:''}</li>`;}).join('');
+   const cards=Object.keys(bagItems).filter(c=>itemDef(c)?.kind==='card'&&itemDef(c).slot===slot);
+   const cardRow=it&&it.slots!==0?(it.card?`<small class="card-in">การ์ด: ${itemDef(it.card).text}</small>`:cards.length?`<span class="card-pick"><select data-card="${slot}">${cards.map(c=>`<option value="${c}">${itemDef(c).name}</option>`).join('')}</select><button type="button" data-slotcard="${slot}">ใส่การ์ด</button></span>`:'<small class="card-in">ช่องการ์ด ว่าง</small>'):'';
+   return `<li><i class="item-icon" style="${it?iconStyle(id):''}"></i><div><small>${SLOT_LABEL[slot]}</small><strong>${it?it.name:'— ว่าง —'}</strong><em>${it?it.text:'แตะอุปกรณ์ในกระเป๋าแล้วกด สวมใส่'}</em>${cardRow}</div>${it?`<button type="button" data-off="${slot}">ถอด</button>`:''}</li>`;}).join('');
+  $('status-gear').querySelectorAll('[data-slotcard]').forEach(b=>b.onclick=()=>slotCard(b.dataset.slotcard,$('status-gear').querySelector(`[data-card="${b.dataset.slotcard}"]`)?.value));
   $('status-gear').querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>takeOff(b.dataset.off));
  }
  applyOffline();render(true);

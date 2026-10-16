@@ -1,7 +1,7 @@
 // Ragnarok-style status (STR AGI VIT INT DEX LUK) and stat-bearing gear (weapon / armor / accessory).
 // Pure rules shared by the client (offline guests + UI) and the realm server. Gear lives in the bag until
 // equipped; it is separate from the cosmetic look in equipment.js, so costumes stay free choices.
-import {BAG_SLOTS,normalizeBag,itemDef} from './items.js?v=03';
+import {BAG_SLOTS,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=04';
 
 export const STATS=['str','agi','vit','int','dex','luk'];
 export const STAT_LABEL={str:'STR',agi:'AGI',vit:'VIT',int:'INT',dex:'DEX',luk:'LUK'};
@@ -67,24 +67,39 @@ export function deriveStats({level=1,classId='novice',stats,gear}){
  const s=normalizeStats(stats),g=normalizeGear(gear),worn=GEAR_SLOTS.map(k=>g[k]&&itemDef(g[k])).filter(Boolean);
  // Refine: weapons +max(2, 8% of base) ATK/MATK per level, armor +1 DEF per level.
  const up=(it,k)=>(it[k]??0)?(it[k]+it.refine*Math.max(2,Math.round(it[k]*.08))):0;
- const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0),S={};for(const k of STATS)S[k]=s[k]+add(k);
+ const cards=worn.map(it=>it.card&&ITEMS[it.card]?.effect).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
+ const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k]),S={};for(const k of STATS)S[k]=s[k]+add(k);
  const atkStat=RANGED.has(classId)?S.dex:S.str;
  const weaponAtk=worn.reduce((n,it)=>n+up(it,'atk'),0),weaponMatk=worn.reduce((n,it)=>n+up(it,'matk'),0);
- const atk=atkStat-1+Math.floor(atkStat/10)**2+weaponAtk,matk=Math.round((S.int-1)*1.5)+Math.floor(S.int/7)**2+weaponMatk;
+ const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+weaponAtk)*(1+sum(e=>e.atkPct))),matk=Math.round((S.int-1)*1.5)+Math.floor(S.int/7)**2+weaponMatk;
  const magic=MAGIC.has(classId);
  return {
   total:S,magic,atk,matk,
-  maxHp:Math.round((140+(level-1)*12)*(1+(S.vit-1)*.02)),
+  maxHp:Math.round((140+(level-1)*12)*(1+(S.vit-1)*.02)*(1+sum(e=>e.hpPct))),
   maxMp:Math.round((100+(level-1)*5)*(1+(S.int-1)*.02)),
-  def:worn.reduce((n,it)=>n+(it.def?it.def+it.refine:0),0)+Math.floor((S.vit-1)/2),
+  def:worn.reduce((n,it)=>n+(it.def?it.def+it.refine:0),0)+Math.floor((S.vit-1)/2)+sum(e=>e.def),
   weaponElement:worn.find(it=>it.slot==='weapon')?.element??'neutral',
   basicBonus:magic?Math.round(matk*.5):atk,
   skillPower:1+(magic?matk:atk)/40,
-  flee:Math.min(.5,(S.agi-1)*.008+(S.luk-1)*.002),
-  crit:Math.min(.4,.01+(S.luk-1)*.004),
-  delay:Math.max(.55,1-(S.agi-1)*.006-(S.dex-1)*.002),
+  flee:Math.min(.5,(S.agi-1)*.008+(S.luk-1)*.002+sum(e=>e.flee)),
+  crit:Math.min(.4,.01+(S.luk-1)*.004+sum(e=>e.crit)),
+  delay:Math.max(.5,(1-(S.agi-1)*.006-(S.dex-1)*.002)*(1-sum(e=>e.delay))),
+  // card specials: extra damage vs size/element, damage taken from an element, coin bonus
+  vsSize:cards.reduce((o,e)=>{for(const k in e.vsSize??{})o[k]=(o[k]??0)+e.vsSize[k];return o;},{}),
+  vsElement:cards.reduce((o,e)=>{for(const k in e.vsElement??{})o[k]=(o[k]??0)+e.vsElement[k];return o;},{}),
+  resist:cards.reduce((o,e)=>{for(const k in e.resist??{})o[k]=(o[k]??0)+e.resist[k];return o;},{}),
+  coinPct:sum(e=>e.coinPct),
   mpRegen:1+(S.int-1)*.02,
  };
+}
+// Slot a card into a worn piece (permanent, like Ragnarok). The card leaves the bag.
+export function insertCard(bag,gear,slot,cardId){
+ const b=normalizeBag(bag),g=normalizeGear(gear),card=ITEMS[cardId],worn=g[slot]&&itemDef(g[slot]);
+ if(card?.kind!=='card')throw new Error('not-card');if(!worn)throw new Error('slot-empty');
+ if(card.slot!==slot)throw new Error('card-slot');if(worn.slots===0)throw new Error('no-card-slot');if(worn.card)throw new Error('slot-full');
+ if(!b.items[cardId])throw new Error('no-item');
+ b.items[cardId]--;if(!b.items[cardId])delete b.items[cardId];
+ g[slot]=composeId(worn.base,worn.refine,cardId);return {bag:b,gear:g};
 }
 // Monster hit after defence: hyperbolic so defence never makes you immune.
 export const incomingDamage=(raw,def)=>Math.max(1,Math.round(raw*100/(100+def*4)));

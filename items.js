@@ -2,7 +2,8 @@
 // server (authoritative online bag). Bag state: {coins, items:{[id]:count}}.
 // Art: one atlas, 6x4 cells of 256 px (1536x1024, transparent). Drop a finished file over the same path to re-skin.
 export const ITEM_ATLAS='assets/items42/items.png',GEAR_ATLAS='assets/gear43/gear.png',REFINE_ATLAS='assets/refine44/refine.png';
-export const ATLASES={gear:GEAR_ATLAS,refine:REFINE_ATLAS}; // item.atlas key → file (default ITEM_ATLAS)
+export const CARD_ATLAS='assets/cards45/cards.png';
+export const ATLASES={gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS}; // item.atlas key → file (default ITEM_ATLAS)
 export const BAG_SLOTS=40,MAX_STACK=999,MAX_COINS=9999999;
 
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
@@ -47,40 +48,55 @@ export const ITEMS={
  'beads-sandal':{atlas:'gear',icon:15,name:'ประคำไม้จันทน์หอม',kind:'gear',slot:'weapon',classes:['acolyte'],matk:27,element:'holy',level:15,buy:1500,sell:375,text:'MATK +27 · พระ / แม่ชี · Lv.15'},
  'vest-cotton':{atlas:'gear',icon:16,name:'เสื้อผ้าฝ้ายทอหนา',kind:'gear',slot:'armor',def:3,buy:150,sell:37,text:'DEF +3'},
  'vest-buffalo':{atlas:'gear',icon:17,name:'เสื้อเกราะหนังควาย',kind:'gear',slot:'armor',def:7,level:12,buy:900,sell:225,text:'DEF +7 · Lv.12'},
- 'vest-lacquer':{atlas:'gear',icon:18,name:'เสื้อเกราะลงรักปิดทอง',kind:'gear',slot:'armor',def:12,level:25,sell:900,text:'DEF +12 · Lv.25 · ดรอปจากบอสโรงสี'},
+ 'vest-lacquer':{atlas:'gear',icon:18,name:'เสื้อเกราะลงรักปิดทอง',kind:'gear',slot:'armor',slots:0,def:12,level:25,sell:900,text:'DEF +12 · Lv.25 · ดรอปจากบอสโรงสี'},
  'takrut-silver':{atlas:'gear',icon:19,name:'ตะกรุดเงิน',kind:'gear',slot:'accessory',bonus:{vit:2},level:5,buy:500,sell:125,text:'VIT +2 · Lv.5'},
  'ring-ruby':{atlas:'gear',icon:20,name:'แหวนพลอยแดง',kind:'gear',slot:'accessory',bonus:{str:2},level:5,buy:500,sell:125,text:'STR +2 · Lv.5'},
  'anklet-silver':{atlas:'gear',icon:21,name:'กำไลข้อเท้าเงิน',kind:'gear',slot:'accessory',bonus:{agi:2},level:5,buy:500,sell:125,text:'AGI +2 · Lv.5'},
  'cloth-yant':{atlas:'gear',icon:22,name:'ผ้ายันต์',kind:'gear',slot:'accessory',bonus:{int:2},level:5,buy:500,sell:125,text:'INT +2 · Lv.5'},
- 'bia-gae':{atlas:'gear',icon:23,name:'เบี้ยแก้',kind:'gear',slot:'accessory',bonus:{luk:2,dex:1},level:10,sell:400,text:'LUK +2 · DEX +1 · Lv.10 · ของหายาก'},
+ 'bia-gae':{atlas:'gear',icon:23,name:'เบี้ยแก้',kind:'gear',slot:'accessory',slots:0,bonus:{luk:2,dex:1},level:10,sell:400,text:'LUK +2 · DEX +1 · Lv.10 · ของหายาก'},
  // 0.44 refine materials and UI cells (atlas assets/refine44/refine.png); cells 6-11 reserved for element stones.
  'iron-ore':{atlas:'refine',icon:0,name:'เศษเหล็กน้ำพี้',kind:'loot',buy:250,sell:60,text:'ใช้ตีบวกอาวุธที่โรงตีครูแสนดาบ'},
  'laterite':{atlas:'refine',icon:1,name:'ก้อนศิลาแลง',kind:'loot',buy:250,sell:60,text:'ใช้ตีบวกเสื้อเกราะที่โรงตีครูแสนดาบ'},
  'lek-lai':{atlas:'refine',icon:2,name:'เหล็กไหล',kind:'loot',sell:500,text:'ของวิเศษ ใช้ร่วมตอนตีบวก เพิ่มโอกาสสำเร็จ 20%'},
+
+ // 0.45 monster cards (atlas assets/cards45/cards.png): one per monster, slot into worn gear (1 slot, permanent).
+ 'card-straw':{atlas:'cards',icon:0,name:'การ์ดหุ่นฟางหลง',kind:'card',slot:'armor',effect:{bonus:{vit:2},hpPct:.05},sell:200,text:'ใส่ในเสื้อเกราะ · VIT +2 · HP +5%'},
+ 'card-rat':{atlas:'cards',icon:1,name:'การ์ดหนูยุ้งข้าว',kind:'card',slot:'weapon',effect:{vsSize:{small:.15}},sell:200,text:'ใส่ในอาวุธ · แรงขึ้น 15% กับมอนตัวเล็ก'},
+ 'card-hopper':{atlas:'cards',icon:2,name:'การ์ดตั๊กแตนเกราะ',kind:'card',slot:'accessory',effect:{bonus:{agi:2},flee:.02},sell:200,text:'ใส่ในเครื่องประดับ · AGI +2 · หลบหลีก +2%'},
+ 'card-monkey':{atlas:'cards',icon:3,name:'การ์ดลูกลิงฉกของ',kind:'card',slot:'weapon',effect:{bonus:{str:2},crit:.03},sell:200,text:'ใส่ในอาวุธ · STR +2 · คริติคอล +3%'},
+ 'card-vine':{atlas:'cards',icon:4,name:'การ์ดเถาวัลย์พันขา',kind:'card',slot:'armor',effect:{def:4},sell:200,text:'ใส่ในเสื้อเกราะ · DEF +4'},
+ 'card-lantern':{atlas:'cards',icon:5,name:'การ์ดโคมหลงทาง',kind:'card',slot:'weapon',effect:{vsElement:{ghost:.2}},sell:200,text:'ใส่ในอาวุธ · แรงขึ้น 20% กับมอนธาตุผี'},
+ 'card-rat-chief':{atlas:'cards',icon:6,name:'การ์ดพญาหนูยุ้งข้าว',kind:'card',slot:'accessory',effect:{coinPct:.25,bonus:{luk:2}},sell:800,text:'ใส่ในเครื่องประดับ · เบี้ยจากมอน +25% · LUK +2'},
+ 'card-monkey-chief':{atlas:'cards',icon:7,name:'การ์ดวานรเจ้าเล่ห์',kind:'card',slot:'weapon',effect:{atkPct:.1,delay:.05},sell:800,text:'ใส่ในอาวุธ · ATK +10% · ความเร็วโจมตี +5%'},
+ 'card-mill-keeper':{atlas:'cards',icon:8,name:'การ์ดเจ้าหุ่นฟางพันเชือก',kind:'card',slot:'armor',effect:{resist:{ghost:.3},hpPct:.1},sell:2000,text:'ใส่ในเสื้อเกราะ · รับดาเมจจากผีลด 30% · HP +10%'},
  'refine-hammer':{atlas:'refine',icon:3,name:'ค้อนตีบวก',kind:'ui'},'refine-success':{atlas:'refine',icon:4,name:'ตีบวกสำเร็จ',kind:'ui'},'refine-broken':{atlas:'refine',icon:5,name:'อุปกรณ์แตก',kind:'ui'},
 };
 // A refined piece keeps its level as an id suffix: 'sword-iron+5'. itemDef() resolves any bag/gear id.
+// 0.45: a slotted card adds '~card-<monster>': 'sword-iron+5~card-rat'.
 export function itemDef(id){
  if(typeof id!=='string')return null;
- const m=/^([a-z-]+)\+(\d{1,2})$/.exec(id);
- if(!m){const it=ITEMS[id];return it?{...it,id,base:id,refine:0}:null;}
- const it=ITEMS[m[1]],n=+m[2];
- if(it?.kind!=='gear'||!['weapon','armor'].includes(it.slot)||n<1||n>10)return null;
- return {...it,id,base:m[1],refine:n,name:it.name+' +'+n,sell:Math.round(it.sell*(1+n*.25))};
+ const m=/^([a-z-]+?)(?:\+(\d{1,2}))?(?:~(card-[a-z-]+))?$/.exec(id);
+ const it=m&&ITEMS[m[1]];if(!it)return null;
+ const n=m[2]?+m[2]:0,card=m[3]?ITEMS[m[3]]:null;
+ if(!m[2]&&!m[3])return {...it,id,base:id,refine:0,card:null};
+ if(it.kind!=='gear'||(m[2]&&(!['weapon','armor'].includes(it.slot)||n<1||n>10)))return null;
+ if(m[3]&&(card?.kind!=='card'||card.slot!==it.slot||it.slots===0))return null;
+ return {...it,id,base:m[1],refine:n,card:m[3]??null,name:it.name+(n?' +'+n:'')+(card?' ['+card.name+']':''),sell:Math.round(it.sell*(1+n*.25))+(card?.sell??0)};
 }
-const BAGGABLE=id=>['loot','potion','gear'].includes(itemDef(id)?.kind);
+export const composeId=(base,refine,card)=>base+(refine>0?'+'+refine:'')+(card?'~'+card:'');
+const BAGGABLE=id=>['loot','potion','gear','card'].includes(itemDef(id)?.kind);
 
 // Per monster id (MONSTER_TYPES[].id): coins [min,max] and independent item rolls [id, chance, count=1].
 export const DROPS={
- straw:{coins:[3,7],items:[['straw-bundle',.55],['rice-sheaf',.1],['spirit-thread',.03],['laterite',.04]]},
- rat:{coins:[2,5],items:[['rat-tooth',.6],['spirit-thread',.03]]},
- hopper:{coins:[5,10],items:[['hopper-wing',.5],['hp-small',.08],['iron-ore',.06]]},
- monkey:{coins:[9,16],items:[['betel-nut',.5],['hp-small',.1],['spirit-thread',.04],['laterite',.07]]},
- vine:{coins:[11,19],items:[['tough-vine',.5],['mp-small',.08],['iron-ore',.08]]},
- lantern:{coins:[14,24],items:[['lantern-paper',.5],['palm-leaf',.05],['spirit-thread',.05],['cloth-yant',.01],['lek-lai',.01]]},
- 'rat-chief':{coins:[80,140],items:[['rat-crown',.3],['spirit-thread',.5],['hp-large',.5,2],['vest-buffalo',.08],['ring-ruby',.1],['iron-ore',.5]]},
- 'monkey-chief':{coins:[120,200],items:[['monkey-bangle',.3],['spirit-thread',.6],['mp-large',.5,2],['anklet-silver',.12],['cloth-yant',.12],['bia-gae',.04],['laterite',.5]]},
- 'mill-keeper':{coins:[400,600],items:[['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3]]},
+ straw:{coins:[3,7],items:[['straw-bundle',.55],['rice-sheaf',.1],['spirit-thread',.03],['laterite',.04],['card-straw',0.004]]},
+ rat:{coins:[2,5],items:[['rat-tooth',.6],['spirit-thread',.03],['card-rat',0.004]]},
+ hopper:{coins:[5,10],items:[['hopper-wing',.5],['hp-small',.08],['iron-ore',.06],['card-hopper',0.004]]},
+ monkey:{coins:[9,16],items:[['betel-nut',.5],['hp-small',.1],['spirit-thread',.04],['laterite',.07],['card-monkey',0.004]]},
+ vine:{coins:[11,19],items:[['tough-vine',.5],['mp-small',.08],['iron-ore',.08],['card-vine',0.004]]},
+ lantern:{coins:[14,24],items:[['lantern-paper',.5],['palm-leaf',.05],['spirit-thread',.05],['cloth-yant',.01],['lek-lai',.01],['card-lantern',0.004]]},
+ 'rat-chief':{coins:[80,140],items:[['rat-crown',.3],['spirit-thread',.5],['hp-large',.5,2],['vest-buffalo',.08],['ring-ruby',.1],['iron-ore',.5],['card-rat-chief',0.04]]},
+ 'monkey-chief':{coins:[120,200],items:[['monkey-bangle',.3],['spirit-thread',.6],['mp-large',.5,2],['anklet-silver',.12],['cloth-yant',.12],['bia-gae',.04],['laterite',.5],['card-monkey-chief',0.04]]},
+ 'mill-keeper':{coins:[400,600],items:[['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3],['card-mill-keeper',0.15]]},
 };
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
@@ -154,4 +170,4 @@ export function useItem(bag,id,player){
 export function itemLabel(list){return list.map(({id,count:n})=>(itemDef(id)?.name??id)+(n>1?' ×'+n:'')).join(', ');}
 
 // Player-facing reasons (shown as a notice) for the error codes above.
-export const ITEM_ERRORS={'not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่','not-refinable':'ตีบวกได้เฉพาะอาวุธและเสื้อเกราะที่สวมอยู่','refine-max':'ตีบวกสูงสุด +10 แล้ว','no-ore':'แร่ตีบวกไม่พอ','no-lek-lai':'ไม่มีเหล็กไหล','refine-far':'ต้องตีบวกที่โรงตีครูแสนดาบ'};
+export const ITEM_ERRORS={'not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่','not-refinable':'ตีบวกได้เฉพาะอาวุธและเสื้อเกราะที่สวมอยู่','refine-max':'ตีบวกสูงสุด +10 แล้ว','no-ore':'แร่ตีบวกไม่พอ','no-lek-lai':'ไม่มีเหล็กไหล','refine-far':'ต้องตีบวกที่โรงตีครูแสนดาบ','not-card':'ไม่ใช่การ์ด','card-slot':'การ์ดนี้ใส่ช่องนี้ไม่ได้','slot-full':'อุปกรณ์นี้มีการ์ดแล้ว','no-card-slot':'อุปกรณ์นี้ไม่มีช่องการ์ด'};

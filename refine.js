@@ -1,6 +1,6 @@
 // Refining +1..+10 at ครูแสนดาบ (0.44). The refine level travels with the item as an id suffix ("sword-iron+5"),
 // so a refined piece keeps its level in the bag. +1..+4 are safe; from +5 a failure breaks the item (Ragnarok).
-import {normalizeBag,itemDef} from './items.js?v=03';
+import {normalizeBag,itemDef,composeId} from './items.js?v=04';
 import {normalizeGear} from './character-stats.js?v=02';
 
 export const REFINE_MAX=10;
@@ -9,7 +9,7 @@ export const REFINE_ORE={weapon:'iron-ore',armor:'laterite'};
 export const refineCost=next=>next*100; // coins
 export const LEK_LAI_BONUS=.2;
 
-export const withRefine=(base,level)=>level>0?`${base}+${level}`:base;
+export const withRefine=(base,level,card=null)=>composeId(base,level,card);
 
 // slot: 'weapon' | 'armor' (accessories cannot be refined). lekLai: spend one เหล็กไหล for +20% success.
 export function refineGear(bag,gear,slot,{lekLai=false,rand=Math.random}={}){
@@ -23,6 +23,6 @@ export function refineGear(bag,gear,slot,{lekLai=false,rand=Math.random}={}){
  b.coins-=cost;b.items[ore]--;if(!b.items[ore])delete b.items[ore];
  if(lekLai){b.items['lek-lai']--;if(!b.items['lek-lai'])delete b.items['lek-lai'];}
  const chance=Math.min(1,REFINE_RATE[next-1]+(lekLai?LEK_LAI_BONUS:0));
- if(rand()<chance){g[slot]=withRefine(def.base,next);return {bag:b,gear:g,result:'success',level:next,chance};}
+ if(rand()<chance){g[slot]=withRefine(def.base,next,def.card);return {bag:b,gear:g,result:'success',level:next,chance};}
  g[slot]=null;return {bag:b,gear:g,result:'broken',level:def.refine,chance};
 }

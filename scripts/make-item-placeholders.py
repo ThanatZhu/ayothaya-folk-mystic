@@ -1,18 +1,24 @@
 # Placeholder item atlas until the painted art arrives: 6x4 cells of 256 px, transparent, simple shapes + a Thai label.
 # The finished art replaces assets/items42/items.png with the same layout (see docs/items42-art.md). Usage: python scripts/make-item-placeholders.py
-import re
+import re, subprocess
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 root = Path(__file__).resolve().parent.parent
 src = (root / 'items.js').read_text(encoding='utf8')
 import sys
-GEAR = '--gear' in sys.argv  # 0.43 stat gear atlas instead of the 0.42 item atlas
-REFINE = '--refine' in sys.argv  # 0.44 refine materials atlas
-ATLAS = 'refine' if REFINE else 'gear' if GEAR else None
+# Pick exactly one sheet; never default, so a typo cannot overwrite painted art.
+SHEETS = {'--items': (None, 'assets/items42/items.png'), '--gear': ('gear', 'assets/gear43/gear.png'), '--refine': ('refine', 'assets/refine44/refine.png'), '--cards': ('cards', 'assets/cards45/cards.png')}
+picked = [a for a in sys.argv[1:] if a in SHEETS]
+FORCE = '--force' in sys.argv
+if len(picked) != 1 or len(sys.argv) != 2 + FORCE: sys.exit('usage: make-item-placeholders.py ' + ' | '.join(SHEETS) + ' [--force]')
+ATLAS, OUT = SHEETS[picked[0]]
+# A committed sheet may already be painted art: only --force replaces it.
+if not FORCE and subprocess.run(['git', '-C', str(root), 'ls-files', '--error-unmatch', OUT], capture_output=True).returncode == 0:
+    sys.exit('refusing to overwrite committed ' + OUT + ' (pass --force for a placeholder)')
 pat = (r"'([a-z-]+)':\{atlas:'" + ATLAS + r"',icon:(\d+),name:'([^']+)',kind:'([a-z]+)'") if ATLAS else r"'([a-z-]+)':\{icon:(\d+),name:'([^']+)',kind:'([a-z]+)'"
 items = re.findall(pat, src)
 font = ImageFont.truetype(str(root / 'assets/fonts/Mali-Bold.ttf'), 34)
-colors = {'loot': (198, 161, 100), 'potion': (205, 80, 70), 'ui': (244, 207, 122), 'reserved': (120, 130, 120), 'gear': (150, 170, 190)}
+colors = {'loot': (198, 161, 100), 'potion': (205, 80, 70), 'ui': (244, 207, 122), 'reserved': (120, 130, 120), 'gear': (150, 170, 190), 'card': (200, 120, 200)}
 atlas = Image.new('RGBA', (1536, 1024), (0, 0, 0, 0))
 for item_id, icon, name, kind in items:
     i = int(icon); x, y = i % 6 * 256, i // 6 * 256
@@ -34,5 +40,5 @@ for item_id, icon, name, kind in items:
     w = d.textlength(label, font=font)
     d.text(((256 - w) / 2, 206), label, font=font, fill=(255, 245, 220, 255), stroke_width=4, stroke_fill=(20, 30, 25, 255))
     atlas.alpha_composite(cell, (x, y))
-out = root / ('assets/refine44/refine.png' if REFINE else 'assets/gear43/gear.png' if GEAR else 'assets/items42/items.png'); out.parent.mkdir(parents=True, exist_ok=True); atlas.save(out)
+out = root / OUT; out.parent.mkdir(parents=True, exist_ok=True); atlas.save(out)
 print('placeholder atlas:', len(items), 'items')

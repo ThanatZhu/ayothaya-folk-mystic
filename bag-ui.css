@@ -92,3 +92,8 @@
 @media (prefers-reduced-motion:reduce){#refine-result{animation:none!important}}
 #target-affinity{display:block;font-size:10px;color:#95efe2}
 @media (orientation:landscape) and (max-height:520px){#refine-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(372px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}}
+
+/* 0.45 card slot row */
+.card-in{display:block;color:#95efe2!important}
+.card-pick{display:flex;gap:4px;margin-top:3px}.card-pick select{flex:1;min-width:0;font:11px Mali,Tahoma,sans-serif;background:#0e2926;color:#f4dfac;border:1px solid #af884f88;border-radius:5px}
+.card-pick button{padding:2px 8px;border:1px solid #95efe2;border-radius:999px;background:#24382b;color:#95efe2;font:700 10px Mali,Tahoma,sans-serif;cursor:pointer}

@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable,monsterHit} from '../combat-core.js';
 import {awardExperience,baseProgress} from '../experience.js';
 import {refineGear} from '../refine.js';
-import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints} from '../character-stats.js';
+import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
 import {normalizeSkills,upgradeSkill,availablePoints} from '../skill-progress.js';
@@ -13,7 +13,7 @@ import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,SHOPS,ITEM_ERRORS} from '
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
-const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip','refine']);
+const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip','refine','insertCard']);
 export class RealmServer{
  constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
@@ -62,6 +62,11 @@ export class RealmServer{
    if(now-p.gearAt<600)return this.itemFail(p,'gear-rate');p.gearAt=now;
    let r;try{r=refineGear(p.bag,p.gear,m.slot,{lekLai:m.lekLai===true});}catch(e){return this.itemFail(p,e.message);}
    p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});return true;
+  }
+  if(m.type==='insertCard'){
+   if(now-p.gearAt<300)return this.itemFail(p,'gear-rate');p.gearAt=now;
+   let r;try{r=insertCard(p.bag,p.gear,m.slot,m.card);}catch(e){return this.itemFail(p,e.message);}
+   p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);w.emit('carded',{slot:m.slot,card:m.card});return true;
   }
   if(m.type==='statUp'||m.type==='equip'||m.type==='unequip'){
    if(now-p.gearAt<200)return this.itemFail(p,'gear-rate');p.gearAt=now;
@@ -155,7 +160,7 @@ export class RealmServer{
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
   const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort();
-  ids.forEach((id,i)=>{const a=this.peers.get(id);a.world.kills++;const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,split(reward.baseXp),split(reward.jobXp)));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});this.grantLoot(a,rollLoot(reward.id),mob);});
+  ids.forEach((id,i)=>{const a=this.peers.get(id);a.world.kills++;const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,split(reward.baseXp),split(reward.jobXp)));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});{const loot=rollLoot(reward.id);loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)));this.grantLoot(a,loot,mob);}});
   p.room.contributors.delete(mob.id);
   for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id){a.world.targetId=null;a.world.path=[];}}
  }
@@ -171,11 +176,11 @@ export class RealmServer{
     const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
     if(result==='respawn')room.contributors.delete(m.id);
     if(result==='hit'&&target){
-     const w=target.world,p=w.player,amount=monsterHit(w,type.damage);if(!amount){w.emit('dodge',{x:p.x,z:p.z});continue;}p.hp=Math.max(0,p.hp-amount);w.emit('playerHit',{x:p.x,z:p.z,amount});
+     const w=target.world,p=w.player,amount=monsterHit(w,type.damage,Math.random,type.id);if(!amount){w.emit('dodge',{x:p.x,z:p.z});continue;}p.hp=Math.max(0,p.hp-amount);w.emit('playerHit',{x:p.x,z:p.z,amount});
      if(p.hp===0){p.down=3;w.auto=false;w.targetId=null;w.path=[];p.moving=false;w.notice('หมดแรง · กลับลานใน 3 วินาที');}
     }
    }
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(['notice','experience','defeat','select','story','loot','used','trade','refined'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p),events:copy(room.events)});}room.events=[];}
   }
  }

@@ -1,4 +1,5 @@
-import {loadPaintedCharacter} from './painted-character.js?v=41';
+import {drawCharacterFrame} from './character-size.js?v=41.2';
+import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {FRAME_COUNT} from './animation-frames.js?v=37';
 export function createMotionPreview(host){
  const canvas=document.createElement('canvas');canvas.width=320;canvas.height=320;canvas.style.cssText='display:block;width:100%;height:100%;image-rendering:pixelated';host.append(canvas);host.classList.add('rig-preview');
@@ -11,7 +12,7 @@ export function createMotionPreview(host){
  function draw(p){
   ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;
   const source=frames?.[Math.max(0,Math.min(FRAME_COUNT-1,Math.round(p.artFrame??0)))]??cell;
-  ctx.drawImage(source,20,8-(p.y??0)*130,280,280);
+  if(frames)drawCharacterFrame(ctx,source,20,8-(p.y??0)*130,280);else ctx.drawImage(source,20,8-(p.y??0)*130,280,280);
  }
  return {setSource,draw};
 }

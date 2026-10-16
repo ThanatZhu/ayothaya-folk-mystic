@@ -1,4 +1,5 @@
-import {loadPaintedCharacter} from './painted-character.js?v=37';
+import {drawCharacterFrame} from './character-size.js?v=41.2';
+import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {characterMotion,attackDuration} from './character-motion.js?v=37';
 import {skillPose,skillTrack} from './skill-choreography.js?v=37';
 import {CLASSES,NOVICE} from './classes.js?v=18';
@@ -20,7 +21,7 @@ function draw(ms){const dt=previous===null?0:Math.min(.05,(ms-previous)/1000);pr
   if(mode==='parts'&&card.ready){for(const [gi,g] of ['male','female'].entries())for(const [i,r] of Object.values(card.parts[g]).entries()){const [x,y,w,h]=r,s=Math.min(80/w,128/h);ctx.drawImage(card.image,x,y,w,h,gi*280+(i%3)*90+(90-w*s)/2,Math.floor(i/3)*155+(150-h*s)/2,w*s,h*s);}continue;}
   const track=skillTrack(card.id,Number(slot.value)),duration=mode==='skill'?track.duration+.6:mode==='attack'?attackDuration(card.id)+.45:1,local=mode==='walk'?time:time%duration;
   const p=mode==='skill'?skillPose(card.id,Number(slot.value),local):characterMotion({classId:card.id,mode,time:local});
-  for(const [gi,g] of ['male','female'].entries()){ctx.fillStyle='#11271c88';ctx.beginPath();ctx.ellipse(140+gi*280,298,53,12,0,0,Math.PI*2);ctx.fill();ctx.drawImage(card.art[g][p.artFrame],gi*280+12+p.x*25,54-p.y*50,256,256);}
+  for(const [gi,g] of ['male','female'].entries()){ctx.fillStyle='#11271c88';ctx.beginPath();ctx.ellipse(140+gi*280,298,53,12,0,0,Math.PI*2);ctx.fill();drawCharacterFrame(ctx,card.art[g][p.artFrame],gi*280+12+p.x*25,54-p.y*50);}
  }
  requestAnimationFrame(draw);
 }requestAnimationFrame(draw);

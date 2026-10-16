@@ -42,3 +42,8 @@ not pretend to save locally. Production Render readiness must be checked separat
 Equipment tests cover class restrictions, novice progression, slot isolation, face
 appearance preservation, image bounds, already-known remote players and real WebSocket
 equip/save/reconnect with two clients. The full suite passed 136 tests after integration with the chapter-one story and click-to-move updates.
+
+## Consistent playable body size (0.41.2)
+All eight professions and both genders now share a 210 logical-pixel standing crown-to-sole height, with spear/trident tips excluded. Each art set has one uniform multiplier for the complete clip, retaining crouches and natural motion. A padded 320px texture preserves extended weapons; preview and world renderers compensate for that padding so it does not shrink the body. Original artwork files are unchanged. Customization is applied before normalization. Includes base and crafted weapons, equipment UI, lobby, skill lab and online character rendering. The optional experimental eight-direction art remains its separate existing path.
+
+Validation: 138 automated tests pass, including every pose staying in bounds and both weapon sets sharing the calibrated height.

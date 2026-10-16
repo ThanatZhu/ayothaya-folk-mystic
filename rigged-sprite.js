@@ -1,5 +1,6 @@
+import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=41.2';
 import * as THREE from './vendor/build/three.module.js';
-import {loadPaintedCharacter} from './painted-character.js?v=41';
+import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {FRAME_COUNT} from './animation-frames.js?v=37';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
 export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null}={}){
@@ -37,9 +38,10 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  mesh.userData.pose=(pose,flip=false)=>{
   const frame=Math.max(0,Math.min(FRAME_COUNT-1,Math.round(pose.artFrame??0)));
   if(!mesh.userData.directional&&frames){material.map=frames[currentGender][frame];mesh.userData.artFrame=frame;}
-  const positions=geometry.attributes.position,foot=mesh.userData.directional?(mesh.userData.footV??1):frames?244/256:1;
-  positions.setXYZ(0,flip?.5:-.5,foot,0);positions.setXYZ(1,flip?-.5:.5,foot,0);
-  positions.setXYZ(2,flip?.5:-.5,foot-1,0);positions.setXYZ(3,flip?-.5:.5,foot-1,0);positions.needsUpdate=true;
+  const painted=frames&&!mesh.userData.directional,extent=painted?FRAME_SIZE/LOGICAL_SIZE:1;
+  const positions=geometry.attributes.position,foot=mesh.userData.directional?(mesh.userData.footV??1):painted?FRAME_FOOT/LOGICAL_SIZE:1;
+  positions.setXYZ(0,(flip?.5:-.5)*extent,foot,0);positions.setXYZ(1,(flip?-.5:.5)*extent,foot,0);
+  positions.setXYZ(2,(flip?.5:-.5)*extent,foot-extent,0);positions.setXYZ(3,(flip?-.5:.5)*extent,foot-extent,0);positions.needsUpdate=true;
  };
  mesh.userData.dispose=()=>{disposed=true;version++;release();geometry.dispose();material.dispose();};
  mesh.userData.setRig(classId,gender);return mesh;

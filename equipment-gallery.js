@@ -1,6 +1,7 @@
+import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {EQUIPMENT,normalizeEquipment,equipItem,starterEquipment} from './equipment.js?v=41';
-import {equipmentIcon} from './equipment-ui.js?v=41';
-import {loadPaintedCharacter} from './painted-character.js?v=41';
+import {equipmentIcon} from './equipment-ui.js?v=41.2';
+import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {motionFrame} from './animation-frames.js?v=37';
 import {className} from './classes.js?v=18';
 const $=id=>document.getElementById(id),select=$('gallery-class'),canvas=$('gallery-art'),ctx=canvas.getContext('2d');
@@ -15,5 +16,5 @@ async function render(){const id=select.value,token=++version;$('gallery-status'
 }
 select.onchange=()=>{gear=normalizeEquipment(null,select.value);art=null;render();};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-function draw(ms){if(art&&!document.hidden){const mode=$('gallery-motion').value,frame=motionFrame(mode,mode==='attack'?ms/1000%1.4:ms/1000,null,reduced.matches,select.value);ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;ctx.drawImage(art[$('gallery-gender').value][frame],32,12,256,256);}requestAnimationFrame(draw);}
+function draw(ms){if(art&&!document.hidden){const mode=$('gallery-motion').value,frame=motionFrame(mode,mode==='attack'?ms/1000%1.4:ms/1000,null,reduced.matches,select.value);ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;drawCharacterFrame(ctx,art[$('gallery-gender').value][frame],32,12);}requestAnimationFrame(draw);}
 render();requestAnimationFrame(draw);

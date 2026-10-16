@@ -1,8 +1,9 @@
+import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {createMultiplayer} from './multiplayer-ui.js?v=41';
-import {createEquipmentUI} from './equipment-ui.js?v=41';
+import {createMultiplayer} from './multiplayer-ui.js?v=41.2';
+import {createEquipmentUI} from './equipment-ui.js?v=41.2';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=40';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=34';
@@ -11,7 +12,7 @@ import {createSoftLook} from './soft-look.js?v=29';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
-import {createRiggedSprite} from './rigged-sprite.js?v=41';
+import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
@@ -149,7 +150,8 @@ try {
  createEquipmentUI({account,game,hero:heroMesh,onArtwork:(canvas,gear)=>{
   characters[0].directionalEnabled=false;pilotToggle.checked=false;
   pilotToggle.disabled=gear.weapon.endsWith('-crafted')||!gear.outfit.endsWith('-original');
-  portrait.style.backgroundImage=`url("${canvas.toDataURL()}")`;portrait.style.backgroundSize='contain';portrait.style.backgroundPosition='center';portrait.style.backgroundRepeat='no-repeat';
+  const icon=document.createElement('canvas');icon.width=icon.height=256;drawCharacterFrame(icon.getContext('2d'),canvas,0,0);
+  portrait.style.backgroundImage=`url("${icon.toDataURL()}")`;portrait.style.backgroundSize='contain';portrait.style.backgroundPosition='center';portrait.style.backgroundRepeat='no-repeat';
  }});
  function toggleOverview(){
   overview=!overview;controls.minZoom=overview?.08:.65;game.clearInput();rotating=null;

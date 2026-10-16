@@ -5,7 +5,7 @@ import {multiplayerURL} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=18';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
-import {createRiggedSprite} from './rigged-sprite.js?v=41';
+import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
 import {characterMotion,attackDuration} from './character-motion.js?v=37';
 import {skillPose,skillTrack} from './skill-choreography.js?v=37';
 import {createSkillEffects} from './skill-effects.js?v=37';

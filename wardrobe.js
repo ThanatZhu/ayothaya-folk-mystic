@@ -1,4 +1,4 @@
-import {createMotionPreview} from './motion-preview.js?v=41';
+import {createMotionPreview} from './motion-preview.js?v=41.2';
 import {APPEARANCE_OPTIONS,validateAppearance} from './appearance-state.js';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {JOBS,progression,JOB_LEVEL} from './advancement.js?v=21';

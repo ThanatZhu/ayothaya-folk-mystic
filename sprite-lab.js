@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {DIRECTIONS,viewDirection,loadDirectionalArt} from './directional-sprite.js?v=17';
 import {screenDirection} from './combat-core.js?v=21';
-import {createRiggedSprite} from './rigged-sprite.js?v=37';
+import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
 import {characterMotion} from './character-motion.js?v=37';
 const $=id=>document.getElementById(id),labels={S:'หน้า',SE:'หน้าขวา',E:'ขวา',NE:'หลังขวา',N:'หลัง',NW:'หลังซ้าย',W:'ซ้าย',SW:'หน้าซ้าย'};
 try{

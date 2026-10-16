@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {CLASSES,NOVICE,atlasPath,classSkills,className} from './classes.js?v=18';
 import {SKILLS} from './combat-core.js?v=23';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
-import {createRiggedSprite} from './rigged-sprite.js?v=37';
+import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
 import {createSkillEffects} from './skill-effects.js?v=37';
 import {characterMotion,attackDuration} from './character-motion.js?v=37';
 import {applySkillArt} from './skill-art.js?v=21';

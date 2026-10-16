@@ -1,5 +1,6 @@
+import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {starterEquipment,equipItem,equipmentItem} from './equipment.js?v=41';
-import {loadPaintedCharacter} from './painted-character.js?v=41';
+import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {motionFrame} from './animation-frames.js?v=37';
 import {className} from './classes.js?v=18';
 import {openHudPanel} from './hud-panels.js';
@@ -57,7 +58,7 @@ export function createEquipmentUI({account,game,hero,onArtwork}){
  const context=$('equipment-hero').getContext('2d'),reduced=matchMedia('(prefers-reduced-motion: reduce)');let last=0;
  function draw(ms){
   if(ms-last>500&&ms>retryAt){last=ms;sync().catch(()=>{if(panel.open)$('equipment-status').textContent='โหลดภาพอุปกรณ์ไม่สำเร็จ กำลังลองใหม่…';});}
-  if(panel.open&&frames&&!document.hidden){const frame=motionFrame(mode,mode==='attack'?(ms/1000)%1.4:ms/1000,null,reduced.matches,person.classId);context.clearRect(0,0,320,320);context.imageSmoothingEnabled=false;context.drawImage(frames[frame],32,12,256,256);}
+  if(panel.open&&frames&&!document.hidden){const frame=motionFrame(mode,mode==='attack'?(ms/1000)%1.4:ms/1000,null,reduced.matches,person.classId);context.clearRect(0,0,320,320);context.imageSmoothingEnabled=false;drawCharacterFrame(context,frames[frame],32,12);}
   requestAnimationFrame(draw);
  }
  requestAnimationFrame(draw);return {open};

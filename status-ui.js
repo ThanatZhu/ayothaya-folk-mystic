@@ -1,9 +1,9 @@
 // Status window (สถานะ · C): STR AGI VIT INT DEX LUK with status points, combat numbers, and the three
 // stat-gear slots. Online the server validates and owns everything; offline guests keep it in this browser.
-import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats} from './character-stats.js?v=01';
-import {ITEMS,ITEM_ERRORS} from './items.js?v=02';
+import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats} from './character-stats.js?v=02';
+import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=03';
 import {baseProgress} from './experience.js?v=21';
-import {iconStyle} from './bag-ui.js?v=02';
+import {iconStyle} from './bag-ui.js?v=03';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -35,7 +35,7 @@ export function createStatusUI({game,account,bagUI}){
  }
  function wear(id){
   if(game.online){world.equipGear?.(id);return;}
-  try{const r=equipGear(bagUI.bag(),local.gear,id,who());local.gear=r.gear;bagUI.setLocal(r.bag);save();applyOffline();world.notice('สวมใส่ '+ITEMS[id].name);render(true);}catch(e){fail(e.message);}
+  try{const r=equipGear(bagUI.bag(),local.gear,id,who());local.gear=r.gear;bagUI.setLocal(r.bag);save();applyOffline();world.notice('สวมใส่ '+itemDef(id).name);render(true);}catch(e){fail(e.message);}
  }
  function takeOff(slot){
   if(game.online){world.unequipGear?.(slot);return;}
@@ -66,10 +66,11 @@ export function createStatusUI({game,account,bagUI}){
   $('status-stats').querySelectorAll('[data-stat]').forEach(b=>b.onclick=()=>raise(b.dataset.stat));
   const d=v.derived,pct=n=>Math.round(n*100)+'%';
   $('status-derived').innerHTML=[['HP สูงสุด',d.maxHp],['MP สูงสุด',d.maxMp],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)],['ความเร็วโจมตี',Math.round(100/d.delay)+'%']].map(([k,n])=>`<div><dt>${k}</dt><dd>${n}</dd></div>`).join('');
-  $('status-gear').innerHTML=GEAR_SLOTS.map(slot=>{const id=v.gear[slot],it=id&&ITEMS[id];
+  $('status-gear').innerHTML=GEAR_SLOTS.map(slot=>{const id=v.gear[slot],it=id&&itemDef(id);
    return `<li><i class="item-icon" style="${it?iconStyle(id):''}"></i><div><small>${SLOT_LABEL[slot]}</small><strong>${it?it.name:'— ว่าง —'}</strong><em>${it?it.text:'แตะอุปกรณ์ในกระเป๋าแล้วกด สวมใส่'}</em></div>${it?`<button type="button" data-off="${slot}">ถอด</button>`:''}</li>`;}).join('');
   $('status-gear').querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>takeOff(b.dataset.off));
  }
  applyOffline();render(true);
- return {update(){applyOffline();render();}};
+ // Refine window hooks (offline gear lives here).
+ return {update(){applyOffline();render();},view,gear:()=>game.online?normalizeGear(world.gear):local.gear,setGear(g){local.gear=normalizeGear(g);save();applyOffline();render(true);},who};
 }

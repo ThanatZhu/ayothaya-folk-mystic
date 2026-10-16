@@ -40,7 +40,7 @@ test('gear equips from the bag, swaps back, respects class and level, and falls 
  r=unequipGear(r.bag,r.gear,'weapon');assert.equal(r.gear.weapon,null);assert.equal(r.bag.items['sword-silver'],1);
  const after=dropInvalidGear({},{weapon:'wrap-novice',armor:'vest-cotton'},{classId:'boxer',level:26});
  assert.deepEqual(after.gear,{weapon:null,armor:'vest-cotton',accessory:null});assert.equal(after.bag.items['wrap-novice'],1);
- for(const id of SHOPS['ครูแสนดาบ'].stock)assert.equal(ITEMS[id].kind,'gear');
+ for(const id of SHOPS['ครูแสนดาบ'].stock)assert.ok(ITEMS[id].kind==='gear'||['iron-ore','laterite'].includes(id),id);
 });
 
 test('server: stat points, equipping and the saved record; max HP grows with VIT', () => {

@@ -7,7 +7,10 @@ root = Path(__file__).resolve().parent.parent
 src = (root / 'items.js').read_text(encoding='utf8')
 import sys
 GEAR = '--gear' in sys.argv  # 0.43 stat gear atlas instead of the 0.42 item atlas
-items = re.findall(r"'([a-z-]+)':\{atlas:'gear',icon:(\d+),name:'([^']+)',kind:'(gear)'", src) if GEAR else re.findall(r"'([a-z-]+)':\{icon:(\d+),name:'([^']+)',kind:'([a-z]+)'", src)
+REFINE = '--refine' in sys.argv  # 0.44 refine materials atlas
+ATLAS = 'refine' if REFINE else 'gear' if GEAR else None
+pat = (r"'([a-z-]+)':\{atlas:'" + ATLAS + r"',icon:(\d+),name:'([^']+)',kind:'([a-z]+)'") if ATLAS else r"'([a-z-]+)':\{icon:(\d+),name:'([^']+)',kind:'([a-z]+)'"
+items = re.findall(pat, src)
 font = ImageFont.truetype(str(root / 'assets/fonts/Mali-Bold.ttf'), 34)
 colors = {'loot': (198, 161, 100), 'potion': (205, 80, 70), 'ui': (244, 207, 122), 'reserved': (120, 130, 120), 'gear': (150, 170, 190)}
 atlas = Image.new('RGBA', (1536, 1024), (0, 0, 0, 0))
@@ -31,5 +34,5 @@ for item_id, icon, name, kind in items:
     w = d.textlength(label, font=font)
     d.text(((256 - w) / 2, 206), label, font=font, fill=(255, 245, 220, 255), stroke_width=4, stroke_fill=(20, 30, 25, 255))
     atlas.alpha_composite(cell, (x, y))
-out = root / ('assets/gear43/gear.png' if GEAR else 'assets/items42/items.png'); out.parent.mkdir(parents=True, exist_ok=True); atlas.save(out)
+out = root / ('assets/refine44/refine.png' if REFINE else 'assets/gear43/gear.png' if GEAR else 'assets/items42/items.png'); out.parent.mkdir(parents=True, exist_ok=True); atlas.save(out)
 print('placeholder atlas:', len(items), 'items')

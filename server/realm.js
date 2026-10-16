@@ -3,6 +3,7 @@ import {normalizeEquipment} from '../equipment.js';
 import {randomUUID} from 'node:crypto';
 import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable,monsterHit} from '../combat-core.js';
 import {awardExperience,baseProgress} from '../experience.js';
+import {refineGear} from '../refine.js';
 import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
@@ -12,7 +13,7 @@ import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,SHOPS,ITEM_ERRORS} from '
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
-const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip']);
+const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip','refine']);
 export class RealmServer{
  constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
@@ -55,6 +56,13 @@ export class RealmServer{
   if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
   const w=p.world,now=this.now();
   if(m.type==='ping'){p.send({type:'pong',stamp:typeof m.stamp==='number'?m.stamp:0});return true;}
+  if(m.type==='refine'){
+   const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null;
+   if(!npc||!SHOPS[npc.name]?.refine||SHOPS[npc.name].mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'refine-far');
+   if(now-p.gearAt<600)return this.itemFail(p,'gear-rate');p.gearAt=now;
+   let r;try{r=refineGear(p.bag,p.gear,m.slot,{lekLai:m.lekLai===true});}catch(e){return this.itemFail(p,e.message);}
+   p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});return true;
+  }
   if(m.type==='statUp'||m.type==='equip'||m.type==='unequip'){
    if(now-p.gearAt<200)return this.itemFail(p,'gear-rate');p.gearAt=now;
    const who=this.who(p);
@@ -167,7 +175,7 @@ export class RealmServer{
      if(p.hp===0){p.down=3;w.auto=false;w.targetId=null;w.path=[];p.moving=false;w.notice('หมดแรง · กลับลานใน 3 วินาที');}
     }
    }
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(['notice','experience','defeat','select','story','loot','used','trade'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(['notice','experience','defeat','select','story','loot','used','trade','refined'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p),events:copy(room.events)});}room.events=[];}
   }
  }

@@ -2,8 +2,8 @@
 // server (authoritative online bag). Bag state: {coins, items:{[id]:count}}.
 // Art: one atlas, 6x4 cells of 256 px (1536x1024, transparent). Drop a finished file over the same path to re-skin.
 export const ITEM_ATLAS='assets/items42/items.png',GEAR_ATLAS='assets/gear43/gear.png',REFINE_ATLAS='assets/refine44/refine.png';
-export const CARD_ATLAS='assets/cards45/cards.png',SOCIAL_ATLAS='assets/social46/social.png';
-export const ATLASES={gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS,social:SOCIAL_ATLAS}; // item.atlas key → file (default ITEM_ATLAS)
+export const CARD_ATLAS='assets/cards45/cards.png',SOCIAL_ATLAS='assets/social46/social.png',EMBLEM_ATLAS='assets/emblems47/emblems.png';
+export const ATLASES={gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS,social:SOCIAL_ATLAS,emblems:EMBLEM_ATLAS}; // item.atlas key → file (default ITEM_ATLAS)
 export const BAG_SLOTS=40,MAX_STACK=999,MAX_COINS=9999999;
 
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
@@ -31,7 +31,9 @@ export const ITEMS={
  'loot-bundle':{icon:22,name:'ห่อผ้า',kind:'ui'},
  // 0.46+ social / market UI cells (assets/social46, see docs/social46-art.md)
  'storage-chest':{atlas:'social',icon:0,name:'คลังเก็บของ',kind:'ui'},'trade-hands':{atlas:'social',icon:1,name:'แลกของ',kind:'ui'},
- 'stall-sign':{atlas:'social',icon:2,name:'ป้ายแผง',kind:'ui'},'market-stalls':{atlas:'social',icon:3,name:'ตลาด',kind:'ui'},'treasure-chest':{icon:23,name:'หีบสมบัติ',kind:'reserved',sell:0},
+ 'stall-sign':{atlas:'social',icon:2,name:'ป้ายแผง',kind:'ui'},'market-stalls':{atlas:'social',icon:3,name:'ตลาด',kind:'ui'},
+ 'whisper':{atlas:'social',icon:4,name:'กระซิบ',kind:'ui'},'friend':{atlas:'social',icon:5,name:'เพื่อน',kind:'ui'},
+ 'guild-flag':{atlas:'social',icon:6,name:'กิลด์',kind:'ui'},'guild-seal':{atlas:'social',icon:7,name:'ตรากิลด์',kind:'ui'},'treasure-chest':{icon:23,name:'หีบสมบัติ',kind:'reserved',sell:0},
  // 0.43 stat gear (atlas assets/gear43/gear.png): class weapons tier 1 / tier 2, armor, accessories.
  'wrap-novice':{atlas:'gear',icon:0,name:'ผ้าพันหมัดเชือกป่าน',kind:'gear',slot:'weapon',classes:['novice'],atk:6,buy:120,sell:30,text:'ATK +6 · ผู้ฝึกตน'},
  'sword-iron':{atlas:'gear',icon:1,name:'ดาบเหล็กกล้า',kind:'gear',slot:'weapon',classes:['swordsman'],atk:14,buy:300,sell:75,text:'ATK +14 · นักดาบ'},
@@ -74,6 +76,10 @@ export const ITEMS={
  'card-mill-keeper':{atlas:'cards',icon:8,name:'การ์ดเจ้าหุ่นฟางพันเชือก',kind:'card',slot:'armor',effect:{resist:{ghost:.3},hpPct:.1},sell:2000,text:'ใส่ในเสื้อเกราะ · รับดาเมจจากผีลด 30% · HP +10%'},
  'refine-hammer':{atlas:'refine',icon:3,name:'ค้อนตีบวก',kind:'ui'},'refine-success':{atlas:'refine',icon:4,name:'ตีบวกสำเร็จ',kind:'ui'},'refine-broken':{atlas:'refine',icon:5,name:'อุปกรณ์แตก',kind:'ui'},
 };
+// 0.47 guild emblems: 24 cells of assets/emblems47 (docs/emblems47-art.md), picked when founding a guild.
+// Ids are letters (emblem-a … emblem-x) because item ids are [a-z-]; the guild stores the number 1–24.
+export const emblemId=n=>'emblem-'+String.fromCharCode(96+n);
+for(let i=1;i<=24;i++)ITEMS[emblemId(i)]={atlas:'emblems',icon:i-1,name:'ตรากิลด์ '+i,kind:'ui'};
 // A refined piece keeps its level as an id suffix: 'sword-iron+5'. itemDef() resolves any bag/gear id.
 // 0.45: a slotted card adds '~card-<monster>': 'sword-iron+5~card-rat'.
 export function itemDef(id){

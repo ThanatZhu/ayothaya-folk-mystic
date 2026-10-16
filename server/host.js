@@ -20,6 +20,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
  const realm=new RealmServer({catalog,capacity}),sessions=new Map(),joinPending=new Set();let closing=false;
+ // 0.47 guilds: loaded once, written on each change (rare: create/join/leave/emblem), outside the per-player saves.
+ if(store?.loadGuilds){realm.guilds=new Map((await store.loadGuilds()).map(g=>[g.id,g]));store.realmGuilds=realm.guilds;realm.onGuild=(g,deleted)=>Promise.resolve(deleted?store.deleteGuild(g):store.saveGuild(g)).catch(e=>console.error('guild-save',e.message));}
  const allowedOrigin=origin=>origins.includes(origin);
  const server=http.createServer(async(req,res)=>{
   const origin=req.headers.origin;if(origin&&allowedOrigin(origin))res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');

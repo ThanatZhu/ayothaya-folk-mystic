@@ -25,6 +25,11 @@ export class LocalStore{
   if(release)this.leases.delete(session.identity.uid);else lock.expires=Date.now()+ttl;
   await this.flush();
  }
+ // 0.47 guilds live beside the profiles; the realm keeps them in memory and calls these on change.
+ async loadGuilds(){try{return JSON.parse(await readFile(path.join(this.directory,'guilds.json'),'utf8'));}catch{return [];}}
+ saveGuild(){return this.flushGuilds();}
+ deleteGuild(){return this.flushGuilds();}
+ flushGuilds(){const data=JSON.stringify([...(this.realmGuilds?.values()??[])]);return writeFile(path.join(this.directory,'guilds.json'),data,{mode:0o600});}
  flush(){const data=JSON.stringify([...this.rows]);this.queue=this.queue.catch(()=>{}).then(async()=>{const file=path.join(this.directory,'profiles.json'),tmp=file+'.tmp';await writeFile(tmp,data,{mode:0o600});await rename(tmp,file);});return this.queue;}
 }
 export class FirebaseStore{
@@ -37,6 +42,9 @@ export class FirebaseStore{
  }
  async checkAuthority(tx){const snap=await tx.get(this.authorityRef);if(!snap.exists||snap.data().id!==this.authorityId||snap.data().expires<Date.now())throw new Error('authority-lost');}
  async releaseAuthority(){await this.db.runTransaction(async tx=>{const s=await tx.get(this.authorityRef);if(s.exists&&s.data().id===this.authorityId)tx.delete(this.authorityRef);});this.authorityUntil=0;}
+ async loadGuilds(){return (await this.db.collection('multiplayerGuilds').get()).docs.map(d=>d.data());}
+ saveGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).set(g);}
+ deleteGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).delete();}
  refs(identity){const root=this.db.collection('multiplayerProfiles').doc(identity.uid);return {profile:root.collection('characters').doc(identity.slotId),lease:this.db.collection('multiplayerLeases').doc(identity.uid),legacy:this.db.collection('players').doc(identity.uid).collection('characters').doc(identity.slotId)};}
  async acquire(identity,leaseId){
   const refs=this.refs(identity);return this.db.runTransaction(async tx=>{
@@ -61,7 +69,7 @@ export class FirebaseStore{
    if(!legacy.exists||legacy.data().revision!==session.mirrorRevision)throw new Error('save-conflict');
    const next={...copy(record),revision:session.mirrorRevision+1};delete next.slotId;
    // Skill levels stay in the private profile; the client-readable mirror keeps its rule-checked shape.
-   const mirror={...next};delete mirror.skills;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.stats;delete mirror.gear;
+   const mirror={...next};delete mirror.skills;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.stats;delete mirror.gear;
    tx.set(session.refs.profile,{record:next,updatedAt:Date.now()});tx.set(session.refs.legacy,{...mirror,updatedAt:new Date()});
    if(release)tx.delete(session.refs.lease);else tx.update(session.refs.lease,{expires:Date.now()+ttl});return next.revision;
   });session.mirrorRevision=revision;

@@ -1,4 +1,6 @@
 import {openHudPanel} from './hud-panels.js?v=34';
+import {iconStyle} from './bag-ui.js?v=03';
+import {emblemId} from './items.js?v=04';
 import * as THREE from 'three';
 import {MultiplayerClient} from './multiplayer-client.js?v=41';
 import {multiplayerURL} from './multiplayer-config.js?v=27';
@@ -27,7 +29,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  shell.append(dialog);const $=id=>shell.querySelector('#'+id),status=text=>{$('online-status').lastChild.textContent=text;};
  // Chat dock: always visible while online and never pauses the game.
  const dock=el('section');dock.id='online-dock';dock.hidden=true;dock.dataset.channel='room';dock.setAttribute('aria-label','แชตออนไลน์');
- dock.innerHTML='<header><div class="mp-tabs" role="tablist" aria-label="ช่องสนทนา"><button role="tab" data-channel="room" aria-selected="true">ห้องนี้</button><button role="tab" data-channel="party" aria-selected="false" disabled>ปาร์ตี้</button><button role="tab" data-channel="system" aria-selected="false">ระบบ</button></div><button id="dock-toggle" class="mp-dock-bar" aria-expanded="true"><span id="dock-preview"></span><b id="dock-unread" hidden></b><i aria-hidden="true">▾</i></button></header><div id="online-messages" role="log" aria-label="ข้อความสนทนา" aria-live="polite"></div><p id="dock-note" role="status"></p><form id="online-chat"><input id="online-text" aria-label="ข้อความแชต" maxlength="240" autocomplete="off" enterkeyhint="send" placeholder=""><button type="submit">ส่ง</button></form>';
+ dock.innerHTML='<header><div class="mp-tabs" role="tablist" aria-label="ช่องสนทนา"><button role="tab" data-channel="room" aria-selected="true">ห้องนี้</button><button role="tab" data-channel="party" aria-selected="false" disabled>ปาร์ตี้</button><button role="tab" data-channel="guild" aria-selected="false" disabled>กิลด์</button><button role="tab" data-channel="system" aria-selected="false">ระบบ</button></div><button id="dock-toggle" class="mp-dock-bar" aria-expanded="true"><span id="dock-preview"></span><b id="dock-unread" hidden></b><i aria-hidden="true">▾</i></button></header><div id="online-messages" role="log" aria-label="ข้อความสนทนา" aria-live="polite"></div><p id="dock-note" role="status"></p><form id="online-chat"><input id="online-text" aria-label="ข้อความแชต" maxlength="240" autocomplete="off" enterkeyhint="send" placeholder=""><button type="submit">ส่ง</button></form>';
  shell.append(dock);
  const partyFrame=el('section');partyFrame.id='party-frame';partyFrame.hidden=true;partyFrame.setAttribute('aria-label','สมาชิกปาร์ตี้');partyFrame.innerHTML='<h3>ปาร์ตี้ <small id="party-count"></small></h3><ol id="party-members"></ol>';shell.append(partyFrame);
  const invites=el('div');invites.id='online-invites';invites.setAttribute('aria-live','assertive');shell.append(invites);
@@ -40,7 +42,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  function setCollapsed(value){dock.classList.toggle('collapsed',value);$('dock-toggle').setAttribute('aria-expanded',String(!value));$('dock-toggle').setAttribute('aria-label',value?'เปิดแชต':'ย่อแชต');if(!value){unread=0;$('dock-unread').hidden=true;$('online-messages').scrollTop=$('online-messages').scrollHeight;}}
  setCollapsed(compact.matches);
  $('dock-toggle').onclick=()=>setCollapsed(!dock.classList.contains('collapsed'));
- function setChannel(channel){dock.dataset.channel=channel;for(const tab of dock.querySelectorAll('[role=tab]'))tab.setAttribute('aria-selected',String(tab.dataset.channel===channel));$('online-text').placeholder=(compact.matches?'':'Enter · ')+(channel==='party'?'พิมพ์ถึงปาร์ตี้…':'พิมพ์ถึงทุกคนในห้อง…');$('online-messages').scrollTop=$('online-messages').scrollHeight;}
+ function setChannel(channel){dock.dataset.channel=channel;for(const tab of dock.querySelectorAll('[role=tab]'))tab.setAttribute('aria-selected',String(tab.dataset.channel===channel));$('online-text').placeholder=(compact.matches?'':'Enter · ')+(channel==='party'?'พิมพ์ถึงปาร์ตี้…':channel==='guild'?'พิมพ์ถึงกิลด์…':'พิมพ์ถึงทุกคนในห้อง… (/w ชื่อ ข้อความ = กระซิบ)');$('online-messages').scrollTop=$('online-messages').scrollHeight;}
  for(const tab of dock.querySelectorAll('[role=tab]'))tab.onclick=()=>setChannel(tab.dataset.channel);
  setChannel('room');
  let noteTimer;const dockNote=text=>{$('dock-note').textContent=text;clearTimeout(noteTimer);noteTimer=setTimeout(()=>{$('dock-note').textContent='';},3500);};
@@ -49,11 +51,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  addEventListener('keydown',e=>{if(e.code!=='Enter'||e.repeat||!active||dock.hidden||editable(e)||document.querySelector('dialog[open]'))return;e.preventDefault();setCollapsed(false);$('online-text').focus();});
  function log(m,live=false){
   if(seenMessages.has(m.id))return;seenMessages.add(m.id);if(seenMessages.size>160)seenMessages.delete(seenMessages.values().next().value);
-  const p=el('p',m.channel==='party'?'party':m.channel==='system'?'system':''),name=el('b','',m.name),time=el('time','',new Date(m.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
-  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.actor===client?.id)p.classList.add('mine');p.append(name,document.createTextNode(' '+m.text),time);
+  const mine=m.actor===client?.id,p=el('p',['party','system','guild','whisper'].includes(m.channel)?m.channel:''),name=el('b','',m.channel==='whisper'&&mine?'ถึง '+m.to:m.name),time=el('time','',new Date(m.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.channel==='guild')p.append(el('span','mp-tag','กิลด์'));if(m.channel==='whisper')p.append(el('span','mp-tag','กระซิบ'));if(mine)p.classList.add('mine');p.append(name,document.createTextNode(' '+m.text),time);
   const box=$('online-messages'),atEnd=box.scrollHeight-box.scrollTop-box.clientHeight<40;box.append(p);while(box.children.length>80)box.firstChild.remove();if(atEnd)box.scrollTop=box.scrollHeight;
   $('dock-preview').textContent=m.name+': '+m.text;
-  if(live){if(dock.classList.contains('collapsed')){unread++;$('dock-unread').textContent=unread>9?'9+':String(unread);$('dock-unread').hidden=false;}bubble(m);}
+  if(live){if(dock.classList.contains('collapsed')){unread++;$('dock-unread').textContent=unread>9?'9+':String(unread);$('dock-unread').hidden=false;}if(m.channel==='room'||m.channel==='party')bubble(m);}
  }
  // Speech bubbles over the speaker; positioned every frame in update().
  function bubble(m){let b=bubbles.get(m.actor);if(!b){b={node:el('span','chat-bubble')};labels.append(b.node);bubbles.set(m.actor,b);}b.node.textContent=m.text.length>70?m.text.slice(0,69)+'…':m.text;b.node.classList.toggle('party',m.channel==='party');b.until=performance.now()+5500;}
@@ -145,14 +147,17 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  $('online-party-leave').onclick=()=>client?.command('leaveParty');
  $('online-chat').onsubmit=e=>{
   e.preventDefault();const input=$('online-text'),text=input.value.trim();if(!text){input.blur();return;}
-  if(!client?.command('chat',{channel:dock.dataset.channel==='party'?'party':'room',text})){dockNote('ต้องเชื่อมต่อออนไลน์ก่อนส่งข้อความ');return;}
-  input.value='';if(!compact.matches)input.blur();
+  // '/w ชื่อ ข้อความ' (or /ก) whispers; the prefix stays in the box so a conversation can continue.
+  const w=/^\/(?:w|ก)\s+(\S+)\s+([\s\S]+)$/.exec(text),channel=dock.dataset.channel;
+  if(!client?.command('chat',w?{channel:'whisper',to:w[1],text:w[2]}:{channel:channel==='party'||channel==='guild'?channel:'room',text})){dockNote('ต้องเชื่อมต่อออนไลน์ก่อนส่งข้อความ');return;}
+  input.value=w?'/w '+w[1]+' ':'';if(!compact.matches)input.blur();
  };
  // System lines (EXP, level ups, notices) appear only in this player's chat, never sent to others.
  addEventListener('game-notice',({detail})=>{if(!active||typeof detail!=='string')return;log({id:'sys-'+performance.now()+Math.random(),channel:'system',name:'ระบบ',text:detail,time:Date.now()});});
  addEventListener('pagehide',()=>client?.stop());
  return {get paused(){return false;},update(dt){
   if(!active)return;clock+=Math.min(.05,dt);fx.update(Math.min(.05,dt),camera);
+  const guildTab=dock.querySelector('[data-channel=guild]');guildTab.disabled=!game.world.myGuild;if(guildTab.disabled&&dock.dataset.channel==='guild')setChannel('room');
   for(const v of views.values()){
    if(v.loading)continue;const state=v.state,p=state.player,old=v.sprite.position.clone(),f=1-Math.exp(-Math.min(.05,dt)*14);v.sprite.position.x+=(p.x-v.sprite.position.x)*f;v.sprite.position.z+=(p.z-v.sprite.position.z)*f;v.gait+=Math.hypot(v.sprite.position.x-old.x,v.sprite.position.z-old.z)/2.1;
    const equipmentKey=JSON.stringify(state.equipment);
@@ -163,6 +168,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    const pose=track&&elapsed<track.duration?skillPose(state.character.classId,v.action.index,elapsed,{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?'attack':emote?v.emote.name:p.moving?'walk':'idle',time:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?elapsed:emote?clock-v.emote.start:clock,phase:v.gait,reduced:reduced.matches});
    v.sprite.material.map=v.frames[0];v.sprite.position.y=(p.z>4.25?.41:.06)+pose.y;const angle=controls.getAzimuthalAngle();v.sprite.userData.pose(pose,p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle)<0);v.sprite.visible=p.hp>0;
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
+   const tag=state.guild?state.guild.emblem+':'+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append(state.guild.name);v.label.append(g);}}
    v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x,v.sprite.position.y+2.1,v.sprite.position.z);
   }
   const now=performance.now();

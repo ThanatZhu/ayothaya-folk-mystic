@@ -5,6 +5,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {WebSocketServer,WebSocket} from 'ws';
 import {RealmServer} from './realm.js';
+import {equipItem} from '../equipment.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
@@ -54,6 +55,16 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let message;try{message=JSON.parse(raw.toString());}catch{ws.close(4002,'invalid-json');return;}
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
    if(session){if(session.closing||session.trainingBusy)return;if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(message.type==='equip'){
+     if(typeof message.id!=='string'||message.id.length>50)return;
+     if(Date.now()-(session.equippedAt??0)<350){send({type:'equipment-error',id:message.id,code:'action-rate'});return;}
+     let equipment;try{equipment=equipItem(session.peer.equipment,session.peer.character.classId,message.item);}catch(e){send({type:'equipment-error',id:message.id,code:e.message});return;}
+     session.equippedAt=Date.now();session.trainingBusy=true;
+     const previous=session.peer.equipment;session.peer.equipment=equipment;
+     try{await checkpoint(session);send({type:'equipped',id:message.id,equipment});}
+     catch{session.peer.equipment=previous;session.closing=true;send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}
+     finally{session.trainingBusy=false;}return;
+    }
     if(message.type==='train'){
      if(typeof message.id!=='string'||message.id.length>50)return;
      if(Date.now()-(session.trainedAt??0)<1200){send({type:'training-error',id:message.id,code:'action-rate'});return;}session.trainedAt=Date.now();

@@ -1,6 +1,7 @@
 import {connectFirebase,deadline} from './firebase-client.js';
 import {ENTRY_KEY,validEntry} from './realm-state.js?v=21';
-import {createRealmStore} from './realm-store.js?v=40';
+import {createRealmStore} from './realm-store.js?v=41';
+import {normalizeEquipment,equipItem} from './equipment.js?v=41';
 const $=id=>document.getElementById(id);
 function toLobby(){location.replace('./');return new Promise(()=>{});}
 export async function prepareCloud(catalog){
@@ -48,6 +49,17 @@ export async function prepareCloud(catalog){
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&bound&&!blocked&&!busy&&!traveling)save().catch(()=>{});});
  return {skills:record?.skills,setSkills(skills){record={...record,skills};lastJSON='';return save().catch(()=>false);},slotId:entry.slotId??record?.slotId,async token(){if(!connection?.auth.currentUser||connection.auth.currentUser.uid!==entry.owner)throw new Error('account-changed');return connection.auth.currentUser.getIdToken();},async beginOnline(){await save();await queue;onlineStarting=true;},setOnline(value){online=value;onlineStarting=false;say('บันทึกอัตโนมัติโดยเซิร์ฟเวอร์ออนไลน์');},data:record?.state,character:record?.character,serverId,get paused(){return blocked||busy;},get cloud(){return store?.cloud;},save,
   get training(){return online?online.training??null:record?.training??null;},
+  get equipment(){return normalizeEquipment(online?.equipment??record?.equipment,record.character.classId);},
+  async equip(id){
+   if(busy||blocked||onlineStarting)throw new Error('not-connected');busy=true;
+   try{
+    if(online){const result=await online.equip(id);return result.equipment;}
+    if(store.cloud)throw new Error('online-required');
+    await save();const equipment=equipItem(record.equipment,record.character.classId,id);
+    const operation=queue.catch(()=>{}).then(async()=>{record=await store.save(serverId,{...record,equipment},bound.capture());lastJSON=JSON.stringify(record.state);return equipment;});
+    queue=operation;return await operation;
+   }finally{busy=false;}
+  },
   async train(mentor,action,jobId){
    if(busy||blocked||onlineStarting)throw new Error('not-connected');busy=true;
    try{

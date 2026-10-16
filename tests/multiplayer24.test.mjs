@@ -102,6 +102,14 @@ test('private online XP and professions ignore later client claims; teacher ques
  db.docs.get(ref).state.traveler.baseXp=900000;s=await store.acquire(identity,'second');assert.equal(s.record.state.traveler.baseXp,100);await store.checkpoint(s,s.record,{release:true});
  db.docs.get(ref).character.classId='shaman';s=await store.acquire(identity,'third');assert.equal(s.record.character.classId,'novice');s.record.training={classId:'boxer',tier:'class',startKills:3};await store.checkpoint(s,s.record,{release:true});assert.equal(db.docs.get(ref).training,undefined);s=await store.acquire(identity,'fourth');assert.equal(s.record.training.startKills,3);
 });
+test('cloud equipment stays private, persists and ignores a later client mirror claim',async()=>{
+ const db=transactionDB(),store=new FirebaseStore(db),identity={uid:'gear-user',serverId:'server-1',slotId:'slot-1'},ref='players/gear-user/characters/slot-1';
+ db.docs.set(ref,{serverId:'server-1',revision:1,character:{name:'ลองอุปกรณ์',gender:'female',classId:'novice'},state:initialSave()});await store.renewAuthority();
+ const first=await store.acquire(identity,'first');first.record.equipment={version:1,weapon:'novice-weapon-crafted',outfit:'novice-outfit-crimson'};await store.checkpoint(first,first.record,{release:true});
+ assert.equal(db.docs.get(ref).equipment,undefined);
+ db.docs.get(ref).equipment={version:1,weapon:'swordsman-weapon-crafted',outfit:'swordsman-outfit-ivory'};
+ const next=await store.acquire(identity,'next');assert.deepEqual(next.record.equipment,first.record.equipment);
+});
 test('local persistence fences stale sessions and survives process restart',async()=>{
  const directory=await mkdtemp(path.join(tempRoot,'test-mp-'));
  try{const store=await new LocalStore(directory).init(),created=await store.createLocal({name:'ทดสอบเซฟ'}),identity={uid:created.uid,serverId:'server-1',slotId:'slot-1'},session=await store.acquire(identity,'first');

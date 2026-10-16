@@ -1,4 +1,5 @@
 import {experienceOf} from './experience.js?v=21';
+import {normalizeEquipment} from './equipment.js?v=41';
 import {trainingAction} from './city-life-data.js?v=40';
 import {CLASS_LEVEL,progression,validateJob} from './advancement.js?v=21';
 import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=21';
@@ -27,7 +28,7 @@ export function createRealmStore({connection=null,owner='guest',catalog,storage}
  const oldRef=server=>connection.sdk.doc(connection.db,'players',owner,'saves',server);
  const pack=(record,slotId)=>{check(record);serverCheck(record.serverId);return {...record,slotId};};
  // Guest saves also keep skill levels; cloud documents keep the rule-checked shape (the realm server owns skills online).
- const payload=record=>({character:record.character,state:record.state,serverId:record.serverId,revision:record.revision,...(!cloud?{training:record.training??null,...(record.skills?{skills:record.skills}:{})}:{})});
+ const payload=record=>({character:record.character,state:record.state,serverId:record.serverId,revision:record.revision,...(!cloud?{equipment:normalizeEquipment(record.equipment,record.character.classId),training:record.training??null,...(record.skills?{skills:record.skills}:{})}:{})});
  function localList(){
   // Validate every old/new record before making any migration writes. Old keys are retained.
   const rows=CHARACTER_SLOTS.map(id=>{const raw=storage.getItem(localKey(id));return raw?pack(JSON.parse(raw),id):null;});
@@ -73,7 +74,7 @@ export function createRealmStore({connection=null,owner='guest',catalog,storage}
    const xp=experienceOf(state.traveler),previous=experienceOf(current.state.traveler);
    if(xp.baseXp<previous.baseXp||(!changed&&xp.jobXp<previous.jobXp))throw new Error('experience-regression');
    const nextState={...state,traveler:{...state.traveler,...xp,jobXp:changed?0:xp.jobXp}};
-   return {slotId:record.slotId,serverId:server,character:hero,state:nextState,revision,...(!cloud?{training:record.training===undefined?current.training??null:record.training,...((record.skills??current.skills)?{skills:record.skills??current.skills}:{})}:{})};
+   return {slotId:record.slotId,serverId:server,character:hero,state:nextState,revision,...(!cloud?{equipment:normalizeEquipment(record.equipment??current.equipment,hero.classId),training:record.training===undefined?current.training??null:record.training,...((record.skills??current.skills)?{skills:record.skills??current.skills}:{})}:{})};
   };
   if(!cloud){const row=next(localList().find(r=>r.slotId===record.slotId));storage.setItem(localKey(row.slotId),JSON.stringify(payload(row)));return row;}
   guard();const {sdk,db}=connection,r=ref(record.slotId);

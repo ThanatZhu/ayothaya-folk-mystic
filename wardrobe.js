@@ -1,6 +1,6 @@
-import {createMotionPreview} from './motion-preview.js?v=37';
+import {createMotionPreview} from './motion-preview.js?v=41';
 import {APPEARANCE_OPTIONS,validateAppearance} from './appearance-state.js';
-import {customizeAtlas} from './character-appearance.js?v=18';
+import {customizeAtlas} from './character-appearance.js?v=41';
 import {JOBS,progression,JOB_LEVEL} from './advancement.js?v=21';
 import {atlasPath} from './classes.js?v=18';
 import {characterMotion,MOTION_MODES} from './character-motion.js?v=37';
@@ -25,7 +25,7 @@ export function createWardrobe({getClass,getGender,getRecord,onApply,onTexture,o
   try{
    if(!images.has(path))images.set(path,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=path;}));
    const img=await images.get(path);if(token!==renderToken)return;
-   const atlas=customizeAtlas(img,appearance,id);sourceURL=atlas.toDataURL();preview.setSource(atlas,gender,id);onTexture(sourceURL,atlas,gender);
+   const atlas=customizeAtlas(img,appearance,id);sourceURL=atlas.toDataURL();preview.setSource(atlas,gender,id,getRecord()?.equipment);onTexture(sourceURL,atlas,gender);
   }catch{images.delete(path);$('wardrobe-message').textContent='โหลดรูปลักษณ์ไม่ได้ ลองเปิดหน้านี้อีกครั้ง';}
  }
  function reset(next={},job=''){appearance=validateAppearance(next);jobId=job;for(const key of Object.keys(labels))$('appearance-'+key).value=appearance[key];}

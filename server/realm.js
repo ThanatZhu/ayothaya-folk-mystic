@@ -1,4 +1,5 @@
 import {markMonsterHit,advanceMonster} from '../monster-catalog.js';
+import {normalizeEquipment} from '../equipment.js';
 import {randomUUID} from 'node:crypto';
 import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable} from '../combat-core.js';
 import {awardExperience} from '../experience.js';
@@ -28,6 +29,7 @@ export class RealmServer{
   const skills=normalizeSkills(record.skills,hero.classId);world.skillLevels=[...skills[hero.classId]];
   const position=record.state.position;if(position&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
   const peer={id:randomUUID(),uid,serverId,slotId,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
+  peer.equipment=normalizeEquipment(record.equipment,hero.classId);
   world.hurt=(mob,damage,color)=>this.hurt(peer,mob,damage,color);
   this.peers.set(peer.id,peer);room.peers.add(peer.id);
   this.storyProgress(peer,{type:'enter',mapId:map.id});
@@ -151,9 +153,9 @@ export class RealmServer{
  }
  progress(p){return {classId:p.character.classId,jobId:p.character.jobId??'',jobXp:p.world.jobXp};}
  snapshot(p){
-  const publicPlayer=a=>({id:a.id,character:a.character,player:a.world.player,emote:a.emote,partyId:a.partyId});
+  const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:a.emote,partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
-  const players=visible.map(a=>{const v=a.world.player,result={id:a.id,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,face:{x:round(v.face.x),z:round(v.face.z)}},partyId:a.partyId,connected:!a.suspended};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
+  const players=visible.map(a=>{const v=a.world.player,result={id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,face:{x:round(v.face.x),z:round(v.face.z)}},partyId:a.partyId,connected:!a.suspended};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
   return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story},players,mobs:p.room.mobs});
  }
  travelDestination(p,id){
@@ -163,5 +165,5 @@ export class RealmServer{
   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
   return destination;
  }
- record(p,original){return {...copy(original),character:copy(p.character),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
+ record(p,original){return {...copy(original),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
 }

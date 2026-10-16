@@ -1,11 +1,11 @@
 import {openHudPanel} from './hud-panels.js?v=34';
 import * as THREE from 'three';
-import {MultiplayerClient} from './multiplayer-client.js?v=40';
+import {MultiplayerClient} from './multiplayer-client.js?v=41';
 import {multiplayerURL} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=18';
-import {customizeAtlas} from './character-appearance.js?v=18';
+import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
-import {createRiggedSprite} from './rigged-sprite.js?v=37';
+import {createRiggedSprite} from './rigged-sprite.js?v=41';
 import {characterMotion,attackDuration} from './character-motion.js?v=37';
 import {skillPose,skillTrack} from './skill-choreography.js?v=37';
 import {createSkillEffects} from './skill-effects.js?v=37';
@@ -98,9 +98,9 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  async function addRemote(state){
   const id=state.id,generation=loadingGeneration,placeholder={loading:true,state};views.set(id,placeholder);
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
-   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createRiggedSprite(frames[0],{classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance});sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
+   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createRiggedSprite(frames[0],{classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance,equipment:state.equipment});sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
    const label=el('span','remote-player-label',state.character.name);labels.append(label);
-   views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null});
+   views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null,equipmentKey:JSON.stringify(state.equipment)});
   }catch{if(views.get(id)===placeholder)placeholder.retryAt=performance.now()+5000;}
  }
  function acceptSnapshot(s){
@@ -155,6 +155,10 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   if(!active)return;clock+=Math.min(.05,dt);fx.update(Math.min(.05,dt),camera);
   for(const v of views.values()){
    if(v.loading)continue;const state=v.state,p=state.player,old=v.sprite.position.clone(),f=1-Math.exp(-Math.min(.05,dt)*14);v.sprite.position.x+=(p.x-v.sprite.position.x)*f;v.sprite.position.z+=(p.z-v.sprite.position.z)*f;v.gait+=Math.hypot(v.sprite.position.x-old.x,v.sprite.position.z-old.z)/2.1;
+   const equipmentKey=JSON.stringify(state.equipment);
+   if(equipmentKey!==v.equipmentKey&&!v.equipmentLoading&&performance.now()>(v.equipmentRetryAt??0)){
+    v.equipmentLoading=true;v.sprite.userData.setEquipment(state.equipment).then(changed=>{if(changed)v.equipmentKey=equipmentKey;}).catch(()=>{v.equipmentRetryAt=performance.now()+5000;}).finally(()=>{v.equipmentLoading=false;});
+   }
    const elapsed=clock-(v.action?.start??-100),track=skillTrack(state.character.classId,v.action?.index),emote=clock-(v.emote?.start??-100)<4;
    const pose=track&&elapsed<track.duration?skillPose(state.character.classId,v.action.index,elapsed,{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?'attack':emote?v.emote.name:p.moving?'walk':'idle',time:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?elapsed:emote?clock-v.emote.start:clock,phase:v.gait,reduced:reduced.matches});
    v.sprite.material.map=v.frames[0];v.sprite.position.y=(p.z>4.25?.41:.06)+pose.y;const angle=controls.getAzimuthalAngle();v.sprite.userData.pose(pose,p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle)<0);v.sprite.visible=p.hp>0;

@@ -1,0 +1,449 @@
+{
+  "version": 41,
+  "frames": {
+    "male": [
+      {
+        "source": "rogue.png",
+        "rect": [
+          38,
+          9,
+          167,
+          218
+        ],
+        "anchor": 79.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          256,
+          8,
+          150,
+          220
+        ],
+        "anchor": 73.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          452,
+          9,
+          147,
+          219
+        ],
+        "anchor": 69.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          660,
+          9,
+          161,
+          218
+        ],
+        "anchor": 68.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          875,
+          9,
+          149,
+          219
+        ],
+        "anchor": 70.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          1068,
+          9,
+          162,
+          219
+        ],
+        "anchor": 74.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          17,
+          243,
+          207,
+          213
+        ],
+        "anchor": 93.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          236,
+          244,
+          192,
+          216
+        ],
+        "anchor": 90.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          448,
+          273,
+          173,
+          185
+        ],
+        "anchor": 85.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          654,
+          243,
+          169,
+          215
+        ],
+        "anchor": 71.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          857,
+          243,
+          184,
+          215
+        ],
+        "anchor": 77.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          1079,
+          242,
+          148,
+          217
+        ],
+        "anchor": 68.0,
+        "scale": 1.009174
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          61,
+          20,
+          230,
+          286
+        ],
+        "anchor": 116.0,
+        "scale": 0.770253
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          375,
+          21,
+          233,
+          286
+        ],
+        "anchor": 117.0,
+        "scale": 0.767541
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          691,
+          20,
+          220,
+          287
+        ],
+        "anchor": 114.0,
+        "scale": 0.770253
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          1001,
+          21,
+          227,
+          287
+        ],
+        "anchor": 115.0,
+        "scale": 0.764848
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          62,
+          322,
+          215,
+          281
+        ],
+        "anchor": 116.0,
+        "scale": 0.781296
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          353,
+          323,
+          255,
+          283
+        ],
+        "anchor": 140.0,
+        "scale": 0.778506
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          690,
+          322,
+          212,
+          287
+        ],
+        "anchor": 114.0,
+        "scale": 0.762174
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          1001,
+          322,
+          222,
+          283
+        ],
+        "anchor": 116.0,
+        "scale": 0.775735
+      }
+    ],
+    "female": [
+      {
+        "source": "rogue.png",
+        "rect": [
+          38,
+          469,
+          168,
+          224
+        ],
+        "anchor": 78.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          260,
+          471,
+          153,
+          223
+        ],
+        "anchor": 73.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          451,
+          470,
+          153,
+          224
+        ],
+        "anchor": 71.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          658,
+          470,
+          164,
+          224
+        ],
+        "anchor": 70.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          874,
+          470,
+          151,
+          224
+        ],
+        "anchor": 70.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          1067,
+          472,
+          164,
+          223
+        ],
+        "anchor": 77.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          17,
+          706,
+          207,
+          219
+        ],
+        "anchor": 92.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          235,
+          707,
+          196,
+          221
+        ],
+        "anchor": 93.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          444,
+          738,
+          173,
+          191
+        ],
+        "anchor": 79.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          652,
+          706,
+          171,
+          223
+        ],
+        "anchor": 73.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          857,
+          707,
+          185,
+          221
+        ],
+        "anchor": 78.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue.png",
+        "rect": [
+          1079,
+          708,
+          148,
+          221
+        ],
+        "anchor": 66.0,
+        "scale": 0.982143
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          51,
+          617,
+          238,
+          298
+        ],
+        "anchor": 112.0,
+        "scale": 0.742433
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          370,
+          619,
+          230,
+          296
+        ],
+        "anchor": 110.0,
+        "scale": 0.747501
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          677,
+          619,
+          239,
+          300
+        ],
+        "anchor": 113.0,
+        "scale": 0.734959
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          998,
+          618,
+          232,
+          299
+        ],
+        "anchor": 112.0,
+        "scale": 0.737434
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          59,
+          918,
+          223,
+          291
+        ],
+        "anchor": 105.0,
+        "scale": 0.760479
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          356,
+          919,
+          241,
+          292
+        ],
+        "anchor": 123.0,
+        "scale": 0.760479
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          678,
+          920,
+          230,
+          295
+        ],
+        "anchor": 109.0,
+        "scale": 0.750061
+      },
+      {
+        "source": "rogue-walk.png",
+        "rect": [
+          998,
+          919,
+          227,
+          295
+        ],
+        "anchor": 108.0,
+        "scale": 0.750061
+      }
+    ]
+  }
+}

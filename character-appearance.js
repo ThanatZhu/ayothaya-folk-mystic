@@ -12,7 +12,11 @@ export function customizeAtlas(image,input={},classId='shaman',layout=null){
   const u=(x%w)/w,v=(y%h)/h,r=p[i],g=p[i+1],b=p[i+2],lum=(r+g+b)/3;
   const [faceX,eyeY]=faceAnchors[Math.floor(x/w)];
   const hair=classId!=='acolyte'&&((u-faceX/100)/.23)**2+((v-(eyeY/100-.19))/.23)**2<1&&v<eyeY/100-.035&&lum<115&&r<g*1.7;
-  const cloth=v>.53&&v<.87&&u>.25&&u<.76&&(b>r*.9||r>g*1.6||Math.max(r,g,b)-Math.min(r,g,b)<28);
+  // Target the original indigo fabric, never the skin, white hand wraps, red
+  // weapon bindings, jade or steel. The old broad RGB test dyed bare arms blue.
+  const indigo=b>r*.9&&b>g*1.04&&g<r*1.4&&r<150&&g<170&&lum>20;
+  const robe=classId==='acolyte'&&(r>g*1.35&&b<g*.5||r>110&&g>r*.86&&b>r*.72);
+  const cloth=v>.52&&v<.9&&u>.22&&u<.80&&(classId==='acolyte'?robe:indigo);
   const iris=Math.abs(v-eyeY/100)<.018&&(Math.abs(u-(faceX/100-.065))<.035||Math.abs(u-(faceX/100+.065))<.035)&&lum<65;
   const tint=hair&&a.hairColor!=='original'?colors[a.hairColor]:cloth&&a.outfit!=='original'?colors[a.outfit]:iris&&a.eyes!=='original'?colors[a.eyes]:null;
   if(tint)for(let k=0;k<3;k++)p[i+k]=Math.min(255,tint[k]*(.4+lum/150));

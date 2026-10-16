@@ -1,7 +1,8 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {createMultiplayer} from './multiplayer-ui.js?v=40';
+import {createMultiplayer} from './multiplayer-ui.js?v=41';
+import {createEquipmentUI} from './equipment-ui.js?v=41';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=40';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=34';
@@ -10,8 +11,8 @@ import {createSoftLook} from './soft-look.js?v=29';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
 import {loadDirectionalArt} from './directional-sprite.js?v=17';
-import {createRiggedSprite} from './rigged-sprite.js?v=37';
-import {customizeAtlas} from './character-appearance.js?v=18';
+import {createRiggedSprite} from './rigged-sprite.js?v=41';
+import {customizeAtlas} from './character-appearance.js?v=41';
 import {jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
@@ -25,7 +26,7 @@ import {createWorldUI} from './world-ui.js?v=41';
 import {createStoryUI} from './story-ui.js?v=01';
 import {resolveMap} from './world-state.js?v=21';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
-import {prepareCloud} from './cloud-save.js?v=40';
+import {prepareCloud} from './cloud-save.js?v=41';
 import {captureSave,applySave} from './save-state.js?v=21';
 const $=id=>document.getElementById(id),loading=getLoadingScreen(),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
@@ -38,7 +39,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=40');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=41');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
@@ -94,7 +95,7 @@ try {
  for(const [kind,x,z,w,h,flip] of map.plants){if(['canopy19','shrub19'].includes(kind))continue;plant(kind,x,-z,w,h,flip);if(kind==='tree')shadow(x,-z,w*.3);}
  const customized=customizeAtlas(heroAtlas.image,account.character.appearance,account.character.classId);
  const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
- const heroMesh=createRiggedSprite(heroFrames[0],{classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance});scene.add(heroMesh);
+ const heroMesh=createRiggedSprite(heroFrames[0],{classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  // A01 is opt-in: standard costume turnaround; original wardrobe/action frames remain default.
  const pilotToggle=$('directional-pilot'),pilotStatus=$('directional-pilot-status');
@@ -145,6 +146,11 @@ try {
  }
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
  multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu({game,account});createSkillWindow({game,classId:account.character.classId});createMmoHud({game,account});
+ createEquipmentUI({account,game,hero:heroMesh,onArtwork:(canvas,gear)=>{
+  characters[0].directionalEnabled=false;pilotToggle.checked=false;
+  pilotToggle.disabled=gear.weapon.endsWith('-crafted')||!gear.outfit.endsWith('-original');
+  portrait.style.backgroundImage=`url("${canvas.toDataURL()}")`;portrait.style.backgroundSize='contain';portrait.style.backgroundPosition='center';portrait.style.backgroundRepeat='no-repeat';
+ }});
  function toggleOverview(){
   overview=!overview;controls.minZoom=overview?.08:.65;game.clearInput();rotating=null;
   const offset=camera.position.clone().sub(controls.target).multiplyScalar(overview?6:1/6);

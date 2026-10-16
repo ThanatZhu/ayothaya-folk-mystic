@@ -252,3 +252,8 @@ Assets and crop/scale/anchor metadata: `assets/animation37/`. Generated using bu
 Scope: these are shared class pose libraries, not 80 independently drawn animation clips. Master jobs share their base class. Artwork faces three-quarter front with horizontal flipping; the optional eight-direction turnaround remains a separate static pilot. Some transitions still show proportion/pose variation between generated frames; further in-between drawing and per-pose cosmetic anchors would improve continuity. Physical-phone performance has not been measured.
 
 Validation: 105 tests pass, including frame bounds for all 320 samples, gait progression, 80 skill frame selections and intact sprite geometry. Content validation and production build pass. Browser gallery loads all eight professions; the boxer kick can be inspected with an intact leg/body silhouette.
+
+
+## Equipment 0.41
+
+Open the portrait → อุปกรณ์, or press I. All eight professions have two weapon appearances and four costume palettes, shown on the actual animated character. New weapon art covers both genders and all twenty frames. Equipment is saved per character and broadcast to nearby online players. These starter items are cosmetic and do not add stats. See [equipment scope and persistence](docs/equipment41.md) and [the preview room](https://ayothaya-folk-mystic.vercel.app/equipment-gallery.html).

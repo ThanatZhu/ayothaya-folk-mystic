@@ -1,0 +1,18 @@
+/* Story quest tracker (story-ui.js). Desktop: right column under the minimap. Phone landscape: free strip under the menu. */
+#quest-tracker{position:fixed;z-index:16;right:max(10px,env(safe-area-inset-right));top:236px;width:236px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;column-gap:8px;row-gap:2px;align-items:center;padding:8px 10px 9px;border:1px solid #c6a16488;border-radius:9px;background:linear-gradient(135deg,#24382bf0,#152925e8);box-shadow:0 3px 12px #0005;font-family:Mali,Tahoma,sans-serif;color:#f6edd6;cursor:pointer}
+#quest-tracker small{grid-column:1/3;font-size:9px;letter-spacing:.04em;color:#ac9360;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#quest-tracker strong{grid-column:1;font-size:13px;color:#f4cf7a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#quest-tracker span{grid-column:1;font-size:11px;line-height:1.35;color:#f4dfac}
+#quest-go{grid-column:2;grid-row:2/4;align-self:center;padding:7px 10px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 11px Mali,Tahoma,sans-serif;white-space:nowrap;cursor:pointer;box-shadow:0 2px 0 #8a6a2e}
+#quest-go:active{transform:translateY(1px);box-shadow:none}
+#quest-go[hidden]{display:none}
+/* NPC the story wants next: gold "!" badge on its name tag. */
+.npc-label.quest-npc{border-color:#f4cf7a!important;color:#fff4cf!important}
+.npc-label.quest-npc::before{content:'!';display:inline-block;margin-right:5px;width:15px;height:15px;border-radius:50%;background:#f4cf7a;color:#2a2210;font-weight:800;font-size:11px;line-height:15px;text-align:center}
+@media (orientation:landscape) and (max-height:520px){
+ #quest-tracker{top:auto;bottom:auto;top:max(134px,calc(env(safe-area-inset-top) + 128px));right:max(8px,env(safe-area-inset-right));width:min(300px,34vw);padding:6px 8px 7px}
+ #quest-tracker small{display:none}
+ #quest-tracker strong{font-size:11px}
+ #quest-tracker span{font-size:10px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ #quest-go{padding:6px 9px;font-size:10px}
+}

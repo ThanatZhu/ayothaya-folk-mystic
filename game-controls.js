@@ -9,6 +9,7 @@ import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=38';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=31';
+import {createRouteWalker} from './route-walk.js?v=01';
 
 import {className} from './classes.js?v=18';
 
@@ -32,6 +33,17 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
  addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){network?.command('emote',{name:e.detail});castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
+ // Click / tap to move (Ragnarok style): a route walker feeds the joystick direction; a gold ring marks the spot.
+ const walker=createRouteWalker(()=>world.nav),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),groundHit=new THREE.Vector3();
+ const marker=new THREE.Mesh(new THREE.RingGeometry(.2,.3,32),new THREE.MeshBasicMaterial({color:'#f4cf7a',transparent:true,opacity:0,depthWrite:false,depthTest:false,side:THREE.DoubleSide}));
+ marker.rotation.x=-Math.PI/2;marker.renderOrder=5;marker.visible=false;scene.add(marker);let markerAge=0;
+ const listeners=new Set(); // story/quest UI listens to the same events the HUD does (offline and online)
+ function walkTo(target,opts={}){
+  if(world.player.hp<=0)return false;
+  walker.go(target,{radius:opts.radius,kind:opts.kind,onArrive:opts.onArrive,onFail:reason=>{marker.visible=false;if(opts.onFail)opts.onFail(reason);else world.notice('ไปตรงนั้นไม่ได้');}});
+  if(opts.marker!==false&&typeof target!=='function'){marker.position.set(target.x,.12,target.z);marker.visible=true;markerAge=0;}else marker.visible=false;
+  return true;
+ }
  const mobViews=world.mobs.map(m=>{
   const h=MONSTER_TYPES[m.type].height??1.45,frames=monsterArt[m.type]?.map(t=>t.clone()),tex=frames?.[0]??monsterTextures[m.type%4].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
   s.userData.monsterId=m.id;
@@ -104,6 +116,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  joystick.addEventListener('pointermove',e=>{if(e.pointerId===joy.id){e.preventDefault();updateStick(e);}});
  for(const name of ['pointerup','pointercancel','lostpointercapture'])joystick.addEventListener(name,e=>{if(e.pointerId===joy.id)clearStick();});
  function clearInput(){
+  walker.cancel();
   keys.clear();input.attack=false;
   if(attackPointer!==null&&$('attack').hasPointerCapture(attackPointer))$('attack').releasePointerCapture(attackPointer);
   if(joy.id!==null&&joystick.hasPointerCapture(joy.id))joystick.releasePointerCapture(joy.id);
@@ -119,6 +132,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(uv){tex.transformUv(uv);const img=tex.image,c=img.getContext?.('2d');if(c&&c.getImageData(Math.min(img.width-1,Math.max(0,Math.floor(uv.x*img.width))),Math.min(img.height-1,Math.max(0,Math.floor(uv.y*img.height))),1,1).data[3]<40)continue;}
    world.select(id);return;
   }
+  if(raycaster.ray.intersectPlane(groundPlane,groundHit))walkTo({x:groundHit.x,z:groundHit.z});
  }
  function pinchSpan(){const a=[...touches.values()];return a.length===2?Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y):0;}
  canvas.addEventListener('pointerdown',e=>{
@@ -146,8 +160,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const paused=isPaused();if(paused)clearInput();
   dt=document.hidden||paused?0:Math.min(.05,Math.max(0,dt));
   const x=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joy.x,y=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)+joy.y;
-  const direction=screenDirection(x,y,controls.getAzimuthalAngle());if(network){network.setInput(paused?{x:0,z:0,attack:false}:{...direction,attack:input.attack||keys.has('Space')});world.time+=dt;predictMove(world,serverSelf,dt,paused?{x:0,z:0}:direction);}else if(!paused)world.update(dt,{...direction,attack:input.attack||keys.has('Space')});
-  world.events.splice(0).forEach(effect);
+  let direction=screenDirection(x,y,controls.getAzimuthalAngle());
+  // Keys / joystick always win over a tapped route; otherwise the route steers like a held joystick.
+  if(Math.hypot(x,y)>.08||world.player.hp<=0)walker.cancel();else if(!paused){const routed=walker.step(world.player,dt);if(routed)direction=routed;}
+  if(marker.visible){markerAge+=dt;if(walker.active){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}if(network){network.setInput(paused?{x:0,z:0,attack:false}:{...direction,attack:input.attack||keys.has('Space')});world.time+=dt;predictMove(world,serverSelf,dt,paused?{x:0,z:0}:direction);}else if(!paused)world.update(dt,{...direction,attack:input.attack||keys.has('Space')});
+  world.events.splice(0).forEach(e=>{effect(e);for(const fn of listeners)fn(e);});
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving)emoteUntil=0;
   const mode=t<hitUntil?'hit':t<castUntil?actionMode:t<emoteUntil?emote:p.moving?'walk':p.shield>0?'guard':'idle';
@@ -222,12 +239,12 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  updateHelp();addEventListener('resize',updateHelp);
  toast(mobileLayout()?'ลากจอยเดิน · แตะมอนและสกิลด้านขวา':'WASD เดิน · คลิกมอนเลือกเป้า · Space โจมตี · F ออโต้');
  function setNetwork(client){network=client;clearInput();world.auto=false;
-  world.skill=i=>client.command('skill',{index:i});world.basicAttack=()=>client.command('attack');world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto');
+  world.skill=i=>client.command('skill',{index:i});world.basicAttack=()=>client.command('attack');world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto');world.questTalk=npc=>client.command('questTalk',{npc});
  }
- function applyNetworkSnapshot(snapshot){const s=snapshot.self;if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
+ function applyNetworkSnapshot(snapshot){const s=snapshot.self;if(s.story)world.story=s.story;if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
   for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);}
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
- return {update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill};
+ return {update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;}};
 }

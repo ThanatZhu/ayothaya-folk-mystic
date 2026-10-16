@@ -36,7 +36,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
   const ring=new THREE.Mesh(new THREE.RingGeometry(.72,.84,40),new THREE.MeshBasicMaterial({color:'#edcf83',side:THREE.DoubleSide,transparent:true,opacity:.7,depthWrite:false}));
   ring.rotation.x=-Math.PI/2;ring.position.set(p.x,.095,p.z);scene.add(ring);
   const label=document.createElement('button');label.className='portal-label';label.textContent='↗ '+name;label.setAttribute('aria-label','จุดเดินทางไป '+name);labels.append(label);
-  label.onclick=()=>{if(Math.hypot(world.player.x-p.x,world.player.z-p.z)<2)travel(p.to);else world.notice('เดินเข้าใกล้วงเดินทาง หรือกดแผนที่โลก');};
+  label.onclick=()=>{if(Math.hypot(world.player.x-p.x,world.player.z-p.z)<2)travel(p.to);else game.walkTo({x:p.x,z:p.z},{radius:1.2,kind:'portal',onArrive:()=>travel(p.to)});};
   return {p,ring,label};
  });
  const npcViews=[...map.npcs,...citizens].map(n=>{
@@ -44,8 +44,9 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
   label.onclick=()=>talk(n);return {n,label};
  });
  function talk(n){
-  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){world.notice('เดินเข้าใกล้ '+n.name+' เพื่อคุย');return;}
-  endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;$('npc-text').textContent=n.text;$('npc-dialog').hidden=false;$('close-npc').focus();
+  // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
+  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
+  endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;$('npc-text').textContent=api.onTalk?.(n)??n.text;$('npc-dialog').hidden=false;$('close-npc').focus();
  }
  $('close-npc').onclick=endTalk;
  $('interact').onclick=()=>{if(nearest)travel(nearest.to);else if(nearNPC)talk(nearNPC);};
@@ -74,5 +75,9 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
   const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}
  }
- minimap();return {update,get paused(){return !!conversation||traveling||mentors.paused;}};
+ // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
+ const api={update,get paused(){return !!conversation||traveling||mentors.paused;},onTalk:null,travelTo:id=>travel(id),
+  talkTo:name=>{const n=npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.n;if(n)talk(n);return !!n;},
+  npcLabel:name=>npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.label??null};
+ minimap();return api;
 }

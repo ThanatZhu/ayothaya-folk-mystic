@@ -9,7 +9,7 @@ const city={id:'ayutthaya',name:'อยุธยา',safe:true,nav,spawn:{x:0,z:
 const field={id:'rice-fields',name:'ทุ่งขวัญข้าว',safe:false,nav,spawn:{x:0,z:0},mobs:[],portals:[],npcs:[]};
 function realm(){
  let time=1e4;const r=new RealmServer({catalog:{capital:'ayutthaya',maps:[city,field]},now:()=>time});const saved=[];r.onGuild=(g,deleted)=>saved.push([g.name,deleted]);
- const add=(name,mapId='ayutthaya',extra={})=>{const state=initialSave();state.mapId=mapId;const sent=[];const p=r.join({uid:'u-'+name,serverId:'server-1',slotId:'slot-1',record:{character:{name,gender:'male',classId:'novice'},state,...extra},send:m=>sent.push(m)});p.sent=sent;return p;};
+ const add=(name,mapId='ayutthaya',extra={})=>{const state=initialSave();state.mapId=mapId;const sent=[];const p=r.join({uid:'u-'+name,serverId:'server-1',slotId:'slot-1',record:{character:{name,gender:'male',classId:'novice'},state,daily:{day:'1970-01-01',streak:1},...extra},send:m=>sent.push(m)});p.sent=sent;return p;};
  const send=(p,type,data={})=>{time+=1500;return r.receive(p.id,{type,seq:p.seq+1,...data});};
  const events=(p,type)=>p.world.events.filter(e=>e.type===type);
  return {r,add,send,events,saved};

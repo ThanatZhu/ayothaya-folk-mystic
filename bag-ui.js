@@ -41,7 +41,7 @@ export function createBagUI({game,worldUI,map,account}){
  function use(id){
   if(!id)return;
   if(game.online){world.useItem?.(id);return;}
-  try{const r=useItem(local,id,world.player);local=r.bag;world.player.hp=r.hp;world.player.mp=r.mp;save();render();}catch(e){fail(e.message);}
+  try{const r=useItem(local,id,world.player,world.status);local=r.bag;world.player.hp=r.hp;world.player.mp=r.mp;world.status=r.status;save();render();}catch(e){fail(e.message);}
  }
  function trade(type,npc,id,qty){
   if(game.online){world.trade?.(type,npc,id,qty);return;}

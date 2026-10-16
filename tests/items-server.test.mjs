@@ -12,7 +12,7 @@ const mill={id:'moonlit-mill',safe:false,nav,spawn:{x:0,z:0},mobs:[[2,0,boss]],p
 function setup(map,bag){
  let time=1e4;const realm=new RealmServer({catalog:{capital:'ayutthaya',maps:[city,mill]},now:()=>time});
  const state=initialSave();state.mapId=map.id;
- const record={character:{name:'tester',gender:'female',classId:'novice'},state,...(bag?{bag}:{})};
+ const record={character:{name:'tester',gender:'female',classId:'novice'},state,daily:{day:'1970-01-01',streak:1},...(bag?{bag}:{})};
  const sent=[],peer=realm.join({uid:'u',serverId:'server-1',slotId:'slot-1',record,send:m=>sent.push(m)});
  const send=(type,data)=>{time+=1000;return realm.receive(peer.id,{type,seq:peer.seq+1,...data});};
  return {realm,peer,send,record,sent};

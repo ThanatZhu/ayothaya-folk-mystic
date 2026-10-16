@@ -1,6 +1,7 @@
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster} from './monster-catalog.js?v=38';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
-import {awardExperience} from './experience.js?v=21';
+import {awardExperience,deathPenalty} from './experience.js?v=21';
+import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=21';
 import {getClass,classSkills} from './classes.js?v=18';
 import {scaledSkill} from './skill-progress.js?v=31';
@@ -56,7 +57,7 @@ export function screenDirection(horizontal,vertical,azimuth){
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 // 0.43: a monster hit after guard, AGI/LUK dodge and DEF (world.derived from character-stats.js). 0 = dodged.
 export function monsterHit(world,raw,rand=Math.random,monsterId=null){
- const p=world.player,d=world.derived;if(d&&rand()<d.flee)return 0;
+ const p=world.player,d=world.derived;if(d&&rand()<d.flee*(world.status?.blind?.5:1))return 0;
  const base=p.shield>0?Math.ceil(raw*.35):raw,resist=d&&monsterId?1-Math.min(.8,d.resist?.[affinityOf(monsterId).element]??0):1;
  return d?Math.max(1,Math.round(base*resist*100/(100+d.def*4))):base;
 }
@@ -89,16 +90,27 @@ export class CombatWorld{
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
   this.mobs=(this.safe?[]:(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]])).map(([x,z,type],id)=>({id,type,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
-  this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;
+  this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;
  }
  get target(){return this.mobs.find(m=>m.id===this.targetId&&m.hp>0)??null;}
  emit(type,extra={}){this.events.push({type,...extra});}
+ // 0.48 ailments: blind and curse weaken every hit; stun/sleep stop acting; silence stops skills.
+ weakness(){return (this.status.blind?.7:1)*(this.status.curse?.75:1);}
+ inflict(name){if(!name||!AILMENTS[name])return;const fresh=!this.status[name];this.status[name]=AILMENTS[name].time;if(fresh)this.notice(AILMENTS[name].name+'! · '+AILMENTS[name].text);}
+ // One monster blow, shared by the offline world and the realm server: damage, ailment roll, or going down (+ death penalty).
+ takeMonsterHit(type){
+  const p=this.player,damage=monsterHit(this,type.damage,Math.random,type.id);if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
+  p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});delete this.status.sleep;
+  if(p.hp>0){this.inflict(rollAilment(type.id));return true;}
+  p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;this.status={};
+  const lost=deathPenalty(this);this.notice('หมดแรง · กลับลานใน 3 วินาที'+(lost?' · Base EXP -'+lost:''));return true;
+ }
  power(n,mob=null){return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false):1));}
  // 0.44 element + size (affinity.js). Basic attacks: weapon element, physical. Skills: class element; magic classes ignore size.
  affinity(mob,basic){const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
   const element=basic?(d?.weaponElement??'neutral'):(CLASS_SKILL_ELEMENT[cls]??d?.weaponElement??'neutral');
   const id=MONSTER_TYPES[mob.type]?.id,a=affinityOf(id),card=1+(d?.vsSize?.[a.size]??0)+(d?.vsElement?.[a.element]??0);
-  return affinityMultiplier({element,physical:basic||!magic,classId:cls},id)*card;}
+  return affinityMultiplier({element,physical:basic||!magic,classId:cls},id)*card*this.weakness();}
  // 0.43 status/gear: max HP/MP and the multipliers above. null keeps the pre-0.43 numbers.
  applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=d.maxHp;p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
  notice(text){this.emit('notice',{text});}
@@ -111,7 +123,7 @@ export class CombatWorld{
   if(mob.hp===0){mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];this.emit('experience',awardExperience(this,reward.baseXp,reward.jobXp));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  basicAttack(quiet=false){
-  const p=this.player;if(p.hp<=0||p.attackCD>0)return false;
+  const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   if(!m){if(!quiet)this.notice('เลือกมอนสเตอร์ หรือเข้าใกล้ก่อนโจมตี');return false;}
   if(distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(!quiet)this.notice('เข้าใกล้เป้าหมายอีกนิด หรือเปิด AUTO');return false;}
@@ -119,7 +131,8 @@ export class CombatWorld{
  }
  skill(index){
   const level=this.skillLevels[index]??1;if(this.skills[index]&&level<1){this.notice('ยังไม่ได้เรียนสกิลนี้');return false;}
-  const s=scaledSkill(this.skills[index],level),p=this.player;if(!s||p.hp<=0)return false;
+  const s=scaledSkill(this.skills[index],level),p=this.player;if(!s||p.hp<=0||held(this.status))return false;
+  if(this.status.silence){this.notice('ใบ้ · ใช้สกิลไม่ได้');return false;}
   if(this.cooldowns[index]>0){this.notice('สกิลยังไม่พร้อม');return false;}
   if(p.mp<s.cost){this.notice('มานาไม่พอ');return false;}
   let m=this.target;
@@ -139,19 +152,22 @@ export class CombatWorld{
   dt=Math.min(.05,Math.max(0,dt));this.time+=dt;const p=this.player;
   p.attackCD=Math.max(0,p.attackCD-dt);p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt*(this.derived?.mpRegen??1));
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;
+  for(const k in this.status){this.status[k]-=dt;if(this.status[k]<=0)delete this.status[k];}
+  if(this.status.poison&&p.hp>1&&(this.poisonTick+=dt)>=1){this.poisonTick=0;const n=Math.min(p.hp-1,Math.max(1,Math.round(p.maxHp*.03)));p.hp-=n;this.emit('playerHit',{x:p.x,z:p.z,amount:n});}
+  const stop=held(this.status),speed=this.profession.speed*(this.status.curse?.6:1);
   if(p.hp<=0){p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
   if(this.safe)p.hp=Math.min(p.maxHp,p.hp+8*dt);
-  const ox=p.x,oz=p.z,manual=Math.hypot(input.x,input.z)>.08;
-  if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*this.profession.speed*dt,input.z/n*this.profession.speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
+  const ox=p.x,oz=p.z,manual=!stop&&Math.hypot(input.x,input.z)>.08;
+  if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);
-  if(this.auto&&!manual&&this.manualGrace===0){
+  if(this.auto&&!stop&&!manual&&this.manualGrace===0){
    let m=this.target;if(!m||distance(m,this.anchor)>9||distance(m,p)>10){m=this.nearest(8);this.targetId=m?.id??null;this.path=[];}
    if(m){
     if(distance(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      if(this.pathTimer<=0){this.path=findPath(p,m,this.nav);this.pathTimer=.65;}
      while(this.path.length&&distance(p,this.path[0])<.16)this.path.shift();
-     const next=this.path[0];if(next){const d=distance(p,next)||1;const step=Math.min(d,this.profession.speed*dt);p.face={x:(next.x-p.x)/d,z:(next.z-p.z)/d};moveBody(p,p.face.x*step,p.face.z*step,this.nav);}
+     const next=this.path[0];if(next){const d=distance(p,next)||1;const step=Math.min(d,speed*dt);p.face={x:(next.x-p.x)/d,z:(next.z-p.z)/d};moveBody(p,p.face.x*step,p.face.z*step,this.nav);}
     }
    }
   }
@@ -161,8 +177,7 @@ export class CombatWorld{
    const type=MONSTER_TYPES[m.type],outcome=advanceMonster(m,p,type,dt,this.nav,{moveBody,lineClear});
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
    if(outcome==='hit'){
-    const damage=monsterHit(this,type.damage,Math.random,type.id);if(!damage){this.emit('dodge',{x:p.x,z:p.z});continue;}p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});
-    if(p.hp===0){p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;this.mobs.forEach(v=>v.aggro=false);this.notice('หมดแรง · กลับลานใน 3 วินาที');break;}
+    if(this.takeMonsterHit(type)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
    }
   }
  }

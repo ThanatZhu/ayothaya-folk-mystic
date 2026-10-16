@@ -28,7 +28,7 @@ const city={id:'ayutthaya',safe:true,nav,spawn:{x:0,z:0},mobs:[],portals:[],npcs
 const field={id:'rice-field',safe:false,nav,spawn:{x:0,z:0},mobs:[],portals:[],npcs:[]};
 function realmWith(mapId,...bags){
  let time=1e4;const realm=new RealmServer({catalog:{capital:'ayutthaya',maps:[city,field]},now:()=>time});
- const peers=bags.map((bag,i)=>{const state=initialSave();state.mapId=mapId;return realm.join({uid:'u'+i,serverId:'server-1',slotId:'slot-1',record:{character:{name:'p'+i,gender:'male',classId:'novice'},state,bag},send:()=>{}});});
+ const peers=bags.map((bag,i)=>{const state=initialSave();state.mapId=mapId;return realm.join({uid:'u'+i,serverId:'server-1',slotId:'slot-1',record:{character:{name:'p'+i,gender:'male',classId:'novice'},state,bag,daily:{day:'1970-01-01',streak:1}},send:()=>{}});});
  const send=(p,type,data)=>{time+=1000;return realm.receive(p.id,{type,seq:p.seq+1,...data});};
  return {realm,peers,send};
 }

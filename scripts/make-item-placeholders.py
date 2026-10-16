@@ -7,7 +7,7 @@ root = Path(__file__).resolve().parent.parent
 src = (root / 'items.js').read_text(encoding='utf8')
 import sys
 # Pick exactly one sheet; never default, so a typo cannot overwrite painted art.
-SHEETS = {'--items': (None, 'assets/items42/items.png'), '--gear': ('gear', 'assets/gear43/gear.png'), '--refine': ('refine', 'assets/refine44/refine.png'), '--cards': ('cards', 'assets/cards45/cards.png'), '--social': ('social', 'assets/social46/social.png'), '--emblems': ('emblems', 'assets/emblems47/emblems.png')}
+SHEETS = {'--items': (None, 'assets/items42/items.png'), '--gear': ('gear', 'assets/gear43/gear.png'), '--refine': ('refine', 'assets/refine44/refine.png'), '--cards': ('cards', 'assets/cards45/cards.png'), '--social': ('social', 'assets/social46/social.png'), '--emblems': ('emblems', 'assets/emblems47/emblems.png'), '--emotes': ('emotes', 'assets/emotes48/emotes.png'), '--items48': ('items48', 'assets/items48/items.png')}
 picked = [a for a in sys.argv[1:] if a in SHEETS]
 FORCE = '--force' in sys.argv
 if len(picked) != 1 or len(sys.argv) != 2 + FORCE: sys.exit('usage: make-item-placeholders.py ' + ' | '.join(SHEETS) + ' [--force]')
@@ -18,8 +18,9 @@ if not FORCE and subprocess.run(['git', '-C', str(root), 'ls-files', '--error-un
 pat = (r"'([a-z-]+)':\{atlas:'" + ATLAS + r"',icon:(\d+),name:'([^']+)',kind:'([a-z]+)'") if ATLAS else r"'([a-z-]+)':\{icon:(\d+),name:'([^']+)',kind:'([a-z]+)'"
 items = re.findall(pat, src)
 if ATLAS == 'emblems': items = [('emblem-%d' % (i + 1), str(i), str(i + 1), 'emblem') for i in range(24)]  # generated in items.js
+if ATLAS == 'emotes': items = [('emote-%d' % (i + 1), str(i), str(i + 1), 'emote') for i in range(24)]
 font = ImageFont.truetype(str(root / 'assets/fonts/Mali-Bold.ttf'), 34)
-colors = {'loot': (198, 161, 100), 'potion': (205, 80, 70), 'ui': (244, 207, 122), 'reserved': (120, 130, 120), 'gear': (150, 170, 190), 'card': (200, 120, 200), 'emblem': (0, 0, 0)}
+colors = {'loot': (198, 161, 100), 'potion': (205, 80, 70), 'ui': (244, 207, 122), 'reserved': (120, 130, 120), 'gear': (150, 170, 190), 'card': (200, 120, 200), 'emblem': (0, 0, 0), 'emote': (0, 0, 0)}
 atlas = Image.new('RGBA', (1536, 1024), (0, 0, 0, 0))
 for item_id, icon, name, kind in items:
     i = int(icon); x, y = i % 6 * 256, i // 6 * 256
@@ -27,6 +28,10 @@ for item_id, icon, name, kind in items:
     c = colors[kind]
     if item_id.startswith('mp') : c = (70, 130, 210)
     if item_id == 'sticky-rice': c = (110, 160, 80)
+    if kind == 'emote':
+        d.ellipse((40, 40, 216, 180), fill=(255, 250, 235, 255), outline=(60, 40, 15, 255), width=6); d.polygon([(90, 170), (120, 172), (80, 215)], fill=(255, 250, 235, 255), outline=(60, 40, 15, 255))
+        w = d.textlength(name, font=font); d.text(((256 - w) / 2, 90), name, font=font, fill=(80, 50, 20, 255))
+        atlas.alpha_composite(cell, (x, y)); continue
     if kind == 'emblem':
         import colorsys
         c = tuple(int(v * 255) for v in colorsys.hsv_to_rgb(int(icon) / 24, .55, .85))

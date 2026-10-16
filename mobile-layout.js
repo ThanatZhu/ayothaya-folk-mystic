@@ -18,6 +18,7 @@ export function createLandscapeGuard({onChange=()=>{}}={}){
   const top=(header?.getBoundingClientRect().height??0)+2;
   const bottom=parseFloat(getComputedStyle(root).getPropertyValue('--safe-bottom'))||0;
   const available=Math.max(1,height-top-bottom-6);
+  root.style.setProperty('--lobby-height',`${available}px`);
   const scale=Math.min(1,available/Math.max(1,layout.offsetHeight,layout.scrollHeight));
   root.style.setProperty('--lobby-scale',String(scale));
   root.style.setProperty('--lobby-top',`${top}px`);

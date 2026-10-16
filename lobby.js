@@ -5,7 +5,7 @@ import {createWardrobe} from './wardrobe.js?v=41.2';
 import {progression,jobFor,CLASS_LEVEL} from './advancement.js?v=21';
 import {CLASSES,getClass,className,atlasPath} from './classes.js?v=18';
 import {previewPose} from './sprite-motion.js';
-import {createLandscapeGuard} from './mobile-layout.js?v=11';
+import {createLandscapeGuard} from './mobile-layout.js?v=48.1';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=21';
 import {createRealmStore} from './realm-store.js?v=41';

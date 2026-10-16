@@ -1,6 +1,6 @@
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster} from './monster-catalog.js?v=38';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
-import {awardExperience,deathPenalty} from './experience.js?v=21';
+import {awardExperience,deathPenalty} from './experience.js?v=48.1';
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=21';
 import {getClass,classSkills} from './classes.js?v=18';

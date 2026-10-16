@@ -9,7 +9,7 @@ const names={shouldercloth:'ผ้าพาดไหล่',cloak:'ผ้าค�
 const motions={idle:'ยืนหายใจ',walk:'เดิน',attack:'โจมตี',cast:'ร่ายอาคม',guard:'ตั้งรับ',hit:'ถูกโจมตี',dash:'ก้าวพุ่ง',bow:'คำนับ',celebrate:'ดีใจ',rest:'พัก'};
 export function createWardrobe({getClass,getGender,getRecord,onApply,onTexture,onNotice}){
  const dialog=document.createElement('dialog');dialog.id='wardrobe';dialog.setAttribute('aria-labelledby','wardrobe-title');
- dialog.innerHTML='<header><div><h2 id="wardrobe-title">ตัวละครของคุณ</h2><p>รูปลักษณ์และเส้นทางอาชีพ</p></div><button type="button" id="wardrobe-close" aria-label="ปิดหน้าปรับตัวละคร">×</button></header><div class="wardrobe-body"><section class="wardrobe-preview"><div id="wardrobe-art" role="img" aria-label="ตัวอย่างรูปลักษณ์ที่เลือก"></div><label>ลองท่าทาง<select id="wardrobe-motion"></select></label><p id="wardrobe-level"></p></section><section class="wardrobe-fields"><div id="appearance-fields"></div><label>Master · Lv. 60<select id="advanced-job"></select></label><p id="job-description"></p><p id="wardrobe-message" role="status"></p></section></div><footer><button id="wardrobe-apply" type="button">ใช้รูปลักษณ์และอาชีพนี้</button></footer>';
+ dialog.innerHTML='<header><div><h2 id="wardrobe-title">ตัวละครของคุณ</h2><p>รูปลักษณ์และเส้นทางอาชีพ</p></div><button type="button" id="wardrobe-close" aria-label="ปิดหน้าปรับตัวละคร">×</button></header><div class="wardrobe-body"><section class="wardrobe-preview"><div id="wardrobe-art" role="img" aria-label="ตัวอย่างรูปลักษณ์ที่เลือก"></div><label>ลองท่าทาง<select id="wardrobe-motion"></select></label><p id="wardrobe-level"></p></section><section class="wardrobe-fields"><div id="appearance-fields"></div><label>Master · Lv. 60<select id="advanced-job"></select></label><p id="job-description"></p><p id="wardrobe-message" role="status"></p></section></div><footer><button id="wardrobe-apply" type="button">ใช้รูปลักษณ์นี้</button></footer>';
  document.body.append(dialog);const $=id=>dialog.querySelector('#'+id),fields=$('appearance-fields');let appearance=validateAppearance(),jobId='',renderToken=0,mode='idle',time=0,last=0,sourceURL='',gender='male',loading=false,beforeOpen=null,committed=false;
  const preview=createMotionPreview($('wardrobe-art'));const images=new Map();
  for(const [key,options] of Object.entries(APPEARANCE_OPTIONS)){
@@ -37,8 +37,8 @@ export function createWardrobe({getClass,getGender,getRecord,onApply,onTexture,o
   $('wardrobe-level').textContent=`Lv. ${level} · EXP ${progression(kills).xp}`;
   const select=$('advanced-job');select.replaceChildren();const base=document.createElement('option');base.value='';base.textContent='ยังไม่เป็น Master';base.disabled=!!record?.character.jobId;select.append(base);
   for(const job of JOBS[getClass()]){const option=document.createElement('option');option.value=job.id;option.textContent=job.name+' · '+job.style;option.disabled=!record||(level<JOB_LEVEL&&job.id!==record.character.jobId)||!!record?.character.jobId&&job.id!==record.character.jobId;select.append(option);}
-  if(!JOBS[getClass()].some(j=>j.id===jobId))jobId='';select.value=jobId;
-  $('job-description').textContent=getClass()==='novice'?'เลือกอาชีพก่อนที่ Lv. 25 แล้วเป็น Master ที่ Lv. 60':record?.character.jobId?'เลือกสาย Master แล้ว':level<JOB_LEVEL?'ปลดล็อก Master ที่ Lv. 60':'เลือกสาย Master ได้แล้ว · เลือกได้ครั้งเดียว';
+  if(!JOBS[getClass()].some(j=>j.id===jobId))jobId='';select.value=jobId;select.disabled=true;
+  $('job-description').textContent=record?.character.jobId?'ผ่านบททดสอบ Master แล้ว':'พบครูประจำสายที่ลานครูแห่งอโยธยา · เปลี่ยนอาชีพ Lv. 25 · Master Lv. 60';
   // Monastic characters keep their class-specific shaved head.
   for(const key of ['hair','hairColor'])$('appearance-'+key).disabled=getClass()==='acolyte';
   $('wardrobe-message').textContent=getClass()==='acolyte'?'พระและแม่ชีคงรูปลักษณ์ศีรษะประจำอาชีพ':'';
@@ -47,7 +47,7 @@ export function createWardrobe({getClass,getGender,getRecord,onApply,onTexture,o
  $('advanced-job').onchange=()=>jobId=$('advanced-job').value;
  $('wardrobe-apply').onclick=async()=>{
   if(loading)return;loading=true;$('wardrobe-apply').disabled=true;$('wardrobe-close').disabled=true;
-  try{await onApply({...appearance},jobId);committed=true;dialog.close();onNotice(getRecord()?'บันทึกรูปลักษณ์และอาชีพแล้ว':'เลือกรูปลักษณ์แล้ว กรอกชื่อเพื่อสร้างตัวละคร');}
+  try{await onApply({...appearance},jobId);committed=true;dialog.close();onNotice(getRecord()?'บันทึกรูปลักษณ์แล้ว':'เลือกรูปลักษณ์แล้ว กรอกชื่อเพื่อสร้างตัวละคร');}
   catch(error){$('wardrobe-message').textContent=error.message==='job-locked'?'ต้องถึง Lv. 60 ก่อนเลือก Master':error.message==='class-first'?'บันทึกอาชีพเริ่มต้นที่เลือกก่อน แล้วเปิดหน้านี้อีกครั้ง':'บันทึกไม่สำเร็จ กรุณาลองใหม่';}
   finally{loading=false;$('wardrobe-apply').disabled=false;$('wardrobe-close').disabled=false;}
  };

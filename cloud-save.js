@@ -1,6 +1,6 @@
 import {connectFirebase,deadline} from './firebase-client.js';
 import {ENTRY_KEY,validEntry} from './realm-state.js?v=21';
-import {createRealmStore} from './realm-store.js?v=21';
+import {createRealmStore} from './realm-store.js?v=40';
 const $=id=>document.getElementById(id);
 function toLobby(){location.replace('./');return new Promise(()=>{});}
 export async function prepareCloud(catalog){
@@ -47,6 +47,14 @@ export async function prepareCloud(catalog){
  const tick=()=>{if(bound&&!blocked&&!busy&&!traveling&&!document.hidden)save().catch(()=>{});};setInterval(tick,10000);addEventListener('online',tick);
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&bound&&!blocked&&!busy&&!traveling)save().catch(()=>{});});
  return {skills:record?.skills,setSkills(skills){record={...record,skills};lastJSON='';return save().catch(()=>false);},slotId:entry.slotId??record?.slotId,async token(){if(!connection?.auth.currentUser||connection.auth.currentUser.uid!==entry.owner)throw new Error('account-changed');return connection.auth.currentUser.getIdToken();},async beginOnline(){await save();await queue;onlineStarting=true;},setOnline(value){online=value;onlineStarting=false;say('บันทึกอัตโนมัติโดยเซิร์ฟเวอร์ออนไลน์');},data:record?.state,character:record?.character,serverId,get paused(){return blocked||busy;},get cloud(){return store?.cloud;},save,
+  get training(){return online?online.training??null:record?.training??null;},
+  async train(mentor,action,jobId){
+   if(busy||blocked||onlineStarting)throw new Error('not-connected');busy=true;
+   try{
+    if(online){const result=await online.train(mentor,action,jobId);if(!store.cloud&&result.advanced){record=await store.save(serverId,record,bound.capture());record=await store.save(serverId,{...record,character:result.character,training:null},record.state);}return result;}
+    if(store.cloud)throw new Error('online-required');await save();const result=await store.train(serverId,record,mentor,action,jobId);record=result.record;lastJSON=JSON.stringify(record.state);return result;
+   }finally{busy=false;}
+  },
   bind(value){bound=value;inert(blocked&&!panel.hidden);},
   async travel(destination){traveling=true;if(online){try{await online.travel(destination.id);if(!store.cloud){const state=bound.capture();state.mapId=destination.id;state.position={...destination.spawn};record=await store.save(serverId,record,state);lastJSON=JSON.stringify(state);}return true;}catch{traveling=false;return false;}}if(onlineStarting){traveling=false;return false;}const state=bound.capture();state.mapId=destination.id;state.position={...destination.spawn};try{await save(state);return true;}catch{traveling=false;return false;}}
  };

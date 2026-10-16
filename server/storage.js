@@ -44,8 +44,7 @@ export class FirebaseStore{
    const record=online.exists?online.data().record:legacy.data();
    if(record.serverId!==identity.serverId||legacy.data().serverId!==identity.serverId)throw new Error('character-server');
    character(record.character); // Legacy XP is imported once; later joins use the private server profile.
-   if(online.exists){const next=character(legacy.data().character);validateCharacterChange(record.character,next,record.state);
-    if(next.classId!==record.character.classId||next.jobId!==record.character.jobId)record.state.traveler.jobXp=0;record.character=next;}
+   if(online.exists){const next=character({...legacy.data().character,classId:record.character.classId,jobId:record.character.jobId??''});validateCharacterChange(record.character,next,record.state);record.character=next;}
    tx.set(refs.lease,{leaseId,expires:Date.now()+ttl,slotId:identity.slotId});
    if(!online.exists)tx.set(refs.profile,{record,updatedAt:Date.now()});
    return {identity,leaseId,refs,record:copy(record),mirrorRevision:legacy.data().revision};
@@ -59,7 +58,7 @@ export class FirebaseStore{
    if(!legacy.exists||legacy.data().revision!==session.mirrorRevision)throw new Error('save-conflict');
    const next={...copy(record),revision:session.mirrorRevision+1};delete next.slotId;
    // Skill levels stay in the private profile; the client-readable mirror keeps its rule-checked shape.
-   const mirror={...next};delete mirror.skills;
+   const mirror={...next};delete mirror.skills;delete mirror.training;
    tx.set(session.refs.profile,{record:next,updatedAt:Date.now()});tx.set(session.refs.legacy,{...mirror,updatedAt:new Date()});
    if(release)tx.delete(session.refs.lease);else tx.update(session.refs.lease,{expires:Date.now()+ttl});return next.revision;
   });session.mirrorRevision=revision;

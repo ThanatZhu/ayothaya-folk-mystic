@@ -10,7 +10,10 @@ export class MultiplayerClient extends EventTarget{
    const socket=this.socket=new this.WebSocket(this.url);
    socket.addEventListener('open',()=>{if(generation!==this.generation){socket.close();return;}socket.send(JSON.stringify({type:'join',...identity}));});
    socket.addEventListener('message',e=>{if(generation!==this.generation)return;let m;try{m=JSON.parse(e.data);}catch{return;}
-    if(m.type==='welcome'){this.seq=0;this.id=m.id;this.retries=0;this.state('online');this.emit('welcome',m);this.emit('snapshot',m.snapshot);}
+    if(m.type==='welcome'){this.training=m.snapshot.self.training??null;this.seq=0;this.id=m.id;this.retries=0;this.state('online');this.emit('welcome',m);this.emit('snapshot',m.snapshot);}
+    else if(m.type==='snapshot'){this.training=m.self.training??null;this.emit('snapshot',m);}
+    else if(m.type==='trained'){this.training=m.training;if(m.advanced)this.stopped=true;this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
+    else if(m.type==='training-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
     else if(m.type==='saved'){this.pending.get(m.id)?.resolve();this.pending.delete(m.id);this.emit('saved',m);}
     else if(m.type==='traveled'){this.stopped=true;this.pending.get(m.id)?.resolve();this.pending.delete(m.id);}
     else if(m.type==='travel-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
@@ -26,7 +29,8 @@ export class MultiplayerClient extends EventTarget{
  setInput(input){const moving=this.input.x||this.input.z;this.input={x:Math.max(-1,Math.min(1,input.x)),z:Math.max(-1,Math.min(1,input.z)),attack:!!input.attack};const now=performance.now(),stopped=moving&&!this.input.x&&!this.input.z;
   // Throttle steering to ~15/s, but send a stop at once so the server does not keep walking past where the player let go.
   if(stopped||now-this.lastInput>=65){this.lastInput=now;this.command('input',this.input);}}
- request(type,id,data={}){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('server-timeout'));},12000);this.pending.set(id,{resolve:()=>{clearTimeout(timer);resolve();},reject:e=>{clearTimeout(timer);reject(e);}});if(!this.command(type,{id,...data})){this.pending.get(id).reject(new Error('not-connected'));this.pending.delete(id);}});}
+ request(type,id,data={}){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('server-timeout'));},12000);this.pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject:e=>{clearTimeout(timer);reject(e);}});if(!this.command(type,{id,...data})){this.pending.get(id).reject(new Error('not-connected'));this.pending.delete(id);}});}
+ train(mentor,action,jobId){return this.request('train',crypto.randomUUID(),{mentor,action,jobId});}
  flush(settings){if(this.saving)return this.saving;this.saving=this.request('save',crypto.randomUUID(),{settings}).finally(()=>{this.saving=null;});return this.saving;}
  async travel(destination){await this.request('travel',crypto.randomUUID(),{destination});this.stopped=true;}
  async leave(){if(this.status!=='online')throw new Error('not-connected');await this.request('leave','leave');this.stopped=true;this.socket?.close();}

@@ -1,14 +1,14 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createMotionPreview} from './motion-preview.js?v=37';
 import {characterMotion} from './character-motion.js?v=37';
-import {createWardrobe} from './wardrobe.js?v=37';
+import {createWardrobe} from './wardrobe.js?v=40';
 import {progression,jobFor,CLASS_LEVEL} from './advancement.js?v=21';
 import {CLASSES,getClass,className,atlasPath} from './classes.js?v=18';
 import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=11';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=21';
-import {createRealmStore} from './realm-store.js?v=21';
+import {createRealmStore} from './realm-store.js?v=40';
 const $=id=>document.getElementById(id);
 createLandscapeGuard();
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',poseMode='cycle',previewTime=0;
@@ -55,7 +55,7 @@ function preview(gender=previewGender){
  previewGender=gender;const c=getClass(selectedClass),art=$('hero-preview');
  art.className='hero-art rig-preview '+gender;art.style.backgroundImage='url("'+atlasPath(c.id)+'")';art.style.setProperty('--row',gender==='female'?'100%':'0%');art.setAttribute('aria-label',className(c.id,gender)+' · '+(gender==='female'?'หญิง':'ชาย'));
  $('class-name').textContent=c.icon+' '+className(c.id,gender);$('class-description').textContent=c.description;$('class-badge').textContent=c.role;
- const canChoose=record?.character.classId==='novice'&&progression(record.state.traveler).level>=CLASS_LEVEL;
+ const canChoose=false; // Class changes now belong to the teachers' in-world trials.
  $('profession-options').hidden=!canChoose;
  $('change-class').hidden=!canChoose||selectedClass===record.character.classId;$('enter-world').hidden=!!record&&selectedClass!==record.character.classId;
  document.querySelectorAll('[name=profession]').forEach(el=>el.checked=el.value===selectedClass);
@@ -88,7 +88,7 @@ function displayCharacter(){
  const realm=SERVERS.find(s=>s.id===selected);$('realm-caption').textContent=realm.name+' · '+realm.subtitle;
  $('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
  $('character-form').hidden=!!record||roster.length>=5;
- $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · เลือกอาชีพ Lv. 25 · Master Lv. 60':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(progression(record.state.traveler).level>=25?'พร้อมเลือกอาชีพแล้ว · เลือกได้ครั้งเดียว':'ผู้ฝึกตน → เลือกอาชีพที่ Lv. 25'):'อาชีพ '+className(record.character.classId,record.character.gender)+' → Master ที่ Lv. 60';
+ $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · เปลี่ยนอาชีพกับครู Lv. 25 · Master Lv. 60':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(progression(record.state.traveler).level>=25?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ผู้ฝึกตน → พบครูเปลี่ยนอาชีพที่ Lv. 25'):'อาชีพ '+className(record.character.classId,record.character.gender)+' → พบครูเลื่อนขั้น Master ที่ Lv. 60';
  if(record){wardrobe.reset(record.character.appearance,record.character.jobId??'');selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
  else{wardrobe.reset();$('character-form').reset();selectedClass='novice';preview('male');}
  show('character');

@@ -19,6 +19,7 @@ export function drawMap(canvas,map,player,{detailed=false}={}){
   c.strokeStyle='#725b37';c.lineWidth=5;c.strokeRect(6,6,W-12,H-12);
  }
  for(const p of map.portals??[]){c.fillStyle='#f7ce70';c.beginPath();c.arc(X(p.x),Y(p.z),detailed?10:3.5,0,Math.PI*2);c.fill();if(detailed){c.font='bold 21px Mali, Tahoma';c.fillText('ทางเดินทาง',X(p.x),Y(p.z)-18);}}
+ if(map.masterCourt){const x=X(map.masterCourt.x),y=Y(map.masterCourt.z);c.fillStyle='#674726';c.beginPath();c.arc(x,y,detailed?16:5,0,Math.PI*2);c.fill();c.fillStyle='#ffda78';c.textAlign='center';c.textBaseline='middle';c.font=`bold ${detailed?27:10}px sans-serif`;c.fillText('★',x,y);}
  const px=X(player.x),py=Y(player.z),r=detailed?13:4;c.fillStyle='#183d35';c.beginPath();c.arc(px,py,r+5,0,Math.PI*2);c.fill();c.fillStyle='#a8ffe0';c.beginPath();c.arc(px,py,r,0,Math.PI*2);c.fill();
  if(detailed){c.font='bold 25px Mali, Tahoma, sans-serif';c.textAlign='center';c.strokeStyle='#19392f';c.lineWidth=7;c.strokeText('คุณ',px,py+34);c.fillStyle='#f4ffeb';c.fillText('คุณ',px,py+34);}
 }

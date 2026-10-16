@@ -5,6 +5,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {WebSocketServer,WebSocket} from 'ws';
 import {RealmServer} from './realm.js';
+import {trainingAction} from '../city-life-data.js';
+import {normalizeSkills} from '../skill-progress.js';
 import {LocalStore,FirebaseStore} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
@@ -51,7 +53,16 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   ws.on('message',async raw=>{
    let message;try{message=JSON.parse(raw.toString());}catch{ws.close(4002,'invalid-json');return;}
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
-   if(session){if(session.closing)return;if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+   if(session){if(session.closing||session.trainingBusy)return;if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(message.type==='train'){
+     if(typeof message.id!=='string'||message.id.length>50)return;
+     if(Date.now()-(session.trainedAt??0)<1200){send({type:'training-error',id:message.id,code:'action-rate'});return;}session.trainedAt=Date.now();
+     let result;try{result=trainingAction(realm.record(session.peer,session.lease.record),message.mentor,message.action,message.jobId);}catch(e){send({type:'training-error',id:message.id,code:e.message});return;}
+     session.trainingBusy=true;session.peer.suspended=true;session.peer.input={x:0,z:0,attack:false};session.peer.training=result.training;
+     if(result.advanced){session.closing=true;session.explicitLeave=true;session.peer.character=result.character;session.peer.world.jobXp=0;session.peer.skills=normalizeSkills(session.peer.skills,result.character.classId);}
+     try{await checkpoint(session,result.advanced);send({type:'trained',id:message.id,...result});if(result.advanced){realm.leave(session.peer.id);ws.close(1000,'trained');}else session.peer.suspended=false;}
+     catch{session.closing=true;send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}finally{session.trainingBusy=false;}return;
+    }
     if(message.type==='save'){if(typeof message.id!=='string'||message.id.length>50)return;
      const settings=message.settings;if(settings&&Number.isFinite(settings.zoom)&&Number.isFinite(settings.azimuth)&&typeof settings.motion==='boolean')session.peer.settings={zoom:Math.max(.65,Math.min(2.7,settings.zoom)),azimuth:settings.azimuth%(Math.PI*2),motion:settings.motion};
      const recent=Date.now()-(session.savedAt??0)<2500;session.savedAt=Date.now();try{if(recent)await session.queue;else await checkpoint(session);send({type:'saved',id:message.id});}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}

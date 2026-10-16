@@ -95,12 +95,12 @@ test('cloud adapter fences runtime and account leases; refuses legacy save races
  db.docs.get('players/google-user/characters/slot-1').revision++;await assert.rejects(a.checkpoint(session,session.record),/save-conflict/);
  await a.releaseAuthority();await b.renewAuthority();await assert.rejects(a.checkpoint(session,session.record),/authority-lost/);
 });
-test('private online XP is not replaced by later client claims; legal job change uses server progress',async()=>{
+test('private online XP and professions ignore later client claims; teacher quest stays private',async()=>{
  const db=transactionDB(),store=new FirebaseStore(db),identity={uid:'google-user',serverId:'server-1',slotId:'slot-1'},ref='players/google-user/characters/slot-1';
  db.docs.set(ref,{serverId:'server-1',revision:1,character:{name:'ผู้ทดสอบ',gender:'female',classId:'novice'},state:initialSave()});await store.renewAuthority();
  let s=await store.acquire(identity,'first');s.record.state.traveler.baseXp=100;await store.checkpoint(s,s.record,{release:true});
  db.docs.get(ref).state.traveler.baseXp=900000;s=await store.acquire(identity,'second');assert.equal(s.record.state.traveler.baseXp,100);await store.checkpoint(s,s.record,{release:true});
- db.docs.get(ref).character.classId='shaman';await assert.rejects(store.acquire(identity,'third'),/class-locked/);
+ db.docs.get(ref).character.classId='shaman';s=await store.acquire(identity,'third');assert.equal(s.record.character.classId,'novice');s.record.training={classId:'boxer',tier:'class',startKills:3};await store.checkpoint(s,s.record,{release:true});assert.equal(db.docs.get(ref).training,undefined);s=await store.acquire(identity,'fourth');assert.equal(s.record.training.startKills,3);
 });
 test('local persistence fences stale sessions and survives process restart',async()=>{
  const directory=await mkdtemp(path.join(tempRoot,'test-mp-'));

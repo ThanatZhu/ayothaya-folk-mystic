@@ -1,3 +1,4 @@
+import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createMotionPreview} from './motion-preview.js?v=37';
 import {characterMotion} from './character-motion.js?v=37';
 import {createWardrobe} from './wardrobe.js?v=37';
@@ -106,7 +107,9 @@ $('change-class').onclick=async()=>{
 };
 $('enter-world').onclick=()=>{
  if(!record||busy)return;
- try{sessionStorage.setItem(ENTRY_KEY,JSON.stringify({owner,serverId:selected,slotId:record.slotId}));location.assign('./game.html?server='+selected+'&map='+record.state.mapId);}catch{say('กรุณาเปิดอนุญาตพื้นที่เก็บข้อมูลของเบราว์เซอร์เพื่อเข้าเกม');}
+ try{sessionStorage.setItem(ENTRY_KEY,JSON.stringify({owner,serverId:selected,slotId:record.slotId}));getLoadingScreen().show(record.state.mapId,{travel:true,message:'กำลังเข้าสู่โลกอโยธยา…'});requestAnimationFrame(()=>location.assign('./game.html?server='+selected+'&map='+record.state.mapId));}catch{say('กรุณาเปิดอนุญาตพื้นที่เก็บข้อมูลของเบราว์เซอร์เพื่อเข้าเกม');}
 };
 $('ambient-toggle').onclick=()=>{const off=document.body.classList.toggle('motion-off');$('ambient-toggle').textContent=off?'เปิดโมชั่น':'หยุดโมชั่น';$('ambient-toggle').setAttribute('aria-pressed',String(off));};
 for(let i=0;i<25;i++){const p=document.createElement('i');p.className='ember';p.style.left=((i*37)%100)+'%';p.style.top=(25+(i*23)%75)+'%';p.style.animationDelay=(-i*.71)+'s';p.style.animationDuration=(7+i%8)+'s';$('embers').append(p);}
+
+addEventListener('pageshow',e=>{if(e.persisted)getLoadingScreen().hide();});

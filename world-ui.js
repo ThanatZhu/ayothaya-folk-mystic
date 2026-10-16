@@ -1,3 +1,4 @@
+import {getLoadingScreen} from './loading-screen.js?v=39';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=38';
 import * as THREE from 'three';
@@ -17,11 +18,11 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,on
  async function travel(id){
   if(traveling||!reachable.has(id)||world.player.hp<=0)return;
   traveling=true;game.clearInput();
-  $('travel-loading').hidden=false;$('travel-loading').textContent='กำลังเซฟและเดินทางไป '+lookup(id).name+'…';
+  getLoadingScreen().show(id,{travel:true});
   if(account){
-   if(!await account.travel(lookup(id))){traveling=false;$('travel-loading').hidden=true;world.notice('เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return;}
+   if(!await account.travel(lookup(id))){traveling=false;getLoadingScreen().hide();world.notice('เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return;}
   }else try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
-  $('travel-loading').hidden=false;$('travel-loading').textContent='กำลังเดินทางไป '+lookup(id).name+'…';
+  getLoadingScreen().stage(1,'กำลังเดินทางไป '+lookup(id).name+'…');
   location.assign('?server='+account.serverId+'&map='+encodeURIComponent(id));
  }
  function openMap(){if(account?.paused)return;game.clearInput();conversation=null;$('npc-dialog').hidden=true;openHudPanel(dialog);drawCityMap();}

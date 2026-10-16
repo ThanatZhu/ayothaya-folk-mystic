@@ -7,7 +7,7 @@ import {WebSocketServer,WebSocket} from 'ws';
 import {RealmServer} from './realm.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
-import {LocalStore,FirebaseStore} from './storage.js';
+import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
  if(!['local','firebase'].includes(mode))throw new Error('invalid-auth-mode');
@@ -44,7 +44,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   if(!authoritative()){socket.write('HTTP/1.1 503 Service Unavailable\r\nRetry-After: 5\r\n\r\n');socket.destroy();return;}
   wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req));
  });
- const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;await store.checkpoint(s.lease,s.travelRecord??realm.record(s.peer,s.lease.record),{release});if(release)s.released=true;});return s.queue;};
+ const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;const record=s.travelRecord??realm.record(s.peer,s.lease.record);await store.checkpoint(s.lease,record,{release});s.autoSavedAt=Date.now();s.savedJson=JSON.stringify(record);if(release)s.released=true;});return s.queue;};
  wss.on('connection',ws=>{
   let session=null,authenticating=false;ws.alive=true;
   const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}ws.send(JSON.stringify(data));}};
@@ -86,7 +86,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     lease=await store.acquire(identity,randomUUID());if(ws.readyState!==WebSocket.OPEN)throw new Error('connection-closed');
     // Send welcome after the full authenticated session exists.
     const queued=[],peer=realm.join({...identity,record:lease.record,send:data=>queued.push(data)});
-    session={peer,lease,ws,queue:Promise.resolve(),expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);queued.forEach(send);
+    session={peer,lease,ws,queue:Promise.resolve(),autoSavedAt:Date.now(),savedJson:null,expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);queued.forEach(send);
    }catch(e){if(lease)await store.checkpoint(lease,lease.record,{release:true}).catch(()=>{});send({type:'error',code:['already-online','room-full','character-not-found','character-server'].includes(e.message)?e.message:'authentication-failed'});ws.close(4003,'join-rejected');}
    finally{if(claimed)joinPending.delete(identity.uid);}
   });
@@ -97,8 +97,11 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  // step per callback ran the world ~20% slow, so predicted clients were pulled back when they stopped.
  let lastTick=performance.now(),carry=0;
  const tick=setInterval(()=>{const now=performance.now();carry=Math.min(.25,carry+(now-lastTick)/1000);lastTick=now;if(mode==='firebase'&&Date.now()>store.authorityUntil){carry=0;for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}while(carry>=.05){carry-=.05;realm.step(.05);}},50);
- const authority=setInterval(renew,5000);await renew();
- const autosave=setInterval(()=>{for(const s of sessions.values())if(!s.closing)checkpoint(s).catch(()=>{s.closing=true;s.peer.send({type:'error',code:'save-failed'});s.ws.close(4010,'save-failed');});},10000);
+ // Waiting for authority: retry every 5 s (a read while another host holds it). Holding it: renew every 40 s.
+ let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();
+ // Save only what changed, at most once a minute; an idle player just keeps the lease alive (see storage.js budget).
+ const dueForSave=s=>{const age=Date.now()-(s.autoSavedAt??0);if(age<SAVE_MIN_GAP)return false;return age>=SAVE_MAX_GAP||JSON.stringify(realm.record(s.peer,s.lease.record))!==s.savedJson;};
+ const autosave=setInterval(()=>{for(const s of sessions.values())if(!s.closing&&dueForSave(s))checkpoint(s).catch(()=>{s.closing=true;s.peer.send({type:'error',code:'save-failed'});s.ws.close(4010,'save-failed');});},10000);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
  return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
 }

@@ -3,7 +3,10 @@ import path from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {character,initialSave} from '../realm-state.js';
 import {validateCharacterChange} from '../realm-store.js';
-const copy=v=>structuredClone(v),ttl=30000;
+// Firestore Spark allows 20k writes/day. 0.41.1 budget: world authority renews every 40 s (~90 writes/h) and a
+// player saves only when changed, at most once a minute (lease kept alive at least every 100 s).
+export const AUTHORITY_TTL=120000,AUTHORITY_RENEW=40000,SAVE_MIN_GAP=60000,SAVE_MAX_GAP=100000;
+const copy=v=>structuredClone(v),ttl=150000;
 // Local mode never accepts Firebase users and is bound to loopback by the host.
 export class LocalStore{
  constructor(directory){this.directory=directory;this.rows=new Map();this.leases=new Map();this.queue=Promise.resolve();}
@@ -29,7 +32,7 @@ export class FirebaseStore{
  async renewAuthority(){
   const until=await this.db.runTransaction(async tx=>{const snap=await tx.get(this.authorityRef),now=Date.now();
    if(snap.exists&&snap.data().id!==this.authorityId&&snap.data().expires>now)throw new Error('another-authority-active');
-   tx.set(this.authorityRef,{id:this.authorityId,expires:now+30000});return now+25000;
+   tx.set(this.authorityRef,{id:this.authorityId,expires:now+AUTHORITY_TTL});return now+AUTHORITY_TTL-25000;
   });this.authorityUntil=until;
  }
  async checkAuthority(tx){const snap=await tx.get(this.authorityRef);if(!snap.exists||snap.data().id!==this.authorityId||snap.data().expires<Date.now())throw new Error('authority-lost');}

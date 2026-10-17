@@ -1,4 +1,4 @@
-import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster} from './monster-catalog.js?v=38';
+import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
 import {awardExperience,deathPenalty} from './experience.js?v=48.1';
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
@@ -109,7 +109,8 @@ export class CombatWorld{
   p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;this.status={};
   const lost=deathPenalty(this);this.notice('หมดแรง · กลับลานใน 3 วินาที'+(lost?' · Base EXP -'+lost:''));return true;
  }
- power(n,mob=null){return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false):1));}
+ // 0.58 combo: a skill on a rooted monster hits 30% harder.
+ power(n,mob=null){const combo=mob?.root>0&&mob.hp>0;if(combo)this.emit('combo',{x:mob.x,z:mob.z});return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false):1)*(combo?1.3:1));}
  // 0.44 element + size (affinity.js). Basic attacks: weapon element, physical. Skills: class element; magic classes ignore size.
  affinity(mob,basic){const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
   const element=basic?(d?.weaponElement??'neutral'):(CLASS_SKILL_ELEMENT[cls]??d?.weaponElement??'neutral');
@@ -180,6 +181,8 @@ export class CombatWorld{
   for(const m of this.mobs){
    const type=MONSTER_TYPES[m.type],outcome=advanceMonster(m,p,type,dt,this.nav,{moveBody,lineClear});
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
+   if(m.justEnraged){m.justEnraged=false;this.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
+   if(outcome==='burst'&&Math.hypot(p.x-m.x,p.z-m.z)<=MONSTER_BEHAVIOUR[type.id].aoe&&this.takeMonsterHit(type)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
    if(outcome==='hit'){
     if(this.takeMonsterHit(type)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
    }

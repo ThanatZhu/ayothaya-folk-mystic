@@ -1,5 +1,5 @@
 import {itemDef} from './items.js?v=04';
-import {monsterFrame} from './monster-catalog.js?v=38';
+import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
@@ -55,7 +55,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const text=document.createElement('span');text.textContent=MONSTER_TYPES[m.type].name;label.append(text);
   const bar=document.createElement('i'),fill=document.createElement('b');bar.append(fill);label.append(bar);$('world-labels').append(label);
   label.addEventListener('click',()=>world.select(m.id));
-  const warning=new THREE.Mesh(new THREE.RingGeometry(.15,MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:'#ed9b59',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));warning.rotation.x=-Math.PI/2;scene.add(warning);
+  const warning=new THREE.Mesh(new THREE.RingGeometry(.15,MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe??MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe?'#ff4a4a':'#ed9b59',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));warning.rotation.x=-Math.PI/2;scene.add(warning);
   return {sprite:s,shadow:sh,height:h,label,fill,frames,frame:-1,warning,deathStart:null};
  });
  hero.sprite.material.map=hero.sprite.material.map.clone();
@@ -68,7 +68,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const floats=[],projection=new THREE.Vector3();
  function toast(text){$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
- function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number'+(!positive&&e.color==='#ffd27a'?' crit':'');el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
+ function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number'+(!positive&&e.color==='#ffd27a'?' crit':'');el.textContent=typeof e.amount==='string'?e.amount:(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
  function effect(e){
   if(e.type==='experience'){
    toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');
@@ -87,6 +87,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});hero.sprite.material.color.set('#ff9b83');}
   else if(e.type==='notice')toast(e.text);
+  else if(e.type==='combo')popup({x:e.x,z:e.z,amount:'คอมโบ!',color:'#7ee8ff'},true);
   else if(e.type==='drop'){const best=Math.max(...e.items.map(i=>itemDef(i.id)?.rarity??0));if(best>=2&&Number.isFinite(e.x))pillar(e.x,e.z,best);}
   else if(e.type==='defeat')toast('ปราบ '+MONSTER_TYPES[world.mobs[e.id].type].name+' แล้ว');
  }
@@ -207,7 +208,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(m.hp<=0&&v.deathStart===null)v.deathStart=t;if(m.hp>0)v.deathStart=null;
    const deadAge=v.deathStart===null?0:t-v.deathStart,visible=m.hp>0||deadAge<1.25;
    v.sprite.visible=v.shadow.visible=visible;v.label.hidden=m.hp<=0;v.warning.visible=m.hp>0&&m.windup>0;
-   v.warning.position.set(m.x,.09,m.z);v.warning.material.opacity=.12+.25*(1-(m.windup??0)/(type.windup??.45));
+   v.warning.position.set(m.x,.09,m.z);v.warning.material.opacity=.12+.25*(1-(m.windup??0)/(MONSTER_BEHAVIOUR[type.id]?.windup??type.windup??.45));
    if(!visible)return;
    const f=monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
    const recoil=reduced?0:Math.sin(Math.PI*Math.min(1,m.hit/.34))*.18;

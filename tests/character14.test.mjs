@@ -29,13 +29,13 @@ test('cloud saves remain scoped to UID and reject an account switch',async()=>{
  await assert.rejects(alice.load('server-1'),/account-changed/);connection.auth.currentUser={uid:'alice'};assert.equal((await alice.load('server-1')).character.appearance.hair,'braid');
 });
 test('all fourteen advanced jobs unlock at level sixty, alter combat, and reject cross-class choices',()=>{
- assert.equal(progression(589).level,59);assert.equal(progression(590).level,60);assert.equal(progression(Infinity).level,1);
- for(const [id,jobs] of Object.entries(JOBS))for(const job of jobs){assert.throws(()=>validateJob(id,job.id,589),/job-locked/);assert.equal(validateJob(id,job.id,590).id,job.id);const base=new CombatWorld({classId:id}),advanced=new CombatWorld({classId:id,jobId:job.id});assert.ok(advanced.profession.damage>base.profession.damage);assert.equal(advanced.skills.length,10);}
+ assert.equal(progression(1321).level,59);assert.equal(progression(1322).level,60);assert.equal(progression(Infinity).level,1);
+ for(const [id,jobs] of Object.entries(JOBS))for(const job of jobs){assert.throws(()=>validateJob(id,job.id,1321),/job-locked/);assert.equal(validateJob(id,job.id,1322).id,job.id);const base=new CombatWorld({classId:id}),advanced=new CombatWorld({classId:id,jobId:job.id});assert.ok(advanced.profession.damage>base.profession.damage);assert.equal(advanced.skills.length,10);}
  assert.throws(()=>validateJob('boxer','guardian',100),/invalid-job/);
 });
 test('job and appearance persist through save; chosen class and Master remain fixed',async()=>{
- const store=createRealmStore({catalog,storage:storage()});let a=await store.create('server-1',hero);a.state.traveler.kills=240;a.state.traveler.baseXp=2400;a=await store.save('server-1',a,a.state);a=await store.changeClass('server-1',a,'boxer');await assert.rejects(store.customize('server-1',a,hero.appearance,'master-boxer'),/job-locked/);
- a.state.traveler.kills=590;a.state.traveler.baseXp=5900;a=await store.save('server-1',a,a.state);a=await store.customize('server-1',a,hero.appearance,'master-boxer');assert.equal((await store.load('server-1')).character.jobId,'master-boxer');
+ const store=createRealmStore({catalog,storage:storage()});let a=await store.create('server-1',hero);a.state.traveler.kills=240;a.state.traveler.baseXp=2856;a=await store.save('server-1',a,a.state);a=await store.changeClass('server-1',a,'boxer');await assert.rejects(store.customize('server-1',a,hero.appearance,'master-boxer'),/job-locked/);
+ a.state.traveler.kills=590;a.state.traveler.baseXp=13216;a=await store.save('server-1',a,a.state);a=await store.customize('server-1',a,hero.appearance,'master-boxer');assert.equal((await store.load('server-1')).character.jobId,'master-boxer');
  await assert.rejects(store.changeClass('server-1',a,'hunter'),/class-final/);assert.deepEqual(a.character.appearance,hero.appearance);assert.equal(a.state.traveler.kills,590);
 });
 test('motion states stay finite and bounded and respect reduced motion',()=>{

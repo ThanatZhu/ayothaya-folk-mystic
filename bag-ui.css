@@ -97,3 +97,6 @@
 .card-in{display:block;color:#95efe2!important}
 .card-pick{display:flex;gap:4px;margin-top:3px}.card-pick select{flex:1;min-width:0;font:11px Mali,Tahoma,sans-serif;background:#0e2926;color:#f4dfac;border:1px solid #af884f88;border-radius:5px}
 .card-pick button{padding:2px 8px;border:1px solid #95efe2;border-radius:999px;background:#24382b;color:#95efe2;font:700 10px Mali,Tahoma,sans-serif;cursor:pointer}
+/* 0.57 rarity: grey · green · blue · purple · gold */
+.slot.r1{border-color:#7ddc6f88}.slot.r2{border-color:#5fb2ffaa;box-shadow:inset 0 0 8px #5fb2ff44}.slot.r3{border-color:#c27bffcc;box-shadow:inset 0 0 10px #c27bff55}.slot.r4{border-color:#ffc23d;box-shadow:inset 0 0 12px #ffc23d66,0 0 6px #ffc23d55}
+strong.r0{color:#e6e0d0}strong.r1{color:#9be88f}strong.r2{color:#7cc4ff}strong.r3{color:#d39bff}strong.r4{color:#ffd36a}

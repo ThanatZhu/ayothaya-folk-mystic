@@ -28,10 +28,10 @@ for(const mode of ['guest','cloud'])test(`${mode}: five total slots across serve
 test('every profession is locked at 24, opens at 25; Master locked at 59, opens at 60',async()=>{
  for(const c of CLASSES){const store=createRealmStore({catalog,storage:memory()});let r=await store.create('server-1',hero);
   for(const kills of [0,239]){r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills,baseXp:kills*10}});await assert.rejects(store.changeClass('server-1',r,c.id),/class-locked/);}
-  r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:240,baseXp:2400}});r=await store.changeClass('server-1',r,c.id);assert.equal(r.character.classId,c.id);
+  r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:240,baseXp:2856}});r=await store.changeClass('server-1',r,c.id);assert.equal(r.character.classId,c.id);
   const {JOBS}=await import('../advancement.js');const job=JOBS[c.id][0].id;
-  r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:589,baseXp:5890}});await assert.rejects(store.customize('server-1',r,{},job),/job-locked/);
-  r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:590,baseXp:5900}});r=await store.customize('server-1',r,{},job);assert.equal((await store.load('server-1',r.slotId)).character.jobId,job);
+  r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:589,baseXp:13215}});await assert.rejects(store.customize('server-1',r,{},job),/job-locked/);
+  r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:590,baseXp:13216}});r=await store.customize('server-1',r,{},job);assert.equal((await store.load('server-1',r.slotId)).character.jobId,job);
   await assert.rejects(store.customize('server-1',r,{},JOBS[c.id][1].id),/job-final/);
  }
 });

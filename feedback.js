@@ -1,6 +1,8 @@
 // 0.53 sound, music and hit feedback. Everything is synthesised with WebAudio (no audio files, nothing to license):
 // Thai pentatonic "ranat" plucks over a drone with ching cymbals in town, klong drums in the fields, a sparse
 // minor-pentatonic air at the mill and in the dungeon. Effects follow the same game events the HUD uses.
+import {ITEMS,itemDef,RARITY_NAME} from './items.js?v=04';
+import {earnedStatPoints} from './character-stats.js?v=02';
 const KEY='ayothaya-audio';
 const THEMES={
  town:{bpm:84,root:72,scale:[0,2,4,7,9],drum:false,ching:true,drone:[48,55],rest:.32},
@@ -55,6 +57,7 @@ export function createFeedback({game,map}){
   level:()=>{[72,74,76,79,81,84,88].forEach((m,i)=>tone(hz(m),{dur:.5,gain:.2,at:i*.075}));hiss({at:.4,dur:.9,gain:.08,freq:7000,q:.5});tone(hz(48),{type:'sine',dur:1.2,gain:.25,at:.45});},
   fanfare:()=>{[67,72,76,79,84].forEach((m,i)=>tone(hz(m),{type:'square',dur:.35,gain:.07,at:i*.11}));tone(hz(84),{dur:1,gain:.18,at:.6});},
   chime:()=>[79,84,88].forEach((m,i)=>tone(hz(m),{dur:.7,gain:.15,at:i*.12})),
+  rare:()=>{[84,88,91,96].forEach((m,i)=>tone(hz(m),{type:'sine',dur:.6,gain:.13,at:i*.07}));hiss({at:.05,dur:.6,gain:.06,freq:8000,q:.6});},
  };
  const play=name=>{if(!ctx||ctx.state!=='running'||!settings.sfx)return;try{SFX[name]();}catch{}};
 
@@ -90,10 +93,17 @@ export function createFeedback({game,map}){
   else if(e.type==='defeat')play('defeat');
   else if(e.type==='used')play('potion');
   else if(e.type==='heal')play('potion');
-  else if(e.type==='experience'&&(e.baseUp||e.jobUp)){play('level');banner(`<strong>${e.baseUp?'LEVEL UP!':'JOB LEVEL UP!'}</strong><span>${e.baseUp?'Base Lv. '+e.baseLevel:'Job Lv. '+e.jobLevel}</span>`,'levelup');levelGlow();}
+  else if(e.type==='experience'&&(e.baseUp||e.jobUp)){play('level');banner(`<strong>${e.baseUp?'LEVEL UP!':'JOB LEVEL UP!'}</strong><span>${e.baseUp?'Base Lv. '+e.baseLevel:'Job Lv. '+e.jobLevel}</span>${e.baseUp?gains(e.baseLevel):''}`,'levelup');levelGlow();}
+  else if(e.type==='drop'){const best=e.items.map(i=>itemDef(i.id)).filter(Boolean).sort((a,b)=>b.rarity-a.rarity)[0];if(best?.rarity>=2){play('rare');world.notice(`✦ ของ${RARITY_NAME[best.rarity]}! ${best.name}`);}}
   else if(['mvp','dungeonClear'].includes(e.type))play('fanfare');
   else if(['daily','tamed','stallSold','refined'].includes(e.type))play('chime');
  });
+ // What a new Base level gives: stat points and gear that just became wearable for this class.
+ function gains(level){
+  const pts=earnedStatPoints(level)-earnedStatPoints(level-1),cls=world.profession?.id;
+  const unlocked=Object.values(ITEMS).filter(it=>it.kind==='gear'&&it.level===level&&(!it.classes||it.classes.includes(cls))).map(it=>it.name);
+  return `<em>+${pts} แต้มสถานะ · กด สถานะ (C) เพื่ออัปค่า</em>${unlocked.length?`<em>ใส่ได้แล้ว: ${unlocked.join(' · ')}</em>`:''}`;
+ }
  // A ring of light on the hero for level ups (DOM, follows nothing: it is short).
  function levelGlow(){const g=document.createElement('div');g.className='level-glow';document.body.append(g);setTimeout(()=>g.remove(),1400);}
 

@@ -7,7 +7,7 @@ import {MONSTER_TYPES} from '../combat-core.js';
 const world=JSON.parse(readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 
 test('atlas cells are unique and every drop, shop and monster reference is real', () => {
- for(const atlas of [undefined,'gear','refine','cards','social','emblems','emotes','items48']){const icons=Object.values(ITEMS).filter(i=>i.atlas===atlas).map(i=>i.icon);
+ for(const atlas of [undefined,'gear','refine','cards','social','emblems','emotes','items48']){const icons=Object.values(ITEMS).filter(i=>i.atlas===atlas&&!i.tint).map(i=>i.icon); // tinted tier 3/4 gear reuses a tier-2 cell on purpose
   assert.equal(new Set(icons).size,icons.length,'unique cells in '+(atlas??'items'));assert.ok(icons.every(i=>i>=0&&i<24));}
  for(const [monster,d] of Object.entries(DROPS)){
   assert.ok(MONSTER_TYPES.some(t=>t.id===monster),monster);

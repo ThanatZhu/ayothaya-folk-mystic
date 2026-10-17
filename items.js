@@ -69,6 +69,23 @@ export const ITEMS={
  'daggers-ivory':{atlas:'gear',icon:13,name:'มีดคู่ด้ามงา',kind:'gear',slot:'weapon',classes:['rogue'],atk:26,level:15,buy:1400,sell:350,text:'ATK +26 · จอมโจร · Lv.15'},
  'staff-candle':{atlas:'gear',icon:14,name:'ไม้เท้ายันต์เทียนชัย',kind:'gear',slot:'weapon',classes:['shaman'],matk:30,element:'fire',level:15,buy:1600,sell:400,text:'MATK +30 · หมอผี · Lv.15'},
  'beads-sandal':{atlas:'gear',icon:15,name:'ประคำไม้จันทน์หอม',kind:'gear',slot:'weapon',classes:['acolyte'],matk:27,element:'holy',level:15,buy:1500,sell:375,text:'MATK +27 · พระ / แม่ชี · Lv.15'},
+ // 0.57 tier 3 (Lv.25, forge or boss) and tier 4 (Lv.35, MVP / dungeon only); tinted tier-2 icons until painted art lands.
+ 'sword-ajna':{atlas:'gear',icon:9,tint:'gold',name:'ดาบอาญาสิทธิ์',kind:'gear',slot:'weapon',classes:['swordsman'],atk:48,level:25,buy:8000,sell:2000,text:'ATK +48 · นักดาบ · Lv.25'},
+ 'sword-nimit':{atlas:'gear',icon:9,tint:'violet',name:'ดาบเทพนิมิต',kind:'gear',slot:'weapon',classes:['swordsman'],atk:69,level:35,sell:7500,text:'ATK +69 · นักดาบ · Lv.35 · ของบอส'},
+ 'spear-panchang':{atlas:'gear',icon:10,tint:'gold',name:'ทวนทองพันชั่ง',kind:'gear',slot:'weapon',classes:['lancer'],atk:51,level:25,buy:8000,sell:2000,text:'ATK +51 · นักทวน · Lv.25'},
+ 'spear-nagaraj':{atlas:'gear',icon:10,tint:'violet',name:'ทวนนาคราช',kind:'gear',slot:'weapon',classes:['lancer'],atk:74,level:35,sell:7500,text:'ATK +74 · นักทวน · Lv.35 · ของบอส'},
+ 'bow-sinchai':{atlas:'gear',icon:11,tint:'gold',name:'ธนูศิลป์ชัย',kind:'gear',slot:'weapon',classes:['hunter'],atk:45,level:25,buy:8000,sell:2000,text:'ATK +45 · นายพราน · Lv.25'},
+ 'bow-rama':{atlas:'gear',icon:11,tint:'violet',name:'ธนูพระราม',kind:'gear',slot:'weapon',classes:['hunter'],atk:64,level:35,sell:7500,text:'ATK +64 · นายพราน · Lv.35 · ของบอส'},
+ 'gloves-leklai':{atlas:'gear',icon:12,tint:'gold',name:'นวมเหล็กไหล',kind:'gear',slot:'weapon',classes:['boxer'],atk:45,level:25,buy:8000,sell:2000,text:'ATK +45 · นักมวย · Lv.25'},
+ 'gloves-kotchasan':{atlas:'gear',icon:12,tint:'violet',name:'นวมพญาคชสาร',kind:'gear',slot:'weapon',classes:['boxer'],atk:64,level:35,sell:7500,text:'ATK +64 · นักมวย · Lv.35 · ของบอส'},
+ 'daggers-stingray':{atlas:'gear',icon:13,tint:'gold',name:'มีดคู่หางกระเบน',kind:'gear',slot:'weapon',classes:['rogue'],atk:42,level:25,buy:8000,sell:2000,text:'ATK +42 · จอมโจร · Lv.25'},
+ 'daggers-moon':{atlas:'gear',icon:13,tint:'violet',name:'มีดคู่เงาจันทร์',kind:'gear',slot:'weapon',classes:['rogue'],atk:60,level:35,sell:7500,text:'ATK +60 · จอมโจร · Lv.35 · ของบอส'},
+ 'staff-octa':{atlas:'gear',icon:14,tint:'gold',name:'ไม้เท้ายันต์แปดทิศ',kind:'gear',slot:'weapon',classes:['shaman'],matk:48,level:25,buy:8000,sell:2000,text:'MATK +48 · หมอผี · Lv.25'},
+ 'staff-naga':{atlas:'gear',icon:14,tint:'violet',name:'ไม้เท้าพญานาค',kind:'gear',slot:'weapon',classes:['shaman'],matk:69,level:35,sell:7500,text:'MATK +69 · หมอผี · Lv.35 · ของบอส'},
+ 'beads-mani':{atlas:'gear',icon:15,tint:'gold',name:'ประคำแก้วมณี',kind:'gear',slot:'weapon',classes:['acolyte'],matk:43,level:25,buy:8000,sell:2000,text:'MATK +43 · พระ / แม่ชี · Lv.25'},
+ 'beads-relic':{atlas:'gear',icon:15,tint:'violet',name:'ประคำพระธาตุ',kind:'gear',slot:'weapon',classes:['acolyte'],matk:62,level:35,sell:7500,text:'MATK +62 · พระ / แม่ชี · Lv.35 · ของบอส'},
+ 'vest-chain':{atlas:'gear',icon:17,tint:'gold',name:'เสื้อเกราะถักโซ่ทอง',kind:'gear',slot:'armor',def:16,level:20,buy:6000,sell:1500,text:'DEF +16 · Lv.20'},
+ 'vest-naga':{atlas:'gear',icon:18,tint:'violet',name:'เกราะเกล็ดนาค',kind:'gear',slot:'armor',def:24,bonus:{vit:3},level:35,sell:9000,text:'DEF +24 · VIT +3 · Lv.35 · ของ MVP'},
  'vest-cotton':{atlas:'gear',icon:16,name:'เสื้อผ้าฝ้ายทอหนา',kind:'gear',slot:'armor',def:3,buy:150,sell:37,text:'DEF +3'},
  'vest-buffalo':{atlas:'gear',icon:17,name:'เสื้อเกราะหนังควาย',kind:'gear',slot:'armor',def:7,level:12,buy:900,sell:225,text:'DEF +7 · Lv.12'},
  'vest-lacquer':{atlas:'gear',icon:18,name:'เสื้อเกราะลงรักปิดทอง',kind:'gear',slot:'armor',slots:0,def:12,level:25,sell:900,text:'DEF +12 · Lv.25 · ดรอปจากบอสโรงสี'},
@@ -103,19 +120,37 @@ for(let i=1;i<=24;i++)ITEMS[emblemId(i)]={atlas:'emblems',icon:i-1,name:'ตร�
 // 0.48 emote bubbles (assets/emotes48, docs/emotes48-art.md), same letter ids.
 export const emoteId=n=>'emote-'+String.fromCharCode(96+n);
 for(let i=1;i<=24;i++)ITEMS[emoteId(i)]={atlas:'emotes',icon:i-1,name:'อีโมต '+i,kind:'ui'};
+// 0.57 rarity (grey · green · blue · purple · gold). Explicit `rarity` wins; otherwise from the item's kind and level.
+export const RARITY=['common','uncommon','rare','epic','legendary'],RARITY_NAME=['ทั่วไป','ดี','หายาก','ล้ำค่า','ตำนาน'];
+const RARE_LOOT={'lek-lai':2,'spirit-rope':2,'palm-leaf':1,'spirit-thread':1,'king-ember':4,'event-token':1};
+function baseRarity(it,id){
+ if(Number.isInteger(it.rarity))return it.rarity;
+ if(it.kind==='card')return ['card-mill-keeper','card-lantern-lord','card-straw-king'].includes(id)?4:3;
+ if(it.kind==='egg')return 2;
+ if(it.kind==='gear'){if(['ember-amulet'].includes(id)||it.tint==='violet')return 4;if(it.tint==='gold'||['vest-lacquer','bia-gae','spirit-lamp'].includes(id))return 3;return (it.level??0)>=8?2:1;}
+ return RARE_LOOT[id]??0;
+}
+// Random affixes on dropped gear: '!' + stat letter + 1–3, e.g. 'vest-buffalo!s2' = STR +2. One rarity step up.
+export const AFFIXES={s:['str','แห่งพละ'],a:['agi','แห่งลมกรด'],v:['vit','แห่งหินผา'],i:['int','แห่งปัญญา'],d:['dex','แห่งเหยี่ยว'],l:['luk','แห่งโชคลาภ']};
+export function rollAffix(rand=Math.random){const keys=Object.keys(AFFIXES),k=keys[Math.floor(rand()*keys.length)],r=rand();return k+(r<.6?1:r<.9?2:3);}
 // A refined piece keeps its level as an id suffix: 'sword-iron+5'. itemDef() resolves any bag/gear id.
 // 0.45: a slotted card adds '~card-<monster>': 'sword-iron+5~card-rat'.
 export function itemDef(id){
  if(typeof id!=='string')return null;
- const m=/^([a-z-]+?)(?:\+(\d{1,2}))?(?:~(card-[a-z-]+))?$/.exec(id);
+ const m=/^([a-z-]+?)(?:\+(\d{1,2}))?(?:~(card-[a-z-]+))?(?:!([savidl])([1-3]))?$/.exec(id);
  const it=m&&ITEMS[m[1]];if(!it)return null;
  const n=m[2]?+m[2]:0,card=m[3]?ITEMS[m[3]]:null;
- if(!m[2]&&!m[3])return {...it,id,base:id,refine:0,card:null};
+ if(!m[2]&&!m[3]&&!m[4])return {...it,id,base:id,refine:0,card:null,affix:null,rarity:baseRarity(it,id)};
+ if(m[4]&&it.kind!=='gear')return null;
  if(it.kind!=='gear'||(m[2]&&(!['weapon','armor'].includes(it.slot)||n<1||n>10)))return null;
  if(m[3]&&(card?.kind!=='card'||card.slot!==it.slot||it.slots===0))return null;
- return {...it,id,base:m[1],refine:n,card:m[3]??null,name:it.name+(n?' +'+n:'')+(card?' ['+card.name+']':''),sell:Math.round(it.sell*(1+n*.25))+(card?.sell??0)};
+ const affix=m[4]?m[4]+m[5]:null,[stat,title]=m[4]?AFFIXES[m[4]]:[],plus=m[5]?+m[5]:0;
+ const bonus=affix?{...(it.bonus??{}),[stat]:(it.bonus?.[stat]??0)+plus}:it.bonus;
+ return {...it,id,base:m[1],refine:n,card:m[3]??null,affix,bonus,rarity:Math.min(4,baseRarity(it,m[1])+(affix?1:0)),
+  name:it.name+(affix?' '+title:'')+(n?' +'+n:'')+(card?' ['+card.name+']':''),text:(it.text??'')+(affix?' · '+stat.toUpperCase()+' +'+plus:''),
+  sell:Math.round(it.sell*(1+n*.25)*(1+plus*.2))+(card?.sell??0)};
 }
-export const composeId=(base,refine,card)=>base+(refine>0?'+'+refine:'')+(card?'~'+card:'');
+export const composeId=(base,refine,card,affix=null)=>base+(refine>0?'+'+refine:'')+(card?'~'+card:'')+(affix?'!'+affix:'');
 const BAGGABLE=id=>['loot','potion','gear','card','scroll','lure','petfood','egg'].includes(itemDef(id)?.kind);
 
 // Per monster id (MONSTER_TYPES[].id): coins [min,max] and independent item rolls [id, chance, count=1].
@@ -128,9 +163,9 @@ export const DROPS={
  lantern:{coins:[14,24],items:[['lantern-paper',.5],['palm-leaf',.05],['spirit-thread',.05],['cloth-yant',.01],['lek-lai',.01],['card-lantern',0.004]]},
  'rat-chief':{coins:[80,140],items:[['rat-crown',.3],['spirit-thread',.5],['hp-large',.5,2],['vest-buffalo',.08],['ring-ruby',.1],['iron-ore',.5],['card-rat-chief',0.04]]},
  'monkey-chief':{coins:[120,200],items:[['monkey-bangle',.3],['spirit-thread',.6],['mp-large',.5,2],['anklet-silver',.12],['cloth-yant',.12],['bia-gae',.04],['laterite',.5],['card-monkey-chief',0.04]]},
- 'lantern-lord':{coins:[500,800],items:[['spirit-lamp',.2],['hp-large',1,3],['mp-large',1,2],['lek-lai',.4],['green-herb',1,3],['card-lantern-lord',0.1]]},
- 'straw-king':{coins:[1500,2500],items:[['ember-amulet',.25],['lek-lai',1,2],['hp-large',1,5],['iron-ore',1,4],['laterite',1,4],['card-straw-king',0.1]]},
- 'mill-keeper':{coins:[400,600],items:[['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3],['card-mill-keeper',0.15]]},
+ 'lantern-lord':{coins:[500,800],items:[['spirit-lamp',.2],['hp-large',1,3],['mp-large',1,2],['lek-lai',.4],['green-herb',1,3],['card-lantern-lord',0.1],['sword-ajna',.06],['spear-panchang',.06],['bow-sinchai',.06],['gloves-leklai',.06],['daggers-stingray',.06],['staff-octa',.06],['beads-mani',.06],['sword-nimit',.015],['spear-nagaraj',.015],['bow-rama',.015],['gloves-kotchasan',.015],['daggers-moon',.015],['staff-naga',.015],['beads-relic',.015]]},
+ 'straw-king':{coins:[1500,2500],items:[['ember-amulet',.25],['lek-lai',1,2],['hp-large',1,5],['iron-ore',1,4],['laterite',1,4],['card-straw-king',0.1],['vest-naga',.2],['sword-nimit',.06],['spear-nagaraj',.06],['bow-rama',.06],['gloves-kotchasan',.06],['daggers-moon',.06],['staff-naga',.06],['beads-relic',.06]]},
+ 'mill-keeper':{coins:[400,600],items:[['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3],['card-mill-keeper',0.15],['sword-ajna',.03],['spear-panchang',.03],['bow-sinchai',.03],['gloves-leklai',.03],['daggers-stingray',.03],['staff-octa',.03],['beads-mani',.03]]},
 };
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
@@ -139,7 +174,7 @@ export const SHOPS={
  // 0.50 festival exchange: paid in event tokens instead of cowries.
  'เจ้าจุก':{mapId:'ayutthaya',title:'ซุ้มงานวัดเจ้าจุก',currency:'event-token',stock:['krathong','green-herb','hp-large','pet-lure','lek-lai']},
  'ป้าละไม':{mapId:'rice-fields',title:'ยุ้งป้าละไม',stock:['hp-small','mp-small','sticky-rice']},
- 'ครูแสนดาบ':{mapId:'ayutthaya',title:'โรงตีอาวุธครูแสนดาบ',refine:true,stock:['iron-ore','laterite','wrap-novice','sword-iron','spear-bamboo','bow-bamboo','gloves-hemp','daggers-twin','staff-wan','beads-wood','knuckle-brass','sword-silver','spear-steel','bow-horn','gloves-leather','daggers-ivory','staff-candle','beads-sandal','vest-cotton','vest-buffalo','takrut-silver','ring-ruby','anklet-silver','cloth-yant']},
+ 'ครูแสนดาบ':{mapId:'ayutthaya',title:'โรงตีอาวุธครูแสนดาบ',refine:true,stock:['iron-ore','laterite','wrap-novice','sword-iron','spear-bamboo','bow-bamboo','gloves-hemp','daggers-twin','staff-wan','beads-wood','knuckle-brass','sword-silver','spear-steel','bow-horn','gloves-leather','daggers-ivory','staff-candle','beads-sandal','vest-cotton','vest-buffalo','takrut-silver','ring-ruby','anklet-silver','cloth-yant','sword-ajna','spear-panchang','bow-sinchai','gloves-leklai','daggers-stingray','staff-octa','beads-mani','vest-chain']},
 };
 
 const int=(v,min,max)=>Number.isSafeInteger(v)?Math.min(Math.max(v,min),max):min;
@@ -168,7 +203,7 @@ export function addLoot(bag,{coins=0,items=[]}={}){
 export function rollLoot(monsterId,rand=Math.random,event=null){
  const d=DROPS[monsterId];if(!d)return {coins:0,items:[]};
  const [lo,hi]=d.coins,coins=lo+Math.floor(rand()*(hi-lo+1)),items=[];
- for(const [id,chance,n=1] of d.items)if(rand()<chance)items.push({id,count:n});
+ for(const [id,chance,n=1] of d.items)if(rand()<chance)items.push({id:ITEMS[id]?.kind==='gear'&&rand()<.35?id+'!'+rollAffix(rand):id,count:n}); // 0.57: 35% of dropped gear gets a random affix
  if(event&&rand()<event.drop)items.push({id:event.token,count:1});
  return {coins,items};
 }

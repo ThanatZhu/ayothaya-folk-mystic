@@ -100,7 +100,7 @@ export function insertCard(bag,gear,slot,cardId){
  if(card.slot!==slot)throw new Error('card-slot');if(worn.slots===0)throw new Error('no-card-slot');if(worn.card)throw new Error('slot-full');
  if(!b.items[cardId])throw new Error('no-item');
  b.items[cardId]--;if(!b.items[cardId])delete b.items[cardId];
- g[slot]=composeId(worn.base,worn.refine,cardId);return {bag:b,gear:g};
+ g[slot]=composeId(worn.base,worn.refine,cardId,worn.affix);return {bag:b,gear:g};
 }
 // Monster hit after defence: hyperbolic so defence never makes you immune.
 export const incomingDamage=(raw,def)=>Math.max(1,Math.round(raw*100/(100+def*4)));

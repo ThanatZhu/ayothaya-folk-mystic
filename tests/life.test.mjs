@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CombatWorld,MONSTER_TYPES} from '../combat-core.js';
-import {deathPenalty,baseProgress} from '../experience.js';
+import {deathPenalty,baseProgress,levelStart} from '../experience.js';
 import {useItem} from '../items.js';
 import {claimDaily,thaiDay,DAILY} from '../daily.js';
 import {RealmServer} from '../server/realm.js';
@@ -32,10 +32,10 @@ test('a monster blow wakes the sleeper; ยาเขียว cures and is spent
 });
 
 test('death penalty: 5 base EXP from Lv.5 outside town, never a level, none for beginners or in town', () => {
- const w=field();w.baseXp=402;assert.equal(deathPenalty(w),2);assert.equal(baseProgress(w).level,5,'stays at the level start');
- w.baseXp=470;assert.equal(deathPenalty(w),5);assert.equal(w.baseXp,465);
- w.baseXp=350;assert.equal(deathPenalty(w),0,'Lv.4');
- const town=new CombatWorld({classId:'swordsman',safe:true,nav});town.baseXp=470;assert.equal(deathPenalty(town),0);
+ const L5=levelStart(5),w=field();w.baseXp=L5+2;assert.equal(deathPenalty(w),2);assert.equal(baseProgress(w).level,5,'stays at the level start');
+ w.baseXp=L5+60;assert.equal(deathPenalty(w),5);assert.equal(w.baseXp,L5+55);
+ w.baseXp=L5-10;assert.equal(deathPenalty(w),0,'Lv.4');
+ const town=new CombatWorld({classId:'swordsman',safe:true,nav});town.baseXp=L5+60;assert.equal(deathPenalty(town),0);
 });
 
 test('daily login: once per Thai day, 7-day cycle, a missed day restarts', () => {

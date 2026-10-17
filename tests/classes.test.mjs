@@ -35,7 +35,7 @@ test('short-range auto attackers close the gap and defeat a target',()=>{
 test('profession change preserves progress and identity and rejects stale saves',async()=>{
  const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,v)};
  const store=createRealmStore({catalog,storage});let record=await store.create('server-2',{name:'แก้ว',gender:'female',classId:'shaman'});
- record.state.traveler.kills=240;record.state.traveler.baseXp=2400;record.state.traveler.cooldowns[0]=1;record=await store.save('server-2',record,record.state);
+ record.state.traveler.kills=240;record.state.traveler.baseXp=2856;record.state.traveler.cooldowns[0]=1;record=await store.save('server-2',record,record.state);
  const changed=await store.changeClass('server-2',record,'boxer');assert.equal(changed.character.classId,'boxer');assert.equal(changed.character.name,'แก้ว');assert.equal(changed.character.gender,'female');assert.deepEqual(changed.state,record.state);
  assert.equal((await store.load('server-2')).character.classId,'boxer');await assert.rejects(store.changeClass('server-2',record,'hunter'),/save-conflict/);await assert.rejects(store.changeClass('server-2',changed,'invalid'),/อาชีพ/);
 });

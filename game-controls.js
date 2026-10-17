@@ -1,3 +1,4 @@
+import {itemDef} from './items.js?v=04';
 import {monsterFrame} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
@@ -27,7 +28,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // 0.29 feedback: one permanent light (constant light count, so no shader recompiles) pulses on each strike,
  // the camera shakes briefly, and dust puffs at every footfall.
- const castLight=new THREE.PointLight('#ffd9a0',0,9,1.6);scene.add(castLight);const footDust=createFootDust(scene);
+ const castLight=new THREE.PointLight('#ffd9a0',0,9,1.6);scene.add(castLight);
+ // 0.57 rare drops: a light pillar where the item fell (rarity blue and up), fading over 2.6 s.
+ const RARITY_COLOR=['#c9c9c9','#7ddc6f','#5fb2ff','#c27bff','#ffc23d'],pillars=[];
+ function pillar(x,z,rarity){const m=new THREE.Mesh(new THREE.CylinderGeometry(.18,.42,6,12,1,true),new THREE.MeshBasicMaterial({color:RARITY_COLOR[rarity],transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));m.position.set(x,3,z);scene.add(m);pillars.push({m,age:0});}const footDust=createFootDust(scene);
  let strikes=[],shakeAmount=0,lastStep=0;
  let heroView='side',heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
@@ -83,6 +87,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});hero.sprite.material.color.set('#ff9b83');}
   else if(e.type==='notice')toast(e.text);
+  else if(e.type==='drop'){const best=Math.max(...e.items.map(i=>itemDef(i.id)?.rarity??0));if(best>=2&&Number.isFinite(e.x))pillar(e.x,e.z,best);}
   else if(e.type==='defeat')toast('ปราบ '+MONSTER_TYPES[world.mobs[e.id].type].name+' แล้ว');
  }
  const skillButtons=SKILLS.map((s,i)=>{
@@ -215,6 +220,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   });
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}
   skillEffects.update(dt,camera);
+  for(let i=pillars.length-1;i>=0;i--){const p=pillars[i];p.age+=dt;p.m.material.opacity=.7*Math.max(0,1-p.age/2.6);p.m.scale.x=p.m.scale.z=1+Math.sin(p.age*6)*.08;if(p.age>2.6){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();pillars.splice(i,1);}}
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>1){f.el.remove();floats.splice(i,1);}else{project(f.el,f.x,1.6+f.age*.8,f.z);f.el.style.opacity=String(1-f.age*.8);}}
   if(performance.now()>noticeUntil)$('notice').classList.remove('visible');
   if(t-lastHUD>.08){lastHUD=t;

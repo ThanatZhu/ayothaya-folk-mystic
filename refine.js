@@ -9,7 +9,7 @@ export const REFINE_ORE={weapon:'iron-ore',armor:'laterite'};
 export const refineCost=next=>next*100; // coins
 export const LEK_LAI_BONUS=.2;
 
-export const withRefine=(base,level,card=null)=>composeId(base,level,card);
+export const withRefine=(base,level,card=null,affix=null)=>composeId(base,level,card,affix);
 
 // slot: 'weapon' | 'armor' (accessories cannot be refined). lekLai: spend one เหล็กไหล for +20% success.
 export function refineGear(bag,gear,slot,{lekLai=false,rand=Math.random}={}){
@@ -23,6 +23,6 @@ export function refineGear(bag,gear,slot,{lekLai=false,rand=Math.random}={}){
  b.coins-=cost;b.items[ore]--;if(!b.items[ore])delete b.items[ore];
  if(lekLai){b.items['lek-lai']--;if(!b.items['lek-lai'])delete b.items['lek-lai'];}
  const chance=Math.min(1,REFINE_RATE[next-1]+(lekLai?LEK_LAI_BONUS:0));
- if(rand()<chance){g[slot]=withRefine(def.base,next,def.card);return {bag:b,gear:g,result:'success',level:next,chance};}
+ if(rand()<chance){g[slot]=withRefine(def.base,next,def.card,def.affix);return {bag:b,gear:g,result:'success',level:next,chance};}
  g[slot]=null;return {bag:b,gear:g,result:'broken',level:def.refine,chance};
 }

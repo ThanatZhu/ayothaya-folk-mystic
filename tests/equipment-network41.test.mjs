@@ -13,7 +13,7 @@ test('socket equip validates class, saves before acknowledgement, broadcasts and
  const open=async token=>{const ws=new WebSocket(`ws://127.0.0.1:${port}/realtime`,{origin}),messages=[];clients.push(ws);ws.on('message',v=>messages.push(JSON.parse(v)));await new Promise((resolve,reject)=>{ws.once('open',resolve);ws.once('error',reject);});ws.send(JSON.stringify({type:'join',token,serverId:'server-1',slotId:'slot-1'}));await wait(()=>messages.some(m=>m.type==='welcome'));return {ws,messages};};
  try{
   const one=await store.createLocal({name:'ลองอุปกรณ์หนึ่ง'}),two=await store.createLocal({name:'ลองอุปกรณ์สอง'}),a=await open(one.token),b=await open(two.token);
-  a.ws.send(JSON.stringify({type:'equip',id:'foreign',item:'swordsman-weapon-crafted',classId:'swordsman',baseXp:2400}));await wait(()=>a.messages.some(m=>m.id==='foreign'));assert.equal(a.messages.find(m=>m.id==='foreign').code,'equipment-class');
+  a.ws.send(JSON.stringify({type:'equip',id:'foreign',item:'swordsman-weapon-crafted',classId:'swordsman',baseXp:2856}));await wait(()=>a.messages.some(m=>m.id==='foreign'));assert.equal(a.messages.find(m=>m.id==='foreign').code,'equipment-class');
   a.ws.send(JSON.stringify({type:'equip',id:'weapon',item:'novice-weapon-crafted',attack:9999}));await wait(()=>a.messages.some(m=>m.id==='weapon'));
   assert.equal(a.messages.find(m=>m.id==='weapon').type,'equipped');assert.equal(store.rows.get(one.uid).equipment.weapon,'novice-weapon-crafted');assert.equal(store.rows.get(one.uid).state.traveler.baseXp,0);
   const id=a.messages.find(m=>m.type==='welcome').id;await wait(()=>b.messages.some(m=>m.type==='snapshot'&&m.players.some(p=>p.id===id&&p.equipment.weapon==='novice-weapon-crafted')));

@@ -91,6 +91,8 @@ export function createBagUI({game,worldUI,map,account}){
 
  // Status window hooks: it reads and writes the offline bag through here and handles 'สวมใส่'.
  const api={bag,setLocal(b){local=normalizeBag(b);save();render(true);},onWear:null,render:()=>render(true),talkHooks:[]};
+ // World-map warp: shows the purse, and pays offline (online the realm server charges).
+ worldUI.coins=()=>bag().coins;worldUI.payWarp=cost=>{if(local.coins<cost)return false;local={...local,coins:local.coins-cost};save();return true;};
  let shown='';
  function render(force=false){
   const b=bag(),sig=JSON.stringify([b,selected,quick,tab,shopNpc?.name,dialog.open,shopDialog.open]);

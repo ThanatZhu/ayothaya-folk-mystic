@@ -35,7 +35,7 @@ export class MultiplayerClient extends EventTarget{
  train(mentor,action,jobId){return this.request('train',crypto.randomUUID(),{mentor,action,jobId});}
  equip(item){return this.request('equip',crypto.randomUUID(),{item});}
  flush(settings){if(this.saving)return this.saving;this.saving=this.request('save',crypto.randomUUID(),{settings}).finally(()=>{this.saving=null;});return this.saving;}
- async travel(destination){await this.request('travel',crypto.randomUUID(),{destination});this.stopped=true;}
+ async travel(destination,warp=false){await this.request('travel',crypto.randomUUID(),{destination,warp});this.stopped=true;}
  async leave(){if(this.status!=='online')throw new Error('not-connected');await this.request('leave','leave');this.stopped=true;this.socket?.close();}
  stop(){this.stopped=true;this.generation++;clearTimeout(this.timer);this.socket?.close();for(const task of this.pending.values())task.reject(new Error('stopped'));this.pending.clear();this.state('offline');}
 }

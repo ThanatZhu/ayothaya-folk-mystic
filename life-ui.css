@@ -36,3 +36,15 @@
 /* 0.50 festival chip under the MVP chip */
 #event-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #f4b86b88;border-radius:999px;background:#2a1e14d8;color:#ffd9a0;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
 #event-chip b{color:#fff0ce;font-weight:600}
+/* 0.59 world map: World button (bottom-right of the open map) and the warp list */
+#world-map{position:relative}
+#world-toggle{position:absolute;right:14px;bottom:14px;z-index:3;padding:8px 16px;border:2px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#2c4a3c,#18302a);color:#f4dfac;font:700 14px Mali,Tahoma,sans-serif;cursor:pointer;box-shadow:0 4px 12px #0007}
+#world-toggle.on{background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210}
+#world-warp{position:absolute;left:10px;right:10px;top:64px;bottom:62px;z-index:3;overflow:auto;padding:10px 12px;border:1px solid #c6a164;border-radius:10px;background:#16261fef;color:#fff0ce;font-family:Mali,Tahoma,sans-serif;box-shadow:0 8px 24px #000a}
+#world-warp h2{margin:0 0 4px;font-size:16px;color:#f4cf7a}#world-warp p{margin:0 0 8px;font-size:12px;color:#d9cba4}
+#world-warp ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+#world-warp li{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #af884f55;border-radius:8px;background:#0e2926aa}
+#world-warp li.here{border-color:#a8ffe0aa;background:#1c3d36}
+#world-warp li div{flex:1;min-width:0}#world-warp strong{display:block;font-size:14px}#world-warp small{font-size:11px;color:#c9b98f}
+#world-warp button{padding:6px 12px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 12px Mali,Tahoma,sans-serif;cursor:pointer;white-space:nowrap}
+#world-warp button:disabled{opacity:.45;cursor:default}

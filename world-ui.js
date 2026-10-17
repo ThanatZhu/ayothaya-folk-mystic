@@ -3,9 +3,9 @@ import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=40';
 import {createMentorUI} from './mentor-ui.js?v=40';
 import * as THREE from 'three';
-import {destinations,restoreTraveler,serializeTraveler} from './world-state.js?v=21';
+import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=21';
 
-export function createWorldUI({catalog,map,game,scene,camera,controls,account,citizens=[],onLocalTravel=()=>{}}){
+export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
  const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0;
@@ -18,18 +18,51 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
  if(map.safe){$('target-name').textContent='เขตปลอดภัย';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
- async function travel(id,recall=false){
-  if(traveling||!(reachable.has(id)||recall)||world.player.hp<=0)return;
+ async function travel(id,recall=false,warp=false){
+  if(traveling||!(reachable.has(id)||recall||warp)||world.player.hp<=0)return;
   if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return;}
   traveling=true;game.clearInput();
   getLoadingScreen().show(id,{travel:true});
   if(account){
-   if(!await account.travel(lookup(id))){traveling=false;getLoadingScreen().hide();world.notice('เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return;}
+   if(!await account.travel(lookup(id),{warp})){traveling=false;getLoadingScreen().hide();world.notice(warp?'วาร์ปไม่สำเร็จ · เบี้ยไม่พอหรือเชื่อมต่อขัดข้อง':'เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return;}
   }else try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
   getLoadingScreen().stage(1,'กำลังเดินทางไป '+lookup(id).name+'…');
   location.assign('?server='+account.serverId+'&map='+encodeURIComponent(id));
  }
- function openMap(){if(account?.paused||mentors.paused)return;endTalk();openHudPanel(dialog);drawCityMap();}
+ // 0.59 realistic map: render the real scene straight down once (sprites hidden, no fog) and draw labels over it.
+ let photo=null;
+ function mapPhoto(){
+  if(photo!==null||!renderer)return photo||null;
+  try{
+   const b=map.bounds,W=1024,H=Math.round(W*b.d/b.w),cx=b.x+b.w/2,cz=b.z+b.d/2;
+   const cam=new THREE.OrthographicCamera(-b.w/2,b.w/2,b.d/2,-b.d/2,1,600);cam.position.set(cx,300,cz);cam.up.set(0,0,-1);cam.lookAt(cx,0,cz);cam.updateMatrixWorld();
+   const rt=new THREE.WebGLRenderTarget(W,H,{samples:4});rt.texture.colorSpace=THREE.SRGBColorSpace;
+   const hidden=[];scene.traverse(o=>{if(o.visible&&(o.isSprite||o.userData?.rigType||o.userData?.monsterId!==undefined)){o.visible=false;hidden.push(o);}});
+   const fog=scene.fog;scene.fog=null;const before=renderer.getRenderTarget();
+   renderer.setRenderTarget(rt);renderer.render(scene,cam);const px=new Uint8Array(W*H*4);renderer.readRenderTargetPixels(rt,0,0,W,H,px);renderer.setRenderTarget(before);
+   scene.fog=fog;hidden.forEach(o=>o.visible=true);rt.dispose();
+   const c=document.createElement('canvas');c.width=W;c.height=H;const img=c.getContext('2d').createImageData(W,H);
+   for(let y=0;y<H;y++)img.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);c.getContext('2d').putImageData(img,0,0);
+   photo=c;
+  }catch(e){console.warn('map photo',e);photo=false;}
+  return photo||null;
+ }
+ // World button: every map with its warp fare; the party dungeon is entered on foot from the mill.
+ const worldPanel=document.createElement('section');worldPanel.id='world-warp';worldPanel.hidden=true;dialog.append(worldPanel);
+ const worldButton=document.createElement('button');worldButton.type='button';worldButton.id='world-toggle';worldButton.textContent='🌐 World';dialog.append(worldButton);
+ worldButton.onclick=()=>{worldPanel.hidden=!worldPanel.hidden;worldButton.classList.toggle('on',!worldPanel.hidden);if(!worldPanel.hidden)drawWorld();};
+ function drawWorld(){
+  const coins=api.coins?.()??0;
+  worldPanel.innerHTML='<h2>แผนที่โลก · วาร์ป</h2><p>วาร์ปไปเมืองหลวง 30 เบี้ย · ที่อื่น 50 เบี้ยต่อช่วงทาง · มีเบี้ย '+coins.toLocaleString('th-TH')+'</p><ol>'+catalog.maps.map(m=>{
+   const cost=warpCost(catalog,map.id,m.id),here=m.id===map.id,sub=(m.subtitle??'').split(' · ')[0];
+   return `<li class="${here?'here':''}"><div><strong>${m.name}</strong><small>${here?'คุณอยู่ที่นี่':m.instance?'เข้าได้จากโรงสีใต้เงาจันทร์เท่านั้น':sub}</small></div>${here||cost===null?'':`<button type="button" data-warp="${m.id}" ${coins<cost?'disabled':''}>วาร์ป · ${cost} เบี้ย</button>`}</li>`;}).join('')+'</ol>';
+  worldPanel.querySelectorAll('[data-warp]').forEach(b=>b.onclick=()=>{
+   const id=b.dataset.warp,cost=warpCost(catalog,map.id,id);
+   if(!game.online&&!api.payWarp?.(cost))return world.notice('เบี้ยไม่พอ');
+   dialog.close();travel(id,false,true);
+  });
+ }
+ function openMap(){if(account?.paused||mentors.paused)return;endTalk();openHudPanel(dialog);worldPanel.hidden=true;worldButton.classList.remove('on');drawCityMap();}
  $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{game.clearInput();$('mini-open').focus();});
  const views=map.portals.map(p=>{
@@ -59,11 +92,11 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
   if(e.code==='KeyR'&&!dialog.open&&!conversation&&!mentors.paused){e.preventDefault();$('interact').click();}
  });
  const mini=$('mini-map');
- const drawCityMap=()=>drawMap($('city-map'),map,world.player,{detailed:true});
+ const drawCityMap=()=>drawMap($('city-map'),map,world.player,{detailed:true,photo:mapPhoto()});
  let mapZoom=1;const viewport=$('city-map-viewport');
  function zoomMap(step){const old=mapZoom;mapZoom=Math.max(1,Math.min(3,mapZoom+step));const x=(viewport.scrollLeft+viewport.clientWidth/2)*mapZoom/old-viewport.clientWidth/2,y=(viewport.scrollTop+viewport.clientHeight/2)*mapZoom/old-viewport.clientHeight/2;viewport.style.setProperty('--map-zoom',mapZoom);viewport.scrollTo(x,y);$('map-minus').disabled=mapZoom===1;$('map-plus').disabled=mapZoom===3;}
  $('map-plus').onclick=()=>zoomMap(.5);$('map-minus').onclick=()=>zoomMap(-.5);
- function minimap(){drawMap(mini,map,world.player);}
+ function minimap(){drawMap(mini,map,world.player,{photo:photo||null});}
  function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function npcPosition(label,n){const e=camera.matrixWorld.elements,h=(n.visualHeight??1.65)+.14;point.set(n.x+e[4]*h,.07+e[5]*h,n.z+e[6]*h).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function update(t){

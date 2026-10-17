@@ -68,6 +68,6 @@ export async function prepareCloud(catalog){
    }finally{busy=false;}
   },
   bind(value){bound=value;inert(blocked&&!panel.hidden);},
-  async travel(destination){traveling=true;if(online){try{await online.travel(destination.id);if(!store.cloud){const state=bound.capture();state.mapId=destination.id;state.position={...destination.spawn};record=await store.save(serverId,record,state);lastJSON=JSON.stringify(state);}return true;}catch{traveling=false;return false;}}if(onlineStarting){traveling=false;return false;}const state=bound.capture();state.mapId=destination.id;state.position={...destination.spawn};try{await save(state);return true;}catch{traveling=false;return false;}}
+  async travel(destination,{warp=false}={}){traveling=true;if(online){try{await online.travel(destination.id,warp);if(!store.cloud){const state=bound.capture();state.mapId=destination.id;state.position={...destination.spawn};record=await store.save(serverId,record,state);lastJSON=JSON.stringify(state);}return true;}catch{traveling=false;return false;}}if(onlineStarting){traveling=false;return false;}const state=bound.capture();state.mapId=destination.id;state.position={...destination.spawn};try{await save(state);return true;}catch{traveling=false;return false;}}
  };
 }

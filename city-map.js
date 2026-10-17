@@ -1,9 +1,11 @@
 // Draw the actual city footprint in world coordinates; never a menu of destinations.
-export function drawMap(canvas,map,player,{detailed=false}={}){
+// 0.59: `photo` = a straight-down render of the real scene over map.bounds; it replaces the vector ground layers.
+export function drawMap(canvas,map,player,{detailed=false,photo=null}={}){
  const c=canvas.getContext('2d'),W=canvas.width,H=canvas.height,b=map.bounds,pad=detailed?48:7;
  const sx=(W-pad*2)/b.w,sz=(H-pad*2)/b.d,X=x=>pad+(x-b.x)*sx,Y=z=>pad+(z-b.z)*sz;
  const rect=(r,color)=>{c.fillStyle=color;c.fillRect(X(r.x),Y(r.z),r.w*sx,r.d*sz);};
  c.fillStyle='#9cae79';c.fillRect(0,0,W,H);
+ if(photo){c.drawImage(photo,X(b.x),Y(b.z),b.w*sx,b.d*sz);if(detailed){c.fillStyle='#00000014';c.fillRect(0,0,W,H);}}else{
  for(const r of map.nav.zones)rect(r,'#bcc293');
  c.lineCap='round';c.strokeStyle='#eddbaf';
  for(const r of map.roads??[]){c.lineWidth=r.width*sx;c.beginPath();c.moveTo(X(r.a[0]),Y(r.a[1]));c.lineTo(X(r.b[0]),Y(r.b[1]));c.stroke();}
@@ -12,6 +14,7 @@ export function drawMap(canvas,map,player,{detailed=false}={}){
  for(const r of map.bridges??[]){rect(r,'#aa8054');if(detailed){c.strokeStyle='#e6c698';c.lineWidth=2;for(let x=X(r.x)+5;x<X(r.x+r.w);x+=9){c.beginPath();c.moveTo(x,Y(r.z));c.lineTo(x,Y(r.z+11));c.stroke();}}}
  for(const r of map.nav.obstacles){if((map.waterAreas??[]).some(a=>r.x>=a.x&&r.z>=a.z&&r.x+r.w<=a.x+a.w&&r.z+r.d<=a.z+a.d))continue;if(detailed)rect({...r,x:r.x+.45,z:r.z+.5},'#6b785a80');rect(r,'#906044');if(detailed){c.strokeStyle='#e0ac70';c.lineWidth=3;c.strokeRect(X(r.x)+2,Y(r.z)+2,r.w*sx-4,r.d*sz-4);c.beginPath();c.moveTo(X(r.x+r.w*.5),Y(r.z));c.lineTo(X(r.x+r.w*.5),Y(r.z+r.d));c.stroke();}}
  for(const p of map.plants??[]){if(!['tree','canopy19'].includes(p[0]))continue;const x=X(p[1]),y=Y(p[2]),r=detailed?12:2.4;c.fillStyle='#456c4b';c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();if(detailed){c.fillStyle='#739058';c.beginPath();c.arc(x-3,y-4,r*.7,0,Math.PI*2);c.fill();}}
+ }
  if(detailed){
   c.textAlign='center';c.textBaseline='middle';c.font='bold 28px Mali, Tahoma, sans-serif';
   for(const d of map.districts??[]){const x=X(d.x),y=Y(d.z)-27,text=d.name,w=c.measureText(text).width+24;c.fillStyle='#f5e8c8ed';c.strokeStyle='#92724e';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y-22,w,44,9);c.fill();c.stroke();c.fillStyle='#493822';c.fillText(text,x,y);}

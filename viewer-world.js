@@ -32,6 +32,7 @@ import {createMarketUI} from './market-ui.js?v=01';
 import {createSocialUI} from './social-ui.js?v=01';
 import {createLifeUI} from './life-ui.js?v=01';
 import {createPetUI} from './pet-ui.js?v=01';
+import {createControlsUI} from './controls-ui.js?v=01';
 import {resolveMap} from './world-state.js?v=21';
 import {createLandscapeGuard} from './mobile-layout.js?v=48.1';
 import {prepareCloud} from './cloud-save.js?v=41';
@@ -169,7 +170,7 @@ try {
  $('overview').onclick=toggleOverview;
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
- worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account});const statusUI=createStatusUI({game,account,bagUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const marketUI=createMarketUI({game,map,account,bagUI});const socialUI=createSocialUI({game,account});const lifeUI=createLifeUI({game,account,camera});const petUI=createPetUI({game,account,scene,bagUI});
+ worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account});const statusUI=createStatusUI({game,account,bagUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const marketUI=createMarketUI({game,map,account,bagUI});const socialUI=createSocialUI({game,account});const lifeUI=createLifeUI({game,account,camera});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});
  document.querySelector('.player-heading small').textContent=(jobFor(account.character.classId,account.character.jobId)?.name??className(account.character.classId,account.character.gender))+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
  motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};

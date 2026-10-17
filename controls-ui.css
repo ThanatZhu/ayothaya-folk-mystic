@@ -1,0 +1,13 @@
+/* 0.51 control layout editor (controls-ui.js) */
+#controls-editor{position:fixed;z-index:60;left:50%;top:max(8px,env(safe-area-inset-top));transform:translateX(-50%);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 12px;width:min(640px,calc(100vw - 24px));padding:8px 12px;border:1px solid #f4cf7a;border-radius:10px;background:#16261fee;color:#fff0ce;font:12px Mali,Tahoma,sans-serif;box-shadow:0 6px 24px #0008}
+#controls-editor[hidden]{display:none}
+#controls-editor strong{color:#f4cf7a;font-size:13px}#controls-editor span{color:#d9cba4;font-size:11px}
+#controls-editor label{display:flex;align-items:center;gap:6px}#controls-editor b{color:#f4cf7a;font-weight:600}
+#controls-editor input[type=range]{width:110px;accent-color:#f4cf7a}
+#controls-editor button{padding:5px 12px;border:1px solid #f4cf7a;border-radius:999px;background:#0e2926;color:#f4dfac;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
+#controls-editor button.primary{background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210}
+body.controls-editing #game-shell canvas{filter:brightness(.6)}
+body.controls-editing :is(#joystick,.combat-controls,#quick-slots){outline:2px dashed #f4cf7a99;outline-offset:4px;border-radius:12px;cursor:move;touch-action:none}
+body.controls-editing .ctl-selected{outline:3px solid #f4cf7a!important;box-shadow:0 0 18px #f4cf7a66}
+#open-controls{margin-top:6px}
+@media (orientation:landscape) and (max-height:520px){#controls-editor{gap:4px 8px;padding:6px 10px;font-size:11px}#controls-editor input[type=range]{width:90px}}

@@ -59,7 +59,9 @@
  body.field-hud .combat-controls.wheel{right:var(--hud-right);bottom:var(--hud-bottom)}
  body.field-hud .combat-controls.wheel #auto-attack{width:44px;height:44px;font-size:9px}
  body.field-hud .combat-controls.wheel .skill kbd,body.field-hud .combat-controls.wheel .skill .skill-level,body.field-hud #attack small{display:none}
- body.field-hud .experience-bars{left:var(--phone-left);right:var(--phone-right);bottom:max(3px,env(safe-area-inset-bottom));gap:5px}
+ /* 0.51: XP along the very bottom edge, Base Lv | Job Lv exactly half the screen each. */
+ body.field-hud .experience-bars{left:0;right:0;bottom:0;gap:2px;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);grid-template-columns:1fr 1fr}
+ body.field-hud .exp-track{border-radius:0;border-left:0;border-right:0;border-bottom:0}
  body.field-hud #online-dock{left:var(--phone-left);bottom:calc(var(--hud-bottom) + 8px);width:min(300px,calc(100vw - var(--phone-left) - var(--phone-right)));max-height:calc(var(--visible-height,100dvh) - 130px)}
  body.field-hud #online-dock.collapsed{min-width:90px;max-width:calc(100vw - var(--phone-left) - var(--phone-right));width:110px}
  body.field-hud #online-dock.collapsed .mp-dock-bar{min-height:28px}

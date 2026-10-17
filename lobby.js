@@ -9,6 +9,8 @@ import {createLandscapeGuard} from './mobile-layout.js?v=48.1';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=21';
 import {createRealmStore} from './realm-store.js?v=41';
+import {wakeServer} from './multiplayer-config.js?v=27';
+wakeServer();
 const $=id=>document.getElementById(id);
 createLandscapeGuard();
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',poseMode='cycle',previewTime=0;

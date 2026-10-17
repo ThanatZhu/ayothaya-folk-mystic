@@ -10,7 +10,7 @@ export class MultiplayerClient extends EventTarget{
    const socket=this.socket=new this.WebSocket(this.url);
    socket.addEventListener('open',()=>{if(generation!==this.generation){socket.close();return;}socket.send(JSON.stringify({type:'join',...identity}));});
    socket.addEventListener('message',e=>{if(generation!==this.generation)return;let m;try{m=JSON.parse(e.data);}catch{return;}
-    if(m.type==='welcome'){this.equipment=m.snapshot.self.equipment;this.training=m.snapshot.self.training??null;this.seq=0;this.id=m.id;this.retries=0;this.state('online');this.emit('welcome',m);this.emit('snapshot',m.snapshot);}
+    if(m.type==='welcome'){this.equipment=m.snapshot.self.equipment;this.training=m.snapshot.self.training??null;this.seq=0;this.id=m.id;this.retries=0;this.everOnline=true;this.state('online');this.emit('welcome',m);this.emit('snapshot',m.snapshot);}
     else if(m.type==='snapshot'){this.equipment=m.self.equipment;this.training=m.self.training??null;this.emit('snapshot',m);}
     else if(m.type==='equipped'){this.equipment=m.equipment;this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
     else if(m.type==='equipment-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
@@ -23,7 +23,7 @@ export class MultiplayerClient extends EventTarget{
     else{if(m.type==='error'&&['authentication-failed','character-not-found','character-server','save-failed','save-conflict'].includes(m.code)){this.stopped=true;this.state('error');}this.emit(m.type,m);}
    });
    socket.addEventListener('close',()=>{if(generation!==this.generation)return;for(const task of this.pending.values())task.reject(new Error('disconnected'));this.pending.clear();
-    if(this.stopped){if(this.status!=='error')this.state('offline');return;}if(this.retries>=8){this.stopped=true;this.state('error');this.emit('error',{code:'connection-timeout'});return;}this.state('reconnecting');const delay=Math.min(15000,700*2**Math.min(this.retries++,5));clearTimeout(this.timer);this.timer=setTimeout(()=>this.connect(),delay+Math.random()*300);
+    if(this.stopped){if(this.status!=='error')this.state('offline');return;}if(this.retries>=14){this.stopped=true;this.state('error');this.emit('error',{code:'connection-timeout'});return;}this.state('reconnecting');const delay=Math.min(15000,700*2**Math.min(this.retries++,5));clearTimeout(this.timer);this.timer=setTimeout(()=>this.connect(),delay+Math.random()*300);
    });socket.addEventListener('error',()=>{});
   }catch(error){this.stopped=true;this.state('error');this.emit('error',{code:error.message});}
  }

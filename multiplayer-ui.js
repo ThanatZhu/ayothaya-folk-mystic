@@ -4,7 +4,7 @@ import {emblemId,emoteId} from './items.js?v=04';
 import {createPetView} from './pet-ui.js?v=01';
 import * as THREE from 'three';
 import {MultiplayerClient} from './multiplayer-client.js?v=41';
-import {multiplayerURL} from './multiplayer-config.js?v=27';
+import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=18';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
@@ -14,7 +14,7 @@ import {skillPose,skillTrack} from './skill-choreography.js?v=37';
 import {createSkillEffects} from './skill-effects.js?v=37';
 const messages={'already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
 const chatErrors=new Set(['chat-rate','no-party','invalid-chat']);
-const statusText={connecting:'กำลังเข้าห้อง…',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
+const statusText={connecting:'กำลังเข้าห้อง… (ถ้าเซิร์ฟเวอร์ฟรีหลับอยู่ อาจรอราว 1 นาที)',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
 const editable=e=>e.target instanceof Element&&!!e.target.closest('input,textarea,select,button,a,[contenteditable=true]');
 function el(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 export function createMultiplayer({scene,camera,controls,game,account,frame}){
@@ -129,9 +129,9 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   row.append(actions,timer);invites.append(row);setTimeout(()=>row.remove(),remaining);
  }
  async function join(){
-  if(active)return;
+  if(active)return;wakeServer();
   try{await account.beginOnline();active=true;client=new MultiplayerClient({url,identity});game.setNetwork(client);account.setOnline(client);
-   client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':detail==='connecting'?'กำลังเข้าห้อง…':detail==='error'?'เชื่อมต่อไม่ได้':'ผู้เล่นออนไลน์');status(statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();if(detail==='error'&&!dialog.open){game.clearInput();openHudPanel(dialog);}});
+   client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;const waking=detail==='reconnecting'&&!client.everOnline;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':waking?'กำลังปลุกเซิร์ฟเวอร์…':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':detail==='connecting'?'กำลังเข้าห้อง…':detail==='error'?'เชื่อมต่อไม่ได้':'ผู้เล่นออนไลน์');status(waking?'เซิร์ฟเวอร์ฟรีหลับอยู่ · กำลังปลุก อาจใช้ถึง 1–2 นาที':statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();if(detail==='error'&&!dialog.open){game.clearInput();openHudPanel(dialog);}});
    client.addEventListener('welcome',({detail})=>{for(const m of detail.history)log(m);});
    client.addEventListener('snapshot',({detail})=>acceptSnapshot(detail));
    client.addEventListener('events',({detail})=>game.world.events.push(...detail.events));

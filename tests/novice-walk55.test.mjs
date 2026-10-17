@@ -18,7 +18,7 @@ for(const [dir,stand] of [['animation37',{male:234,female:240}],['equipment41',{
 });
 
 test('the walk phase is driven by distance (1.23 world units per cycle for novice) and the art bob is not doubled', () => {
- assert.equal(walkCycle('novice'),1.23);assert.equal(walkCycle('swordsman'),2.1);
+ assert.equal(walkCycle('novice'),1.23);assert.equal(walkCycle('acolyte'),.788);
  for(let i=0;i<8;i++)assert.equal(characterMotion({mode:'walk',classId:'novice',phase:i/8+.01}).artFrame,12+i);
  assert.equal(characterMotion({mode:'walk',classId:'novice',phase:.3}).y,0);
 });

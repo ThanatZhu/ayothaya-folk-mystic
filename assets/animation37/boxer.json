@@ -136,91 +136,91 @@
       },
       {
         "rect": [
-          82,
-          36,
-          217,
-          291
+          0,
+          0,
+          256,
+          308
         ],
-        "anchor": 122.0,
-        "scale": 0.735673,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.764574,
+        "source": "boxer-walk-male.png"
       },
       {
         "rect": [
-          381,
-          36,
-          212,
-          293
+          256,
+          0,
+          256,
+          308
         ],
-        "anchor": 116.0,
-        "scale": 0.730651,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.764574,
+        "source": "boxer-walk-male.png"
       },
       {
         "rect": [
-          663,
-          36,
-          211,
-          292
+          512,
+          0,
+          256,
+          308
         ],
-        "anchor": 116.0,
-        "scale": 0.733153,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.764574,
+        "source": "boxer-walk-male.png"
       },
       {
         "rect": [
-          957,
-          37,
-          208,
-          290
+          768,
+          0,
+          256,
+          308
         ],
-        "anchor": 113.0,
-        "scale": 0.738209,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.764574,
+        "source": "boxer-walk-male.png"
       },
       {
         "rect": [
-          83,
-          350,
-          216,
-          289
+          1024,
+          0,
+          256,
+          308
         ],
-        "anchor": 120.0,
-        "scale": 0.740764,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.764574,
+        "source": "boxer-walk-male.png"
       },
       {
         "rect": [
-          381,
-          349,
-          216,
-          290
+          1280,
+          0,
+          256,
+          308
         ],
-        "anchor": 116.0,
-        "scale": 0.738209,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.764574,
+        "source": "boxer-walk-male.png"
       },
       {
         "rect": [
-          662,
-          350,
-          212,
-          289
+          1536,
+          0,
+          256,
+          308
         ],
-        "anchor": 116.0,
-        "scale": 0.740764,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.764574,
+        "source": "boxer-walk-male.png"
       },
       {
         "rect": [
-          957,
-          349,
-          222,
-          291
+          1792,
+          0,
+          256,
+          308
         ],
-        "anchor": 114.0,
-        "scale": 0.735673,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.764574,
+        "source": "boxer-walk-male.png"
       }
     ],
     "female": [
@@ -358,91 +358,91 @@
       },
       {
         "rect": [
-          85,
-          669,
-          211,
-          284
+          0,
+          0,
+          256,
+          308
         ],
-        "anchor": 116.0,
-        "scale": 0.73559,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.746099,
+        "source": "boxer-walk-female.png"
       },
       {
         "rect": [
-          377,
-          669,
-          213,
-          285
+          256,
+          0,
+          256,
+          308
         ],
-        "anchor": 116.0,
-        "scale": 0.733009,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.746099,
+        "source": "boxer-walk-female.png"
       },
       {
         "rect": [
-          667,
-          670,
-          213,
-          287
+          512,
+          0,
+          256,
+          308
         ],
-        "anchor": 115.0,
-        "scale": 0.727901,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.746099,
+        "source": "boxer-walk-female.png"
       },
       {
         "rect": [
-          957,
-          669,
-          222,
-          285
+          768,
+          0,
+          256,
+          308
         ],
-        "anchor": 116.0,
-        "scale": 0.733009,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.746099,
+        "source": "boxer-walk-female.png"
       },
       {
         "rect": [
-          87,
-          967,
-          218,
-          271
+          1024,
+          0,
+          256,
+          308
         ],
-        "anchor": 116.0,
-        "scale": 0.770877,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.746099,
+        "source": "boxer-walk-female.png"
       },
       {
         "rect": [
-          383,
-          967,
-          213,
-          272
+          1280,
+          0,
+          256,
+          308
         ],
-        "anchor": 113.0,
-        "scale": 0.768043,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.746099,
+        "source": "boxer-walk-female.png"
       },
       {
         "rect": [
-          666,
-          967,
-          217,
-          274
+          1536,
+          0,
+          256,
+          308
         ],
-        "anchor": 114.0,
-        "scale": 0.762436,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.746099,
+        "source": "boxer-walk-female.png"
       },
       {
         "rect": [
-          959,
-          967,
-          236,
-          274
+          1792,
+          0,
+          256,
+          308
         ],
-        "anchor": 115.0,
-        "scale": 0.762436,
-        "source": "boxer-walk.png"
+        "anchor": 128.0,
+        "scale": 0.746099,
+        "source": "boxer-walk-female.png"
       }
     ]
   },

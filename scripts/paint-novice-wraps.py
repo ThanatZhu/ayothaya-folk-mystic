@@ -2,16 +2,16 @@
 # walk (assets/animation37/novice-walk-*.png) has bare forearms, so this paints the wraps onto them for equipment41:
 # skin-coloured pixels in the arm band (below the face/neck, above the shins) of connected arm blobs → dark red cloth
 # keeping the original shading, with thin gold rings like the idle art. Outlines and everything else stay untouched.
-# usage: python scripts/paint-novice-wraps.py <animation37 walk png> <equipment41 walk png>
+# usage: python scripts/paint-novice-wraps.py <animation37 walk png> <equipment41 walk png> [arm band top y, default 148]
 import sys
 from collections import deque
 import numpy as np
 from PIL import Image
-src, dst = sys.argv[1], sys.argv[2]
+src, dst = sys.argv[1], sys.argv[2]; TOP = int(sys.argv[3]) if len(sys.argv) > 3 else 148   # front view: the neck reaches ~168
 im = np.array(Image.open(src).convert('RGBA')).astype(float); r, g, b, a = (im[..., k] for k in range(4))
 H, W = a.shape; ys = np.arange(H)[:, None].repeat(W, 1)
 skin = (a > 200) & (r > 150) & (g > r * .52) & (g < r * .86) & (b < g * .78)
-band = skin & (ys >= 148) & (ys < 226)              # face/neck end ~140, shins start ~230 in the 320 px frame
+band = skin & (ys >= TOP) & (ys < 226)              # face/neck end ~140, shins start ~230 in the 320 px frame
 label = np.zeros((H, W), int); keep = np.zeros((H, W), bool); n = 0
 for y0, x0 in zip(*np.nonzero(band)):               # drop specks (shirt shadows): arms are big blobs
     if label[y0, x0]: continue
@@ -20,7 +20,7 @@ for y0, x0 in zip(*np.nonzero(band)):               # drop specks (shirt shadows
         y, x = q.popleft(); blob.append((y, x))
         for ny, nx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
             if 0 <= ny < H and 0 <= nx < W and band[ny, nx] and not label[ny, nx]: label[ny, nx] = n; q.append((ny, nx))
-    if len(blob) >= 60 and min(y for y, _ in blob) < 195:   # a blob that only starts below 195 is a lifted knee, not an arm
+    if len(blob) >= 60 and min(y for y, _ in blob) < max(195, TOP + 30):   # a blob that only starts below 195 is a lifted knee, not an arm
         for y, x in blob: keep[y, x] = True
 # fist highlights are paler peach than the arm: take them when they touch a wrapped arm (2 px)
 peach = (a > 200) & (r > 140) & (b < g * .9) & (g < r * .95) & (ys < 230)

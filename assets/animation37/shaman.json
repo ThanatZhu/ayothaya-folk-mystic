@@ -136,91 +136,91 @@
       },
       {
         "rect": [
-          32,
-          17,
-          227,
-          304
-        ],
-        "anchor": 123.0,
-        "scale": 0.710819,
-        "source": "shaman-walk.png"
-      },
-      {
-        "rect": [
-          347,
-          16,
-          222,
-          305
-        ],
-        "anchor": 122.0,
-        "scale": 0.708488,
-        "source": "shaman-walk.png"
-      },
-      {
-        "rect": [
-          656,
-          16,
-          228,
-          305
+          0,
+          0,
+          256,
+          308
         ],
         "anchor": 128.0,
-        "scale": 0.708488,
-        "source": "shaman-walk.png"
+        "scale": 0.771746,
+        "source": "shaman-walk-male.png"
       },
       {
         "rect": [
-          972,
-          17,
-          227,
-          304
+          256,
+          0,
+          256,
+          308
         ],
-        "anchor": 126.0,
-        "scale": 0.710819,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.771746,
+        "source": "shaman-walk-male.png"
       },
       {
         "rect": [
-          33,
-          330,
-          225,
-          300
+          512,
+          0,
+          256,
+          308
         ],
-        "anchor": 125.0,
-        "scale": 0.720296,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.771746,
+        "source": "shaman-walk-male.png"
       },
       {
         "rect": [
-          347,
-          330,
-          221,
-          302
+          768,
+          0,
+          256,
+          308
         ],
-        "anchor": 121.0,
-        "scale": 0.715526,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.771746,
+        "source": "shaman-walk-male.png"
       },
       {
         "rect": [
-          658,
-          330,
-          226,
-          303
+          1024,
+          0,
+          256,
+          308
         ],
-        "anchor": 127.0,
-        "scale": 0.713165,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.771746,
+        "source": "shaman-walk-male.png"
       },
       {
         "rect": [
-          977,
-          330,
-          221,
-          301
+          1280,
+          0,
+          256,
+          308
         ],
-        "anchor": 121.0,
-        "scale": 0.717903,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.771746,
+        "source": "shaman-walk-male.png"
+      },
+      {
+        "rect": [
+          1536,
+          0,
+          256,
+          308
+        ],
+        "anchor": 128.0,
+        "scale": 0.771746,
+        "source": "shaman-walk-male.png"
+      },
+      {
+        "rect": [
+          1792,
+          0,
+          256,
+          308
+        ],
+        "anchor": 128.0,
+        "scale": 0.771746,
+        "source": "shaman-walk-male.png"
       }
     ],
     "female": [
@@ -358,91 +358,91 @@
       },
       {
         "rect": [
-          33,
-          644,
-          224,
-          301
+          0,
+          0,
+          256,
+          308
         ],
-        "anchor": 123.0,
-        "scale": 0.718074,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.77193,
+        "source": "shaman-walk-female.png"
       },
       {
         "rect": [
-          347,
-          644,
-          224,
-          303
+          256,
+          0,
+          256,
+          308
         ],
-        "anchor": 121.0,
-        "scale": 0.713334,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.77193,
+        "source": "shaman-walk-female.png"
       },
       {
         "rect": [
-          658,
-          644,
-          226,
-          304
+          512,
+          0,
+          256,
+          308
         ],
-        "anchor": 124.0,
-        "scale": 0.710988,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.77193,
+        "source": "shaman-walk-female.png"
       },
       {
         "rect": [
-          974,
-          644,
-          226,
-          302
+          768,
+          0,
+          256,
+          308
         ],
-        "anchor": 123.0,
-        "scale": 0.715697,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.77193,
+        "source": "shaman-walk-female.png"
       },
       {
         "rect": [
-          32,
-          952,
-          224,
-          296
+          1024,
+          0,
+          256,
+          308
         ],
-        "anchor": 123.0,
-        "scale": 0.730204,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.77193,
+        "source": "shaman-walk-female.png"
       },
       {
         "rect": [
-          348,
-          955,
-          221,
-          291
+          1280,
+          0,
+          256,
+          308
         ],
-        "anchor": 122.0,
-        "scale": 0.74275,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.77193,
+        "source": "shaman-walk-female.png"
       },
       {
         "rect": [
-          658,
-          953,
-          225,
-          293
+          1536,
+          0,
+          256,
+          308
         ],
-        "anchor": 124.0,
-        "scale": 0.73768,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.77193,
+        "source": "shaman-walk-female.png"
       },
       {
         "rect": [
-          974,
-          952,
-          223,
-          294
+          1792,
+          0,
+          256,
+          308
         ],
-        "anchor": 123.0,
-        "scale": 0.735171,
-        "source": "shaman-walk.png"
+        "anchor": 128.0,
+        "scale": 0.77193,
+        "source": "shaman-walk-female.png"
       }
     ]
   },

@@ -32,5 +32,5 @@ test('known remote characters receive equipment changes and authoritative record
 });
 test('new weapons have twenty complete frames per gender without clipped source or destination',()=>{
  for(const id of new Set(EQUIPMENT.map(i=>i.classId))){const base=new URL('../assets/equipment41/',import.meta.url),meta=JSON.parse(readFileSync(new URL(id+'.json',base)));
- for(const gender of ['male','female']){assert.equal(meta.frames[gender].length,20);for(const f of meta.frames[gender]){const png=readFileSync(new URL(f.source,base)),W=png.readUInt32BE(16),H=png.readUInt32BE(20),[x,y,w,h]=f.rect;assert.ok(x>=0&&y>=0&&x+w<=W&&y+h<=H);const left=128-f.anchor*f.scale;assert.ok(left>=0&&left+w*f.scale<=256&&244-h*f.scale>=0,id+' '+gender);}}}
+ for(const gender of ['male','female']){assert.ok([20,36].includes(meta.frames[gender].length),'20 poses, or + front/back walk (0.56.2)');for(const f of meta.frames[gender]){const png=readFileSync(new URL(f.source,base)),W=png.readUInt32BE(16),H=png.readUInt32BE(20),[x,y,w,h]=f.rect;assert.ok(x>=0&&y>=0&&x+w<=W&&y+h<=H);const left=128-f.anchor*f.scale;assert.ok(left>=0&&left+w*f.scale<=256&&244-h*f.scale>=0,id+' '+gender);}}}
 });

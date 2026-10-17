@@ -20,7 +20,9 @@ export function walkView(face,azimuth,previous='side'){
 // cadence is capped: up to WALK_CADENCE cycles per second the planted foot keeps pace, above it the feet slide a little.
 export const WALK_CADENCE=2;
 export const gaitStep=(distance,dt,classId)=>Math.min(distance/walkCycle(classId),Math.max(0,dt)*WALK_CADENCE);
-export const walkCycle=classId=>classId==='novice'?1.23:2.1;
+// 0.56.2: the redrawn side walks (outputs/walk-handoff, scripts/import-walk056.py) step 20 px per frame (acolyte 16, robe).
+const WALK_CYCLE={novice:1.23,swordsman:.984,lancer:.984,hunter:.984,boxer:.984,rogue:.984,shaman:.984,acolyte:.788};
+export const walkCycle=classId=>WALK_CYCLE[classId]??2.1;
 export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side'}={}){
  const t=Math.max(0,Number.isFinite(time)?time:0),p={artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};

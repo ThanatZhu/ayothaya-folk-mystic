@@ -37,7 +37,8 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,ci
   const ring=new THREE.Mesh(new THREE.RingGeometry(.72,.84,40),new THREE.MeshBasicMaterial({color:'#edcf83',side:THREE.DoubleSide,transparent:true,opacity:.7,depthWrite:false}));
   ring.rotation.x=-Math.PI/2;ring.position.set(p.x,.095,p.z);scene.add(ring);
   const label=document.createElement('button');label.className='portal-label';label.textContent='↗ '+name;label.setAttribute('aria-label','จุดเดินทางไป '+name);labels.append(label);
-  label.onclick=()=>{if(Math.hypot(world.player.x-p.x,world.player.z-p.z)<2)travel(p.to);else game.walkTo({x:p.x,z:p.z},{radius:1.2,kind:'portal',onArrive:()=>travel(p.to)});};
+  // 0.53: inside a town the gates are a cart ride away — no walk to the gate first.
+  label.onclick=()=>{if(map.safe||Math.hypot(world.player.x-p.x,world.player.z-p.z)<2)travel(p.to);else game.walkTo({x:p.x,z:p.z},{radius:1.2,kind:'portal',onArrive:()=>travel(p.to)});};
   return {p,ring,label};
  });
  const npcViews=[...map.npcs,...citizens].map(n=>{

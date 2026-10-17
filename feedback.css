@@ -1,0 +1,13 @@
+/* 0.53 hit feedback (feedback.js): critical numbers, level-up banner + glow, sound sliders in the profile panel */
+.damage-number.crit{font-size:1.75em!important;color:#ffd27a!important;text-shadow:0 0 6px #ff9b3d,0 2px 2px #000!important;animation:crit-pop .32s cubic-bezier(.2,1.6,.4,1)}
+.damage-number.crit::after{content:'!'}
+@keyframes crit-pop{from{scale:.4}to{scale:1}}
+.big-banner.levelup strong{font-size:32px;color:#ffe08a;letter-spacing:1px;text-shadow:0 0 12px #ffcf5a,0 2px 6px #000}
+.big-banner.levelup{border-color:#ffe08a;background:radial-gradient(circle at 50% 40%,#5a4a1cee,#1a2a22ee)}
+.level-glow{position:fixed;z-index:8;left:50%;top:52%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;pointer-events:none;
+ box-shadow:0 0 0 4px #ffe08acc,0 0 40px 18px #ffd25a88;animation:level-glow 1.3s ease-out forwards}
+@keyframes level-glow{to{scale:9;opacity:0}}
+#audio-settings{display:grid;gap:6px;margin:8px 0;padding:8px 10px;border:1px solid #af884f55;border-radius:8px;font-size:12px}
+#audio-settings label{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:8px}
+#audio-settings input{accent-color:#f4cf7a}
+@media(prefers-reduced-motion:reduce){.level-glow,.damage-number.crit{animation:none}}

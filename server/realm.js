@@ -375,7 +375,8 @@ export class RealmServer{
   const destination=this.catalog.maps.find(m=>m.id===id);
   // 0.46 ธูปกลับเมือง: from any map straight to the capital, spending one incense.
   const recall=!portal&&id===this.catalog.capital&&p.room.map.id!==id&&(p.bag.items['return-incense']??0)>0;
-  if((!portal&&!recall)||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
+  const townHop=!portal&&p.room.map.safe&&p.room.map.portals?.some(v=>v.to===id); // 0.53 town gates need no walk
+  if((!portal&&!recall&&!townHop)||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
   if(recall){const b=normalizeBag(p.bag);b.items['return-incense']--;if(!b.items['return-incense'])delete b.items['return-incense'];this.setBag(p,b);}
   this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;

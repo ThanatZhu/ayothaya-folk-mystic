@@ -68,6 +68,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(s.mapId!==map.id){
    const hop=nextHop(catalog.maps,map.id,s.mapId),portal=map.portals.find(p=>p.to===hop);
    if(!portal){done();world.notice('ยังหาทางไปไม่เจอ');return;}
+   if(map.safe){try{sessionStorage.setItem(RESUME,'1');}catch{}done();worldUI.travelTo(hop);return;} // town: ride straight out of the gate
    game.walkTo({x:portal.x,z:portal.z},{radius:1.2,kind:'quest',onArrive:()=>{try{sessionStorage.setItem(RESUME,'1');}catch{}done();worldUI.travelTo(hop);},onFail:()=>{done();world.notice('เดินไปจุดเดินทางไม่ได้');}});
   }else if(s.type==='talk'){
    if(!worldUI.talkTo(s.npc))world.notice('ไม่พบ '+s.npc+' ในแผนที่นี้');

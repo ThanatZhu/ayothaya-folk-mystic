@@ -64,7 +64,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const floats=[],projection=new THREE.Vector3();
  function toast(text){$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
- function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number';el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
+ function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number'+(!positive&&e.color==='#ffd27a'?' crit':'');el.textContent=(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
  function effect(e){
   if(e.type==='experience'){
    toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');

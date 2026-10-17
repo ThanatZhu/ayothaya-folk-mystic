@@ -48,3 +48,4 @@
 #world-warp li div{flex:1;min-width:0}#world-warp strong{display:block;font-size:14px}#world-warp small{font-size:11px;color:#c9b98f}
 #world-warp button{padding:6px 12px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 12px Mali,Tahoma,sans-serif;cursor:pointer;white-space:nowrap}
 #world-warp button:disabled{opacity:.45;cursor:default}
+.life-label{position:absolute;top:0;left:0;pointer-events:none;padding:1px 8px;border-radius:9px;background:#2b2316c8;border:1px solid #f4cf7a66;color:#f4e3b8;font:700 11px Mali,Tahoma,sans-serif;white-space:nowrap}

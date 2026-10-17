@@ -38,7 +38,8 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  mesh.userData.pose=(pose,flip=false)=>{
   let frame=Math.max(0,Math.min(FRAME_COUNT-1,Math.round(pose.artFrame??0)));
   // Front/back walk only where that art exists; otherwise the side cycle (with its left/right flip).
-  const missing=frames&&frame>=frames[currentGender].length;if(missing)frame=12+(frame-12)%8;
+  // A class without front/back art: walking falls back to the side cycle, standing to the original idle frame.
+  const missing=frames&&frame>=frames[currentGender].length;if(missing)frame=pose.stand?0:12+(frame-12)%8;
   if(frame>=20)flip=false; // front/back walk art is drawn facing the camera / away from it
   if(!mesh.userData.directional&&frames){material.map=frames[currentGender][frame];mesh.userData.artFrame=frame;}
   const painted=frames&&!mesh.userData.directional,extent=painted?FRAME_SIZE/LOGICAL_SIZE:1;

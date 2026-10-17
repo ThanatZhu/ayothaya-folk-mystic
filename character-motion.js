@@ -70,7 +70,7 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
   p.handLX=p.armL;p.handRX=p.armR;p.handLY=-(p.armLY??0)-p.armL*.5;p.handRY=-(p.armRY??0)-p.armR*.5;
   p.footLX=p.legL;p.footRX=p.legR;p.footLY=-p.liftL;p.footRY=-p.liftR;
  }
- p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId,view);
+ p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId,view);p.stand=mode==='idle'?1:0;
  return p;
 }
 // Continuous soft weights avoid cutting a sprite into disconnected rectangles.

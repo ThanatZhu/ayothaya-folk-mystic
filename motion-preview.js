@@ -11,7 +11,7 @@ export function createMotionPreview(host){
  }
  function draw(p){
   ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;
-  const source=frames?.[Math.max(0,Math.min(FRAME_COUNT-1,Math.round(p.artFrame??0)))]??cell;
+  const source=frames?.[Math.max(0,Math.min(FRAME_COUNT-1,Math.round(p.artFrame??0)))]??frames?.[0]??cell;
   if(frames)drawCharacterFrame(ctx,source,20,8-(p.y??0)*130,280);else ctx.drawImage(source,20,8-(p.y??0)*130,280,280);
  }
  return {setSource,draw};

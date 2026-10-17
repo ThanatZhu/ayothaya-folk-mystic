@@ -25,6 +25,8 @@ export const MONSTER_TYPES=[
  {name:'ไหผีจอมซน',hp:90,speed:.8,damage:8,baseXp:18,jobXp:12}
 ];
 MONSTER_TYPES.push(...FRONTIER_MONSTERS);
+// 0.52 pacing: AUTO looks for monsters within 14 of where it was switched on (was 8); towns are walked 30% faster.
+export const AUTO_RANGE=14,TOWN_PACE=1.3;
 export const OBSTACLES=[
  {x:-7.2,z:-11.5,w:6.4,d:7.3}, // north house, veranda and staircase
  {x:7.2,z:-8.2,w:5.8,d:7.4}, // east house and steps
@@ -95,6 +97,8 @@ export class CombatWorld{
  get target(){return this.mobs.find(m=>m.id===this.targetId&&m.hp>0)??null;}
  emit(type,extra={}){this.events.push({type,...extra});}
  // 0.48 ailments: blind and curse weaken every hit; stun/sleep stop acting; silence stops skills.
+ // One walking speed for the world, the server and client prediction: class × curse × town pace.
+ walkSpeed(){return this.profession.speed*(this.status?.curse?.6:1)*(this.safe?TOWN_PACE:1);}
  weakness(){return (this.status.blind?.7:1)*(this.status.curse?.75:1);}
  inflict(name){if(!name||!AILMENTS[name])return;const fresh=!this.status[name];this.status[name]=AILMENTS[name].time;if(fresh)this.notice(AILMENTS[name].name+'! · '+AILMENTS[name].text);}
  // One monster blow, shared by the offline world and the realm server: damage, ailment roll, or going down (+ death penalty).
@@ -115,7 +119,7 @@ export class CombatWorld{
  applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=d.maxHp;p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
  notice(text){this.emit('notice',{text});}
  select(id){const mob=this.mobs.find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
- nearest(range=8){return this.mobs.filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=8)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
+ nearest(range=AUTO_RANGE){return this.mobs.filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
  toggleAuto(){if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);
@@ -154,14 +158,14 @@ export class CombatWorld{
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;
   for(const k in this.status){this.status[k]-=dt;if(this.status[k]<=0)delete this.status[k];}
   if(this.status.poison&&p.hp>1&&(this.poisonTick+=dt)>=1){this.poisonTick=0;const n=Math.min(p.hp-1,Math.max(1,Math.round(p.maxHp*.03)));p.hp-=n;this.emit('playerHit',{x:p.x,z:p.z,amount:n});}
-  const stop=held(this.status),speed=this.profession.speed*(this.status.curse?.6:1);
+  const stop=held(this.status),speed=this.walkSpeed();
   if(p.hp<=0){p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
   if(this.safe)p.hp=Math.min(p.maxHp,p.hp+8*dt);
   const ox=p.x,oz=p.z,manual=!stop&&Math.hypot(input.x,input.z)>.08;
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);
   if(this.auto&&!stop&&!manual&&this.manualGrace===0){
-   let m=this.target;if(!m||distance(m,this.anchor)>9||distance(m,p)>10){m=this.nearest(8);this.targetId=m?.id??null;this.path=[];}
+   let m=this.target;if(!m||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_RANGE+2){m=this.nearest(AUTO_RANGE);this.targetId=m?.id??null;this.path=[];}
    if(m){
     if(distance(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
@@ -188,8 +192,8 @@ export class CombatWorld{
 // ease onto the server position whenever we are not steering (stopping, auto-pathing).
 export function predictMove(world,server,dt,dir){
  const p=world.player;if(!server||p.hp<=0)return;
- const manual=Math.hypot(dir.x,dir.z)>.08,ox=p.x,oz=p.z;
- if(manual){const n=Math.max(1,Math.hypot(dir.x,dir.z));moveBody(p,dir.x/n*world.profession.speed*dt,dir.z/n*world.profession.speed*dt,world.nav);p.face={x:dir.x,z:dir.z};}
+ const manual=!held(world.status)&&Math.hypot(dir.x,dir.z)>.08,ox=p.x,oz=p.z,speed=world.walkSpeed();
+ if(manual){const n=Math.max(1,Math.hypot(dir.x,dir.z));moveBody(p,dir.x/n*speed*dt,dir.z/n*speed*dt,world.nav);p.face={x:dir.x,z:dir.z};}
  const ex=server.x-p.x,ez=server.z-p.z,error=Math.hypot(ex,ez);
  if(error>2.5){p.x=server.x;p.z=server.z;}
  else if(!manual&&error>.002){const f=1-Math.exp(-dt*10);p.x+=ex*f;p.z+=ez*f;if(server.moving)p.face=server.face;}

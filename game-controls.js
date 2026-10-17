@@ -29,7 +29,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // the camera shakes briefly, and dust puffs at every footfall.
  const castLight=new THREE.PointLight('#ffd9a0',0,9,1.6);scene.add(castLight);const footDust=createFootDust(scene);
  let strikes=[],shakeAmount=0,lastStep=0;
- let gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
+ let heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
  addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){network?.command('emote',{name:e.detail});castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
@@ -185,7 +185,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else{if(hero.frames)hero.sprite.material.map=hero.frames[0];hero.sprite.userData.footV=1;}
   const facing=p.face.x*Math.cos(azimuth)-p.face.z*Math.sin(azimuth);
   hero.sprite.userData.directional=!!directional;
-  hero.sprite.userData.pose?.(visualPose,directional?false:facing<0);
+  if(Math.abs(facing)/faceLength>.3)heroFlip=facing<0; // hysteresis: keep the last side until clearly turning
+  hero.sprite.userData.pose?.(visualPose,directional?false:heroFlip);
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   footDust.update(dt);
   if(mode==='walk'&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,p.z>4.25?.44:.09,p.z-p.face.z/faceLength*.25);}}

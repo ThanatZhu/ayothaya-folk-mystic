@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CombatWorld,predictMove} from '../combat-core.js';
+import {CombatWorld,predictMove,TOWN_PACE} from '../combat-core.js';
 const map={id:'field',safe:true,nav:{zones:[{x:-50,z:-50,w:100,d:100}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[]};
 // Client renders at 60 fps; server steps at 20 Hz, snapshots at 10 Hz, 50 ms each way.
 function simulate(heldSeconds,totalSeconds){
- const client=new CombatWorld(map),server=new CombatWorld(map),frame=1/60,speed=client.profession.speed,latency=.05;
+ const client=new CombatWorld(map),server=new CombatWorld(map),frame=1/60,speed=client.profession.speed*(map.safe?TOWN_PACE:1),latency=.05;
  const inbound=[],outbound=[],steps=[];let snapshot=null,serverClock=0,tick=0;
  for(let t=0;t<totalSeconds;t+=frame){
   const dir=t<heldSeconds?{x:0,z:-1}:{x:0,z:0};

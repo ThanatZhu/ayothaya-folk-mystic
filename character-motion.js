@@ -25,7 +25,7 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
    p['foot'+side+'Y']=swing?-Math.sin(progress*Math.PI)*.06*stride:0;
   }
   p.handLX=-s*.035*arms;p.handLY=Math.max(0,-s)*-.012;p.handRX=s*.035*arms;p.handRY=Math.max(0,s)*-.012;
-  p.crouch=.012+.008*Math.cos(a*2);p.body=0;p.y=0;
+  p.crouch=.012+.008*Math.cos(a*2);p.body=0;p.y=Math.abs(Math.sin(a))*.03; // two rises per cycle, one per footfall
  }else if(mode==='attack'){
   const q=t/attackDuration(classId);if(q>=1)return p;
   const wind=ease(q/.28),strike=ease((q-.28)/.16),recover=ease((q-.55)/.45),power=strike*(1-recover);

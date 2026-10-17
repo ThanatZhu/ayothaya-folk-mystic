@@ -8,7 +8,7 @@ import {LocalStore,FirebaseStore} from '../server/storage.js';
 import {createHost} from '../server/host.js';
 import {initialSave} from '../realm-state.js';
 import {CLASSES,NOVICE} from '../classes.js';
-import {MONSTER_TYPES} from '../combat-core.js';
+import {MONSTER_TYPES,TOWN_PACE} from '../combat-core.js';
 const tempRoot=path.resolve('.local-multiplayer');
 await mkdir(tempRoot,{recursive:true});
 async function cleanup(directory){assert.ok(path.resolve(directory).startsWith(tempRoot+path.sep));await rm(directory,{recursive:true,force:true});}
@@ -30,7 +30,7 @@ test('rooms isolate realms; snapshots never expose UID, auth or another server',
 test('server movement clamps speed, stops stale inputs and ignores position/XP forgery',()=>{
  const {realm,add,send,step}=fixture();const {peer:p}=add('playerOne');
  send(p,'input',{x:1,z:1,attack:false,baseXp:999999,position:{x:999,z:999}});step(4);
- assert.ok(Math.hypot(p.world.player.x,p.world.player.z)<=p.world.profession.speed*.2+.001);assert.equal(p.world.baseXp,0);
+ assert.ok(Math.hypot(p.world.player.x,p.world.player.z)<=p.world.profession.speed*(p.world.safe?TOWN_PACE:1)*.2+.001);assert.equal(p.world.baseXp,0);
  step(10);const {x,z}=p.world.player;step(5);assert.deepEqual({x:p.world.player.x,z:p.world.player.z},{x,z});
  assert.equal(send(p,'input',{x:Infinity,z:0,attack:false}),false);assert.equal(send(p,'reward',{amount:999}),false);
  const seq=p.seq;assert.equal(realm.receive(p.id,{type:'input',seq,x:1,z:0,attack:true}),false);

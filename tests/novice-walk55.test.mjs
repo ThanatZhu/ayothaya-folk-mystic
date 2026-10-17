@@ -29,3 +29,10 @@ test('0.56 walk view: up/down the screen picks the front/back cycle (20–27 / 2
  assert.equal(walkView({x:1,z:1},0,'front'),'front');assert.equal(walkView({x:1,z:1},0,'side'),'side');
  assert.equal(motionFrame('walk',0,.01,false,'novice','front'),20);assert.equal(motionFrame('walk',0,.99,false,'novice','back'),35);
 });
+
+test('0.56.1 cadence cap: at most 2 walk cycles per second, the art stride below that', async () => {
+ const {gaitStep,WALK_CADENCE}=await import('../character-motion.js');
+ assert.equal(WALK_CADENCE,2);
+ assert.ok(Math.abs(gaitStep(1.23*1/60,1/60,'novice')-1/60)<1e-9,'1.23 u/s → 1 cycle/s, no slide');
+ assert.ok(Math.abs(gaitStep(5.3/60,1/60,'novice')-2/60)<1e-9,'town pace 5.3 u/s capped at 2 cycles/s');
+});

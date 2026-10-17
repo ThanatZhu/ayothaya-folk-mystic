@@ -2,7 +2,7 @@ import {monsterFrame} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
-import {characterMotion,attackDuration,walkCycle,walkView} from './character-motion.js?v=37';
+import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=37';
 import {progression,jobFor} from './advancement.js?v=21';
@@ -169,7 +169,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(p.moving)emoteUntil=0;
   const mode=t<hitUntil?'hit':t<castUntil?actionMode:t<emoteUntil?emote:p.moving?'walk':p.shield>0?'guard':'idle';
   const distanceMoved=Math.hypot(p.x-lastX,p.z-lastZ);lastX=p.x;lastZ=p.z;
-  if(distanceMoved<1)gait+=distanceMoved/walkCycle(world.profession.id); // No steps while blocked; teleports do not advance the gait.
+  if(distanceMoved<1)gait+=gaitStep(distanceMoved,dt,world.profession.id); // No steps while blocked; teleports do not advance the gait.
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
   const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
   if(!visualPose||reduced)visualPose={...pose};

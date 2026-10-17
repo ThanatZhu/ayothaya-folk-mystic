@@ -16,6 +16,10 @@ export function walkView(face,azimuth,previous='side'){
  if(vertical<.8)return 'side';
  return previous;
 }
+// Owner: steps looked too quick. At town pace the art's short stride needs ~4 cycles/s (8-9 steps/s, a sprint), so the
+// cadence is capped: up to WALK_CADENCE cycles per second the planted foot keeps pace, above it the feet slide a little.
+export const WALK_CADENCE=2;
+export const gaitStep=(distance,dt,classId)=>Math.min(distance/walkCycle(classId),Math.max(0,dt)*WALK_CADENCE);
 export const walkCycle=classId=>classId==='novice'?1.23:2.1;
 export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side'}={}){

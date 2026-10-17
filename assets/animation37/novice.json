@@ -136,91 +136,91 @@
       },
       {
         "rect": [
-          81,
-          42,
-          151,
-          279
+          0,
+          0,
+          256,
+          308
         ],
-        "anchor": 82.0,
-        "scale": 0.775278,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778067,
+        "source": "novice-walk-male.png"
       },
       {
         "rect": [
-          387,
-          41,
-          155,
-          280
+          256,
+          0,
+          256,
+          308
         ],
-        "anchor": 82.0,
-        "scale": 0.772509,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778067,
+        "source": "novice-walk-male.png"
       },
       {
         "rect": [
-          699,
-          41,
-          159,
-          279
+          512,
+          0,
+          256,
+          308
         ],
-        "anchor": 87.0,
-        "scale": 0.775278,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778067,
+        "source": "novice-walk-male.png"
       },
       {
         "rect": [
-          1011,
-          41,
-          161,
-          280
+          768,
+          0,
+          256,
+          308
         ],
-        "anchor": 89.0,
-        "scale": 0.772509,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778067,
+        "source": "novice-walk-male.png"
       },
       {
         "rect": [
-          74,
-          353,
-          160,
-          280
+          1024,
+          0,
+          256,
+          308
         ],
-        "anchor": 88.0,
-        "scale": 0.772509,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778067,
+        "source": "novice-walk-male.png"
       },
       {
         "rect": [
-          390,
-          353,
-          155,
-          279
+          1280,
+          0,
+          256,
+          308
         ],
-        "anchor": 82.0,
-        "scale": 0.775278,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778067,
+        "source": "novice-walk-male.png"
       },
       {
         "rect": [
-          700,
-          353,
-          160,
-          280
+          1536,
+          0,
+          256,
+          308
         ],
-        "anchor": 87.0,
-        "scale": 0.772509,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778067,
+        "source": "novice-walk-male.png"
       },
       {
         "rect": [
-          1012,
-          353,
-          166,
-          280
+          1792,
+          0,
+          256,
+          308
         ],
-        "anchor": 90.0,
-        "scale": 0.772509,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778067,
+        "source": "novice-walk-male.png"
       }
     ],
     "female": [
@@ -358,91 +358,91 @@
       },
       {
         "rect": [
-          79,
-          671,
-          152,
-          287
+          0,
+          0,
+          256,
+          308
         ],
-        "anchor": 78.0,
-        "scale": 0.753984,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778393,
+        "source": "novice-walk-female.png"
       },
       {
         "rect": [
-          387,
-          672,
-          155,
-          284
+          256,
+          0,
+          256,
+          308
         ],
-        "anchor": 80.0,
-        "scale": 0.761949,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778393,
+        "source": "novice-walk-female.png"
       },
       {
         "rect": [
-          700,
-          672,
-          159,
-          287
+          512,
+          0,
+          256,
+          308
         ],
-        "anchor": 83.0,
-        "scale": 0.753984,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778393,
+        "source": "novice-walk-female.png"
       },
       {
         "rect": [
-          1013,
-          673,
-          160,
-          286
+          768,
+          0,
+          256,
+          308
         ],
-        "anchor": 85.0,
-        "scale": 0.75662,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778393,
+        "source": "novice-walk-female.png"
       },
       {
         "rect": [
-          72,
-          985,
-          159,
-          259
+          1024,
+          0,
+          256,
+          308
         ],
-        "anchor": 88.0,
-        "scale": 0.835496,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778393,
+        "source": "novice-walk-female.png"
       },
       {
         "rect": [
-          387,
-          985,
-          158,
-          259
+          1280,
+          0,
+          256,
+          308
         ],
-        "anchor": 87.0,
-        "scale": 0.835496,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778393,
+        "source": "novice-walk-female.png"
       },
       {
         "rect": [
-          698,
-          985,
-          160,
-          259
+          1536,
+          0,
+          256,
+          308
         ],
-        "anchor": 88.0,
-        "scale": 0.835496,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778393,
+        "source": "novice-walk-female.png"
       },
       {
         "rect": [
-          1020,
-          984,
-          160,
-          261
+          1792,
+          0,
+          256,
+          308
         ],
-        "anchor": 84.0,
-        "scale": 0.829094,
-        "source": "novice-walk.png"
+        "anchor": 128.0,
+        "scale": 0.778393,
+        "source": "novice-walk-female.png"
       }
     ]
   },

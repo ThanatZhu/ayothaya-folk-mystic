@@ -4,6 +4,10 @@ import {neutralJoints} from './character-rig.js?v=37';
 export const MOTION_MODES=['idle','walk','attack','cast','guard','hit','dash','bow','celebrate','rest'];
 const clamp=v=>Math.max(0,Math.min(1,v));
 const ease=v=>{v=clamp(v);return v*v*(3-2*v);};
+// World units walked per full 8-frame walk cycle, measured from the art so the planted foot does not slide:
+// novice (0.55 hand-off): the stance foot travels ~99.5 source px per step → 199 px × 0.778 × 0.971 × 2.1·1.25/320 ≈ 1.23.
+// Other classes keep the old value until their walk art is redrawn and measured.
+export const walkCycle=classId=>classId==='novice'?1.23:2.1;
 export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null}={}){
  const t=Math.max(0,Number.isFinite(time)?time:0),p={artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
@@ -25,7 +29,7 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
    p['foot'+side+'Y']=swing?-Math.sin(progress*Math.PI)*.06*stride:0;
   }
   p.handLX=-s*.035*arms;p.handLY=Math.max(0,-s)*-.012;p.handRX=s*.035*arms;p.handRY=Math.max(0,s)*-.012;
-  p.crouch=.012+.008*Math.cos(a*2);p.body=0;p.y=Math.abs(Math.sin(a))*.03; // two rises per cycle, one per footfall
+  p.crouch=.012+.008*Math.cos(a*2);p.body=0;p.y=classId==='novice'?0:Math.abs(Math.sin(a))*.03; // footfall rise; the redrawn novice cycle bobs in the art, so the planted foot stays on the ground
  }else if(mode==='attack'){
   const q=t/attackDuration(classId);if(q>=1)return p;
   const wind=ease(q/.28),strike=ease((q-.28)/.16),recover=ease((q-.55)/.45),power=strike*(1-recover);

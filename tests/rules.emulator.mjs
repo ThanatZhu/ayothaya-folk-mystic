@@ -89,3 +89,13 @@ test('legacy saves are read-only once migrated and cannot be created',async()=>{
  await seed(slot,row());
  await assertFails(setDoc(doc(as(owner),legacy),stamped(row({revision:3}))));
 });
+
+test('0.50.2: field maps, stat-grown HP/MP and field coordinates save offline; absurd values still fail',async()=>{
+ await seed(slot,row());
+ const save=(rev,state)=>setDoc(doc(as(owner),slot),stamped(row({revision:rev,state:{...initialSave(),...state}})));
+ await assertSucceeds(save(2,{mapId:'rice-fields',position:{x:-6,z:55},traveler:traveler({hp:164,mp:110})}));
+ await assertSucceeds(save(3,{mapId:'mill-cellar',position:{x:0,z:-62},traveler:traveler({hp:3895,mp:1746})}));
+ await assertFails(save(4,{mapId:'atlantis'}));
+ await assertFails(save(4,{traveler:traveler({hp:20000})}));
+ await assertFails(save(4,{position:{x:0,z:300}}));
+});

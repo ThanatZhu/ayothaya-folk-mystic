@@ -60,11 +60,18 @@
  body.field-hud .combat-controls.wheel #auto-attack{width:44px;height:44px;font-size:9px}
  body.field-hud .combat-controls.wheel .skill kbd,body.field-hud .combat-controls.wheel .skill .skill-level,body.field-hud #attack small{display:none}
  /* 0.51: XP along the very bottom edge, Base Lv | Job Lv exactly half the screen each. */
- body.field-hud .experience-bars{left:0;right:0;bottom:0;gap:2px;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);grid-template-columns:1fr 1fr}
+ body.field-hud .experience-bars{left:0;right:0;bottom:0;gap:2px;padding:0;grid-template-columns:1fr 1fr} /* flush with the physical screen edge, ignoring notch/home-bar insets (owner request) */
  body.field-hud .exp-track{border-radius:0;border-left:0;border-right:0;border-bottom:0}
- body.field-hud #online-dock{left:var(--phone-left);bottom:calc(var(--hud-bottom) + 8px);width:min(300px,calc(100vw - var(--phone-left) - var(--phone-right)));max-height:calc(var(--visible-height,100dvh) - 130px)}
- body.field-hud #online-dock.collapsed{min-width:90px;max-width:calc(100vw - var(--phone-left) - var(--phone-right));width:110px}
- body.field-hud #online-dock.collapsed .mp-dock-bar{min-height:28px}
+ /* 0.51.1 chat: centred at the bottom, smaller text. */
+ body.field-hud #online-dock{left:50%;translate:-50% 0;bottom:calc(var(--hud-bottom) + 8px);width:min(300px,calc(100vw - var(--phone-left) - var(--phone-right)));max-height:calc(var(--visible-height,100dvh) - 130px);font-size:9px}
+ body.field-hud #online-dock.collapsed{min-width:90px;max-width:min(240px,calc(100vw - var(--phone-left) - var(--phone-right) - 60px));width:auto}
+ /* 0.51.1 talking to an NPC: the dialog owns the bottom of the screen, so the controls step aside until it closes. */
+ body.field-hud:has(#online-dock:not(.collapsed):not([hidden])) #interact{bottom:calc(var(--hud-bottom) + 190px)} /* open chat: talk button rides above it */
+ body.field-hud:has(#npc-dialog:not([hidden])) :is(#joystick,.combat-controls,#quick-slots,#online-dock,#interact){visibility:hidden;pointer-events:none}
+ body.field-hud #online-dock.collapsed .mp-dock-bar{min-height:24px}
+ body.field-hud #online-dock .mp-tabs button{min-height:24px;padding:2px 8px;font-size:9px}
+ body.field-hud #online-dock #online-messages time{font-size:7px}
+ body.field-hud #online-dock #online-chat :is(input,button){min-height:28px;font-size:9px}
  body.field-hud #quick-slots{left:var(--phone-left);bottom:calc(var(--hud-bottom) + 54px);margin-left:0;gap:6px}
  body.field-hud #quick-slots button{width:44px;height:44px}
  body.field-hud #quick-slots kbd{display:none}

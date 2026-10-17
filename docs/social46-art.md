@@ -26,8 +26,8 @@ dark outline, readable at 32 px. Cells are numbered left→right, top→bottom f
 | 17 | mvp-crown | MVP | a golden Thai chada crown with red gems |
 | 18 | boss-timer | เวลาบอส | a burning incense stick in a brass holder with a ring of smoke (a clock) |
 | 19 | dungeon-gate | ดันเจี้ยน | a ruined stone temple gate with a dark doorway and roots |
-| 20 | pet-egg | ไข่สัตว์เลี้ยง | a speckled egg in a small woven nest |
-| 21 | pet-food | อาหารสัตว์เลี้ยง | a clay bowl with rice and a small fish |
+| 20 | pet-food | อาหารสัตว์เลี้ยง | a clay bowl with rice and a small fish |
+| 21 | pet-egg | ไข่สัตว์เลี้ยง | a speckled egg in a small woven nest |
 | 22 | pet-bell | กระดิ่งสัตว์เลี้ยง | a red collar with a small brass bell |
 | 23 | event-krathong | กระทง | a banana-leaf krathong with a candle and incense |
 | 24 | event-token | เหรียญงานวัด | a round festival token with a ribbon |

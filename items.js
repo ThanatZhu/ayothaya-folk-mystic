@@ -27,7 +27,7 @@ export const ITEMS={
  'king-ember':{atlas:'items48',icon:3,name:'ถ่านเพลิงราชาหุ่นฟาง',kind:'loot',sell:1500,text:'รางวัลผู้ได้ MVP · ขายได้ราคาดี'},
  // 0.50 pets and the festival
  'pet-lure':{atlas:'items48',icon:4,name:'ข้าวเหนียวล่อสัตว์',kind:'lure',buy:300,tokens:6,sell:75,text:'เลือก หนู/หุ่นฟาง/ตั๊กแตน/ลูกลิง แล้วใช้ · ยิ่งมอนเลือดน้อยยิ่งจับง่าย'},
- 'pet-food':{atlas:'social',icon:20,name:'ข้าวคลุกปลา',kind:'petfood',buy:20,sell:5,text:'อาหารสัตว์เลี้ยง · ให้ตอนหิวจะสนิทขึ้น'},
+ 'pet-food':{atlas:'social',icon:19,name:'ข้าวคลุกปลา',kind:'petfood',buy:20,sell:5,text:'อาหารสัตว์เลี้ยง · ให้ตอนหิวจะสนิทขึ้น'},
  'egg-rat':{atlas:'items48',icon:5,name:'ไข่หนูยุ้งข้าว',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ LUK +2'},
  'egg-straw':{atlas:'items48',icon:6,name:'ไข่หุ่นฟางหลง',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ STR +1 DEX +1'},
  'egg-hopper':{atlas:'items48',icon:7,name:'ไข่ตั๊กแตนเกราะ',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ VIT +2'},
@@ -50,7 +50,7 @@ export const ITEMS={
  'st-poison':{atlas:'social',icon:8,name:'พิษ',kind:'ui'},'st-stun':{atlas:'social',icon:9,name:'มึนงง',kind:'ui'},'st-sleep':{atlas:'social',icon:10,name:'หลับ',kind:'ui'},
  'st-silence':{atlas:'social',icon:11,name:'ใบ้',kind:'ui'},'st-blind':{atlas:'social',icon:12,name:'ตาพร่า',kind:'ui'},'st-curse':{atlas:'social',icon:13,name:'คำสาป',kind:'ui'},
  'mvp-crown':{atlas:'social',icon:16,name:'MVP',kind:'ui'},'boss-timer':{atlas:'social',icon:17,name:'เวลาบอส',kind:'ui'},'dungeon-gate':{atlas:'social',icon:18,name:'ดันเจี้ยน',kind:'ui'},
- 'pet-egg':{atlas:'social',icon:19,name:'ไข่สัตว์เลี้ยง',kind:'ui'},'pet-bell':{atlas:'social',icon:21,name:'กระดิ่งสัตว์เลี้ยง',kind:'ui'},
+ 'pet-egg':{atlas:'social',icon:20,name:'ไข่สัตว์เลี้ยง',kind:'ui'},'pet-bell':{atlas:'social',icon:21,name:'กระดิ่งสัตว์เลี้ยง',kind:'ui'},
  'daily-gift':{atlas:'social',icon:14,name:'ของขวัญรายวัน',kind:'ui'},'death-soul':{atlas:'social',icon:15,name:'วิญญาณหลุด',kind:'ui'},'treasure-chest':{icon:23,name:'หีบสมบัติ',kind:'reserved',sell:0},
  // 0.43 stat gear (atlas assets/gear43/gear.png): class weapons tier 1 / tier 2, armor, accessories.
  'wrap-novice':{atlas:'gear',icon:0,name:'ผ้าพันหมัดเชือกป่าน',kind:'gear',slot:'weapon',classes:['novice'],atk:6,buy:120,sell:30,text:'ATK +6 · ผู้ฝึกตน'},

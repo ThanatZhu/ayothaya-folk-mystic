@@ -49,8 +49,8 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  function render(){
   const obj=currentObjective(state()),sig=JSON.stringify([state(),game.walking&&walking]);
   if(sig===shown)return;shown=sig;
-  $('quest-chapter').textContent=STORY_TITLE;
-  $('quest-title').textContent=obj?obj.quest.title+` (${obj.stepNumber}/${obj.steps})`:'จบบทที่ 1 แล้ว';
+  $('quest-chapter').textContent=obj?.quest?.chapter??STORY_TITLE;
+  $('quest-title').textContent=obj?obj.quest.title+` (${obj.stepNumber}/${obj.steps})`:'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';
   $('quest-hint').textContent=obj?hintText(obj):'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';
   $('quest-go').hidden=!obj;
   $('quest-go').textContent=game.walking&&walking?'■ หยุด':'▶ เดินไป';

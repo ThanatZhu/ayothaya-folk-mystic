@@ -10,7 +10,7 @@ export async function createFrontierScene({scene,map,ground,tiles}){
  const material=(color,map)=>new THREE.MeshLambertMaterial({color,map});
  const wood=material('#b79b6d',tiles.wood),stone=material('#9b9f83'),soil=material('#8e805b'),water=new THREE.MeshPhongMaterial({color:'#416e66',shininess:70,transparent:true,opacity:.92});
  const box=(x,y,z,w,h,d,mat)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;root.add(m);return m;};
- ground.color.set(night?'#9bacb1':map.procedural==='rice'?'#e6dfbd':'#d8e2c9');
+ ground.color.set(night?'#9bacb1':map.mood==='dusk'?'#d6c3a6':map.procedural==='rice'?'#e6dfbd':'#d8e2c9');
  const b=map.bounds;box(b.x+b.w/2,-.48,b.z+b.d/2,b.w+160,.9,b.d+160,soil);
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(b.w+160,b.d+160),ground);floor.rotation.x=-Math.PI/2;floor.position.set(b.x+b.w/2,.005,b.z+b.d/2);floor.receiveShadow=true;root.add(floor);
  // Dark shoreline + translucent wave highlights give depth without a flat blue strip.

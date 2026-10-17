@@ -19,7 +19,7 @@ test('every story step points at an NPC, monster and map that exist in the world
   }
   assert.ok(s.hint);if(s.type==='talk')assert.ok(s.say);
  }
- for(const q of STORY)for(const it of q.reward.items??[])assert.ok(ITEMS[it.id]&&['loot','potion'].includes(ITEMS[it.id].kind),`${q.id} rewards ${it.id}`);
+ for(const q of STORY)for(const it of q.reward.items??[])assert.ok(ITEMS[it.id]&&['loot','potion','gear'].includes(ITEMS[it.id].kind),`${q.id} rewards ${it.id}`);
 });
 
 test('the whole chapter can be played through in order and pays each reward once', () => {

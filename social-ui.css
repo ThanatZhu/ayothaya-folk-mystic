@@ -27,3 +27,11 @@
 .guild-emblem{margin:8px 0}.guild-emblem summary{margin:0 10px 6px;font-size:12px;color:#f4cf7a;cursor:pointer}
 .social-actions{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:10px 10px 0;font-size:11px;color:#c9b98f}
 @media (orientation:landscape) and (max-height:520px){#social-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(380px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}}
+/* 0.60 quests window (quests-ui.js) reuses the social window look */
+#quests-window[data-hud-panel]{position:fixed;inset:auto;top:85px;right:200px;left:auto;bottom:auto;margin:0;width:400px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 160px);padding:0 0 12px;border:1px solid #c6a16488;border-radius:8px;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;box-shadow:0 6px 24px #0006;z-index:40;overflow:auto;font-family:Mali,Tahoma,sans-serif}
+#quests-window>header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#b5924520;border-bottom:1px solid #af884f44}#quests-window h2{margin:0;font-size:16px;color:#f4cf7a;flex:1}
+#quests-window .social-list button{padding:4px 10px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
+#quests-window .social-list button:disabled{opacity:.45}#quests-window .claimed{font-size:11px;color:#9be88f}
+.album-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;padding:0 10px}.album-grid span{aspect-ratio:1;border:1px solid #af884f44;border-radius:6px;background:#0e2926;display:grid;place-items:center}
+.album-grid span .item-icon{width:90%;height:90%}.album-grid span:not(.got){filter:grayscale(1) brightness(.4)}.album-grid span.got{border-color:#c27bffaa}
+@media (orientation:landscape) and (max-height:520px){#quests-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(400px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}}

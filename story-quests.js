@@ -41,6 +41,24 @@ export const STORY=[
   {type:'defeat',monster:'mill-keeper',count:1,mapId:'moonlit-mill',hint:'ปลดเชือกเจ้าหุ่นฟางพันเชือก'},
   {type:'talk',npc:'ขุนอินทร์',mapId:'ayutthaya',hint:'กลับไปรายงานขุนอินทร์',say:'ประทีปที่ท่าน้ำกลับมาสว่างแล้ว! เจ้าผูกสายใยเส้นแรกคืนได้ เมืองนี้ติดหนี้เจ้า'},
  ]},
+ // ---- บทที่ 2 · โคมผีกลางบึง (0.60)
+ {id:'s9',chapter:'บทที่ 2 · โคมผีกลางบึง',title:'ข่าวจากบึงบัว',reward:{baseXp:900,jobXp:500,coins:600,items:[{id:'green-herb',count:5}]},steps:[
+  {type:'talk',npc:'ขุนอินทร์',mapId:'ayutthaya',hint:'ฟังข่าวจากขุนอินทร์',say:'มีคนเห็นโคมลอยเหนือบึงบัวหลังโรงสี ทั้งที่ประทีปในเมืองสว่างแล้ว ไปดูทีเถิด'},
+  {type:'enter',mapId:'lotus-marsh',hint:'เดินทางไปบึงบัวต้องมนตร์ (ผ่านโรงสี)'},
+  {type:'talk',npc:'ยายบัวผัน',mapId:'lotus-marsh',hint:'คุยกับยายบัวผัน',say:'หนูในบึงตัวโตผิดปกติ มันกัดสายใยที่ข้าผูกไว้กับต้นบัวจนขาดหมด'},
+ ]},
+ {id:'s10',chapter:'บทที่ 2 · โคมผีกลางบึง',title:'หนูบึงยักษ์',reward:{baseXp:1200,jobXp:650,coins:800,items:[{id:'hp-large',count:5}]},steps:[
+  {type:'defeat',monster:'marsh-rat',count:6,mapId:'lotus-marsh',hint:'ไล่หนูบึงยักษ์'},
+  {type:'talk',npc:'ยายบัวผัน',mapId:'lotus-marsh',hint:'กลับไปหายายบัวผัน',say:'ดีแล้ว ทีนี้เห็นไหม โคมพวกนั้นลอยรวมกันอยู่กลางบึง'},
+ ]},
+ {id:'s11',chapter:'บทที่ 2 · โคมผีกลางบึง',title:'โคมผีบึง',reward:{baseXp:1600,jobXp:900,coins:1000,items:[{id:'lek-lai',count:1}]},steps:[
+  {type:'defeat',monster:'bog-lantern',count:4,mapId:'lotus-marsh',hint:'ดับโคมผีบึง (ถอยออกจากวงแดง)'},
+  {type:'talk',npc:'ยายบัวผัน',mapId:'lotus-marsh',hint:'บอกยายบัวผัน',say:'โคมดับแล้ว แต่ต้นเหตุยังอยู่ พญาวานรตัวนั้นขโมยประทีปไปซ่อนไว้กลางบึง'},
+ ]},
+ {id:'s12',chapter:'บทที่ 2 · โคมผีกลางบึง',title:'พญาวานรบึง',reward:{baseXp:3000,jobXp:1600,coins:2500,items:[{id:'vest-chain',count:1}]},steps:[
+  {type:'defeat',monster:'marsh-ape',count:1,mapId:'lotus-marsh',hint:'ล้มพญาวานรบึง'},
+  {type:'talk',npc:'ขุนอินทร์',mapId:'ayutthaya',hint:'นำประทีปกลับไปให้ขุนอินทร์',say:'ประทีปดวงสุดท้ายกลับมาแล้ว อยุธยาติดค้างบุญคุณเจ้าอีกครั้ง'},
+ ]},
 ];
 
 export function normalizeStory(state){

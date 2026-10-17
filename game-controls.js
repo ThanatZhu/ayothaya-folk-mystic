@@ -2,7 +2,7 @@ import {monsterFrame} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
 import {viewDirection} from './directional-sprite.js?v=17';
-import {characterMotion,attackDuration,walkCycle} from './character-motion.js?v=37';
+import {characterMotion,attackDuration,walkCycle,walkView} from './character-motion.js?v=37';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=37';
 import {progression,jobFor} from './advancement.js?v=21';
@@ -29,7 +29,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // the camera shakes briefly, and dust puffs at every footfall.
  const castLight=new THREE.PointLight('#ffd9a0',0,9,1.6);scene.add(castLight);const footDust=createFootDust(scene);
  let strikes=[],shakeAmount=0,lastStep=0;
- let heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
+ let heroView='side',heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
  addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){network?.command('emote',{name:e.detail});castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
@@ -171,7 +171,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const distanceMoved=Math.hypot(p.x-lastX,p.z-lastZ);lastX=p.x;lastZ=p.z;
   if(distanceMoved<1)gait+=distanceMoved/walkCycle(world.profession.id); // No steps while blocked; teleports do not advance the gait.
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
-  const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced});
+  const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
   if(!visualPose||reduced)visualPose={...pose};
   else for(const key of Object.keys(pose))visualPose[key]=['frame','artFrame'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;

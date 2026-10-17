@@ -6,7 +6,7 @@ import {skillTrack,skillPose,SKILL_TRACKS} from '../skill-choreography.js';
 const ids=Object.keys(SKILL_TRACKS),base=new URL('../assets/animation37/',import.meta.url);
 test('every class and gender has complete, unclipped authored frames and six parts',()=>{
  for(const id of ids){const meta=JSON.parse(readFileSync(new URL(id+'.json',base)));for(const gender of ['male','female']){
-  assert.equal(meta.frames[gender].length,FRAME_COUNT);assert.equal(Object.keys(meta.parts[gender]).length,6);
+  assert.ok([20,28,FRAME_COUNT].includes(meta.frames[gender].length),'poses + side walk, optionally + front (20–27) and back (28–35) walk');assert.equal(Object.keys(meta.parts[gender]).length,6);
   for(const f of meta.frames[gender]){const png=readFileSync(new URL(f.source,base)),W=png.readUInt32BE(16),H=png.readUInt32BE(20),[x,y,w,h]=f.rect;
    assert.ok(x>=0&&y>=0&&x+w<=W&&y+h<=H&&w>0&&h>0,id+' '+gender+' source bounds');
    assert.ok(f.scale>0&&Number.isFinite(f.anchor));

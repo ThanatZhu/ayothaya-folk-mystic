@@ -7,9 +7,18 @@ const ease=v=>{v=clamp(v);return v*v*(3-2*v);};
 // World units walked per full 8-frame walk cycle, measured from the art so the planted foot does not slide:
 // novice (0.55 hand-off): the stance foot travels ~99.5 source px per step → 199 px × 0.778 × 0.971 × 2.1·1.25/320 ≈ 1.23.
 // Other classes keep the old value until their walk art is redrawn and measured.
+// Which walk cycle a facing shows on screen: side, front (toward the camera = down the screen) or back (up).
+// Hysteresis: a diagonal keeps the previous view, so the sprite does not flicker between cycles.
+export function walkView(face,azimuth,previous='side'){
+ const right=face.x*Math.cos(azimuth)-face.z*Math.sin(azimuth),toward=face.x*Math.sin(azimuth)+face.z*Math.cos(azimuth);
+ const vertical=Math.abs(toward)/(Math.abs(right)||1e-6);
+ if(vertical>1.4)return toward>0?'front':'back';
+ if(vertical<.8)return 'side';
+ return previous;
+}
 export const walkCycle=classId=>classId==='novice'?1.23:2.1;
 export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
-export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null}={}){
+export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side'}={}){
  const t=Math.max(0,Number.isFinite(time)?time:0),p={artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
  if(reduced)return p;
  if(mode==='walk'){
@@ -55,7 +64,7 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
   p.handLX=p.armL;p.handRX=p.armR;p.handLY=-(p.armLY??0)-p.armL*.5;p.handRY=-(p.armRY??0)-p.armR*.5;
   p.footLX=p.legL;p.footRX=p.legR;p.footLY=-p.liftL;p.footRY=-p.liftR;
  }
- p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId);
+ p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId,view);
  return p;
 }
 // Continuous soft weights avoid cutting a sprite into disconnected rectangles.

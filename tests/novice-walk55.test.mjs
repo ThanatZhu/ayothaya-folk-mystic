@@ -22,3 +22,10 @@ test('the walk phase is driven by distance (1.23 world units per cycle for novic
  for(let i=0;i<8;i++)assert.equal(characterMotion({mode:'walk',classId:'novice',phase:i/8+.01}).artFrame,12+i);
  assert.equal(characterMotion({mode:'walk',classId:'novice',phase:.3}).y,0);
 });
+
+test('0.56 walk view: up/down the screen picks the front/back cycle (20–27 / 28–35), diagonals keep the last view', async () => {
+ const {walkView}=await import('../character-motion.js');const {motionFrame}=await import('../animation-frames.js');
+ assert.equal(walkView({x:1,z:0},0),'side');assert.equal(walkView({x:0,z:1},0),'front');assert.equal(walkView({x:0,z:-1},0),'back');
+ assert.equal(walkView({x:1,z:1},0,'front'),'front');assert.equal(walkView({x:1,z:1},0,'side'),'side');
+ assert.equal(motionFrame('walk',0,.01,false,'novice','front'),20);assert.equal(motionFrame('walk',0,.99,false,'novice','back'),35);
+});

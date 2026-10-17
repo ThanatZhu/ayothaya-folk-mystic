@@ -1,9 +1,11 @@
 // Whole painted poses: anatomical connections are authored pixels, never mesh cuts.
-export const FRAME_COUNT=20;
-export function motionFrame(mode,time=0,phase=null,reduced=false,classId='novice'){
+// 0–19 poses + side walk (12–19); 0.56 adds optional front walk 20–27 (toward the camera) and back walk 28–35.
+export const FRAME_COUNT=36;
+export const WALK_BASE={side:12,front:20,back:28};
+export function motionFrame(mode,time=0,phase=null,reduced=false,classId='novice',view='side'){
  if(reduced)return 0;
  const t=Math.max(0,Number.isFinite(time)?time:0);
- if(mode==='walk')return 12+Math.floor((((phase??t*1.65)%1+1)%1)*8);
+ if(mode==='walk')return (WALK_BASE[view]??12)+Math.floor((((phase??t*1.65)%1+1)%1)*8);
  if(mode==='attack'||mode==='cast')return t<.24?5:t<.58?(classId==='hunter'?7:6):t<.85?10:0;
  if(mode==='guard')return ['swordsman','novice'].includes(classId)?8:classId==='acolyte'?9:5;
  if(mode==='hit')return 5;

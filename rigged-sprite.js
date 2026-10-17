@@ -36,7 +36,10 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  mesh.userData.rigType='painted-frames';
  mesh.onBeforeRender=(_r,_s,camera)=>{mesh.quaternion.copy(camera.quaternion);mesh.updateMatrixWorld();};
  mesh.userData.pose=(pose,flip=false)=>{
-  const frame=Math.max(0,Math.min(FRAME_COUNT-1,Math.round(pose.artFrame??0)));
+  let frame=Math.max(0,Math.min(FRAME_COUNT-1,Math.round(pose.artFrame??0)));
+  // Front/back walk only where that art exists; otherwise the side cycle (with its left/right flip).
+  const missing=frames&&frame>=frames[currentGender].length;if(missing)frame=12+(frame-12)%8;
+  if(frame>=20)flip=false; // front/back walk art is drawn facing the camera / away from it
   if(!mesh.userData.directional&&frames){material.map=frames[currentGender][frame];mesh.userData.artFrame=frame;}
   const painted=frames&&!mesh.userData.directional,extent=painted?FRAME_SIZE/LOGICAL_SIZE:1;
   const positions=geometry.attributes.position,foot=mesh.userData.directional?(mesh.userData.footV??1):painted?FRAME_FOOT/LOGICAL_SIZE:1;

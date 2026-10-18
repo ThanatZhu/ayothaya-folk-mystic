@@ -35,9 +35,10 @@ import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=64';
 import {createLifeNPC} from './life-npc.js?v=62';
 import {createFeedback} from './feedback.js?v=64';
+import {createHud63} from './hud-63.js?v=66';
 import {resolveMap} from './world-state.js?v=21';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=64.1';
-import {createLandscapeGuard} from './mobile-layout.js?v=48.1';
+import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {prepareCloud} from './cloud-save.js?v=41';
 import {captureSave,applySave} from './save-state.js?v=21';
 const $=id=>document.getElementById(id),loading=getLoadingScreen(),loader=new THREE.TextureLoader();
@@ -49,7 +50,7 @@ function frame(image,rect,repeat=false){
  if(repeat)t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
 }
 let gameHandle=null;
-const landscape=createLandscapeGuard({onChange:()=>gameHandle?.clearInput()});
+const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
  const response=await fetch('./maps/world.json?v=63');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
@@ -175,7 +176,7 @@ try {
  $('overview').onclick=toggleOverview;
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
- worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account});const statusUI=createStatusUI({game,account,bagUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const marketUI=createMarketUI({game,map,account,bagUI});const socialUI=createSocialUI({game,account});const lifeUI=createLifeUI({game,account,camera});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});
+ worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account});const statusUI=createStatusUI({game,account,bagUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const marketUI=createMarketUI({game,map,account,bagUI});const socialUI=createSocialUI({game,account});const lifeUI=createLifeUI({game,account,camera});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});createHud63();
  document.querySelector('.player-heading small').textContent=(jobFor(account.character.classId,account.character.jobId)?.name??className(account.character.classId,account.character.gender))+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
  motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};

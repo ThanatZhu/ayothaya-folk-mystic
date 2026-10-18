@@ -36,7 +36,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   }
   if(serveStatic&&mode==='local'&&req.method==='GET'){
    try{const decoded=decodeURIComponent(url.pathname),relative=decoded==='/'?'index.html':decoded.slice(1),base=path.join(root,'dist'),file=path.resolve(base,relative);
-    if(!file.startsWith(base+path.sep)||relative.includes('..'))throw new Error('path');const body=await readFile(file),ext=path.extname(file);const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.glb':'model/gltf-binary','.woff2':'font/woff2'}[ext]??'application/octet-stream';res.writeHead(200,{'Content-Type':mime});res.end(body);
+    if(!file.startsWith(base+path.sep)||relative.includes('..'))throw new Error('path');const body=await readFile(file),ext=path.extname(file);const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.glb':'model/gltf-binary','.woff2':'font/woff2','.ttf':'font/ttf','.webp':'image/webp','.webmanifest':'application/manifest+json'}[ext]??'application/octet-stream';res.writeHead(200,{'Content-Type':mime});res.end(body);
    }catch{res.writeHead(404).end();}return;
   }
   reply(404,{error:'not-found'});

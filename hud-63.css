@@ -1,0 +1,153 @@
+/* 0.66 HUD layout (hud-63.js injects this last). 8 px spacing grid, 16-24 px screen margins, frames are decoration only. */
+:root{--g:8px;--edge:max(16px,env(safe-area-inset-left));--edge-r:max(16px,env(safe-area-inset-right));--edge-t:max(16px,env(safe-area-inset-top));--exp-h:14px;
+ --jade:#14322d;--jade-2:#1d4a41;--gold:#e9c46a;--ink:#fff3d6;--muted:#cfe0d4;--surface:#0f2421e6}
+.hud63-frame{position:absolute;inset:0;pointer-events:none;z-index:2;background:no-repeat center/100% 100%}
+
+/* ---------- profile (top-left): portrait, name, level, HP/MP in one framed group ---------- */
+body.field-hud.hud63 .player-panel{left:var(--edge);top:var(--edge-t);width:270px;height:84px;min-height:0;padding:0;box-sizing:border-box;
+ background:none;border:0;box-shadow:none;overflow:visible}
+body.field-hud.hud63 .player-panel::before,body.field-hud.hud63 .player-panel::after{display:none}
+.hud63 .f-profile{background-image:url("assets/ui63/frames/profile.png")}
+body.field-hud.hud63 .player-panel .portrait{position:absolute;left:6.1%;top:10.4%;width:22.9%;height:74%;margin:0;border-radius:50%;z-index:1;
+ background-color:var(--jade);box-shadow:none;border:0}
+body.field-hud.hud63 .player-panel .portrait::after{display:none}
+body.field-hud.hud63 .player-heading{position:static;display:block;margin:0}
+body.field-hud.hud63 .player-heading>div{position:absolute;left:37%;top:19%;width:51%;height:30%;min-width:0;display:flex;align-items:center;z-index:3}
+body.field-hud.hud63 .player-heading strong{display:block;font-size:14px;font-weight:700;line-height:1.1;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.field-hud.hud63 .player-heading small{display:none}
+body.field-hud.hud63 .level-badge{position:absolute;left:4%;top:auto;bottom:-6px;right:auto;z-index:4;font-size:11px;padding:1px 7px;border-radius:999px;
+ background:var(--jade);border:1px solid var(--gold);color:var(--gold);line-height:16px}
+body.field-hud.hud63 .player-panel .meter{position:absolute;left:33.8%;width:60%;height:10.2%;margin:0;border-radius:6px;background:#1a110bcc;z-index:1;overflow:hidden}
+body.field-hud.hud63 .player-panel .meter:has(#hp){top:58.4%}
+body.field-hud.hud63 .player-panel .meter:has(#mp){top:76.9%}
+body.field-hud.hud63 .player-panel .meter i{border-radius:6px}
+body.field-hud.hud63 .player-panel .meter span{position:absolute;inset:auto 6px auto auto;top:50%;transform:translateY(-50%);z-index:3;font-size:9px;font-weight:700;line-height:1;
+ color:#fff;text-shadow:0 0 2px #000,0 1px 2px #000;letter-spacing:.2px}
+body.field-hud.hud63 .player-foot{display:none}
+body.field-hud.hud63 #online-button{left:var(--edge);top:calc(var(--edge-t) + 84px + var(--g));bottom:auto;right:auto}
+body.field-hud.hud63 #ailment-row{left:var(--edge);top:calc(var(--edge-t) + 84px + 44px + var(--g))}
+
+/* ---------- minimap (top-right): area name on the top plaque, coordinates on the bottom plaque ---------- */
+body.field-hud.hud63 .mini-panel{top:var(--edge-t);right:var(--edge-r);width:200px;height:198px;padding:0;background:none;border:0;box-shadow:none;box-sizing:border-box}
+.hud63 .f-minimap{background-image:url("assets/ui63/frames/minimap.png")}
+body.field-hud.hud63 #mini-open{position:absolute;left:9%;top:14.9%;width:81.7%;height:72.1%;padding:0;border:0;background:#203a2f;border-radius:10px;overflow:hidden;z-index:1}
+body.field-hud.hud63 #mini-open::after{display:none}
+body.field-hud.hud63 .mini-panel canvas{width:100%;height:100%;aspect-ratio:auto;display:block}
+body.field-hud.hud63 .field-map-title{position:absolute;left:24%;right:24%;top:3.5%;height:8%;display:flex;align-items:center;justify-content:center;z-index:3;
+ font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;padding:0;background:none;border:0;left:20%;right:20%}
+body.field-hud.hud63 #mini-meta{position:absolute;left:24%;right:24%;bottom:3.8%;height:8%;display:flex;align-items:center;justify-content:center;z-index:3;
+ font-size:10px;color:var(--muted);white-space:nowrap;margin:0}
+
+/* ---------- main menu (top centre): equal buttons, secondary entries in a drawer ---------- */
+body.field-hud.hud63 #game-menu{left:50%;right:auto;top:var(--edge-t);transform:translateX(-50%);gap:var(--g);padding:0;background:none}
+body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:56px;min-width:56px;height:58px;min-height:58px;padding:4px 2px;border-radius:10px;
+ background:linear-gradient(#2a4a3f,#16302a);border:1px solid #c9a35a;box-shadow:0 2px 6px #0007;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+body.field-hud.hud63 #game-menu>button span,body.field-hud.hud63 #menu-drawer>button span{display:block;font-size:11px;font-weight:600;color:var(--ink);line-height:1}
+body.field-hud.hud63 #game-menu i{width:32px;height:32px;border-radius:8px;background:none;border:0}
+body.field-hud.hud63 #menu-more i{display:grid;place-items:center;font-size:22px;font-style:normal;color:var(--gold);font-weight:700}
+body.field-hud.hud63 #menu-more i::after{display:none}
+body.field-hud.hud63 #menu-drawer{display:none;position:absolute;top:calc(100% + var(--g));right:0;padding:var(--g);gap:var(--g);border-radius:12px;background:var(--surface);
+ border:1px solid #c9a35a;box-shadow:0 8px 24px #0009;flex-direction:row}
+body.field-hud.hud63 #game-menu.more-open #menu-drawer{display:flex}
+body.field-hud.hud63 #game-menu.more-open #menu-more{background:linear-gradient(#3b6656,#1f4339)}
+#menu-toggle{display:none}
+
+/* ---------- right column under the minimap: quest tracker (foldable) + event chips ---------- */
+#hud-right{position:fixed;z-index:16;right:var(--edge-r);top:calc(var(--edge-t) + 198px + var(--g));width:240px;display:flex;flex-direction:column;align-items:stretch;gap:var(--g);pointer-events:none}
+#hud-right>*{pointer-events:auto}
+body.field-hud.hud63 #hud-right #quest-tracker{position:relative;inset:auto;width:auto;top:auto;right:auto;margin:0;padding:6px 8px;border-radius:10px;
+ background:var(--surface);border:12px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 12px / 0 stretch;box-shadow:0 4px 14px #0007}
+body.field-hud.hud63 #quest-tracker small{font-size:10px;color:var(--muted)}
+body.field-hud.hud63 #quest-tracker strong{font-size:13px;color:var(--ink)}
+body.field-hud.hud63 #quest-tracker span{font-size:11px;color:var(--muted)}
+#quest-fold{position:absolute;top:-14px;left:-14px;width:28px;height:28px;border-radius:50%;border:1px solid #c9a35a;background:var(--jade);color:var(--gold);font-size:13px;z-index:3;cursor:pointer}
+body.field-hud.hud63 #quest-tracker.folded>:is(small,span){display:none}
+body.field-hud.hud63 #quest-tracker.folded{padding:4px 8px}
+body.field-hud.hud63 #hud-right #hud-chips{position:static;flex-direction:column;align-items:flex-end;gap:6px;top:auto;right:auto}
+body.field-hud.hud63 #hud-chips>button{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+
+/* ---------- target (under the menu, centred, small) and notices ---------- */
+body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 58px + var(--g));left:50%;transform:translateX(-50%);width:220px}
+body.field-hud.hud63 #notice{top:calc(var(--edge-t) + 58px + 64px)}
+
+/* ---------- chat (bottom-left): readable jade glass, folds to a bar ---------- */
+body.field-hud.hud63 #online-dock{border-radius:12px;background:#0d1f1cf0;box-shadow:0 6px 18px #0008}
+body.field-hud.hud63 #online-dock:not(.collapsed){border:14px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 14px / 0 stretch}
+body.field-hud.hud63 #online-dock.collapsed{border:1px solid #c9a35a}
+body.field-hud.hud63 #online-dock #online-messages{font-size:13px;line-height:1.45;color:var(--ink)}
+@media (pointer:fine) and (min-width:901px) and (min-height:601px){
+ body.field-hud.hud63 #online-dock{left:var(--edge);bottom:calc(var(--exp-h) + 16px);width:340px}
+ body.field-hud.hud63 #online-dock #online-messages{height:84px}
+ body.field-hud.hud63 #online-dock.collapsed{width:240px}
+}
+
+/* ---------- desktop skill bar (bottom centre): equal square slots, key, cooldown, then attack ---------- */
+body.field-hud.hud63-bar{--bar-x:max(50%,calc(var(--edge) + 340px + var(--g) + 330px))}
+body.field-hud.hud63-bar .combat-controls.wheel{left:var(--bar-x)!important;right:auto!important;bottom:calc(var(--exp-h) + 16px)!important;transform:translateX(-50%);
+ width:auto!important;height:auto!important;display:flex!important;align-items:flex-end;gap:12px;padding:8px 10px;border-radius:14px;background:#0f2421cc;
+ border:1px solid #c9a35a99;box-shadow:0 6px 18px #0008;pointer-events:auto}
+body.field-hud.hud63-bar .combat-controls.wheel .skills{display:flex!important;gap:6px;position:static}
+body.field-hud.hud63-bar .combat-controls.wheel .skill{position:relative!important;right:auto!important;bottom:auto!important;width:46px!important;height:46px!important;border-radius:9px!important}
+body.field-hud.hud63-bar .combat-controls.wheel .skill.cooling:after{border-radius:8px!important}
+body.field-hud.hud63-bar .combat-controls.wheel .skill kbd{left:2px;top:2px;width:15px;height:15px;font-size:10px;border-radius:4px}
+body.field-hud.hud63-bar .combat-controls.wheel .skill .skill-level{bottom:-6px;font-size:9px}
+body.field-hud.hud63-bar .combat-controls.wheel .skill.locked{filter:grayscale(.85) brightness(.7)}
+body.field-hud.hud63-bar .combat-controls.wheel .skill.no-mana{box-shadow:inset 0 0 0 2px #4a8fe0}
+body.field-hud.hud63-bar .combat-controls.wheel .attack-controls{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;position:static!important;width:auto!important;height:auto!important}
+body.field-hud.hud63-bar .combat-controls.wheel #auto-attack{position:relative!important;right:auto!important;bottom:auto!important;width:44px;height:44px}
+body.field-hud.hud63-bar .combat-controls.wheel #attack{position:relative!important;right:auto!important;bottom:auto!important;width:58px;height:58px;
+ box-shadow:0 0 0 2px #c9a35a,0 4px 10px #0008}
+body.field-hud.hud63-bar #quick-slots{left:calc(var(--bar-x) - 318px);right:auto;margin-left:0;bottom:calc(var(--exp-h) + 16px + 76px + var(--g))}
+
+/* ---------- EXP: thin lines on the bottom edge, labels above them ---------- */
+body.field-hud.hud63 .experience-bars{left:var(--edge);right:var(--edge-r);bottom:max(4px,env(safe-area-inset-bottom));gap:var(--g)}
+body.field-hud.hud63 .exp-track{height:4px;border-radius:2px;overflow:visible;background:#0008;border:0}
+body.field-hud.hud63 .exp-track>i{border-radius:2px}
+body.field-hud.hud63 .exp-track>span{inset:auto auto 6px 0;font-size:10px;line-height:1;color:#f3e9cc;text-shadow:0 1px 2px #000;background:none}
+
+/* ---------- phones and small windows ---------- */
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ :root{--edge:max(8px,env(safe-area-inset-left));--edge-r:max(8px,env(safe-area-inset-right));--edge-t:max(6px,env(safe-area-inset-top));--exp-h:8px}
+ body.field-hud.hud63 .player-panel{width:204px;height:63px}
+ body.field-hud.hud63 .player-heading strong{font-size:12px}
+ body.field-hud.hud63 .player-panel .meter span{font-size:8px}
+ body.field-hud.hud63 .mini-panel{width:120px;height:119px}
+ body.field-hud.hud63 .field-map-title{font-size:9px}
+ body.field-hud.hud63 #mini-meta{display:none}
+ /* One 44 px button opens the whole menu as a panel. */
+ body.field-hud.hud63 #menu-toggle{display:flex;position:fixed;z-index:21;top:var(--edge-t);right:calc(var(--edge-r) + 120px + var(--g));width:48px;height:48px;border-radius:12px;
+  flex-direction:column;align-items:center;justify-content:center;gap:1px;background:linear-gradient(#2a4a3f,#16302a);border:1px solid #c9a35a;color:var(--gold)}
+ body.field-hud.hud63 #menu-toggle b{font-size:18px;line-height:1}body.field-hud.hud63 #menu-toggle span{font-size:9px;color:var(--ink)}
+ body.field-hud.hud63 #game-menu{display:none;position:fixed;z-index:22;left:auto;right:calc(var(--edge-r) + 120px + var(--g));top:calc(var(--edge-t) + 48px + var(--g));transform:none;
+  flex-wrap:wrap;width:min(260px,calc(100vw - 32px));padding:var(--g);border-radius:12px;background:var(--surface);border:1px solid #c9a35a;box-shadow:0 8px 24px #0009}
+ body.field-hud.hud63 #game-menu.phone-open{display:flex}
+ body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:56px;min-width:56px;height:56px;min-height:56px}
+ body.field-hud.hud63 #game-menu #menu-profile{display:flex}
+ body.field-hud.hud63 #menu-more{display:none!important}
+ body.field-hud.hud63 #menu-drawer{display:contents!important}
+ #hud-right{top:calc(var(--edge-t) + 119px + var(--g));width:min(220px,40vw)}
+ body.field-hud.hud63 .target-panel{left:var(--edge);top:calc(var(--edge-t) + 63px + 44px + var(--g));transform:none;width:170px}
+ body.field-hud.hud63 #hud-chips>button{font-size:10px;padding:3px 8px}
+ body.field-hud.hud63 #online-button{top:calc(var(--edge-t) + 63px + var(--g))}
+ body.field-hud.hud63 #ailment-row{top:calc(var(--edge-t) + 63px + 44px + var(--g))}
+ body.field-hud.hud63 #online-dock:not(.collapsed){border-width:10px;border-image-width:10px}
+ body.field-hud.hud63 #online-dock #online-messages{height:72px}
+}
+/* Portrait phones: field in the middle, controls along the bottom, joystick bottom-left, skills bottom-right. */
+@media (orientation:portrait) and (max-width:600px){
+ body.field-hud.hud63 #hud-right{width:min(200px,52vw)}
+ body.field-hud.hud63 #online-dock{left:var(--edge);right:auto;translate:none;bottom:calc(var(--exp-h) + 196px);width:min(340px,calc(100vw - 16px))}
+ body.field-hud.hud63 #online-dock.collapsed{width:auto;max-width:180px}
+ body.field-hud.hud63 #quick-slots{left:var(--edge);right:auto;margin-left:0;bottom:calc(var(--exp-h) + 140px);translate:none}
+ body.field-hud.hud63 .joystick{left:var(--edge);bottom:calc(var(--exp-h) + 20px)}
+ body.field-hud.hud63 .combat-controls.wheel{right:var(--edge-r);bottom:calc(var(--exp-h) + 12px)}
+ body.field-hud.hud63 #interact{bottom:calc(var(--exp-h) + 240px)}
+}
+/* Phone landscape: the right column would reach the skill wheel, so event chips become one row at the top centre. */
+@media (orientation:landscape) and (max-height:600px){
+ body.field-hud.hud63 #hud-right #hud-chips{position:fixed;top:var(--edge-t);left:50%;transform:translateX(-50%);flex-direction:row;align-items:center;max-width:calc(100vw - 2 * (var(--edge) + 210px));z-index:15}
+ body.field-hud.hud63 #hud-chips>button{flex:0 1 auto;min-width:0}
+ body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 63px + 44px + var(--g))}
+}
+@media (orientation:portrait) and (max-width:600px){body.field-hud.hud63 #online-dock.collapsed{min-width:140px}}
+#online-dock.collapsed #dock-preview:empty::before{content:"แชต";color:var(--ink,#fff3d6)}

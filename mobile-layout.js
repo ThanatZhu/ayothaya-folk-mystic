@@ -2,7 +2,8 @@ export function needsLandscape({width,height,coarse=false,touchPoints=0}){
  return height>width&&(coarse||touchPoints>0||width<=800);
 }
 
-export function createLandscapeGuard({onChange=()=>{}}={}){
+// 0.66 the game page passes allowPortrait: hud-63 has a portrait layout; the lobby keeps asking for landscape.
+export function createLandscapeGuard({onChange=()=>{},allowPortrait=false}={}){
  const gate=document.getElementById('orientation-gate'),hint=document.getElementById('orientation-hint');
  const root=document.documentElement,layout=document.querySelector('.lobby-layout'),header=document.querySelector('.lobby-header');
  let fitFrame=0;
@@ -34,7 +35,7 @@ export function createLandscapeGuard({onChange=()=>{}}={}){
  document.addEventListener('focusin',scheduleFit);document.addEventListener('focusout',scheduleFit);
  let blocked=false;
  function update(){
-  const next=needsLandscape({width:innerWidth,height:innerHeight,coarse:matchMedia('(any-pointer: coarse)').matches,touchPoints:navigator.maxTouchPoints});
+  const next=!allowPortrait&&needsLandscape({width:innerWidth,height:innerHeight,coarse:matchMedia('(any-pointer: coarse)').matches,touchPoints:navigator.maxTouchPoints});
   if(next!==blocked){blocked=next;onChange(blocked);}
   document.documentElement.classList.toggle('portrait-blocked',blocked);
   if(blocked&&!gate.open)gate.showModal();

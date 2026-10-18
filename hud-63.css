@@ -150,4 +150,42 @@ body.field-hud.hud63 .exp-track>span{inset:auto auto 6px 0;font-size:10px;line-h
  body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 63px + 44px + var(--g))}
 }
 @media (orientation:portrait) and (max-width:600px){body.field-hud.hud63 #online-dock.collapsed{min-width:140px}}
-#online-dock.collapsed #dock-preview:empty::before{content:"แชต";color:var(--ink,#fff3d6)}
+@media (orientation:portrait) and (max-width:600px){#online-dock.collapsed #dock-preview:empty::before{content:"แชต";color:var(--ink,#fff3d6)}}
+
+/* ===== 0.67 desktop mockup pass: restrained jade glass with gold hairline + lotus corners, single-row hotbar ===== */
+@media (pointer:fine) and (min-width:901px) and (min-height:601px){
+ .hud63 .f-profile,.hud63 .f-minimap{display:none}
+ body.field-hud.hud63 .player-panel{width:280px;height:86px;background:#0f2421e0;border:12px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 12px / 0 stretch;border-radius:10px;box-shadow:0 6px 18px #0008}
+ body.field-hud.hud63 .player-panel .portrait{left:-2px;top:-2px;width:66px;height:66px;box-shadow:0 0 0 2px #c9a35a}
+ body.field-hud.hud63 .player-heading>div{left:80px;top:-2px;width:auto;right:52px;height:22px}
+ body.field-hud.hud63 .player-heading strong{font-size:15px}
+ body.field-hud.hud63 .level-badge{left:auto;right:-2px;top:-1px;bottom:auto;font-size:11px}
+ body.field-hud.hud63 .player-panel .meter{left:80px;right:-2px;width:auto;height:16px;border-radius:5px}
+ body.field-hud.hud63 .player-panel .meter:has(#hp){top:24px}
+ body.field-hud.hud63 .player-panel .meter:has(#mp){top:44px}
+ body.field-hud.hud63 .player-panel .meter span{left:0;right:0;inset:0;transform:none;display:flex;align-items:center;justify-content:center;font-size:11px}
+ body.field-hud.hud63 #online-button{top:calc(var(--edge-t) + 86px + var(--g))}
+ body.field-hud.hud63 .mini-panel{width:200px;height:206px;background:#0f2421e8;border:12px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 12px / 0 stretch;border-radius:10px;box-shadow:0 6px 18px #0008}
+ body.field-hud.hud63 #mini-open{left:0;top:22px;width:100%;height:calc(100% - 44px);border-radius:6px}
+ body.field-hud.hud63 .field-map-title{left:0;right:0;top:-2px;height:20px}
+ body.field-hud.hud63 #mini-meta{left:0;right:0;bottom:-2px;height:20px}
+ #hud-right{top:calc(var(--edge-t) + 206px + var(--g))}
+ body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:64px;min-width:64px;height:62px;min-height:62px;background:#0f2421e0;border:1px solid #c9a35a;border-radius:8px}
+ body.field-hud.hud63 #game-menu i{width:36px;height:36px}
+ body.field-hud.hud63 #menu-more i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 100% 33.333%/600% 400% no-repeat}
+ body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 62px + var(--g))}
+ /* hotbar: Q E | 1..0 | attack, one straight row */
+ body.field-hud.hud63-bar{--bar-x:max(50%,calc(var(--edge) + 340px + var(--g) + 390px))}
+ body.field-hud.hud63-bar .combat-controls.wheel{padding:8px 12px;gap:10px;border:12px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 12px / 0 stretch;background:#0f2421e0}
+ body.field-hud.hud63-bar .combat-controls.wheel #quick-slots{position:static!important;display:flex;gap:6px;margin:0;translate:none!important;align-items:flex-end}
+ body.field-hud.hud63-bar .combat-controls.wheel #quick-slots>button{width:46px;height:46px;border-radius:9px}
+ body.field-hud.hud63-bar .combat-controls.wheel #attack{width:64px;height:64px;border-radius:50%}
+ body.field-hud.hud63-bar>#auto-attack{position:fixed!important;right:var(--edge-r)!important;bottom:calc(var(--exp-h) + 16px)!important;left:auto!important;width:auto!important;height:40px!important;
+  padding:0 14px;border-radius:999px!important;display:flex!important;flex-direction:row!important;align-items:center;gap:6px;z-index:20;background:#0f2421f0!important;border:1px solid #c9a35a;opacity:1!important;white-space:nowrap;color:#fff3d6;transform:none!important}
+ body.field-hud.hud63-bar>#auto-attack>*{position:static!important;transform:none!important;margin:0!important}
+ body.field-hud.hud63-bar>#auto-attack strong{font-size:0}body.field-hud.hud63-bar>#auto-attack strong::before{content:"อัตโนมัติ";font-size:13px}
+ body.field-hud.hud63-bar>#auto-attack small{font-size:10px;opacity:.8}
+ /* EXP: muted gold hairline */
+ body.field-hud.hud63 .exp-track>i{background:linear-gradient(90deg,#b8862f,#f1cf73)}
+ body.field-hud.hud63 .exp-track.job>i{background:linear-gradient(90deg,#4f8f7f,#8fd6c1)}
+}

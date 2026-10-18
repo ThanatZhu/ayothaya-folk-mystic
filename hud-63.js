@@ -1,12 +1,13 @@
 // 0.66 HUD layout pass: groups the existing live HUD (DOM/canvas made by the other modules) into a standard MMORPG
 // arrangement and adds the wood-gold-jade frames (assets/ui63/frames) as pointer-events:none decoration.
 // Nothing here replaces a control: buttons, shortcuts and data stay owned by their modules.
-const PRIMARY=['menu-profile','menu-bag','menu-skills','menu-quests','menu-social'];
-const SECONDARY=['menu-status','menu-pet','menu-players','menu-chat'];
+// 0.67 follows the approved desktop mockup (outputs/ui-hud63-desktop-mockup.png): four main buttons + เมนู.
+const PRIMARY=['menu-profile','menu-bag','menu-skills','menu-quests'];
+const SECONDARY=['menu-social','menu-status','menu-pet','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63(){
  const $=id=>document.getElementById(id),body=document.body;
- const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=66';document.head.append(link); // last sheet wins ties
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=67';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
  deco(document.querySelector('.player-panel'),'f-profile');
@@ -28,7 +29,7 @@ export function createHud63(){
  if(nav){
   for(const id of PRIMARY){const b=$(id);if(b)nav.append(b);}
   const more=document.createElement('button');more.type='button';more.id='menu-more';more.setAttribute('aria-expanded','false');more.setAttribute('aria-label','เมนูเพิ่มเติม');more.title='เพิ่มเติม';
-  more.innerHTML='<i aria-hidden="true">⋯</i><span>เพิ่มเติม</span>';nav.append(more);
+  more.innerHTML='<i aria-hidden="true"></i><span>เมนู</span>';more.title='เมนู';nav.append(more);
   const drawer=document.createElement('div');drawer.id='menu-drawer';drawer.setAttribute('role','group');drawer.setAttribute('aria-label','เมนูรอง');nav.append(drawer);
   for(const id of SECONDARY){const b=$(id);if(b)drawer.append(b);}
   const toggle=document.createElement('button');toggle.type='button';toggle.id='menu-toggle';toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','เปิดเมนู');toggle.innerHTML='<b aria-hidden="true">☰</b><span>เมนู</span>';
@@ -43,6 +44,10 @@ export function createHud63(){
  }
  // Desktop skill bar: one row of equal slots instead of the touch wheel (the wheel stays on touch screens).
  const bar=matchMedia('(pointer:fine) and (min-width:901px) and (min-height:601px)');
- const applyBar=()=>body.classList.toggle('hud63-bar',bar.matches);bar.addEventListener('change',applyBar);applyBar();
+ // Desktop: potions sit at the start of the hotbar row and AUTO becomes a small toggle at the bottom right.
+ const cc=document.querySelector('.combat-controls'),ac=document.querySelector('.attack-controls'),auto=$('auto-attack'),quick=$('quick-slots');
+ const applyBar=()=>{body.classList.toggle('hud63-bar',bar.matches);
+  if(bar.matches){if(quick&&cc&&quick.parentElement!==cc)cc.prepend(quick);if(auto&&auto.parentElement!==body)body.append(auto);}
+  else{if(quick&&quick.parentElement!==body)body.append(quick);if(auto&&ac&&auto.parentElement!==ac)ac.prepend(auto);}};bar.addEventListener('change',applyBar);applyBar();
  return {};
 }

@@ -1,6 +1,6 @@
 import {experienceOf} from './experience.js?v=64';
 import {normalizeEquipment} from './equipment.js?v=41';
-import {trainingAction} from './city-life-data.js?v=62';
+import {trainingAction} from './city-life-data.js?v=66.1';
 import {CLASS_LEVEL,progression,validateJob} from './advancement.js?v=21';
 import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=62';
 import {validateSave,nextRevision} from './save-state.js?v=21';

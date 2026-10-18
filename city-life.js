@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {CITIZEN_STYLES} from './city-life-data.js?v=62';
+import {CITIZEN_STYLES} from './city-life-data.js?v=66.1';
 import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1';
 
 // Whole painted poses, aligned at their feet. No skeletal cutouts or squash/stretch.

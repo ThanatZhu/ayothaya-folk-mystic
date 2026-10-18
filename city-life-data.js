@@ -1,14 +1,14 @@
 import {JOBS,CLASS_LEVEL,JOB_LEVEL,progression} from './advancement.js?v=21';
 export const MASTER_COURT={name:'ลานครูแห่งอโยธยา',x:40,z:-46};
 export const MENTORS=[
- {id:'sword-master',classId:'swordsman',name:'ขุนอินทรเดช',title:'ครูดาบ',x:30,z:-54,sheet:'masters-arms',row:0,color:'#e6ba73',text:'ดาบที่มั่นคงเริ่มจากใจที่ไม่หวั่นไหว จงออกปกป้องชาวบ้าน แล้วกลับมารับคำสอนจากข้า'},
- {id:'spear-master',classId:'lancer',name:'ครูหญิงพิกุล',title:'ครูทวน',x:44,z:-54,sheet:'masters-arms',row:1,color:'#e9aa81',text:'ปลายทวนมีไว้รักษาระยะและคุ้มครองสหาย เจ้าพร้อมเรียนรู้จังหวะของมันหรือยัง'},
- {id:'hunt-master',classId:'hunter',name:'พรานแม่แก้ว',title:'ครูพราน',x:34,z:-54,sheet:'masters-arms',row:2,color:'#bdd58a',text:'ป่ามีภาษาของมัน ก่อนปล่อยศร เจ้าต้องมองเส้นทางกลับบ้านของทุกคนให้เห็น'},
- {id:'box-master',classId:'boxer',name:'ครูคง',title:'ครูมวย',x:48,z:-54,sheet:'masters-arms',row:3,color:'#f0ad83',text:'ยืนให้มั่น หายใจให้เป็น แล้วค่อยออกหมัด ฝีมือของเจ้ามีไว้ปกป้องผู้อ่อนแอ'},
- {id:'shadow-master',classId:'rogue',name:'แม่เงาจันทร์',title:'ครูมีดคู่',x:30,z:-38,sheet:'masters-mystic',row:0,color:'#d2abd5',text:'ความไวเพียงอย่างเดียวไม่พอ เจ้าต้องรู้ว่าเมื่อใดควรเข้าหา และเมื่อใดควรถอย'},
- {id:'spirit-master',classId:'shaman',name:'ปู่คำสิงห์',title:'ครูอาคม',x:44,z:-38,sheet:'masters-mystic',row:1,color:'#93dfd3',text:'ทุกดวงวิญญาณเคยมีชื่อ จงใช้วิชาเพื่อคลายทุกข์ มิใช่ผูกทุกสิ่งไว้กับตน'},
- {id:'monk-master',classId:'acolyte',name:'หลวงพ่อปัญญาธร',title:'ครูสายเมตตา',x:34,z:-38,sheet:'masters-mystic',row:2,color:'#eed397',text:'กำลังใจอันสงบช่วยคุ้มครองผู้คนได้ จงไปบรรเทาภัยนอกกำแพง แล้วกลับมาเล่าให้อาตมาฟัง'},
- {id:'nun-master',classId:'acolyte',name:'แม่ชีบุญเรือน',title:'ครูสายเมตตา',x:48,z:-38,sheet:'masters-mystic',row:3,color:'#e8e3cb',text:'เมตตาคือการลงมือช่วยผู้อื่น พระและแม่ชีเรียนบททดสอบเดียวกัน เลือกเส้นทางที่ใจเจ้าพร้อมเถิด'}
+ {id:'sword-master',classId:'swordsman',name:'ขุนอินทรเดช',title:'ครูดาบ',x:29,z:-54,sheet:'masters-arms',row:0,color:'#e6ba73',text:'ดาบที่มั่นคงเริ่มจากใจที่ไม่หวั่นไหว จงออกปกป้องชาวบ้าน แล้วกลับมารับคำสอนจากข้า'},
+ {id:'spear-master',classId:'lancer',name:'ครูหญิงพิกุล',title:'ครูทวน',x:51,z:-54,sheet:'masters-arms',row:1,color:'#e9aa81',text:'ปลายทวนมีไว้รักษาระยะและคุ้มครองสหาย เจ้าพร้อมเรียนรู้จังหวะของมันหรือยัง'},
+ {id:'hunt-master',classId:'hunter',name:'พรานแม่แก้ว',title:'ครูพราน',x:29,z:-48,sheet:'masters-arms',row:2,color:'#bdd58a',text:'ป่ามีภาษาของมัน ก่อนปล่อยศร เจ้าต้องมองเส้นทางกลับบ้านของทุกคนให้เห็น'},
+ {id:'box-master',classId:'boxer',name:'ครูคง',title:'ครูมวย',x:51,z:-48,sheet:'masters-arms',row:3,color:'#f0ad83',text:'ยืนให้มั่น หายใจให้เป็น แล้วค่อยออกหมัด ฝีมือของเจ้ามีไว้ปกป้องผู้อ่อนแอ'},
+ {id:'shadow-master',classId:'rogue',name:'แม่เงาจันทร์',title:'ครูมีดคู่',x:29,z:-42,sheet:'masters-mystic',row:0,color:'#d2abd5',text:'ความไวเพียงอย่างเดียวไม่พอ เจ้าต้องรู้ว่าเมื่อใดควรเข้าหา และเมื่อใดควรถอย'},
+ {id:'spirit-master',classId:'shaman',name:'ปู่คำสิงห์',title:'ครูอาคม',x:51,z:-42,sheet:'masters-mystic',row:1,color:'#93dfd3',text:'ทุกดวงวิญญาณเคยมีชื่อ จงใช้วิชาเพื่อคลายทุกข์ มิใช่ผูกทุกสิ่งไว้กับตน'},
+ {id:'monk-master',classId:'acolyte',name:'หลวงพ่อปัญญาธร',title:'ครูสายเมตตา',x:29,z:-36,sheet:'masters-mystic',row:2,color:'#eed397',text:'กำลังใจอันสงบช่วยคุ้มครองผู้คนได้ จงไปบรรเทาภัยนอกกำแพง แล้วกลับมาเล่าให้อาตมาฟัง'},
+ {id:'nun-master',classId:'acolyte',name:'แม่ชีบุญเรือน',title:'ครูสายเมตตา',x:51,z:-36,sheet:'masters-mystic',row:3,color:'#e8e3cb',text:'เมตตาคือการลงมือช่วยผู้อื่น พระและแม่ชีเรียนบททดสอบเดียวกัน เลือกเส้นทางที่ใจเจ้าพร้อมเถิด'}
 ];
 export const mentorById=id=>MENTORS.find(m=>m.id===id);
 export function trainingStatus(character,training,traveler,mentorId){

@@ -37,7 +37,7 @@ import {createLifeNPC} from './life-npc.js?v=62';
 import {createFeedback} from './feedback.js?v=64';
 import {createHud63} from './hud-63.js?v=66';
 import {resolveMap} from './world-state.js?v=21';
-import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=64.1';
+import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=66.1';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {prepareCloud} from './cloud-save.js?v=41';
 import {captureSave,applySave} from './save-state.js?v=21';
@@ -52,7 +52,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=63');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=66.1');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));

@@ -1,6 +1,6 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {openHudPanel} from './hud-panels.js?v=34';
-import {drawMap} from './city-map.js?v=64.1';
+import {drawMap} from './city-map.js?v=65';
 import {createMentorUI} from './mentor-ui.js?v=40';
 import * as THREE from 'three';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=21';
@@ -54,7 +54,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  }
  // World button: every map with its warp fare; the party dungeon is entered on foot from the mill.
  const worldPanel=document.createElement('section');worldPanel.id='world-warp';worldPanel.hidden=true;dialog.append(worldPanel);
- const worldButton=document.createElement('button');worldButton.type='button';worldButton.id='world-toggle';worldButton.textContent='🌐 World';dialog.append(worldButton);
+ const worldButton=document.createElement('button');worldButton.type='button';worldButton.id='world-toggle';worldButton.textContent='World';dialog.append(worldButton);
  worldButton.onclick=()=>{worldPanel.hidden=!worldPanel.hidden;worldButton.classList.toggle('on',!worldPanel.hidden);if(!worldPanel.hidden)drawWorld();};
  function drawWorld(){
   const coins=api.coins?.()??0;

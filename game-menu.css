@@ -57,3 +57,11 @@ body.field-hud #settings-panel,body.field-hud #open-settings{display:none!import
 @media (pointer:fine) and (min-height:521px) and (min-width:761px){
  html body :is(#skill-window,#online-panel,#status-window,#bag-window,#shop-window,#social-window,#pet-window,#quests-window)[data-hud-panel][open]{inset:0;margin:auto;height:fit-content;max-height:calc(100dvh - 140px)}
 }
+/* 0.65 painted UI icons: assets/ui63/ui-menu63.png, 6 columns x 4 rows (scripts/normalize-ui63.py). */
+body.field-hud #game-menu i{position:relative}
+body.field-hud #game-menu i>*{visibility:hidden}
+body.field-hud #game-menu i::after,#world-toggle::before,#open-settings::before{content:"";background:url("assets/ui63/ui-menu63.png?v=65") var(--cell,0 0)/600% 400% no-repeat}
+body.field-hud #game-menu i::after{position:absolute;inset:6%}
+#world-toggle::before,#open-settings::before{display:inline-block;width:1.5em;height:1.5em;margin-right:.35em;vertical-align:middle}
+#menu-profile{--cell:0% 0%}#menu-skills{--cell:20% 0%}#menu-status{--cell:40% 0%}#menu-bag{--cell:60% 0%}#menu-social{--cell:80% 0%}#menu-pet{--cell:100% 0%}
+#menu-quests{--cell:0% 33.333%}#menu-players{--cell:20% 33.333%}#menu-chat{--cell:40% 33.333%}#world-toggle{--cell:80% 33.333%}#open-settings{--cell:100% 33.333%}

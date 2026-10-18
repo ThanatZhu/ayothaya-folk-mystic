@@ -561,3 +561,10 @@ Public build is a single-player browser prototype; multiplayer server/account pe
 - Tests: npm test 208/208, test:multiplayer 16/16, check:content valid, build OK. Local server (AUTH_MODE=local) tour: all six maps, NPC talk, mentor dialog, bridge crossings with deck height (capital, rice, orchard, mill, cellar, marsh), portal chain incl. mill-cellar, world-map warp, phone 915×412. No console errors.
 - Live: Render /health commit 0df669b, contentVersion 62, authority true; Vercel shows 0.62 and serves all six v2 GLBs (200). Production guest mode verified: capital → NPC ลุงเรือง → portal to rice-fields → back.
 - Not verified: Google-login online play on production, a physical phone. Known: old `maps/ayutthaya.glb/.blend/-preview.png` are no longer loaded (kept, not deleted); hero can be hidden behind v2 roofs (no roof fade yet).
+
+## 0.63 → 0.65 (2026-10-18)
+- 0.63 `e4e52c5`: monster camps of 4–5 with pack rally; desktop utility windows centred. `bc84b2e`: Codex's eight-direction painted characters as default (owner-approved) + skill VFX.
+- 0.64 `ef941df`: camp leaders (3× HP, 2× EXP, 3 loot rolls), daily leader bounty, 20-minute field surge (EXP/drop ×2 for 5 min, channel announce), purple/gold drop banner + announce, level gifts Lv 3–25. Verified live: Render ef941df, Vercel 0.64, surge chip shown in production guest mode.
+- 0.64.1 `55b0ee0`: owner reported (iPhone video) flickering ground on several maps and an incomplete, static map. Fixed coplanar ground z-fighting with per-layer polygon offset; map photo now renders shadows for the whole map; open map redraws every 250 ms with monster/NPC markers. Verified live: Render 55b0ee0, Vercel 0.64.1.
+- 0.65: painted UI icon sheet `assets/ui63/ui-menu63.png` (ChatGPT/Codex art, glow stripped and re-gridded by `scripts/normalize-ui63.py` in Blender) on the top menu, World and settings buttons and as map markers (portal, NPC, shop, you, teachers' court, boss).
+- Tests 234/234, multiplayer 16/16. Not verified: a physical phone after the 0.64.1 flicker fix (owner to confirm).

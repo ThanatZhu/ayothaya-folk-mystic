@@ -20,7 +20,7 @@ export class MultiplayerClient extends EventTarget{
     else if(m.type==='traveled'){this.stopped=true;this.pending.get(m.id)?.resolve();this.pending.delete(m.id);}
     else if(m.type==='travel-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
     else if(m.type==='left'){this.pending.get('leave')?.resolve();this.pending.delete('leave');this.stopped=true;this.state('offline');}
-    else{if(m.type==='error'&&['authentication-failed','character-not-found','character-server','save-failed','save-conflict'].includes(m.code)){this.stopped=true;this.state('error');}this.emit(m.type,m);}
+    else{if(m.type==='error'&&['authentication-failed','character-not-found','character-server','save-failed','save-conflict','replaced'].includes(m.code)){this.stopped=true;this.state('error');}this.emit(m.type,m);}
    });
    socket.addEventListener('close',()=>{if(generation!==this.generation)return;for(const task of this.pending.values())task.reject(new Error('disconnected'));this.pending.clear();
     if(this.stopped){if(this.status!=='error')this.state('offline');return;}if(this.retries>=14){this.stopped=true;this.state('error');this.emit('error',{code:'connection-timeout'});return;}this.state('reconnecting');const delay=Math.min(15000,700*2**Math.min(this.retries++,5));clearTimeout(this.timer);this.timer=setTimeout(()=>this.connect(),delay+Math.random()*300);

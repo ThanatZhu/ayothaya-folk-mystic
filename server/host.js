@@ -96,6 +96,9 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     identity={uid:verified.uid,serverId:message.serverId,slotId:message.slotId};
     if(!['server-1','server-2'].includes(identity.serverId)||!/^slot-[1-5]$/.test(identity.slotId??''))throw new Error('invalid-identity');
     if(joinPending.has(identity.uid))throw new Error('already-online');joinPending.add(identity.uid);claimed=true;
+    // 0.61.2 the newest login wins (Ragnarok style): the old window is told it was replaced, saves and closes first.
+    const old=[...sessions.values()].find(s=>s.lease?.identity?.uid===identity.uid&&!s.closing);
+    if(old){const closed=new Promise(r=>{old.onClosed=r;});try{old.ws.send(JSON.stringify({type:'error',code:'replaced'}));}catch{}old.ws.close(4009,'replaced');await Promise.race([closed,new Promise(r=>setTimeout(r,8000))]);}
     lease=await store.acquire(identity,randomUUID());if(ws.readyState!==WebSocket.OPEN)throw new Error('connection-closed');
     // Send welcome after the full authenticated session exists.
     const queued=[],peer=realm.join({...identity,record:lease.record,send:data=>queued.push(data)});
@@ -103,7 +106,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    }catch(e){if(lease)await store.checkpoint(lease,lease.record,{release:true}).catch(()=>{});send({type:'error',code:['already-online','room-full','character-not-found','character-server'].includes(e.message)?e.message:'authentication-failed'});ws.close(4003,'join-rejected');}
    finally{if(claimed)joinPending.delete(identity.uid);}
   });
-  ws.on('close',()=>{clearTimeout(timer);if(session){session.closing=true;realm.suspend(session.peer.id);checkpoint(session,true).catch(()=>{}).finally(()=>{if(sessions.get(session.peer.id)===session){if(session.explicitLeave)realm.leave(session.peer.id);sessions.delete(session.peer.id);}});}});
+  ws.on('close',()=>{clearTimeout(timer);if(session){session.closing=true;realm.suspend(session.peer.id);checkpoint(session,true).catch(()=>{}).finally(()=>{if(sessions.get(session.peer.id)===session){if(session.explicitLeave)realm.leave(session.peer.id);sessions.delete(session.peer.id);}session.onClosed?.();});}});
   ws.on('error',()=>{});
  });
  // Step by real elapsed time in fixed 50 ms slices: timers fire late (especially on Windows), and a fixed

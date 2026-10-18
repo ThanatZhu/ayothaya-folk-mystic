@@ -27,7 +27,9 @@ export class RealmServer{
  constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
-  const existing=[...this.peers.values()].find(p=>p.uid===uid);
+  let existing=[...this.peers.values()].find(p=>p.uid===uid);
+  // A suspended copy of another character, or one past its resume window, is dropped so the new login can enter.
+  if(existing?.suspended&&(existing.resumeUntil<this.now()||existing.serverId!==serverId||existing.slotId!==slotId)){this.leave(existing.id);existing=null;}
   if(existing){
    if(!existing.suspended||existing.resumeUntil<this.now()||existing.serverId!==serverId||existing.slotId!==slotId)throw new Error('already-online');
    existing.suspended=false;existing.resumeUntil=0;existing.send=send;existing.seq=0;existing.known=new Set();existing.input={x:0,z:0,attack:false};existing.inputAt=this.now();

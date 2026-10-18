@@ -1,6 +1,6 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {openHudPanel} from './hud-panels.js?v=34';
-import {drawMap} from './city-map.js?v=65';
+import {drawMap} from './city-map.js?v=68.1';
 import {createMentorUI} from './mentor-ui.js?v=40';
 import * as THREE from 'three';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=21';

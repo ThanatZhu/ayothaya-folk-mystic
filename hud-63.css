@@ -227,3 +227,19 @@ body.field-hud.hud63{--chat-w:340px}
  body.field-hud.hud63 .target-panel small{display:none}
 }
 body.field-hud.hud63 #hud-right #quest-tracker{padding-left:16px}
+
+/* ===== 0.68.1: EXP hairline on the very screen edge, quest text shown in full ===== */
+body.field-hud.hud63 .experience-bars{left:0!important;right:0!important;bottom:0!important;gap:0!important}
+body.field-hud.hud63 .exp-track{height:3px;border-radius:0}
+body.field-hud.hud63 .exp-track>i{border-radius:0}
+body.field-hud.hud63 .exp-track>span{left:max(8px,env(safe-area-inset-left));bottom:5px}
+body.field-hud.hud63 .exp-track.job>span{left:8px}
+body.field-hud.hud63 #quest-tracker :is(strong,span,small){white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:block}
+body.field-hud.hud63 #quest-tracker strong{font-size:11px!important;line-height:1.15}
+body.field-hud.hud63 #quest-tracker span{font-size:9.5px!important;line-height:1.15}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ body.field-hud.hud63 #quest-tracker strong{font-size:10px!important}
+ body.field-hud.hud63 #quest-tracker span{font-size:8.5px!important}
+ body.field-hud.hud63 #quest-tracker small{display:none!important}
+ body.field-hud.hud63 #quest-go{min-height:36px;min-width:44px;font-size:9.5px;padding:0 6px}
+}

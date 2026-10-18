@@ -29,6 +29,20 @@ export function jobProgress(saved,classId='novice',jobId=''){
 }
 // 0.48 death penalty: lose up to 5 base EXP of the current level outside town from Lv.5; never loses a level.
 export const DEATH_XP=5;
+// 0.64 level milestones: something new every 2-3 base levels (granted once, base level never drops).
+export const LEVEL_GIFTS={
+ 3:{text:'ปลดล็อกค่าหัวประจำวัน · คุยกับขุนอินทร์ในเมือง',coins:200,items:[{id:'hp-small',count:5}]},
+ 5:{text:'ได้ธูปกลับเมือง · กลับเมืองได้ทุกที่',coins:250,items:[{id:'return-incense',count:3}]},
+ 8:{text:'สวนหมากคลองเก่าเหมาะกับเลเวลนี้แล้ว',coins:300,items:[{id:'mp-small',count:5}]},
+ 10:{text:'ลองล่าหัวหน้าฝูง · ดรอปมากกว่า 3 เท่า',coins:400,items:[{id:'sticky-rice',count:5}]},
+ 12:{text:'จ้างทหารรับจ้างกับครูแสนดาบได้คุ้มแล้ว',coins:600,items:[{id:'hp-small',count:10}]},
+ 15:{text:'โรงสีใต้เงาจันทร์รออยู่ · ชวนเพื่อนตั้งปาร์ตี้',coins:800,items:[{id:'mp-large',count:3}]},
+ 18:{text:'ล่า MVP ราชาหุ่นฟางเพลิงกับเพื่อน',coins:1000,items:[{id:'hp-large',count:5}]},
+ 20:{text:'ดันเจี้ยนใต้ถุนโรงสีเปิดให้ปาร์ตี้แล้ว',coins:1200,items:[{id:'return-incense',count:5}]},
+ 23:{text:'อีกนิดเดียวจะเปลี่ยนอาชีพ',coins:1500,items:[{id:'mp-large',count:5}]},
+ 25:{text:'เปลี่ยนอาชีพที่ลานครู · บึงบัวต้องมนตร์เปิดรับแล้ว',coins:2500,items:[{id:'hp-large',count:10}]},
+};
+export const levelGifts=(from,to)=>Object.entries(LEVEL_GIFTS).filter(([l])=>+l>from&&+l<=to).map(([l,g])=>({level:+l,...g}));
 export function deathPenalty(world){
  if(world.safe)return 0;const p=baseProgress(world);if(p.level<5||p.maxed)return 0;
  const lost=Math.min(DEATH_XP,p.current);world.baseXp=experienceOf(world).baseXp-lost;return lost;
@@ -36,5 +50,5 @@ export function deathPenalty(world){
 export function awardExperience(world,base,job){
  const before=baseProgress(world).level,jobBefore=jobProgress(world,world.profession.id,world.jobId).level;
  const old=experienceOf(world);world.baseXp=Math.min(MAX_XP,old.baseXp+base);world.jobXp=Math.min(MAX_XP,old.jobXp+job);
- return {base,job,baseLevel:baseProgress(world).level,jobLevel:jobProgress(world,world.profession.id,world.jobId).level,baseUp:baseProgress(world).level>before,jobUp:jobProgress(world,world.profession.id,world.jobId).level>jobBefore};
+ return {base,job,baseFrom:before,baseLevel:baseProgress(world).level,jobLevel:jobProgress(world,world.profession.id,world.jobId).level,baseUp:baseProgress(world).level>before,jobUp:jobProgress(world,world.profession.id,world.jobId).level>jobBefore};
 }

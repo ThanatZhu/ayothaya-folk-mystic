@@ -1,10 +1,10 @@
 // 0.48 everyday UI: ailment icons on the HUD, RO-style emote bubbles (picker + own bubble), daily login popup.
 // Remote players' bubbles are drawn by multiplayer-ui.js; the server rewards the daily login online, this file offline.
-import {emoteId,itemDef} from './items.js?v=04';
+import {emoteId,itemDef} from './items.js?v=64';
 import {AILMENTS} from './ailments.js?v=01';
 import {claimDaily,DAILY} from './daily.js?v=01';
-import {activeEvent,expRate} from './events.js?v=01';
-import {iconStyle} from './bag-ui.js?v=03';
+import {activeEvent,expRate,surge} from './events.js?v=64';
+import {iconStyle} from './bag-ui.js?v=64';
 import {openHudPanel} from './hud-panels.js?v=34';
 import * as THREE from 'three';
 
@@ -13,7 +13,7 @@ const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 const POSES=[['bow','ไหว้'],['celebrate','ดีใจ'],['rest','นั่งพัก'],['guard','ตั้งท่า']];
 
 export function createLifeUI({game,account,camera}){
- if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=01';css.dataset.lifeUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=64';css.dataset.lifeUi='';document.head.append(css);}
  const world=game.world;world.status??={};
 
  // Ailment row under the player frame.
@@ -74,7 +74,14 @@ export function createLifeUI({game,account,camera}){
  });
  // 0.50 festival chip + the EXP rate the offline world uses (the server applies its own online).
  const fest=document.createElement('button');fest.type='button';fest.id='event-chip';fest.hidden=true;chips.append(fest);let festId=null,rateAt=0;
- function drawEvent(){const e=activeEvent(Date.now());if(performance.now()>rateAt){rateAt=performance.now()+30000;world.expRate=expRate(Date.now());}
+ // 0.64 field surge chip: where the next 5-minute EXP/drop x2 frenzy is, and a countdown. Clicking warps you there through the World map.
+ const surgeChip=document.createElement('button');surgeChip.type='button';surgeChip.id='surge-chip';chips.append(surgeChip);let surgeText='';
+ const mapName=id=>({'rice-fields':'ทุ่งขวัญข้าว','old-orchard':'สวนหมากคลองเก่า','moonlit-mill':'โรงสีใต้เงาจันทร์','lotus-marsh':'บึงบัวต้องมนตร์'})[id]??id;
+ function drawSurge(){const now=Date.now(),s=surge(now),left=Math.max(0,Math.ceil(((s.active?s.endsAt:s.nextAt)-now)/1000)),mm=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+  const text=s.active?`🔥 ฝูงคลั่ง ${mapName(s.map)} · เหลือ ${mm}`:`🔥 ฝูงคลั่งถัดไป ${mapName(s.nextMap)} · อีก ${mm}`;
+  if(text!==surgeText){surgeText=text;surgeChip.textContent=text;surgeChip.classList.toggle('on',s.active);}}
+ surgeChip.onclick=()=>{const s=surge(Date.now());world.notice(s.active?`ฝูงคลั่งที่ ${mapName(s.map)} · EXP ×2 และดรอป ×2 · กด M แล้วเลือก World เพื่อวาร์ป`:`ทุก 20 นาทีจะมีฝูงคลั่ง 5 นาทีในแผนที่นอกเมือง · ครั้งถัดไป ${mapName(s.nextMap)}`);};
+ function drawEvent(){const e=activeEvent(Date.now());if(performance.now()>rateAt){rateAt=performance.now()+30000;world.expRate=expRate(Date.now(),document.body.dataset.map);}drawSurge();
   if((e?.id??null)===festId)return;festId=e?.id??null;fest.hidden=!e;if(!e)return;
   const end=new Date(e.end+'T00:00:00+07:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});
   fest.innerHTML=`${icon('krathong','item-icon small')}<span>${e.name}</span><b>ถึง ${end}</b>`;fest.onclick=()=>world.notice(e.name+' · '+e.text);

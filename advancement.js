@@ -1,4 +1,4 @@
-import {baseProgress} from './experience.js?v=21';
+import {baseProgress} from './experience.js?v=64';
 export const JOBS={
  novice:[],
  swordsman:[{id:'guardian',name:'ขุนดาบพิทักษ์',style:'ป้องกัน',damage:1.12,shield:1.5},{id:'duelist',name:'ขุนดาบทะลวง',style:'โจมตี',damage:1.3,delay:.9}],

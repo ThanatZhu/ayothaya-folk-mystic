@@ -1,14 +1,14 @@
 // 0.60 "ภารกิจ" window: daily bounty board (claim in a town) and the card album. Online the realm server owns both;
 // offline guests keep them in localStorage and pay out through the same 'reward' / experience events.
-import {itemDef} from './items.js?v=04';
-import {MONSTER_TYPES} from './combat-core.js?v=63';
-import {awardExperience} from './experience.js?v=21';
-import {dailyBounties,normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd,ALBUM_CARDS,ALBUM_MILESTONES} from './bounty.js?v=01';
-import {iconStyle} from './bag-ui.js?v=03';
+import {itemDef} from './items.js?v=64';
+import {MONSTER_TYPES} from './combat-core.js?v=64';
+import {awardExperience} from './experience.js?v=64';
+import {dailyBounties,normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd,ALBUM_CARDS,ALBUM_MILESTONES} from './bounty.js?v=64';
+import {iconStyle} from './bag-ui.js?v=64';
 import {openHudPanel} from './hud-panels.js?v=34';
 const $=id=>document.getElementById(id);
 const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
-const TIER=['ง่าย','กลาง','ยาก'];
+const TIER=['ง่าย','กลาง','ยาก','หัวหน้า'];
 
 export function createQuestsUI({game,account,map,bagUI}){
  const world=game.world,slot=(account?.serverId??'local')+':'+(account?.slotId??'guest');
@@ -17,7 +17,7 @@ export function createQuestsUI({game,account,map,bagUI}){
  const bounty=()=>normalizeBounty(game.online?world.bounty:localBounty,Date.now()),album=()=>normalizeAlbum(game.online?world.album:localAlbum);
  game.onEvent(e=>{
   if(game.online){if(e.type==='album')world.notice(`สมุดการ์ดครบ ${e.count} ใบ · ได้รับรางวัล!`);return;}
-  if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const r=bountyDefeat(localBounty,Date.now(),id);if(r.changed){localBounty=r.state;keep('ayothaya-bounty:',localBounty);}}}
+  if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const r=bountyDefeat(localBounty,Date.now(),id,mob.leader);if(r.changed){localBounty=r.state;keep('ayothaya-bounty:',localBounty);}}}
   if(e.type==='drop'){const cards=e.items.map(i=>i.id).filter(id=>itemDef(id)?.kind==='card');if(cards.length){const r=albumAdd(localAlbum,cards);if(r.added){localAlbum=r.album;keep('ayothaya-album:',localAlbum);
    for(const m of r.milestones){world.notice(`สมุดการ์ดครบ ${m.count} ใบ · ได้รับรางวัล!`);world.emit('reward',m.reward);}}}}
  });

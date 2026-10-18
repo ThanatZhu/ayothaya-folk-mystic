@@ -211,7 +211,8 @@ export function addLoot(bag,{coins=0,items=[]}={}){
  return {bag:b,coins:gained,added,lost};
 }
 
-export function rollLoot(monsterId,rand=Math.random,event=null){
+export function rollLoot(monsterId,rand=Math.random,event=null,rolls=1){
+ if(rolls>1){const all={coins:0,items:[]};for(let i=0;i<rolls;i++){const r=rollLoot(monsterId,rand,i?null:event);all.coins+=r.coins;all.items.push(...r.items);}return all;} // 0.64 leaders/surge roll several times
  const d=DROPS[monsterId];if(!d)return {coins:0,items:[]};
  const [lo,hi]=d.coins,coins=lo+Math.floor(rand()*(hi-lo+1)),items=[];
  for(const [id,chance,n=1] of d.items)if(rand()<chance)items.push({id:ITEMS[id]?.kind==='gear'&&rand()<.35?id+'!'+rollAffix(rand):id,count:n}); // 0.57: 35% of dropped gear gets a random affix

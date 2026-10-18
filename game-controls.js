@@ -1,13 +1,13 @@
-import {itemDef} from './items.js?v=04';
+import {itemDef} from './items.js?v=64';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
-import {jobProgress} from './experience.js?v=21';
+import {jobProgress} from './experience.js?v=64';
 import {applySkillArt} from './skill-art.js?v=21';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=63';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=63';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=64';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=31';
 import {createRouteWalker} from './route-walk.js?v=01';
 
@@ -48,10 +48,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   return true;
  }
  const mobViews=world.mobs.map(m=>{
-  const h=MONSTER_TYPES[m.type].height??1.45,frames=monsterArt[m.type]?.map(t=>t.clone()),tex=frames?.[0]??monsterTextures[m.type%4].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
+  const h=(MONSTER_TYPES[m.type].height??1.45)*(m.leader?1.35:1),frames=monsterArt[m.type]?.map(t=>t.clone()),tex=frames?.[0]??monsterTextures[m.type%4].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
   s.userData.monsterId=m.id;
-  const label=document.createElement('button');label.className='mob-label';label.type='button';label.setAttribute('aria-label','เลือกเป้า '+MONSTER_TYPES[m.type].name+' '+(m.id+1));
-  const text=document.createElement('span');text.textContent=MONSTER_TYPES[m.type].name;label.append(text);
+  const label=document.createElement('button');label.className='mob-label'+(m.leader?' leader':'');label.type='button';label.setAttribute('aria-label','เลือกเป้า '+MONSTER_TYPES[m.type].name+' '+(m.id+1));
+  const text=document.createElement('span');text.textContent=(m.leader?'★ หัวหน้า':'')+MONSTER_TYPES[m.type].name;label.append(text);
   const bar=document.createElement('i'),fill=document.createElement('b');bar.append(fill);label.append(bar);$('world-labels').append(label);
   label.addEventListener('click',()=>world.select(m.id));
   const warning=new THREE.Mesh(new THREE.RingGeometry(.15,MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe??MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe?'#ff4a4a':'#ed9b59',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));warning.rotation.x=-Math.PI/2;scene.add(warning);

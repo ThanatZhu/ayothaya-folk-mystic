@@ -1,6 +1,6 @@
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
-import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=48.1';
+import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=64';
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=21';
 import {getClass,classSkills} from './classes.js?v=18';
@@ -96,10 +96,14 @@ export function lineClear(a,b,nav=DEFAULT_NAV){
 // 0.63 packs: on maps with packs:true each mobs entry is a camp of 4-5 of that monster around the point
 // (bosses stay alone). Deterministic, so the realm server and every client build identical ids.
 const PACK=[[0,0],[2.2,.7],[-1.8,1.6],[-.9,-2.2],[2,-1.6]];
+// 0.64 camp leader (slot 0): 3x HP, 2x EXP, 3 loot rolls, 3x respawn time, drawn 35% larger. Members give 0.6x EXP.
+export const LEADER={hp:3,xp:2,loot:3,respawn:3,scale:1.35,member:.6};
+export const mobXp=m=>m.leader?LEADER.xp:m.pack!==undefined?LEADER.member:1;
+export const mobRespawn=m=>(MONSTER_TYPES[m.type].respawn??12)*(m.leader?LEADER.respawn:1);
 export function packSpawns(mobs,{packs=false,nav=DEFAULT_NAV}={}){
  if(!packs)return mobs;
- return mobs.flatMap(([x,z,type],i)=>MONSTER_TYPES[type]?.boss?[[x,z,type,i]]:PACK.slice(0,4+i%2).map(([dx,dz])=>{
-  for(const f of [1,.6,.3])if(walkable(x+dx*f,z+dz*f,.4,nav))return [x+dx*f,z+dz*f,type,i];return [x,z,type,i];}));
+ return mobs.flatMap(([x,z,type],i)=>MONSTER_TYPES[type]?.boss?[[x,z,type,i]]:PACK.slice(0,4+i%2).map(([dx,dz],k)=>{
+  for(const f of [1,.6,.3])if(walkable(x+dx*f,z+dz*f,.4,nav))return [x+dx*f,z+dz*f,type,i,k===0];return [x,z,type,i,k===0];}));
 }
 // A struck monster calls up to two idle packmates within 6 m, so camps fight together.
 export function rallyPack(mobs,mob){
@@ -111,7 +115,7 @@ export class CombatWorld{
   this.profession=advanceStats(getClass(config.classId??'shaman'),config.jobId);this.skills=advanceSkills(classSkills(this.profession.id,SKILLS),this.profession.id,config.jobId);
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
-  this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack],id)=>({id,type,pack,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
+  this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack,leader],id)=>({id,type,pack,leader:!!leader,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),maxHp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
   this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
  }
  // 0.61 hired mercenary: attacks your target (or, on AUTO, the nearest monster) within 6, every 1.4 s, 10 + 2·level damage.
@@ -154,7 +158,7 @@ export class CombatWorld{
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
-  if(mob.hp===0){mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=this.expRate??1;this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
+  if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  basicAttack(quiet=false){
   const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;

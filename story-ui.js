@@ -1,8 +1,8 @@
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop} from './story-quests.js?v=01';
-import {MONSTER_TYPES} from './combat-core.js?v=63';
-import {awardExperience} from './experience.js?v=21';
+import {MONSTER_TYPES} from './combat-core.js?v=64';
+import {awardExperience} from './experience.js?v=64';
 
 const RESUME='ayothaya-story-autowalk';
 const $=id=>document.getElementById(id);

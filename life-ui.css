@@ -49,3 +49,10 @@
 #world-warp button{padding:6px 12px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 12px Mali,Tahoma,sans-serif;cursor:pointer;white-space:nowrap}
 #world-warp button:disabled{opacity:.45;cursor:default}
 .life-label{position:absolute;top:0;left:0;pointer-events:none;padding:1px 8px;border-radius:9px;background:#2b2316c8;border:1px solid #f4cf7a66;color:#f4e3b8;font:700 11px Mali,Tahoma,sans-serif;white-space:nowrap}
+/* 0.64 field surge countdown and camp leaders */
+#surge-chip{display:flex;align-items:center;padding:4px 10px;border:1px solid #ff8a4c88;border-radius:999px;background:#2a1a14d8;color:#ffc9a0;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
+#surge-chip.on{border-color:#ff6a2c;background:#5a2412e8;color:#fff0ce;box-shadow:0 0 12px #ff6a2c88;animation:surge-pulse 1.4s ease-in-out infinite}
+@keyframes surge-pulse{50%{box-shadow:0 0 22px #ff6a2ccc}}
+@media (prefers-reduced-motion:reduce){#surge-chip.on{animation:none}}
+.mob-label.leader span{color:#ffd76a;font-weight:800}
+.mob-label.leader b{background:#e0a33a}

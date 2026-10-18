@@ -1,7 +1,7 @@
 // 0.53 sound, music and hit feedback. Everything is synthesised with WebAudio (no audio files, nothing to license):
 // Thai pentatonic "ranat" plucks over a drone with ching cymbals in town, klong drums in the fields, a sparse
 // minor-pentatonic air at the mill and in the dungeon. Effects follow the same game events the HUD uses.
-import {ITEMS,itemDef,RARITY_NAME} from './items.js?v=04';
+import {ITEMS,itemDef,RARITY_NAME} from './items.js?v=64';
 import {earnedStatPoints} from './character-stats.js?v=02';
 const KEY='ayothaya-audio';
 const THEMES={
@@ -94,7 +94,7 @@ export function createFeedback({game,map}){
   else if(e.type==='used')play('potion');
   else if(e.type==='heal')play('potion');
   else if(e.type==='experience'&&(e.baseUp||e.jobUp)){play('level');banner(`<strong>${e.baseUp?'LEVEL UP!':'JOB LEVEL UP!'}</strong><span>${e.baseUp?'Base Lv. '+e.baseLevel:'Job Lv. '+e.jobLevel}</span>${e.baseUp?gains(e.baseLevel):''}`,'levelup');levelGlow();}
-  else if(e.type==='drop'){const best=e.items.map(i=>itemDef(i.id)).filter(Boolean).sort((a,b)=>b.rarity-a.rarity)[0];if(best?.rarity>=2){play('rare');world.notice(`✦ ของ${RARITY_NAME[best.rarity]}! ${best.name}`);}}
+  else if(e.type==='drop'){const best=e.items.map(i=>itemDef(i.id)).filter(Boolean).sort((a,b)=>b.rarity-a.rarity)[0];if(best?.rarity>=2){play('rare');world.notice(`✦ ของ${RARITY_NAME[best.rarity]}! ${best.name}`);if(best.rarity>=3)banner(`<strong>✦ ${RARITY_NAME[best.rarity]}!</strong><span>${best.name}</span>`,'levelup rare-drop');}}
   else if(['mvp','dungeonClear'].includes(e.type))play('fanfare');
   else if(['daily','tamed','stallSold','refined'].includes(e.type))play('chime');
  });

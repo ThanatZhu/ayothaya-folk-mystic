@@ -1,4 +1,4 @@
-import {experienceOf} from './experience.js?v=21';
+import {experienceOf} from './experience.js?v=64';
 // Only transient player resources cross map boundaries; positions and targets never do.
 export function resolveMap(catalog,id){return catalog.maps.find(m=>m.id===id)??catalog.maps.find(m=>m.id===catalog.capital);}
 export function destinations(catalog,map){return new Set(map.portals.map(p=>p.to));}

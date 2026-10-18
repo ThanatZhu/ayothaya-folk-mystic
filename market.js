@@ -1,6 +1,6 @@
 // Storage, player trade and vending stalls (0.46). Pure rules shared by client and realm server.
 // Offers are {coins, items:{[id]:count}}; every move is all-or-nothing and never creates or loses items.
-import {BAG_SLOTS,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=04';
+import {BAG_SLOTS,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=64';
 
 export const STORAGE_SLOTS=100,STORAGE_NPC='ลุงเรือง',STALL_MAX=8,PRICE_MAX=9999999;
 export const TRADABLE=id=>['loot','potion','gear','card','scroll'].includes(itemDef(id)?.kind);

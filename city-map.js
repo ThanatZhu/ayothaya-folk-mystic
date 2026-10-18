@@ -1,6 +1,6 @@
 // Draw the actual city footprint in world coordinates; never a menu of destinations.
 // 0.59: `photo` = a straight-down render of the real scene over map.bounds; it replaces the vector ground layers.
-export function drawMap(canvas,map,player,{detailed=false,photo=null}={}){
+export function drawMap(canvas,map,player,{detailed=false,photo=null,mobs=[],npcs=[]}={}){
  const c=canvas.getContext('2d'),W=canvas.width,H=canvas.height,b=map.bounds,pad=detailed?48:7;
  const sx=(W-pad*2)/b.w,sz=(H-pad*2)/b.d,X=x=>pad+(x-b.x)*sx,Y=z=>pad+(z-b.z)*sz;
  const rect=(r,color)=>{c.fillStyle=color;c.fillRect(X(r.x),Y(r.z),r.w*sx,r.d*sz);};
@@ -17,10 +17,13 @@ export function drawMap(canvas,map,player,{detailed=false,photo=null}={}){
  }
  if(detailed){
   c.textAlign='center';c.textBaseline='middle';c.font='bold 28px Mali, Tahoma, sans-serif';
-  for(const d of map.districts??[]){const x=X(d.x),y=Y(d.z)-27,text=d.name,w=c.measureText(text).width+24;c.fillStyle='#f5e8c8ed';c.strokeStyle='#92724e';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y-22,w,44,9);c.fill();c.stroke();c.fillStyle='#493822';c.fillText(text,x,y);}
+  for(const d of map.districts??[]){const x=X(d.x),y=Y(d.z)-27,text=d.name,w=Math.ceil(c.measureText(text).width*1.12)+30;c.fillStyle='#f5e8c8ed';c.strokeStyle='#92724e';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y-22,w,44,9);c.fill();c.stroke();c.fillStyle='#493822';c.fillText(text,x,y,w-18);}
   c.textAlign='left';c.font='bold 30px Mali, Tahoma, sans-serif';c.fillStyle='#294f48';c.fillText('N ↑',pad,pad/2);
   c.strokeStyle='#725b37';c.lineWidth=5;c.strokeRect(6,6,W-12,H-12);
  }
+ // 0.64.1 live markers: monsters (red, gold for camp leaders) and NPCs, redrawn while the map is open.
+ for(const m of mobs){if(m.hp<=0)continue;c.fillStyle=m.leader?'#ffc23d':'#d9534a';c.beginPath();c.arc(X(m.x),Y(m.z),detailed?(m.leader?7:4.5):(m.leader?2.4:1.5),0,Math.PI*2);c.fill();}
+ for(const n of npcs){c.fillStyle=n.mentorId?'#ffe9a8':'#f4f0dc';c.strokeStyle='#3b2c1a';c.lineWidth=detailed?2:1;c.beginPath();c.arc(X(n.x),Y(n.z),detailed?6:2,0,Math.PI*2);c.fill();c.stroke();}
  for(const p of map.portals??[]){c.fillStyle='#f7ce70';c.beginPath();c.arc(X(p.x),Y(p.z),detailed?10:3.5,0,Math.PI*2);c.fill();if(detailed){c.font='bold 21px Mali, Tahoma';c.fillText('ทางเดินทาง',X(p.x),Y(p.z)-18);}}
  if(map.masterCourt){const x=X(map.masterCourt.x),y=Y(map.masterCourt.z);c.fillStyle='#674726';c.beginPath();c.arc(x,y,detailed?16:5,0,Math.PI*2);c.fill();c.fillStyle='#ffda78';c.textAlign='center';c.textBaseline='middle';c.font=`bold ${detailed?27:10}px sans-serif`;c.fillText('★',x,y);}
  const px=X(player.x),py=Y(player.z),r=detailed?13:4;c.fillStyle='#183d35';c.beginPath();c.arc(px,py,r+5,0,Math.PI*2);c.fill();c.fillStyle='#a8ffe0';c.beginPath();c.arc(px,py,r,0,Math.PI*2);c.fill();

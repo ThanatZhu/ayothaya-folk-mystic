@@ -11,6 +11,9 @@ export const MOODS={
 export const moodOf=map=>map.instance?'cellar':map.procedural==='mill'?'night':map.mood==='dusk'?'dusk':'day';
 const FLAT=/^(Ground|Soil foundation|Water surface|Damp canal|Streets|Tracks|Courtyard|Feathered|Island meadow|Wetland islands|Cellar foundation|Raised flagstone|Spirit arena|Earthen rice|Dense low rice|Stone moss|Fine meadow|Dense rice|Rice seed|Cupped floating|Lotus|Layered lotus|Arena inlays)/;
 
+// 0.64.1 ground layers are modelled at the same height (streets, tracks, shoulders, courtyards), which z-fights
+// as the camera moves, worst on phones. Each layer gets its own depth bias so the upper layer always wins.
+const LAYERS=[[/^(Ground|Island meadow|Soil foundation|Cellar foundation)/,0],[/^(Damp canal|Wetland islands|Earthen rice)/,1],[/^Tracks/,2],[/^Feathered/,3],[/^(Streets|Courtyard|Raised flagstone|Spirit arena paved)/,4],[/^(Dense low rice|Stone moss|Arena inlays)/,5]];
 export function prepareSceneV2({scene,model,map}){
  const mood=MOODS[moodOf(map)],converted=new Map(),water=[];
  scene.background=new THREE.Color(mood.sky);scene.fog=new THREE.Fog(mood.fog,60,150);
@@ -27,6 +30,8 @@ export function prepareSceneV2({scene,model,map}){
    converted.set(source,m);source.dispose();
   }
   o.material=converted.get(source);
+  const rank=LAYERS.find(([re])=>re.test(o.name))?.[1];
+  if(rank){const key=o.material.uuid+'|'+rank;if(!converted.has(key)){const m=o.material.clone();m.polygonOffset=true;m.polygonOffsetFactor=-rank;m.polygonOffsetUnits=-rank*4;converted.set(key,m);if(water.includes(o.material))water.push(m);}o.material=converted.get(key);}
  });
  for(const m of water)for(const t of [m.map,m.normalMap])if(t){t.wrapS=t.wrapT=THREE.RepeatWrapping;}
  let running=!matchMedia('(prefers-reduced-motion:reduce)').matches,time=0;

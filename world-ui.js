@@ -1,6 +1,6 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {openHudPanel} from './hud-panels.js?v=34';
-import {drawMap} from './city-map.js?v=40';
+import {drawMap} from './city-map.js?v=64.1';
 import {createMentorUI} from './mentor-ui.js?v=40';
 import * as THREE from 'three';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=21';
@@ -8,7 +8,7 @@ import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-s
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
  const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
- let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0;
+ let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0,lastBig=0;
  const mentors=createMentorUI({game,account});
  function endTalk(){if(conversation)conversation.talking=false;conversation=null;$('npc-dialog').hidden=true;game.clearInput();}
  if(!account)try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}
@@ -34,13 +34,18 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  function mapPhoto(){
   if(photo!==null||!renderer)return photo||null;
   try{
-   const b=map.bounds,W=1024,H=Math.round(W*b.d/b.w),cx=b.x+b.w/2,cz=b.z+b.d/2;
+   const b=map.bounds,W=1536,H=Math.round(W*b.d/b.w),cx=b.x+b.w/2,cz=b.z+b.d/2;
+   // 0.64.1 the sun's shadow box normally follows the hero; widen it to the whole map for this one render.
+   let sun=null;scene.traverse(o=>{if(o.isDirectionalLight&&o.castShadow)sun=o;});
+   const kept=sun&&{pos:sun.position.clone(),target:sun.target.position.clone(),cam:{...sun.shadow.camera}};
+   if(sun){const s=sun.shadow.camera,half=Math.max(b.w,b.d)/2+4;Object.assign(s,{left:-half,right:half,top:half,bottom:-half,far:400});s.updateProjectionMatrix();sun.target.position.set(cx,0,cz);sun.position.set(cx-14*4,100,cz+12*4);sun.target.updateMatrixWorld();sun.updateMatrixWorld();}
    const cam=new THREE.OrthographicCamera(-b.w/2,b.w/2,b.d/2,-b.d/2,1,600);cam.position.set(cx,300,cz);cam.up.set(0,0,-1);cam.lookAt(cx,0,cz);cam.updateMatrixWorld();
    const rt=new THREE.WebGLRenderTarget(W,H,{samples:4});rt.texture.colorSpace=THREE.SRGBColorSpace;
    const hidden=[];scene.traverse(o=>{if(o.visible&&(o.isSprite||o.userData?.rigType||o.userData?.monsterId!==undefined)){o.visible=false;hidden.push(o);}});
    const fog=scene.fog;scene.fog=null;const before=renderer.getRenderTarget();
    renderer.setRenderTarget(rt);renderer.render(scene,cam);const px=new Uint8Array(W*H*4);renderer.readRenderTargetPixels(rt,0,0,W,H,px);renderer.setRenderTarget(before);
    scene.fog=fog;hidden.forEach(o=>o.visible=true);rt.dispose();
+   if(sun){const s=sun.shadow.camera;Object.assign(s,{left:kept.cam.left,right:kept.cam.right,top:kept.cam.top,bottom:kept.cam.bottom,far:kept.cam.far});s.updateProjectionMatrix();sun.position.copy(kept.pos);sun.target.position.copy(kept.target);}
    const c=document.createElement('canvas');c.width=W;c.height=H;const img=c.getContext('2d').createImageData(W,H);
    for(let y=0;y<H;y++)img.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);c.getContext('2d').putImageData(img,0,0);
    photo=c;
@@ -92,11 +97,12 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   if(e.code==='KeyR'&&!dialog.open&&!conversation&&!mentors.paused){e.preventDefault();$('interact').click();}
  });
  const mini=$('mini-map');
- const drawCityMap=()=>drawMap($('city-map'),map,world.player,{detailed:true,photo:mapPhoto()});
+ const markers=()=>({mobs:world.mobs,npcs:map.npcs});
+ const drawCityMap=()=>drawMap($('city-map'),map,world.player,{detailed:true,photo:mapPhoto(),...markers()});
  let mapZoom=1;const viewport=$('city-map-viewport');
  function zoomMap(step){const old=mapZoom;mapZoom=Math.max(1,Math.min(3,mapZoom+step));const x=(viewport.scrollLeft+viewport.clientWidth/2)*mapZoom/old-viewport.clientWidth/2,y=(viewport.scrollTop+viewport.clientHeight/2)*mapZoom/old-viewport.clientHeight/2;viewport.style.setProperty('--map-zoom',mapZoom);viewport.scrollTo(x,y);$('map-minus').disabled=mapZoom===1;$('map-plus').disabled=mapZoom===3;}
  $('map-plus').onclick=()=>zoomMap(.5);$('map-minus').onclick=()=>zoomMap(-.5);
- function minimap(){drawMap(mini,map,world.player,{photo:photo||null});}
+ function minimap(){drawMap(mini,map,world.player,{photo:photo||null,...markers()});}
  function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function npcPosition(label,n){const e=camera.matrixWorld.elements,h=(n.visualHeight??1.65)+.14;point.set(n.x+e[4]*h,.07+e[5]*h,n.z+e[6]*h).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function update(t){
@@ -110,6 +116,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   if(canInteract)$('interact').textContent=nearest?'เดินทางไป '+lookup(nearest.to).name:'คุยกับ '+nearNPC.name;
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
   const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}
+  if(dialog.open&&now-lastBig>250){lastBig=now;drawCityMap();} // 0.64.1 the open map follows you live
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
  const api={update,get paused(){return !!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),

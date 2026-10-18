@@ -1,5 +1,5 @@
 import {validExperience} from './experience.js?v=21';
-import {walkable} from './combat-core.js?v=62';
+import {walkable} from './combat-core.js?v=63';
 import {serializeTraveler,restoreTraveler} from './world-state.js?v=21';
 
 export function captureSave(world,map,camera,controls,motion){

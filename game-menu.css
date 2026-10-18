@@ -53,3 +53,7 @@ body.field-hud .skill-icon.skill-art{display:block;width:38px;height:38px;min-wi
 
 /* Camera/how-to panel retired from the player-facing UI by owner request. */
 body.field-hud #settings-panel,body.field-hud #open-settings{display:none!important}
+/* 0.63 desktop: utility windows open in the middle of the screen instead of tucked under the top-right menu. */
+@media (pointer:fine) and (min-height:521px) and (min-width:761px){
+ html body :is(#skill-window,#online-panel,#status-window,#bag-window,#shop-window,#social-window,#pet-window,#quests-window)[data-hud-panel][open]{inset:0;margin:auto;height:fit-content;max-height:calc(100dvh - 140px)}
+}

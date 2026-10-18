@@ -67,6 +67,7 @@ for(const m of catalog.maps){
  });
  if(l.mobs)m.mobs=m.mobs.map((mob,i)=>[...Object.values(nearest(m.nav,l.mobs[i],reach)),mob[2]]);
  else m.mobs=m.mobs.map(([x,z,type])=>[...Object.values(nearest(m.nav,[x,z],reach)),type]);
+ if(!m.safe&&!m.instance)m.packs=true; // 0.63 camps of 4-5 (combat-core packSpawns)
  m.nav.props=m.npcs.map(n=>[n.x,n.z,n.mentorId?.43:.45]);
  if(l.loops){
   m.citizens=m.citizens.map((c,i)=>{

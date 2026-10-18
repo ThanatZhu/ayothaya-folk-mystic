@@ -5359,7 +5359,8 @@
           "z": -30
         }
       ],
-      "scene": "maps/v2/rice-fields.glb"
+      "scene": "maps/v2/rice-fields.glb",
+      "packs": true
     },
     {
       "id": "old-orchard",
@@ -5840,7 +5841,8 @@
           "z": -34
         }
       ],
-      "scene": "maps/v2/old-orchard.glb"
+      "scene": "maps/v2/old-orchard.glb",
+      "packs": true
     },
     {
       "id": "moonlit-mill",
@@ -6227,7 +6229,8 @@
           "z": -26
         }
       ],
-      "scene": "maps/v2/moonlit-mill.glb"
+      "scene": "maps/v2/moonlit-mill.glb",
+      "packs": true
     },
     {
       "id": "mill-cellar",
@@ -6938,7 +6941,8 @@
         }
       ],
       "mood": "dusk",
-      "scene": "maps/v2/lotus-marsh.glb"
+      "scene": "maps/v2/lotus-marsh.glb",
+      "packs": true
     }
   ]
 }

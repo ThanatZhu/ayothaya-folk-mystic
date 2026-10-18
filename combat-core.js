@@ -93,12 +93,25 @@ export function lineClear(a,b,nav=DEFAULT_NAV){
  const n=Math.max(1,Math.ceil(distance(a,b)/.18));
  for(let i=1;i<n;i++){const f=i/n;if(!walkable(a.x+(b.x-a.x)*f,a.z+(b.z-a.z)*f,.05,nav))return false;}return true;
 }
+// 0.63 packs: on maps with packs:true each mobs entry is a camp of 4-5 of that monster around the point
+// (bosses stay alone). Deterministic, so the realm server and every client build identical ids.
+const PACK=[[0,0],[2.2,.7],[-1.8,1.6],[-.9,-2.2],[2,-1.6]];
+export function packSpawns(mobs,{packs=false,nav=DEFAULT_NAV}={}){
+ if(!packs)return mobs;
+ return mobs.flatMap(([x,z,type],i)=>MONSTER_TYPES[type]?.boss?[[x,z,type,i]]:PACK.slice(0,4+i%2).map(([dx,dz])=>{
+  for(const f of [1,.6,.3])if(walkable(x+dx*f,z+dz*f,.4,nav))return [x+dx*f,z+dz*f,type,i];return [x,z,type,i];}));
+}
+// A struck monster calls up to two idle packmates within 6 m, so camps fight together.
+export function rallyPack(mobs,mob){
+ if(mob.pack===undefined)return;let n=0;
+ for(const m of mobs)if(n<2&&m!==mob&&m.pack===mob.pack&&m.hp>0&&!m.aggro&&Math.hypot(m.x-mob.x,m.z-mob.z)<6){m.aggro=true;n++;}
+}
 export class CombatWorld{
  constructor(config={}){
   this.profession=advanceStats(getClass(config.classId??'shaman'),config.jobId);this.skills=advanceSkills(classSkills(this.profession.id,SKILLS),this.profession.id,config.jobId);
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
-  this.mobs=(this.safe?[]:(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]])).map(([x,z,type],id)=>({id,type,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
+  this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack],id)=>({id,type,pack,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp,maxHp:MONSTER_TYPES[type].hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
   this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
  }
  // 0.61 hired mercenary: attacks your target (or, on AUTO, the nearest monster) within 6, every 1.4 s, 10 + 2·level damage.
@@ -139,7 +152,7 @@ export class CombatWorld{
  nearest(range=AUTO_RANGE){return this.mobs.filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
  toggleAuto(){if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);
+  if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
   if(mob.hp===0){mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=this.expRate??1;this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }

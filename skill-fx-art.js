@@ -13,9 +13,20 @@ export const FX_STYLES={
 function texture(w,h,pixel){const data=new Uint8Array(w*h*4);for(let y=0;y<h;y++)for(let x=0;x<w;x++)data.set(pixel((x+.5)/w,(y+.5)/h,x,y),(y*w+x)*4);const t=new THREE.DataTexture(data,w,h);t.colorSpace=THREE.SRGBColorSpace;t.magFilter=THREE.NearestFilter;t.needsUpdate=true;return t;}
 function polygon(points){const shape=new THREE.Shape();points.forEach(([x,y],i)=>shape[i?'lineTo':'moveTo'](x,y));shape.closePath();return new THREE.ShapeGeometry(shape);}
 export function createFxArt(){
- const paper=texture(32,64,(u,v,x,y)=>{const edge=u<.08||u>.92||v<.04||v>.96,ink=(Math.abs(u-.5)<.045&&v>.14&&v<.84)||(v>.16&&v<.8&&Math.abs((y%11)-5)<1.2&&Math.abs(u-.5)<.22)||(Math.abs(Math.abs(u-.5)-.18)<.04&&v>.29&&v<.48);return edge?[142,64,35,255]:ink?[177,57,40,255]:[255,233,169,255];});
+ const paper=texture(96,192,(u,v,x,y)=>{
+  const edge=Math.min(u,1-u,v*2,(1-v)*2),grain=Math.sin(x*1.73+y*.81)*Math.sin(y*2.17)*5;
+  if(edge<.016+.006*Math.sin(y*1.4))return [0,0,0,0];
+  const px=(u-.5)*2,py=(v-.43)*3.6,r=Math.hypot(px,py),a=Math.atan2(py,px);
+  const medallion=Math.abs(r-.44)<.017||Math.abs(r-.34)<.012||(r>.34&&r<.44&&Math.abs(Math.sin(a*8))<.11);
+  const knot=Math.abs(Math.abs(px)+Math.abs(py)-.28)<.018||Math.abs(r-.12)<.016;
+  const top=Math.abs(Math.hypot(px,(v-.17)*3.6)-.12)<.016;
+  const stem=v>.59&&v<.84&&Math.abs(px-.05*Math.sin(v*48))<.022;
+  const curls=v>.63&&v<.85&&(Math.abs(Math.abs(px)-(.13+.04*Math.sin(v*50)))<.018);
+  const border=edge<.045||Math.abs(u-.105)<.008||Math.abs(u-.895)<.008;
+  return medallion||knot||top||stem||curls?[155,56,34,255]:border?[178,112,55,255]:[250+grain,223+grain,165+grain,255];
+ });
  const spirit=texture(64,96,(u,v)=>{const x=(u-.5)*2,y=(v-.5)*2,r=.53*(1-y*.42),flame=Math.abs(x-.15*Math.sin(y*6))<r*(1-Math.abs(y)**2),eyes=v>.46&&v<.53&&(Math.abs(u-.35)<.055||Math.abs(u-.65)<.055);return eyes?[12,68,70,255]:flame?[128,255,226,Math.round(255*(.6+.4*(1-Math.abs(x))))]:[0,0,0,0];});
- const seal=texture(128,128,(u,v)=>{const x=u-.5,y=v-.5,r=Math.hypot(x,y),a=Math.atan2(y,x),ring=Math.abs(r-.43)<.009||Math.abs(r-.34)<.006,spoke=Math.abs(Math.sin(a*8))<.06&&r>.35&&r<.42,diamond=Math.abs(Math.abs(x)+Math.abs(y)-.29)<.009,core=Math.abs(r-.12)<.008;return [255,243,201,ring||spoke||diamond||core?240:0];});
+ const seal=texture(256,256,(u,v)=>{const x=u-.5,y=v-.5,r=Math.hypot(x,y),a=Math.atan2(y,x),ring=Math.abs(r-.43)<.006||Math.abs(r-.34)<.004,spoke=Math.abs(Math.sin(a*8))<.06&&r>.35&&r<.42,diamond=Math.abs(Math.abs(x)+Math.abs(y)-.29)<.006,core=Math.abs(r-.12)<.006;return [255,243,201,ring||spoke||diamond||core?240:0];});
  const soft=texture(48,48,(u,v)=>{const a=Math.round(255*Math.max(0,1-Math.hypot(u-.5,v-.5)*2)**2);return [255,255,255,a];});
  const crescent=new THREE.BufferGeometry(),vertices=[];
  for(let i=0;i<32;i++){const a=-1.2+i*2.4/32,b=-1.2+(i+1)*2.4/32,w=.22*Math.sin((i+.5)/32*Math.PI),points=[[Math.cos(a),Math.sin(a)],[Math.cos(b),Math.sin(b)],[(1-w)*Math.cos(a),(1-w)*Math.sin(a)],[(1-w)*Math.cos(b),(1-w)*Math.sin(b)]];for(const j of [0,1,2,1,3,2])vertices.push(...points[j],0);}crescent.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));

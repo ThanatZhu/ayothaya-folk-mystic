@@ -1,5 +1,30 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>ห้องลองตัวละคร · อโยธยา</title><link rel="icon" href="data:,"><link rel="stylesheet" href="typography.css?v=10"><link rel="stylesheet" href="sprite-lab.css?v=17"><script type="importmap">{"imports":{"three":"./vendor/build/three.module.js","three/addons/":"./vendor/addons/"}}</script></head>
-<body><header><a href="./">← กลับอโยธยา</a><span>CHARACTER ATELIER <b>7 CLASSES / 112 VIEWS</b></span></header>
-<main><section class="stage-panel"><div class="stage-title"><p>จากภาพวาด สู่การออกเดินทาง</p><h1 id="class-title">หมอผีแห่งอโยธยา</h1><span>ต้นแบบชาย–หญิง · ภาพ 8 ทิศ</span></div><div id="stage" aria-label="ฉากทดสอบตัวละครทุกอาชีพหมุนกล้องได้"></div><div class="stage-bottom"><span id="facing" role="status">กำลังเตรียมตัวละคร…</span><div class="camera-actions"><button id="camera-left" aria-label="หมุนกล้องซ้าย">↶</button><button id="camera-home">คืนมุม</button><button id="camera-right" aria-label="หมุนกล้องขวา">↷</button></div><small>ลากฉากเพื่อหมุนกล้อง · Q / E หมุนทีละมุม</small></div></section>
-<aside><div class="eyebrow">THE FOLK MYSTIC</div><h2>ลองหันมาดูทุกด้าน</h2><label class="profession-label" for="profession">เลือกอาชีพ</label><select id="profession" aria-label="เลือกอาชีพ"></select><p class="intro">ดูด้านหน้า ด้านข้าง และด้านหลังจริง<br>เลือกภาพ หรือหมุนกล้องรอบตัวละคร</p><div class="genders" role="group" aria-label="เลือกรูปลักษณ์"><button data-gender="male" aria-pressed="true">ชาย</button><button data-gender="female" aria-pressed="false">หญิง</button></div><div id="directions" class="directions" role="group" aria-label="เลือกทิศตัวละคร"></div><div class="options"><label><input id="breathe" type="checkbox" checked> ขยับหายใจเบา ๆ</label><label><input id="guides" type="checkbox" checked> แสดงจุดวางเท้า</label></div><div class="note"><strong>ภาพต้นแบบ · ยังไม่มีเฟรมเดินใหม่</strong><p>ชุดมาตรฐานยังไม่แยกเสื้อผ้าและอาวุธ<br>ยังไม่มีเฟรมเดินหรือโจมตีใหม่ในชุดนี้</p></div><p id="status" role="status">กำลังโหลดภาพ…</p></aside></main><script type="module" src="sprite-lab.js?v=41.2"></script></body></html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f3f0e7">
+<title>ห้องลองตัวละคร · อโยธยา</title><link rel="icon" href="data:,"><link rel="stylesheet" href="typography.css?v=10"><link rel="stylesheet" href="sprite-lab.css?v=42">
+<script type="importmap">{"imports":{"three":"./vendor/build/three.module.js","three/addons/":"./vendor/addons/"}}</script>
+</head>
+<body>
+<header class="site-header"><a class="back-link" href="./"><span aria-hidden="true">←</span> กลับอโยธยา</a><span class="brand">AYOTHAYA <i>FOLK MYSTIC</i></span><div class="collection-count" aria-label="8 อาชีพ 16 รูปลักษณ์ 128 มุม"><span><b>8</b> อาชีพ</span><span><b>16</b> รูปลักษณ์</span><span><b>128</b> มุม</span></div></header>
+<main>
+<section class="stage-panel" aria-label="พื้นที่ลองตัวละคร">
+<div class="stage-title"><p class="eyebrow">ห้องลองตัวละคร</p><h1 id="class-title">นักเดินทางแห่งอโยธยา</h1><span>ภาพวาดที่คุ้นเคย ในโลกที่หมุนดูได้</span></div><div class="stage-mark" aria-hidden="true">อโยธยา</div>
+<div id="stage" aria-label="ฉากตัวละคร หมุนกล้องเพื่อดูทั้งแปดทิศ"></div>
+<div class="camera-toolbar"><span id="facing" role="status">กำลังเตรียมตัวละคร…</span><div class="camera-actions" role="group" aria-label="ควบคุมมุมกล้อง"><button id="camera-left" type="button" aria-label="หมุนกล้องซ้าย">↶</button><button id="camera-home" type="button">คืนมุม</button><button id="camera-right" type="button" aria-label="หมุนกล้องขวา">↷</button></div></div>
+<div class="stage-bottom">
+<div class="playback-row"><button id="replay" class="primary-button" type="button">พัก</button><span id="phase" role="status">พร้อมลอง</span><label class="speed-control" for="speed">ความเร็ว <select id="speed"><option value=".5">0.5×</option><option value="1" selected>1×</option></select></label></div>
+<label class="scrub-label" for="scrub"><span>ดูจังหวะการเคลื่อนไหว</span><span aria-hidden="true">0 — 100%</span></label><input id="scrub" type="range" min="0" max="1000" step="1" value="0" aria-label="เลื่อนดูจังหวะการเคลื่อนไหว">
+<div class="stage-caption"><small>ลากฉากเพื่อหมุนกล้อง · Q / E เปลี่ยนมุม</small><small id="metrics">กำลังเตรียมภาพ</small></div>
+</div>
+</section>
+<aside class="control-panel" aria-label="เลือกตัวละครและการเคลื่อนไหว">
+<div class="panel-heading"><p class="eyebrow">ตัวละครของคุณ</p><span class="edition">ชุดมาตรฐาน</span></div>
+<div class="character-choice"><label class="field-label" for="profession">อาชีพ</label><select id="profession" aria-label="เลือกอาชีพ"></select><div class="genders" role="group" aria-label="เลือกรูปลักษณ์"><button type="button" data-gender="male" aria-pressed="true">ชาย</button><button type="button" data-gender="female" aria-pressed="false">หญิง</button></div></div>
+<section class="control-section directions-section" aria-labelledby="directions-label"><div class="section-heading"><h2 id="directions-label">มองให้ครบทุกด้าน</h2><span>8 ทิศ</span></div><div id="directions" class="directions" role="group" aria-label="เลือกทิศตัวละคร"></div></section>
+<section class="control-section motion-section" aria-labelledby="motion-label"><div class="section-heading"><h2 id="motion-label">ลองขยับ</h2><label class="compact-check"><input id="loop" type="checkbox" checked> เล่นวน</label></div><label class="sr-only" for="motion-mode">เลือกการเคลื่อนไหว</label><select id="motion-mode"><option value="idle">ยืนพัก</option><option value="walk">เดิน</option><option value="attack">โจมตีพื้นฐาน</option><option value="skill">ใช้ทักษะ</option></select><div id="skills" class="skills" role="group" aria-label="เลือกทักษะของอาชีพ"></div><div class="skill-card" aria-live="polite"><h3 id="skill-title">เตรียมออกเดินทาง</h3><p id="skill-description">เลือกท่าเดิน การโจมตี หรือทักษะ แล้วลองดูจากมุมต่าง ๆ</p></div></section>
+<section class="control-section scene-section" aria-labelledby="scene-label"><div class="section-heading"><h2 id="scene-label">บรรยากาศ</h2></div><label class="sr-only" for="environment">เลือกฉาก</label><select id="environment"><option value="studio">ห้องภาพ</option><option value="ayutthaya">อโยธยา</option><option value="rice-fields">ทุ่งนา</option></select><div class="options"><label><input id="fx-enabled" type="checkbox" checked> แสดงเอฟเฟกต์ทักษะ</label><label><input id="reduced-fx" type="checkbox"> ลดเอฟเฟกต์</label><label><input id="guides" type="checkbox"> แสดงจุดวางเท้า</label></div></section>
+<div class="note"><span aria-hidden="true">✦</span><p>ขยับด้วยโครงกระดูก 2D · ชุดมาตรฐาน<br><small>ภาพวาดหลายทิศ พร้อมเอฟเฟกต์ในฉาก 3D</small></p></div><p id="status" role="status">กำลังโหลดภาพ…</p>
+</aside>
+</main><script type="module" src="sprite-lab.js?v=42"></script>
+</body></html>

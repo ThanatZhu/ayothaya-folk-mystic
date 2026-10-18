@@ -2,10 +2,9 @@ import {itemDef} from './items.js?v=04';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=21';
 import {applySkillArt} from './skill-art.js?v=21';
-import {viewDirection} from './directional-sprite.js?v=17';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
-import {createSkillEffects,createFootDust} from './skill-effects.js?v=37';
+import {createSkillEffects,createFootDust} from './skill-effects.js?v=63';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=63';
@@ -64,7 +63,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const playerRing=new THREE.Mesh(ringGeometry,new THREE.MeshBasicMaterial({color:'#8de8d0',side:THREE.DoubleSide,transparent:true,opacity:.55}));playerRing.rotation.x=-Math.PI/2;playerRing.scale.setScalar(.78);scene.add(playerRing);
  const shield=new THREE.Mesh(new THREE.RingGeometry(.7,.74,40),new THREE.MeshBasicMaterial({color:'#edd592',side:THREE.DoubleSide,transparent:true,opacity:.55}));shield.rotation.x=-Math.PI/2;scene.add(shield);
  const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · '+(jobFor(world.profession.id,config.jobId)?.name??className(world.profession.id,config.gender));$('world-labels').append(playerLabel);
- const motionPreference=matchMedia('(prefers-reduced-motion:reduce)');
+ const motionPreference=matchMedia('(prefers-reduced-motion:reduce)'),compactEffects=matchMedia('(pointer:coarse),(max-width:900px)');
  const floats=[],projection=new THREE.Vector3();
  function toast(text){$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
@@ -82,7 +81,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    }
    const beats=track?track.strikes.map(b=>world.time+b*track.duration):[world.time+.12];strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    const presentation=track??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
-   skillEffects.create(presentation,{...e,reduced:motionPreference.matches});
+   const from=e.from??world.player,to=e.to??from;
+   skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});
   }else if(e.type==='damage'){popup(e);}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});hero.sprite.material.color.set('#ff9b83');}
@@ -177,22 +177,20 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const distanceMoved=Math.hypot(p.x-lastX,p.z-lastZ);lastX=p.x;lastZ=p.z;
   if(distanceMoved<1)gait+=gaitStep(distanceMoved,dt,world.profession.id); // No steps while blocked; teleports do not advance the gait.
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
-  const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
+  const poseTime=mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart;
+  const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:poseTime,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
   if(!visualPose||reduced)visualPose={...pose};
   else for(const key of Object.keys(pose))visualPose[key]=['frame','artFrame','stand'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
-  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,groundHeight(world.nav,p.x,p.z)+.06+visualPose.y,p.z+p.face.z/faceLength*rootOffset);
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,groundHeight(world.nav,p.x,p.z)+.06+(hero.sprite.userData.directionalActive&&mode==='walk'?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
   hero.sprite.scale.set(heroSize,heroSize,1);
-  const azimuth=controls.getAzimuthalAngle(),directional=hero.directionalEnabled&&hero.directionalFrames;
-  if(directional){
-   hero.viewDirection=viewDirection(p.face,azimuth,hero.viewDirection);
-   hero.sprite.material.map=hero.directionalFrames[hero.viewDirection];hero.sprite.userData.footV=hero.directionalFootV;
-  }else{if(hero.frames)hero.sprite.material.map=hero.frames[0];hero.sprite.userData.footV=1;}
+  const azimuth=controls.getAzimuthalAngle();
+  if(hero.frames)hero.sprite.material.map=hero.frames[0];
+  hero.sprite.userData.setFacing?.(p.face,azimuth,{mode,time:poseTime,phase:mode==='walk'?gait:null,reduced});
   const facing=p.face.x*Math.cos(azimuth)-p.face.z*Math.sin(azimuth);
-  hero.sprite.userData.directional=!!directional;
   if(Math.abs(facing)/faceLength>.3)heroFlip=facing<0; // hysteresis: keep the last side until clearly turning
-  hero.sprite.userData.pose?.(visualPose,directional?false:heroFlip);
+  hero.sprite.userData.pose?.(visualPose,heroFlip);
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   footDust.update(dt);
   if(mode==='walk'&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,p.z>4.25?.44:.09,p.z-p.face.z/faceLength*.25);}}

@@ -5,7 +5,7 @@ import {CLASSES} from '../classes.js';
 import {DIRECTIONS,DIRECTIONAL_CLASSES,directionalManifestPath,placement} from '../directional-sprite.js';
 
 test('directional art covers the full playable class registry and rejects unknown paths',()=>{
- assert.deepEqual(DIRECTIONAL_CLASSES,CLASSES.map(c=>c.id));
+ assert.deepEqual(DIRECTIONAL_CLASSES,['novice',...CLASSES.map(c=>c.id)]);
  assert.throws(()=>directionalManifestPath('../unknown'),/invalid-class/);
  assert.equal(directionalManifestPath(),directionalManifestPath('shaman'));
 });

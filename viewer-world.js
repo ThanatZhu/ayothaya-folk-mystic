@@ -2,7 +2,7 @@ import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {createMultiplayer} from './multiplayer-ui.js?v=62';
+import {createMultiplayer} from './multiplayer-ui.js?v=63';
 import {createEquipmentUI} from './equipment-ui.js?v=41.2';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=62';
 import {createGameMenu} from './game-menu.js?v=34';
@@ -11,8 +11,7 @@ import {createMmoHud} from './mmo-hud.js?v=48.1';
 import {createSoftLook} from './soft-look.js?v=29';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
-import {loadDirectionalArt} from './directional-sprite.js?v=17';
-import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
+import {createPaintedAvatar} from './painted-avatar.js?v=63';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
@@ -20,7 +19,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=62';
+import {createGame} from './game-controls.js?v=63';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=42.1';
@@ -110,25 +109,22 @@ try {
  for(const [kind,x,z,w,h,flip] of map.plants){if(['canopy19','shrub19'].includes(kind))continue;plant(kind,x,-z,w,h,flip);if(kind==='tree')shadow(x,-z,w*.3);}
  const customized=customizeAtlas(heroAtlas.image,account.character.appearance,account.character.classId);
  const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
- const heroMesh=createRiggedSprite(heroFrames[0],{classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
+ const heroMesh=createPaintedAvatar(heroFrames[0],{classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
- // A01 is opt-in: standard costume turnaround; original wardrobe/action frames remain default.
+ // The shared avatar selects camera-relative painted art by default; unsupported
+ // custom silhouettes retain their original equipped artwork.
  const pilotToggle=$('directional-pilot'),pilotStatus=$('directional-pilot-status');
- $('directional-pilot-option').hidden=account.character.classId==='novice';
- $('directional-pilot-name').textContent='ลอง '+className(account.character.classId,account.character.gender)+' 8 ทิศ · ชุดมาตรฐาน';
+ $('directional-pilot-option').hidden=false;
+ $('directional-pilot-name').textContent=className(account.character.classId,account.character.gender)+' · ภาพตัวละคร 8 ทิศ';
  $('directional-lab-link').href='./sprite-lab.html?class='+account.character.classId;
+ function directionalStatus(){
+  const reason=heroMesh.userData.directionalReason;pilotToggle.checked=heroMesh.userData.directionalActive;
+  pilotToggle.disabled=reason==='weapon'||reason==='appearance';
+  pilotStatus.textContent=reason==='weapon'?'ใช้ภาพอาวุธพิเศษที่สวมใส่':reason==='appearance'?'ใช้ภาพพร้อมการแต่งตัวที่บันทึกไว้':reason==='load'?'โหลดภาพหลายทิศไม่สำเร็จ ใช้ภาพเดิมต่อได้':pilotToggle.checked?'หันตามมุมกล้อง · ขยับแขนขาจากภาพเดิม':'ใช้ภาพท่าเดิม';
+ }
+ pilotToggle.checked=true;
  pilotToggle.onchange=async()=>{
-  const hero=characters[0];
-  if(!pilotToggle.checked){hero.directionalEnabled=false;pilotStatus.textContent='กลับมาใช้ภาพและชุดเดิมแล้ว';return;}
-  pilotToggle.disabled=true;pilotStatus.textContent='กำลังโหลดภาพตัวละคร 8 ทิศ…';
-  try{
-   if(!hero.directionalFrames){
-    const art=await loadDirectionalArt(account.character.classId);hero.directionalFrames={};hero.directionalFootV=art.footV;
-    for(const [d,canvas] of Object.entries(art.frames[account.character.gender]))hero.directionalFrames[d]=frame(canvas,[0,0,1,1]);
-   }
-   hero.directionalEnabled=true;pilotStatus.textContent='ชุดมาตรฐาน 8 ทิศ · ใช้การขยับเดิมชั่วคราว · ยังไม่มีคลิปเดิน/โจมตีใหม่';
-  }catch(error){console.error(error);pilotToggle.checked=false;hero.directionalEnabled=false;pilotStatus.textContent='โหลดไม่สำเร็จ ใช้ภาพเดิมต่อได้ ลองเปิดอีกครั้ง';}
-  finally{pilotToggle.disabled=false;}
+  pilotToggle.disabled=true;await heroMesh.userData.setDirectional(pilotToggle.checked);directionalStatus();
  };
 
  for(const n of map.npcs.filter(n=>!n.mentorId)){const h=1.65;characters.push({sprite:sprite(personTextures[n.texture],n.x,-n.z,h,h,.06),shadow:shadow(n.x,-n.z,.4),height:h});}
@@ -143,7 +139,7 @@ try {
  const motion=sceneMotion??frontier??createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
  const monsterArt=await loadMonsterFrames(map);
- await heroMesh.userData.ready;if(heroMesh.userData.artError)throw new Error('Character animation unavailable');loading.stage(4);
+ await heroMesh.userData.ready;if(heroMesh.userData.artError)throw new Error('Character animation unavailable');directionalStatus();loading.stage(4);
  const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,monsterArt,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>loading.active||!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  // Local test hook (dev server only) for automated walk/bridge/portal checks; absent on the deployed site.
@@ -166,8 +162,7 @@ try {
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
  multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu({game,account});createSkillWindow({game,classId:account.character.classId});createMmoHud({game,account});
  createEquipmentUI({account,game,hero:heroMesh,onArtwork:(canvas,gear)=>{
-  characters[0].directionalEnabled=false;pilotToggle.checked=false;
-  pilotToggle.disabled=gear.weapon.endsWith('-crafted')||!gear.outfit.endsWith('-original');
+  directionalStatus();
   const icon=document.createElement('canvas');icon.width=icon.height=256;drawCharacterFrame(icon.getContext('2d'),canvas,0,0);
   portrait.style.backgroundImage=`url("${icon.toDataURL()}")`;portrait.style.backgroundSize='contain';portrait.style.backgroundPosition='center';portrait.style.backgroundRepeat='no-repeat';
  }});

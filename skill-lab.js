@@ -3,7 +3,7 @@ import {CLASSES,NOVICE,atlasPath,classSkills,className} from './classes.js?v=18'
 import {SKILLS} from './combat-core.js?v=63';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
-import {createSkillEffects} from './skill-effects.js?v=37';
+import {createSkillEffects} from './skill-effects.js?v=68';
 import {characterMotion,attackDuration} from './character-motion.js?v=37';
 import {applySkillArt} from './skill-art.js?v=21';
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion:reduce)');
@@ -29,9 +29,14 @@ try{
   }catch(error){console.error(error);if(version===loadVersion){loading=!textures;$('profession').value=classId;$('status').textContent='โหลดภาพไม่สำเร็จ ลองเลือกอาชีพอีกครั้ง';}}
   finally{if(version===loadVersion)$('stage').removeAttribute('aria-busy');}
  }
- function resetEffect(){effects.clear();if(demoMode!=='skill'){fx=null;return;}fx=effects.create(skillTrack(classId,index),{from:{x:0,z:0},to:{x:flip?-1.4:1.4,z:0},color:all.find(c=>c.id===classId).color,reduced:reduced.matches});}
- function replay(){if(loading)return;time=0;playing=!reduced.matches;resetEffect();if(reduced.matches)time=skillTrack(classId,index).duration*.47;$('replay').textContent=playing?'Ⅱ หยุด':'▶ เล่นท่า';document.querySelectorAll('[data-phase]').forEach(b=>b.setAttribute('aria-pressed','false'));}
- function info(){const skill=classSkills(classId,SKILLS)[index],track=skillTrack(classId,index);$('title').textContent=skill.name;$('description').textContent=track.label;$('duration').textContent=track.duration.toFixed(2)+' วินาที';for(const b of $('skills').children)b.setAttribute('aria-pressed',String(Number(b.dataset.index)===index));}
+ function resetEffect(){
+  effects.clear();if(!['skill','attack'].includes(demoMode)){fx=null;return;}
+  const basic=demoMode==='attack';
+  const track=basic?{...skillTrack(classId,0),duration:attackDuration(classId),strikes:[.42]}:skillTrack(classId,index);
+  fx=effects.create(track,{skillIndex:basic?null:index,from:{x:0,z:0},to:{x:flip?-1.4:1.4,z:0},color:all.find(c=>c.id===classId).color,reduced:reduced.matches});
+ }
+ function replay(){if(loading)return;time=0;playing=!reduced.matches;resetEffect();if(reduced.matches)time=(demoMode==='skill'?skillTrack(classId,index).duration:demoMode==='attack'?attackDuration(classId):1.5)*.47;$('replay').textContent=playing?'Ⅱ หยุด':'▶ เล่นท่า';document.querySelectorAll('[data-phase]').forEach(b=>b.setAttribute('aria-pressed','false'));}
+ function info(){const skill=classSkills(classId,SKILLS)[index],track=skillTrack(classId,index);$('title').textContent=skill.name;$('description').textContent=track.label;$('duration').textContent=(demoMode==='skill'?track.duration:demoMode==='attack'?attackDuration(classId):1.5).toFixed(2)+' วินาที';for(const b of $('skills').children)b.setAttribute('aria-pressed',String(Number(b.dataset.index)===index));}
  function redraw(){
   $('skills').replaceChildren();const buttons=classSkills(classId,SKILLS).map((s,i)=>{const b=document.createElement('button');b.type='button';b.dataset.index=i;b.setAttribute('aria-label','สกิล '+s.key+' '+s.name);const icon=document.createElement('strong'),label=document.createElement('span'),key=document.createElement('kbd');icon.textContent=s.icon;key.textContent=s.key;label.append(key,document.createTextNode(s.name));b.append(icon,label);b.onclick=()=>{if(loading)return;index=i;demoMode='skill';$('motion-mode').value='skill';info();replay();};$('skills').append(b);return b;});applySkillArt(buttons,classId);info();
   for(const b of document.querySelectorAll('[data-gender]')){b.textContent=classId==='acolyte'?(b.dataset.gender==='male'?'พระ':'แม่ชี'):(b.dataset.gender==='male'?'ชาย':'หญิง');b.setAttribute('aria-pressed',String(b.dataset.gender===gender));}

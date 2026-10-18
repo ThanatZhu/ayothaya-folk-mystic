@@ -7,10 +7,10 @@ const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.met
 const map=catalog.maps[0];
 const capture=world=>captureSave(world,map,{zoom:1.3},{getAzimuthalAngle:()=>.7},false);
 test('expanded district saves restore far coordinates and overview does not save invalid zoom',()=>{
- const a=new CombatWorld(map);a.player.x=38;a.player.z=-70;
+ const {x,z}=map.masterCourt,a=new CombatWorld(map);a.player.x=x;a.player.z=z;
  const data=captureSave(a,map,{zoom:.14},{getAzimuthalAngle:()=>.7},true);
  const b=new CombatWorld(map);applySave(b,map,validateSave(data,catalog));
- assert.equal(b.player.x,38);assert.equal(b.player.z,-70);assert.equal(data.settings.zoom,.65);
+ assert.equal(b.player.x,x);assert.equal(b.player.z,z);assert.equal(data.settings.zoom,.65);
  for(const m of catalog.maps.filter(m=>!m.safe))assert.equal(validateSave({...data,mapId:m.id},catalog).mapId,m.id);
 });
 test('cloud snapshot round-trips resources, cooldowns, map and walkable position',()=>{
@@ -29,8 +29,8 @@ test('newer or corrupt saves are rejected rather than replaced by defaults',()=>
  assert.throws(()=>validateSave({...data,traveler:{...data.traveler,hp:NaN}},catalog),/save-data/);
 });
 test('a position inside an obstacle or a different map is not restored',()=>{
- const world=new CombatWorld(map),data=capture(world),obstacle=map.nav.obstacles[0];
- data.position={x:obstacle.x+obstacle.w/2,z:obstacle.z+obstacle.d/2};applySave(world,map,data);
+ const world=new CombatWorld(map),data=capture(world),canal=map.waterAreas[0];
+ data.position={x:canal.x+canal.w/2,z:canal.z+canal.d/2};applySave(world,map,data);
  assert.equal(world.player.x,map.spawn.x);assert.equal(world.player.z,map.spawn.z);
  data.position={x:map.districts[1].x,z:map.districts[1].z};data.mapId='bangsai';applySave(world,map,data);
  assert.equal(world.player.x,map.spawn.x);assert.equal(world.player.z,map.spawn.z);

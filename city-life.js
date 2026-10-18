@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {CITIZEN_STYLES} from './city-life-data.js?v=40';
+import {CITIZEN_STYLES} from './city-life-data.js?v=62';
 import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1';
 
 // Whole painted poses, aligned at their feet. No skeletal cutouts or squash/stretch.
@@ -30,10 +30,11 @@ export async function createCityLife({scene,map,shadow,paving}){
   n.visualHeight=n.citizen?1.85:2.1;
   return {n,frames,maxHeight,sprite,walk,shadow:shadow(n.x,-n.z,.38),frame:-1,flip:false};
  });
- const pavingTexture=paving.clone();pavingTexture.repeat.set(9,10);pavingTexture.needsUpdate=true;
+ // v2 scenes model their own sparring court; the painted floor only dresses the legacy capital.
+ if(!map.scene){const pavingTexture=paving.clone();pavingTexture.repeat.set(9,10);pavingTexture.needsUpdate=true;
  const floor=new THREE.Mesh(new THREE.BoxGeometry(18,.06,23),new THREE.MeshLambertMaterial({map:pavingTexture,color:'#cfbb91'}));floor.position.set(38,.026,-70);floor.receiveShadow=true;scene.add(floor);
  const edgeMat=new THREE.MeshLambertMaterial({color:'#a88c59'});for(const [x,z,w,d] of [[29,-70,.2,23],[47,-70,.2,23],[38,-81.5,18,.2],[38,-58.5,18,.2]]){const edge=new THREE.Mesh(new THREE.BoxGeometry(w,.03,d),edgeMat);edge.position.set(x,.05,z);scene.add(edge);}
- const seal=new THREE.Mesh(new THREE.RingGeometry(2.7,2.76,64),new THREE.MeshBasicMaterial({color:'#b59255',transparent:true,opacity:.55,depthWrite:false,side:THREE.DoubleSide}));seal.rotation.x=-Math.PI/2;seal.position.set(38,.061,-70);scene.add(seal);
+ const seal=new THREE.Mesh(new THREE.RingGeometry(2.7,2.76,64),new THREE.MeshBasicMaterial({color:'#b59255',transparent:true,opacity:.55,depthWrite:false,side:THREE.DoubleSide}));seal.rotation.x=-Math.PI/2;seal.position.set(38,.061,-70);scene.add(seal);}
  const banners=[];
  for(const n of map.npcs.filter(n=>n.mentorId)){
   const ring=new THREE.Mesh(new THREE.RingGeometry(.66,.73,32),new THREE.MeshBasicMaterial({color:n.color,transparent:true,opacity:.65,depthWrite:false,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.set(n.x,.09,n.z);scene.add(ring);
@@ -42,7 +43,7 @@ export async function createCityLife({scene,map,shadow,paving}){
   const flag=new THREE.Mesh(new THREE.PlaneGeometry(.55,1.05,4,5),new THREE.MeshLambertMaterial({color:n.color,side:THREE.DoubleSide}));flag.position.set(x+side*.28,1.8,z);scene.add(flag);banners.push(flag);
  }
  const sign=document.createElement('canvas');sign.width=768;sign.height=144;const ctx=sign.getContext('2d');ctx.fillStyle='#163a2eea';ctx.strokeStyle='#d5b472';ctx.lineWidth=7;ctx.beginPath();ctx.roundRect(5,5,758,134,22);ctx.fill();ctx.stroke();ctx.fillStyle='#ffe5ab';ctx.textAlign='center';ctx.font='bold 52px Mali,Tahoma';ctx.fillText('ลานครูแห่งอโยธยา',384,67);ctx.font='26px Mali,Tahoma';ctx.fillText('เปลี่ยนอาชีพ Lv. 25  ·  Master Lv. 60',384,110);
- const signTexture=new THREE.CanvasTexture(sign);signTexture.colorSpace=THREE.SRGBColorSpace;const plaque=new THREE.Sprite(new THREE.SpriteMaterial({map:signTexture,transparent:true,depthWrite:false}));plaque.position.set(38,2.8,-80);plaque.scale.set(6,1.125,1);scene.add(plaque);
+ const signTexture=new THREE.CanvasTexture(sign);signTexture.colorSpace=THREE.SRGBColorSpace;const plaque=new THREE.Sprite(new THREE.SpriteMaterial({map:signTexture,transparent:true,depthWrite:false}));plaque.position.set(map.masterCourt.x,2.8,map.masterCourt.z-(map.scene?12.5:10));plaque.scale.set(6,1.125,1);scene.add(plaque);
  function update(dt,player,camera){
   const time=Date.now()/1000;
   for(const a of actors){const n=a.n;let frame=0,flip=false;

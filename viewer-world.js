@@ -2,9 +2,9 @@ import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {createMultiplayer} from './multiplayer-ui.js?v=41.2';
+import {createMultiplayer} from './multiplayer-ui.js?v=62';
 import {createEquipmentUI} from './equipment-ui.js?v=41.2';
-import {createCityLife,clearCourtTrees} from './city-life.js?v=42.1';
+import {createCityLife,clearCourtTrees} from './city-life.js?v=62';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=34';
 import {createMmoHud} from './mmo-hud.js?v=48.1';
@@ -20,7 +20,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=48.1';
+import {createGame} from './game-controls.js?v=62';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=42.1';
@@ -31,12 +31,13 @@ import {createRefineUI} from './refine-ui.js?v=01';
 import {createMarketUI} from './market-ui.js?v=01';
 import {createSocialUI} from './social-ui.js?v=01';
 import {createLifeUI} from './life-ui.js?v=01';
-import {createPetUI} from './pet-ui.js?v=01';
+import {createPetUI} from './pet-ui.js?v=62';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=01';
-import {createLifeNPC} from './life-npc.js?v=01';
+import {createLifeNPC} from './life-npc.js?v=62';
 import {createFeedback} from './feedback.js?v=01';
 import {resolveMap} from './world-state.js?v=21';
+import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=62';
 import {createLandscapeGuard} from './mobile-layout.js?v=48.1';
 import {prepareCloud} from './cloud-save.js?v=41';
 import {captureSave,applySave} from './save-state.js?v=21';
@@ -51,7 +52,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=43');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=62');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
@@ -67,8 +68,8 @@ try {
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.copy(target);controls.enableDamping=true;controls.dampingFactor=.1;controls.enablePan=false;
  controls.minPolarAngle=controls.maxPolarAngle=Math.atan2(Math.hypot(23,28),24);controls.minZoom=.65;controls.maxZoom=2.7;controls.rotateSpeed=.6;controls.update();
  const softLook=createSoftLook({renderer,scene,camera});
- const night=map.procedural==='mill',dusk=map.mood==='dusk';scene.add(new THREE.HemisphereLight(night?'#b4d5dd':dusk?'#ffd2a8':'#fffdf4',night?'#4e6260':dusk?'#5d5a72':'#a3af84',night?(map.instance?.5:.85):dusk?1.05:1.35));
- const sun=new THREE.DirectionalLight(night?'#bed9ed':'#ffefd2',night?.7:1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
+ const night=map.procedural==='mill',dusk=map.mood==='dusk',mood=map.scene?MOODS[moodOf(map)]:null;scene.add(mood?new THREE.HemisphereLight(...mood.hemi):new THREE.HemisphereLight(night?'#b4d5dd':dusk?'#ffd2a8':'#fffdf4',night?'#4e6260':dusk?'#5d5a72':'#a3af84',night?(map.instance?.5:.85):dusk?1.05:1.35));
+ const sun=mood?new THREE.DirectionalLight(...mood.sun):new THREE.DirectionalLight(night?'#bed9ed':'#ffefd2',night?.7:1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
  Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;sun.shadow.radius=5;sun.shadow.intensity=.74;scene.add(sun);scene.add(sun.target);
  let rotating=null;
  function resize(){const a=innerWidth/innerHeight,h=Math.max(12.8,18.2/a);camera.left=-h*a;camera.right=h*a;camera.top=h;camera.bottom=-h;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false);softLook.setSize(innerWidth,innerHeight);}
@@ -77,14 +78,15 @@ try {
  $('left').onclick=()=>turn(-1);$('right').onclick=()=>turn(1);$('in').onclick=()=>zoom(1.18);$('out').onclick=()=>zoom(1/1.18);
  $('reset').onclick=()=>{rotating=null;camera.position.copy(initial);camera.zoom=1;controls.target.copy(target);camera.updateProjectionMatrix();controls.update();};
  controls.addEventListener('start',()=>{rotating=null;});addEventListener('keydown',e=>{if(document.querySelector('dialog:modal')||$('account-panel').dataset.blocking==='true'||e.ctrlKey||e.metaKey||e.altKey||e.repeat||e.target.closest?.('input,textarea,select'))return;if(e.code==='KeyQ')turn(-1);if(e.code==='KeyE')turn(1);});addEventListener('resize',resize);resize();
- const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas,capitalAtlas,leafAtlas]=await Promise.all([map.procedural?Promise.resolve({scene:new THREE.Group()}):new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./'+map.model+'?v=29'),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId)),loader.loadAsync('./assets/capital-materials19.png'),loader.loadAsync('./assets/capital-leaves19.png')]);
+ const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas,capitalAtlas,leafAtlas]=await Promise.all([map.procedural&&!map.scene?Promise.resolve({scene:new THREE.Group()}):new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./'+(map.scene??map.model)+(map.scene?'?v=62':'?v=29'),e=>{if(e.total)loading.stage(2,'กำลังโหลดฉาก '+Math.round(e.loaded/e.total*100)+'%');}),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId)),loader.loadAsync('./assets/capital-materials19.png'),loader.loadAsync('./assets/capital-leaves19.png')]);
  loading.stage(3);clearCourtTrees(gltf.scene,map);
  const tiles={wood:frame(materials.image,[0,0,.5,.5],true),roof:frame(materials.image,[.5,0,.5,.5],true),sand:frame(materials.image,[0,.5,.5,.5],true),grass:frame(materials.image,[.5,.5,.5,.5],true)},cache=new Map();
  for(const [key,rect] of Object.entries({brick:[0,0,.5,.5],plaster:[.5,0,.5,.5],paving:[0,.5,.5,.5],meadow:[.5,.5,.5,.5]}))tiles[key]=frame(worldMaterials.image,rect,true);
  const capitalLook=createCapitalLook({map,atlas:capitalAtlas,frame});tiles.roof=capitalLook.roof;
  // Painted look: smooth the tiled building textures instead of hard pixel edges.
  for(const t of Object.values(tiles)){t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.anisotropy=4;t.needsUpdate=true;}
- gltf.scene.traverse(o=>{if(o.isMesh){if(o.name.startsWith('Living_canopy')||o.name.startsWith('Living canopy')||o.name.startsWith('Market_pottery')||o.name.startsWith('Market pottery'))o.visible=false;o.castShadow=!/Water|River$|River_|Terrain|terrain|ground19|soil|fragment|Garden_canal/.test(o.name);o.receiveShadow=true;const name=o.material.name.replace(/\.\d+$/,''),colors=o.geometry.attributes.color,cacheKey=name+(colors?'|ao':'');
+ const sceneMotion=map.scene?prepareSceneV2({scene,model:gltf.scene,map}):null;
+ if(!map.scene)gltf.scene.traverse(o=>{if(o.isMesh){if(o.name.startsWith('Living_canopy')||o.name.startsWith('Living canopy')||o.name.startsWith('Market_pottery')||o.name.startsWith('Market pottery'))o.visible=false;o.castShadow=!/Water|River$|River_|Terrain|terrain|ground19|soil|fragment|Garden_canal/.test(o.name);o.receiveShadow=true;const name=o.material.name.replace(/\.\d+$/,''),colors=o.geometry.attributes.color,cacheKey=name+(colors?'|ao':'');
   // Blender-baked ambient occlusion (bake_building_ao.py) arrives as vertex colours; ease it so under-floor areas stay readable.
   if(colors&&!o.geometry.userData.aoEased){for(let i=0;i<colors.count;i++)for(let c=0;c<3;c++)colors.setComponent(i,c,1-(1-colors.getComponent(i,c))*.78);colors.needsUpdate=true;o.geometry.userData.aoEased=true;}
   if(!cache.has(cacheKey)){const key=name.startsWith('wood')?'wood':name.startsWith('roof')?'roof':name==='sand'?'sand':name==='grass'?'grass':tiles[name]?name:null;
@@ -93,9 +95,10 @@ try {
    if(name==='amber'||name==='flame'){m.color.set('#ffbc5d');m.emissive.set('#ff7c12');m.emissiveIntensity=name==='flame'?1.3:.7;}if(name==='water')m.color.set('#68a5a1');if(name==='bark19'){m.map=tiles.wood;m.color.set('#a58a62');}if(name==='stone19')m.color.set('#b8b9a0');m.vertexColors=!!colors;cache.set(cacheKey,name==='ground19'?capitalLook.ground:name.startsWith('canopy')?capitalLook.canopy(name):['water','amber','flame'].includes(name)?m:paintify(m));
   }o.material=cache.get(cacheKey);
  }});scene.add(gltf.scene);
- createCapitalProps({scene,map});
- const landscapeDetails=createLandscapeDetails({scene,map});
- const cityTrees=createCapitalTrees({scene,map,texture:leafAtlas,crownTexture:capitalLook.crownTexture});
+ // v2 scenes already contain their trees, props and ground detail: never layer the old procedural set on top.
+ const idle={update(){}};if(!map.scene)createCapitalProps({scene,map});
+ const landscapeDetails=map.scene?idle:createLandscapeDetails({scene,map});
+ const cityTrees=map.scene?idle:createCapitalTrees({scene,map,texture:leafAtlas,crownTexture:capitalLook.crownTexture});
  const botanic={tree:frame(flora.image,[0,0,.558,.612]),banana:frame(flora.image,[.56,0,.44,.602]),hedge:frame(flora.image,[0,.68,.55,.30]),pots:frame(flora.image,[.587,.608,.409,.386])};
  for(const [i,kind] of ['forest','palm','bamboo','rice'].entries())botanic[kind]=frame(regionalFlora.image,[(i%2)*.5,Math.floor(i/2)*.5,.5,.5]);
  const personTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(people.image,r));
@@ -134,13 +137,17 @@ try {
  const geo=new THREE.BufferGeometry(),positions=new Float32Array(90);let seed=2026;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
  for(let i=0;i<30;i++){positions[i*3]=-16+rnd()*32;positions[i*3+1]=.4+rnd()*4;positions[i*3+2]=-20+rnd()*20;}geo.setAttribute('position',new THREE.BufferAttribute(positions,3));
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
- const frontier=map.procedural?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
- const motion=frontier??createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
+ const frontier=map.procedural&&!map.scene?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
+ // Leaving the map reloads the page; free the scene's GPU memory first so the next map starts clean.
+ addEventListener('pagehide',()=>{disposeScene(scene);renderer.dispose();});
+ const motion=sceneMotion??frontier??createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
  const monsterArt=await loadMonsterFrames(map);
  await heroMesh.userData.ready;if(heroMesh.userData.artError)throw new Error('Character animation unavailable');loading.stage(4);
  const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,monsterArt,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender},isPaused:()=>loading.active||!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
+ // Local test hook (dev server only) for automated walk/bridge/portal checks; absent on the deployed site.
+ if(['127.0.0.1','localhost'].includes(location.hostname))window.__ayothaya={game,map,camera,renderer,scene};
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
  // Extract one atlas cell so a circular portrait can preserve the sprite's natural aspect ratio.

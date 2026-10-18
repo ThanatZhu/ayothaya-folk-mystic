@@ -14,8 +14,8 @@ test('online teacher uses authoritative level, position and kills; persists ques
  try{
   const dev=await store.createLocal({name:'ทดสอบลานครู'}),a=await open(dev.token),peer=[...host.realm.peers.values()][0];
   const send=(id,action,extra={})=>{a.ws.send(JSON.stringify({type:'train',id,mentor:'box-master',action,...extra}));};
-  send('forged','accept',{position:{x:43,z:-71},baseXp:9900,kills:1000});await wait(()=>a.messages.some(m=>m.id==='forged'));assert.equal(a.messages.find(m=>m.id==='forged').code,'trainer-distance');
-  Object.assign(peer.world.player,{x:43,z:-70.5});peer.world.baseXp=2856;peer.world.jobXp=300;peer.world.kills=10;
+  send('forged','accept',{position:{x:48,z:-55},baseXp:9900,kills:1000});await wait(()=>a.messages.some(m=>m.id==='forged'));assert.equal(a.messages.find(m=>m.id==='forged').code,'trainer-distance');
+  Object.assign(peer.world.player,{x:48,z:-52.5});peer.world.baseXp=2856;peer.world.jobXp=300;peer.world.kills=10;
   await new Promise(r=>setTimeout(r,1250));send('accept','accept');await wait(()=>a.messages.some(m=>m.id==='accept'));assert.equal(store.rows.get(dev.uid).training.startKills,10);
   await new Promise(r=>setTimeout(r,1250));send('early','complete',{kills:999});await wait(()=>a.messages.some(m=>m.id==='early'));assert.equal(a.messages.find(m=>m.id==='early').code,'trainer-incomplete');
   peer.world.kills=15;await new Promise(r=>setTimeout(r,1250));send('finish','complete');await wait(()=>a.messages.some(m=>m.id==='finish'));assert.equal(a.messages.find(m=>m.id==='finish').advanced,true);const row=store.rows.get(dev.uid);assert.equal(row.character.classId,'boxer');assert.equal(row.state.traveler.baseXp,2856);assert.equal(row.state.traveler.jobXp,0);assert.equal(row.training,null);assert.equal(store.leases.size,0);

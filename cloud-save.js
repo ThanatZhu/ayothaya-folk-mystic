@@ -1,5 +1,5 @@
 import {connectFirebase,deadline} from './firebase-client.js';
-import {ENTRY_KEY,validEntry} from './realm-state.js?v=21';
+import {ENTRY_KEY,validEntry} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=41';
 import {normalizeEquipment,equipItem} from './equipment.js?v=41';
 const $=id=>document.getElementById(id);

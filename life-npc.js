@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
-import {walkable} from './combat-core.js?v=38';
+import {walkable,groundHeight} from './combat-core.js?v=62';
 const MERC_COST=200,MERC_TIME=1200;
 const NAMES=['นายแก่น','แม่จันทร์','ทิดคำ','อ้ายพรม','นางแก้ว','ขุนทอง','อีแป้น','ตาผล'];
 const CLASSES=['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
@@ -18,7 +18,7 @@ export function createLifeNPC({game,map,scene,camera,controls,bagUI}){
    place(dt,t){
     const p=characterMotion({classId,mode:t-this.attackAt<attackDuration(classId)?'attack':this.moving?'walk':'idle',time:t-this.attackAt<attackDuration(classId)?t-this.attackAt:t,phase:this.gait,view:this.view=walkView(this.face,controls.getAzimuthalAngle(),this.view)});
     const side=this.face.x*Math.cos(controls.getAzimuthalAngle())-this.face.z*Math.sin(controls.getAzimuthalAngle());if(Math.abs(side)>.3)this.flip=side<0;
-    sprite.position.set(this.x,.06,this.z);sprite.userData.pose(p,this.flip);
+    sprite.position.set(this.x,groundHeight(game.world.nav,this.x,this.z)+.06,this.z);sprite.userData.pose(p,this.flip);
     at.set(this.x,2.25,this.z).project(camera);tag.hidden=Math.abs(at.x)>1.05||Math.abs(at.y)>1.05||at.z>=1||!sprite.visible;
     tag.style.transform=`translate(-50%,-100%) translate(${(at.x*.5+.5)*innerWidth}px,${(-at.y*.5+.5)*innerHeight}px)`;
    },

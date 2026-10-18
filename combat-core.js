@@ -39,7 +39,14 @@ const props=[[-3,2.5,.26],[2.5,3.7,.26],[-7.1,-3.1,.28],[7,-5.6,.28],
  [-4.3,-1.8,.36],[4.7,-2.2,.36],[9,2.5,.4], // NPCs
  [-6.4,-6.3,.55],[-1.6,-6.3,.5],[7.6,-3.4,.6],[-11.2,-.8,.55],[-7.4,-2.2,.45]];
 export const DEFAULT_NAV={zones:[{x:-13.1,z:-11.6,w:26.2,d:15.9},{x:-1.7,z:3.7,w:2.4,d:3.65}],obstacles:OBSTACLES,props};
+// 0.62: Blender v2 scenes bake a walk grid (scripts/bake-nav-v2.py): '.' blocked, 'a'+k = floor k*5 cm high.
+function gridCell(g,x,z){const row=g.rows[Math.round((z-g.z0)/g.cell)];return row?.[Math.round((x-g.x0)/g.cell)]??'.';}
+export function groundHeight(nav,x,z){const c=nav?.grid?gridCell(nav.grid,x,z):'.';return c==='.'?0:(c.charCodeAt(0)-97)*.05;}
 export function walkable(x,z,r=.28,nav=DEFAULT_NAV){
+ const g=nav.grid;if(g){ // every cell the body's bounding square touches must be open
+  const i0=Math.round((x-r-g.x0)/g.cell),i1=Math.round((x+r-g.x0)/g.cell),j0=Math.round((z-r-g.z0)/g.cell),j1=Math.round((z+r-g.z0)/g.cell);
+  for(let j=j0;j<=j1;j++){const row=g.rows[j];if(!row)return false;for(let i=i0;i<=i1;i++)if((row[i]??'.')==='.')return false;}
+ }
  if(!nav.zones.some(b=>x>=b.x+r&&x<=b.x+b.w-r&&z>=b.z+r&&z<=b.z+b.d-r))return false;
  for(const b of nav.obstacles){if(x>b.x-r&&x<b.x+b.w+r&&z>b.z-r&&z<b.z+b.d+r)return false;}
  return !nav.props.some(([px,pz,pr])=>Math.hypot(x-px,z-pz)<r+pr);

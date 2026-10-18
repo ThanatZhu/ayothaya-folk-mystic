@@ -7,7 +7,7 @@ import {CLASSES,getClass,className,atlasPath} from './classes.js?v=18';
 import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=48.1';
 import {connectFirebase,deadline} from './firebase-client.js';
-import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=21';
+import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=41';
 import {wakeServer} from './multiplayer-config.js?v=27';
 wakeServer();

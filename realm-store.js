@@ -1,8 +1,8 @@
 import {experienceOf} from './experience.js?v=21';
 import {normalizeEquipment} from './equipment.js?v=41';
-import {trainingAction} from './city-life-data.js?v=40';
+import {trainingAction} from './city-life-data.js?v=62';
 import {CLASS_LEVEL,progression,validateJob} from './advancement.js?v=21';
-import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=21';
+import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=62';
 import {validateSave,nextRevision} from './save-state.js?v=21';
 
 export function validateCharacterChange(before,after,state){

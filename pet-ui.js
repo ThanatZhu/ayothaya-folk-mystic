@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import {ITEM_ERRORS,itemDef} from './items.js?v=04';
 import {PETS,FOOD,LOYAL,INTIMACY_MAX,mood,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from './pets.js?v=01';
-import {MONSTER_TYPES} from './combat-core.js?v=38';
+import {MONSTER_TYPES,groundHeight} from './combat-core.js?v=62';
 import {loadMonsterFrames} from './monster-art.js?v=38';
 import {iconStyle} from './bag-ui.js?v=03';
 import {openHudPanel} from './hud-panels.js?v=34';
@@ -24,6 +24,7 @@ export function createPetView(scene,id){
    if(d>12)s.position.set(owner.x-.8,.06,owner.z+.6);
    const moving=d>1.1;if(moving){const step=Math.min(d-1.1,(2.6+d)*dt);s.position.x+=dx/d*step;s.position.z+=dz/d*step;gait+=dt*8;}
    if(art){const frame=moving?1+(Math.floor(gait)%2):0;if(mat.map!==art[frame]){mat.map=art[frame];mat.needsUpdate=true;}}
+   if(owner.y!==undefined)s.position.y=owner.y+.06;
    if(Math.abs(dx)>.05)s.scale.x=Math.abs(s.scale.x)*(dx<0?-1:1);
   },
   dispose(){scene.remove(s);mat.dispose();}};
@@ -77,7 +78,7 @@ export function createPetUI({game,account,scene,bagUI}){
   world.petBonus=petBonus(p);
   if(view&&view.id!==p?.id){view.dispose();view=null;}
   if(p&&!view)view=createPetView(scene,p.id);
-  view?.follow(world.player,dt);
+  view?.follow({x:world.player.x,z:world.player.z,y:groundHeight(world.nav,world.player.x,world.player.z)},dt);
   render();
  }};
 }

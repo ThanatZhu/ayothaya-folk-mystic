@@ -18,7 +18,7 @@ export function character(input){
  return result;
 }
 export function validEntry(entry,owner,server){return !!entry&&entry.owner===owner&&entry.serverId===server&&isServer(server)&&(!entry.slotId||isSlot(entry.slotId));}
-export function initialSave(){return {schema:1,mapId:'ayutthaya',traveler:{version:5,hp:140,mp:100,kills:0,baseXp:0,jobXp:0,cooldowns:Array(10).fill(0)},position:{x:0,z:0},settings:{zoom:1.05,azimuth:.68,motion:true}};}
+export function initialSave(){return {schema:1,mapId:'ayutthaya',traveler:{version:5,hp:140,mp:100,kills:0,baseXp:0,jobXp:0,cooldowns:Array(10).fill(0)},position:{x:.5,z:36},settings:{zoom:1.05,azimuth:.68,motion:true}};}
 export function validateRecord(record,validateState){
  if(!record||!Number.isSafeInteger(record.revision)||record.revision<1)throw new Error('save-data');
  character(record.character);validateState(record.state);return record;

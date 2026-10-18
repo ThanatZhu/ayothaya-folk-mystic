@@ -1,8 +1,9 @@
 import {openHudPanel} from './hud-panels.js?v=34';
 import {iconStyle} from './bag-ui.js?v=03';
 import {emblemId,emoteId} from './items.js?v=04';
-import {createPetView} from './pet-ui.js?v=01';
+import {createPetView} from './pet-ui.js?v=62';
 import * as THREE from 'three';
+import {groundHeight} from './combat-core.js?v=62';
 import {MultiplayerClient} from './multiplayer-client.js?v=41';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=18';
@@ -168,7 +169,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    }
    const elapsed=clock-(v.action?.start??-100),track=skillTrack(state.character.classId,v.action?.index),emote=clock-(v.emote?.start??-100)<4;
    const pose=track&&elapsed<track.duration?skillPose(state.character.classId,v.action.index,elapsed,{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?'attack':emote?v.emote.name:p.moving?'walk':'idle',time:v.action&&v.action.index===null&&elapsed<attackDuration(state.character.classId)?elapsed:emote?clock-v.emote.start:clock,phase:v.gait,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)});
-   v.sprite.material.map=v.frames[0];v.sprite.position.y=(p.z>4.25?.41:.06)+pose.y;const angle=controls.getAzimuthalAngle();{const side=p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle);if(Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0;
+   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+pose.y;const angle=controls.getAzimuthalAngle();{const side=p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle);if(Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0;
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
    const tag=state.guild?state.guild.emblem+':'+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append(state.guild.name);v.label.append(g);}}
    v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x,v.sprite.position.y+2.1,v.sprite.position.z);

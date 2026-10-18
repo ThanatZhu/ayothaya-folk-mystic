@@ -2,7 +2,7 @@
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
 import {activeEvent} from './events.js?v=01';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,useItem,itemLabel,itemDef} from './items.js?v=04';
-import {MONSTER_TYPES} from './combat-core.js?v=38';
+import {MONSTER_TYPES} from './combat-core.js?v=62';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

@@ -8,7 +8,7 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=37';
 import {progression,jobFor} from './advancement.js?v=21';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove} from './combat-core.js?v=48.1';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=62';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=31';
 import {createRouteWalker} from './route-walk.js?v=01';
 
@@ -182,7 +182,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   else for(const key of Object.keys(pose))visualPose[key]=['frame','artFrame','stand'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
-  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,(p.z>4.25?.41:.06)+visualPose.y,p.z+p.face.z/faceLength*rootOffset);
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,groundHeight(world.nav,p.x,p.z)+.06+visualPose.y,p.z+p.face.z/faceLength*rootOffset);
   hero.sprite.scale.set(heroSize,heroSize,1);
   const azimuth=controls.getAzimuthalAngle(),directional=hero.directionalEnabled&&hero.directionalFrames;
   if(directional){
@@ -198,7 +198,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(mode==='walk'&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,p.z>4.25?.44:.09,p.z-p.face.z/faceLength*.25);}}
   let flash=0,shake=0;for(const s of strikes){const d=t-s.at;if(d>=0&&d<.45){flash=Math.max(flash,s.power*Math.exp(-d*9));if(d<.25)shake=Math.max(shake,s.power*Math.exp(-d*16));}}strikes=strikes.filter(s=>t-s.at<.5);
   castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,1.3,p.z);shakeAmount=reduced?0:shake*.11;
-  hero.shadow.position.set(p.x,p.z>4.25?.46:.072,p.z);playerRing.position.set(p.x,p.z>4.25?.47:.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
+  const floor=groundHeight(world.nav,p.x,p.z);hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
   // Camera follows the player while preserving user-controlled azimuth and zoom.
   const follow=new THREE.Vector3(p.x,1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
   controls.update();camera.updateMatrixWorld();
@@ -212,7 +212,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(!visible)return;
    const f=monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
    const recoil=reduced?0:Math.sin(Math.PI*Math.min(1,m.hit/.34))*.18;
-   v.sprite.position.set(m.x+(m.recoil?.x??0)*recoil,.06,m.z+(m.recoil?.z??0)*recoil);v.shadow.position.set(m.x,.073,m.z);
+   const mobFloor=groundHeight(world.nav,m.x,m.z);v.sprite.position.set(m.x+(m.recoil?.x??0)*recoil,mobFloor+.06,m.z+(m.recoil?.z??0)*recoil);v.shadow.position.set(m.x,mobFloor+.073,m.z);
    v.sprite.scale.set(v.height*1.1,v.height,1);v.sprite.material.rotation=0;
    v.sprite.material.transparent=m.hp<=0;v.sprite.material.opacity=m.hp<=0?Math.max(0,1-(deadAge-.5)/.75):1;
    v.sprite.material.color.set(m.hit>.25&&!reduced?'#ffe8c8':m.root>0?'#9ddacc':'#fff1da');v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);

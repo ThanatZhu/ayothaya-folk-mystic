@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {CombatWorld,walkable,findPath,moveBody} from '../combat-core.js';
+import {CombatWorld,walkable,findPath,moveBody,groundHeight} from '../combat-core.js';
 import {resolveMap,destinations,restoreTraveler,serializeTraveler} from '../world-state.js';
 const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 const map=catalog.maps[0];
@@ -24,10 +24,11 @@ test('all eight districts are reachable on foot and every story NPC can be appro
  }
 });
 test('canal collisions block water and leave three connected bridge crossings',()=>{
- assert.equal(walkable(-28,-50,.32,map.nav),false);
- for(const z of [0,-32,-70]){const p={x:-34,z};moveBody(p,13,0,map.nav);assert.ok(p.x>-23,'bridge '+z);}
- const a={x:-2,z:2};moveBody(a,0,20,map.nav);assert.ok(a.z<4.2);
- const b={x:-.5,z:2};moveBody(b,0,20,map.nav);assert.ok(b.z>6.5&&b.z<7.1);
+ // 0.62 Blender v2 capital: west canal x -29.5..-20.5 with three plank bridges, south moat bridged at x 0.
+ assert.equal(walkable(-25,0,.32,map.nav),false);assert.equal(walkable(-56,49,.32,map.nav),false);
+ for(const z of [26,-6,-36]){const p={x:-34,z};moveBody(p,13,0,map.nav);assert.ok(p.x>-22,'bridge '+z);assert.ok(groundHeight(map.nav,-25,z)>.2,'deck '+z);}
+ const a={x:-56,z:38};moveBody(a,0,20,map.nav);assert.ok(a.z<44.6,'moat blocks');
+ const b={x:0,z:38};moveBody(b,0,20,map.nav);assert.ok(b.z>56,'south bridge');
 });
 test('capital heals players and rejects monster spawns and auto combat',()=>{
  const w=new CombatWorld({...map,mobs:[[0,0,0]]});assert.equal(w.mobs.length,0);assert.equal(w.toggleAuto(),false);

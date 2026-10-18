@@ -143,12 +143,6 @@ body.field-hud.hud63 .exp-track>span{inset:auto auto 6px 0;font-size:10px;line-h
  body.field-hud.hud63 .combat-controls.wheel{right:var(--edge-r);bottom:calc(var(--exp-h) + 12px)}
  body.field-hud.hud63 #interact{bottom:calc(var(--exp-h) + 240px)}
 }
-/* Phone landscape: the right column would reach the skill wheel, so event chips become one row at the top centre. */
-@media (orientation:landscape) and (max-height:600px){
- body.field-hud.hud63 #hud-right #hud-chips{position:fixed;top:var(--edge-t);left:50%;transform:translateX(-50%);flex-direction:row;align-items:center;max-width:calc(100vw - 2 * (var(--edge) + 210px));z-index:15}
- body.field-hud.hud63 #hud-chips>button{flex:0 1 auto;min-width:0}
- body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 63px + 44px + var(--g))}
-}
 @media (orientation:portrait) and (max-width:600px){body.field-hud.hud63 #online-dock.collapsed{min-width:140px}}
 @media (orientation:portrait) and (max-width:600px){#online-dock.collapsed #dock-preview:empty::before{content:"แชต";color:var(--ink,#fff3d6)}}
 
@@ -189,3 +183,47 @@ body.field-hud.hud63 .exp-track>span{inset:auto auto 6px 0;font-size:10px;line-h
  body.field-hud.hud63 .exp-track>i{background:linear-gradient(90deg,#b8862f,#f1cf73)}
  body.field-hud.hud63 .exp-track.job>i{background:linear-gradient(90deg,#4f8f7f,#8fd6c1)}
 }
+
+/* ===== 0.68 owner feedback: event chips = icon + time (tap for details), target top-centre, tighter quest, fixed-width chat ===== */
+body.field-hud.hud63 #hud-right #hud-chips{flex-direction:row;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px}
+body.field-hud.hud63 #hud-chips>button{display:flex;align-items:center;gap:4px;padding:3px 9px 3px 5px;min-height:30px;border-radius:999px;font-size:11px;max-width:none}
+body.field-hud.hud63 #hud-chips>button[hidden]{display:none}
+body.field-hud.hud63 #hud-chips>button>span{display:none}
+body.field-hud.hud63 #hud-chips>button>b{font-weight:700;white-space:nowrap}
+body.field-hud.hud63 #hud-chips>button>i{font-style:normal;font-size:15px;line-height:1}
+body.field-hud.hud63 #hud-chips .item-icon{width:22px;height:22px}
+/* target monster: always top-centre, under the menu on desktop, at the top edge on phones */
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ body.field-hud.hud63 .target-panel{left:50%;top:var(--edge-t);transform:translateX(-50%);width:min(220px,40vw);padding:4px 10px;min-height:0}
+ body.field-hud.hud63 .target-panel strong{font-size:12px}body.field-hud.hud63 .target-panel small{font-size:10px}
+ body.field-hud.hud63 #notice{top:calc(var(--edge-t) + 62px)}
+}
+/* quest list: small, text packed tight */
+body.field-hud.hud63 #hud-right #quest-tracker{padding:4px 6px;row-gap:0;column-gap:6px}
+body.field-hud.hud63 #quest-tracker small{font-size:9px;line-height:1.1}
+body.field-hud.hud63 #quest-tracker strong{font-size:12px;line-height:1.15}
+body.field-hud.hud63 #quest-tracker span{font-size:10px;line-height:1.15}
+body.field-hud.hud63 #quest-go{min-height:28px;padding:2px 10px;font-size:11px;align-self:center}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ #hud-right{width:min(200px,36vw)}
+ body.field-hud.hud63 #hud-right #quest-tracker{border-width:8px;border-image-width:8px;padding:2px 4px}
+ body.field-hud.hud63 #quest-tracker small{display:none}
+ body.field-hud.hud63 #quest-tracker strong{font-size:11px}
+ body.field-hud.hud63 #quest-tracker span{font-size:9.5px}
+ body.field-hud.hud63 #quest-go{min-height:44px;min-width:44px;padding:0 8px;font-size:10px}
+ body.field-hud.hud63 #hud-chips>button{min-height:28px;font-size:10px}
+}
+/* chat keeps one width open or folded */
+body.field-hud.hud63 #online-dock.collapsed{width:var(--chat-w)!important;max-width:none!important}
+body.field-hud.hud63 #online-dock{width:var(--chat-w)!important;max-width:none!important}
+body.field-hud.hud63{--chat-w:340px}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){body.field-hud.hud63{--chat-w:min(320px,calc(100vw - 2 * (var(--edge) + 200px)))}}
+@media (orientation:portrait) and (max-width:600px){body.field-hud.hud63{--chat-w:min(300px,calc(100vw - 16px))}}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ /* phones: event chips move to the free left column under the online chip, clear of the skill wheel */
+ body.field-hud.hud63 #hud-right #hud-chips{position:fixed;left:var(--edge);right:auto;top:calc(var(--edge-t) + 63px + 44px + var(--g));width:220px;justify-content:flex-start;z-index:15}
+ body.field-hud.hud63 #ailment-row{top:calc(var(--edge-t) + 63px + 44px + 40px + var(--g))}
+ body.field-hud.hud63 .target-panel{padding:3px 10px 5px;min-height:0;height:auto}
+ body.field-hud.hud63 .target-panel small{display:none}
+}
+body.field-hud.hud63 #hud-right #quest-tracker{padding-left:16px}

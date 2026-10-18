@@ -79,7 +79,7 @@ export function createLifeUI({game,account,camera}){
  const mapName=id=>({'rice-fields':'ทุ่งขวัญข้าว','old-orchard':'สวนหมากคลองเก่า','moonlit-mill':'โรงสีใต้เงาจันทร์','lotus-marsh':'บึงบัวต้องมนตร์'})[id]??id;
  function drawSurge(){const now=Date.now(),s=surge(now),left=Math.max(0,Math.ceil(((s.active?s.endsAt:s.nextAt)-now)/1000)),mm=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
   const text=s.active?`🔥 ฝูงคลั่ง ${mapName(s.map)} · เหลือ ${mm}`:`🔥 ฝูงคลั่งถัดไป ${mapName(s.nextMap)} · อีก ${mm}`;
-  if(text!==surgeText){surgeText=text;surgeChip.textContent=text;surgeChip.classList.toggle('on',s.active);}}
+  if(text!==surgeText){surgeText=text;surgeChip.innerHTML=`<i aria-hidden="true">🔥</i><span>ฝูงคลั่ง${s.active?"":"ถัดไป"} ${mapName(s.active?s.map:s.nextMap)}</span><b>${s.active?"เหลือ ":"อีก "}${mm}</b>`;surgeChip.setAttribute("aria-label",text);surgeChip.classList.toggle("on",s.active);}}
  surgeChip.onclick=()=>{const s=surge(Date.now());world.notice(s.active?`ฝูงคลั่งที่ ${mapName(s.map)} · EXP ×2 และดรอป ×2 · กด M แล้วเลือก World เพื่อวาร์ป`:`ทุก 20 นาทีจะมีฝูงคลั่ง 5 นาทีในแผนที่นอกเมือง · ครั้งถัดไป ${mapName(s.nextMap)}`);};
  function drawEvent(){const e=activeEvent(Date.now());if(performance.now()>rateAt){rateAt=performance.now()+30000;world.expRate=expRate(Date.now(),document.body.dataset.map);}drawSurge();
   if((e?.id??null)===festId)return;festId=e?.id??null;fest.hidden=!e;if(!e)return;

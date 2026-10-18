@@ -32,15 +32,15 @@ test('auto never chases a distant monster outside the bounded scan area',()=>{
  const w=new CombatWorld();w.mobs.forEach(m=>Object.assign(m,{x:12,z:-10,home:{x:12,z:-10}}));
  w.toggleAuto();const start={x:w.player.x,z:w.player.z};tick(w,3);assert.equal(w.player.x,start.x);assert.equal(w.player.z,start.z);
 });
-test('invalid casts do not consume mana, and cooldown prevents repeated damage',()=>{
- const w=new CombatWorld();w.mobs.forEach(m=>Object.assign(m,{x:12,z:-10}));const mp=w.player.mp;
- assert.equal(w.skill(0),false);assert.equal(w.player.mp,mp);assert.equal(w.cooldowns[0],0);
+test('a skill with no target is cast at the air, and cooldown prevents repeated damage',()=>{
+ const w=new CombatWorld();w.mobs.forEach(m=>Object.assign(m,{x:12,z:-10}));const mp=w.player.mp,far=w.mobs[0].hp;
+ assert.equal(w.skill(0),true);assert.ok(w.player.mp<mp);assert.ok(w.events.find(e=>e.type==='cast').air);assert.equal(w.mobs[0].hp,far);w.cooldowns[0]=0;
  Object.assign(w.mobs[0],{x:0,z:1.2});w.select(0);assert.equal(w.skill(0),true);
  const hp=w.mobs[0].hp,mana=w.player.mp;assert.equal(w.skill(0),false);assert.equal(w.mobs[0].hp,hp);assert.equal(w.player.mp,mana);
 });
 test('skills cannot shoot through buildings; mana and HP remain bounded',()=>{
- const w=new CombatWorld();Object.assign(w.player,{x:-9,z:-.1});Object.assign(w.mobs[0],{x:-9,z:-4.8});w.select(0);
- assert.equal(w.skill(0),false);assert.equal(w.player.mp,100);
+ const w=new CombatWorld();Object.assign(w.player,{x:-9,z:-.1});Object.assign(w.mobs[0],{x:-9,z:-4.8});w.select(0);const hp=w.mobs[0].hp;
+ assert.equal(w.skill(0),true);assert.equal(w.mobs[0].hp,hp);w.player.mp=100; // the walled-off monster is never hit
  w.player.hp=130;assert.equal(w.skill(4),true);assert.equal(w.player.hp,140);w.skill(8);assert.ok(w.player.mp<=100);
 });
 test('root holds a monster, shield reduces retaliation, dead player respawns safely',()=>{

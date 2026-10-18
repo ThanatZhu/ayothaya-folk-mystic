@@ -160,11 +160,13 @@ export class CombatWorld{
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
+ // 0.68 a point in front of the player (toward `toward` when given): where an attack or skill lands with no target.
+ airPoint(range,toward=null){const p=this.player;if(toward){const dx=toward.x-p.x,dz=toward.z-p.z;if(Math.hypot(dx,dz)>.01)p.face={x:dx,z:dz};}const n=Math.hypot(p.face.x,p.face.z)||1;return {x:p.x+p.face.x/n*range,z:p.z+p.face.z/n*range};}
  basicAttack(quiet=false){
   const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
-  if(!m){if(!quiet)this.notice('เลือกมอนสเตอร์ หรือเข้าใกล้ก่อนโจมตี');return false;}
-  if(distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(!quiet)this.notice('เข้าใกล้เป้าหมายอีกนิด หรือเปิด AUTO');return false;}
+  // 0.68 no target in reach: swing at the air (auto-chase still uses AUTO / walking to the target).
+  if(!m||distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(quiet||this.safe)return false;p.attackCD=this.profession.delay*(this.derived?.delay??1);this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:this.airPoint(Math.min(this.profession.range,2.4),m),color:this.profession.color,kind:this.profession.kind,air:true});return true;}
   p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?1.5:1)*this.affinity(m,true))),crit?'#ffd27a':undefined);}return true;
  }
  skill(index){
@@ -174,7 +176,11 @@ export class CombatWorld{
   if(this.cooldowns[index]>0){this.notice('สกิลยังไม่พร้อม');return false;}
   if(p.mp<s.cost){this.notice('มานาไม่พอ');return false;}
   let m=this.target;
-  if(s.range){m=m??this.nearest(s.range);if(!m||distance(p,m)>s.range||!lineClear(p,m,this.nav)){this.notice('เลือกมอนสเตอร์ในระยะสกิล');return false;}this.select(m.id);p.face={x:m.x-p.x,z:m.z-p.z};}
+  let air=null;
+  if(s.range&&this.safe){this.notice('เขตปลอดภัย · ออกนอกเมืองเพื่อใช้สกิลโจมตี');return false;}
+  if(s.range){const hit=m&&distance(p,m)<=s.range&&lineClear(p,m,this.nav)?m:this.nearest(s.range);
+   // 0.68 no target in range: the skill is cast at the air in front of you (area skills still hit what is there).
+   if(hit&&lineClear(p,hit,this.nav)){m=hit;this.select(m.id);p.face={x:m.x-p.x,z:m.z-p.z};}else{air=this.airPoint(Math.min(s.range,4),m);m=null;}}
   const from={x:p.x,z:p.z};
   p.mp-=s.cost;this.cooldowns[index]=s.cd;
   if(s.type==='heal'){p.hp=Math.min(p.maxHp,p.hp+(s.heal??48));this.emit('heal',{x:p.x,z:p.z,amount:s.heal??48,color:s.color});}
@@ -182,9 +188,9 @@ export class CombatWorld{
   else if(s.type==='mana'){p.mp=Math.min(p.maxMp,p.mp+48);this.notice(s.name+' · มานา +48');}
   else if(s.type==='dash'){const n=Math.hypot(p.face.x,p.face.z)||1;moveBody(p,p.face.x/n*2.8,p.face.z/n*2.8,this.nav);this.manualGrace=.7;this.path=[];}
   else if(s.type==='nova'){this.mobs.filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
-  else if(s.type==='area'){this.mobs.filter(v=>v.hp>0&&distance(v,m)<=s.radius&&lineClear(m,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
-  else{this.hurt(m,this.power(s.damage,m),s.color);if(s.type==='root')m.root=3.5;if(s.type==='push'){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
-  this.emit('cast',{skillIndex:index,from,to:m&&s.type!=='dash'?{x:m.x,z:m.z}:{x:p.x,z:p.z},color:s.color,kind:s.type,radius:s.radius??1});return true;
+  else if(s.type==='area'){const c=m??air;this.mobs.filter(v=>v.hp>0&&distance(v,c)<=s.radius&&lineClear(c,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
+  else if(m){this.hurt(m,this.power(s.damage,m),s.color);if(s.type==='root')m.root=3.5;if(s.type==='push'){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
+  this.emit('cast',{skillIndex:index,from,to:s.type==='dash'?{x:p.x,z:p.z}:m?{x:m.x,z:m.z}:air??{x:p.x,z:p.z},air:!!air,color:s.color,kind:s.type,radius:s.radius??1});return true;
  }
  update(dt,input={x:0,z:0,attack:false},{monsters=true}={}){
   dt=Math.min(.05,Math.max(0,dt));this.time+=dt;const p=this.player;

@@ -23,8 +23,9 @@ test('all seven classes have usable ten-slot skill sets with damage/resource eff
  }
 });
 test('melee cannot hit at bow range; attack visuals and timing reflect each class',()=>{
- for(const c of CLASSES){const w=world(c.id);w.mobs[0].x=4;w.select(0);const expected=c.range>=4;assert.equal(w.basicAttack(),expected,c.id);
- if(expected){assert.equal(w.events.find(e=>e.type==='cast').kind,c.kind);assert.equal(w.player.attackCD,c.delay);}
+ for(const c of CLASSES){const w=world(c.id);w.mobs[0].x=4;w.select(0);const hp=w.mobs[0].hp,reach=c.range>=4;assert.equal(w.basicAttack(),true,c.id);
+ // 0.68 out of reach the swing still happens, at the air: no damage.
+ const cast=w.events.find(e=>e.type==='cast');assert.equal(cast.kind,c.kind);assert.equal(w.player.attackCD,c.delay);assert.equal(!!cast.air,!reach,c.id);if(!reach)assert.equal(w.mobs[0].hp,hp);
  }
  assert.ok(getClass('boxer').delay<getClass('lancer').delay);
  assert.ok(getClass('hunter').range>getClass('swordsman').range);

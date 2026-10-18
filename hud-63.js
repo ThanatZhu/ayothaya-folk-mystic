@@ -7,7 +7,7 @@ const SECONDARY=['menu-social','menu-status','menu-pet','menu-players','menu-cha
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63(){
  const $=id=>document.getElementById(id),body=document.body;
- const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=67';document.head.append(link); // last sheet wins ties
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=68';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
  deco(document.querySelector('.player-panel'),'f-profile');
@@ -19,9 +19,9 @@ export function createHud63(){
  const quest=$('quest-tracker'),chips=$('hud-chips');if(quest)right.append(quest);if(chips)right.append(chips);
  if(quest){
   const fold=document.createElement('button');fold.type='button';fold.id='quest-fold';fold.setAttribute('aria-label','ย่อหรือขยายรายการภารกิจ');
-  const compact=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)').matches,key='ayothaya-quest-fold:'+(compact?'phone':'desktop'),saved=store(key);
+  const compact=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)').matches,key='ayothaya-quest-fold68:'+(compact?'phone':'desktop'),saved=store(key);
   const set=v=>{quest.classList.toggle('folded',v);fold.textContent=v?'▸':'▾';fold.setAttribute('aria-expanded',String(!v));store(key,v?'1':'0');};
-  set(saved===null?compact:saved==='1');
+  set(saved==='1'); // 0.68 the list is compact now, so it starts open everywhere
   fold.onclick=e=>{e.stopPropagation();set(!quest.classList.contains('folded'));};quest.append(fold);
  }
  // Main menu: most used first, the rest behind "เพิ่มเติม"; on phones the whole menu sits behind one 44 px button.

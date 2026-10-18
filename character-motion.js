@@ -21,7 +21,9 @@ export function walkView(face,azimuth,previous='side'){
 export const WALK_CADENCE=2;
 export const gaitStep=(distance,dt,classId)=>Math.min(distance/walkCycle(classId),Math.max(0,dt)*WALK_CADENCE);
 // 0.56.2: the redrawn side walks (outputs/walk-handoff, scripts/import-walk056.py) step 20 px per frame (acolyte 16, robe).
-const WALK_CYCLE={novice:1.23,swordsman:.984,lancer:.984,hunter:.984,boxer:.984,rogue:.984,shaman:.984,acolyte:.788};
+// 0.61.3 owner chose the original character art again; its walk strides ~2.1 world units per cycle for every class.
+// Per-class values return here if a redrawn walk in the original style is added later.
+const WALK_CYCLE={};
 export const walkCycle=classId=>WALK_CYCLE[classId]??2.1;
 export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side'}={}){
@@ -44,7 +46,7 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
    p['foot'+side+'Y']=swing?-Math.sin(progress*Math.PI)*.06*stride:0;
   }
   p.handLX=-s*.035*arms;p.handLY=Math.max(0,-s)*-.012;p.handRX=s*.035*arms;p.handRY=Math.max(0,s)*-.012;
-  p.crouch=.012+.008*Math.cos(a*2);p.body=0;p.y=classId==='novice'?0:Math.abs(Math.sin(a))*.03; // footfall rise; the redrawn novice cycle bobs in the art, so the planted foot stays on the ground
+  p.crouch=.012+.008*Math.cos(a*2);p.body=0;p.y=Math.abs(Math.sin(a))*.03; // footfall rise; the redrawn novice cycle bobs in the art, so the planted foot stays on the ground
  }else if(mode==='attack'){
   const q=t/attackDuration(classId);if(q>=1)return p;
   const wind=ease(q/.28),strike=ease((q-.28)/.16),recover=ease((q-.55)/.45),power=strike*(1-recover);

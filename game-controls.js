@@ -179,7 +179,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
   const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
   if(!visualPose||reduced)visualPose={...pose};
-  else for(const key of Object.keys(pose))visualPose[key]=['frame','artFrame'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
+  else for(const key of Object.keys(pose))visualPose[key]=['frame','artFrame','stand'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,(p.z>4.25?.41:.06)+visualPose.y,p.z+p.face.z/faceLength*rootOffset);

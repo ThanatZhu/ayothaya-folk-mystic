@@ -264,3 +264,6 @@ body.field-hud.hud63 #quest-tracker span{font-size:9.5px!important;line-height:1
  body.field-hud.hud63 #ailment-row{top:calc(var(--below-menu) + 60px)}
 }
 body.field-hud.hud63 #quest-tracker small{line-height:1.25!important;margin:0 0 2px!important;position:static!important}body.field-hud.hud63 #quest-tracker strong{position:static!important;margin:0!important}
+
+/* 0.68.3 iOS zooms the whole page into any input under 16px and never zooms back: keep every in-game field at 16px on touch screens */
+@media (pointer:coarse){#game-shell :is(input,textarea,select),body :is(#online-text,dialog input,dialog textarea){font-size:16px!important}}

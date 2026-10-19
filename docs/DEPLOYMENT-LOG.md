@@ -568,3 +568,12 @@ Public build is a single-player browser prototype; multiplayer server/account pe
 - 0.64.1 `55b0ee0`: owner reported (iPhone video) flickering ground on several maps and an incomplete, static map. Fixed coplanar ground z-fighting with per-layer polygon offset; map photo now renders shadows for the whole map; open map redraws every 250 ms with monster/NPC markers. Verified live: Render 55b0ee0, Vercel 0.64.1.
 - 0.65: painted UI icon sheet `assets/ui63/ui-menu63.png` (ChatGPT/Codex art, glow stripped and re-gridded by `scripts/normalize-ui63.py` in Blender) on the top menu, World and settings buttons and as map markers (portal, NPC, shop, you, teachers' court, boss).
 - Tests 234/234, multiplayer 16/16. Not verified: a physical phone after the 0.64.1 flicker fix (owner to confirm).
+
+## 0.69 Approved game logo (2026-10-19)
+
+- Release commit `7db13bd`, based on production `336a73b` (0.68.2). Integrated the owner's approved gold lotus / cyan spirit-flame logo into the lobby hero and shared loading screen; emblem appears in the lobby header, favicons, touch icon and web manifest.
+- Original transparent PNG bytes are preserved under `assets/brand69/`. `brand69.css` loads last; loading branding switches to a compact height at viewport heights <=600 px. Accessible brand text remains present. No gameplay, account, save or server logic changed.
+- Validation after rebasing onto 0.68.2: `npm test` 234/234, `npm run build` and `npm run check:content` passed. Multiplayer 16/16 also passed before the rebase (upstream changed ground/HUD, not multiplayer code).
+- Production: Vercel reports success for `7db13bd`; public lobby shows 0.69. index.html, game.html, loading-preview.html, brand69.css and manifest match the build after normalizing Windows line endings. Both PNG SHA-256 hashes match the approved source exactly. All seven public resources returned HTTP 200.
+- Render health: HTTP 200, commit `7db13bd`, `ok:true`, `authority:true`, contentVersion 62 after rollout completed.
+- Limitation: browser visual testing on desktop/mobile and live Google login were not available in this run because the computer-use browser inventory was empty. Layout received a static CSS review; no visual-QA claim is made. HTTP evidence is saved locally in `outputs/logo69-deployment.json` beside the repository.

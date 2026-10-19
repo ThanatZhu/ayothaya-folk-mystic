@@ -12,3 +12,9 @@
 #audio-settings input{accent-color:#f4cf7a}
 @media(prefers-reduced-motion:reduce){.level-glow,.damage-number.crit{animation:none}}
 .big-banner em{display:block;font-style:normal;font-size:12px;color:#fff0ce;margin-top:2px}
+/* 0.74 punchier numbers: every hit pops in large and settles, spread sideways so stacked hits stay readable */
+.damage-number{font-size:22px;font-weight:900;translate:var(--dx,0) 0;text-shadow:0 0 4px #000,1px 2px 0 #1a120c;animation:dmg-pop .3s cubic-bezier(.2,1.8,.4,1)}
+.damage-number.crit{font-size:2.3em!important;color:#ffe27a!important;text-shadow:0 0 10px #ff7b2d,0 0 3px #000,1px 2px 0 #3a1406!important;animation:crit-pop .38s cubic-bezier(.2,1.9,.4,1)}
+@keyframes dmg-pop{from{scale:1.9}to{scale:1}}
+@keyframes crit-pop{from{scale:2.6}to{scale:1}}
+@media(prefers-reduced-motion:reduce){.damage-number{animation:none}}

@@ -75,9 +75,10 @@ export function createCombatEffect(art,track,options={}){
  const bill=m=>m.quaternion.copy(billboardQ),floor=m=>m.rotation.set(-Math.PI/2,0,0);
  const place=(m,x,y,z,s)=>{m.position.set(x,y,z);m.scale.setScalar(s);};
  const contact=profile.kind==='area'&&['novice','swordsman','lancer','boxer','rogue'].includes(profile.classId)?0:dist;
- const impact=(b,x=dist,y=targetY+1,strength=1,delay=0)=>{
+ const impact=(b,x=dist,y=targetY+1,strength=1,delay=0)=>{strength*=profile.basic?1:1.35;
   add('star',accent,b,.19,(m,t)=>{place(m,x,y,0,(.25+t*.45)*pulse(t)*strength);bill(m);m.rotateZ(.22+b*.8);},delay);
   if(!low)add('plane',flashMaterial,b,.28,(m,t)=>{place(m,x,y,0,(.6+t*.8)*(1-t)*strength);bill(m);},delay);
+  if(!profile.basic)add('ring',accent,b,.32,(m,t)=>{place(m,x,targetY+.06,0,(.5+t*1.6)*strength);floor(m);},delay);
  };
  const slash=(b,{wide=false,heavy=false,orbit=false,twin=false}={})=>{
   const r=orbit?radius:wide?radius*.78:Math.min(reach,Math.max(.95,dist*.85));
@@ -114,6 +115,10 @@ export function createCombatEffect(art,track,options={}){
   const cue=new THREE.Mesh(art.geometry[shape],magical?glyphMaterial:material);cue.name='Anticipation';cue.userData.shape=shape;cue.renderOrder=2;cue.visible=false;group.add(cue);
   specs.push({mesh:cue,start:0,life:Math.max(.12,beats[0]*duration),fn:(m,t)=>{const aimed=['attack','bind','push'].includes(profile.kind);place(m,aimed?.5:0,.025,0,(magical?.9:.45)*Math.sin(Math.PI*t)*.8);floor(m);if(aimed)m.scale.x*=1.35;}});
  }
+ // 0.74 cast circle: every skill (not basic attacks) draws the class seal under the caster while it winds up.
+ if(!reduced&&!profile.basic){const big=profile.kind==='ultimate'?radius*1.5:1.9;
+  add('plane',glyphMaterial,0,Math.max(.5,beats[0]*duration+.45),(m,t)=>{place(m,0,.03,0,big*Math.min(1,t*5)*(1-Math.max(0,t-.75)*4));floor(m);m.rotation.z=t*2.2;},-beats[0]*duration);
+  add('plane',flashMaterial,0,.42,(m,t)=>{place(m,0,.05,0,big*.9*pulse(t));floor(m);});}
  for(let b=0;b<beats.length;b++){
   if(reduced){
    const support=['heal','shield','focus'].includes(profile.kind),shape=profile.kind==='shield'?'ward':profile.kind==='heal'?'petal':profile.kind==='bind'?'ring':profile.attack==='lance'||profile.attack==='arrow'?'spear':profile.attack==='slash'||profile.attack==='twin'?'sweep':profile.attack==='light'?'petal':'star';

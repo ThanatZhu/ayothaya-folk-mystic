@@ -1,5 +1,5 @@
 import * as THREE from './vendor/build/three.module.js';
-import {createCombatVfxResources,createCombatEffect} from './combat-vfx.js?v=68';
+import {createCombatVfxResources,createCombatEffect} from './combat-vfx.js?v=74';
 
 // Shared by local/remote players and the seekable skill lab.
 export function createSkillEffects(scene){

@@ -16,7 +16,7 @@ const rng=seed=>()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
 const seedOf=s=>[...s].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7);
 
 export function createFeedback({game,map}){
- if(!document.querySelector('link[data-feedback]')){const css=document.createElement('link');css.rel='stylesheet';css.href='feedback.css?v=01';css.dataset.feedback='';document.head.append(css);}
+ if(!document.querySelector('link[data-feedback]')){const css=document.createElement('link');css.rel='stylesheet';css.href='feedback.css?v=74';css.dataset.feedback='';document.head.append(css);}
  const world=game.world;let settings={music:.35,sfx:.7};try{settings={...settings,...JSON.parse(localStorage.getItem(KEY))};}catch{}
  let ctx=null,master,musicBus,sfxBus,noise,timer=null;
  function start(){ // browsers only allow audio after a tap / key press

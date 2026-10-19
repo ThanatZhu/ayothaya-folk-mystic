@@ -3,7 +3,7 @@ import {CLASSES,NOVICE,atlasPath,classSkills,className} from './classes.js?v=73'
 import {SKILLS} from './combat-core.js?v=72.1';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
-import {createSkillEffects} from './skill-effects.js?v=68';
+import {createSkillEffects} from './skill-effects.js?v=74';
 import {characterMotion,attackDuration} from './character-motion.js?v=37';
 import {applySkillArt} from './skill-art.js?v=21';
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion:reduce)');

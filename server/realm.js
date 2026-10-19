@@ -435,7 +435,7 @@ export class RealmServer{
   w.notice((m.type==='shopBuy'?'ซื้อจากร้าน ':'ขายให้ร้าน ')+shop.ownerName+' แล้ว'+(r.tax?' · ภาษี '+r.tax+' เบี้ย':''));
   this.shopsChanged(p.serverId);return true;
  }
- setBag(p,bag){p.bag=bag;p.bagVersion++;if(p.stall)p.stall={...p.stall,...normalizeStall(p.stall,bag)};}
+ setBag(p,bag){p.bag=bag;p.bagVersion++;if(p.stall)p.stall={...p.stall,...normalizeStall(p.stall,bag,tradePerks(p.tradeXp).slots)};}
  // ---- 0.46 player trade: both lock, both confirm, then one atomic swap and an immediate save of both.
  partner(p){const o=p.trade&&this.peers.get(p.trade.with);return o&&o.trade?.with===p.id?o:null;}
  sendTrade(a,b){for(const [x,y] of [[a,b],[b,a]])x.world.emit('tradeState',{partner:{id:y.id,name:y.character.name},mine:x.trade.offer,theirs:y.trade.offer,myLock:x.trade.locked,theirLock:y.trade.locked,myOk:x.trade.ok,theirOk:y.trade.ok});}
@@ -471,9 +471,9 @@ export class RealmServer{
   if(m.type==='stallList'){w.emit('stalls',{list:[...p.room.peers].map(id=>this.peers.get(id)).filter(o=>o.stall&&o!==p).map(o=>({owner:o.id,name:o.character.name,title:o.stall.title,items:o.stall.items,x:o.stall.x,z:o.stall.z}))});return true;}
   if(m.type==='stallBuy'){const o=this.peers.get(m.owner);if(!o?.stall||o.suspended||o.room!==p.room)return this.itemFail(p,'stall-none');if(o===p)return this.itemFail(p,'stall-self');
    let r;try{r=buyFromStall(o.bag,o.stall,p.bag,m.item,m.count,tradePerks(o.tradeXp).slots);}catch(e){return this.itemFail(p,e.message);}
-   {const tax=taxOf(r.cost,tradePerks(o.tradeXp));r.sellerBag={...r.sellerBag,coins:r.sellerBag.coins-tax};this.traded(p.serverId,[p,o],m.item,r.cost,m.count);}
+   {const tax=taxOf(r.cost,tradePerks(o.tradeXp));r.net=r.cost-tax;r.sellerBag={...r.sellerBag,coins:r.sellerBag.coins-tax};this.traded(p.serverId,[p,o],m.item,r.cost,m.count);}
    this.setBag(o,r.sellerBag);this.setBag(p,r.buyerBag);o.stall={...o.stall,...r.stall};p.saveNow=o.saveNow=true;
-   o.world.emit('stallSold',{item:m.item,count:m.count,coins:r.cost,buyer:p.character.name});w.notice('ซื้อจากแผง '+o.character.name+' แล้ว');
+   o.world.emit('stallSold',{item:m.item,count:m.count,coins:r.net,buyer:p.character.name});w.notice('ซื้อจากแผง '+o.character.name+' แล้ว');
    this.stallCommand(p,{type:'stallList'});return true;}
   return false;
  }
@@ -526,8 +526,8 @@ export class RealmServer{
   if(m.type==='friendList'){this.sendFriends(p);return true;}
   if(m.type==='friendAdd'){const o=this.byName(p,cleanName(m.name));if(!o)return fail('whisper-offline');if(o.key===p.key)return fail('friend-self');
    if(p.friends.some(f=>f.key===o.key))return fail('friend-already');if(p.friends.length>=FRIEND_MAX)return fail('friend-full');
-   p.friendAsk=o.key;o.world.emit('friendAsk',{from:p.id,name:p.character.name});w.notice('ส่งคำขอเป็นเพื่อนถึง '+o.character.name+' แล้ว');return true;}
-  if(m.type==='friendAnswer'){const o=this.peers.get(m.from);if(!o||o.friendAsk!==p.key)return fail('friend-none');o.friendAsk=null;
+   (p.friendAsks??=new Set()).add(o.key);o.world.emit('friendAsk',{from:p.id,name:p.character.name});w.notice('ส่งคำขอเป็นเพื่อนถึง '+o.character.name+' แล้ว');return true;}
+  if(m.type==='friendAnswer'){const o=this.peers.get(m.from);if(!o||!o.friendAsks?.has(p.key))return fail('friend-none');o.friendAsks.delete(p.key);
    if(!m.accept){o.world.notice(p.character.name+' ปฏิเสธคำขอเป็นเพื่อน');return true;}
    if(p.friends.length>=FRIEND_MAX||o.friends.length>=FRIEND_MAX)return fail('friend-full');
    for(const [x,y] of [[p,o],[o,p]]){if(!x.friends.some(f=>f.key===y.key))x.friends.push({key:y.key,name:y.character.name});x.saveNow=true;x.world.notice('เป็นเพื่อนกับ '+y.character.name+' แล้ว');this.sendFriends(x);}

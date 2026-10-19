@@ -149,7 +149,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
   // 0.90 offline AUTO drinks potions under the thresholds set in the skill window (the server does this online).
   if(!game.online&&world.auto&&performance.now()-autoDrink>800){const id=pickPotion(local,world.player,world.autoConfig);if(id){autoDrink=performance.now();use(id);}}
   if(dialog.open)try{equipmentUI?.paint(heroCtx);}catch{} // a preview must never stop the game loop
-  if(shopDialog.open&&shopNpc&&Math.hypot(world.player.x-shopNpc.x,world.player.z-shopNpc.z)>4.5)shopDialog.close();
+  if(shopDialog.open&&shopNpc&&Math.hypot(world.player.x-shopNpc.x,world.player.z-shopNpc.z)>3.6)shopDialog.close();
   render();
  };
  return api;

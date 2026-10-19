@@ -2,7 +2,7 @@
 // Online every move is a realm-server command; offline only storage works (kept in localStorage beside the bag).
 import {ITEM_ERRORS,itemDef} from './items.js?v=94';
 import {STORAGE_NPC,STORAGE_SLOTS,STALL_MAX,TRADABLE,normalizeStorage,moveOffer} from './market.js?v=70';
-import {iconStyle} from './bag-ui.js?v=94';
+import {iconStyle} from './bag-ui.js?v=97.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -112,7 +112,7 @@ export function createMarketUI({game,map,account,bagUI}){
  }
  let stallShown=null; // the stall form is not re-rendered while typing, only when the stall opens or closes
  return {update(){
-  if(view==='storage'&&npc&&Math.hypot(world.player.x-npc.x,world.player.z-npc.z)>4.5)dialog.close();
+  if(view==='storage'&&npc&&Math.hypot(world.player.x-npc.x,world.player.z-npc.z)>3.6)dialog.close();
   if(view!=='stall')render();else if(world.myStall!==stallShown){stallShown=world.myStall;render(true);}
  }};
 }

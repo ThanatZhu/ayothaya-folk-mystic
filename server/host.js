@@ -73,7 +73,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   ws.on('message',async raw=>{
    let message;try{message=JSON.parse(raw.toString());}catch{ws.close(4002,'invalid-json');return;}
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
-   if(session){if(session.closing||session.trainingBusy){if(!['input','ping','save'].includes(message.type)){console.warn('dropped',message.type,session.closing?'closing':'busy',session.peer?.character?.name);send({type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+   if(session){if(session.closing||session.trainingBusy){if(message.type==='save'&&typeof message.id==='string'){const id=message.id.slice(0,50);session.queue.then(()=>send({type:'saved',id}),()=>{});return;} // the busy job checkpoints; answer once it lands
+    if(!['input','ping'].includes(message.type)){const reply={equip:'equipment-error',train:'training-error'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
     // 0.97 outfit changes carry a request id; stat gear from the bag (equip without id) goes on to the realm.
     if(message.type==='equip'&&typeof message.id==='string'){
      if(message.id.length>50)return;

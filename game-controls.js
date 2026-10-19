@@ -261,7 +261,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  updateHelp();addEventListener('resize',updateHelp);
  toast(mobileLayout()?'ลากจอยเดิน · แตะมอนและสกิลด้านขวา':'WASD เดิน · คลิกมอนเลือกเป้า · Space โจมตี · F ออโต้');
- function setNetwork(client){network=client;clearInput();world.auto=false;
+ function setNetwork(client){network=client;clearInput();world.auto=false;autoSent='';client.addEventListener('welcome',()=>{autoSent='';}); // a fresh server world starts on default AUTO settings
   // 0.97 the AUTO button shows only what the server reports.
   world.skill=i=>client.command('skill',{index:i});world.basicAttack=()=>client.command('attack');world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=on=>client.command('auto',{on});world.questTalk=npc=>client.command('questTalk',{npc});world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard)=>client.command('refine',{slot,npc,lekLai,guard});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});
  }

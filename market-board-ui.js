@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=94';
 import {TRADABLE} from './market.js?v=70';
 import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket} from './market-board.js?v=70';
-import {iconStyle} from './bag-ui.js?v=94';
+import {iconStyle} from './bag-ui.js?v=97.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -54,9 +54,9 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
   game.walkTo({x:s.x,z:s.z},{radius:2.2,kind:'npc',onArrive:()=>visit(id),onFail:()=>world.notice('ไปที่ร้านไม่ได้')});}
 
  game.onEvent(e=>{
-  if(e.type==='shops'){shops=e.list;syncSigns();render(true);}
-  if(e.type==='shopMine'){mine={shops:e.shops,perks:e.perks};render(true);}
-  if(e.type==='marketResults'){results=e;render(true);}
+  if(e.type==='shops'){shops=e.list;syncSigns();if(tab!=='open')render(true);} // never wipe a half-filled open-shop form
+  if(e.type==='shopMine'){mine={shops:e.shops,perks:e.perks};if(tab!=='open')render(true);}
+  if(e.type==='marketResults'){results=e;if(tab!=='open')render(true);}
  });
 
  const listRow=(id,r,btn)=>`<li data-id="${esc(id)}">${icon(id)}<div><strong>${esc(itemDef(id)?.name)}</strong><small>${money(r.price)} · เหลือ ${r.count}</small></div>${btn}</li>`;
@@ -113,7 +113,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
  // A buying store names a base item: exact name first, then the first tradable item whose name contains the text.
  const findItem=q=>{if(!q)return null;const ids=Object.keys(ITEMS).filter(TRADABLE);return ids.find(id=>ITEMS[id].name===q)??ids.find(id=>ITEMS[id].name.includes(q))??null;};
  return {update(){
-  if(tab==='shop'&&dialog.open){const s=shops.find(v=>v.id===counter);if(s&&Math.hypot(world.player.x-s.x,world.player.z-s.z)>5)dialog.close();}
+  if(tab==='shop'&&dialog.open){const s=shops.find(v=>v.id===counter);if(s&&Math.hypot(world.player.x-s.x,world.player.z-s.z)>4.5)dialog.close();}
   for(const [id,v] of signs){const s=shops.find(x=>x.id===id);if(!s)continue;const d=Math.hypot(world.player.x-s.x,world.player.z-s.z);point.set(s.x,2.9,s.z).project(camera);
    v.btn.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;v.btn.style.visibility=d<30&&Math.abs(point.x)<1.1&&Math.abs(point.y)<1.1?'visible':'hidden';}
   if(tab!=='open')render(); // the open-shop form is never redrawn while the player is typing in it

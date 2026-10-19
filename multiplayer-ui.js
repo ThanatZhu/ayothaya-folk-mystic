@@ -1,5 +1,5 @@
 import {openHudPanel} from './hud-panels.js?v=34';
-import {iconStyle} from './bag-ui.js?v=94';
+import {iconStyle} from './bag-ui.js?v=97.4';
 import {emblemId,emoteId} from './items.js?v=94';
 import {createPetView} from './pet-ui.js?v=62';
 import * as THREE from 'three';

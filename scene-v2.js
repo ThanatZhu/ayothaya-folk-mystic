@@ -13,7 +13,7 @@ const FLAT=/^(Ground|Soil foundation|Water surface|Damp canal|Streets|Tracks|Cou
 
 // 0.64.1 ground layers are modelled at the same height (streets, tracks, shoulders, courtyards), which z-fights
 // as the camera moves, worst on phones. Each layer gets its own depth bias so the upper layer always wins.
-const LAYERS=[[/^(Ground|Island meadow|Soil foundation|Cellar foundation)/,0],[/^(Damp canal|Wetland islands|Earthen rice)/,1],[/^Tracks/,2],[/^Feathered/,3],[/^(Streets|Courtyard|Raised flagstone|Spirit arena paved)/,4],[/^(Dense low rice|Stone moss|Arena inlays)/,5]];
+const LAYERS=[[/^(Ground|Island meadow|Soil foundation|Cellar foundation)/,0],[/^(Damp canal|Wetland islands|Earthen rice)/,1],[/^Tracks/,2],[/^Feathered/,3],[/^(Courtyard|Raised flagstone|Spirit arena paved)/,4],[/^Streets/,5],[/^(Dense low rice|Stone moss|Arena inlays)/,6]];
 const TOP_RANK=Math.max(...LAYERS.map(([,r])=>r));
 export function prepareSceneV2({scene,model,map}){
  const mood=MOODS[moodOf(map)],converted=new Map(),water=[];
@@ -32,6 +32,9 @@ export function prepareSceneV2({scene,model,map}){
   }
   o.material=converted.get(source);
   const rank=LAYERS.find(([re])=>re.test(o.name))?.[1];
+  // 0.68.2 phones still flickered: their depth buffer cannot separate layers 2 mm apart, so lower layers are also
+  // physically moved down 2 cm per rank (the top layer stays put, so feet keep standing on it).
+  if(rank!==undefined)o.position.y-=(TOP_RANK-rank)*.02;
   // 0.66.1 push lower layers back instead of pulling upper ones forward: a forward bias on streets/courtyards hid the feet
   // of everyone standing on them. The top layer keeps its true depth; sprites are never covered.
   if(rank!==undefined){const back=TOP_RANK-rank,key=o.material.uuid+'|'+rank;if(back>0&&!converted.has(key)){const m=o.material.clone();m.polygonOffset=true;m.polygonOffsetFactor=back;m.polygonOffsetUnits=back*4;converted.set(key,m);if(water.includes(o.material))water.push(m);}if(back>0)o.material=converted.get(key);}

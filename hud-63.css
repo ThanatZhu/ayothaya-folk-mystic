@@ -243,3 +243,24 @@ body.field-hud.hud63 #quest-tracker span{font-size:9.5px!important;line-height:1
  body.field-hud.hud63 #quest-tracker small{display:none!important}
  body.field-hud.hud63 #quest-go{min-height:36px;min-width:44px;font-size:9.5px;padding:0 6px}
 }
+
+/* ===== 0.68.2 phones: the menu is a row along the top again (owner preference); target box drops below it ===== */
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ body.field-hud.hud63 #menu-toggle{display:none!important}
+ body.field-hud.hud63 #game-menu{display:flex!important;flex-wrap:nowrap;left:auto;right:calc(var(--edge-r) + 120px + var(--g));top:var(--edge-t);transform:none;width:auto;padding:0;gap:4px;background:none;border:0;box-shadow:none}
+ body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:46px;min-width:44px;height:50px;min-height:44px;padding:3px 1px;gap:2px}
+ body.field-hud.hud63 #game-menu i{width:26px;height:26px}
+ body.field-hud.hud63 #game-menu>button span,body.field-hud.hud63 #menu-drawer>button span{font-size:9px}
+ body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 50px + var(--g))}
+}
+/* narrow portrait phones: the menu runs across the full width under the profile and minimap (two rows),
+   then the target box (left) and quest + event chips (right) sit below it */
+@media (orientation:portrait) and (max-width:600px){
+ body.field-hud.hud63{--menu-top:calc(var(--edge-t) + 119px + var(--g));--below-menu:calc(var(--edge-t) + 119px + 104px + 2 * var(--g))}
+ body.field-hud.hud63 #game-menu{flex-wrap:wrap;justify-content:center;left:var(--edge);right:var(--edge-r);top:var(--menu-top);width:auto}
+ body.field-hud.hud63 .target-panel{left:var(--edge);top:var(--below-menu);transform:none;width:min(170px,44vw)}
+ body.field-hud.hud63 #hud-right{top:var(--below-menu)}
+ body.field-hud.hud63 #hud-right #hud-chips{position:static;width:auto;justify-content:flex-end}
+ body.field-hud.hud63 #ailment-row{top:calc(var(--below-menu) + 60px)}
+}
+body.field-hud.hud63 #quest-tracker small{line-height:1.25!important;margin:0 0 2px!important;position:static!important}body.field-hud.hud63 #quest-tracker strong{position:static!important;margin:0!important}

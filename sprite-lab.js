@@ -11,7 +11,7 @@ import {attackDuration} from './character-motion.js?v=37';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createSkillEffects} from './skill-effects.js?v=68';
 import {applySkillArt} from './skill-art.js?v=21';
-import {prepareSceneV2,disposeScene} from './scene-v2.js?v=66.1';
+import {prepareSceneV2,disposeScene} from './scene-v2.js?v=68.2';
 const $=id=>document.getElementById(id),labels={S:'หน้า',SE:'หน้าขวา',E:'ขวา',NE:'หลังขวา',N:'หลัง',NW:'หลังซ้าย',W:'ซ้าย',SW:'หน้าซ้าย'};
 try{
  const requested=new URLSearchParams(location.search).get('class');

@@ -6,7 +6,9 @@ import {groundHeight} from './combat-core.js?v=72.1';
 // Blender v2 map (never on tracks, plazas, canals, bridges, buildings or the rice paddies, which keep their own
 // blades). Everything is drawn into one canvas atlas at load, so nothing is downloaded. Each 20 m chunk is one
 // instanced draw, so the camera only pays for the chunks it sees. Phones get ~40% of the clumps.
-export const MEADOW_MAPS=new Set(['rice-fields']);
+// Per map: flowers = drift level above which flowers bloom, ferns = drift level above which ferns gather (lower = more).
+const MIX={'rice-fields':{flowers:.3,ferns:.5},'old-orchard':{flowers:.5,ferns:.25}};
+export const MEADOW_MAPS=new Set(Object.keys(MIX));
 const TILES=['grass','tall','fern','daisy','marigold','orchid','clover'],COLS=4,ROWS=2,CELL=256,CHUNK=20;
 // [tile, width, height] per kind; heights stay under a character's knee so feet remain readable.
 const KIND={grass:[0,1.15,.5],tall:[1,1.1,.72],fern:[2,1.6,.62],daisy:[3,1.05,.5],marigold:[4,1.05,.5],orchid:[5,1.05,.52],clover:[6,1.2,.32]};
@@ -60,7 +62,7 @@ export function createMeadow({scene,map,model,quality='high',reduced=false}){
  mvPosition=modelViewMatrix*mvPosition;gl_Position=projectionMatrix*mvPosition;`);
  };
  material.customProgramCacheKey=()=>'meadow75';
- const paddy=paddyMask(model,map),{x:bx,z:bz,w,d}=map.bounds;
+ const mix=MIX[map.id]??MIX['rice-fields'],paddy=paddyMask(model,map),{x:bx,z:bz,w,d}=map.bounds;
  let seed=4211;const r=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
  // Slow value noise so flowers and ferns gather in drifts instead of an even sprinkle.
  const drift=(x,z,k)=>(Math.sin(x*.13+k)*Math.cos(z*.11-k*1.7)+Math.sin((x+z)*.05+k*2.3))*.5;
@@ -81,8 +83,8 @@ export function createMeadow({scene,map,model,quality='high',reduced=false}){
    // Road shoulders keep only short sparse tufts; the open meadow gets the full mix.
    if(edge<1.4){if(r()<.35)place('grass',x,z,.7+r()*.3);continue;}
    const f=drift(x,z,1),g=drift(x,z,4),roll=r();
-   if(f>.3&&roll<.5)place(['daisy','marigold','orchid'][Math.floor(drift(x,z,9)*3+3)%3],x,z,.85+r()*.35);
-   else if(g>.5&&roll<.3||water(x,z,1.6)&&roll<.4)place('fern',x,z,.8+r()*.45);
+   if(f>mix.flowers&&roll<.5)place(['daisy','marigold','orchid'][Math.floor(drift(x,z,9)*3+3)%3],x,z,.85+r()*.35);
+   else if(g>mix.ferns&&roll<.3||water(x,z,1.6)&&roll<.4)place('fern',x,z,.8+r()*.45);
    else if(roll<.12)place('clover',x,z,.8+r()*.4);
    else place(g<-.3?'tall':'grass',x,z,.8+r()*.45);
   }

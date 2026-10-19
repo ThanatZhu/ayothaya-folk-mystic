@@ -119,7 +119,7 @@ export class CombatWorld{
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
   this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack,leader],id)=>({id,type,pack,leader:!!leader,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),maxHp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
-  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
+  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.foe=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
  }
  // 0.61 hired mercenary: attacks your target (or, on AUTO, the nearest monster) within 6, every 1.4 s, 10 + 2·level damage.
  hire(seconds){this.merc={left:seconds,cd:0};}
@@ -130,7 +130,9 @@ export class CombatWorld{
   const m=this.target??(this.auto?this.nearest(6):null);if(!m||distance(m,p)>6)return;
   c.cd=1.4;this.emit('merc',{x:m.x,z:m.z});this.hurt(m,10+2*baseProgress(this).level,'#cfe8ff');
  }
- get target(){return this.mobs.find(m=>m.id===this.targetId&&m.hp>0)??null;}
+ // 0.93 duel: the opponent stands in as one more target (the server keeps its position and HP in step with the real player).
+ foes(){return this.foe?[...this.mobs,this.foe]:this.mobs;}
+ get target(){return this.foes().find(m=>m.id===this.targetId&&m.hp>0)??null;}
  emit(type,extra={}){this.events.push({type,...extra});}
  // 0.48 ailments: blind and curse weaken every hit; stun/sleep stop acting; silence stops skills.
  // One walking speed for the world, the server and client prediction: class × curse × town pace.
@@ -148,20 +150,20 @@ export class CombatWorld{
  // 0.58 combo: a skill on a rooted monster hits 30% harder.
  power(n,mob=null){const combo=mob?.root>0&&mob.hp>0;if(combo)this.emit('combo',{x:mob.x,z:mob.z});return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false):1)*(combo?1.3:1));}
  // 0.44 element + size (affinity.js). Basic attacks: weapon element, physical. Skills: class element; magic classes ignore size.
- affinity(mob,basic){const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
+ affinity(mob,basic){if(mob.pvp)return this.weakness();const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
   const element=basic?(d?.weaponElement??'neutral'):(CLASS_SKILL_ELEMENT[cls]??d?.weaponElement??'neutral');
   const id=MONSTER_TYPES[mob.type]?.id,a=affinityOf(id),card=1+(d?.vsSize?.[a.size]??0)+(d?.vsElement?.[a.element]??0);
   return affinityMultiplier({element,physical:basic||!magic,classId:cls},id)*card*this.weakness();}
  // 0.43 status/gear: max HP/MP and the multipliers above. null keeps the pre-0.43 numbers.
  applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=d.maxHp;p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
  notice(text){this.emit('notice',{text});}
- select(id){const mob=this.mobs.find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
- nearest(range=AUTO_RANGE){return this.mobs.filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
+ select(id){const mob=this.foes().find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
+ nearest(range=AUTO_RANGE){return this.foes().filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
  // 0.91 explicit on/off (the button and quests send the state they want, so two quick taps can no longer cross).
  setAuto(on){return on===this.auto?true:this.toggleAuto();}
  toggleAuto(){if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
+  if(!mob||mob.hp<=0||mob.pvp)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
@@ -192,8 +194,8 @@ export class CombatWorld{
   else if(s.type==='shield'){p.shield=s.duration??8;this.notice(s.name+' · ลดความเสียหาย '+p.shield+' วินาที');}
   else if(s.type==='mana'){p.mp=Math.min(p.maxMp,p.mp+48);this.notice(s.name+' · มานา +48');}
   else if(s.type==='dash'){const n=Math.hypot(p.face.x,p.face.z)||1;moveBody(p,p.face.x/n*2.8,p.face.z/n*2.8,this.nav);this.manualGrace=.7;this.path=[];}
-  else if(s.type==='nova'){this.mobs.filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
-  else if(s.type==='area'){const c=m??air;this.mobs.filter(v=>v.hp>0&&distance(v,c)<=s.radius&&lineClear(c,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
+  else if(s.type==='nova'){this.foes().filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
+  else if(s.type==='area'){const c=m??air;this.foes().filter(v=>v.hp>0&&distance(v,c)<=s.radius&&lineClear(c,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
   else if(m){this.hurt(m,this.power(s.damage,m),s.color);if(s.type==='root')m.root=3.5;if(s.type==='push'){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
   this.emit('cast',{skillIndex:index,from,to:s.type==='dash'?{x:p.x,z:p.z}:m?{x:m.x,z:m.z}:air??{x:p.x,z:p.z},air:!!air,color:s.color,kind:s.type,radius:s.radius??1});return true;
  }

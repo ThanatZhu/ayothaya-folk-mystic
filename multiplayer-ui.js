@@ -3,7 +3,7 @@ import {iconStyle} from './bag-ui.js?v=83';
 import {emblemId,emoteId} from './items.js?v=70';
 import {createPetView} from './pet-ui.js?v=62';
 import * as THREE from 'three';
-import {groundHeight} from './combat-core.js?v=72.1';
+import {groundHeight} from './combat-core.js?v=93';
 import {MultiplayerClient} from './multiplayer-client.js?v=41';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=73';
@@ -13,7 +13,7 @@ import {createPaintedAvatar} from './painted-avatar.js?v=63';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
 import {skillPose,skillTrack} from './skill-choreography.js?v=37';
 import {createSkillEffects} from './skill-effects.js?v=74';
-const messages={'replaced':'บัญชีนี้เข้าเล่นจากอีกหน้าต่าง/อีกเครื่องแล้ว · หน้านี้ออฟไลน์','already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
+const messages={'duel-invalid':'ท้าดวลได้เฉพาะนอกเมือง กับผู้เล่นในแผนที่เดียวกัน','duel-busy':'มีคนกำลังประลองอยู่แล้ว','duel-far':'อยู่ห่างกันเกิน 20 ม. · เดินเข้าไปใกล้ก่อนท้าดวล','replaced':'บัญชีนี้เข้าเล่นจากอีกหน้าต่าง/อีกเครื่องแล้ว · หน้านี้ออฟไลน์','already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
 const chatErrors=new Set(['chat-rate','no-party','invalid-chat']);
 const statusText={connecting:'กำลังเข้าห้อง… (ถ้าเซิร์ฟเวอร์ฟรีหลับอยู่ อาจรอราว 1 นาที)',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
 const editable=e=>e.target instanceof Element&&!!e.target.closest('input,textarea,select,button,a,[contenteditable=true]');
@@ -69,6 +69,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(party?.leader===p.id)name.prepend(el('span','mp-crown','♛ '));li.append(el('span','mp-avatar',className(p.classId).slice(0,1)),who);
    const action=(text,type,data,primary)=>{const b=el('button',primary?'mp-primary':'',text);b.onclick=()=>client?.command(type,data);li.append(b);};
    if(p.id!==client?.id&&!p.partyId&&(!party||party.leader===client.id))action('เชิญ','invite',{target:p.id},true);
+   if(p.id!==client?.id)action('ท้าดวล','duel',{target:p.id});
    if(p.id!==client?.id&&party?.leader===client?.id&&party.members.includes(p.id)){action('หัวหน้า','leader',{target:p.id});action('นำออก','kick',{target:p.id});}
    $('online-players').append(li);
   }
@@ -124,10 +125,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   }
   updateParty();
  }
- function showInvite(m){
+ // 0.93 a duel challenge reuses the invite card; accepting challenges back, declining just lets it expire.
+ function showInvite(m,duel=false){
   const row=el('div','mp-invite'),text=el('p'),remaining=Math.max(0,m.expires-Date.now()),timer=el('i','mp-timer');
-  text.append(el('b','',m.name),document.createTextNode(' ชวนคุณเข้าปาร์ตี้'));timer.style.animationDuration=remaining+'ms';row.append(el('span','mp-invite-icon','♛'),text);
-  const actions=el('div','mp-invite-actions');for(const [label,accept] of [['รับคำเชิญ',true],['ปฏิเสธ',false]]){const b=el('button',accept?'mp-primary':'',label);b.onclick=()=>{client.command('answer',{invite:m.id,accept});row.remove();};actions.append(b);}
+  text.append(el('b','',m.name),document.createTextNode(duel?' ท้าคุณประลอง!':' ชวนคุณเข้าปาร์ตี้'));timer.style.animationDuration=remaining+'ms';row.append(el('span','mp-invite-icon',duel?'⚔':'♛'),text);
+  const actions=el('div','mp-invite-actions');for(const [label,accept] of duel?[['รับคำท้า',true],['ไม่รับ',false]]:[['รับคำเชิญ',true],['ปฏิเสธ',false]]){const b=el('button',accept?'mp-primary':'',label);b.onclick=()=>{if(duel){if(accept)client.command('duel',{target:m.from});}else client.command('answer',{invite:m.id,accept});row.remove();};actions.append(b);}
   row.append(actions,timer);invites.append(row);setTimeout(()=>row.remove(),remaining);
  }
  async function join(){
@@ -141,6 +143,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    client.addEventListener('social',({detail})=>{roster=detail.players;party=detail.party;drawRoster();chip('ออนไลน์ · '+roster.length+' คน');});
    client.addEventListener('error',({detail})=>{const text=messages[detail.code]??(client.status==='error'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ · กดเชื่อมต่อใหม่อีกครั้ง':'ไม่สามารถทำรายการนี้ได้ · '+detail.code);status(text);if(chatErrors.has(detail.code)||!dialog.open)dockNote(text);});
    client.addEventListener('invite',({detail})=>showInvite(detail));
+   client.addEventListener('duelAsk',({detail})=>showInvite(detail,true));
    // Round-trip time for the status line.
    client.addEventListener('pong',({detail})=>{if(Number.isFinite(detail.stamp))button.dataset.ping=String(Math.round(performance.now()-detail.stamp));});
    setInterval(()=>{if(client.status==='online')client.command('ping',{stamp:performance.now()});},4000);

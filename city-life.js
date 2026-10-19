@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {CITIZEN_STYLES} from './city-life-data.js?v=73.1';
 import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1';
-import {groundHeight} from './combat-core.js?v=72.1';
+import {groundHeight} from './combat-core.js?v=93';
 
 // Whole painted poses, aligned at their feet. No skeletal cutouts or squash/stretch.
 export function clearCourtTrees(model,map){

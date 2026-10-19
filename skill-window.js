@@ -2,7 +2,7 @@ import {applySkillArt} from './skill-art.js?v=21';
 import {openHudPanel} from './hud-panels.js?v=34';
 // Skill window (menu "สกิล" or K). 0.84: a skill tree. Each skill opens when the skills it needs reach a level
 // (shared rules in skill-progress.js, enforced by the realm server too); tap a skill for its numbers.
-import {SKILL_MAX,OPEN_MAX,SKILL_TREE,requirements,skillOpen,nextLevelText,scaledSkill} from './skill-progress.js?v=84';
+import {SKILL_MAX,OPEN_MAX,SKILL_TREE,requirements,skillOpen,nextLevelText,scaledSkill} from './skill-progress.js?v=87';
 const reasons={'no-skill-points':'แต้มสกิลไม่พอ · ได้เพิ่มเมื่อ Job Level ขึ้น','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา · เปิดพร้อมระบบเควสต์','skill-max':'ขั้นสูงสุดแล้ว','skill-locked':'ยังไม่ปลดล็อก · อัปสกิลที่ต้องใช้ให้ถึงขั้นก่อน','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','online-required':'ต้องเชื่อมต่อออนไลน์เพื่ออัปสกิล','not-connected':'กำลังเชื่อมต่อ · ลองอีกครั้ง'};
 // Grid place of each slot: [column, row]. Rows are the tree tiers, top to bottom.
 const PLACE={0:[1,0],4:[3,0],1:[0,1],2:[1,1],5:[3,1],3:[0,2],6:[1,2],8:[3,2],7:[0,3],9:[2,3]};

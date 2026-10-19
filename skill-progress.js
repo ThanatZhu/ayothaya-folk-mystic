@@ -27,13 +27,18 @@ export function earnedPoints({classId='novice',jobId='',jobXp=0}={}){
  if(classId==='novice')return level;
  return 9+(jobId?39:0)+level;
 }
- // A path with no data yet starts on the tree (0.84). Older saves already hold their own arrays and keep them.
+// 0.87 owner: every character, old or new, climbs the tree from the start. Skill data saved before the tree has no
+// TREE_MARK, so on its next load each path goes back to START_LEVELS once (every spent point returns, since spending
+// counts levels above 1). The mark is a ten-zero array, so it costs no points and passes the save checks.
+export const TREE_MARK='_tree84';
 export function normalizeSkills(raw,classId){
- const out={};
+ const out={},marked=Array.isArray(raw?.[TREE_MARK]);
  if(raw&&typeof raw==='object'&&!Array.isArray(raw))for(const [id,levels] of Object.entries(raw)){
-  if(typeof id==='string'&&id.length<=24&&Array.isArray(levels)&&levels.length===SLOTS)out[id]=levels.map(clampLevel);
+  if(id===TREE_MARK)continue;
+  if(typeof id==='string'&&id.length<=24&&Array.isArray(levels)&&levels.length===SLOTS)out[id]=marked?levels.map(clampLevel):[...START_LEVELS];
  }
  if(!out[classId])out[classId]=[...START_LEVELS];
+ out[TREE_MARK]=Array(SLOTS).fill(0);
  return out;
 }
 // Learning a skill (level 1) comes from its quest; points pay only for levels 2-10.

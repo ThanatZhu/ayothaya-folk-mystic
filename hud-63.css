@@ -245,3 +245,9 @@ body.field-hud.hud63 #menu-market i{position:relative}
 body.field-hud.hud63.chat-typing #online-dock #dock-preview{display:none}
 body.field-hud.hud63 #menu-rank i{position:relative}
 body.field-hud.hud63 #menu-rank i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 100% 66.667%/600% 400% no-repeat}
+/* 0.87 owner: a bigger chat on computers (wider box, about twice the lines) */
+@media (pointer:fine) and (min-width:901px) and (min-height:601px){
+ body.field-hud.hud63{--chat-w:min(480px,34vw)}
+ body.field-hud.hud63 #online-dock #online-messages{height:min(190px,24vh)}
+ body.field-hud.hud63 #online-dock #online-messages{font-size:14px}
+}

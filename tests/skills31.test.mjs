@@ -12,11 +12,14 @@ test('skill points: one per Job Level, carried across Novice, class and Master',
  assert.equal(earnedPoints({classId:'swordsman',jobXp:jobXpFor('swordsman','',5)}),13);
  assert.equal(earnedPoints({classId:'swordsman',jobId:'guardian',jobXp:0}),48);
 });
-test('a new path starts on the tree (strike + recover); saved arrays are kept as they are',()=>{
+test('every path starts on the tree; pre-tree saves reset once (points return), marked saves are kept',()=>{
  const skills=normalizeSkills(undefined,'hunter');
  assert.deepEqual(skills.hunter,[1,0,0,0,1,0,0,0,0,0]);assert.equal(spentPoints(skills),0);
  assert.equal(availablePoints(skills,{classId:'novice',jobXp:0}),0);
- const bad=normalizeSkills({hunter:[1,2,'x',99,-1,1,1,1,1,1],junk:[1]},'hunter');
+ const old=normalizeSkills({hunter:[4,4,3,2,4,1,3,1,2,3],novice:[2,1,1,1,1,1,1,1,1,1]},'hunter');
+ assert.deepEqual(old.hunter,[1,0,0,0,1,0,0,0,0,0]);assert.deepEqual(old.novice,[1,0,0,0,1,0,0,0,0,0]);assert.equal(spentPoints(old),0);
+ assert.deepEqual(normalizeSkills(old,'hunter'),old,'the reset happens only once');
+ const bad=normalizeSkills({_tree84:Array(10).fill(0),hunter:[1,2,'x',99,-1,1,1,1,1,1],junk:[1]},'hunter');
  assert.deepEqual(bad.hunter,[1,2,1,1,1,1,1,1,1,1]);assert.equal(bad.junk,undefined);
 });
 test('upgrades need points, stop at the trial gate, and never mutate the input',()=>{
@@ -46,7 +49,7 @@ test('an unlearned skill cannot be cast, offline or on the server',()=>{
  const map={id:'f',safe:false,nav:{zones:[{x:-20,z:-20,w:40,d:40}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[[1,0,0]]};
  const w=new CombatWorld(map);w.skillLevels[4]=0;assert.equal(w.skill(4),false);w.skillLevels[4]=1;assert.equal(w.skill(4),true);
  let time=1e4;const realm=new RealmServer({catalog:{capital:'f',maps:[map]},now:()=>time});
- const record={character:{name:'tester',gender:'male',classId:'novice'},state:initialSave(),skills:{novice:[1,1,1,1,0,1,1,1,1,1]}};
+ const record={character:{name:'tester',gender:'male',classId:'novice'},state:initialSave(),skills:{_tree84:Array(10).fill(0),novice:[1,1,1,1,0,1,1,1,1,1]}};
  const peer=realm.join({uid:'u',serverId:'server-1',slotId:'slot-1',record,send:()=>{}});
  time+=100;assert.equal(realm.receive(peer.id,{type:'skill',seq:1,index:4}),false);
  assert.deepEqual(realm.record(peer,record).skills.novice,[1,1,1,1,0,1,1,1,1,1]);

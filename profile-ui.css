@@ -28,3 +28,9 @@
 /* 0.84 settings: centred on screen and wider, over a light scrim (tap outside to close) */
 html body.field-hud #account-panel:not([data-blocking=true]):not([hidden]){inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;transform:none!important;width:auto!important;max-width:none!important;max-height:none!important;display:grid!important;place-items:center;padding:12px;background:#0b141099;backdrop-filter:blur(2px);z-index:46}
 html body.field-hud #account-panel:not([data-blocking=true]) .account-card{width:min(640px,94vw)!important;max-height:calc(100dvh - 32px)!important;overflow-y:auto}
+/* 0.85 even layout: both action buttons share one size; combat numbers fill whole rows (2 + 3 + 2 on 6 columns) */
+#profile-card .profile-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#profile-card .profile-actions button{display:flex;align-items:center;justify-content:center;width:100%;margin:0;min-height:48px;padding:6px 12px;border:1px solid #f4cf7a;border-radius:999px;background:#24382b;color:#f4dfac;font:700 12px/1.25 Mali,Tahoma,sans-serif;text-align:center}
+#profile-card .profile-actions button.glow{background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210}
+#profile-derived{grid-template-columns:repeat(6,1fr)!important}
+#profile-derived div:nth-child(-n+2),#profile-derived div:nth-child(n+6){grid-column:span 3}#profile-derived div:nth-child(n+3):nth-child(-n+5){grid-column:span 2}

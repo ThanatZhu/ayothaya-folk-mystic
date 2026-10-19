@@ -1,6 +1,6 @@
 import http from 'node:http';
 import {randomUUID} from 'node:crypto';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {WebSocketServer,WebSocket} from 'ws';
@@ -8,6 +8,7 @@ import {RealmServer} from './realm.js';
 import {equipItem} from '../equipment.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
+import {cleanBalance} from '../balance.js';
 import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
@@ -36,6 +37,16 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>1024){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
    try{if(store.rows.size>=1000)throw new Error('local-session-limit');const result=await store.createLocal(JSON.parse(data));reply(201,{token:result.token,slotId:'slot-1',serverId:'server-1',character:result.record.character});}catch{reply(400,{error:'invalid-character'});}return;
+  }
+  // 0.85 admin dashboard save: only the local development server (the owner's own machine) writes balance-data.js;
+  // the production server has no such route. The file then ships with the next git push.
+  if(mode==='local'&&url.pathname==='/dev/balance'&&req.method==='POST'){
+   if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
+   let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>200000){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
+   try{const clean=cleanBalance(JSON.parse(data)),text='// Balance overrides written by the admin dashboard (admin.html). Empty = the numbers in the code.\nexport default '+JSON.stringify(clean,null,1)+';\n';
+    await writeFile(path.join(root,'balance-data.js'),text);await writeFile(path.join(root,'dist','balance-data.js'),text).catch(()=>{});
+    reply(200,{ok:true,changes:Object.values(clean).reduce((n,g)=>n+Object.values(g).reduce((m,f)=>m+Object.keys(f).length,0),0)});}catch{reply(400,{error:'invalid'});}
+   return;
   }
   if(serveStatic&&mode==='local'&&req.method==='GET'){
    try{const decoded=decodeURIComponent(url.pathname),relative=decoded==='/'?'index.html':decoded.slice(1),base=path.join(root,'dist'),file=path.resolve(base,relative);

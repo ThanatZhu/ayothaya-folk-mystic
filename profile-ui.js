@@ -10,7 +10,7 @@ import {openHudPanel} from './hud-panels.js?v=34';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 export function createProfileUI({game,account,statusUI,equipmentUI}){
- const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-ui.css?v=84';document.head.append(link);
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-ui.css?v=85';document.head.append(link);
  const world=game.world,person=account.character;
  // Settings: keep the old toggle (cloud-save.js owns open/close and the blocking state) on a gear button.
  const toggleSettings=$('open-account').onclick;
@@ -46,7 +46,7 @@ export function createProfileUI({game,account,statusUI,equipmentUI}){
   $('profile-levels').innerHTML=bar('Base',base)+bar('Job',job);
   $('profile-base').innerHTML=STATS.map(k=>`<li><b>${STAT_LABEL[k]}</b><span>${total[k]??v.stats[k]}</span></li>`).join('');
   const pct=n=>Math.round(n*100)+'%';
-  $('profile-derived').innerHTML=[['HP',`${Math.round(world.player.hp)} / ${d.maxHp}`],['MP',`${Math.round(world.player.mp)} / ${d.maxMp}`],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)],['ความเร็วโจมตี',Math.round(100/d.delay)+'%']].map(([k,n])=>`<div><dt>${esc(k)}</dt><dd>${esc(n)}</dd></div>`).join('');
+  $('profile-derived').innerHTML=[['HP',`${Math.round(world.player.hp)} / ${d.maxHp}`],['MP',`${Math.round(world.player.mp)} / ${d.maxMp}`],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['ความเร็วโจมตี',Math.round(100/d.delay)+'%'],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)]].map(([k,n])=>`<div><dt>${esc(k)}</dt><dd>${esc(n)}</dd></div>`).join('');
   $('profile-raise').textContent=v.points>0?`อัปแต้มสถานะ · เหลือ ${v.points} แต้ม`:'หน้าสถานะ · อัปแต้ม';$('profile-raise').classList.toggle('glow',v.points>0);
  }
  return {open,update(){render();}};

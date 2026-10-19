@@ -1,3 +1,4 @@
+import {patch} from './balance.js';
 // Shared profession catalogue: lobby, persistence, combat and sprite renderer.
 export const CLASSES=[
  {id:'swordsman',name:'นักดาบ',icon:'⚔',role:'แนวหน้า · ดาบและโล่',description:'เข้าประชิด ฟันกวาด และตั้งรับด้วยโล่',color:'#e5b867',range:1.65,damage:21,delay:.8,speed:4.08,kind:'slash',names:['ฟันเปิดทาง','ดาบกวาด','ตีสกัด','โล่กระแทก','พักหายใจ','ตั้งโล่','ดาบผ่าเกราะ','พุ่งเข้าหา','รวบรวมแรง','วงดาบพิทักษ์']},
@@ -27,3 +28,5 @@ export function classSkills(id,base){
   return next;
  });
 }
+// 0.85 admin balance overrides (balance.js): basic attack damage, delay and reach per path.
+for(const c of [NOVICE,...CLASSES])patch('classes',c.id,c);

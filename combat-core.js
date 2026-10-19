@@ -1,3 +1,4 @@
+import {patch,monsterKey} from './balance.js';
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
 import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=73';
@@ -25,6 +26,7 @@ export const MONSTER_TYPES=[
  {name:'ไหผีจอมซน',hp:90,speed:.8,damage:8,baseXp:18,jobXp:12}
 ];
 MONSTER_TYPES.push(...FRONTIER_MONSTERS);
+MONSTER_TYPES.forEach((m,i)=>patch('monsters',monsterKey(m,i),m)); // 0.85 admin balance overrides
 // 0.52 pacing: AUTO looks for monsters within 14 of where it was switched on (was 8); towns are walked 30% faster.
 export const AUTO_RANGE=14,TOWN_PACE=1.3;
 export const OBSTACLES=[
@@ -112,7 +114,7 @@ export function rallyPack(mobs,mob){
 }
 export class CombatWorld{
  constructor(config={}){
-  this.profession=advanceStats(getClass(config.classId??'shaman'),config.jobId);this.skills=advanceSkills(classSkills(this.profession.id,SKILLS),this.profession.id,config.jobId);
+  this.profession=advanceStats(getClass(config.classId??'shaman'),config.jobId);this.skills=advanceSkills(classSkills(this.profession.id,SKILLS).map((s,i)=>patch('skills',this.profession.id+':'+i,{...s})),this.profession.id,config.jobId);
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
   this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack,leader],id)=>({id,type,pack,leader:!!leader,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),maxHp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));

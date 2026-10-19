@@ -8,7 +8,7 @@ import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=72.1';
-import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=31';
+import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=84';
 import {createRouteWalker} from './route-walk.js?v=01';
 
 import {className} from './classes.js?v=73';

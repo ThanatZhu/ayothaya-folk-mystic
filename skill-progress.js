@@ -5,22 +5,35 @@ export const SKILL_MAX=10;
 // Levels 5 and 10 need a skill trial / final scroll quest (step L3). Until quests exist, upgrades stop at 4.
 export const OPEN_MAX=4;
 const SLOTS=10;
+// 0.84 skill tree (owner): every path shares one shape because slot roles match in all eight classes
+// (0 strike, 1 area, 2 bind, 3 push, 4 recover, 5 guard, 6 heavy strike, 7 dash, 8 focus, 9 ultimate).
+// A new path knows its strike and recover skills; the rest open when the listed skills reach the listed level.
+// Learning an opened skill is free; levels 2-4 cost one point each. Saves from before 0.84 keep every skill.
+export const SKILL_TREE=[
+ {slot:0,tier:0,req:[]},{slot:4,tier:0,req:[]},
+ {slot:1,tier:1,req:[[0,2]]},{slot:2,tier:1,req:[[0,2]]},{slot:5,tier:1,req:[[4,2]]},
+ {slot:3,tier:2,req:[[1,2]]},{slot:6,tier:2,req:[[0,3],[2,1]]},{slot:8,tier:2,req:[[4,3],[5,1]]},
+ {slot:7,tier:3,req:[[3,1]]},{slot:9,tier:3,req:[[6,3],[8,2]]},
+];
+export const START_LEVELS=[1,0,0,0,1,0,0,0,0,0];
+export const requirements=slot=>SKILL_TREE.find(n=>n.slot===slot)?.req??[];
+export const skillOpen=(levels,slot)=>requirements(slot).every(([s,l])=>(levels?.[s]??0)>=l);
 const clampLevel=v=>Number.isInteger(v)&&v>=0&&v<=SKILL_MAX?v:1;
 
 // One skill point per Job Level gained, carried across class changes:
-// Novice Job 1-10 = 9, class Job 1-50 = 49 more, Master Job 1-70 = 69 more.
+// Novice Job 1-10 = 9, class Job 1-40 = 39 more, Master Job 1-40 = 39 more (0.73 caps).
 export function earnedPoints({classId='novice',jobId='',jobXp=0}={}){
  const level=jobProgress({jobXp},classId,jobId).level-1;
  if(classId==='novice')return level;
- return 9+(jobId?49:0)+level;
+ return 9+(jobId?39:0)+level;
 }
-// Missing data (characters made before 0.31) is grandfathered: every skill of the current class at level 1.
+ // A path with no data yet starts on the tree (0.84). Older saves already hold their own arrays and keep them.
 export function normalizeSkills(raw,classId){
  const out={};
  if(raw&&typeof raw==='object'&&!Array.isArray(raw))for(const [id,levels] of Object.entries(raw)){
   if(typeof id==='string'&&id.length<=24&&Array.isArray(levels)&&levels.length===SLOTS)out[id]=levels.map(clampLevel);
  }
- if(!out[classId])out[classId]=Array(SLOTS).fill(1);
+ if(!out[classId])out[classId]=[...START_LEVELS];
  return out;
 }
 // Learning a skill (level 1) comes from its quest; points pay only for levels 2-10.
@@ -32,7 +45,7 @@ export function upgradeSkill(skills,classId,index,progress,cap=OPEN_MAX){
  if(!Number.isInteger(index)||index<0||index>=SLOTS)throw new Error('invalid-skill');
  const levels=skills[classId];if(!levels)throw new Error('invalid-skill');
  const level=levels[index];
- if(level<1)throw new Error('skill-not-learned');
+ if(level<1){if(!skillOpen(levels,index))throw new Error('skill-locked');return {...skills,[classId]:levels.map((l,i)=>i===index?1:l)};}
  if(level>=SKILL_MAX)throw new Error('skill-max');
  if(level>=cap)throw new Error('skill-trial-required');
  if(availablePoints(skills,progress)<1)throw new Error('no-skill-points');

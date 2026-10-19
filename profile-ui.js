@@ -10,11 +10,12 @@ import {openHudPanel} from './hud-panels.js?v=34';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 export function createProfileUI({game,account,statusUI,equipmentUI}){
- const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-ui.css?v=83';document.head.append(link);
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-ui.css?v=84';document.head.append(link);
  const world=game.world,person=account.character;
  // Settings: keep the old toggle (cloud-save.js owns open/close and the blocking state) on a gear button.
  const toggleSettings=$('open-account').onclick;
- const card=document.querySelector('#account-panel .account-card');card.querySelector('.brand').textContent='ตั้งค่าเกม';
+ const card=document.querySelector('#account-panel .account-card');
+ $('account-panel').addEventListener('click',e=>{if(e.target.id==='account-panel'&&$('account-panel').dataset.blocking!=='true')$('close-account').click();});card.querySelector('.brand').textContent='ตั้งค่าเกม';
  const gear=document.createElement('button');gear.type='button';gear.id='menu-settings';gear.title='ตั้งค่า';gear.setAttribute('aria-label','ตั้งค่าเกม');
  gear.innerHTML='<i aria-hidden="true"><b>⚙</b></i><span>ตั้งค่า</span>';gear.onclick=()=>{game.clearInput();toggleSettings?.();};
  // hud-63 re-orders the menu right after this runs, so the gear joins at the end on the next tick.

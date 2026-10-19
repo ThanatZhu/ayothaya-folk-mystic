@@ -38,7 +38,7 @@ import {createFeedback} from './feedback.js?v=64';
 import {createMarketBoardUI} from './market-board-ui.js?v=70';
 import {createHud63} from './hud-63.js?v=71';
 import {resolveMap} from './world-state.js?v=21';
-import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=68.2';
+import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=71.2';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {prepareCloud} from './cloud-save.js?v=41';
 import {captureSave,applySave} from './save-state.js?v=21';
@@ -71,7 +71,15 @@ try {
  const softLook=createSoftLook({renderer,scene,camera});
  const night=map.procedural==='mill',dusk=map.mood==='dusk',mood=map.scene?MOODS[moodOf(map)]:null;scene.add(mood?new THREE.HemisphereLight(...mood.hemi):new THREE.HemisphereLight(night?'#b4d5dd':dusk?'#ffd2a8':'#fffdf4',night?'#4e6260':dusk?'#5d5a72':'#a3af84',night?(map.instance?.5:.85):dusk?1.05:1.35));
  const sun=mood?new THREE.DirectionalLight(...mood.sun):new THREE.DirectionalLight(night?'#bed9ed':'#ffefd2',night?.7:1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
- Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0003;sun.shadow.normalBias=.02;sun.shadow.radius=5;sun.shadow.intensity=.74;scene.add(sun);scene.add(sun.target);
+ Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0005;sun.shadow.normalBias=.05;sun.shadow.radius=5;sun.shadow.intensity=.74;scene.add(sun);scene.add(sun.target);
+ // 0.71.2 the shadow box follows the hero but moves in whole shadow-map texels, so ground shadows no longer shimmer
+ // ("flicker") while walking. Texel size = shadow box width / map size.
+ const sunPoint=new THREE.Vector3(),sunTexel=64/shadowSize;
+ function followSun(p){
+  sun.position.set(p.x-14,25,p.z+12);sun.target.position.set(p.x,0,p.z);sun.updateMatrixWorld();sun.target.updateMatrixWorld();sun.shadow.updateMatrices(sun);
+  sunPoint.set(p.x,0,p.z).applyMatrix4(sun.shadow.camera.matrixWorldInverse);const dx=Math.round(sunPoint.x/sunTexel)*sunTexel-sunPoint.x,dy=Math.round(sunPoint.y/sunTexel)*sunTexel-sunPoint.y;
+  sunPoint.set(dx,dy,0).applyQuaternion(sun.shadow.camera.quaternion);sun.position.add(sunPoint);sun.target.position.add(sunPoint);
+ }
  let rotating=null;
  function resize(){const a=innerWidth/innerHeight,h=Math.max(12.8,18.2/a);camera.left=-h*a;camera.right=h*a;camera.top=h;camera.bottom=-h;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false);softLook.setSize(innerWidth,innerHeight);}
  function turn(direction){rotating={from:controls.getAzimuthalAngle(),delta:direction*Math.PI/4,start:performance.now(),radius:camera.position.distanceTo(controls.target),polar:controls.getPolarAngle()};}
@@ -191,7 +199,7 @@ try {
  renderer.setAnimationLoop(ms=>{
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
   const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);game.update(dt);storyUI.update();bagUI.update();statusUI.update();refineUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
-  flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;sun.position.set(game.world.player.x-14,25,game.world.player.z+12);sun.target.position.set(game.world.player.x,0,game.world.player.z);
+  flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;followSun(game.world.player);
   const viewDistance=camera.position.distanceTo(controls.target);scene.fog.near=viewDistance+14;scene.fog.far=viewDistance+102; // haze follows the camera (overview moves it 6x further)
   const shake=game.shakeOffset(shakeVector);camera.position.add(shake);softLook.render();camera.position.sub(shake);if(firstFrame){firstFrame=false;loading.finish();}
  });

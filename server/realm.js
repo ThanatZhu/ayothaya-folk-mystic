@@ -23,6 +23,8 @@ export const MVP_INTERVAL=3600e3,MVP_FIRST=300e3,DUNGEON_REWARD={coins:800,items
 import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,foodBuff,SHOPS,ITEM_ERRORS,itemDef,RARITY_NAME} from '../items.js';
 import {craft} from '../crafting.js';
 import {WAR,warWindow,warLabel} from '../guild-war.js';
+import {ARENA,arenaWeek,arenaDay,arenaEnds,byPoints} from '../arena.js';
+const SERVER_IDS=['server-1','server-2'],SERVER_NAME={'server-1':'เซิร์ฟ 1','server-2':'เซิร์ฟ 2'};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
@@ -38,7 +40,7 @@ function autoPotionFor(realm,p){
 }
 export class RealmServer{
  autoPotion(p){autoPotionFor(this,p);}
- constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false}={}){this.wars=new Map();this.warAlways=warAlways;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
+ constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false}={}){this.wars=new Map();this.warAlways=warAlways;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
   let existing=[...this.peers.values()].find(p=>p.uid===uid);
@@ -69,7 +71,7 @@ export class RealmServer{
   peer.stats=normalizeStats(record.stats);peer.gear=normalizeGear(record.gear);peer.statSig='';peer.gearAt=-Infinity;this.refreshStats(peer);
   world.hurt=(mob,damage,color)=>this.hurt(peer,mob,damage,color);
   this.peers.set(peer.id,peer);room.peers.add(peer.id);
-  this.storyProgress(peer,{type:'enter',mapId:map.id});
+  this.storyProgress(peer,{type:'enter',mapId:map.id});this.arenaClaim(peer);
   // 0.48 daily login: first join of the Thai day grants the next reward of the 7-day cycle.
   const daily=claimDaily(peer.daily,this.now());if(daily){peer.daily=daily.daily;this.grantLoot(peer,daily.reward);peer.saveNow=true;world.emit('daily',{streak:daily.streak,reward:daily.reward});}
   send({type:'welcome',id:peer.id,room:roomId,capacity:this.capacity,history:copy(room.history),snapshot:this.snapshot(peer)});this.social(room);return peer;
@@ -249,9 +251,10 @@ export class RealmServer{
  castleOwner(serverId){return [...this.guilds.values()].find(g=>g.serverId===serverId&&g.castle)??null;}
  warTick(){
   const w=warWindow(this.now(),this.warAlways);
-  for(const serverId of new Set([...this.peers.values()].map(p=>p.serverId))){
+  for(const serverId of new Set([...SERVER_IDS,...[...this.peers.values()].map(p=>p.serverId)])){
    const s=this.warState(serverId);
-   if(w.active&&!s.active){s.active=true;s.holder=this.castleOwner(serverId)?.id??null;s.stone.hp=s.stone.maxHp;this.announce(serverId,`⚔️ กิลด์วอร์เริ่มแล้ว! · ไปที่${this.catalog.maps.find(m=>m.id===WAR.map)?.name??WAR.map} ทำลาย${WAR.stone.name}เพื่อยึด${WAR.name} · ${WAR.minutes} นาที`);}
+   if(!w.active&&w.nextAt>this.now()&&w.nextAt-this.now()<=15*6e4&&s.reminded!==w.nextAt){s.reminded=w.nextAt;this.herald(serverId,`⏰ อีก 15 นาทีกิลด์วอร์เริ่ม! · ${warLabel(this.now())} ที่โรงสีใต้เงาจันทร์`);}
+   if(w.active&&!s.active){s.active=true;s.holder=this.castleOwner(serverId)?.id??null;s.stone.hp=s.stone.maxHp;this.herald(serverId,`⚔️ กิลด์วอร์เริ่มแล้ว! · ไปที่${this.catalog.maps.find(m=>m.id===WAR.map)?.name??WAR.map} ทำลาย${WAR.stone.name}เพื่อยึด${WAR.name} · ${WAR.minutes} นาที`);}
    if(!w.active&&s.active){s.active=false;this.warEnd(serverId,s);}
   }
   for(const p of this.peers.values())this.warRivals(p);
@@ -282,10 +285,37 @@ export class RealmServer{
  warEnd(serverId,s){
   const prev=this.castleOwner(serverId),g=s.holder&&this.guilds.get(s.holder);
   if(prev&&prev!==g){prev.castle=false;this.guildChanged(prev);}
-  if(!g){this.announce(serverId,'🏯 กิลด์วอร์จบแล้ว · ไม่มีกิลด์ใดยึด'+WAR.name+'ได้');return;}
-  g.castle=true;this.guildChanged(g);this.announce(serverId,`👑 กิลด์ ${g.name} ครอง${WAR.name}สัปดาห์นี้! · สงครามครั้งหน้า ${warLabel(this.now())}`);
+  if(!g){this.herald(serverId,'🏯 กิลด์วอร์จบแล้ว · ไม่มีกิลด์ใดยึด'+WAR.name+'ได้');return;}
+  g.castle=true;this.guildChanged(g);this.herald(serverId,`👑 กิลด์ ${g.name} ครอง${WAR.name}สัปดาห์นี้! · สงครามครั้งหน้า ${warLabel(this.now())}`);
   for(const x of g.members){const o=this.online(x.key);if(o?.serverId===serverId){this.grantLoot(o,structuredClone(WAR.reward));o.saveNow=true;o.world.notice('👑 หีบสงครามของผู้ครองป้อม · ได้รับรางวัลแล้ว');}}
  }
+ herald(serverId,text){this.announce(serverId,text);this.onAnnounce?.('**['+(SERVER_NAME[serverId]??serverId)+']** '+text);}
+ // ---- 0.96 weekly duel tournament (arena.js), stored beside the power board as leaders['arena:'+serverId].
+ arena(serverId){const id='arena:'+serverId,week=arenaWeek(this.now());let a=this.leaders.get(id);if(!a||a.week!==week)a=this.arenaRollover(serverId,a,week);return a;}
+ arenaRollover(serverId,old,week){
+  const top=Object.entries(old?.rows??{}).filter(([,v])=>v.points>0).sort(byPoints).slice(0,3),prizes={...(old?.prizes??{})};
+  top.forEach(([k],i)=>{prizes[k]={place:i+1,week:old.week};});
+  const a={week,rows:{},last:top.map(([,v],i)=>({place:i+1,name:v.name,classId:v.classId,points:v.points,wins:v.wins})),prizes};
+  this.leaders.set('arena:'+serverId,a);this.leadersDirty.add('arena:'+serverId);this.arenaPairs.clear();
+  if(top.length)this.herald(serverId,'🏆 ผลทัวร์นาเมนต์ประลองประจำสัปดาห์ · '+a.last.map(x=>['🥇','🥈','🥉'][x.place-1]+' '+x.name+' '+x.points+' แต้ม').join(' · '));
+  for(const p of this.peers.values())if(p.serverId===serverId)this.arenaClaim(p,a);
+  return a;
+ }
+ arenaClaim(p,a=this.arena(p.serverId)){
+  const z=a.prizes?.[p.key];if(!z)return;delete a.prizes[p.key];this.leadersDirty.add('arena:'+p.serverId);
+  this.grantLoot(p,structuredClone(ARENA.prizes[z.place-1]));p.saveNow=true;p.world.notice('🏆 รางวัลทัวร์นาเมนต์ประลอง อันดับ '+z.place+' · ได้รับแล้ว');
+ }
+ arenaScore(w,l,draw){
+  if(!w||!l||w.uid===l.uid)return;const a=this.arena(w.serverId),pair=[w.key,l.key].sort().join('|')+'|'+arenaDay(this.now()),n=this.arenaPairs.get(pair)??0;
+  if(n>=ARENA.pairDaily){for(const x of [w,l])x.world.notice('คู่นี้นับแต้มทัวร์นาเมนต์ครบ '+ARENA.pairDaily+' ครั้งของวันนี้แล้ว');return;}
+  this.arenaPairs.set(pair,n+1);
+  const row=x=>a.rows[x.key]??={name:x.character.name,classId:x.character.classId,points:0,wins:0,losses:0,draws:0,t:this.now()};
+  if(draw){for(const x of [w,l]){row(x).points+=ARENA.draw;row(x).draws++;row(x).t=this.now();x.world.notice('ทัวร์นาเมนต์ +'+ARENA.draw+' แต้ม (เสมอ)');}}
+  else{row(w).points+=ARENA.win;row(w).wins++;row(w).t=this.now();row(l).losses++;w.world.notice('ทัวร์นาเมนต์ +'+ARENA.win+' แต้ม · รวม '+row(w).points);}
+  this.leadersDirty.add('arena:'+w.serverId);
+ }
+ arenaView(p){const a=this.arena(p.serverId),rows=Object.entries(a.rows).sort(byPoints),mine=rows.findIndex(([k])=>k===p.key);
+  return {rows:rows.slice(0,30).map(([k,v],i)=>({rank:i+1,me:k===p.key,name:v.name,classId:v.classId,points:v.points,wins:v.wins,losses:v.losses,draws:v.draws})),me:mine<0?null:{rank:mine+1,points:rows[mine][1].points},last:a.last,endsAt:arenaEnds(this.now())};}
  warView(p){
   const s=this.wars.get(p.serverId),owner=this.castleOwner(p.serverId),here=p.room.map.id===WAR.map;
   return {active:!!s?.active,next:warLabel(this.now()),owner:owner?.name??null,holder:s?.active&&s.holder?this.guilds.get(s.holder)?.name??null:null,
@@ -309,6 +339,7 @@ export class RealmServer{
  endDuel(winner,loser,reason,draw=false){
   for(const x of [winner,loser]){if(!x?.duel)continue;if(x.world.targetId===x.world.foe?.id)x.world.targetId=null;x.duel=null;x.world.foe=null;}
   const names=[winner,loser].map(x=>x?.character.name??'อีกฝ่าย'),room=(winner??loser)?.room;
+  this.arenaScore(winner,loser,draw);
   if(draw){for(const x of [winner,loser])x?.world.notice('🤝 ประลองเสมอ · '+reason);return;}
   winner?.world.notice('🏆 ชนะการประลอง! · '+reason);loser?.world.notice('💢 แพ้การประลอง · '+reason);
   for(const id of room?.peers??[]){const a=this.peers.get(id);if(a!==winner&&a!==loser)a.world.notice('⚔️ '+names[0]+' ชนะ '+names[1]+' ในการประลอง');}
@@ -346,6 +377,7 @@ export class RealmServer{
   for(const [id,v] of this.invites)if(v.expires<this.now())this.invites.delete(id);
   for(const party of [...this.parties.values()])for(const [uid,until] of party.pending??[])if(until<this.now()){party.pending.delete(uid);if(party.members.size+party.pending.size<2){for(const id of party.members){const a=this.peers.get(id);a.partyId=null;this.social(a.room);}this.parties.delete(party.id);}}
   this.warTick();
+  if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
   for(const p of this.peers.values()){if(p.suspended)continue;petTick(p.pet,dt);p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);p.world.update(dt,p.input,{monsters:false});this.autoPotion(p);}
   for(const room of this.rooms.values()){
    for(const m of room.mobs){
@@ -453,7 +485,7 @@ export class RealmServer{
   board[p.key]={name:p.character.name,classId:p.character.classId,gender:p.character.gender,level:this.who(p).level,power,t:this.now()};
   const keep=Object.entries(board).sort((a,b)=>b[1].power-a[1].power).slice(0,200);this.leaders.set(p.serverId,Object.fromEntries(keep));this.leadersDirty.add(p.serverId);}
  leaderboard(p){const rows=Object.entries(this.leaders.get(p.serverId)??{}).sort((a,b)=>b[1].power-a[1].power);
-  const mine=rows.findIndex(([k])=>k===p.key);return {rows:rows.slice(0,50).map(([k,v],i)=>({rank:i+1,me:k===p.key,...v})),me:mine<0?null:{rank:mine+1,...rows[mine][1]}};}
+  const mine=rows.findIndex(([k])=>k===p.key);return {rows:rows.slice(0,50).map(([k,v],i)=>({rank:i+1,me:k===p.key,...v})),me:mine<0?null:{rank:mine+1,...rows[mine][1]},arena:this.arenaView(p)};}
  refreshStats(p){
   const who=this.who(p),pet=petBonus(p.pet),food=foodBuff(p.world),sig=JSON.stringify([who,p.stats,p.gear,pet,food]);if(sig===p.statSig)return;
   const fit=dropInvalidGear(p.bag,p.gear,who);if(JSON.stringify(fit.gear)!==JSON.stringify(p.gear)){p.gear=fit.gear;this.setBag(p,fit.bag);}

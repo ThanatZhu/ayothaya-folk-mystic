@@ -1,4 +1,5 @@
 import http from 'node:http';
+import {discordPoster} from './discord-webhook.js';
 import {randomUUID} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -21,6 +22,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
  const realm=new RealmServer({catalog,capacity,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set();let closing=false;
+ const toDiscord=discordPoster();if(toDiscord)realm.onAnnounce=toDiscord; // 0.96 war + tournament news (DISCORD_WEBHOOK_URL)
  // 0.47 guilds: loaded once, written on each change (rare: create/join/leave/emblem), outside the per-player saves.
  // 0.70 market: shops stay open while their owners are offline, so they live outside the player saves.
  if(store?.loadShops){realm.shops=new Map((await store.loadShops()).map(s=>[s.id,s]));store.realmShops=realm.shops;realm.onShop=(s,deleted)=>deleted?store.deleteShop(s):store.saveShop(s);const prices=await store.loadPrices();store.allPrices=prices;realm.prices=new Map(Object.entries(prices));realm.onPrices=(id,p)=>store.savePrices(id,p);}

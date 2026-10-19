@@ -23,3 +23,7 @@
 .perf-settings label{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:8px}
 .perf-settings select{font:inherit;padding:3px 6px;border-radius:6px;border:1px solid #af884f88;background:#1d2a20;color:#f3e6c4}
 .perf-settings small{opacity:.75;line-height:1.4}
+/* 0.80 GPU helper under the graphics settings */
+.perf-gpu{display:grid;gap:5px;padding:6px 8px;border-radius:6px;background:#00000022;line-height:1.45}
+.perf-gpu b{color:#f4cf7a}.perf-gpu p,.perf-gpu ol{margin:0}.perf-gpu ol{padding-left:18px}
+.perf-open{display:block;text-align:center;padding:6px;border-radius:6px;background:#e0b65c;color:#1c241c;font-weight:bold;text-decoration:none}

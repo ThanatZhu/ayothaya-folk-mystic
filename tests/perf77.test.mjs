@@ -26,3 +26,11 @@ test('automatic resolution drops when frames are slow, never below the level flo
  for(const end=t+60000;t<end;t+=1000/60)perf.shouldDraw(t); // smooth 60 FPS again
  assert.equal(perf.renderScale,1);assert.equal(r.ratio,1.5);
 });
+test('GPU name is read from the ANGLE string and built-in GPUs are recognised',async()=>{
+ const {gpuName,integratedGpu}=await import('../perf-settings.js');
+ const gl=raw=>({getExtension:()=>({UNMASKED_RENDERER_WEBGL:1}),getParameter:()=>raw});
+ const intel=gpuName(gl('ANGLE (Intel, Intel(R) UHD Graphics 630 (0x00003E9B) Direct3D11 vs_5_0 ps_5_0, D3D11)'));
+ const nvidia=gpuName(gl('ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 Ti (0x00002191) Direct3D11 vs_5_0 ps_5_0, D3D11)'));
+ assert.equal(intel,'Intel(R) UHD Graphics 630');assert.equal(nvidia,'NVIDIA GeForce GTX 1660 Ti');
+ assert.ok(integratedGpu(intel));assert.ok(!integratedGpu(nvidia));assert.ok(integratedGpu('AMD Radeon(TM) Graphics'));assert.ok(!integratedGpu('AMD Radeon RX 6600'));
+});

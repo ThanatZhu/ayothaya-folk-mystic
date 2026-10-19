@@ -11,7 +11,7 @@ import {createMmoHud} from './mmo-hud.js?v=48.1';
 import {createSoftLook} from './soft-look.js?v=29';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=78';
-import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=78';
+import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=80';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
 import {createPaintedAvatar} from './painted-avatar.js?v=63';
 import {customizeAtlas} from './character-appearance.js?v=41';
@@ -36,7 +36,7 @@ import {createPetUI} from './pet-ui.js?v=62';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=64';
 import {createLifeNPC} from './life-npc.js?v=62';
-import {createFeedback} from './feedback.js?v=77';
+import {createFeedback} from './feedback.js?v=80';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=72';
 import {createMarketBoardUI} from './market-board-ui.js?v=70';
 import {createHud63} from './hud-63.js?v=72';
@@ -64,7 +64,7 @@ try {
  history.replaceState(null,'','?server='+account.serverId+'&map='+encodeURIComponent(map.id));
  let worldUI=null,multiplayer=null,overview=false;
 
- const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}); // 0.80 ask for the dedicated GPU on dual-GPU laptopsrenderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NeutralToneMapping;renderer.toneMappingExposure=1.16;
  renderer.domElement.setAttribute('aria-label',map.name+' · ฉากเมืองหมุนกล้องได้ เดินด้วย WASD หรือจอยสัมผัส');document.getElementById('game-shell').prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color('#d3dcc4');scene.fog=new THREE.Fog('#d9dfcb',62,150); // soft haze toward the far (top) edge

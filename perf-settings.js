@@ -16,6 +16,13 @@ export function readPerf(){
  const fps=FPS_CHOICES.includes(saved.fps)?saved.fps:60,quality=QUALITY[saved.quality]?saved.quality:phone()?'mid':'high';
  return {fps,quality};
 }
+// 0.80 which GPU the browser actually draws with. Laptops with a dedicated card often run the browser on the
+// built-in one; a page cannot change that (Windows owns it), so the panel names the GPU and opens the right
+// Windows settings page in one tap, with the three steps beside it.
+export function gpuName(gl){try{const d=gl.getExtension('WEBGL_debug_renderer_info');const raw=d?gl.getParameter(d.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER);// "ANGLE (Intel, Intel(R) UHD Graphics 630 (0x00003E9B) Direct3D11 ..., D3D11)" -> "Intel(R) UHD Graphics 630"
+const text=String(raw),parts=text.startsWith('ANGLE (')?text.slice(7,-1).split(', '):[text];
+return (parts[1]??parts[0]).replace(/\s*\(0x[0-9a-f]+\).*$/i,'').replace(/\s*Direct3D.*$/i,'').trim();}catch{return '';}}
+export const integratedGpu=name=>/intel|radeon\(tm\) graphics|radeon graphics|vega \d+ graphics/i.test(name)&&!/\barc\b/i.test(name);
 export function createPerfSettings({renderer,scene,sun,softLook,resize,onApply=()=>{}}){
  const state=readPerf();let last=-Infinity,scale=1,windowStart=-1,drawn=0;
  const ratio=()=>{const q=QUALITY[state.quality],top=Math.min(devicePixelRatio,q.ratio);return Math.max(Math.min(q.min,top),top*scale);};
@@ -56,6 +63,10 @@ export function createPerfSettings({renderer,scene,sun,softLook,resize,onApply=(
    wrap.innerHTML=`<label>จำกัด FPS<select id="perf-fps">${FPS_CHOICES.map(f=>`<option value="${f}">${f?f+' FPS':'ตามหน้าจอ'}</option>`).join('')}</select></label>`+
     `<label>กราฟิก<select id="perf-quality">${Object.entries(QUALITY).map(([k,q])=>`<option value="${k}">${q.label}</option>`).join('')}</select></label>`+
     '<small>เกมลดความละเอียดเองเมื่อ FPS ตก · ยังกระตุกลอง 30 FPS หรือกราฟิกต่ำ · ความหนาแน่นหญ้าเปลี่ยนตอนย้ายแมพ · 120 FPS ใช้ได้กับจอ 120Hz เท่านั้น</small>';
+   const gpu=gpuName(renderer.getContext?.()),windows=/Windows/.test(navigator.userAgent);
+   if(gpu){const p=document.createElement('div');p.className='perf-gpu';
+    p.innerHTML=`<span>การ์ดจอที่ใช้อยู่: <b></b></span>`+(integratedGpu(gpu)&&windows?'<p>นี่คือการ์ดจอในตัว ถ้าเครื่องมีการ์ดจอแยก (NVIDIA / AMD) เกมจะลื่นกว่ามาก</p><a class="perf-open" href="ms-settings:display-advancedgraphics">เปิดตั้งค่าการ์ดจอของ Windows</a><ol><li>Browse หรือเลือกเบราว์เซอร์นี้ (Chrome / Edge)</li><li>Options › High performance › Save</li><li>ปิดเบราว์เซอร์ทุกหน้าต่างแล้วเปิดใหม่</li></ol>':'');
+    p.querySelector('b').textContent=gpu;wrap.append(p);}
    box.append(wrap);
    const fps=wrap.querySelector('#perf-fps'),quality=wrap.querySelector('#perf-quality');fps.value=String(state.fps);quality.value=state.quality;
    fps.onchange=()=>{state.fps=+fps.value;save();};

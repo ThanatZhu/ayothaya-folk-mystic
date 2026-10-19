@@ -44,7 +44,8 @@ function paddyMask(model,map){
  // Cells covered by the Blender rice blades are paddies: they already carry rice, so the meadow skips them.
  const {x:bx,z:bz,w,d}=map.bounds,cols=Math.ceil(w),mask=new Uint8Array(cols*Math.ceil(d)),v=new THREE.Vector3();
  model.updateMatrixWorld(true);
- model.traverse(o=>{if(!o.isMesh||!/^Dense rice blades/.test(o.name))return;const pos=o.geometry.attributes.position;
+ const seen=new Set(); // tiles of one Blender mesh share a vertex buffer: read each buffer once
+ model.traverse(o=>{if(!o.isMesh||!/^Dense rice blades/.test(o.name)||seen.has(o.geometry.attributes.position))return;const pos=o.geometry.attributes.position;seen.add(pos);
   for(let i=0;i<pos.count;i+=3){v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld);const cx=Math.floor(v.x-bx),cz=Math.floor(v.z-bz);
    for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const x=cx+dx,z=cz+dz;if(x>=0&&z>=0&&x<cols&&z<d)mask[z*cols+x]=1;}}});
  return (x,z)=>mask[Math.floor(z-bz)*cols+Math.floor(x-bx)]===1;

@@ -1,3 +1,3 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 const loading=getLoadingScreen();loading.show(new URLSearchParams(location.search).get('map')||'ayutthaya');
-import('./viewer-world.js?v=88').catch(error=>{console.error(error);loading.fail();});
+import('./viewer-world.js?v=90').catch(error=>{console.error(error);loading.fail();});

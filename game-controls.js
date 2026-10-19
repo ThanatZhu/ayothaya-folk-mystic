@@ -12,6 +12,7 @@ import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './sk
 import {createRouteWalker} from './route-walk.js?v=01';
 
 import {className} from './classes.js?v=73';
+import {normalizeAuto} from './auto-play.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
@@ -91,11 +92,20 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   else if(e.type==='drop'){const best=Math.max(...e.items.map(i=>itemDef(i.id)?.rarity??0));if(best>=2&&Number.isFinite(e.x))pillar(e.x,e.z,best);}
   else if(e.type==='defeat')toast('ปราบ '+MONSTER_TYPES[world.mobs[e.id].type].name+' แล้ว');
  }
+ // 0.90 hotbar: which skill sits on each of the ten buttons / keys 1-0 (dragged in the skill window), and the AUTO
+ // settings (skills to cast, potion thresholds). Both are per path on this device; AUTO settings go to the server online.
+ const HOT_KEY='ayothaya-hotbar:'+world.profession.id,AUTO_KEY='ayothaya-auto:'+world.profession.id;
+ let hotbar=[0,1,2,3,4,5,6,7,8,9];try{const h=JSON.parse(localStorage.getItem(HOT_KEY));if(Array.isArray(h)&&h.length===10&&[...h].sort((a,b)=>a-b).join()==='0,1,2,3,4,5,6,7,8,9')hotbar=h;}catch{}
+ try{world.autoConfig=normalizeAuto(JSON.parse(localStorage.getItem(AUTO_KEY)));}catch{world.autoConfig=normalizeAuto(null);}
+ let autoSent='';
  const skillButtons=SKILLS.map((s,i)=>{
   const b=document.createElement('button');b.type='button';b.className='skill';b.setAttribute('aria-label',`สกิล ${s.key} ${s.name}`);b.title=`${s.key} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;
-  b.innerHTML=`<kbd>${s.key}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.style.setProperty('--skill-color',s.color);b.addEventListener('click',()=>{if(!isPaused())world.skill(i);});$('skills').append(b);return b;
+  b.innerHTML=`<kbd>${s.key}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.style.setProperty('--skill-color',s.color);b.addEventListener('click',()=>{if(!isPaused())world.skill(hotbar[i]);});$('skills').append(b);return b;
  });
- applySkillArt(skillButtons,world.profession.id);
+ function paintHotbar(){skillButtons.forEach((b,i)=>{const s=world.skills[hotbar[i]];if(!s)return;b.querySelector('strong').textContent=s.icon;b.querySelector('span').textContent=s.short??s.name;b.setAttribute('aria-label',`สกิล ${SKILLS[i].key} ${s.name}`);b.title=`${SKILLS[i].key} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;b.style.setProperty('--skill-color',s.color);});applySkillArt(skillButtons,world.profession.id,hotbar);}
+ paintHotbar();
+ function setHotbar(order){if(!Array.isArray(order)||order.length!==10)return;hotbar=[...order];try{localStorage.setItem(HOT_KEY,JSON.stringify(hotbar));}catch{}paintHotbar();}
+ function setAutoConfig(cfg){world.autoConfig=normalizeAuto(cfg);try{localStorage.setItem(AUTO_KEY,JSON.stringify(world.autoConfig));}catch{}autoSent='';}
 
  $('auto-attack').addEventListener('click',()=>{if(!isPaused())world.toggleAuto();});
  $('attack').addEventListener('pointerdown',e=>{if(isPaused())return;e.preventDefault();attackPointer=e.pointerId;input.attack=true;$('attack').setPointerCapture(e.pointerId);world.basicAttack();});
@@ -112,7 +122,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(e.repeat)return;
   if(e.code==='KeyF')world.toggleAuto();
   if(e.code==='Space')world.basicAttack();
-  if(/^Digit[0-9]$/.test(e.code)){const n=Number(e.code.slice(-1));world.skill(n===0?9:n-1);}
+  if(/^Digit[0-9]$/.test(e.code)){const n=Number(e.code.slice(-1));world.skill(hotbar[n===0?9:n-1]);}
  });
  addEventListener('keyup',e=>keys.delete(e.code));
  const joystick=$('joystick'),knob=$('stick');
@@ -236,7 +246,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    $('auto-attack').classList.toggle('active',world.auto);$('auto-attack').setAttribute('aria-pressed',String(world.auto));$('auto-state').textContent=world.auto?'เปิด':'ปิด';
    $('target-name').textContent=target?MONSTER_TYPES[target.type].name:world.safe?'เขตปลอดภัย':'ยังไม่เลือกเป้าหมาย';$('target-hp').textContent=target?`${target.hp} / ${target.maxHp}`:world.safe?'พักฟื้น · พูดคุย · เดินทาง':'คลิก / แตะมอนสเตอร์';$('target-fill').style.width=target?`${target.hp/target.maxHp*100}%`:'0%';
    if(!network)world.skillPoints=availablePoints(localSkills,progress());
-   skillButtons.forEach((b,i)=>{const cd=world.cooldowns[i],lv=world.skillLevels[i]??1;b.querySelector('.skill-level').textContent=lv?'Lv'+lv:'—';b.classList.toggle('locked',!lv);b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<SKILLS[i].cost);b.style.setProperty('--cooldown',`${cd/SKILLS[i].cd*100}%`);});
+   if(network){const j=JSON.stringify(world.autoConfig);if(j!==autoSent&&network.command('autoConfig',world.autoConfig))autoSent=j;}
+   skillButtons.forEach((b,i)=>{const cd=world.cooldowns[hotbar[i]],lv=world.skillLevels[hotbar[i]]??1;b.querySelector('.skill-level').textContent=lv?'Lv'+lv:'—';b.classList.toggle('locked',!lv);b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<SKILLS[i].cost);b.style.setProperty('--cooldown',`${cd/SKILLS[i].cd*100}%`);});
   }
  }
  function mobileLayout(){return innerWidth<=800||matchMedia('(pointer:coarse)').matches;}
@@ -254,5 +265,5 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
- return {update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;}};
+ return {get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;}};
 }

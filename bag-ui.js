@@ -5,6 +5,7 @@ import {levelGifts} from './experience.js?v=73';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,useItem,itemLabel,itemDef} from './items.js?v=70';
 import {MONSTER_TYPES,LEADER} from './combat-core.js?v=72.1';
 import {openHudPanel} from './hud-panels.js?v=34';
+import {pickPotion} from './auto-play.js';
 
 const $=id=>document.getElementById(id);
 const QUICK_KEY='ayothaya-quick-slots';
@@ -143,7 +144,10 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
   }
  }
  render(true);
+ let autoDrink=0;
  api.update=()=>{
+  // 0.90 offline AUTO drinks potions under the thresholds set in the skill window (the server does this online).
+  if(!game.online&&world.auto&&performance.now()-autoDrink>800){const id=pickPotion(local,world.player,world.autoConfig);if(id){autoDrink=performance.now();use(id);}}
   if(dialog.open)try{equipmentUI?.paint(heroCtx);}catch{} // a preview must never stop the game loop
   if(shopDialog.open&&shopNpc&&Math.hypot(world.player.x-shopNpc.x,world.player.z-shopNpc.z)>4.5)shopDialog.close();
   render();

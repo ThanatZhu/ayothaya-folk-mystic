@@ -1,4 +1,5 @@
 import {patch,monsterKey} from './balance.js';
+import {normalizeAuto,pickAutoSkill} from './auto-play.js';
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
 import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=73';
@@ -118,7 +119,7 @@ export class CombatWorld{
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
   this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack,leader],id)=>({id,type,pack,leader:!!leader,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),maxHp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
-  this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
+  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
  }
  // 0.61 hired mercenary: attacks your target (or, on AUTO, the nearest monster) within 6, every 1.4 s, 10 + 2·level damage.
  hire(seconds){this.merc={left:seconds,cd:0};}
@@ -210,6 +211,9 @@ export class CombatWorld{
   if(this.auto&&!stop&&!manual&&this.manualGrace===0){
    let m=this.target;if(!m||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_RANGE+2){m=this.nearest(AUTO_RANGE);this.targetId=m?.id??null;this.path=[];}
    if(m){
+    // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
+    this.autoCast=Math.max(0,this.autoCast-dt);
+    if(this.autoCast===0&&lineClear(p,m,this.nav)){const i=pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0){this.autoCast=.5;this.skill(i);}}
     if(distance(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      if(this.pathTimer<=0){this.path=findPath(p,m,this.nav);this.pathTimer=.65;}

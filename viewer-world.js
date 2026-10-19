@@ -2,7 +2,7 @@ import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {createMultiplayer} from './multiplayer-ui.js?v=97.2';
+import {createMultiplayer} from './multiplayer-ui.js?v=97.3';
 import {createEquipmentUI} from './equipment-ui.js?v=83';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=82';
 import {createGameMenu} from './game-menu.js?v=34';
@@ -21,13 +21,13 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=21';
-import {createGame} from './game-controls.js?v=97';
+import {createGame} from './game-controls.js?v=97.3';
 import {atlasPath,className} from './classes.js?v=73';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=70';
 import {createStoryUI} from './story-ui.js?v=92';
 import {createBagUI} from './bag-ui.js?v=94';
-import {createStatusUI} from './status-ui.js?v=97.2';
+import {createStatusUI} from './status-ui.js?v=97.3';
 import {createProfileUI} from './profile-ui.js?v=85';
 import {createRefineUI} from './refine-ui.js?v=94';
 import {createCraftUI} from './craft-ui.js?v=94';
@@ -67,7 +67,8 @@ try {
  history.replaceState(null,'','?server='+account.serverId+'&map='+encodeURIComponent(map.id));
  let worldUI=null,multiplayer=null,overview=false;
 
- const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}); // 0.80 ask for the dedicated GPU on dual-GPU laptopsrenderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}); // 0.80 ask for the dedicated GPU on dual-GPU laptops
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NeutralToneMapping;renderer.toneMappingExposure=1.16;
  renderer.domElement.setAttribute('aria-label',map.name+' · ฉากเมืองหมุนกล้องได้ เดินด้วย WASD หรือจอยสัมผัส');document.getElementById('game-shell').prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color('#d3dcc4');scene.fog=new THREE.Fog('#d9dfcb',62,150); // soft haze toward the far (top) edge
@@ -77,7 +78,8 @@ try {
  const softLook=createSoftLook({renderer,scene,camera});
  const night=map.procedural==='mill',dusk=map.mood==='dusk',mood=map.scene?MOODS[moodOf(map)]:null;scene.add(mood?new THREE.HemisphereLight(...mood.hemi):new THREE.HemisphereLight(night?'#b4d5dd':dusk?'#ffd2a8':'#fffdf4',night?'#4e6260':dusk?'#5d5a72':'#a3af84',night?(map.instance?.5:.85):dusk?1.05:1.35));
  const sun=mood?new THREE.DirectionalLight(...mood.sun):new THREE.DirectionalLight(night?'#bed9ed':'#ffefd2',night?.7:1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
- Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0005;sun.shadow.normalBias=.05;sun.shadow.radius=4;sun.shadow.intensity=.84; // 0.82 a little deeper and crisper for depthscene.add(sun);scene.add(sun.target);
+ Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0005;sun.shadow.normalBias=.05;sun.shadow.radius=4;sun.shadow.intensity=.84; // 0.82 a little deeper and crisper for depth
+ scene.add(sun);scene.add(sun.target);
  // 0.71.2 the shadow box follows the hero but moves in whole shadow-map texels, so ground shadows no longer shimmer
  // ("flicker") while walking. Texel size = shadow box width / map size.
  const sunPoint=new THREE.Vector3(),sunTexel=64/shadowSize;

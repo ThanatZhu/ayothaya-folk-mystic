@@ -4,7 +4,7 @@ import {emblemId,emoteId} from './items.js?v=94';
 import {createPetView} from './pet-ui.js?v=62';
 import * as THREE from 'three';
 import {groundHeight} from './combat-core.js?v=97';
-import {MultiplayerClient} from './multiplayer-client.js?v=41';
+import {MultiplayerClient} from './multiplayer-client.js?v=97.3';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=73';
 import {customizeAtlas} from './character-appearance.js?v=41';

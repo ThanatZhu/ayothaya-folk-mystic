@@ -27,7 +27,7 @@ export class MultiplayerClient extends EventTarget{
    });socket.addEventListener('error',()=>{});
   }catch(error){this.stopped=true;this.state('error');this.emit('error',{code:error.message});}
  }
- command(type,data={}){if(this.status!=='online'||this.socket?.readyState!==1)return false;this.socket.send(JSON.stringify({type,...data,seq:++this.seq}));return true;}
+ command(type,data={}){if(this.status!=='online'||this.socket?.readyState!==1){if(type!=='input')console.warn('command-blocked',type,this.status,this.socket?.readyState,this.stopped);return false;}this.socket.send(JSON.stringify({type,...data,seq:++this.seq}));return true;}
  setInput(input){const moving=this.input.x||this.input.z;this.input={x:Math.max(-1,Math.min(1,input.x)),z:Math.max(-1,Math.min(1,input.z)),attack:!!input.attack};const now=performance.now(),stopped=moving&&!this.input.x&&!this.input.z;
   // Throttle steering to ~15/s, but send a stop at once so the server does not keep walking past where the player let go.
   if(stopped||now-this.lastInput>=65){this.lastInput=now;this.command('input',this.input);}}

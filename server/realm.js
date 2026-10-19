@@ -91,7 +91,7 @@ export class RealmServer{
  receive(id,m){
   const p=this.peers.get(id);if(!p||p.suspended)return false;
   if(!m||typeof m!=='object'||Array.isArray(m)||!allowed.has(m.type)||!integer(m.seq,1,Number.MAX_SAFE_INTEGER))return this.error(p,'invalid-message');
-  if(m.seq<=p.seq)return false;p.seq=m.seq;
+  if(m.seq<=p.seq)return m.type==='input'?false:this.error(p,'stale-command');p.seq=m.seq;
   if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
   const w=p.world,now=this.now();
   if(m.type==='ping'){p.send({type:'pong',stamp:typeof m.stamp==='number'?m.stamp:0});return true;}
@@ -164,7 +164,7 @@ export class RealmServer{
    const who=this.who(p);
    try{
     if(m.type==='statUp')p.stats=raiseStat(p.stats,m.stat,who.level);
-    else{const r=m.type==='equip'?equipGear(p.bag,p.gear,m.item,who):unequipGear(p.bag,p.gear,m.slot);p.gear=r.gear;this.setBag(p,r.bag);}
+    else{const r=m.type==='equip'?equipGear(p.bag,p.gear,m.item,who):unequipGear(p.bag,p.gear,m.slot);p.gear=r.gear;this.setBag(p,r.bag);if(m.type==='equip')w.notice('สวมใส่ '+itemDef(m.item).name);}
    }catch(e){return this.itemFail(p,e.message);}
    this.refreshStats(p);return true;
   }

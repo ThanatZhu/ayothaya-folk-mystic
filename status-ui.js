@@ -34,7 +34,7 @@ export function createStatusUI({game,account,bagUI}){
   try{local.stats=raiseStat(local.stats,stat,who().level);save();applyOffline();render(true);}catch(e){fail(e.message);}
  }
  function wear(id){
-  if(game.online){world.equipGear?.(id);return;}
+  if(game.online){if(!world.equipGear?.(id))world.notice('ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์ · ลองอีกครั้ง');return;}
   try{const r=equipGear(bagUI.bag(),local.gear,id,who());local.gear=r.gear;bagUI.setLocal(r.bag);save();applyOffline();world.notice('สวมใส่ '+itemDef(id).name);render(true);}catch(e){fail(e.message);}
  }
  // 0.45: slot a card from the bag into a worn piece (permanent).

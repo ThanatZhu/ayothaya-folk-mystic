@@ -63,7 +63,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   if(!authoritative()){socket.write('HTTP/1.1 503 Service Unavailable\r\nRetry-After: 5\r\n\r\n');socket.destroy();return;}
   wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req));
  });
- const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;const record=s.travelRecord??realm.record(s.peer,s.lease.record);await store.checkpoint(s.lease,record,{release});s.autoSavedAt=Date.now();s.savedJson=JSON.stringify(record);if(release)s.released=true;});return s.queue;};
+ // 0.97.2 a save that hangs fails after 15 s, so a session can never stay busy (and drop commands) forever.
+ const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;const record=s.travelRecord??realm.record(s.peer,s.lease.record);let timer;await Promise.race([store.checkpoint(s.lease,record,{release}),new Promise((_,no)=>{timer=setTimeout(()=>no(new Error('save-timeout')),15000);})]).finally(()=>clearTimeout(timer));s.autoSavedAt=Date.now();s.savedJson=JSON.stringify(record);if(release)s.released=true;});return s.queue;};
  wss.on('connection',ws=>{
   let session=null,authenticating=false;ws.alive=true;
   const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}ws.send(JSON.stringify(data));}};
@@ -72,7 +73,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   ws.on('message',async raw=>{
    let message;try{message=JSON.parse(raw.toString());}catch{ws.close(4002,'invalid-json');return;}
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
-   if(session){if(session.closing||session.trainingBusy)return;if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+   if(session){if(session.closing||session.trainingBusy){if(!['input','ping','save'].includes(message.type)){console.warn('dropped',message.type,session.closing?'closing':'busy',session.peer?.character?.name);send({type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
     // 0.97 outfit changes carry a request id; stat gear from the bag (equip without id) goes on to the realm.
     if(message.type==='equip'&&typeof message.id==='string'){
      if(message.id.length>50)return;

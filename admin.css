@@ -26,3 +26,6 @@ td input.edited{border-color:var(--gold);background:#3b3219;color:var(--gold);fo
 .empty{padding:24px;border:1px dashed var(--rule);border-radius:10px;max-width:640px}.empty h2{margin:0 0 6px;color:var(--gold)}
 .dump{width:100%;min-height:140px;margin-bottom:8px;background:var(--bg);color:var(--ink);border:1px solid var(--rule);border-radius:8px}
 .foot{font-size:12px;color:var(--muted);max-width:90ch}
+/* 0.89 skill table tab */
+td small{display:block;color:var(--muted);font-size:11px}td.req{white-space:normal;min-width:170px;font-size:12px;color:var(--muted)}
+td.top{background:#1f3b31;color:var(--jade);font-weight:700}td.bottom{background:#3d2620;color:var(--bad)}

@@ -66,7 +66,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · '+(jobFor(world.profession.id,config.jobId)?.name??className(world.profession.id,config.gender));$('world-labels').append(playerLabel);
  const motionPreference=matchMedia('(prefers-reduced-motion:reduce)'),compactEffects=matchMedia('(pointer:coarse),(max-width:900px)');
  const floats=[],projection=new THREE.Vector3();
- function toast(text){$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
+ // 0.91 the notice sits just under the target box whenever that box shows, so the two never overlap (every layout).
+ function placeNotice(){const n=$('notice'),t=document.querySelector('.target-panel'),r=t&&getComputedStyle(t).display!=='none'&&t.offsetParent?t.getBoundingClientRect():null;n.style.top=r&&r.height?Math.round(r.bottom+8)+'px':'';}
+ function toast(text){placeNotice();$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number'+(!positive&&e.color==='#ffd27a'?' crit':'');el.textContent=typeof e.amount==='string'?e.amount:(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');el.style.setProperty('--dx',`${Math.round((Math.random()-.5)*44)}px`);$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
  function effect(e){
@@ -233,7 +235,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   skillEffects.update(dt,camera);
   for(let i=pillars.length-1;i>=0;i--){const p=pillars[i];p.age+=dt;p.m.material.opacity=.7*Math.max(0,1-p.age/2.6);p.m.scale.x=p.m.scale.z=1+Math.sin(p.age*6)*.08;if(p.age>2.6){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();pillars.splice(i,1);}}
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>1){f.el.remove();floats.splice(i,1);}else{project(f.el,f.x,1.6+f.age*.8,f.z);f.el.style.opacity=String(1-f.age*.8);}}
-  if(performance.now()>noticeUntil)$('notice').classList.remove('visible');
+  if(performance.now()>noticeUntil)$('notice').classList.remove('visible');else placeNotice();
   if(t-lastHUD>.08){lastHUD=t;
    $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`Lv. ${progression(world).level} · ปราบมอน ${world.kills} ตัว`;if($('hero-level'))$('hero-level').textContent='Lv. '+progression(world).level;
    const base=progression(world),job=jobProgress(world,world.profession.id,world.jobId);

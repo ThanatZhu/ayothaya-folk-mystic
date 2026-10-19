@@ -40,7 +40,7 @@ test('0.64 camps: one leader per camp with triple HP and slower respawn; surge d
  const {levelGifts}=await import('../experience.js');
  const {rollLoot}=await import('../items.js');
  const rice=catalog.maps.find(m=>m.id==='rice-fields'),w=new CombatWorld(rice),camps=new Set(w.mobs.map(m=>m.pack));
- for(const c of camps){const leaders=w.mobs.filter(m=>m.pack===c&&m.leader);assert.equal(leaders.length,1);}
+ for(const c of camps){const members=w.mobs.filter(m=>m.pack===c),leaders=members.filter(m=>m.leader);assert.equal(leaders.length,members.length>1?1:0);} // 0.72.1 elites stand alone
  const lead=w.mobs.find(m=>m.leader),member=w.mobs.find(m=>!m.leader);
  assert.equal(lead.maxHp,MONSTER_TYPES[lead.type].hp*LEADER.hp);assert.equal(mobXp(lead),LEADER.xp);assert.equal(mobXp(member),LEADER.member);
  assert.equal(mobRespawn(lead),(MONSTER_TYPES[lead.type].respawn??12)*LEADER.respawn);

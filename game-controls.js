@@ -1,4 +1,4 @@
-import {itemDef} from './items.js?v=64';
+import {itemDef} from './items.js?v=70';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=64';
 import {applySkillArt} from './skill-art.js?v=21';

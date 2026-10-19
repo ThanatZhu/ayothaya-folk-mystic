@@ -1,7 +1,7 @@
 // Storage at ลุงเรือง, player trade and vending stalls (0.46). One window, five views.
 // Online every move is a realm-server command; offline only storage works (kept in localStorage beside the bag).
-import {ITEM_ERRORS,itemDef} from './items.js?v=64';
-import {STORAGE_NPC,STORAGE_SLOTS,STALL_MAX,TRADABLE,normalizeStorage,moveOffer} from './market.js?v=01';
+import {ITEM_ERRORS,itemDef} from './items.js?v=70';
+import {STORAGE_NPC,STORAGE_SLOTS,STALL_MAX,TRADABLE,normalizeStorage,moveOffer} from './market.js?v=70';
 import {iconStyle} from './bag-ui.js?v=64';
 import {openHudPanel} from './hud-panels.js?v=34';
 
@@ -12,7 +12,7 @@ const coins=n=>icon('cowrie','item-icon small')+(n??0).toLocaleString('th-TH');
 const TITLES={storage:'คลังเก็บของ · ลุงเรือง',pick:'แลกของกับผู้เล่น',ask:'คำขอแลกของ',trade:'แลกของ',stall:'ตั้งแผงขายของ',market:'ตลาด · แผงผู้เล่น'};
 
 export function createMarketUI({game,map,account,bagUI}){
- if(!document.querySelector('link[data-market-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='market-ui.css?v=01';css.dataset.marketUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-market-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='market-ui.css?v=70';css.dataset.marketUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-storage:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  let local;try{local=normalizeStorage(JSON.parse(localStorage.getItem(key)));}catch{local=normalizeStorage(null);}
  let remote=normalizeStorage(null),npc=null,view=null,trade=null,ask=null,players=[],stalls=[],shown='';

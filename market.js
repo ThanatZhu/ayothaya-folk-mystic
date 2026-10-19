@@ -1,6 +1,6 @@
 // Storage, player trade and vending stalls (0.46). Pure rules shared by client and realm server.
 // Offers are {coins, items:{[id]:count}}; every move is all-or-nothing and never creates or loses items.
-import {BAG_SLOTS,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=64';
+import {BAG_SLOTS,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=70';
 
 export const STORAGE_SLOTS=100,STORAGE_NPC='ลุงเรือง',STALL_MAX=8,PRICE_MAX=9999999;
 export const TRADABLE=id=>['loot','potion','gear','card','scroll'].includes(itemDef(id)?.kind);
@@ -32,17 +32,17 @@ export function swapOffers(bagA,offerA,bagB,offerB){
  return [a2,b2];
 }
 // A stall lists up to STALL_MAX items from the owner's bag at fixed prices.
-export function normalizeStall(stall,bag){
+export function normalizeStall(stall,bag,max=STALL_MAX){
  const b=normalizeBag(bag),items={};
  for(const [id,v] of Object.entries(stall?.items??{})){
-  if(Object.keys(items).length>=STALL_MAX||!TRADABLE(id))continue;
+  if(Object.keys(items).length>=max||!TRADABLE(id))continue;
   const count=Math.min(v?.count??0,b.items[id]??0),price=Number.isSafeInteger(v?.price)?Math.min(Math.max(v.price,1),PRICE_MAX):0;
   if(count>0&&price>0)items[id]={count,price};
  }
  return {title:String(stall?.title??'').slice(0,24)||'แผงขายของ',items};
 }
-export function buyFromStall(sellerBag,stall,buyerBag,id,qty){
- const s=normalizeStall(stall,sellerBag),row=s.items[id];
+export function buyFromStall(sellerBag,stall,buyerBag,id,qty,max=STALL_MAX){
+ const s=normalizeStall(stall,sellerBag,max),row=s.items[id];
  if(!row)throw new Error('not-sold');if(!Number.isSafeInteger(qty)||qty<1||qty>row.count)throw new Error('bad-count');
  const cost=row.price*qty;
  const [buyer1,seller1]=moveOffer(buyerBag,sellerBag,{coins:cost,items:{}});

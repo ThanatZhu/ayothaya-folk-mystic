@@ -1,7 +1,8 @@
 // Draw the actual city footprint in world coordinates; never a menu of destinations.
 // 0.59: `photo` = a straight-down render of the real scene over map.bounds; it replaces the vector ground layers.
 import {MONSTER_TYPES} from './combat-core.js?v=68';
-import {SHOPS} from './items.js?v=64';
+import {SHOPS} from './items.js?v=70';
+import {MARKET_ZONE} from './market-board.js?v=70';
 // 0.65 painted map markers from the UI icon sheet (assets/ui63, 6x4 cells of 256 px); dots are the fallback until it loads.
 const ui=new Image();ui.src=new URL('./assets/ui63/ui-menu63.png?v=65',import.meta.url).href;
 const ICON={portal:13,talk:14,shop:16,you:17,court:18,boss:19};
@@ -32,6 +33,8 @@ export function drawMap(canvas,map,player,{detailed=false,photo=null,mobs=[],npc
  for(const m of mobs){if(m.hp<=0)continue;if(MONSTER_TYPES[m.type]?.boss&&mark(c,ICON.boss,X(m.x),Y(m.z),detailed?40:12))continue;c.fillStyle=m.leader?'#ffc23d':'#d9534a';c.beginPath();c.arc(X(m.x),Y(m.z),detailed?(m.leader?7:4.5):(m.leader?2.4:1.5),0,Math.PI*2);c.fill();}
  for(const n of npcs){if(!n.mentorId&&mark(c,SHOPS[n.name]?ICON.shop:ICON.talk,X(n.x),Y(n.z),detailed?30:9))continue;c.fillStyle=n.mentorId?'#ffe9a8':'#f4f0dc';c.strokeStyle='#3b2c1a';c.lineWidth=detailed?2:1;c.beginPath();c.arc(X(n.x),Y(n.z),detailed?6:2,0,Math.PI*2);c.fill();c.stroke();}
  for(const p of map.portals??[]){if(!mark(c,ICON.portal,X(p.x),Y(p.z),detailed?44:14)){c.fillStyle='#f7ce70';c.beginPath();c.arc(X(p.x),Y(p.z),detailed?10:3.5,0,Math.PI*2);c.fill();}c.fillStyle='#f7ce70';if(detailed){c.font='bold 21px Mali, Tahoma';c.textAlign='left';c.fillText('ทางเดินทาง',X(p.x)-c.measureText('ทางเดินทาง').width/2,Y(p.z)-26);}}
+ // 0.70 the market street, where shops may be opened
+ if(map.id===MARKET_ZONE.mapId){const z=MARKET_ZONE;c.save();c.setLineDash(detailed?[10,6]:[3,2]);c.strokeStyle='#e9c46a';c.lineWidth=detailed?3:1;c.strokeRect(X(z.x),Y(z.z),z.w*sx,z.d*sz);c.restore();mark(c,ICON.shop,X(z.x+z.w/2),Y(z.z+z.d/2),detailed?40:12);if(detailed){c.font='bold 22px Mali, Tahoma';c.textAlign='left';const t='ตลาดกลาง';c.fillStyle='#ffe5ab';c.fillText(t,X(z.x+z.w/2)-c.measureText(t).width/2,Y(z.z+z.d/2)+34);}}
  if(map.masterCourt&&mark(c,ICON.court,X(map.masterCourt.x),Y(map.masterCourt.z),detailed?48:14)){}else if(map.masterCourt){const x=X(map.masterCourt.x),y=Y(map.masterCourt.z);c.fillStyle='#674726';c.beginPath();c.arc(x,y,detailed?16:5,0,Math.PI*2);c.fill();c.fillStyle='#ffda78';c.textAlign='center';c.textBaseline='middle';c.font=`bold ${detailed?27:10}px sans-serif`;c.fillText('★',x,y);}
  const px=X(player.x),py=Y(player.z),r=detailed?13:4;if(!mark(c,ICON.you,px,py,detailed?40:13)){c.fillStyle='#183d35';c.beginPath();c.arc(px,py,r+5,0,Math.PI*2);c.fill();c.fillStyle='#a8ffe0';c.beginPath();c.arc(px,py,r,0,Math.PI*2);c.fill();}
  if(detailed){c.font='bold 25px Mali, Tahoma, sans-serif';c.textAlign='center';c.strokeStyle='#19392f';c.lineWidth=7;c.strokeText('คุณ',px,py+34);c.fillStyle='#f4ffeb';c.fillText('คุณ',px,py+34);}

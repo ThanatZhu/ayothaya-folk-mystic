@@ -5,6 +5,7 @@ import {CombatWorld,MONSTER_TYPES,moveBody,lineClear,walkable,rallyPack,LEADER,m
 import {awardExperience,baseProgress,levelGifts} from '../experience.js';
 import {refineGear} from '../refine.js';
 import {STORAGE_SLOTS,STORAGE_NPC,normalizeStorage,normalizeOffer,moveOffer,hasOffer,swapOffers,normalizeStall,buyFromStall} from '../market.js';
+import {MARKET_ZONE,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,searchMarket,publicShop} from '../market-board.js';
 import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
@@ -22,9 +23,9 @@ import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,SHOPS,ITEM_ERRORS,itemDef
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
-const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','hire']);
+const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','hire']);
 export class RealmServer{
- constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
+ constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
   let existing=[...this.peers.values()].find(p=>p.uid===uid);
@@ -47,7 +48,8 @@ export class RealmServer{
   const peer={id:randomUUID(),uid,serverId,slotId,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
   peer.equipment=normalizeEquipment(record.equipment,hero.classId);
   peer.bag=normalizeBag(record.bag);peer.bagVersion=1;peer.bagSent=0;peer.itemAt=-Infinity;
-  peer.key=uid+':'+slotId;peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;
+  peer.key=uid+':'+slotId;peer.tradeXp=Number.isSafeInteger(record.trade?.xp)&&record.trade.xp>0?record.trade.xp:0;if(map.id===MARKET_ZONE.mapId)peer.world.emit('shops',{list:this.shopList(serverId)});
+  peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;
   peer.daily=record.daily??null;peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.pet=normalizePet(record.pet);peer.bounty=record.bounty??null;peer.album=normalizeAlbum(record.album);
   if(party){party.pending.delete(uid);party.members.add(peer.id);peer.partyId=party.id;if(party.leaderPending===uid||!party.members.has(party.leader)){party.leader=peer.id;if(party.leaderPending===uid)party.leaderPending=null;}}
   peer.storage=normalizeStorage(record.storage);peer.trade=null;peer.stall=null;peer.saveNow=false;
@@ -96,6 +98,7 @@ export class RealmServer{
   }
   if(m.type.startsWith('trade'))return this.tradeCommand(p,m);
   if(m.type.startsWith('stall'))return this.stallCommand(p,m);
+  if(m.type.startsWith('shop')||m.type==='marketSearch')return this.marketCommand(p,m);
   if(m.type.startsWith('friend')||m.type.startsWith('guild'))return this.socialCommand(p,m);
   // 0.50 pets: lure a selected tameable monster, hatch the egg, feed it, or send it back into its egg.
   if(['tame','hatch','petFeed','petReturn'].includes(m.type)){
@@ -146,7 +149,7 @@ export class RealmServer{
    const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null,shop=npc&&SHOPS[npc.name];
    if(!shop||shop.mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'shop-too-far');
    const qty=m.count??1;
-   try{this.setBag(p,m.type==='buy'?buy(p.bag,npc.name,m.item,qty):sell(p.bag,m.item,qty));}catch(e){return this.itemFail(p,e.message);}
+   try{const before=p.bag.coins,next=m.type==='buy'?buy(p.bag,npc.name,m.item,qty):sell(p.bag,m.item,qty),spent=m.type==='buy'?before-next.coins:0,off=Math.floor(spent*tradePerks(p.tradeXp).npcDiscount);this.setBag(p,off?{...next,coins:next.coins+off}:next);}catch(e){return this.itemFail(p,e.message);}
    w.emit('trade',{kind:m.type,item:m.item,count:qty,coins:p.bag.coins});return true;
   }
   if(m.type==='questTalk'){
@@ -231,6 +234,7 @@ export class RealmServer{
  }
  step(dt=.05){
   dt=Math.max(0,Math.min(.05,dt));this.clock+=dt;this.tickId++;
+  if(this.tickId%1200===0&&this.onPrices)for(const id of this.pricesDirty){this.pricesDirty.delete(id);Promise.resolve(this.onPrices(id,this.prices.get(id))).catch(e=>console.error('price-save',e.message));}
   {const s=surge(this.now()); // 0.64 announce each field surge once, on every channel
    if(s.active&&this.surgeSlot!==s.slot){this.surgeSlot=s.slot;const name=this.catalog.maps.find(m=>m.id===s.map)?.name??s.map;for(const id of new Set([...this.peers.values()].map(p=>p.serverId)))this.announce(id,`🔥 ฝูงคลั่งที่ ${name}! · EXP ×2 และดรอป ×2 อีก 5 นาที`);}}
   for(const p of this.peers.values())if(p.suspended&&p.resumeUntil&&p.resumeUntil<this.now())this.leave(p.id);
@@ -250,7 +254,7 @@ export class RealmServer{
      target.world.takeMonsterHit(type);
     }
    }
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p),events:copy(room.events)});}room.events=[];}
   }
  }
@@ -259,6 +263,39 @@ export class RealmServer{
   p.world.emit('story',{npc:event.npc??null,say:r.say??null,completed:r.completed?.title??null,story:r.state});
   if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:r.reward.items??[]});}
   return true;
+ }
+ // ---- 0.70 central market: consignment shops (open while the owner is offline), buying stores, search, tax, prices.
+ shopList(serverId){return [...this.shops.values()].filter(s=>s.serverId===serverId).map(publicShop);}
+ shopsChanged(serverId){const list=this.shopList(serverId);for(const p of this.peers.values())if(p.serverId===serverId&&!p.suspended&&p.room.map.id===MARKET_ZONE.mapId)p.world.emit('shops',{list});}
+ saveShop(shop,deleted=false){if(this.onShop)Promise.resolve(this.onShop(shop,deleted)).catch(e=>console.error('shop-save',e.message));}
+ traded(serverId,peers,item,coins,count){for(const a of peers)if(a)a.tradeXp=Math.min(1e9,(a.tradeXp??0)+coins);const prices=this.prices.get(serverId)??{};this.prices.set(serverId,recordPrice(prices,item,Math.round(coins/count),this.now()));this.pricesDirty.add(serverId);}
+ mine(p){return [...this.shops.values()].filter(s=>s.ownerKey===p.key).map(s=>({...publicShop(s),pouch:s.pouch,escrow:s.escrow,log:s.log}));}
+ marketCommand(p,m){
+  const w=p.world,perks=tradePerks(p.tradeXp),fail=c=>this.itemFail(p,c),now=this.now();
+  if(m.type==='marketSearch'){const stalls=[...this.peers.values()].filter(o=>o.serverId===p.serverId&&o.stall&&!o.suspended).map(o=>({owner:o.id,name:o.character.name,title:o.stall.title,items:o.stall.items,x:o.stall.x,z:o.stall.z,mapId:o.room.map.id}));
+   w.emit('marketResults',{query:String(m.query??'').slice(0,30),rows:searchMarket([...this.shops.values()].filter(s=>s.serverId===p.serverId),stalls,m.query),prices:this.prices.get(p.serverId)??{}});return true;}
+  if(m.type==='shopMine'){w.emit('shopMine',{shops:this.mine(p),perks});return true;}
+  if(m.type==='shopList'){w.emit('shops',{list:this.shopList(p.serverId)});return true;}
+  if(m.type==='shopOpen'){
+   let r;try{r=openShop({bag:p.bag,req:m.shop,perks,owner:{key:p.key,name:p.character.name,serverId:p.serverId},x:w.player.x,z:w.player.z,mapId:p.room.map.id,now,id:randomUUID(),existing:[...this.shops.values()].filter(s=>s.serverId===p.serverId)});}catch(e){return fail(e.message);}
+   this.setBag(p,r.bag);this.shops.set(r.shop.id,r.shop);p.saveNow=true;this.saveShop(r.shop);this.shopsChanged(p.serverId);
+   w.notice((r.shop.kind==='buy'?'เปิดร้านรับซื้อ ':'เปิดร้านค้าง ')+r.shop.title+' แล้ว · เปิดต่อแม้ออกจากเกม');w.emit('shopMine',{shops:this.mine(p),perks});return true;}
+  const shop=this.shops.get(m.shop);if(!shop||shop.serverId!==p.serverId)return fail('stall-none');
+  if(m.type==='shopCollect'||m.type==='shopClose'){if(shop.ownerKey!==p.key)return fail('stall-none');
+   let r;try{r=collectShop(shop,p.bag,{close:m.type==='shopClose'});}catch(e){return fail(e.message);}
+   p.tradeXp=Math.min(1e9,(p.tradeXp??0)+(shop.xpOwed??0));if(r.shop)r.shop.xpOwed=0;
+   this.setBag(p,r.bag);p.saveNow=true;if(r.shop){this.shops.set(shop.id,r.shop);this.saveShop(r.shop);}else{this.shops.delete(shop.id);this.saveShop(shop,true);this.shopsChanged(p.serverId);}
+   w.notice((m.type==='shopClose'?'ปิดร้านแล้ว':'รับของจากร้านแล้ว')+(r.coins?' · เบี้ย +'+r.coins:''));w.emit('shopMine',{shops:this.mine(p),perks});return true;}
+  if(p.room.map.id!==MARKET_ZONE.mapId||Math.hypot(w.player.x-shop.x,w.player.z-shop.z)>4.5)return fail('shop-far');
+  if(shop.ownerKey===p.key)return fail('stall-self');
+  const owner=[...this.peers.values()].find(o=>o.key===shop.ownerKey&&!o.suspended),ownerPerks=tradePerks(owner?.tradeXp??0);
+  let r;try{r=m.type==='shopBuy'?buyFromShop(shop,p.bag,m.item,m.count,ownerPerks,{who:p.character.name,now}):m.type==='shopSell'?sellToShop(shop,p.bag,m.item,m.count,tradePerks(p.tradeXp),{who:p.character.name,now}):null;}catch(e){return fail(e.message);}
+  if(!r)return false;
+  r.shop.xpOwed=(shop.xpOwed??0)+(r.cost??r.pay); // the owner's trade experience is paid out when they collect
+  this.setBag(p,r.bag);p.saveNow=true;this.shops.set(shop.id,r.shop);this.saveShop(r.shop);this.traded(p.serverId,[p],m.item,r.cost??r.pay,m.count);
+  owner?.world.emit('stallSold',{item:m.item,count:m.count,coins:(r.cost??r.pay)-r.tax,buyer:p.character.name});
+  w.notice((m.type==='shopBuy'?'ซื้อจากร้าน ':'ขายให้ร้าน ')+shop.ownerName+' แล้ว'+(r.tax?' · ภาษี '+r.tax+' เบี้ย':''));
+  this.shopsChanged(p.serverId);return true;
  }
  setBag(p,bag){p.bag=bag;p.bagVersion++;if(p.stall)p.stall={...p.stall,...normalizeStall(p.stall,bag)};}
  // ---- 0.46 player trade: both lock, both confirm, then one atomic swap and an immediate save of both.
@@ -290,12 +327,13 @@ export class RealmServer{
  // ---- 0.46 vending: a stall lists items from the owner's bag at fixed prices; city only; closes if the owner walks off.
  stallCommand(p,m){
   const w=p.world;
-  if(m.type==='stallOpen'){if(!p.room.map.safe)return this.itemFail(p,'stall-city');p.stall={...normalizeStall(m.stall,p.bag),x:w.player.x,z:w.player.z};
+  if(m.type==='stallOpen'){if(!p.room.map.safe)return this.itemFail(p,'stall-city');if(!inMarket(p.room.map.id,w.player.x,w.player.z))return this.itemFail(p,'shop-zone');p.stall={...normalizeStall(m.stall,p.bag,tradePerks(p.tradeXp).slots),x:w.player.x,z:w.player.z};
    if(!Object.keys(p.stall.items).length){p.stall=null;return this.itemFail(p,'no-item');}w.notice('เปิดแผง '+p.stall.title+' แล้ว');return true;}
   if(m.type==='stallClose'){p.stall=null;w.notice('ปิดแผงแล้ว');return true;}
   if(m.type==='stallList'){w.emit('stalls',{list:[...p.room.peers].map(id=>this.peers.get(id)).filter(o=>o.stall&&o!==p).map(o=>({owner:o.id,name:o.character.name,title:o.stall.title,items:o.stall.items,x:o.stall.x,z:o.stall.z}))});return true;}
   if(m.type==='stallBuy'){const o=this.peers.get(m.owner);if(!o?.stall||o.suspended||o.room!==p.room)return this.itemFail(p,'stall-none');if(o===p)return this.itemFail(p,'stall-self');
-   let r;try{r=buyFromStall(o.bag,o.stall,p.bag,m.item,m.count);}catch(e){return this.itemFail(p,e.message);}
+   let r;try{r=buyFromStall(o.bag,o.stall,p.bag,m.item,m.count,tradePerks(o.tradeXp).slots);}catch(e){return this.itemFail(p,e.message);}
+   {const tax=taxOf(r.cost,tradePerks(o.tradeXp));r.sellerBag={...r.sellerBag,coins:r.sellerBag.coins-tax};this.traded(p.serverId,[p,o],m.item,r.cost,m.count);}
    this.setBag(o,r.sellerBag);this.setBag(p,r.buyerBag);o.stall={...o.stall,...r.stall};p.saveNow=o.saveNow=true;
    o.world.emit('stallSold',{item:m.item,count:m.count,coins:r.cost,buyer:p.character.name});w.notice('ซื้อจากแผง '+o.character.name+' แล้ว');
    this.stallCommand(p,{type:'stallList'});return true;}
@@ -409,5 +447,5 @@ export class RealmServer{
   this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;
   return destination;
  }
- record(p,original){return {...copy(original),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),album:copy(p.album),pet:copy(p.pet),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
+ record(p,original){return {...copy(original),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),album:copy(p.album),trade:{xp:p.tradeXp??0},pet:copy(p.pet),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
 }

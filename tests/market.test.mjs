@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {MARKET_ZONE} from '../market-board.js';
 import assert from 'node:assert/strict';
 import {moveOffer,swapOffers,normalizeStall,buyFromStall,STORAGE_SLOTS} from '../market.js';
 import {RealmServer} from '../server/realm.js';
@@ -63,10 +64,12 @@ test('server: a trade swaps only after both lock and confirm, and flags both for
 
 test('server: stalls open only in town, sell to others, and close when the owner walks off', () => {
  const {realm,peers:[s,c],send}=realmWith('ayutthaya',{coins:0,items:{'rat-tooth':4}},{coins:100,items:{}});
+ // 0.70 stalls open on the market street only
+ const street={x:MARKET_ZONE.x+4,z:MARKET_ZONE.z+4};Object.assign(c.world.player,street);assert.equal(send(s,'stallOpen',{stall:{title:'x',items:{'rat-tooth':{count:1,price:1}}}}),false,'off the market street');Object.assign(s.world.player,street);
  assert.equal(send(s,'stallOpen',{stall:{title:'ฟันหนู',items:{'rat-tooth':{count:4,price:10}}}}),true);
  assert.equal(send(s,'stallBuy',{owner:s.id,item:'rat-tooth',count:1}),false,'own stall');
  assert.equal(send(c,'stallBuy',{owner:s.id,item:'rat-tooth',count:3}),true);
- assert.deepEqual([s.bag,c.bag],[{coins:30,items:{'rat-tooth':1}},{coins:70,items:{'rat-tooth':3}}]);
+ assert.deepEqual([s.bag,c.bag],[{coins:30-Math.floor(30*.03),items:{'rat-tooth':1}},{coins:70,items:{'rat-tooth':3}}]); // 3% sales tax
  assert.equal(s.stall.items['rat-tooth'].count,1);
  s.world.player.x+=5;realm.snapshot(s);assert.equal(s.stall,null);
  const far=realmWith('rice-field',{coins:0,items:{'rat-tooth':1}});

@@ -22,12 +22,12 @@ import {createAmbientMotion} from './ambient-motion.js?v=21';
 import {createGame} from './game-controls.js?v=64';
 import {atlasPath,className} from './classes.js?v=18';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=68.1';
+import {createWorldUI} from './world-ui.js?v=70';
 import {createStoryUI} from './story-ui.js?v=02';
 import {createBagUI} from './bag-ui.js?v=64';
 import {createStatusUI} from './status-ui.js?v=02';
 import {createRefineUI} from './refine-ui.js?v=01';
-import {createMarketUI} from './market-ui.js?v=01';
+import {createMarketUI} from './market-ui.js?v=70';
 import {createSocialUI} from './social-ui.js?v=01';
 import {createLifeUI} from './life-ui.js?v=68';
 import {createPetUI} from './pet-ui.js?v=62';
@@ -35,6 +35,7 @@ import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=64';
 import {createLifeNPC} from './life-npc.js?v=62';
 import {createFeedback} from './feedback.js?v=64';
+import {createMarketBoardUI} from './market-board-ui.js?v=70';
 import {createHud63} from './hud-63.js?v=68.3';
 import {resolveMap} from './world-state.js?v=21';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=68.2';
@@ -179,7 +180,7 @@ try {
  $('overview').onclick=toggleOverview;
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
- worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account});const statusUI=createStatusUI({game,account,bagUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const marketUI=createMarketUI({game,map,account,bagUI});const socialUI=createSocialUI({game,account});const lifeUI=createLifeUI({game,account,camera});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});createHud63();
+ worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account});const statusUI=createStatusUI({game,account,bagUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});const socialUI=createSocialUI({game,account});const lifeUI=createLifeUI({game,account,camera});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});createHud63();
  document.querySelector('.player-heading small').textContent=(jobFor(account.character.classId,account.character.jobId)?.name??className(account.character.classId,account.character.gender))+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
  motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};
@@ -189,7 +190,7 @@ try {
  let firstFrame=true,lastMs=null;const shakeVector=new THREE.Vector3();
  renderer.setAnimationLoop(ms=>{
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
-  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);game.update(dt);storyUI.update();bagUI.update();statusUI.update();refineUI.update();marketUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
+  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);game.update(dt);storyUI.update();bagUI.update();statusUI.update();refineUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
   flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;sun.position.set(game.world.player.x-14,25,game.world.player.z+12);sun.target.position.set(game.world.player.x,0,game.world.player.z);
   const viewDistance=camera.position.distanceTo(controls.target);scene.fog.near=viewDistance+14;scene.fog.far=viewDistance+102; // haze follows the camera (overview moves it 6x further)
   const shake=game.shakeOffset(shakeVector);camera.position.add(shake);softLook.render();camera.position.sub(shake);if(firstFrame){firstFrame=false;loading.finish();}

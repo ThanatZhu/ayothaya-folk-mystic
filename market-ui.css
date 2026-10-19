@@ -31,3 +31,19 @@
 .remote-player-label[data-stall]:not([data-stall=""])::after{content:attr(data-stall);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);padding:2px 9px;border:2px solid #8a5a2b;border-radius:4px;background:#f4e3b8;color:#4a2a10;font:700 11px Mali,Tahoma,sans-serif;text-shadow:none;white-space:nowrap}
 @media (orientation:landscape) and (max-height:520px){#market-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(420px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}}
 @media (max-width:520px){.market-cols{grid-template-columns:1fr}}
+/* 0.70 ตลาดกลาง */
+#market-board[open]{position:fixed;inset:0;margin:auto;width:min(460px,calc(100vw - 24px));height:fit-content;max-height:calc(100dvh - 40px);overflow:auto;z-index:45;padding:0;border:1px solid #c6a16488;border-radius:10px;background:linear-gradient(135deg,#24382bf6,#152925f2);color:#fff0ce;font-family:Mali,Tahoma,sans-serif;box-shadow:0 10px 30px #000a}
+#market-board>header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #af884f44;position:sticky;top:0;background:#1d322af2;z-index:1}
+#market-board>header h2{margin:0;flex:1;font-size:16px;color:#ffe5ab}
+.board-tabs{display:flex;gap:6px;padding:8px 12px}
+.board-tabs button,.board-kind button{flex:1;min-height:40px;border-radius:8px;border:1px solid #c9a35a88;background:#1a2f28;color:#fff0ce;font:600 12px Mali,Tahoma}
+.board-tabs [aria-selected=true],.board-kind [aria-pressed=true]{background:#3b6656;border-color:#e9c46a}
+#board-body{padding:0 12px 12px}
+.board-search{display:flex;gap:6px;margin:4px 0}
+.board-search input,.board-want input,#market-board .market-coin input{flex:1;min-height:40px;border-radius:8px;border:1px solid #c9a35a88;background:#0e1f1b;color:#fff0ce;padding:0 10px;font:14px Mali,Tahoma}
+.board-kind{display:flex;gap:6px;margin:8px 0}
+.board-want{display:grid;grid-template-columns:1fr 70px 70px;gap:6px}
+#market-board .shop-count,#market-board .shop-price{width:64px;min-height:34px;border-radius:6px;border:1px solid #c9a35a66;background:#0e1f1b;color:#fff0ce}
+.board-log{margin:4px 0;padding-left:16px;font-size:11px;color:#cfe0d4}
+#open-market-board{min-height:40px;border-radius:8px;border:1px solid #e9c46a;background:linear-gradient(#3b6656,#1f4339);color:#ffe5ab;font:700 12px Mali,Tahoma;display:flex;align-items:center;gap:6px;padding:0 12px}
+.shop-label{background:#163a2ee6!important;border-color:#d5b472!important;color:#ffe5ab!important}

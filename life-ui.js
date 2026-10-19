@@ -1,6 +1,6 @@
 // 0.48 everyday UI: ailment icons on the HUD, RO-style emote bubbles (picker + own bubble), daily login popup.
 // Remote players' bubbles are drawn by multiplayer-ui.js; the server rewards the daily login online, this file offline.
-import {emoteId,itemDef} from './items.js?v=64';
+import {emoteId,itemDef} from './items.js?v=70';
 import {AILMENTS} from './ailments.js?v=01';
 import {claimDaily,DAILY} from './daily.js?v=01';
 import {activeEvent,expRate,surge} from './events.js?v=64';

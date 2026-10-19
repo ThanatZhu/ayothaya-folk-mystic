@@ -1,6 +1,6 @@
 // Friends and guild window (0.47). Online only: the realm server owns both lists.
 // Whisper: "/w ชื่อ ข้อความ" in chat, or the กระซิบ button here (multiplayer-ui.js sends it).
-import {emblemId} from './items.js?v=64';
+import {emblemId} from './items.js?v=70';
 import {GUILD_COST,EMBLEMS} from './social.js?v=01';
 import {iconStyle} from './bag-ui.js?v=64';
 import {openHudPanel} from './hud-panels.js?v=34';

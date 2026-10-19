@@ -1,7 +1,7 @@
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems} from './story-quests.js?v=98';
-import {createCoach} from './coach.js?v=99';
+import {createCoach} from './coach.js?v=99.2';
 import {MONSTER_TYPES} from './combat-core.js?v=97';
 import {awardExperience,baseProgress} from './experience.js?v=73';
 
@@ -39,9 +39,9 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  };
 
  // Tracker panel (own stylesheet, so game.html needs no edit).
- if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=99.1';css.dataset.storyUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=99.2';css.dataset.storyUi='';document.head.append(css);}
  const panel=document.createElement('section');panel.id='quest-tracker';panel.setAttribute('aria-label','เควสเนื้อเรื่อง');
- panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ลูกศรแนะนำ">💡</button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
+ panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ลูกศรแนะนำ"><b>💡</b><span>ลูกศร</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
  document.body.append(panel);
  // 0.99 arrows that point at the next button to press, and a welcome card for a brand-new character
  const coach=createCoach({game,account,objective:()=>currentObjective(state()),paused:()=>!!document.querySelector('#welcome-card[open],#job-ready[open]')||[...document.querySelectorAll('.journey-loading,#travel-loading')].some(e=>!e.classList.contains('leaving')&&e.checkVisibility?.({checkVisibilityCSS:true}))});

@@ -57,7 +57,11 @@ export function createCoach({game,account,objective,paused=()=>false}){
    arrow.style.left=r.left+r.width/2+'px';arrow.style.top=(below?r.bottom+8:r.top-34)+'px';
    if(pick.text!==lastText){lastText=pick.text;text.textContent=pick.text;}
    const tw=Math.min(260,innerWidth-24),tx=Math.min(Math.max(12,r.left+r.width/2-tw/2),innerWidth-tw-12);
-   Object.assign(tip.style,{left:tx+'px',width:tw+'px',top:(below?r.bottom+40:Math.max(8,r.top-84))+'px'});
+   let left=tx,ty=below?r.bottom+40:Math.max(8,r.top-84);
+   // never lay the tip over the quest tracker: beside it on the left instead (past the 💡 toggle)
+   const q=document.getElementById('quest-tracker')?.getBoundingClientRect();
+   if(q&&q.width&&left<q.right&&left+tw>q.left&&ty<q.bottom&&ty+60>q.top){left=Math.max(12,q.left-tw-70);ty=Math.max(8,Math.min(r.top-10,innerHeight-80));}
+   Object.assign(tip.style,{left:left+'px',width:tw+'px',top:ty+'px'});
   },
  };
  return api;

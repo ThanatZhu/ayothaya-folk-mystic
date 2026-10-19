@@ -31,13 +31,15 @@
 @keyframes coach-pulse{50%{box-shadow:0 0 0 8px #f4cf7a22,0 0 30px #f4cf7a}}
 @keyframes coach-bob{50%{transform:translate(-50%,8px)}}@keyframes coach-bob-up{50%{transform:translate(-50%,-8px)}}
 @media (prefers-reduced-motion:reduce){#coach .coach-ring,#coach .coach-arrow{animation:none}}
-#quest-tracker #quest-coach{position:absolute;top:6px;right:6px;z-index:1;width:28px;height:28px;border:1px solid #f4cf7a88;border-radius:50%;background:#0e2926;font-size:14px;line-height:1;cursor:pointer}
+/* 0.99.1 the arrow toggle hangs outside the tracker on its left edge, so it never covers the quest text or ▶ เดินไป */
+#quest-tracker #quest-coach{position:absolute;top:0;right:calc(100% + 18px);z-index:1;display:grid;place-items:center;gap:1px;width:48px;height:52px;padding:4px 0 3px;border:2px solid #f4cf7a;border-radius:12px;background:linear-gradient(180deg,#2e4a2c,#102b24);color:#f4dfac;font:700 10px/1 Mali,Tahoma,sans-serif;box-shadow:0 3px 12px #0007;cursor:pointer}
+#quest-tracker #quest-coach b{font-size:22px;line-height:1}
+#quest-tracker #quest-coach:hover{border-color:#fff0ce}
 #quest-coach.off{opacity:.45;filter:grayscale(1)}
 #welcome-card{width:min(440px,calc(100vw - 32px));box-sizing:border-box;padding:20px 22px;border:1px solid #f4cf7a;border-radius:18px;background:linear-gradient(135deg,#2e4a2c,#102b24);color:#fff0ca;font-family:Mali,Tahoma,sans-serif;box-shadow:0 20px 80px #0009}
 #welcome-card::backdrop{background:#041b1a99}
 #welcome-card small{color:#95efe2;font-weight:700}#welcome-card h2{margin:4px 0 10px;color:#f4cf7a;font-size:22px}
 #welcome-card ul{margin:0 0 16px;padding-left:18px;display:grid;gap:8px;font-size:14px}#welcome-card b{color:#f4cf7a}
 #welcome-go{display:block;width:100%;min-height:46px;border:0;border-radius:12px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 16px Mali,Tahoma,sans-serif;cursor:pointer}
-#quest-tracker #quest-chapter{padding-right:30px}
 #quest-tracker #quest-chapter,#quest-tracker #quest-title,#quest-tracker #quest-hint{grid-column:1}
 #quest-tracker #quest-how{grid-column:1/-1;grid-row:4}

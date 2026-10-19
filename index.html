@@ -1,11 +1,73 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#182b29"><title>อโยธยา · Folk Mystic</title><link rel="icon" type="image/png" href="assets/brand69/ayothaya-emblem.png"><link rel="apple-touch-icon" href="assets/brand69/ayothaya-emblem.png"><link rel="stylesheet" href="lobby.css?v=09"><link rel="stylesheet" href="mobile-layout.css?v=11"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="lobby-classes.css?v=09"><link rel="preload" href="assets/fonts/Mali-Medium.ttf" as="font" type="font/ttf" crossorigin><link rel="preload" href="assets/fonts/Mali-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="typography.css?v=10"><link rel="stylesheet" href="viewport-fit.css?v=11"><link rel="stylesheet" href="wardrobe.css?v=15"><link rel="stylesheet" href="character-slots.css?v=18b"><link rel="stylesheet" href="loading-screen.css?v=39.1"><link rel="stylesheet" href="phone-lobby.css?v=48.1"><link rel="stylesheet" href="brand69.css?v=69"></head>
-<body><div id="game-shell"><div class="scenery" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div><div id="embers" aria-hidden="true"></div>
-<header class="lobby-header"><a class="wordmark" href="./"><img class="brand-emblem" src="assets/brand69/ayothaya-emblem.png" width="1254" height="1254" alt="" decoding="async"><div>AYOTHAYA <span>FOLK MYSTIC</span></div></a><div class="top-actions"><span id="identity">ยินดีต้อนรับ นักเดินทาง</span><button id="ambient-toggle" aria-pressed="false">หยุดโมชั่น</button><button id="enter-fullscreen" aria-label="เล่นเต็มจอ">⛶</button></div></header>
-<main class="lobby-layout"><section class="story"><p class="eyebrow">A WORLD OF LIVING BELIEFS</p><h1 class="brand-title"><img class="brand-hero" src="assets/brand69/ayothaya-logo.png" width="1536" height="1024" alt="อโยธยา · Ayothaya Folk Mystic" fetchpriority="high" decoding="async"></h1><div class="gold-line"></div><p class="story-copy">ใต้ร่มไทร ริมสายน้ำ<br>เรื่องราวบทใหม่… รอให้คุณออกเดินทาง</p><span class="edition">THAI FANTASY · CHIBI PIXEL</span></section>
-<section class="lobby-card" aria-label="เริ่มการผจญภัย"><nav aria-label="ขั้นตอนเข้าเกม"><ol class="steps"><li data-step="login" aria-current="step"><b>01</b> บัญชี</li><li data-step="servers"><b>02</b> เซิร์ฟเวอร์</li><li data-step="character"><b>03</b> ตัวละคร</li></ol></nav>
-<div id="login-screen" class="screen"><p class="eyebrow">WELCOME HOME, TRAVELER</p><h2 tabindex="-1">เริ่มต้นตำนานของคุณ</h2><p class="muted">เข้าสู่ระบบเพื่อเก็บการเดินทางของคุณ<br>แล้วกลับมาพบกันได้บนทุกอุปกรณ์</p><button id="login-google" class="google" disabled><span class="google-g">G</span> เข้าสู่ระบบด้วย Google</button><button id="continue-account" class="primary" hidden>ไปเลือกเซิร์ฟเวอร์ →</button><div class="divider"><span>หรือ</span></div><button id="login-guest" class="secondary">ทดลองเล่นบนเครื่องนี้</button><p class="small">โหมดทดลองเก็บเซฟเฉพาะเบราว์เซอร์นี้<br>บัญชี Google และโหมดทดลองมีตัวละครแยกกัน</p></div>
-<div id="servers-screen" class="screen" hidden><p class="eyebrow">CHOOSE YOUR WORLD</p><h2 tabindex="-1">เลือกเซิร์ฟเวอร์</h2><p class="muted">หนึ่งโลก หนึ่งการเดินทางของคุณ</p><div class="server-list"><button class="server" data-server="server-1"><span class="server-number">01</span><span><strong>เซิร์ฟ 1</strong><small>อยุธยา · ริมเจ้าพระยา</small></span><span class="server-arrow">→</span></button><button class="server" data-server="server-2"><span class="server-number">02</span><span><strong>เซิร์ฟ 2</strong><small>อยุธยา · แสงจันทร์</small></span><span class="server-arrow">→</span></button></div><p class="small">5 ตัวละครต่อบัญชี · แต่ละตัวผูกกับเซิร์ฟเวอร์ที่สร้าง<br>พบผู้เล่นร่วมเซิร์ฟเวอร์เมื่อเชื่อมต่อออนไลน์</p><button class="text-button" id="back-login">← กลับหน้าบัญชี</button></div>
-<div id="character-screen" class="screen" hidden><div class="character-heading"><div><p id="realm-caption" class="eyebrow"></p><h2 id="character-title" tabindex="-1">สร้างตัวละคร</h2></div><span class="slot" id="slot-count">0 / 5</span></div><div id="character-slots" role="group" aria-label="ตัวละคร 5 ช่องต่อบัญชี"></div><p id="progression-hint" role="status"></p><div class="character-body"><div class="character-stage"><div id="hero-preview" class="hero-art male" role="img" aria-label="หมอผีชาย"></div><div class="pedestal"></div><span id="class-badge" class="class-badge">หมอผี · วิญญาณและยันต์</span><div class="pose-controls" role="group" aria-label="ลองท่าตัวละคร"><button type="button" data-pose="cycle" aria-pressed="true">สลับท่า</button><button type="button" data-pose="walk" aria-pressed="false">เดิน</button><button type="button" data-pose="attack" aria-pressed="false">โจมตี</button></div></div><div class="character-details"><fieldset id="profession-options"><legend>เลือกอาชีพ <small>7 เส้นทางการผจญภัย</small></legend><div id="class-options" class="class-options"></div></fieldset><div class="class-summary"><strong id="class-name"></strong><p id="class-description"></p></div><button id="open-wardrobe" type="button">แต่งตัว · ท่าทาง · Master</button><form id="character-form"><label for="hero-name">ชื่อตัวละคร</label><input id="hero-name" name="name" placeholder="ชื่อของนักเดินทาง" maxlength="16" autocomplete="off" required minlength="2" aria-describedby="name-hint"><small id="name-hint">2–16 ตัวอักษร · ไทย / อังกฤษ / ตัวเลข</small><fieldset id="gender-options"><legend>รูปลักษณ์</legend><label><input type="radio" name="gender" value="male" checked> ชาย</label><label><input type="radio" name="gender" value="female"> หญิง</label></fieldset><button id="create-character" class="primary" type="submit">สร้างตัวละคร</button></form><div id="existing-character" hidden><h3 id="existing-name"></h3><p id="existing-detail" class="muted"></p><p class="small">เลือกอาชีพเมื่อ Job 10 ตัน · เลื่อนเป็น Master เมื่อ Job 40 ตัน</p><button id="change-class" class="secondary" hidden>เลือกอาชีพนี้ถาวร</button><button id="enter-world" class="primary">เข้าสู่โลกอโยธยา →</button></div></div></div><button class="text-button" id="back-servers">← เปลี่ยนเซิร์ฟเวอร์</button></div>
-<p id="lobby-status" class="lobby-status" role="status" aria-live="polite">กำลังเชื่อมต่อบัญชี…</p><button id="retry-connection" class="text-button" hidden>เชื่อมต่ออีกครั้ง</button><button id="switch-account" class="text-button" hidden>ออกจากบัญชี Google</button></section></main><footer class="lobby-footer"><a href="./sprite-lab.html" style="color:inherit">ห้องลองทุกอาชีพ 8 ทิศ ↗</a><span>EARLY WORLD PREVIEW · 0.98</span></footer></div>
-<dialog id="orientation-gate" aria-labelledby="rotate-title"><div class="brand">AYOTHAYA · FOLK MYSTIC</div><div class="rotate-device" aria-hidden="true"></div><h1 id="rotate-title">หมุนเครื่องเป็นแนวนอน</h1><p>เปิดการเดินทางในแนวนอน<br>เพื่อเห็นโลกอโยธยาได้เต็มตา</p><button id="rotate-fullscreen">เล่นเต็มจอแนวนอน</button><p id="orientation-hint">หมุนเครื่องแล้วเริ่มผจญภัยกัน</p></dialog><script type="module" src="lobby.js?v=73.1"></script></body></html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f2420">
+<title>อโยธยา · Ayothaya Folk Mystic — MMORPG แฟนตาซีไทยบนเว็บ</title>
+<meta name="description" content="ผจญภัยในอยุธยาแฟนตาซีบนเว็บ เล่นฟรี ไม่ต้องติดตั้ง · 7 อาชีพ ตีบวก การ์ด สัตว์เลี้ยง กิลด์วอร์ยึดป้อมทุกเสาร์ และทัวร์นาเมนต์ประลองรายสัปดาห์">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Ayothaya Folk Mystic"><meta property="og:title" content="อโยธยา · Ayothaya Folk Mystic">
+<meta property="og:description" content="MMORPG แฟนตาซีไทยบนเว็บ เล่นฟรี ไม่ต้องติดตั้ง · ตีบวก ล่าบอส ตั้งกิลด์ ยึดป้อมทุกคืนวันเสาร์">
+<meta property="og:image" content="https://ayothaya-folk-mystic.vercel.app/assets/landing98/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:url" content="https://ayothaya-folk-mystic.vercel.app/"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/brand69/ayothaya-emblem.png"><link rel="apple-touch-icon" href="assets/brand69/ayothaya-emblem.png"><link rel="manifest" href="manifest.webmanifest">
+<link rel="preload" href="assets/landing98/hero.webp" as="image" type="image/webp" fetchpriority="high">
+<link rel="stylesheet" href="typography.css?v=10"><link rel="stylesheet" href="landing.css?v=98"></head>
+<body>
+<header class="nav"><a class="mark" href="./"><img src="assets/brand69/ayothaya-emblem.png" width="40" height="40" alt=""><span>AYOTHAYA <b>FOLK MYSTIC</b></span></a>
+ <nav aria-label="หัวข้อ"><a href="#features">ระบบเด่น</a><a href="#classes">อาชีพ</a><a href="#world">แผนที่</a><a href="#events">กิจกรรม</a><a href="#news">อัปเดต</a></nav>
+ <a class="btn small gold" href="play.html">เข้าเกม</a></header>
+
+<main>
+<section class="hero">
+ <div class="hero-copy">
+  <span class="chip">MMORPG แฟนตาซีไทยบนเว็บ · เล่นฟรี · ไม่ต้องติดตั้ง</span>
+  <h1><img src="assets/brand69/ayothaya-logo.png" width="1536" height="1024" alt="อโยธยา · Ayothaya Folk Mystic"></h1>
+  <p class="lead">ผจญภัยในอยุธยาแห่งความเชื่อ ตีบวกอาวุธ ล่าบอส ตั้งกิลด์ยึดป้อมโรงสี แล้วประลองชิงอันดับทุกสัปดาห์ — เปิดเบราว์เซอร์แล้วเล่นได้ทันที ทั้งคอมและมือถือ</p>
+  <div class="actions"><a class="btn gold" href="play.html">เล่นเลย</a><a class="btn" id="discord" href="#" target="_blank" rel="noopener" hidden>เข้าร่วม Discord</a><a class="btn" href="#features">ดูระบบในเกม</a></div>
+  <p class="status" id="status"><i></i><span>กำลังเช็กเซิร์ฟเวอร์…</span></p>
+ </div>
+ <div class="hero-cast" aria-hidden="true"><img class="c1" src="assets/landing98/class-swordsman-m.webp" alt=""><img class="c2" src="assets/landing98/class-shaman-f.webp" alt=""><img class="c3" src="assets/landing98/class-hunter-m.webp" alt=""></div>
+</section>
+
+<section id="features" class="block"><h2>ระบบเด่น</h2><p class="sub">ทุกอย่างหาได้จากการเล่น ของดรอปจากมอนกลายเป็นยา อาหาร และหินตีบวก หมุนเวียนในตลาดของผู้เล่น</p>
+ <ul class="features">
+  <li><b>⚔️</b><h3>7 อาชีพ · สาย Master</h3><p>เริ่มจากผู้ฝึกตน เลือกอาชีพที่ลานครู ผ่านบททดสอบ แล้วไต่สู่ Master</p></li>
+  <li><b>🔨</b><h3>ตีบวก +10</h3><p>+1 ถึง +4 ไม่มีวันแตก ตั้งแต่ +5 ลุ้นสุดตัว มีเหล็กไหลและยันต์กันแตกช่วย</p></li>
+  <li><b>🃏</b><h3>การ์ดมอนสเตอร์</h3><p>ทุกมอนมีการ์ดของตัวเอง ใส่ในอุปกรณ์เพิ่มพลังแบบถาวร</p></li>
+  <li><b>⚒️</b><h3>คราฟต์</h3><p>ยา อาหารเพิ่มสเตตัส 10 นาที และหินตีบวก จากของดรอป</p></li>
+  <li><b>🐾</b><h3>สัตว์เลี้ยง</h3><p>ล่อจับมอนตัวเล็ก ฟักไข่ เลี้ยงจนสนิทแล้วได้สเตตัสติดตัว</p></li>
+  <li><b>🏯</b><h3>กิลด์วอร์ยึดป้อม</h3><p>ทุกเสาร์ 20:00 ทำลายศิลาราชสีห์ ครองป้อมโรงสีทั้งสัปดาห์</p></li>
+  <li><b>🏆</b><h3>ทัวร์นาเมนต์ประลอง</h3><p>ท้าดวลสะสมแต้ม อันดับ 1–3 ประจำสัปดาห์รับรางวัล</p></li>
+  <li><b>🌦️</b><h3>โลกมีชีวิต</h3><p>ฝน หมอก พายุ เปลี่ยนทุก 15 นาที ฝูงคลั่ง EXP ×2 และบอส MVP</p></li>
+ </ul></section>
+
+<section id="classes" class="block"><h2>อาชีพ</h2><p class="sub">ทุกอาชีพเลือกได้ทั้งชายและหญิง แตะการ์ดเพื่อสลับ</p>
+ <ul class="classes" id="class-list"></ul></section>
+
+<section id="world" class="block"><h2>ออกเดินทาง</h2><p class="sub">จากเมืองหลวงอยุธยา ออกประตูเหนือสู่ทุ่งนา สวนหมาก โรงสี และบึงบัวต้องมนตร์</p>
+ <ul class="maps">
+  <li><img src="assets/landing98/rice-fields.webp" width="720" height="405" alt="ทุ่งขวัญข้าว" loading="lazy"><h3>ทุ่งขวัญข้าว</h3><p>Lv. 1–12 · หุ่นฟางหลง หนูยุ้งข้าว ตั๊กแตนเกราะ และพญาหนูยุ้งข้าว</p></li>
+  <li><img src="assets/landing98/old-orchard.webp" width="720" height="405" alt="สวนหมากคลองเก่า" loading="lazy"><h3>สวนหมากคลองเก่า</h3><p>Lv. 10–22 · ลูกลิงฉกของ เถาวัลย์พันขา โคมหลงทาง และวานรเจ้าเล่ห์</p></li>
+  <li><img src="assets/landing98/moonlit-mill.webp" width="720" height="405" alt="โรงสีใต้เงาจันทร์" loading="lazy"><h3>โรงสีใต้เงาจันทร์</h3><p>Lv. 15–25 · เจ้าหุ่นฟางพันเชือก ดันเจี้ยนใต้ถุน และสนามกิลด์วอร์ · ต่อไปบึงบัว Lv. 25–35</p></li>
+ </ul></section>
+
+<section id="events" class="block"><h2>กิจกรรมประจำสัปดาห์</h2>
+ <ul class="events">
+  <li><b>🏯 กิลด์วอร์ยึดป้อมโรงสี</b><span>ทุกวันเสาร์ 20:00–20:30 น.</span><em id="war-clock"></em></li>
+  <li><b>🏆 ปิดรอบทัวร์นาเมนต์ประลอง</b><span>ทุกคืนวันอาทิตย์ 24:00 น.</span><em id="arena-clock"></em></li>
+  <li><b>🔥 ฝูงคลั่ง EXP ×2 ดรอป ×2</b><span>ทุก 20 นาที นาน 5 นาที วนทุกแผนที่นอกเมือง</span><em>ตลอดวัน</em></li>
+  <li><b>👑 บอส MVP</b><span>ราชาหุ่นฟางเพลิงที่โรงสี เกิดใหม่เป็นรอบ ประกาศทั้งเซิร์ฟ</span><em>ดูเวลาในเกม</em></li>
+ </ul></section>
+
+<section id="news" class="block"><h2>อัปเดตล่าสุด</h2>
+ <ul class="news">
+  <li><b>0.98</b><p>เควสเนื้อเรื่องใหม่ที่สอนเล่นไปในตัว 23 เควส · บททดสอบเปลี่ยนอาชีพแบบ 3 ด่าน · หน้าต่างเด้งเมื่อ Job ตัน</p></li>
+  <li><b>0.97</b><p>สภาพอากาศ ฝน หมอก พายุฟ้าแลบ · แก้ปุ่ม AUTO และการสวมใส่</p></li>
+  <li><b>0.96</b><p>ทัวร์นาเมนต์ประลองรายสัปดาห์ · ประกาศกิจกรรมเข้า Discord</p></li>
+  <li><b>0.95</b><p>กิลด์วอร์ยึดป้อมโรงสีทุกคืนวันเสาร์</p></li>
+  <li><b>0.93–0.94</b><p>ท้าดวล PvP · คราฟต์ยา อาหาร หินตีบวก และยันต์กันแตก</p></li>
+ </ul></section>
+
+<section class="cta"><h2>พร้อมออกเดินทางหรือยัง</h2><p>เล่นฟรีบนเบราว์เซอร์ บันทึกด้วยบัญชี Google หรือทดลองเล่นได้ทันที</p><a class="btn gold" href="play.html">เล่นเลย</a></section>
+</main>
+
+<footer><span>© Ayothaya Folk Mystic · EARLY WORLD PREVIEW · 0.98</span><a href="play.html">เข้าเกม</a><a href="#top" onclick="scrollTo({top:0,behavior:'smooth'});return false">กลับด้านบน</a></footer>
+<script type="module" src="landing.js?v=98"></script>
+</body></html>

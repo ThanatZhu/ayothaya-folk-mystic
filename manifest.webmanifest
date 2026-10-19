@@ -2,7 +2,7 @@
   "name": "Ayothaya Folk Mystic",
   "short_name": "Ayothaya",
   "lang": "th",
-  "start_url": "./?map=ayutthaya",
+  "start_url": "./play.html",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "landscape",

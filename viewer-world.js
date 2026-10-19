@@ -46,7 +46,7 @@ import {createHud63} from './hud-63.js?v=97';
 import {resolveMap} from './world-state.js?v=94';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=92';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
-import {prepareCloud} from './cloud-save.js?v=97';
+import {prepareCloud} from './cloud-save.js?v=98';
 import {captureSave,applySave} from './save-state.js?v=21';
 const $=id=>document.getElementById(id),loading=getLoadingScreen(),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.

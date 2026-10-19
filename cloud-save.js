@@ -3,7 +3,7 @@ import {ENTRY_KEY,validEntry} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=73';
 import {normalizeEquipment,equipItem} from './equipment.js?v=41';
 const $=id=>document.getElementById(id);
-function toLobby(){location.replace('./');return new Promise(()=>{});}
+function toLobby(){location.replace('./play.html');return new Promise(()=>{});}
 export async function prepareCloud(catalog){
  let entry;try{entry=JSON.parse(sessionStorage.getItem(ENTRY_KEY));}catch{}
  const serverId=new URLSearchParams(location.search).get('server');
@@ -31,7 +31,7 @@ export async function prepareCloud(catalog){
   lastJSON=JSON.stringify(record.state);$('account-name').textContent=record.character.name+' · เซิร์ฟ '+serverId.slice(-1);
   say(store.cloud?'บันทึกอัตโนมัติ · บัญชี Google':'บันทึกอัตโนมัติ · เฉพาะเบราว์เซอร์นี้');
  }catch(e){blocked=true;report(e);$('retry-sync').hidden=true;$('reload-save').hidden=false;open();}
- if(connection)connection.sdk.onAuthStateChanged(connection.auth,u=>{if(u?.uid!==entry.owner){blocked=true;location.replace('./');}});
+ if(connection)connection.sdk.onAuthStateChanged(connection.auth,u=>{if(u?.uid!==entry.owner){blocked=true;location.replace('./play.html');}});
  function save(override){
   if(online)return online.flush(bound?.capture().settings);
   if(onlineStarting)return Promise.resolve(true);
@@ -43,8 +43,8 @@ export async function prepareCloud(catalog){
   });queue=operation;return operation.catch(e=>{report(e);throw e;});
  }
  $('retry-sync').onclick=()=>save().then(()=>{$('retry-sync').hidden=true;$('open-account').classList.remove('sync-error');}).catch(()=>{});
- $('return-lobby').onclick=async()=>{if(busy)return;busy=true;try{if(!blocked)await save();sessionStorage.removeItem(ENTRY_KEY);location.assign('./');}catch{open();}finally{busy=false;}};
- $('logout-account').onclick=async()=>{if(busy)return;busy=true;try{await save();await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.assign('./');}catch{open();}finally{busy=false;}};
+ $('return-lobby').onclick=async()=>{if(busy)return;busy=true;try{if(!blocked)await save();sessionStorage.removeItem(ENTRY_KEY);location.assign('./play.html');}catch{open();}finally{busy=false;}};
+ $('logout-account').onclick=async()=>{if(busy)return;busy=true;try{await save();await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.assign('./play.html');}catch{open();}finally{busy=false;}};
  const tick=()=>{if(bound&&!blocked&&!busy&&!traveling&&!document.hidden)save().catch(()=>{});};setInterval(tick,10000);addEventListener('online',tick);
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&bound&&!blocked&&!busy&&!traveling)save().catch(()=>{});});
  return {skills:record?.skills,setSkills(skills){record={...record,skills};lastJSON='';return save().catch(()=>false);},slotId:entry.slotId??record?.slotId,async token(){if(!connection?.auth.currentUser||connection.auth.currentUser.uid!==entry.owner)throw new Error('account-changed');return connection.auth.currentUser.getIdToken();},async beginOnline(){await save().catch(()=>{});await queue.catch(()=>{});onlineStarting=true;}/* the realm server loads its own private copy, so a rejected browser save must not block going online */,setOnline(value){online=value;onlineStarting=false;say('บันทึกอัตโนมัติโดยเซิร์ฟเวอร์ออนไลน์');$('open-account').classList.remove('sync-error');$('retry-sync').hidden=true;},data:record?.state,character:record?.character,serverId,get paused(){return blocked||busy;},get cloud(){return store?.cloud;},save,

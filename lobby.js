@@ -40,7 +40,7 @@ async function setup(){
   connection=await deadline(connectFirebase());$('login-google').disabled=false;$('retry-connection').hidden=true;
   const user=connection.auth.currentUser;$('continue-account').hidden=!user;$('switch-account').hidden=!user;$('login-google').hidden=!!user;
   if(screen==='login')say(user?'ยินดีต้อนรับกลับ '+(user.displayName||'นักเดินทาง'):'');
-  connection.sdk.onAuthStateChanged(connection.auth,u=>{if(owner&&owner!=='guest'&&u?.uid!==owner)location.replace('./');});
+  connection.sdk.onAuthStateChanged(connection.auth,u=>{if(owner&&owner!=='guest'&&u?.uid!==owner)location.replace('./play.html');});
  }catch(e){if(screen==='login'){report(e);$('retry-connection').hidden=false;}}
 }
 $('retry-connection').onclick=()=>location.reload();setup();
@@ -50,7 +50,7 @@ $('login-google').onclick=async()=>{
 };
 $('continue-account').onclick=()=>selectIdentity(connection.auth.currentUser.uid);
 $('login-guest').onclick=()=>selectIdentity('guest');
-$('switch-account').onclick=async()=>{if(busy)return;lock(true);try{await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.replace('./');}catch(e){report(e);lock(false);}};
+$('switch-account').onclick=async()=>{if(busy)return;lock(true);try{await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.replace('./play.html');}catch(e){report(e);lock(false);}};
 $('back-login').onclick=()=>{if(!busy){owner=null;show('login');setup();}};
 $('back-servers').onclick=()=>{if(!busy)show('servers');};
 function preview(gender=previewGender){

@@ -31,6 +31,7 @@ import {createStatusUI} from './status-ui.js?v=94';
 import {createProfileUI} from './profile-ui.js?v=85';
 import {createRefineUI} from './refine-ui.js?v=94';
 import {createCraftUI} from './craft-ui.js?v=94';
+import {createWeather} from './weather-fx.js?v=97';
 import {createMarketUI} from './market-ui.js?v=70';
 import {createSocialUI} from './social-ui.js?v=95';
 import {createLifeUI} from './life-ui.js?v=68';
@@ -41,11 +42,11 @@ import {createLifeNPC} from './life-npc.js?v=62';
 import {createFeedback} from './feedback.js?v=80';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=96';
 import {createMarketBoardUI} from './market-board-ui.js?v=70';
-import {createHud63} from './hud-63.js?v=95';
+import {createHud63} from './hud-63.js?v=97';
 import {resolveMap} from './world-state.js?v=94';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=92';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
-import {prepareCloud} from './cloud-save.js?v=41';
+import {prepareCloud} from './cloud-save.js?v=97';
 import {captureSave,applySave} from './save-state.js?v=21';
 const $=id=>document.getElementById(id),loading=getLoadingScreen(),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
@@ -201,7 +202,7 @@ try {
  const graphicsLabel=()=>{$('graphics').textContent=softLook.enabled?'ภาพละมุน · เปิด':'ภาพละมุน · ปิด (ประหยัดเครื่อง)';$('graphics').setAttribute('aria-pressed',String(softLook.enabled));};
  graphicsLabel();$('graphics').onclick=()=>{softLook.setEnabled(!softLook.enabled);graphicsLabel();};
  $('load')?.remove();loading.stage(5);document.querySelectorAll('.camera-panel button,.attack-controls button').forEach(b=>b.disabled=false);
- const perf=createPerfSettings({renderer,scene,sun,softLook,resize,onApply:graphicsLabel});const perfBox=$('audio-settings');if(perfBox)perf.mount(perfBox);
+ const perf=createPerfSettings({renderer,scene,sun,softLook,resize,onApply:graphicsLabel});const weather=createWeather({scene,controls,sun,map,game,quality:readPerf().quality,reduced:matchMedia('(prefers-reduced-motion:reduce)').matches});const perfBox=$('audio-settings');if(perfBox)perf.mount(perfBox);
  let firstFrame=true,lastMs=null;const shakeVector=new THREE.Vector3();
  renderer.setAnimationLoop(ms=>{
   if(!perf.shouldDraw(ms))return;
@@ -209,6 +210,7 @@ try {
   const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);meadow.update(t);game.update(dt);storyUI.update();bagUI.update();statusUI.update();profileUI.update();refineUI.update();craftUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
   flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;followSun(game.world.player);
   const viewDistance=camera.position.distanceTo(controls.target);scene.fog.near=viewDistance+14;scene.fog.far=viewDistance+102; // haze follows the camera (overview moves it 6x further)
+  weather.update(document.hidden||landscape.blocked?0:dt);
   const shake=game.shakeOffset(shakeVector);camera.position.add(shake);softLook.render();camera.position.sub(shake);if(firstFrame){firstFrame=false;loading.finish();}
  });
 }catch(error){console.error(error);$('status').textContent='เปิดฉากไม่สำเร็จ';loading.fail();}

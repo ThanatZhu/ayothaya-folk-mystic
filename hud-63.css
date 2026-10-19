@@ -253,3 +253,7 @@ body.field-hud.hud63 #menu-rank i::after{display:block;content:"";position:absol
 }
 /* 0.95 guild war line inside the target box */
 #war-line{display:block;margin-top:3px;font-size:10px;font-weight:700;color:#ffb47a}#war-line[hidden]{display:none}
+/* 0.97 weather chip (weather-fx.js), first in the chip row under the minimap */
+#weather-chip{display:flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #9cc6d688;border-radius:999px;background:#14262ad8;color:#d6eef5;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
+#weather-chip i{font-style:normal}#weather-chip b{font-weight:400;opacity:.85}
+#weather-chip[data-weather=storm]{border-color:#b9a4ff;background:#241d3ae8;color:#efe6ff;box-shadow:0 0 10px #8f7bff66}

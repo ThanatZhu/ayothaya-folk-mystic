@@ -7,7 +7,7 @@ const reasons={'no-skill-points':'แต้มสกิลไม่พอ · ไ
 // Grid place of each slot: [column, row]. Rows are the tree tiers, top to bottom.
 const PLACE={0:[1,0],4:[3,0],1:[0,1],2:[1,1],5:[3,1],3:[0,2],6:[1,2],8:[3,2],7:[0,3],9:[2,3]};
 export function createSkillWindow({game,classId}){
- if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=84';css.dataset.skillTree='';document.head.append(css);}
+ if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=88';css.dataset.skillTree='';document.head.append(css);}
  const dialog=document.createElement('dialog');dialog.id='skill-window';dialog.setAttribute('aria-labelledby','skill-window-title');
  dialog.innerHTML='<header><div><small>SKILL TREE</small><h2 id="skill-window-title">ต้นไม้สกิล</h2></div><b id="skill-points"></b><button class="mp-icon" id="skill-close" aria-label="ปิดหน้าสกิล">×</button></header><p class="skill-hint">เริ่มจากสกิลแถวบน · อัปให้ถึงขั้นที่กำหนดเพื่อปลดล็อกสกิลถัดไป (เรียนฟรี) · ขั้น 2–4 ใช้ 1 แต้ม · ขั้น 5 และ 10 ต้องผ่านเควสต์</p><div class="skill-tree" id="skill-tree"><svg id="skill-links" aria-hidden="true"></svg></div><section id="skill-detail" aria-live="polite"></section><p id="skill-note" role="status"></p>';
  document.getElementById('game-shell').append(dialog);
@@ -23,12 +23,17 @@ export function createSkillWindow({game,classId}){
  });
  if(classId)applySkillArt(nodes.map(n=>n.node),classId);
  const levels=()=>world.skillLevels??[];
- // Lines from each requirement to the skill it opens; gold when that requirement is met.
+ // 0.88 square connectors (owner: no diagonal lines): down from the requirement, across in the gap between rows,
+ // down into the skill. A link that skips a row runs down the gutter beside the skill instead of crossing a card.
+ // Gold when that requirement is met; the level needed sits just above the skill it opens.
  function links(){
   const svg=$('skill-links'),box=tree.getBoundingClientRect();if(!box.width)return;svg.setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);
-  const at=i=>{const r=nodes[i].node.getBoundingClientRect();return [r.left-box.left+r.width/2,r.top-box.top+r.height/2,r.height/2];};
-  svg.innerHTML=SKILL_TREE.flatMap(n=>n.req.map(([s,l])=>{const [x1,y1,h1]=at(s),[x2,y2,h2]=at(n.slot),met=(levels()[s]??0)>=l;
-   return `<line x1="${x1}" y1="${y1+h1}" x2="${x2}" y2="${y2-h2}" class="${met?'met':''}"/><text x="${(x1+x2)/2+4}" y="${(y1+h1+y2-h2)/2+4}" class="${met?'met':''}">Lv${l}</text>`;})).join('');
+  const at=i=>{const r=nodes[i].node.getBoundingClientRect();return {x:r.left-box.left+r.width/2,top:r.top-box.top,bottom:r.bottom-box.top,left:r.left-box.left,row:PLACE[i][1]};};
+  const gap=13;
+  svg.innerHTML=SKILL_TREE.flatMap(n=>n.req.map(([s,l],k)=>{const a=at(s),b=at(n.slot),met=(levels()[s]??0)>=l,cls=met?'met':'';
+   const below=a.bottom+gap,above=b.top-gap,side=b.left-6;
+   const d=b.row-a.row>1?`M${a.x} ${a.bottom}V${below}H${side}V${above}H${b.x}V${b.top}`:`M${a.x} ${a.bottom}V${above}H${b.x}V${b.top}`;
+   return `<path d="${d}" class="${cls}"/><text x="${b.x+5+k*30}" y="${b.top-3}" class="${cls}">Lv${l}</text>`;})).join('');
  }
  function draw(){
   const points=world.skillPoints??0,lv=levels();$('skill-points').textContent='แต้มสกิล '+points;

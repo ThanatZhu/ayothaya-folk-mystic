@@ -251,3 +251,5 @@ body.field-hud.hud63 #menu-rank i::after{display:block;content:"";position:absol
  body.field-hud.hud63 #online-dock #online-messages{height:min(190px,24vh)}
  body.field-hud.hud63 #online-dock #online-messages{font-size:14px}
 }
+/* 0.95 guild war line inside the target box */
+#war-line{display:block;margin-top:3px;font-size:10px;font-weight:700;color:#ffb47a}#war-line[hidden]{display:none}

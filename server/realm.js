@@ -22,6 +22,7 @@ export const MERC_COST=200,MERC_TIME=1200;
 export const MVP_INTERVAL=3600e3,MVP_FIRST=300e3,DUNGEON_REWARD={coins:800,items:[{id:'lek-lai',count:1},{id:'green-herb',count:3},{id:'hp-large',count:3}]};
 import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,foodBuff,SHOPS,ITEM_ERRORS,itemDef,RARITY_NAME} from '../items.js';
 import {craft} from '../crafting.js';
+import {WAR,warWindow,warLabel} from '../guild-war.js';
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
@@ -37,7 +38,7 @@ function autoPotionFor(realm,p){
 }
 export class RealmServer{
  autoPotion(p){autoPotionFor(this,p);}
- constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
+ constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false}={}){this.wars=new Map();this.warAlways=warAlways;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
   let existing=[...this.peers.values()].find(p=>p.uid===uid);
@@ -243,6 +244,53 @@ export class RealmServer{
   else if(party.leader===p.id)party.leader=party.members.values().next().value;
  }
  social(room){for(const id of room.peers){const p=this.peers.get(id),party=this.parties.get(p.partyId);p.send({type:'social',players:[...room.peers].map(id=>{const a=this.peers.get(id);return {id,name:a.character.name,classId:a.character.classId,partyId:a.partyId};}),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
+ // ---- 0.95 weekly guild war (guild-war.js). One war state per channel; the stone is shared by everyone there.
+ warState(serverId){let s=this.wars.get(serverId);if(!s){s={active:false,holder:null,stone:{id:'war:stone',pvp:true,name:WAR.stone.name,x:WAR.stone.x,z:WAR.stone.z,hp:WAR.stone.hp,maxHp:WAR.stone.hp}};this.wars.set(serverId,s);}return s;}
+ castleOwner(serverId){return [...this.guilds.values()].find(g=>g.serverId===serverId&&g.castle)??null;}
+ warTick(){
+  const w=warWindow(this.now(),this.warAlways);
+  for(const serverId of new Set([...this.peers.values()].map(p=>p.serverId))){
+   const s=this.warState(serverId);
+   if(w.active&&!s.active){s.active=true;s.holder=this.castleOwner(serverId)?.id??null;s.stone.hp=s.stone.maxHp;this.announce(serverId,`⚔️ กิลด์วอร์เริ่มแล้ว! · ไปที่${this.catalog.maps.find(m=>m.id===WAR.map)?.name??WAR.map} ทำลาย${WAR.stone.name}เพื่อยึด${WAR.name} · ${WAR.minutes} นาที`);}
+   if(!w.active&&s.active){s.active=false;this.warEnd(serverId,s);}
+  }
+  for(const p of this.peers.values())this.warRivals(p);
+ }
+ // Enemy-guild players in the war map (and the stone, unless your guild holds it) become targets for this player.
+ warRivals(p){
+  const s=this.wars.get(p.serverId),w=p.world,g=s?.active&&p.room.map.id===WAR.map&&!p.suspended?this.guildOf(p):null;
+  if(!g){if(w.rivals.length){if(String(w.targetId).startsWith('war:'))w.targetId=null;w.rivals=[];}return;}
+  const list=s.holder===g.id?[]:[s.stone];p.rivalCache??=new Map();
+  for(const id of p.room.peers){const a=this.peers.get(id);if(a===p||a.suspended||!this.guildOf(a)||a.guildId===g.id)continue;
+   let v=p.rivalCache.get(a.id);if(!v){v={id:'war:'+a.id,pvp:true,name:a.character.name};p.rivalCache.set(a.id,v);}
+   Object.assign(v,{x:a.world.player.x,z:a.world.player.z,hp:a.world.player.hp,maxHp:a.world.player.maxHp,guild:this.guildOf(a)?.name??''});list.push(v);}
+  w.rivals=list;
+ }
+ warHit(p,mob,damage,color){
+  const s=this.wars.get(p.serverId);if(!s?.active||!p.world.rivals.includes(mob))return;
+  if(mob===s.stone){const amount=Math.min(mob.hp,damage);mob.hp-=amount;p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color});
+   if(mob.hp>0)return;const g=this.guildOf(p);s.holder=g.id;mob.hp=mob.maxHp;
+   for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id)a.world.targetId=null;}
+   this.announce(p.serverId,`🏯 กิลด์ ${g.name} ยึด${WAR.name}ได้! · ${p.character.name} ทำลาย${WAR.stone.name}`);return;}
+  const a=this.peers.get(mob.id.slice(4)),v=a?.world.player;if(!v||v.hp<=0)return;
+  const amount=monsterHit(a.world,Math.max(1,Math.round(damage*WAR.scale)));if(!amount){a.world.emit('dodge',{x:v.x,z:v.z});return;}
+  v.hp=Math.max(0,v.hp-amount);mob.hp=v.hp;p.world.emit('damage',{id:mob.id,x:v.x,z:v.z,amount,color});a.world.emit('playerHit',{x:v.x,z:v.z,amount});
+  if(v.hp>0)return; // knocked out: back to the map's start in 3 s, no EXP loss
+  v.down=3;Object.assign(a.world,{auto:false,targetId:null,path:[],status:{}});
+  a.world.notice('ถูก '+p.character.name+' ล้มในกิลด์วอร์ · กลับจุดเกิดใน 3 วินาที');p.world.notice('⚔️ ล้ม '+a.character.name+' ได้!');
+ }
+ warEnd(serverId,s){
+  const prev=this.castleOwner(serverId),g=s.holder&&this.guilds.get(s.holder);
+  if(prev&&prev!==g){prev.castle=false;this.guildChanged(prev);}
+  if(!g){this.announce(serverId,'🏯 กิลด์วอร์จบแล้ว · ไม่มีกิลด์ใดยึด'+WAR.name+'ได้');return;}
+  g.castle=true;this.guildChanged(g);this.announce(serverId,`👑 กิลด์ ${g.name} ครอง${WAR.name}สัปดาห์นี้! · สงครามครั้งหน้า ${warLabel(this.now())}`);
+  for(const x of g.members){const o=this.online(x.key);if(o?.serverId===serverId){this.grantLoot(o,structuredClone(WAR.reward));o.saveNow=true;o.world.notice('👑 หีบสงครามของผู้ครองป้อม · ได้รับรางวัลแล้ว');}}
+ }
+ warView(p){
+  const s=this.wars.get(p.serverId),owner=this.castleOwner(p.serverId),here=p.room.map.id===WAR.map;
+  return {active:!!s?.active,next:warLabel(this.now()),owner:owner?.name??null,holder:s?.active&&s.holder?this.guilds.get(s.holder)?.name??null:null,
+   stone:s?.active&&here?{hp:s.stone.hp,maxHp:s.stone.maxHp}:null,left:s?.active?Math.max(0,Math.ceil((warWindow(this.now(),this.warAlways).endsAt-this.now())/1000)):0,rivals:here?p.world.rivals:[]};
+ }
  startDuel(a,b){
   const until=this.now()+DUEL.time;
   for(const [x,y] of [[a,b],[b,a]]){const v=x.world.player;x.duelAsk=null;x.duel={foe:y.id,until};v.hp=v.maxHp;v.mp=v.maxMp;x.world.auto=false;
@@ -272,7 +320,7 @@ export class RealmServer{
   if(v.hp===1)this.endDuel(p,y,'น็อก '+y.character.name);
  }
  hurt(p,mob,damage,color='#fff0a6'){
-  if(mob?.pvp)return this.duelHit(p,mob,damage,color);
+  if(mob?.pvp)return String(mob.id).startsWith('war:')?this.warHit(p,mob,damage,color):this.duelHit(p,mob,damage,color);
   if(!mob||mob.hp<=0||p.room.map.safe)return;
   const amount=Math.min(mob.hp,damage);mob.hp-=amount;markMonsterHit(mob,p.world.player);rallyPack(p.room.mobs,mob);
   let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
@@ -297,6 +345,7 @@ export class RealmServer{
   for(const p of this.peers.values())if(p.suspended&&p.resumeUntil&&p.resumeUntil<this.now())this.leave(p.id);
   for(const [id,v] of this.invites)if(v.expires<this.now())this.invites.delete(id);
   for(const party of [...this.parties.values()])for(const [uid,until] of party.pending??[])if(until<this.now()){party.pending.delete(uid);if(party.members.size+party.pending.size<2){for(const id of party.members){const a=this.peers.get(id);a.partyId=null;this.social(a.room);}this.parties.delete(party.id);}}
+  this.warTick();
   for(const p of this.peers.values()){if(p.suspended)continue;petTick(p.pet,dt);p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);p.world.update(dt,p.input,{monsters:false});this.autoPotion(p);}
   for(const room of this.rooms.values()){
    for(const m of room.mobs){
@@ -435,7 +484,7 @@ export class RealmServer{
  online(key){for(const o of this.peers.values())if(o.key===key&&!o.suspended)return o;return null;}
  byName(p,name){for(const o of this.peers.values())if(o!==p&&o.serverId===p.serverId&&!o.suspended&&o.character.name===name)return o;return null;}
  guildOf(p){const g=p.guildId&&this.guilds.get(p.guildId);return g&&g.members.some(x=>x.key===p.key)?g:null;}
- guildTag(p){const g=this.guildOf(p);return g?{name:g.name,emblem:g.emblem}:null;}
+ guildTag(p){const g=this.guildOf(p);return g?{name:g.name,emblem:g.emblem,...(g.castle?{castle:true}:{})}:null;}
  sendFriends(p){p.world.emit('friends',{list:p.friends.map(f=>{const o=this.online(f.key);return {name:f.name,online:!!o,map:o?.room.map.name??null};})});}
  guildView(g){return g?{name:g.name,emblem:g.emblem,members:g.members.map(x=>{const o=this.online(x.key);return {name:x.name,leader:x.key===g.leader,online:!!o,map:o?.room.map.name??null};})}:null;}
  guildChanged(g){this.onGuild?.(g,false);for(const x of g.members){const o=this.online(x.key);if(o){o.guildId=g.id;o.world.emit('guild',{guild:this.guildView(g)});}}}
@@ -494,7 +543,7 @@ export class RealmServer{
   const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:a.emote,partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
   const players=visible.map(a=>{const v=a.world.player,result={id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,face:{x:round(v.face.x),z:round(v.face.z)}},partyId:a.partyId,connected:!a.suspended,pet:a.pet?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a)};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
-  return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})},players,mobs:p.room.mobs});
+  return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})},players,mobs:p.room.mobs});
  }
  travelDestination(p,id,{warp=false}={}){
   const portal=p.room.map.portals?.find(v=>v.to===id&&distance(v,p.world.player)<2.6);

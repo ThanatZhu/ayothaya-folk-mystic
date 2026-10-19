@@ -58,7 +58,7 @@ export function createSocialUI({game,account}){
    return;
   }
   const me=account?.character?.name??null,lead=guild.members.find(m=>m.leader)?.name,leader=!!me&&lead===me;
-  body.innerHTML=`<div class="guild-head">${emblemIcon(guild.emblem,'item-icon big')}<div><strong>${esc(guild.name)}</strong><small>หัวหน้า ${esc(lead)} · สมาชิก ${guild.members.length}/30</small></div></div>`+
+  body.innerHTML=`<div class="guild-head">${emblemIcon(guild.emblem,'item-icon big')}<div><strong>${esc(guild.name)}</strong><small>หัวหน้า ${esc(lead)} · สมาชิก ${guild.members.length}/30</small></div></div>`+(game.world.war?`<p class="social-note">🏯 ป้อมโรงสี · ผู้ครอง: ${esc(game.world.war.owner??'ยังไม่มี')} · กิลด์วอร์ ${esc(game.world.war.next)} ที่โรงสีใต้เงาจันทร์ · ทำลายศิลาราชสีห์เพื่อยึดป้อม</p>`:'')+
    (leader?`<form class="social-add" id="guild-invite"><input id="invite-name" maxlength="24" placeholder="ชื่อผู้เล่นที่จะชวน" aria-label="ชวนเข้ากิลด์"><button type="submit">ชวนเข้ากิลด์</button></form>`:'')+
    `<ul class="social-list">${guild.members.map(m=>`<li class="${m.online?'on':''}" data-name="${esc(m.name)}"><i class="dot"></i><div><strong>${m.leader?'♛ ':''}${esc(m.name)}</strong><small>${m.online?esc(m.map):'ออฟไลน์'}</small></div>${m.name!==me&&m.online?`<button type="button" data-a="whisper">กระซิบ</button>`:''}${leader&&m.name!==me?'<button type="button" data-a="kick">เชิญออก</button>':''}</li>`).join('')}</ul>`+
    (leader?`<details class="guild-emblem"><summary>เปลี่ยนตรากิลด์</summary><div class="emblem-grid">${emblems}</div></details>`:'')+

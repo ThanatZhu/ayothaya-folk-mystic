@@ -1,6 +1,6 @@
 import * as THREE from './vendor/build/three.module.js';
 import {roadDistance} from './landscape-details.js?v=38';
-import {groundHeight} from './combat-core.js?v=94';
+import {groundHeight} from './combat-core.js?v=95';
 
 // 0.75 living meadow: painted grass tufts, tall grass, ferns and flower clumps scattered over the open ground of a
 // Blender v2 map (never on tracks, plazas, canals, bridges, buildings or the rice paddies, which keep their own

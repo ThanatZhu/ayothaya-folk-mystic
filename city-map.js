@@ -1,6 +1,6 @@
 // Draw the actual city footprint in world coordinates; never a menu of destinations.
 // 0.59: `photo` = a straight-down render of the real scene over map.bounds; it replaces the vector ground layers.
-import {MONSTER_TYPES} from './combat-core.js?v=94';
+import {MONSTER_TYPES} from './combat-core.js?v=95';
 import {SHOPS} from './items.js?v=94';
 import {MARKET_ZONE} from './market-board.js?v=70';
 // 0.65 painted map markers from the UI icon sheet (assets/ui63, 6x4 cells of 256 px); dots are the fallback until it loads.

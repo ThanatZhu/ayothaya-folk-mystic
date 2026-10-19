@@ -119,7 +119,7 @@ export class CombatWorld{
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
   this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack,leader],id)=>({id,type,pack,leader:!!leader,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),maxHp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
-  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.foe=null;this.food=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
+  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.foe=null;this.rivals=[];this.food=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
  }
  // 0.61 hired mercenary: attacks your target (or, on AUTO, the nearest monster) within 6, every 1.4 s, 10 + 2·level damage.
  hire(seconds){this.merc={left:seconds,cd:0};}
@@ -131,7 +131,8 @@ export class CombatWorld{
   c.cd=1.4;this.emit('merc',{x:m.x,z:m.z});this.hurt(m,10+2*baseProgress(this).level,'#cfe8ff');
  }
  // 0.93 duel: the opponent stands in as one more target (the server keeps its position and HP in step with the real player).
- foes(){return this.foe?[...this.mobs,this.foe]:this.mobs;}
+ // 0.95 guild war: rivals are enemy-guild players and the guardian stone, kept in step by the server the same way.
+ foes(){return this.foe||this.rivals.length?[...this.mobs,...(this.foe?[this.foe]:[]),...this.rivals]:this.mobs;}
  get target(){return this.foes().find(m=>m.id===this.targetId&&m.hp>0)??null;}
  emit(type,extra={}){this.events.push({type,...extra});}
  // 0.48 ailments: blind and curse weaken every hit; stun/sleep stop acting; silence stops skills.

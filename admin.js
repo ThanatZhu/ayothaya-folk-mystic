@@ -3,7 +3,7 @@
 // balance-data.js for the next deploy. Player data is not touched here.
 import {ITEMS} from './items.js?v=94';
 import {CLASSES,NOVICE,classSkills} from './classes.js?v=73';
-import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=94';
+import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=95';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
 import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=87';
 

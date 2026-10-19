@@ -4,7 +4,8 @@ import {patch} from './balance.js';
 // Art: one atlas, 6x4 cells of 256 px (1536x1024, transparent). Drop a finished file over the same path to re-skin.
 export const ITEM_ATLAS='assets/items42/items.png',GEAR_ATLAS='assets/gear43/gear.png',REFINE_ATLAS='assets/refine44/refine.png';
 export const CARD_ATLAS='assets/cards45/cards.png',SOCIAL_ATLAS='assets/social46/social.png',EMBLEM_ATLAS='assets/emblems47/emblems.png',EMOTE_ATLAS='assets/emotes48/emotes.png',ITEMS48_ATLAS='assets/items48/items.png';
-export const ATLASES={gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS,social:SOCIAL_ATLAS,emblems:EMBLEM_ATLAS,emotes:EMOTE_ATLAS,items48:ITEMS48_ATLAS}; // item.atlas key → file (default ITEM_ATLAS)
+export const GEAR85_ATLAS='assets/gear85/gear.svg';
+export const ATLASES={gear85:GEAR85_ATLAS,gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS,social:SOCIAL_ATLAS,emblems:EMBLEM_ATLAS,emotes:EMOTE_ATLAS,items48:ITEMS48_ATLAS}; // item.atlas key → file (default ITEM_ATLAS)
 export const BAG_SLOTS=40,MAX_STACK=999,MAX_COINS=9999999;
 
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
@@ -89,6 +90,15 @@ export const ITEMS={
  'vest-naga':{atlas:'gear',icon:18,tint:'violet',name:'เกราะเกล็ดนาค',kind:'gear',slot:'armor',def:24,bonus:{vit:3},level:35,sell:9000,text:'DEF +24 · VIT +3 · Lv.35 · ของ MVP'},
  'vest-cotton':{atlas:'gear',icon:16,name:'เสื้อผ้าฝ้ายทอหนา',kind:'gear',slot:'armor',def:3,buy:150,sell:37,text:'DEF +3'},
  'vest-buffalo':{atlas:'gear',icon:17,name:'เสื้อเกราะหนังควาย',kind:'gear',slot:'armor',def:7,level:12,buy:900,sell:225,text:'DEF +7 · Lv.12'},
+ // 0.85 three more gear slots (head, garment, shoes): forge stock plus a boss crown. Stand-in SVG icons until painted art.
+ 'hat-headband':{atlas:'gear85',icon:0,name:'ผ้าโพกหัวนักเดินทาง',kind:'gear',slot:'head',def:1,buy:120,sell:30,text:'DEF +1'},
+ 'hat-ngob':{atlas:'gear85',icon:1,name:'งอบใบลาน',kind:'gear',slot:'head',def:3,bonus:{vit:1},level:10,buy:900,sell:225,text:'DEF +3 · VIT +1 · Lv.10'},
+ 'hat-ricecrown':{atlas:'items',icon:3,name:'มงกุฎรวงข้าว',kind:'gear',slot:'head',def:5,bonus:{luk:3,int:1},level:22,sell:1800,text:'DEF +5 · LUK +3 · INT +1 · Lv.22 · ของบอสโรงสี'},
+ 'cloak-cotton':{atlas:'gear85',icon:2,name:'ผ้าคลุมฝ้ายทอมือ',kind:'gear',slot:'garment',def:1,bonus:{agi:1},level:5,buy:400,sell:100,text:'DEF +1 · AGI +1 · Lv.5'},
+ 'cloak-yant':{atlas:'gear85',icon:3,name:'ผ้าคลุมยันต์แดง',kind:'gear',slot:'garment',def:3,bonus:{int:2,vit:1},level:18,buy:2400,sell:600,text:'DEF +3 · INT +2 · VIT +1 · Lv.18'},
+ 'shoes-woven':{atlas:'gear85',icon:4,name:'รองเท้าสานใบตาล',kind:'gear',slot:'shoes',def:1,buy:150,sell:37,text:'DEF +1'},
+ 'shoes-buffalo':{atlas:'gear85',icon:5,name:'รองเท้าหนังควาย',kind:'gear',slot:'shoes',def:2,bonus:{agi:1},level:12,buy:1100,sell:275,text:'DEF +2 · AGI +1 · Lv.12'},
+ 'shoes-ranger':{atlas:'gear85',icon:6,name:'รองเท้าพรานป่า',kind:'gear',slot:'shoes',def:3,bonus:{agi:2,dex:1},level:24,buy:3200,sell:800,text:'DEF +3 · AGI +2 · DEX +1 · Lv.24'},
  'vest-lacquer':{atlas:'gear',icon:18,name:'เสื้อเกราะลงรักปิดทอง',kind:'gear',slot:'armor',slots:0,def:12,level:25,sell:900,text:'DEF +12 · Lv.25 · ดรอปจากบอสโรงสี'},
  'takrut-silver':{atlas:'gear',icon:19,name:'ตะกรุดเงิน',kind:'gear',slot:'accessory',bonus:{vit:2},level:5,buy:500,sell:125,text:'VIT +2 · Lv.5'},
  'ring-ruby':{atlas:'gear',icon:20,name:'แหวนพลอยแดง',kind:'gear',slot:'accessory',bonus:{str:2},level:5,buy:500,sell:125,text:'STR +2 · Lv.5'},
@@ -177,7 +187,7 @@ export const DROPS={
  'lotus-vine':{coins:[28,46],items:[['lotus-seed',.5],['green-herb',.15],['spirit-thread',.1],['card-lotus-vine',0.004]]},
  'bog-lantern':{coins:[30,50],items:[['lotus-seed',.4],['lantern-paper',.5],['lek-lai',.02],['card-bog-lantern',0.004]]},
  'marsh-ape':{coins:[300,450],items:[['lotus-seed',1,3],['hp-large',.8,2],['lek-lai',.25],['vest-chain',.08],['card-marsh-ape',0.04]]},
- 'mill-keeper':{coins:[400,600],items:[['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3],['card-mill-keeper',0.15],['sword-ajna',.03],['spear-panchang',.03],['bow-sinchai',.03],['gloves-leklai',.03],['daggers-stingray',.03],['staff-octa',.03],['beads-mani',.03]]},
+ 'mill-keeper':{coins:[400,600],items:[['hat-ricecrown',.2],['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3],['card-mill-keeper',0.15],['sword-ajna',.03],['spear-panchang',.03],['bow-sinchai',.03],['gloves-leklai',.03],['daggers-stingray',.03],['staff-octa',.03],['beads-mani',.03]]},
 };
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
@@ -186,7 +196,7 @@ export const SHOPS={
  // 0.50 festival exchange: paid in event tokens instead of cowries.
  'เจ้าจุก':{mapId:'ayutthaya',title:'ซุ้มงานวัดเจ้าจุก',currency:'event-token',stock:['krathong','green-herb','hp-large','pet-lure','lek-lai']},
  'ป้าละไม':{mapId:'rice-fields',title:'ยุ้งป้าละไม',stock:['hp-small','mp-small','sticky-rice']},
- 'ครูแสนดาบ':{mapId:'ayutthaya',title:'โรงตีอาวุธครูแสนดาบ',refine:true,stock:['iron-ore','laterite','wrap-novice','sword-iron','spear-bamboo','bow-bamboo','gloves-hemp','daggers-twin','staff-wan','beads-wood','knuckle-brass','sword-silver','spear-steel','bow-horn','gloves-leather','daggers-ivory','staff-candle','beads-sandal','vest-cotton','vest-buffalo','takrut-silver','ring-ruby','anklet-silver','cloth-yant','sword-ajna','spear-panchang','bow-sinchai','gloves-leklai','daggers-stingray','staff-octa','beads-mani','vest-chain']},
+ 'ครูแสนดาบ':{mapId:'ayutthaya',title:'โรงตีอาวุธครูแสนดาบ',refine:true,stock:['iron-ore','laterite','wrap-novice','sword-iron','spear-bamboo','bow-bamboo','gloves-hemp','daggers-twin','staff-wan','beads-wood','knuckle-brass','sword-silver','spear-steel','bow-horn','gloves-leather','daggers-ivory','staff-candle','beads-sandal','hat-headband','hat-ngob','cloak-cotton','cloak-yant','shoes-woven','shoes-buffalo','shoes-ranger','vest-cotton','vest-buffalo','takrut-silver','ring-ruby','anklet-silver','cloth-yant','sword-ajna','spear-panchang','bow-sinchai','gloves-leklai','daggers-stingray','staff-octa','beads-mani','vest-chain']},
 };
 
 const int=(v,min,max)=>Number.isSafeInteger(v)?Math.min(Math.max(v,min),max):min;

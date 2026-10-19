@@ -7,7 +7,7 @@ import {iconStyle} from './bag-ui.js?v=83';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
-const SLOT_LABEL={weapon:'อาวุธ',armor:'เสื้อเกราะ',accessory:'เครื่องประดับ'};
+const SLOT_LABEL={weapon:'อาวุธ',head:'หมวก',armor:'เสื้อเกราะ',garment:'ผ้าคลุม',shoes:'รองเท้า',accessory:'เครื่องประดับ'};
 
 export function createStatusUI({game,account,bagUI}){
  const world=game.world,key='ayothaya-status:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');

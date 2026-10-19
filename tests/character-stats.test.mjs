@@ -39,7 +39,7 @@ test('gear equips from the bag, swaps back, respects class and level, and falls 
  assert.throws(()=>equipGear({items:{'sword-silver':1}},{},'sword-silver',{classId:'swordsman',level:3}),/low-level/);
  r=unequipGear(r.bag,r.gear,'weapon');assert.equal(r.gear.weapon,null);assert.equal(r.bag.items['sword-silver'],1);
  const after=dropInvalidGear({},{weapon:'wrap-novice',armor:'vest-cotton'},{classId:'boxer',level:26});
- assert.deepEqual(after.gear,{weapon:null,armor:'vest-cotton',accessory:null});assert.equal(after.bag.items['wrap-novice'],1);
+ assert.deepEqual(after.gear,{weapon:null,head:null,armor:'vest-cotton',garment:null,shoes:null,accessory:null});assert.equal(after.bag.items['wrap-novice'],1);
  for(const id of SHOPS['ครูแสนดาบ'].stock)assert.ok(ITEMS[id].kind==='gear'||['iron-ore','laterite'].includes(id),id);
 });
 

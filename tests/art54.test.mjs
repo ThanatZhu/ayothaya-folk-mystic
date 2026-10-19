@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {ATLASES} from '../items.js';
 import {MONSTER_TYPES} from '../combat-core.js';
-const size=f=>{const b=fs.readFileSync(new URL('../'+f,import.meta.url));assert.equal(b.toString('ascii',12,16),'IHDR',f);return [b.readUInt32BE(16),b.readUInt32BE(20)];};
+const size=f=>{const b=fs.readFileSync(new URL('../'+f,import.meta.url));if(f.endsWith('.svg'))return b.toString().match(/viewBox="0 0 (\d+) (\d+)"/).slice(1).map(Number); // 0.85 stand-in vector atlas
+assert.equal(b.toString('ascii',12,16),'IHDR',f);return [b.readUInt32BE(16),b.readUInt32BE(20)];};
 
 test('0.54 painted atlases are 1536×1024 (6×4 cells of 256) and every item points inside them', () => {
  for(const [key,file] of Object.entries(ATLASES))assert.deepEqual(size(file),[1536,1024],key);

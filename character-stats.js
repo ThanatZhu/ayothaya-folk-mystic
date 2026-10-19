@@ -6,7 +6,8 @@ import {BAG_SLOTS,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=70';
 export const STATS=['str','agi','vit','int','dex','luk'];
 export const STAT_LABEL={str:'STR',agi:'AGI',vit:'VIT',int:'INT',dex:'DEX',luk:'LUK'};
 export const STAT_HINT={str:'พลังโจมตีกายภาพ',agi:'ความเร็วโจมตี · หลบหลีก',vit:'HP · ลดความเสียหาย',int:'พลังเวท · MP',dex:'ความแม่นยำ · พลังธนู · ความเร็ว',luk:'คริติคอล · โชค'};
-export const STAT_MAX=99,GEAR_SLOTS=['weapon','armor','accessory'];
+// 0.85 six gear slots (owner request): saves from before keep their three, the new ones start empty.
+export const STAT_MAX=99,GEAR_SLOTS=['weapon','head','armor','garment','shoes','accessory'];
 const MAGIC=new Set(['shaman','acolyte']),RANGED=new Set(['hunter']);
 
 export function normalizeStats(stats){

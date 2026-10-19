@@ -125,3 +125,7 @@ html body.field-hud #bag-window[data-hud-panel]{width:min(760px,96vw);max-width:
  .bag-body{grid-template-columns:190px minmax(0,1fr)}.gear-slot{width:46px;height:46px}.gear-slot .item-icon{width:32px;height:32px}
  #bag-window .bag-grid{grid-template-columns:repeat(6,1fr);max-height:calc(100dvh - 210px)}
 }
+/* 0.85 six gear slots: head / weapon / accessory down the left, armor / garment / shoes down the right */
+.g-head{left:0;top:2%}.g-weapon{left:0;top:36%}.g-accessory{left:0;top:70%}
+.g-armor{right:0;left:auto;top:2%}.g-garment{right:0;left:auto;top:36%}.g-shoes{right:0;left:auto;top:70%}
+.bag-stage{margin-bottom:18px}.bag-stage canvas{inset:6% 22% auto!important;width:56%!important}

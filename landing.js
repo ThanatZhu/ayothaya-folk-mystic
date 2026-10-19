@@ -3,9 +3,9 @@ import {warWindow} from './guild-war.js?v=98';
 import {arenaEnds} from './arena.js?v=98';
 import {MULTIPLAYER_URL} from './multiplayer-config.js';
 
-const DISCORD_INVITE=''; // paste the server invite (https://discord.gg/...) here to show the Discord button
+const DISCORD_INVITE='https://discord.gg/Be9WwsX6'; // the Discord buttons and links show only when this is set
 const $=id=>document.getElementById(id);
-if(DISCORD_INVITE){$('discord').href=DISCORD_INVITE;$('discord').hidden=false;}
+if(DISCORD_INVITE)for(const a of document.querySelectorAll('[data-discord]')){a.href=DISCORD_INVITE;a.hidden=false;}
 
 // Server status from the realm's /health (players across both channels). Render's free tier sleeps when idle;
 // this request also wakes it, so the lobby is ready by the time the player gets there.

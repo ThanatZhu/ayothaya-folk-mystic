@@ -2,7 +2,7 @@
 import {SHOPS,ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=94';
 import {REFINE_RATE,REFINE_ORE,REFINE_MAX,LEK_LAI_BONUS,refineCost,refineGear} from './refine.js?v=94';
 import {affinityOf,ELEMENT_NAME,SIZE_NAME} from './affinity.js?v=02';
-import {MONSTER_TYPES} from './combat-core.js?v=95';
+import {MONSTER_TYPES} from './combat-core.js?v=97';
 import {iconStyle} from './bag-ui.js?v=94';
 import {openHudPanel} from './hud-panels.js?v=34';
 

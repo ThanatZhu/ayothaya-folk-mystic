@@ -13,21 +13,29 @@ const FLAT=/^(Ground|Soil foundation|Water surface|Damp canal|Streets|Tracks|Cou
 
 // 0.64.1 ground layers are modelled at the same height (streets, tracks, shoulders, courtyards), which z-fights
 // as the camera moves, worst on phones. Each layer gets its own depth bias so the upper layer always wins.
-const LAYERS=[[/^(Ground|Island meadow|Soil foundation|Cellar foundation)/,0],[/^(Damp canal|Wetland islands|Earthen rice)/,1],[/^Tracks/,2],[/^Feathered/,3],[/^(Courtyard|Raised flagstone|Spirit arena paved)/,4],[/^Streets/,5],[/^(Dense low rice|Stone moss|Arena inlays)/,6]];
+// 0.75 foundations sit one rank under the ground: their top face is modelled at the ground height. GLTFLoader turns
+// spaces into underscores, so only names without a space before the matched word ever took part in this ranking;
+// the foundation rule matches both spellings, the others keep the ranking every map was tuned with.
+const LAYERS=[[/^(Soil|Cellar)[ _]foundation/,-1],[/^(Ground|Island meadow)/,0],[/^(Damp canal|Wetland islands|Earthen rice)/,1],[/^Tracks/,2],[/^Feathered/,3],[/^(Courtyard|Raised flagstone|Spirit arena paved)/,4],[/^Streets/,5],[/^(Dense low rice|Stone moss|Arena inlays)/,6]];
 const TOP_RANK=Math.max(...LAYERS.map(([,r])=>r));
 export function prepareSceneV2({scene,model,map}){
- const mood=MOODS[moodOf(map)],converted=new Map(),water=[];
+ const mood=MOODS[moodOf(map)],converted=new Map(),water=[],wind={value:0};
  scene.background=new THREE.Color(mood.sky);scene.fog=new THREE.Fog(mood.fog,60,150);
  model.traverse(o=>{
   if(!o.isMesh)return;
   // Ground layers and dense scatter receive shadows only: casting them costs a lot and adds nothing from above.
-  o.castShadow=!FLAT.test(o.name);o.receiveShadow=true;
+  // 0.75 match the Blender names (GLTFLoader turns spaces into underscores), so flat ground and field scatter really
+  // stop casting shadows; that also keeps the swaying rice and grass from leaving still shadows behind.
+  o.castShadow=!FLAT.test(o.name.replace(/_/g,' '));o.receiveShadow=true;
   const source=o.material;if(!converted.has(source)){
    // Physical extensions (specular/IOR/clearcoat) cost shader time with no visible gain at this camera distance.
    const m=new THREE.MeshStandardMaterial();
    for(const k of ['name','color','map','normalMap','normalScale','roughness','roughnessMap','metalness','metalnessMap','emissive','emissiveMap','emissiveIntensity','alphaTest','transparent','opacity','side','vertexColors','alphaMap','aoMap'])if(source[k]!==undefined)m[k]=source[k]?.clone&&!source[k].isTexture?source[k].clone():source[k];
    if(/water/i.test(m.name)){m.roughness=.22;m.metalness=.05;m.color.multiplyScalar(map.instance?.9:1);water.push(m);}
    if(m.emissive.getHex()&&(m.emissiveMap||m.emissiveIntensity>0))m.emissiveIntensity=Math.max(m.emissiveIntensity,1)*mood.lamp;
+   // 0.75 rice, seed heads and meadow blades lean in a slow breeze (their meshes sit at the origin, so object space is
+   // world space and position.y is the height above the field). They cast no shadows, so no depth shader is needed.
+   if(/rice|grain|grassblade|grassdry/i.test(m.name)){m.onBeforeCompile=s=>{s.uniforms.fieldWind=wind;s.vertexShader='uniform float fieldWind;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n float lean=max(position.y-.12,0.);lean*=lean;transformed.x+=lean*.16*sin(fieldWind*1.5+position.x*.27+position.z*.19);transformed.z+=lean*.1*sin(fieldWind*1.1+position.x*.13-position.z*.23);');};m.customProgramCacheKey=()=>'field-wind75';}
    converted.set(source,m);source.dispose();
   }
   o.material=converted.get(source);
@@ -42,7 +50,7 @@ export function prepareSceneV2({scene,model,map}){
  for(const m of water)for(const t of [m.map,m.normalMap])if(t){t.wrapS=t.wrapT=THREE.RepeatWrapping;}
  let running=!matchMedia('(prefers-reduced-motion:reduce)').matches,time=0;
  return {
-  update(dt){if(running)time+=Math.min(.08,Math.max(0,dt));for(const m of water){if(m.normalMap)m.normalMap.offset.set(time*.012,time*.02);if(m.map)m.map.offset.set(-time*.004,time*.006);}return time;},
+  update(dt){if(running)time+=Math.min(.08,Math.max(0,dt));wind.value=time;for(const m of water){if(m.normalMap)m.normalMap.offset.set(time*.012,time*.02);if(m.map)m.map.offset.set(-time*.004,time*.006);}return time;},
   toggle(){running=!running;return running;},get running(){return running;},
  };
 }

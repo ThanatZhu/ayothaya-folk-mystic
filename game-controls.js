@@ -239,7 +239,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  function mobileLayout(){return innerWidth<=800||matchMedia('(pointer:coarse)').matches;}
  function updateHelp(){
-  document.querySelector('.control-hint').textContent=mobileLayout()?'ลากจอยซ้ายเพื่อเดิน · แตะมอนเลือกเป้า · ลากด้านขวาหมุนกล้อง':'WASD เดิน · Space โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E หมุนกล้อง';
+  document.querySelector('.control-hint').textContent=mobileLayout()?'ลากจอยซ้ายเพื่อเดิน · แตะมอนเลือกเป้า · ลากด้านขวาหมุนกล้อง':'WASD เดิน · Space โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E ใช้ยา';
   document.querySelector('.player-foot span:last-child').textContent=mobileLayout()?'จอยซ้าย · เดิน':'W A S D · เดิน';
  }
  updateHelp();addEventListener('resize',updateHelp);

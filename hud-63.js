@@ -2,12 +2,15 @@
 // arrangement and adds the wood-gold-jade frames (assets/ui63/frames) as pointer-events:none decoration.
 // Nothing here replaces a control: buttons, shortcuts and data stay owned by their modules.
 // 0.67 follows the approved desktop mockup (outputs/ui-hud63-desktop-mockup.png): four main buttons + เมนู.
-const PRIMARY=['menu-profile','menu-bag','menu-skills','menu-quests'];
-const SECONDARY=['menu-social','menu-status','menu-pet','menu-players','menu-chat'];
+// 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
+// (the chat box) are reachable elsewhere, so those three buttons are hidden.
+const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market'];
+const SECONDARY=['menu-social','menu-status','menu-pet'];
+const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63(){
  const $=id=>document.getElementById(id),body=document.body;
- const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=68.3';document.head.append(link); // last sheet wins ties
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=70.1';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
  deco(document.querySelector('.player-panel'),'f-profile');
@@ -27,6 +30,9 @@ export function createHud63(){
  // Main menu: most used first, the rest behind "เพิ่มเติม"; on phones the whole menu sits behind one 44 px button.
  const nav=$('game-menu');
  if(nav){
+  const market=document.createElement('button');market.type='button';market.id='menu-market';market.title='ตลาดกลาง';market.setAttribute('aria-label','ตลาดกลาง');
+  market.innerHTML='<i aria-hidden="true"></i><span>ตลาด</span>';market.onclick=()=>$('open-market-board')?.click();nav.append(market);
+  for(const id of HIDDEN){const b=$(id);if(b){b.hidden=true;b.classList.add('hud63-hidden');}}
   for(const id of PRIMARY){const b=$(id);if(b)nav.append(b);}
   const more=document.createElement('button');more.type='button';more.id='menu-more';more.setAttribute('aria-expanded','false');more.setAttribute('aria-label','เมนูเพิ่มเติม');more.title='เพิ่มเติม';
   more.innerHTML='<i aria-hidden="true"></i><span>เมนู</span>';more.title='เมนู';nav.append(more);
@@ -49,5 +55,16 @@ export function createHud63(){
  const applyBar=()=>{body.classList.toggle('hud63-bar',bar.matches);
   if(bar.matches){if(quick&&cc&&quick.parentElement!==cc)cc.prepend(quick);if(auto&&auto.parentElement!==body)body.append(auto);}
   else{if(quick&&quick.parentElement!==body)body.append(quick);if(auto&&ac&&auto.parentElement!==ac)ac.prepend(auto);}};bar.addEventListener('change',applyBar);applyBar();
+ // 0.70.1 phones: while typing in chat the on-screen keyboard covers the bottom of the screen, so the chat box moves
+ // to the top of the part that is still visible; when typing ends the page snaps back to its normal size and place.
+ const text=$('online-text'),vv=window.visualViewport;
+ if(text){text.setAttribute('autocomplete','off');text.setAttribute('autocorrect','off');text.setAttribute('enterkeyhint','send');}
+ const place=()=>{if(!body.classList.contains('chat-typing'))return;document.documentElement.style.setProperty('--vv-top',(vv?.offsetTop??0)+'px');document.documentElement.style.setProperty('--vv-h',(vv?.height??innerHeight)+'px');};
+ const touch=matchMedia('(pointer:coarse)');
+ document.addEventListener('focusin',e=>{if(touch.matches&&e.target===text){body.classList.add('chat-typing');place();}});
+ document.addEventListener('focusout',e=>{if(e.target!==text)return;body.classList.remove('chat-typing');
+  // iOS leaves the page scrolled/zoomed after the keyboard closes: restore the original view.
+  setTimeout(()=>{window.scrollTo(0,0);document.scrollingElement&&(document.scrollingElement.scrollTop=0);dispatchEvent(new Event('resize'));},80);});
+ vv?.addEventListener('resize',place);vv?.addEventListener('scroll',place);
  return {};
 }

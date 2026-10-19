@@ -267,3 +267,14 @@ body.field-hud.hud63 #quest-tracker small{line-height:1.25!important;margin:0 0 
 
 /* 0.68.3 iOS zooms the whole page into any input under 16px and never zooms back: keep every in-game field at 16px on touch screens */
 @media (pointer:coarse){#game-shell :is(input,textarea,select),body :is(#online-text,dialog input,dialog textarea){font-size:16px!important}}
+
+/* 0.70.1 chat while the phone keyboard is open: pinned to the top of the visible area, messages readable */
+body.field-hud.hud63.chat-typing #online-dock{position:fixed!important;top:calc(var(--vv-top,0px) + 6px)!important;bottom:auto!important;left:50%!important;right:auto!important;translate:-50% 0!important;
+ width:min(560px,calc(100vw - 16px))!important;max-height:calc(var(--vv-h,50vh) - 12px);z-index:60;display:flex!important}
+body.field-hud.hud63.chat-typing #online-dock :is(.mp-tabs,#online-messages,#online-chat){display:flex!important}
+body.field-hud.hud63.chat-typing #online-dock #online-messages{display:block!important;height:auto!important;max-height:calc(var(--vv-h,50vh) - 110px);min-height:40px;overflow:auto}
+/* 0.70.1 market button + retired buttons */
+body.field-hud.hud63 .hud63-hidden{display:none!important}
+body.field-hud.hud63 #menu-market i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 60% 66.667%/600% 400% no-repeat}
+body.field-hud.hud63 #menu-market i{position:relative}
+body.field-hud.hud63.chat-typing #online-dock #dock-preview{display:none}

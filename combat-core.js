@@ -102,8 +102,8 @@ export const mobXp=m=>m.leader?LEADER.xp:m.pack!==undefined?LEADER.member:1;
 export const mobRespawn=m=>(MONSTER_TYPES[m.type].respawn??12)*(m.leader?LEADER.respawn:1);
 export function packSpawns(mobs,{packs=false,nav=DEFAULT_NAV}={}){
  if(!packs)return mobs;
- return mobs.flatMap(([x,z,type],i)=>MONSTER_TYPES[type]?.boss?[[x,z,type,i]]:PACK.slice(0,4+i%2).map(([dx,dz],k)=>{
-  for(const f of [1,.6,.3])if(walkable(x+dx*f,z+dz*f,.4,nav))return [x+dx*f,z+dz*f,type,i,k===0];return [x,z,type,i,k===0];}));
+ return mobs.flatMap(([x,z,type],i)=>{const T=MONSTER_TYPES[type];return T?.boss||T?.elite||T?.sheet==='elite-monsters'?[[x,z,type,i]]:PACK.slice(0,4+i%2).map(([dx,dz],k)=>{
+  for(const f of [1,.6,.3])if(walkable(x+dx*f,z+dz*f,.4,nav))return [x+dx*f,z+dz*f,type,i,k===0];return [x,z,type,i,k===0];});});
 }
 // A struck monster calls up to two idle packmates within 6 m, so camps fight together.
 export function rallyPack(mobs,mob){

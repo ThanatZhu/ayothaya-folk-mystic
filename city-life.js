@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {CITIZEN_STYLES} from './city-life-data.js?v=73.1';
 import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1';
+import {groundHeight} from './combat-core.js?v=72.1';
 
 // Whole painted poses, aligned at their feet. No skeletal cutouts or squash/stretch.
 export function clearCourtTrees(model,map){
@@ -53,7 +54,8 @@ export async function createCityLife({scene,map,shadow,paving}){
     const scale=n.visualHeight/a.maxHeight;a.sprite.scale.set(f.w*scale,f.h*scale,1);
     a.sprite.center.set(flip?1-f.anchor/f.w:f.anchor/f.w,f.pad/f.h);a.frame=frame;a.flip=flip;}
 
-   a.sprite.position.set(n.x,.07,n.z);a.shadow.position.set(n.x,.073,n.z);a.sprite.visible=a.shadow.visible=Math.hypot(player.x-n.x,player.z-n.z)<60;
+   // 0.79 stand on the walk grid's height like the hero, so feet stay on bridge decks and raised floors.
+   const y=groundHeight(map.nav,n.x,n.z);a.sprite.position.set(n.x,y+.07,n.z);a.shadow.position.set(n.x,y+.073,n.z);a.sprite.visible=a.shadow.visible=Math.hypot(player.x-n.x,player.z-n.z)<60;
   }
   banners.forEach((flag,i)=>{const p=flag.geometry.attributes.position;for(let j=0;j<p.count;j++)p.setZ(j,Math.sin(time*1.8+p.getY(j)*3+i)*.06*(.55-p.getY(j)));p.needsUpdate=true;});
  }

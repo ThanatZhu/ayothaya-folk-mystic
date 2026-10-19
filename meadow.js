@@ -6,8 +6,11 @@ import {groundHeight} from './combat-core.js?v=72.1';
 // Blender v2 map (never on tracks, plazas, canals, bridges, buildings or the rice paddies, which keep their own
 // blades). Everything is drawn into one canvas atlas at load, so nothing is downloaded. Each 20 m chunk is one
 // instanced draw, so the camera only pays for the chunks it sees. Phones get ~40% of the clumps.
-// Per map: flowers = drift level above which flowers bloom, ferns = drift level above which ferns gather (lower = more).
-const MIX={'rice-fields':{flowers:.3,ferns:.5},'old-orchard':{flowers:.5,ferns:.25}};
+// Per map: flowers = drift level above which flowers bloom, ferns = drift level above which ferns gather (lower = more),
+// density = clumps per square metre. The lotus marsh is one big water area with walkable islands, so its water box is
+// ignored and the walk grid alone decides where land is. The mill cellar is indoors and gets none.
+const MIX={'rice-fields':{flowers:.3,ferns:.5},'old-orchard':{flowers:.5,ferns:.25},
+ ayutthaya:{flowers:.35,ferns:.6,density:2},'moonlit-mill':{flowers:.55,ferns:.3},'lotus-marsh':{flowers:.25,ferns:.35,islands:true}};
 export const MEADOW_MAPS=new Set(Object.keys(MIX));
 const TILES=['grass','tall','fern','daisy','marigold','orchid','clover'],COLS=4,ROWS=2,CELL=256,CHUNK=20;
 // [tile, width, height] per kind; heights stay under a character's knee so feet remain readable.
@@ -74,18 +77,19 @@ export function createMeadow({scene,map,model,quality='high',reduced=false}){
   const shade=kind==='grass'||kind==='tall'||kind==='clover'?.82+r()*.26:.95+r()*.1;tint.setRGB(shade*(.96+r()*.08),shade,shade*(.92+r()*.08));
   chunks.get(key).push({matrix:dummy.matrix.clone(),tile,color:tint.clone()});
  };
- const water=(x,z,m)=>map.waterAreas.some(a=>x>a.x-m&&x<a.x+a.w+m&&z>a.z-m&&z<a.z+a.d+m),bridge=(x,z)=>(map.bridges??[]).some(a=>x>a.x-a.w/2-.5&&x<a.x+a.w/2+.5&&z>a.z-a.d/2-.5&&z<a.z+a.d/2+.5);
+ const shore=(x,z)=>map.nav.grid&&[[1.6,0],[-1.6,0],[0,1.6],[0,-1.6]].some(([dx,dz])=>!walkableCell(map.nav.grid,x+dx,z+dz));
+ const water=(x,z,m)=>!mix.islands&&map.waterAreas.some(a=>x>a.x-m&&x<a.x+a.w+m&&z>a.z-m&&z<a.z+a.d+m),bridge=(x,z)=>(map.bridges??[]).some(a=>x>a.x-a.w/2-.5&&x<a.x+a.w/2+.5&&z>a.z-a.d/2-.5&&z<a.z+a.d/2+.5);
  for(let cz=Math.ceil(bz)+1;cz<bz+d-1;cz++)for(let cx=Math.ceil(bx)+1;cx<bx+w-1;cx++){
-  const per=2.6*scale,n=Math.floor(per)+(r()<per%1?1:0);
+  const per=(mix.density??2.6)*scale,n=Math.floor(per)+(r()<per%1?1:0);
   for(let k=0;k<n;k++){
-   const x=cx+r(),z=cz+r(),edge=roadDistance(x,z,map);
+   const x=cx+r(),z=cz+r(),edge=roadDistance(x,z,mix.islands?{...map,plazas:[]}:map); // marsh plazas are the islands themselves
    if(edge<.25||paddy(x,z)||water(x,z,.4)||bridge(x,z))continue;
    if(map.nav.grid&&!walkableCell(map.nav.grid,x,z))continue;
    // Road shoulders keep only short sparse tufts; the open meadow gets the full mix.
    if(edge<1.4){if(r()<.35)place('grass',x,z,.7+r()*.3);continue;}
    const f=drift(x,z,1),g=drift(x,z,4),roll=r();
    if(f>mix.flowers&&roll<.5)place(['daisy','marigold','orchid'][Math.floor(drift(x,z,9)*3+3)%3],x,z,.85+r()*.35);
-   else if(g>mix.ferns&&roll<.3||water(x,z,1.6)&&roll<.4)place('fern',x,z,.8+r()*.45);
+   else if(g>mix.ferns&&roll<.3||(water(x,z,1.6)||mix.islands&&shore(x,z))&&roll<.4)place('fern',x,z,.8+r()*.45);
    else if(roll<.12)place('clover',x,z,.8+r()*.4);
    else place(g<-.3?'tall':'grass',x,z,.8+r()*.45);
   }

@@ -1,9 +1,9 @@
 // Status window (สถานะ · C): STR AGI VIT INT DEX LUK with status points, combat numbers, and the three
 // stat-gear slots. Online the server validates and owns everything; offline guests keep it in this browser.
-import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=72';
-import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=70';
+import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=94';
+import {ITEMS,ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=94';
 import {baseProgress} from './experience.js?v=73';
-import {iconStyle} from './bag-ui.js?v=83';
+import {iconStyle} from './bag-ui.js?v=94';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -17,7 +17,7 @@ export function createStatusUI({game,account,bagUI}){
  const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};
  const who=()=>({classId,level:baseProgress(world).level});
  const view=()=>game.online?{stats:normalizeStats(world.stats),gear:normalizeGear(world.gear),points:world.statPoints??0,derived:world.derivedView??deriveStats({...who()})}
-  :{...local,points:statPoints(local.stats,who().level),derived:deriveStats({...who(),...local,pet:world.petBonus})};
+  :{...local,points:statPoints(local.stats,who().level),derived:deriveStats({...who(),...local,pet:world.petBonus,food:foodBuff(world)})};
  const fail=code=>world.notice(ITEM_ERRORS[code]??code);
 
  // Offline: keep the local world's combat numbers in step with level / stats / gear.
@@ -26,8 +26,8 @@ export function createStatusUI({game,account,bagUI}){
   if(game.online)return;
   const fit=dropInvalidGear(bagUI.bag(),local.gear,who());
   if(JSON.stringify(fit.gear)!==JSON.stringify(local.gear)){local.gear=fit.gear;bagUI.setLocal(fit.bag);save();}
-  const sig=JSON.stringify([who(),local,world.petBonus]);if(sig===appliedSig)return;appliedSig=sig;
-  world.applyDerived(deriveStats({...who(),...local,pet:world.petBonus}));
+  const food=foodBuff(world),sig=JSON.stringify([who(),local,world.petBonus,food]);if(sig===appliedSig)return;appliedSig=sig;
+  world.applyDerived(deriveStats({...who(),...local,pet:world.petBonus,food}));
  }
  function raise(stat){
   if(game.online){world.statUp?.(stat);return;}

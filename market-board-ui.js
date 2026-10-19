@@ -1,10 +1,10 @@
 // 0.70 ตลาดกลาง: search every shop and stall on the server, open consignment / buying shops that stay open while
 // you are offline, collect proceeds, and see shop signs on the market street. Every action is a realm command.
 import * as THREE from 'three';
-import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=70';
+import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=94';
 import {TRADABLE} from './market.js?v=70';
 import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket} from './market-board.js?v=70';
-import {iconStyle} from './bag-ui.js?v=83';
+import {iconStyle} from './bag-ui.js?v=94';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

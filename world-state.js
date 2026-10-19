@@ -19,6 +19,7 @@ export function restoreTraveler(world,saved){
  world.player.mp=bounded(saved.mp,world.player.maxMp,world.player.maxMp);
  world.kills=Math.floor(bounded(saved.kills,1e7,0));
  Object.assign(world,experienceOf(saved));
+ if(typeof saved.food?.id==='string'&&saved.food.left>0)world.food={id:saved.food.id,left:Math.min(600,saved.food.left)}; // 0.94 meal buff crosses maps
  if(Array.isArray(saved.cooldowns)&&saved.cooldowns.length===world.cooldowns.length)world.cooldowns=saved.cooldowns.map(v=>bounded(v,60,0));
 }
-export function serializeTraveler(world){return {version:5,hp:world.player.hp,mp:world.player.mp,kills:world.kills,...experienceOf(world),cooldowns:[...world.cooldowns]};}
+export function serializeTraveler(world){return {version:5,hp:world.player.hp,mp:world.player.mp,kills:world.kills,...experienceOf(world),cooldowns:[...world.cooldowns],food:world.food?{...world.food}:null};}

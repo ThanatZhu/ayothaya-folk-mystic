@@ -3,7 +3,7 @@ import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=70';
 import {createMentorUI} from './mentor-ui.js?v=73';
 import * as THREE from 'three';
-import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=21';
+import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=94';
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');

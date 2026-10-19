@@ -1,6 +1,6 @@
 // 0.90 AUTO helpers shared by the browser and the realm server (owner: AUTO also casts skills and drinks potions,
 // set from the skill window). Pure functions: the caller owns the world, the bag and the timing.
-import {ITEMS} from './items.js?v=70';
+import {ITEMS} from './items.js?v=94';
 export const AUTO_DEFAULT={skills:[0],hp:40,mp:0};
 const SELF=new Set(['heal','shield','mana','focus','blessing']);
 // Clean a config from the client: skill slots 0-9 (unique, at most 10), potion thresholds 0-90 % (0 = off).
@@ -27,7 +27,7 @@ export function pickAutoSkill(world,cfg,scaled){
 }
 // Best potion for the threshold that fired: the strongest one in the bag that restores that bar.
 export function pickPotion(bag,player,cfg){
- const items=bag?.items??{},have=id=>(items[id]??0)>0&&ITEMS[id]?.kind==='potion';
+ const items=bag?.items??{},have=id=>(items[id]??0)>0&&ITEMS[id]?.kind==='potion'&&!ITEMS[id].buff; // food is eaten by hand
  const best=key=>Object.keys(items).filter(id=>have(id)&&(ITEMS[id][key]??0)>0).sort((a,b)=>ITEMS[b][key]-ITEMS[a][key])[0]??null;
  if(cfg?.hp&&player.hp>0&&player.hp<player.maxHp*cfg.hp/100)return best('hp');
  if(cfg?.mp&&player.hp>0&&player.mp<player.maxMp*cfg.mp/100)return best('mp');

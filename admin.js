@@ -1,9 +1,9 @@
 // 0.85 back-office dashboard: every tunable game number in one place (paths, skills, items, monsters).
 // Edits are kept as overrides (balance.js FIELDS); "บันทึกเข้าเกม" posts them to the local dev server, which writes
 // balance-data.js for the next deploy. Player data is not touched here.
-import {ITEMS} from './items.js?v=70';
+import {ITEMS} from './items.js?v=94';
 import {CLASSES,NOVICE,classSkills} from './classes.js?v=73';
-import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=93';
+import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=94';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
 import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=87';
 

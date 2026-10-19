@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
-import {walkable,groundHeight} from './combat-core.js?v=93';
+import {walkable,groundHeight} from './combat-core.js?v=94';
 const MERC_COST=200,MERC_TIME=1200;
 const NAMES=['นายแก่น','แม่จันทร์','ทิดคำ','อ้ายพรม','นางแก้ว','ขุนทอง','อีแป้น','ตาผล'];
 const CLASSES=['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];

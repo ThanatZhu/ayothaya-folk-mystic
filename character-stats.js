@@ -1,7 +1,7 @@
 // Ragnarok-style status (STR AGI VIT INT DEX LUK) and stat-bearing gear (weapon / armor / accessory).
 // Pure rules shared by the client (offline guests + UI) and the realm server. Gear lives in the bag until
 // equipped; it is separate from the cosmetic look in equipment.js, so costumes stay free choices.
-import {BAG_SLOTS,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=70';
+import {BAG_SLOTS,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=94';
 
 export const STATS=['str','agi','vit','int','dex','luk'];
 export const STAT_LABEL={str:'STR',agi:'AGI',vit:'VIT',int:'INT',dex:'DEX',luk:'LUK'};
@@ -69,12 +69,12 @@ export function combatPower(d,level=1){
  if(!d)return 0;const dmg=Math.max(d.atk??0,d.matk??0)*(1+(d.crit??0)*.5)/Math.max(.5,d.delay??1);
  return Math.round(dmg*6+(d.maxHp??0)*.6+(d.maxMp??0)*.2+(d.def??0)*12+(d.flee??0)*1500+level*25);
 }
-export function deriveStats({level=1,classId='novice',stats,gear,pet=null}){
+export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=null}){
  const s=normalizeStats(stats),g=normalizeGear(gear),worn=GEAR_SLOTS.map(k=>g[k]&&itemDef(g[k])).filter(Boolean);
  // Refine: weapons +max(2, 8% of base) ATK/MATK per level, armor +1 DEF per level.
  const up=(it,k)=>(it[k]??0)?(it[k]+it.refine*Math.max(2,Math.round(it[k]*.08))):0;
  const cards=worn.map(it=>it.card&&ITEMS[it.card]?.effect).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
- const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0),S={}; // pet: loyal pet bonus (0.50)
+ const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0)+(food?.[k]??0),S={}; // pet: loyal pet bonus (0.50); food: meal buff (0.94)
  for(const k of STATS)S[k]=s[k]+add(k);
  const atkStat=RANGED.has(classId)?S.dex:S.str;
  const weaponAtk=worn.reduce((n,it)=>n+up(it,'atk'),0),weaponMatk=worn.reduce((n,it)=>n+up(it,'matk'),0);

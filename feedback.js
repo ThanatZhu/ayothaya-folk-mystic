@@ -1,8 +1,8 @@
 // 0.53 sound, music and hit feedback. Everything is synthesised with WebAudio (no audio files, nothing to license):
 // Thai pentatonic "ranat" plucks over a drone with ching cymbals in town, klong drums in the fields, a sparse
 // minor-pentatonic air at the mill and in the dungeon. Effects follow the same game events the HUD uses.
-import {ITEMS,itemDef,RARITY_NAME} from './items.js?v=70';
-import {earnedStatPoints} from './character-stats.js?v=72';
+import {ITEMS,itemDef,RARITY_NAME} from './items.js?v=94';
+import {earnedStatPoints} from './character-stats.js?v=94';
 const KEY='ayothaya-audio';
 const THEMES={
  town:{bpm:84,root:72,scale:[0,2,4,7,9],drum:false,ching:true,drone:[48,55],rest:.32},

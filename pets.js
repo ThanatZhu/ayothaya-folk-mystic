@@ -1,6 +1,6 @@
 // Pets (0.50), shared by the offline game and the realm server. Lure a weakened monster → egg → hatch → it follows you.
 // Hunger falls 1 per minute; feeding when hungry builds intimacy, overfeeding or starving loses it; loyal pets give a stat bonus.
-import {normalizeBag,BAG_SLOTS} from './items.js?v=70';
+import {normalizeBag,BAG_SLOTS} from './items.js?v=94';
 export const PETS={
  rat:{name:'หนูยุ้งข้าว',egg:'egg-rat',chance:.35,bonus:{luk:2},text:'LUK +2'},
  straw:{name:'หุ่นฟางหลง',egg:'egg-straw',chance:.3,bonus:{str:1,dex:1},text:'STR +1 · DEX +1'},

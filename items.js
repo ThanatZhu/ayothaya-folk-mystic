@@ -40,6 +40,13 @@ export const ITEMS={
  'mp-small':{icon:14,name:'น้ำมนต์ใส',kind:'potion',buy:30,sell:7,mp:40,text:'ฟื้น MP 40'},
  'mp-large':{icon:15,name:'น้ำมนต์ทองคำ',kind:'potion',buy:110,sell:27,mp:120,text:'ฟื้น MP 120'},
  'sticky-rice':{icon:16,name:'ข้าวเหนียวห่อใบตอง',kind:'potion',buy:40,sell:10,hp:45,mp:20,text:'ฟื้น HP 45 และ MP 20'},
+ // 0.94 crafted food (craft window): a little HP/MP and a stat buff for 10 minutes; one meal at a time, a new one replaces it.
+ 'khao-tom-mat':{icon:16,tint:'gold',name:'ข้าวต้มมัด',kind:'potion',sell:30,hp:60,buff:{str:4},time:600,text:'HP 60 · STR +4 นาน 10 นาที'},
+ 'miang-kham':{icon:6,tint:'gold',name:'เมี่ยงคำ',kind:'potion',sell:30,hp:40,mp:20,buff:{agi:4},time:600,text:'HP 40 · MP 20 · AGI +4 นาน 10 นาที'},
+ 'khao-lam':{icon:5,tint:'gold',name:'ข้าวหลาม',kind:'potion',sell:40,hp:120,buff:{vit:4},time:600,text:'HP 120 · VIT +4 นาน 10 นาที'},
+ 'bua-loi':{icon:9,tint:'violet',name:'บัวลอยใบเตย',kind:'potion',sell:40,mp:60,buff:{int:4},time:600,text:'MP 60 · INT +4 นาน 10 นาที'},
+ 'fried-hopper':{icon:2,tint:'gold',name:'ตั๊กแตนทอดกรอบ',kind:'potion',sell:30,hp:40,buff:{dex:4},time:600,text:'HP 40 · DEX +4 นาน 10 นาที'},
+ 'break-guard':{atlas:'refine',icon:2,tint:'violet',name:'ยันต์กันแตก',kind:'loot',sell:400,text:'ใช้ตอนตีบวก +5 ขึ้นไป · ถ้าล้มเหลว อุปกรณ์ไม่แตก (ยันต์หมดไป)'},
  'return-incense':{icon:17,name:'ธูปกลับเมือง',kind:'scroll',buy:120,sell:30,text:'จุดแล้วกลับเมืองหลวงอยุธยาจากที่ไหนก็ได้'},
  'cowrie':{icon:18,name:'เบี้ย',kind:'ui'},'cowrie-pile':{icon:19,name:'กองเบี้ย',kind:'ui'},
  'cloth-bag':{icon:20,name:'ถุงย่าม',kind:'ui'},'shop-sign':{icon:21,name:'ป้ายร้านค้า',kind:'ui'},
@@ -253,20 +260,21 @@ export function sell(bag,id,qty=1){
 }
 
 // Drinking a potion: returns the new bag and the healed player stats (caps at max; refuses when nothing to heal).
-export function useItem(bag,id,player,status={}){
+export function useItem(bag,id,player,status={}){ // food (item.buff) also returns food:{id,left}
  const item=ITEMS[id];if(item?.kind!=='potion')throw new Error('not-usable');
  const b=normalizeBag(bag);if(!b.items[id])throw new Error('no-item');
  if(player.hp<=0)throw new Error('defeated');if(status.stun||status.sleep)throw new Error('held');
  const cure=!!item.cure&&Object.keys(status).length>0;
  const hp=Math.min(player.maxHp,player.hp+(item.hp??0)),mp=Math.min(player.maxMp,player.mp+(item.mp??0));
- if(hp===player.hp&&mp===player.mp&&!cure)throw new Error(item.cure?'no-ailment':'already-full');
+ if(hp===player.hp&&mp===player.mp&&!cure&&!item.buff)throw new Error(item.cure?'no-ailment':'already-full');
  b.items[id]--;if(!b.items[id])delete b.items[id];
- return {bag:b,hp,mp,status:cure?{}:status};
+ return {bag:b,hp,mp,status:cure?{}:status,food:item.buff?{id,left:item.time}:null};
 }
 
 export function itemLabel(list){return list.map(({id,count:n})=>(itemDef(id)?.name??id)+(n>1?' ×'+n:'')).join(', ');}
 
 // Player-facing reasons (shown as a notice) for the error codes above.
-export const ITEM_ERRORS={'shop-zone':'ตั้งร้านได้เฉพาะถนนตลาดแม่บัวในอยุธยา','shop-limit':'เปิดร้านค้างครบจำนวนแล้ว · เพิ่มทักษะการค้าเพื่อเปิดเพิ่ม','shop-crowded':'ชิดร้านอื่นเกินไป · ขยับออกอีกนิด','shop-far':'เดินไปที่ร้านก่อน','not-wanted':'ร้านนี้ไม่ได้รับซื้อของชิ้นนี้','not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่','not-refinable':'ตีบวกได้เฉพาะอาวุธและเสื้อเกราะที่สวมอยู่','refine-max':'ตีบวกสูงสุด +10 แล้ว','no-ore':'แร่ตีบวกไม่พอ','no-lek-lai':'ไม่มีเหล็กไหล','refine-far':'ต้องตีบวกที่โรงตีครูแสนดาบ','not-card':'ไม่ใช่การ์ด','card-slot':'การ์ดนี้ใส่ช่องนี้ไม่ได้','slot-full':'อุปกรณ์นี้มีการ์ดแล้ว','no-card-slot':'อุปกรณ์นี้ไม่มีช่องการ์ด','storage-far':'คุยกับลุงเรืองที่ท่าน้ำเพื่อเปิดคลัง','coin-cap':'เบี้ยเต็มแล้ว','trade-far':'อยู่ไกลกันเกินไป','trade-busy':'อีกฝ่ายกำลังแลกของอยู่','trade-none':'ไม่ได้แลกของอยู่','trade-locked':'ล็อกข้อเสนอแล้ว แก้ไขไม่ได้','trade-wait':'รออีกฝ่ายล็อกก่อน','stall-city':'ตั้งแผงได้เฉพาะในเมือง','stall-none':'แผงนี้ปิดแล้ว','stall-self':'ซื้อจากแผงตัวเองไม่ได้','recall-here':'อยู่ในเมืองหลวงแล้ว','held':'ขยับตัวไม่ได้','no-ailment':'ไม่มีอาการผิดปกติ','not-tameable':'ล่อได้เฉพาะ หนู หุ่นฟาง ตั๊กแตน ลูกลิง ที่เลือกเป็นเป้าไว้','pet-active':'มีสัตว์เลี้ยงออกมาอยู่แล้ว (คืนเป็นไข่ก่อน)','no-pet':'ยังไม่มีสัตว์เลี้ยง','no-tokens':'เหรียญงานวัดไม่พอ','bounty-town':'รับรางวัลค่าหัวได้ในเมือง','bounty-none':'ไม่มีค่าหัวนี้','bounty-claimed':'รับรางวัลไปแล้ว','bounty-unfinished':'ยังล่าไม่ครบ','hire-far':'จ้างทหารได้ที่โรงตีครูแสนดาบ','hire-active':'มีทหารรับจ้างอยู่แล้ว'};
+export const foodBuff=world=>world.food?.left>0?ITEMS[world.food.id]?.buff??null:null;
+export const ITEM_ERRORS={'no-recipe':'ไม่มีสูตรนี้','no-material':'วัตถุดิบไม่พอ','craft-rate':'ค่อย ๆ ทำทีละรอบ','no-break-guard':'ไม่มียันต์กันแตก','shop-zone':'ตั้งร้านได้เฉพาะถนนตลาดแม่บัวในอยุธยา','shop-limit':'เปิดร้านค้างครบจำนวนแล้ว · เพิ่มทักษะการค้าเพื่อเปิดเพิ่ม','shop-crowded':'ชิดร้านอื่นเกินไป · ขยับออกอีกนิด','shop-far':'เดินไปที่ร้านก่อน','not-wanted':'ร้านนี้ไม่ได้รับซื้อของชิ้นนี้','not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่','not-refinable':'ตีบวกได้เฉพาะอาวุธและเสื้อเกราะที่สวมอยู่','refine-max':'ตีบวกสูงสุด +10 แล้ว','no-ore':'แร่ตีบวกไม่พอ','no-lek-lai':'ไม่มีเหล็กไหล','refine-far':'ต้องตีบวกที่โรงตีครูแสนดาบ','not-card':'ไม่ใช่การ์ด','card-slot':'การ์ดนี้ใส่ช่องนี้ไม่ได้','slot-full':'อุปกรณ์นี้มีการ์ดแล้ว','no-card-slot':'อุปกรณ์นี้ไม่มีช่องการ์ด','storage-far':'คุยกับลุงเรืองที่ท่าน้ำเพื่อเปิดคลัง','coin-cap':'เบี้ยเต็มแล้ว','trade-far':'อยู่ไกลกันเกินไป','trade-busy':'อีกฝ่ายกำลังแลกของอยู่','trade-none':'ไม่ได้แลกของอยู่','trade-locked':'ล็อกข้อเสนอแล้ว แก้ไขไม่ได้','trade-wait':'รออีกฝ่ายล็อกก่อน','stall-city':'ตั้งแผงได้เฉพาะในเมือง','stall-none':'แผงนี้ปิดแล้ว','stall-self':'ซื้อจากแผงตัวเองไม่ได้','recall-here':'อยู่ในเมืองหลวงแล้ว','held':'ขยับตัวไม่ได้','no-ailment':'ไม่มีอาการผิดปกติ','not-tameable':'ล่อได้เฉพาะ หนู หุ่นฟาง ตั๊กแตน ลูกลิง ที่เลือกเป็นเป้าไว้','pet-active':'มีสัตว์เลี้ยงออกมาอยู่แล้ว (คืนเป็นไข่ก่อน)','no-pet':'ยังไม่มีสัตว์เลี้ยง','no-tokens':'เหรียญงานวัดไม่พอ','bounty-town':'รับรางวัลค่าหัวได้ในเมือง','bounty-none':'ไม่มีค่าหัวนี้','bounty-claimed':'รับรางวัลไปแล้ว','bounty-unfinished':'ยังล่าไม่ครบ','hire-far':'จ้างทหารได้ที่โรงตีครูแสนดาบ','hire-active':'มีทหารรับจ้างอยู่แล้ว'};
 // 0.85 admin balance overrides (balance.js); item description texts are not rewritten.
 for(const [id,item] of Object.entries(ITEMS))patch('items',id,item);

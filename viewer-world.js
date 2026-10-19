@@ -2,7 +2,7 @@ import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {createMultiplayer} from './multiplayer-ui.js?v=63';
+import {createMultiplayer} from './multiplayer-ui.js?v=68.3';
 import {createEquipmentUI} from './equipment-ui.js?v=41.2';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=62';
 import {createGameMenu} from './game-menu.js?v=34';
@@ -110,7 +110,10 @@ try {
  for(const [kind,x,z,w,h,flip] of map.plants){if(['canopy19','shrub19'].includes(kind))continue;plant(kind,x,-z,w,h,flip);if(kind==='tree')shadow(x,-z,w*.3);}
  const customized=customizeAtlas(heroAtlas.image,account.character.appearance,account.character.classId);
  const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
- const heroMesh=createPaintedAvatar(heroFrames[0],{classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
+ // 0.68.3 the original full-bodied art is the default again (the 8-direction side views read as paper-thin);
+ // the 8-direction art stays one tap away in settings and the choice is remembered on this device.
+ let eightWay=false;try{eightWay=localStorage.getItem('ayothaya-eight-way')==='1';}catch{}
+ const heroMesh=createPaintedAvatar(heroFrames[0],{directional:eightWay,classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  // The shared avatar selects camera-relative painted art by default; unsupported
  // custom silhouettes retain their original equipped artwork.
@@ -123,9 +126,9 @@ try {
   pilotToggle.disabled=reason==='weapon'||reason==='appearance';
   pilotStatus.textContent=reason==='weapon'?'ใช้ภาพอาวุธพิเศษที่สวมใส่':reason==='appearance'?'ใช้ภาพพร้อมการแต่งตัวที่บันทึกไว้':reason==='load'?'โหลดภาพหลายทิศไม่สำเร็จ ใช้ภาพเดิมต่อได้':pilotToggle.checked?'หันตามมุมกล้อง · ขยับแขนขาจากภาพเดิม':'ใช้ภาพท่าเดิม';
  }
- pilotToggle.checked=true;
+ pilotToggle.checked=eightWay;
  pilotToggle.onchange=async()=>{
-  pilotToggle.disabled=true;await heroMesh.userData.setDirectional(pilotToggle.checked);directionalStatus();
+  pilotToggle.disabled=true;try{localStorage.setItem('ayothaya-eight-way',pilotToggle.checked?'1':'0');}catch{}await heroMesh.userData.setDirectional(pilotToggle.checked);directionalStatus();
  };
 
  for(const n of map.npcs.filter(n=>!n.mentorId)){const h=1.65;characters.push({sprite:sprite(personTextures[n.texture],n.x,-n.z,h,h,.06),shadow:shadow(n.x,-n.z,.4),height:h});}

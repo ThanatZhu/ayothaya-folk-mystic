@@ -102,7 +102,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  async function addRemote(state){
   const id=state.id,generation=loadingGeneration,placeholder={loading:true,state};views.set(id,placeholder);
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
-   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createPaintedAvatar(frames[0],{classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance,equipment:state.equipment});sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
+   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createPaintedAvatar(frames[0],{directional:false,classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance,equipment:state.equipment});sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
    const label=el('span','remote-player-label',state.character.name);labels.append(label);
    views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null,equipmentKey:JSON.stringify(state.equipment)});
   }catch{if(views.get(id)===placeholder)placeholder.retryAt=performance.now()+5000;}

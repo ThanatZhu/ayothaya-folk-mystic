@@ -11,6 +11,7 @@ import {createMmoHud} from './mmo-hud.js?v=48.1';
 import {createSoftLook} from './soft-look.js?v=29';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=76';
+import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=77';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
 import {createPaintedAvatar} from './painted-avatar.js?v=63';
 import {customizeAtlas} from './character-appearance.js?v=41';
@@ -35,7 +36,7 @@ import {createPetUI} from './pet-ui.js?v=62';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=64';
 import {createLifeNPC} from './life-npc.js?v=62';
-import {createFeedback} from './feedback.js?v=64';
+import {createFeedback} from './feedback.js?v=77';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=72';
 import {createMarketBoardUI} from './market-board-ui.js?v=70';
 import {createHud63} from './hud-63.js?v=72';
@@ -109,7 +110,7 @@ try {
  // v2 scenes already contain their trees, props and ground detail: never layer the old procedural set on top.
  const idle={update(){}};if(!map.scene)createCapitalProps({scene,map});
  const landscapeDetails=map.scene?idle:createLandscapeDetails({scene,map});
- const meadow=map.scene&&MEADOW_MAPS.has(map.id)?createMeadow({scene,map,model:gltf.scene,quality:matchMedia('(pointer:coarse),(max-width:900px)').matches?'low':'high',reduced:matchMedia('(prefers-reduced-motion:reduce)').matches}):idle;
+ const meadow=map.scene&&MEADOW_MAPS.has(map.id)?createMeadow({scene,map,model:gltf.scene,quality:QUALITY[readPerf().quality].meadow,reduced:matchMedia('(prefers-reduced-motion:reduce)').matches}):idle;
  const cityTrees=map.scene?idle:createCapitalTrees({scene,map,texture:leafAtlas,crownTexture:capitalLook.crownTexture});
  const botanic={tree:frame(flora.image,[0,0,.558,.612]),banana:frame(flora.image,[.56,0,.44,.602]),hedge:frame(flora.image,[0,.68,.55,.30]),pots:frame(flora.image,[.587,.608,.409,.386])};
  for(const [i,kind] of ['forest','palm','bamboo','rice'].entries())botanic[kind]=frame(regionalFlora.image,[(i%2)*.5,Math.floor(i/2)*.5,.5,.5]);
@@ -198,8 +199,10 @@ try {
  const graphicsLabel=()=>{$('graphics').textContent=softLook.enabled?'ภาพละมุน · เปิด':'ภาพละมุน · ปิด (ประหยัดเครื่อง)';$('graphics').setAttribute('aria-pressed',String(softLook.enabled));};
  graphicsLabel();$('graphics').onclick=()=>{softLook.setEnabled(!softLook.enabled);graphicsLabel();};
  $('load')?.remove();loading.stage(5);document.querySelectorAll('.camera-panel button,.attack-controls button').forEach(b=>b.disabled=false);
+ const perf=createPerfSettings({renderer,scene,sun,softLook,resize,onApply:graphicsLabel});const perfBox=$('audio-settings');if(perfBox)perf.mount(perfBox);
  let firstFrame=true,lastMs=null;const shakeVector=new THREE.Vector3();
  renderer.setAnimationLoop(ms=>{
+  if(!perf.shouldDraw(ms))return;
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
   const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);meadow.update(t);game.update(dt);storyUI.update();bagUI.update();statusUI.update();refineUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
   flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;followSun(game.world.player);

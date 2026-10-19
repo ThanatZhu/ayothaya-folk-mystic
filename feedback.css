@@ -18,3 +18,8 @@
 @keyframes dmg-pop{from{scale:1.9}to{scale:1}}
 @keyframes crit-pop{from{scale:2.6}to{scale:1}}
 @media(prefers-reduced-motion:reduce){.damage-number{animation:none}}
+/* 0.77 performance settings sit under the sound sliders */
+.perf-settings{display:grid;gap:6px;margin-top:4px;padding-top:6px;border-top:1px solid #af884f33}
+.perf-settings label{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:8px}
+.perf-settings select{font:inherit;padding:3px 6px;border-radius:6px;border:1px solid #af884f88;background:#1d2a20;color:#f3e6c4}
+.perf-settings small{opacity:.75;line-height:1.4}

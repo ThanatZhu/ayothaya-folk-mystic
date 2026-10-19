@@ -2,7 +2,7 @@ import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {characterMotion,attackDuration} from './character-motion.js?v=37';
 import {skillPose,skillTrack} from './skill-choreography.js?v=37';
-import {CLASSES,NOVICE} from './classes.js?v=18';
+import {CLASSES,NOVICE} from './classes.js?v=73';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)'),cards=[],slot=document.getElementById('slot');
 let mode='walk',paused=reduced.matches,time=0,previous=null,failures=0;
 for(let n=0;n<10;n++){const o=document.createElement('option');o.value=n;o.textContent='สกิล '+(n===9?'0':n+1);slot.append(o);}

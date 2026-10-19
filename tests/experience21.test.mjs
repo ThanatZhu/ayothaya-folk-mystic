@@ -22,14 +22,14 @@ test('defeats award independent base/job rewards exactly once, including multi-l
 test('legacy kills preserve Base Level and migrate job XP; caps and corrupt XP are explicit',()=>{
  assert.deepEqual(experienceOf({kills:260}),{baseXp:2600,jobXp:1560});assert.equal(baseProgress({kills:260}).level,23); // 2,600 EXP on the 0.57 curve
  assert.equal(baseProgress({baseXp:MAX_XP,jobXp:0}).percent,100);
- for(const [id,job,cap] of [['novice','',10],['boxer','',50],['boxer','master-boxer',70]]){const p=jobProgress({baseXp:0,jobXp:MAX_XP},id,job);assert.equal(p.level,cap);assert.equal(p.percent,100);}
+ for(const [id,job,cap] of [['novice','',10],['boxer','',40],['boxer','master-boxer',40]]){const p=jobProgress({baseXp:0,jobXp:MAX_XP},id,job);assert.equal(p.level,cap);assert.equal(p.percent,100);}
  for(const bad of [{baseXp:-1,jobXp:0},{baseXp:0,jobXp:.5},{baseXp:Infinity,jobXp:0},{baseXp:5}]){const save=initialSave();delete save.traveler.baseXp;delete save.traveler.jobXp;Object.assign(save.traveler,bad);assert.throws(()=>validateSave(save,catalog),/save-data/);}
 });
 test('creation always novice and separate slots retain XP; class and Master reset only Job EXP',async()=>{
  const store=createRealmStore({catalog,storage:memory()});let a=await store.create('server-1',{name:'คนแรก',gender:'male',classId:'boxer',jobId:'master-boxer'});
  const b=await store.create('server-2',{name:'คนสอง',gender:'female',classId:'hunter'});assert.equal(a.character.classId,'novice');assert.equal(a.character.jobId,'');assert.equal(a.state.traveler.baseXp,0);
- const state=structuredClone(a.state);state.traveler.baseXp=2856;state.traveler.jobXp=1200;a=await store.save('server-1',a,state);a=await store.changeClass('server-1',a,'boxer');assert.equal(a.state.traveler.baseXp,2856);assert.equal(a.state.traveler.jobXp,0);
- a=await store.save('server-1',a,{...a.state,traveler:{...a.state.traveler,baseXp:13216,jobXp:1550}});a=await store.customize('server-1',a,{},'master-boxer');assert.equal(a.state.traveler.baseXp,13216);assert.equal(a.state.traveler.jobXp,0);
+ const state=structuredClone(a.state);state.traveler.baseXp=2856;state.traveler.jobXp=1260;a=await store.save('server-1',a,state);a=await store.changeClass('server-1',a,'boxer');assert.equal(a.state.traveler.baseXp,2856);assert.equal(a.state.traveler.jobXp,0);
+ a=await store.save('server-1',a,{...a.state,traveler:{...a.state.traveler,baseXp:13216,jobXp:17160}});a=await store.customize('server-1',a,{},'master-boxer');assert.equal(a.state.traveler.baseXp,13216);assert.equal(a.state.traveler.jobXp,0);
  assert.equal((await store.load('server-2',b.slotId)).state.traveler.baseXp,0);
  await assert.rejects(store.save('server-1',a,{...a.state,traveler:{...a.state.traveler,baseXp:0}}),/experience-regression/);
 });

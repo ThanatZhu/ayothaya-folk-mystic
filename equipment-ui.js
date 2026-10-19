@@ -2,7 +2,7 @@ import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {starterEquipment,equipItem,equipmentItem} from './equipment.js?v=41';
 import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {motionFrame} from './animation-frames.js?v=37';
-import {className} from './classes.js?v=18';
+import {className} from './classes.js?v=73';
 import {openHudPanel} from './hud-panels.js';
 const make=(tag,css,text)=>{const el=document.createElement(tag);if(css)el.className=css;if(text)el.textContent=text;return el;};
 export function equipmentIcon(item){

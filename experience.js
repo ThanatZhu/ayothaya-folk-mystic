@@ -20,8 +20,10 @@ export function baseProgress(saved){
  return {level,xp:total,current,required,next:maxed?0:required-current,percent:maxed?100:current/required*100,maxed};
 }
 export const levelStart=l=>START[Math.max(1,Math.min(99,l))];
+export const NOVICE_JOB_CAP=10,JOB_CAP=40;
 export function jobProgress(saved,classId='novice',jobId=''){
- const total=experienceOf(saved).jobXp,cap=classId==='novice'?10:jobId?70:50;
+ // 0.73 owner rule: Base Lv.99; Job Lv.10 as ผู้ฝึกตน, Job Lv.40 for a class and for its master job (RO style).
+ const total=experienceOf(saved).jobXp,cap=classId==='novice'?NOVICE_JOB_CAP:JOB_CAP;
  let current=total,level=1;
  while(level<cap&&current>=40+level*20){current-=40+level*20;level++;}
  const required=40+level*20,maxed=level===cap;
@@ -39,8 +41,8 @@ export const LEVEL_GIFTS={
  15:{text:'โรงสีใต้เงาจันทร์รออยู่ · ชวนเพื่อนตั้งปาร์ตี้',coins:800,items:[{id:'mp-large',count:3}]},
  18:{text:'ล่า MVP ราชาหุ่นฟางเพลิงกับเพื่อน',coins:1000,items:[{id:'hp-large',count:5}]},
  20:{text:'ดันเจี้ยนใต้ถุนโรงสีเปิดให้ปาร์ตี้แล้ว',coins:1200,items:[{id:'return-incense',count:5}]},
- 23:{text:'อีกนิดเดียวจะเปลี่ยนอาชีพ',coins:1500,items:[{id:'mp-large',count:5}]},
- 25:{text:'เปลี่ยนอาชีพที่ลานครู · บึงบัวต้องมนตร์เปิดรับแล้ว',coins:2500,items:[{id:'hp-large',count:10}]},
+ 23:{text:'Job 10 ตันแล้วไปเปลี่ยนอาชีพที่ลานครูได้',coins:1500,items:[{id:'mp-large',count:5}]},
+ 25:{text:'บึงบัวต้องมนตร์เปิดรับแล้ว',coins:2500,items:[{id:'hp-large',count:10}]},
 };
 export const levelGifts=(from,to)=>Object.entries(LEVEL_GIFTS).filter(([l])=>+l>from&&+l<=to).map(([l,g])=>({level:+l,...g}));
 export function deathPenalty(world){

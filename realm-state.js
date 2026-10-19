@@ -1,6 +1,6 @@
 import {validateAppearance} from './appearance-state.js';
-import {jobFor,validateJob} from './advancement.js?v=21';
-import {isClass} from './classes.js?v=18';
+import {jobFor,validateJob} from './advancement.js?v=73';
+import {isClass} from './classes.js?v=73';
 export const SERVERS=[{id:'server-1',name:'เซิร์ฟ 1',subtitle:'อยุธยา · ริมเจ้าพระยา'},{id:'server-2',name:'เซิร์ฟ 2',subtitle:'อยุธยา · แสงจันทร์'}];
 export const CHARACTER_SLOTS=['slot-1','slot-2','slot-3','slot-4','slot-5'];
 export const isSlot=id=>CHARACTER_SLOTS.includes(id);

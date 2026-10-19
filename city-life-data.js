@@ -1,4 +1,4 @@
-import {JOBS,CLASS_LEVEL,JOB_LEVEL,progression} from './advancement.js?v=21';
+import {JOBS,CLASS_LEVEL,JOB_LEVEL,progression,advanceReady} from './advancement.js?v=73';
 export const MASTER_COURT={name:'ลานครูแห่งอโยธยา',x:40,z:-46};
 export const MENTORS=[
  {id:'sword-master',classId:'swordsman',name:'ขุนอินทรเดช',title:'ครูดาบ',x:29,z:-54,sheet:'masters-arms',row:0,color:'#e6ba73',text:'ดาบที่มั่นคงเริ่มจากใจที่ไม่หวั่นไหว จงออกปกป้องชาวบ้าน แล้วกลับมารับคำสอนจากข้า'},
@@ -16,7 +16,7 @@ export function trainingStatus(character,training,traveler,mentorId){
  const level=progression(traveler).level,tier=character.classId==='novice'?'class':'master',required=tier==='class'?CLASS_LEVEL:JOB_LEVEL;
  const target=tier==='class'?5:15,own=training?.classId===mentor.classId&&training?.tier===tier;
  const progress=own?Math.min(target,Math.max(0,(traveler.kills??0)-training.startKills)):0;
- return {mentor,level,tier,required,target,progress,own,training:training??null,completed:!!character.jobId,wrongClass:character.classId!=='novice'&&character.classId!==mentor.classId,eligible:level>=required,branches:JOBS[mentor.classId]};
+ return {mentor,level,tier,required,target,progress,own,training:training??null,completed:!!character.jobId,wrongClass:character.classId!=='novice'&&character.classId!==mentor.classId,eligible:advanceReady(traveler,character.classId,character.jobId??'').ok,jobLevel:advanceReady(traveler,character.classId,character.jobId??'').job.level,jobCap:advanceReady(traveler,character.classId,character.jobId??'').job.cap,branches:JOBS[mentor.classId]};
 }
 // Shared quest rules. Online callers supply only an action and mentor/branch IDs;
 // the realm supplies position, level, kill count and the saved quest baseline.
@@ -40,6 +40,6 @@ export const CITIZEN_STYLES=[
  {sheet:'citizens-market',row:3,name:'พ่อครัว',text:'เดินเหนื่อยก็พักก่อนนะ กลิ่นข้าวหอม ๆ ช่วยให้คิดถึงบ้านเสมอ'},
  {sheet:'citizens-river',row:0,name:'ชาวนา',text:'นอกกำแพงมีหุ่นฟางเดินได้ ข้าฝากพวกนักเดินทางดูแลทุ่งด้วยนะ'},
  {sheet:'citizens-river',row:1,name:'คนเรือ',text:'คลองเชื่อมทุกย่านไว้ด้วยกัน จะข้ามฟากก็ใช้สะพานนะ'},
- {sheet:'citizens-river',row:2,name:'ผู้เฒ่า',text:'ครูทั้งหลายรวมตัวอยู่ที่ลานครู ฝึกถึงระดับ 25 จึงรับบททดสอบอาชีพได้'},
+ {sheet:'citizens-river',row:2,name:'ผู้เฒ่า',text:'ครูทั้งหลายรวมตัวอยู่ที่ลานครู ฝึกจน Job ตันก่อน จึงรับบททดสอบอาชีพได้'},
  {sheet:'citizens-river',row:3,name:'ช่างสาน',text:'ข้าจะเอาเสื่อไปส่งเรือนช่าง เจ้าชอบลายดอกพิกุลหรือลายขัดกันล่ะ'}
 ];

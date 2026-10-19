@@ -1,14 +1,14 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createMotionPreview} from './motion-preview.js?v=41.2';
 import {characterMotion} from './character-motion.js?v=37';
-import {createWardrobe} from './wardrobe.js?v=41.2';
-import {progression,jobFor,CLASS_LEVEL} from './advancement.js?v=21';
-import {CLASSES,getClass,className,atlasPath} from './classes.js?v=18';
+import {createWardrobe} from './wardrobe.js?v=73.2';
+import {progression,jobFor,CLASS_LEVEL,advanceReady} from './advancement.js?v=73';
+import {CLASSES,getClass,className,atlasPath} from './classes.js?v=73';
 import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
-import {createRealmStore} from './realm-store.js?v=41';
+import {createRealmStore} from './realm-store.js?v=73';
 import {wakeServer} from './multiplayer-config.js?v=27';
 wakeServer();
 const $=id=>document.getElementById(id);
@@ -25,7 +25,7 @@ function show(next){screen=next;document.body.dataset.screen=next;for(const s of
 function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#switch-account,#continue-account,#change-class,#open-wardrobe,.character-slot').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
- const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องถึง Lv. 25 ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องถึง Lv. 60 ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
+ const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
  say(code==='character-exists'?'มีตัวละครในเซิร์ฟเวอร์นี้แล้ว กดเปลี่ยนเซิร์ฟเวอร์แล้วเลือกอีกครั้ง':code==='auth/popup-blocked'?'กรุณาอนุญาตป๊อปอัป แล้วกด Google อีกครั้ง':code==='auth/popup-closed-by-user'?'ยังไม่ได้ล็อกอิน ลองใหม่ได้ครับ':code==='permission-denied'?'ยังเข้าถึงเซฟไม่ได้ กรุณาลองอีกครั้ง':String(code).startsWith('ชื่อ')||String(code).startsWith('กรุณา')?code:'เชื่อมต่อไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง');
 }
 const catalogReady=fetch('./maps/world.json?v=29').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
@@ -90,7 +90,7 @@ function displayCharacter(){
  const realm=SERVERS.find(s=>s.id===selected);$('realm-caption').textContent=realm.name+' · '+realm.subtitle;
  $('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
  $('character-form').hidden=!!record||roster.length>=5;
- $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · เปลี่ยนอาชีพกับครู Lv. 25 · Master Lv. 60':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(progression(record.state.traveler).level>=25?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ผู้ฝึกตน → พบครูเปลี่ยนอาชีพที่ Lv. 25'):'อาชีพ '+className(record.character.classId,record.character.gender)+' → พบครูเลื่อนขั้น Master ที่ Lv. 60';
+ $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · Job 10 ตันแล้วเปลี่ยนอาชีพ · Job 40 ตันรับ Master · Base สูงสุด 99':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(advanceReady(record.state.traveler,'novice').ok?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ฝึก Job ผู้ฝึกตนให้ตัน (Job 10) เพื่อเปลี่ยนอาชีพ'):'อาชีพ '+className(record.character.classId,record.character.gender)+'ฝึก Job ให้ตัน (Job 40) เพื่อรับ Master';
  if(record){wardrobe.reset(record.character.appearance,record.character.jobId??'');selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
  else{wardrobe.reset();$('character-form').reset();selectedClass='novice';preview('male');}
  show('character');

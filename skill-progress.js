@@ -1,6 +1,6 @@
 // Skill levels 1-10 and skill points (docs/LIVE-SERVICE.md section 1). Pure functions shared by the
 // browser and the authoritative realm server; the server is the only writer for Google accounts.
-import {jobProgress} from './experience.js?v=64';
+import {jobProgress} from './experience.js?v=73';
 export const SKILL_MAX=10;
 // Levels 5 and 10 need a skill trial / final scroll quest (step L3). Until quests exist, upgrades stop at 4.
 export const OPEN_MAX=4;

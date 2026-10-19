@@ -1,17 +1,17 @@
 import {itemDef} from './items.js?v=70';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
-import {jobProgress} from './experience.js?v=64';
+import {jobProgress} from './experience.js?v=73';
 import {applySkillArt} from './skill-art.js?v=21';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
 import {skillTrack,skillPose} from './skill-choreography.js?v=37';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=63';
-import {progression,jobFor} from './advancement.js?v=21';
+import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=72.1';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=31';
 import {createRouteWalker} from './route-walk.js?v=01';
 
-import {className} from './classes.js?v=18';
+import {className} from './classes.js?v=73';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();

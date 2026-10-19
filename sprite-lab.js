@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
-import {CLASSES,NOVICE,getClass,className,classSkills} from './classes.js?v=63';
+import {CLASSES,NOVICE,getClass,className,classSkills} from './classes.js?v=73';
 import {DIRECTIONS,loadDirectionalArt} from './directional-sprite.js?v=63';
 import {createDirectionalActor} from './directional-actor.js?v=63';
 import {stableViewDirection} from './directional-motion.js';

@@ -1,5 +1,5 @@
-import {trainingStatus,mentorById} from './city-life-data.js?v=66.1';
-import {className} from './classes.js?v=18';
+import {trainingStatus,mentorById} from './city-life-data.js?v=73.1';
+import {className} from './classes.js?v=73';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 const errors={'trainer-level':'ระดับยังไม่ถึงเงื่อนไขของครู','trainer-distance':'เดินเข้าใกล้ครูก่อนนะ','trainer-active':'มีบททดสอบที่รับไว้แล้ว ให้กลับหาครูสายเดิมก่อน','trainer-incomplete':'ยังทำบททดสอบไม่ครบ','trainer-class':'ครูท่านนี้สอนอีกสายอาชีพ','trainer-finished':'คุณผ่านการเลื่อนขั้นแล้ว','trainer-quest':'ยังไม่ได้รับบททดสอบนี้','action-rate':'รอสักครู่แล้วลองอีกครั้ง','online-required':'ต้องเชื่อมต่อเซิร์ฟเวอร์ก่อนรับบททดสอบ','not-connected':'กำลังเชื่อมต่อเซิร์ฟเวอร์ กรุณารอสักครู่'};
 export function createMentorUI({game,account}){
@@ -16,7 +16,7 @@ export function createMentorUI({game,account}){
  function render(){if(!current)return;const s=trainingStatus(account.character,account.training,game.world,current.mentorId),ready=s.own&&s.progress>=s.target;
   $('mentor-role').textContent=current.title+' · '+className(current.classId,account.character.gender);
   $('mentor-quest').textContent=s.tier==='class'?'บททดสอบฝากตัวเป็นศิษย์':'บททดสอบสู่ Master';
-  $('mentor-objective').textContent=s.completed?'คุณผ่านการเลื่อนขั้นแล้ว ยินดีต้อนรับกลับมาฝึกฝนเสมอ':s.wrongClass?'กลับไปหาครูประจำสายอาชีพของคุณเพื่อเลื่อนขั้น':!s.eligible?'ฝึกถึง Base Lv. '+s.required+' ก่อนกลับมารับบททดสอบ':s.training&&!s.own?'คุณรับบททดสอบของสาย '+className(s.training.classId,account.character.gender)+' ไว้แล้ว':(s.own?'กำจัดมอนสเตอร์นอกเมือง '+s.progress+' / '+s.target+' ตัว':'รับบททดสอบ แล้วกำจัดมอนสเตอร์นอกเมือง '+s.target+' ตัว')+' · กลับมาหาครูเพื่อ'+(s.tier==='class'?'เปลี่ยนอาชีพ':'เลื่อนขั้น')+(ready?' · พร้อมส่งแล้ว':'');
+  $('mentor-objective').textContent=s.completed?'คุณผ่านการเลื่อนขั้นแล้ว ยินดีต้อนรับกลับมาฝึกฝนเสมอ':s.wrongClass?'กลับไปหาครูประจำสายอาชีพของคุณเพื่อเลื่อนขั้น':!s.eligible?'ฝึก Job ให้ตัน ('+s.jobLevel+' / '+s.jobCap+')'+(s.level<s.required?' และ Base Lv. '+s.required:'')+' ก่อนกลับมารับบททดสอบ':s.training&&!s.own?'คุณรับบททดสอบของสาย '+className(s.training.classId,account.character.gender)+' ไว้แล้ว':(s.own?'กำจัดมอนสเตอร์นอกเมือง '+s.progress+' / '+s.target+' ตัว':'รับบททดสอบ แล้วกำจัดมอนสเตอร์นอกเมือง '+s.target+' ตัว')+' · กลับมาหาครูเพื่อ'+(s.tier==='class'?'เปลี่ยนอาชีพ':'เลื่อนขั้น')+(ready?' · พร้อมส่งแล้ว':'');
   const allowed=!s.completed&&!s.wrongClass&&s.eligible;
   $('mentor-progress').hidden=!s.own;$('mentor-progress').max=s.target;$('mentor-progress').value=s.progress;
   $('mentor-accept').hidden=!allowed||!!s.training;$('mentor-cancel').hidden=!s.own||s.completed;$('mentor-complete').hidden=!s.own||s.completed;$('mentor-complete').disabled=busy||!ready;

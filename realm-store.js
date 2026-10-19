@@ -1,7 +1,7 @@
-import {experienceOf} from './experience.js?v=64';
+import {experienceOf} from './experience.js?v=73';
 import {normalizeEquipment} from './equipment.js?v=41';
-import {trainingAction} from './city-life-data.js?v=66.1';
-import {CLASS_LEVEL,progression,validateJob} from './advancement.js?v=21';
+import {trainingAction} from './city-life-data.js?v=73.1';
+import {CLASS_LEVEL,progression,validateJob,advanceReady} from './advancement.js?v=73';
 import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=62';
 import {validateSave,nextRevision} from './save-state.js?v=21';
 
@@ -9,7 +9,7 @@ export function validateCharacterChange(before,after,state){
  if(before.name!==after.name||before.gender!==after.gender)throw new Error('character-identity');
  if(before.classId!==after.classId){
   if(before.classId!=='novice'||after.classId==='novice')throw new Error('class-final');
-  if(progression(state.traveler).level<CLASS_LEVEL)throw new Error('class-locked');
+  if(!advanceReady(state.traveler,'novice').ok)throw new Error('class-locked');
   if(after.jobId)throw new Error('job-locked');
  }
  if((before.jobId??'')!==(after.jobId??'')){

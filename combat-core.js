@@ -1,9 +1,9 @@
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
-import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=64';
+import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=73';
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
-import {advanceStats,advanceSkills} from './advancement.js?v=21';
-import {getClass,classSkills} from './classes.js?v=18';
+import {advanceStats,advanceSkills} from './advancement.js?v=73';
+import {getClass,classSkills} from './classes.js?v=73';
 import {scaledSkill} from './skill-progress.js?v=31';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[

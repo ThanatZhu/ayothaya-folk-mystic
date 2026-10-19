@@ -1,4 +1,4 @@
-import {CLASSES,isClass} from './classes.js?v=18';
+import {CLASSES,isClass} from './classes.js?v=73';
 export const DIRECTIONAL_CLASSES=['novice',...CLASSES.map(c=>c.id)];
 export function directionalManifestPath(classId='shaman'){
  if(!DIRECTIONAL_CLASSES.includes(classId))throw new Error('invalid-class');

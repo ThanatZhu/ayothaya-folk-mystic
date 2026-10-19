@@ -8,7 +8,7 @@ export const CLASSES=[
  {id:'shaman',name:'หมอผี',icon:'✦',role:'มนตรา · วิญญาณและยันต์',description:'ใช้วิญญาณโจมตีเป็นวง พร้อมอาคมฟื้นฟู',color:'#80e4d3',range:3.3,damage:14,delay:.78,speed:4.08,kind:'bolt'},
  {id:'acolyte',name:'พระ / แม่ชี',icon:'☼',role:'สนับสนุน · ฟื้นฟูและคุ้มครอง',description:'สวดคุ้มครอง ฟื้นฟูตนเอง และส่งแสงสลายภูต',color:'#f4dc9e',range:4.2,damage:10,delay:1,speed:3.96,kind:'blessing',names:['แสงเมตตา','รัศมีสงบ','ตรึงจิต','แสงผลัก','พรฟื้นฟู','เขตคุ้มครอง','แสงสลายภูต','ก้าวสงบ','ภาวนา','รัศมีคุ้มครอง']}
 ];
-export const NOVICE={id:'novice',name:'ผู้ฝึกตน',icon:'✿',role:'Novice · จุดเริ่มต้นของทุกเส้นทาง',description:'ฝึกฝนถึง Lv. 25 เพื่อเลือกอาชีพ และ Lv. 60 เพื่อเป็น Master',color:'#d6c79d',range:1.4,damage:12,delay:.8,speed:4.08,kind:'punch',names:['หมัดฝึกฝน','กวาดแขน','หยุดคู่ต่อสู้','ผลักถอย','พักหายใจ','ตั้งรับ','หมัดมุ่งมั่น','ก้าวหลบ','รวบรวมสมาธิ','แรงฮึดสุดท้าย']};
+export const NOVICE={id:'novice',name:'ผู้ฝึกตน',icon:'✿',role:'Novice · จุดเริ่มต้นของทุกเส้นทาง',description:'ฝึกจน Job 10 ตันเพื่อเลือกอาชีพ · อาชีพ Job 40 ตันเพื่อเป็น Master',color:'#d6c79d',range:1.4,damage:12,delay:.8,speed:4.08,kind:'punch',names:['หมัดฝึกฝน','กวาดแขน','หยุดคู่ต่อสู้','ผลักถอย','พักหายใจ','ตั้งรับ','หมัดมุ่งมั่น','ก้าวหลบ','รวบรวมสมาธิ','แรงฮึดสุดท้าย']};
 export const isClass=id=>id==='novice'||CLASSES.some(c=>c.id===id);
 export function getClass(id='shaman'){const c=id==='novice'?NOVICE:CLASSES.find(c=>c.id===id);if(!c)throw new Error('invalid-class');return c;}
 export const className=(id,gender)=>id==='acolyte'?(gender==='female'?'แม่ชี':'พระ'):getClass(id).name;

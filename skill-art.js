@@ -1,4 +1,4 @@
-import {isClass} from './classes.js?v=21';
+import {isClass} from './classes.js?v=73';
 export const skillAtlas=id=>{if(!isClass(id))throw new Error('invalid-class');return new URL('./assets/skills/'+id+'-21.png',import.meta.url).href;};
 export async function applySkillArt(buttons,classId){
  const image=new Image(),url=skillAtlas(classId);image.src=url;

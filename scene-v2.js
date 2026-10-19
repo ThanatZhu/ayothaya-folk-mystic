@@ -46,6 +46,10 @@ export function prepareSceneV2({scene,model,map}){
   // 0.66.1 push lower layers back instead of pulling upper ones forward: a forward bias on streets/courtyards hid the feet
   // of everyone standing on them. The top layer keeps its true depth; sprites are never covered.
   if(rank!==undefined){const back=TOP_RANK-rank,key=o.material.uuid+'|'+rank;if(back>0&&!converted.has(key)){const m=o.material.clone();m.polygonOffset=true;m.polygonOffsetFactor=back;m.polygonOffsetUnits=back*4;converted.set(key,m);if(water.includes(o.material))water.push(m);}if(back>0)o.material=converted.get(key);}
+  // 0.92 a road layer overlaps itself where two tracks cross (same height, different UVs) and the depth buffer cannot
+  // order that, so crossings flickered as the camera moved. Ground layers now draw first in rank order, and the layers
+  // above the ground stop writing depth, so the later strip always wins; the ground still writes depth for the rest.
+  if(rank!==undefined){o.renderOrder=rank-30;if(rank>0){const key2=o.material.uuid+'|flat';if(!converted.has(key2)){const m=o.material.clone();m.depthWrite=false;converted.set(key2,m);if(water.includes(o.material))water.push(m);}o.material=converted.get(key2);}}
  });
  for(const m of water)for(const t of [m.map,m.normalMap])if(t){t.wrapS=t.wrapT=THREE.RepeatWrapping;}
  let running=!matchMedia('(prefers-reduced-motion:reduce)').matches,time=0;

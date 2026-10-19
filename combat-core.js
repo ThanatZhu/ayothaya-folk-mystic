@@ -29,7 +29,7 @@ export const MONSTER_TYPES=[
 MONSTER_TYPES.push(...FRONTIER_MONSTERS);
 MONSTER_TYPES.forEach((m,i)=>patch('monsters',monsterKey(m,i),m)); // 0.85 admin balance overrides
 // 0.52 pacing: AUTO looks for monsters within 14 of where it was switched on (was 8); towns are walked 30% faster.
-export const AUTO_RANGE=14,TOWN_PACE=1.3;
+export const AUTO_RANGE=14,AUTO_SEEK=30,TOWN_PACE=1.3;
 export const OBSTACLES=[
  {x:-7.2,z:-11.5,w:6.4,d:7.3}, // north house, veranda and staircase
  {x:7.2,z:-8.2,w:5.8,d:7.4}, // east house and steps
@@ -157,6 +157,8 @@ export class CombatWorld{
  notice(text){this.emit('notice',{text});}
  select(id){const mob=this.mobs.find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
  nearest(range=AUTO_RANGE){return this.mobs.filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
+ // 0.91 explicit on/off (the button and quests send the state they want, so two quick taps can no longer cross).
+ setAuto(on){return on===this.auto?true:this.toggleAuto();}
  toggleAuto(){if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
@@ -209,7 +211,11 @@ export class CombatWorld{
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);
   if(this.auto&&!stop&&!manual&&this.manualGrace===0){
-   let m=this.target;if(!m||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_RANGE+2){m=this.nearest(AUTO_RANGE);this.targetId=m?.id??null;this.path=[];}
+   let m=this.target;if(!m||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_SEEK+2){m=this.nearest(AUTO_RANGE);
+    // 0.91 nothing left near where AUTO was switched on (e.g. turned on at the respawn yard): take the closest monster
+    // within 30 m of the player and move the hunting spot there.
+    if(!m){m=this.mobs.filter(x=>x.hp>0&&distance(x,p)<=AUTO_SEEK).sort((a,b)=>distance(a,p)-distance(b,p))[0]??null;if(m)this.anchor={x:m.x,z:m.z};}
+    this.targetId=m?.id??null;this.path=[];}
    if(m){
     // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
     this.autoCast=Math.max(0,this.autoCast-dt);

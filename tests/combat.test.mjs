@@ -28,9 +28,11 @@ test('auto reaches a target, damages it and counts a kill; manual input override
  w.update(.05,{x:-1,z:0});assert.ok(w.player.x<x);assert.ok(w.manualGrace>0);assert.equal(w.path.length,0);
  tick(w,14);assert.ok(w.kills>=1);assert.ok(walkable(w.player.x,w.player.z));
 });
-test('auto never chases a distant monster outside the bounded scan area',()=>{
- const w=new CombatWorld();w.mobs.forEach(m=>Object.assign(m,{x:12,z:-10,home:{x:12,z:-10}}));
- w.toggleAuto();const start={x:w.player.x,z:w.player.z};tick(w,3);assert.equal(w.player.x,start.x);assert.equal(w.player.z,start.z);
+test('auto seeks a monster up to 30 m away (0.91) but never chases one beyond that',()=>{
+ const far=new CombatWorld();far.mobs.forEach(m=>Object.assign(m,{x:30,z:-25,home:{x:30,z:-25}}));
+ far.toggleAuto();const start={x:far.player.x,z:far.player.z};tick(far,3);assert.equal(far.player.x,start.x);assert.equal(far.player.z,start.z);
+ const near=new CombatWorld();near.mobs.forEach(m=>Object.assign(m,{x:12,z:-10,home:{x:12,z:-10}}));
+ near.toggleAuto();const from={x:near.player.x,z:near.player.z};tick(near,3);assert.ok(Math.hypot(near.player.x-from.x,near.player.z-from.z)>.5,'walks toward the monster 16 m away');
 });
 test('a skill with no target is cast at the air, and cooldown prevents repeated damage',()=>{
  const w=new CombatWorld();w.mobs.forEach(m=>Object.assign(m,{x:12,z:-10}));const mp=w.player.mp,far=w.mobs[0].hp;

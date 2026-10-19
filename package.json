@@ -7,10 +7,13 @@
     "build": "node build-vercel.mjs",
     "check:content": "node scripts/validate-content.mjs",
     "server": "node server/host.js",
+    "bot": "node --env-file=.env server/discord-bot.js",
+    "bot:setup": "node --env-file=.env server/discord-setup.js",
     "test:multiplayer": "node --test tests/multiplayer*.test.mjs",
     "test:rules": "node scripts/test-rules.mjs"
   },
   "dependencies": {
+    "discord.js": "^14.27.0",
     "firebase-admin": "^14.5.0",
     "ws": "^8.22.0"
   },

@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=70';
 import {TRADABLE} from './market.js?v=70';
 import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket} from './market-board.js?v=70';
-import {iconStyle} from './bag-ui.js?v=64';
+import {iconStyle} from './bag-ui.js?v=83';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

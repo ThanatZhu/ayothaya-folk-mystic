@@ -4,7 +4,7 @@ import {itemDef} from './items.js?v=70';
 import {MONSTER_TYPES} from './combat-core.js?v=72.1';
 import {awardExperience} from './experience.js?v=73';
 import {dailyBounties,normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd,ALBUM_CARDS,ALBUM_MILESTONES} from './bounty.js?v=64';
-import {iconStyle} from './bag-ui.js?v=64';
+import {iconStyle} from './bag-ui.js?v=83';
 import {openHudPanel} from './hud-panels.js?v=34';
 const $=id=>document.getElementById(id);
 const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;

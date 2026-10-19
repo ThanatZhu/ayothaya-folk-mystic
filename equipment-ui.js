@@ -61,5 +61,7 @@ export function createEquipmentUI({account,game,hero,onArtwork}){
   if(panel.open&&frames&&!document.hidden){const frame=motionFrame(mode,mode==='attack'?(ms/1000)%1.4:ms/1000,null,reduced.matches,person.classId);context.clearRect(0,0,320,320);context.imageSmoothingEnabled=false;drawCharacterFrame(context,frames[frame],32,12);}
   requestAnimationFrame(draw);
  }
- requestAnimationFrame(draw);return {open};
+ // 0.83 the bag and the character card show the same dressed character (idle loop) on their own 320 px canvas.
+ function paint(ctx,ms=performance.now()){const img=frames?.[motionFrame('idle',ms/1000,null,reduced.matches,person.classId)]??frames?.[0];if(!img)return false;ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;drawCharacterFrame(ctx,img,32,12);return true;}
+ requestAnimationFrame(draw);return {open,paint};
 }

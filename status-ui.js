@@ -3,7 +3,7 @@
 import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=72';
 import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=70';
 import {baseProgress} from './experience.js?v=73';
-import {iconStyle} from './bag-ui.js?v=64';
+import {iconStyle} from './bag-ui.js?v=83';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -47,7 +47,7 @@ export function createStatusUI({game,account,bagUI}){
   if(game.online){world.unequipGear?.(slot);return;}
   try{const r=unequipGear(bagUI.bag(),local.gear,slot);local.gear=r.gear;bagUI.setLocal(r.bag);save();applyOffline();render(true);}catch(e){fail(e.message);}
  }
- bagUI.onWear=wear;
+ bagUI.onWear=wear;bagUI.gearView=()=>view().gear;bagUI.onTakeOff=takeOff; // 0.83 the bag shows and removes worn gear
 
  const menuButton=document.createElement('button');menuButton.id='menu-status';menuButton.type='button';menuButton.title='สถานะ';menuButton.setAttribute('aria-label','สถานะ');
  menuButton.innerHTML='<i><b class="status-glyph" aria-hidden="true">✦</b></i><span>สถานะ</span>';

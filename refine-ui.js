@@ -3,7 +3,7 @@ import {SHOPS,ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=70';
 import {REFINE_RATE,REFINE_ORE,REFINE_MAX,LEK_LAI_BONUS,refineCost,refineGear} from './refine.js?v=01';
 import {affinityOf,ELEMENT_NAME,SIZE_NAME} from './affinity.js?v=02';
 import {MONSTER_TYPES} from './combat-core.js?v=72.1';
-import {iconStyle} from './bag-ui.js?v=64';
+import {iconStyle} from './bag-ui.js?v=83';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

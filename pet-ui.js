@@ -5,7 +5,7 @@ import {ITEM_ERRORS,itemDef} from './items.js?v=70';
 import {PETS,FOOD,LOYAL,INTIMACY_MAX,mood,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from './pets.js?v=01';
 import {MONSTER_TYPES,groundHeight} from './combat-core.js?v=72.1';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {iconStyle} from './bag-ui.js?v=64';
+import {iconStyle} from './bag-ui.js?v=83';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

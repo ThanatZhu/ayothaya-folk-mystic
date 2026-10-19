@@ -1,13 +1,14 @@
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
-import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop} from './story-quests.js?v=73';
+import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems} from './story-quests.js?v=98';
 import {MONSTER_TYPES} from './combat-core.js?v=97';
-import {awardExperience} from './experience.js?v=73';
+import {awardExperience,baseProgress} from './experience.js?v=73';
 
 const RESUME='ayothaya-story-autowalk';
 const $=id=>document.getElementById(id);
 
 export function createStoryUI({game,worldUI,map,catalog,account}){
+ const baseLevel=()=>baseProgress(game.world).level;
  const world=game.world,key='ayothaya-story:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeStory(JSON.parse(localStorage.getItem(key)));}catch{return normalizeStory(null);}};
  let local=read();
@@ -19,12 +20,13 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(game.online)return null;
   const r=storyEvent(local,event);if(!r.changed)return r;
   local=r.state;save();
-  if(r.reward){world.emit('experience',awardExperience(world,r.reward.baseXp,r.reward.jobXp));world.emit('reward',{coins:r.reward.coins??0,items:r.reward.items??[]});}
+  if(r.reward){world.emit('experience',awardExperience(world,r.reward.baseXp,r.reward.jobXp));world.emit('reward',{coins:r.reward.coins??0,items:rewardItems(r.reward,account?.character?.classId??world.profession.id)});}
   if(r.completed)world.notice('เควสสำเร็จ · '+r.completed.title);
   render();return r;
  }
  game.onEvent(e=>{
   if(e.type==='defeat'&&!game.online){const mob=world.mobs.find(m=>m.id===e.id);const id=mob&&MONSTER_TYPES[mob.type]?.id;if(id)offline({type:'defeat',monster:id,mapId:map.id});}
+  if(e.type==='storyDo'&&!game.online)offline({type:'do',action:e.action}); // 0.98 offline tutorial actions (craft, pet, shop)
   if(e.type==='story'){if(e.story)world.story=e.story;if(e.completed)world.notice('เควสสำเร็จ · '+e.completed);render();}
  });
  // Talking to the quest NPC shows the story line instead of their idle chatter.
@@ -36,13 +38,15 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  };
 
  // Tracker panel (own stylesheet, so game.html needs no edit).
- if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=01';css.dataset.storyUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=98';css.dataset.storyUi='';document.head.append(css);}
  const panel=document.createElement('section');panel.id='quest-tracker';panel.setAttribute('aria-label','เควสเนื้อเรื่อง');
- panel.innerHTML='<small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><button id="quest-go" type="button"></button>';
+ panel.innerHTML='<small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
  document.body.append(panel);
  function hintText(obj){
   const s=obj.step,where=s.mapId!==map.id?' · '+(catalog.maps.find(m=>m.id===s.mapId)?.name??''):'';
   if(s.type==='defeat'){const name=MONSTER_TYPES.find(t=>t.id===s.monster)?.name??s.monster;return `${s.hint} ${name} ${obj.count}/${s.count}${where}`;}
+  if(s.type==='level')return `${s.hint} (ตอนนี้ Lv.${baseLevel()})`;
+  if(s.type==='do'&&!s.mapId)return s.hint;
   return s.hint+where;
  }
  let markedNpc=null,shown='';
@@ -52,10 +56,11 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   $('quest-chapter').textContent=obj?.quest?.chapter??STORY_TITLE;
   $('quest-title').textContent=obj?obj.quest.title+` (${obj.stepNumber}/${obj.steps})`:'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';
   $('quest-hint').textContent=obj?hintText(obj):'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';
+  $('quest-how').textContent=obj?.step.how??'';$('quest-how').hidden=!obj?.step.how;
   $('quest-go').hidden=!obj;
   $('quest-go').textContent=game.walking&&walking?'■ หยุด':'▶ เดินไป';
   // A gold "!" over the NPC the story wants next.
-  const want=obj?.step.type==='talk'&&obj.step.mapId===map.id?obj.step.npc:null;
+  const want=(obj?.step.type==='talk'||obj?.step.type==='do')&&obj.step.npc&&obj.step.mapId===map.id?obj.step.npc:null;
   if(markedNpc!==want){worldUI.npcLabel(markedNpc)?.classList.remove('quest-npc');worldUI.npcLabel(want)?.classList.add('quest-npc');markedNpc=want;}
  }
 
@@ -63,14 +68,17 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  let walking=false;
  function go(){
   const obj=currentObjective(state());if(!obj){world.notice('จบเนื้อเรื่องบทที่ 1 แล้ว');return;}
-  const s=obj.step;walking=true;
+  const s=obj.step;
+  // do / level steps without a place: the tracker already says how; repeat it as a toast
+  if((s.type==='do'||s.type==='level')&&!s.mapId){world.notice(s.how??s.hint);return;}
+  walking=true;
   const done=()=>{walking=false;render();};
   if(s.mapId!==map.id){
    const hop=nextHop(catalog.maps,map.id,s.mapId),portal=map.portals.find(p=>p.to===hop);
    if(!portal){done();world.notice('ยังหาทางไปไม่เจอ');return;}
    if(map.safe){try{sessionStorage.setItem(RESUME,'1');}catch{}done();worldUI.travelTo(hop);return;} // town: ride straight out of the gate
    game.walkTo({x:portal.x,z:portal.z},{radius:1.2,kind:'quest',onArrive:()=>{try{sessionStorage.setItem(RESUME,'1');}catch{}done();worldUI.travelTo(hop);},onFail:()=>{done();world.notice('เดินไปจุดเดินทางไม่ได้');}});
-  }else if(s.type==='talk'){
+  }else if(s.type==='talk'||s.type==='do'){
    if(!worldUI.talkTo(s.npc))world.notice('ไม่พบ '+s.npc+' ในแผนที่นี้');
    walking=game.walking;
   }else if(s.type==='defeat'){
@@ -89,5 +97,10 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  let resume=false;try{resume=sessionStorage.getItem(RESUME)==='1';sessionStorage.removeItem(RESUME);}catch{}
  // Online progress arrives with the first snapshot; give it a moment before resuming the walk on the new map.
  if(resume)setTimeout(go,1600);
- return {update(){if(walking&&!game.walking)walking=false;render();}};
+ // Offline only: do/level steps that are already true finish by themselves (the server does this online).
+ let checked=0;
+ const api={context:null,update(){if(walking&&!game.walking)walking=false;
+  if(!game.online&&api.context&&performance.now()-checked>1000){checked=performance.now();for(let i=0;i<30&&offline({type:'check',ctx:api.context()})?.changed;i++);}
+  render();}};
+ return api;
 }

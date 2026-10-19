@@ -11,26 +11,36 @@ export const MENTORS=[
  {id:'nun-master',classId:'acolyte',name:'แม่ชีบุญเรือน',title:'ครูสายเมตตา',x:51,z:-36,sheet:'masters-mystic',row:3,color:'#e8e3cb',text:'เมตตาคือการลงมือช่วยผู้อื่น พระและแม่ชีเรียนบททดสอบเดียวกัน เลือกเส้นทางที่ใจเจ้าพร้อมเถิด'}
 ];
 export const mentorById=id=>MENTORS.find(m=>m.id===id);
+// 0.98 the job trials are a real test: hunt outside the walls, bring materials and cowries, and defeat the trial boss.
+// Items, cowries and the boss are checked by the realm server (it owns the bag); offline guests only do the hunt.
+export const TRIAL={
+ class:{kills:40,boss:'mill-keeper',bossName:'หุ่นฟางพันเชือก (โรงสีใต้เงาจันทร์)',coins:2000,items:[['tough-vine',10],['betel-nut',10],['lantern-paper',5]]},
+ master:{kills:100,boss:'marsh-ape',bossName:'พญาวานรบึง (บึงบัวต้องมนตร์)',coins:10000,items:[['spirit-thread',10],['palm-leaf',3],['lotus-seed',20]]},
+};
+export function trialItemsShort(bag,trial){const items=bag?.items??{};return [...trial.items.filter(([id,n])=>(items[id]??0)<n),...((bag?.coins??0)<trial.coins?[['coins',trial.coins]]:[])];}
 export function trainingStatus(character,training,traveler,mentorId){
  const mentor=mentorById(mentorId);if(!mentor)throw new Error('trainer-invalid');
  const level=progression(traveler).level,tier=character.classId==='novice'?'class':'master',required=tier==='class'?CLASS_LEVEL:JOB_LEVEL;
- const target=tier==='class'?5:15,own=training?.classId===mentor.classId&&training?.tier===tier;
+ const trial=TRIAL[tier],target=trial.kills,own=training?.classId===mentor.classId&&training?.tier===tier;
  const progress=own?Math.min(target,Math.max(0,(traveler.kills??0)-training.startKills)):0;
- return {mentor,level,tier,required,target,progress,own,training:training??null,completed:!!character.jobId,wrongClass:character.classId!=='novice'&&character.classId!==mentor.classId,eligible:advanceReady(traveler,character.classId,character.jobId??'').ok,jobLevel:advanceReady(traveler,character.classId,character.jobId??'').job.level,jobCap:advanceReady(traveler,character.classId,character.jobId??'').job.cap,branches:JOBS[mentor.classId]};
+ return {mentor,level,tier,required,target,progress,own,training:training??null,completed:!!character.jobId,wrongClass:character.classId!=='novice'&&character.classId!==mentor.classId,eligible:advanceReady(traveler,character.classId,character.jobId??'').ok,jobLevel:advanceReady(traveler,character.classId,character.jobId??'').job.level,jobCap:advanceReady(traveler,character.classId,character.jobId??'').job.cap,branches:JOBS[mentor.classId],trial,bossDone:own&&!!training.bossDone};
 }
 // Shared quest rules. Online callers supply only an action and mentor/branch IDs;
 // the realm supplies position, level, kill count and the saved quest baseline.
-export function trainingAction({character,training,state},mentorId,action,jobId=''){
+export function trainingAction({character,training,state},mentorId,action,jobId='',bag=null){
  const s=trainingStatus(character,training,state.traveler,mentorId),m=s.mentor,p=state.position;
  if(state.mapId!=='ayutthaya'||!p||Math.hypot(p.x-m.x,p.z-m.z)>3||state.traveler.hp<=0)throw new Error('trainer-distance');
  if(!['accept','cancel','complete'].includes(action))throw new Error('trainer-action');
  if(s.completed)throw new Error('trainer-finished');if(s.wrongClass)throw new Error('trainer-class');if(!s.eligible)throw new Error('trainer-level');
- if(action==='accept'){if(training)throw new Error('trainer-active');return {character,training:{classId:m.classId,tier:s.tier,startKills:state.traveler.kills},advanced:false};}
+ if(action==='accept'){if(training)throw new Error('trainer-active');return {character,training:{classId:m.classId,tier:s.tier,startKills:state.traveler.kills,boss:s.trial.boss},advanced:false};}
  if(!s.own)throw new Error('trainer-quest');
  if(action==='cancel')return {character,training:null,advanced:false};
  if(s.progress<s.target)throw new Error('trainer-incomplete');
+ let paid=null;
+ if(bag){if(!training.bossDone)throw new Error('trainer-boss');if(trialItemsShort(bag,s.trial).length)throw new Error('trainer-items');
+  paid={...bag,coins:bag.coins-s.trial.coins,items:{...bag.items}};for(const [id,n] of s.trial.items){paid.items[id]-=n;if(!paid.items[id])delete paid.items[id];}}
  if(s.tier==='master'&&!s.branches.some(j=>j.id===jobId))throw new Error('invalid-job');
- return {character:{...character,classId:m.classId,jobId:s.tier==='master'?jobId:''},training:null,advanced:true};
+ return {character:{...character,classId:m.classId,jobId:s.tier==='master'?jobId:''},training:null,advanced:true,...(paid?{bag:paid}:{})};
 }
 
 export const CITIZEN_STYLES=[

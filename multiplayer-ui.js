@@ -1,7 +1,7 @@
 import {openHudPanel} from './hud-panels.js?v=34';
-import {iconStyle} from './bag-ui.js?v=97.4';
+import {iconStyle} from './bag-ui.js?v=98';
 import {emblemId,emoteId} from './items.js?v=94';
-import {createPetView} from './pet-ui.js?v=62';
+import {createPetView} from './pet-ui.js?v=98';
 import * as THREE from 'three';
 import {groundHeight} from './combat-core.js?v=97';
 import {MultiplayerClient} from './multiplayer-client.js?v=97.3';

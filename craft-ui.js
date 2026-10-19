@@ -1,7 +1,7 @@
 // 0.94 craft window, opened from the bag header. Online the server crafts; offline the local bag does.
 import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=94';
 import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=94';
-import {iconStyle} from './bag-ui.js?v=97.4';
+import {iconStyle} from './bag-ui.js?v=98';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -21,7 +21,7 @@ export function createCraftUI({game,bagUI}){
  $('bag-coins')?.after(open);
  function make(out,times){
   if(game.online){world.market?.('craft',{item:out,times});return;}
-  try{const r=craft(bagUI.bag(),out,times);bagUI.setLocal(r.bag);world.notice('คราฟต์สำเร็จ · '+itemDef(out).name+' ×'+r.made);render(true);}
+  try{const r=craft(bagUI.bag(),out,times);bagUI.setLocal(r.bag);world.emit('storyDo',{action:'craft'});world.notice('คราฟต์สำเร็จ · '+itemDef(out).name+' ×'+r.made);render(true);}
   catch(e){world.notice(ITEM_ERRORS[e.message]??e.message);}
  }
  game.onEvent(e=>{if(e.type==='crafted')world.notice('คราฟต์สำเร็จ · '+itemDef(e.item).name+' ×'+e.count);});

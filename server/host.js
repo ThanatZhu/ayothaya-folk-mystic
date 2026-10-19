@@ -89,8 +89,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(message.type==='train'){
      if(typeof message.id!=='string'||message.id.length>50)return;
      if(Date.now()-(session.trainedAt??0)<1200){send({type:'training-error',id:message.id,code:'action-rate'});return;}session.trainedAt=Date.now();
-     let result;try{result=trainingAction(realm.record(session.peer,session.lease.record),message.mentor,message.action,message.jobId);}catch(e){send({type:'training-error',id:message.id,code:e.message});return;}
-     session.trainingBusy=true;session.peer.suspended=true;session.peer.input={x:0,z:0,attack:false};session.peer.training=result.training;
+     let result;try{result=trainingAction(realm.record(session.peer,session.lease.record),message.mentor,message.action,message.jobId,session.peer.bag);}catch(e){send({type:'training-error',id:message.id,code:e.message});return;}
+     session.trainingBusy=true;session.peer.suspended=true;session.peer.input={x:0,z:0,attack:false};session.peer.training=result.training;if(result.bag){realm.setBag(session.peer,result.bag);delete result.bag;} // 0.98 trial materials and cowries paid
      if(result.advanced){session.closing=true;session.explicitLeave=true;session.peer.character=result.character;session.peer.world.jobXp=0;session.peer.skills=normalizeSkills(session.peer.skills,result.character.classId);}
      try{await checkpoint(session,result.advanced);send({type:'trained',id:message.id,...result});if(result.advanced){realm.leave(session.peer.id);ws.close(1000,'trained');}else session.peer.suspended=false;}
      catch{session.closing=true;send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}finally{session.trainingBusy=false;}return;

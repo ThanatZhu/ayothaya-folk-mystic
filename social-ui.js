@@ -2,7 +2,7 @@
 // Whisper: "/w ชื่อ ข้อความ" in chat, or the กระซิบ button here (multiplayer-ui.js sends it).
 import {emblemId} from './items.js?v=94';
 import {GUILD_COST,EMBLEMS} from './social.js?v=01';
-import {iconStyle} from './bag-ui.js?v=97.4';
+import {iconStyle} from './bag-ui.js?v=98';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

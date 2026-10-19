@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {CITIZEN_STYLES} from './city-life-data.js?v=73.1';
+import {CITIZEN_STYLES} from './city-life-data.js?v=98';
 import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1';
 import {groundHeight} from './combat-core.js?v=97';
 

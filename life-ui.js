@@ -4,7 +4,7 @@ import {emoteId,itemDef} from './items.js?v=94';
 import {AILMENTS} from './ailments.js?v=01';
 import {claimDaily,DAILY} from './daily.js?v=01';
 import {activeEvent,expRate,surge} from './events.js?v=64';
-import {iconStyle} from './bag-ui.js?v=97.4';
+import {iconStyle} from './bag-ui.js?v=98';
 import {openHudPanel} from './hud-panels.js?v=34';
 import * as THREE from 'three';
 

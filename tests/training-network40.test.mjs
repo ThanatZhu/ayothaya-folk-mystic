@@ -5,6 +5,7 @@ import path from 'node:path';
 import {WebSocket} from 'ws';
 import {LocalStore} from '../server/storage.js';
 import {createHost} from '../server/host.js';
+import {TRIAL} from '../city-life-data.js';
 const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8'));
 test('online teacher uses authoritative level, position and kills; persists quest and releases the session only after class save',async()=>{
  const base=path.resolve('.local-multiplayer');await mkdir(base,{recursive:true});const directory=await mkdtemp(path.join(base,'training40-')),store=await new LocalStore(directory).init(),origin='http://127.0.0.1:8871';
@@ -18,7 +19,10 @@ test('online teacher uses authoritative level, position and kills; persists ques
   Object.assign(peer.world.player,{x:51,z:-46.5});peer.world.baseXp=2856;peer.world.jobXp=1260;peer.world.kills=10;
   await new Promise(r=>setTimeout(r,1250));send('accept','accept');await wait(()=>a.messages.some(m=>m.id==='accept'));assert.equal(store.rows.get(dev.uid).training.startKills,10);
   await new Promise(r=>setTimeout(r,1250));send('early','complete',{kills:999});await wait(()=>a.messages.some(m=>m.id==='early'));assert.equal(a.messages.find(m=>m.id==='early').code,'trainer-incomplete');
-  peer.world.kills=15;await new Promise(r=>setTimeout(r,1250));send('finish','complete');await wait(()=>a.messages.some(m=>m.id==='finish'));assert.equal(a.messages.find(m=>m.id==='finish').advanced,true);const row=store.rows.get(dev.uid);assert.equal(row.character.classId,'boxer');assert.equal(row.state.traveler.baseXp,2856);assert.equal(row.state.traveler.jobXp,0);assert.equal(row.training,null);assert.equal(store.leases.size,0);
+  // 0.98 online the trial also needs its boss and the materials + cowries, which are paid on completion
+  peer.world.kills=10+TRIAL.class.kills;await new Promise(r=>setTimeout(r,1250));send('boss','complete');await wait(()=>a.messages.some(m=>m.id==='boss'));assert.equal(a.messages.find(m=>m.id==='boss').code,'trainer-boss');
+  peer.training={...peer.training,bossDone:true};peer.bag={coins:TRIAL.class.coins+5,items:Object.fromEntries(TRIAL.class.items.map(([id,n])=>[id,n+1]))};
+  await new Promise(r=>setTimeout(r,1250));send('finish','complete');await wait(()=>a.messages.some(m=>m.id==='finish'));assert.equal(a.messages.find(m=>m.id==='finish').advanced,true);const row=store.rows.get(dev.uid);assert.equal(row.character.classId,'boxer');assert.equal(row.state.traveler.baseXp,2856);assert.equal(row.state.traveler.jobXp,0);assert.equal(row.training,null);assert.equal(row.bag.coins,5);assert.ok(TRIAL.class.items.every(([id])=>row.bag.items[id]===1));assert.equal(store.leases.size,0);
   const b=await open(dev.token),welcome=b.messages.find(m=>m.type==='welcome');assert.equal(welcome.snapshot.self.character.classId,'boxer');assert.equal(welcome.snapshot.self.training,null);assert.equal(welcome.snapshot.self.jobXp,0);
  }finally{for(const c of clients)c.terminate();await host.close();assert.ok(path.resolve(directory).startsWith(base+path.sep));await rm(directory,{recursive:true,force:true});}
 });

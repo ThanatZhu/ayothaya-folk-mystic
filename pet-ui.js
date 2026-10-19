@@ -5,7 +5,7 @@ import {ITEM_ERRORS,itemDef} from './items.js?v=94';
 import {PETS,FOOD,LOYAL,INTIMACY_MAX,mood,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from './pets.js?v=01';
 import {MONSTER_TYPES,groundHeight} from './combat-core.js?v=97';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {iconStyle} from './bag-ui.js?v=97.4';
+import {iconStyle} from './bag-ui.js?v=98';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -43,8 +43,8 @@ export function createPetUI({game,account,scene,bagUI}){
   if(game.online)return world.market?.(type,type==='tame'?{target:world.targetId}:type==='hatch'?{item}:{});
   try{
    if(type==='tame'){const mob=world.target;if(!mob)throw new Error('not-tameable');const r=tame(bagUI.bag(),MONSTER_TYPES[mob.type].id,mob);bagUI.setLocal(r.bag);
-    if(r.ok){mob.hp=0;mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;world.targetId=null;}world.emit('tamed',{ok:r.ok,egg:PETS[MONSTER_TYPES[mob.type].id].egg});}
-   else{const r=type==='hatch'?hatch(bagUI.bag(),local,item):type==='petFeed'?feedPet(bagUI.bag(),local):returnPet(bagUI.bag(),local);bagUI.setLocal(r.bag);local=r.pet;save();}
+    if(r.ok){world.emit('storyDo',{action:'pet'});mob.hp=0;mob.dead=MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;world.targetId=null;}world.emit('tamed',{ok:r.ok,egg:PETS[MONSTER_TYPES[mob.type].id].egg});}
+   else{const r=type==='hatch'?hatch(bagUI.bag(),local,item):type==='petFeed'?feedPet(bagUI.bag(),local):returnPet(bagUI.bag(),local);bagUI.setLocal(r.bag);local=r.pet;save();if(type==='hatch')world.emit('storyDo',{action:'pet'});}
   }catch(e){fail(e.message);}
   render(true);
  }

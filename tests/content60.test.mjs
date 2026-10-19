@@ -23,7 +23,7 @@ test('album: each card counts once, milestones pay when crossed', () => {
  a=albumAdd(a.album,[ALBUM_CARDS[2]]);assert.deepEqual(a.milestones.map(m=>m.count),[3]);assert.equal(albumAdd(a.album,[ALBUM_CARDS[0]]).added,0);
 });
 test('chapter 2 continues after chapter 1 and the marsh is reached from the mill', () => {
- assert.ok(STORY.length>=12);assert.equal(STORY[8].chapter,'บทที่ 2 · โคมผีกลางบึง');
+ assert.ok(STORY.length>=21);assert.equal(STORY.find(q=>q.chapter)?.chapter,'บทที่ 2 · โคมผีกลางบึง');
  assert.ok(catalog.maps.find(m=>m.id==='moonlit-mill').portals.some(p=>p.to==='lotus-marsh'));
 });
 test('server: bounty claim only in a town, pays EXP + coins; first card fills the album', () => {

@@ -3,7 +3,7 @@
 import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=94';
 import {ITEMS,ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=94';
 import {baseProgress} from './experience.js?v=73';
-import {iconStyle} from './bag-ui.js?v=97.4';
+import {iconStyle} from './bag-ui.js?v=98';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -82,5 +82,7 @@ export function createStatusUI({game,account,bagUI}){
  }
  applyOffline();render(true);
  // Refine window hooks (offline gear lives here).
- return {update(){applyOffline();render();},view,gear:()=>game.online?normalizeGear(world.gear):local.gear,setGear(g){local.gear=normalizeGear(g);save();applyOffline();render(true);},who};
+ // 0.98 what the tutorial quests can see (offline; the realm builds the same online)
+ const storyContext=()=>{const g=view().gear,worn=Object.values(g).filter(Boolean).map(id=>itemDef(id));return {level:who().level,weapon:!!g.weapon,refined:worn.some(d=>d?.refine>0),carded:worn.some(d=>d?.card),job:classId!=='novice',skilled:(world.skillLevels??[]).reduce((n,v)=>n+v,0)>2,auto:!!world.auto,guild:false};};
+ return {storyContext,update(){applyOffline();render();},view,gear:()=>game.online?normalizeGear(world.gear):local.gear,setGear(g){local.gear=normalizeGear(g);save();applyOffline();render(true);},who};
 }

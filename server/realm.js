@@ -11,7 +11,7 @@ import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalid
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
 import {normalizeSkills,upgradeSkill,availablePoints} from '../skill-progress.js';
-import {normalizeStory,storyEvent} from '../story-quests.js';
+import {normalizeStory,storyEvent,rewardItems} from '../story-quests.js';
 import {FRIEND_MAX,GUILD_MAX,GUILD_COST,SOCIAL_ERRORS,cleanName,validGuildName,validEmblem,normalizeFriends} from '../social.js';
 import {claimDaily,thaiDay} from '../daily.js';
 import {normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd} from '../bounty.js';
@@ -24,6 +24,7 @@ import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,foodBuff,SHOPS,ITEM_ERROR
 import {craft} from '../crafting.js';
 import {WAR,warWindow,warLabel} from '../guild-war.js';
 import {ARENA,arenaWeek,arenaDay,arenaEnds,byPoints} from '../arena.js';
+import {TRIAL} from '../city-life-data.js';
 const SERVER_IDS=['server-1','server-2'],SERVER_NAME={'server-1':'เซิร์ฟ 1','server-2':'เซิร์ฟ 2'};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
@@ -71,7 +72,7 @@ export class RealmServer{
   peer.stats=normalizeStats(record.stats);peer.gear=normalizeGear(record.gear);peer.statSig='';peer.gearAt=-Infinity;this.refreshStats(peer);
   world.hurt=(mob,damage,color)=>this.hurt(peer,mob,damage,color);
   this.peers.set(peer.id,peer);room.peers.add(peer.id);
-  this.storyProgress(peer,{type:'enter',mapId:map.id});this.arenaClaim(peer);
+  this.storyProgress(peer,{type:'enter',mapId:map.id});this.storyCheck(peer);this.arenaClaim(peer);
   // 0.48 daily login: first join of the Thai day grants the next reward of the 7-day cycle.
   const daily=claimDaily(peer.daily,this.now());if(daily){peer.daily=daily.daily;this.grantLoot(peer,daily.reward);peer.saveNow=true;world.emit('daily',{streak:daily.streak,reward:daily.reward});}
   send({type:'welcome',id:peer.id,room:roomId,capacity:this.capacity,history:copy(room.history),snapshot:this.snapshot(peer)});this.social(room);return peer;
@@ -114,7 +115,7 @@ export class RealmServer{
   if(m.type==='craft'){
    if(now-(p.craftAt??-Infinity)<300)return this.itemFail(p,'craft-rate');p.craftAt=now;
    let r;try{r=craft(p.bag,m.item,m.times);}catch(e){return this.itemFail(p,e.message);}
-   this.setBag(p,r.bag);w.emit('crafted',{item:m.item,count:r.made});return true;
+   this.setBag(p,r.bag);w.emit('crafted',{item:m.item,count:r.made});this.storyProgress(p,{type:'do',action:'craft'});return true;
   }
   if(m.type==='duel'){
    const t=this.peers.get(m.target);if(!t||t===p||t.suspended||t.room!==p.room||p.room.map.safe)return this.error(p,'duel-invalid');
@@ -135,8 +136,8 @@ export class RealmServer{
     if(m.type==='tame'){const mob=p.room.mobs.find(x=>x.id===m.target);if(!mob||distance(mob,w.player)>8)throw new Error('not-tameable');
      const id=MONSTER_TYPES[mob.type].id,r=tame(p.bag,id,mob);this.setBag(p,r.bag);
      if(r.ok){mob.hp=0;mob.dead=p.room.map.instance?1e9:MONSTER_TYPES[mob.type].respawn??12;mob.aggro=false;p.room.contributors.delete(mob.id);p.saveNow=true;}
-     w.emit('tamed',{ok:r.ok,egg:PETS[id].egg,x:mob.x,z:mob.z});}
-    else if(m.type==='hatch'){const r=hatch(p.bag,p.pet,m.item);this.setBag(p,r.bag);p.pet=r.pet;p.saveNow=true;}
+     w.emit('tamed',{ok:r.ok,egg:PETS[id].egg,x:mob.x,z:mob.z});if(r.ok)this.storyProgress(p,{type:'do',action:'pet'});}
+    else if(m.type==='hatch'){const r=hatch(p.bag,p.pet,m.item);this.setBag(p,r.bag);p.pet=r.pet;p.saveNow=true;this.storyProgress(p,{type:'do',action:'pet'});}
     else if(m.type==='petFeed'){const r=feedPet(p.bag,p.pet);this.setBag(p,r.bag);p.pet=r.pet;}
     else{const r=returnPet(p.bag,p.pet);this.setBag(p,r.bag);p.pet=null;p.saveNow=true;}
    }catch(e){return this.itemFail(p,e.message);}
@@ -179,7 +180,7 @@ export class RealmServer{
    if(!shop||shop.mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'shop-too-far');
    const qty=m.count??1;
    try{const before=p.bag.coins,next=m.type==='buy'?buy(p.bag,npc.name,m.item,qty):sell(p.bag,m.item,qty),spent=m.type==='buy'?before-next.coins:0,off=Math.floor(spent*tradePerks(p.tradeXp).npcDiscount);this.setBag(p,off?{...next,coins:next.coins+off}:next);}catch(e){return this.itemFail(p,e.message);}
-   w.emit('trade',{kind:m.type,item:m.item,count:qty,coins:p.bag.coins});return true;
+   w.emit('trade',{kind:m.type,item:m.item,count:qty,coins:p.bag.coins});this.storyProgress(p,{type:'do',action:'shop'});return true;
   }
   if(m.type==='questTalk'){
    // Story talk only counts next to that NPC in this room; the shared rules decide whether it advances anything.
@@ -339,7 +340,7 @@ export class RealmServer{
  endDuel(winner,loser,reason,draw=false){
   for(const x of [winner,loser]){if(!x?.duel)continue;if(x.world.targetId===x.world.foe?.id)x.world.targetId=null;x.duel=null;x.world.foe=null;}
   const names=[winner,loser].map(x=>x?.character.name??'อีกฝ่าย'),room=(winner??loser)?.room;
-  this.arenaScore(winner,loser,draw);
+  this.arenaScore(winner,loser,draw);for(const x of [winner,loser])if(x)this.storyProgress(x,{type:'do',action:'duel'});
   if(draw){for(const x of [winner,loser])x?.world.notice('🤝 ประลองเสมอ · '+reason);return;}
   winner?.world.notice('🏆 ชนะการประลอง! · '+reason);loser?.world.notice('💢 แพ้การประลอง · '+reason);
   for(const id of room?.peers??[]){const a=this.peers.get(id);if(a!==winner&&a!==loser)a.world.notice('⚔️ '+names[0]+' ชนะ '+names[1]+' ในการประลอง');}
@@ -363,7 +364,7 @@ export class RealmServer{
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
   const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort(),rate=expRate(this.now(),p.room.map.id)*mobXp(mob),event=activeEvent(this.now()),rolls=(mob.leader?LEADER.loot:1)*(surgeOn(this.now(),p.room.map.id)?2:1); // 0.50 event/weekend EXP + token drops
-  ids.forEach((id,i)=>{const a=this.peers.get(id);a.world.kills++;const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,split(Math.round(reward.baseXp*rate)),split(Math.round(reward.jobXp*rate))));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls);loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)));this.grantLoot(a,loot,mob);}});
+  ids.forEach((id,i)=>{const a=this.peers.get(id);a.world.kills++;if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,split(Math.round(reward.baseXp*rate)),split(Math.round(reward.jobXp*rate))));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls);loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)));this.grantLoot(a,loot,mob);}});
   p.room.contributors.delete(mob.id);
   for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id){a.world.targetId=null;a.world.path=[];}}
  }
@@ -377,6 +378,7 @@ export class RealmServer{
   for(const [id,v] of this.invites)if(v.expires<this.now())this.invites.delete(id);
   for(const party of [...this.parties.values()])for(const [uid,until] of party.pending??[])if(until<this.now()){party.pending.delete(uid);if(party.members.size+party.pending.size<2){for(const id of party.members){const a=this.peers.get(id);a.partyId=null;this.social(a.room);}this.parties.delete(party.id);}}
   this.warTick();
+  if(this.tickId%20===0)for(const p of this.peers.values())if(!p.suspended)this.storyCheck(p);
   if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
   for(const p of this.peers.values()){if(p.suspended)continue;petTick(p.pet,dt);p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);p.world.update(dt,p.input,{monsters:false});this.autoPotion(p);}
   for(const room of this.rooms.values()){
@@ -399,9 +401,15 @@ export class RealmServer{
  storyProgress(p,event){
   const r=storyEvent(p.story,event);if(!r.changed)return false;p.story=r.state;
   p.world.emit('story',{npc:event.npc??null,say:r.say??null,completed:r.completed?.title??null,story:r.state});
-  if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:r.reward.items??[]});}
+  if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:rewardItems(r.reward,p.character.classId)});p.saveNow=true;}
   return true;
  }
+ // 0.98 tutorial steps that are already true (wearing a weapon, a refined or carded piece, a class, a level, AUTO on,
+ // a guild) finish on their own; checked once a second and right after joining.
+ storyContext(p){const g=p.gear??{},worn=Object.values(g).filter(Boolean).map(id=>itemDef(id));
+  return {level:this.who(p).level,weapon:!!g.weapon,refined:worn.some(d=>d?.refine>0),carded:worn.some(d=>d?.card),job:p.character.classId!=='novice',
+   skilled:(p.world.skillLevels??[]).reduce((n,v)=>n+v,0)>2,auto:!!p.world.auto,guild:!!this.guildOf(p)};}
+ storyCheck(p){for(let i=0;i<30&&this.storyProgress(p,{type:'check',ctx:this.storyContext(p)});i++);}
  // ---- 0.70 central market: consignment shops (open while the owner is offline), buying stores, search, tax, prices.
  shopList(serverId){return [...this.shops.values()].filter(s=>s.serverId===serverId).map(publicShop);}
  shopsChanged(serverId){const list=this.shopList(serverId);for(const p of this.peers.values())if(p.serverId===serverId&&!p.suspended&&p.room.map.id===MARKET_ZONE.mapId)p.world.emit('shops',{list});}

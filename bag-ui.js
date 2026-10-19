@@ -54,7 +54,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  }
  function trade(type,npc,id,qty){
   if(game.online){world.trade?.(type,npc,id,qty);return;}
-  try{local=type==='buy'?buy(local,npc,id,qty):sell(local,id,qty);save();world.notice((type==='buy'?'ซื้อ ':'ขาย ')+itemLabel([{id,count:qty}])+' · เหลือเบี้ย '+local.coins);render();}catch(e){fail(e.message);}
+  try{local=type==='buy'?buy(local,npc,id,qty):sell(local,id,qty);save();world.emit('storyDo',{action:'shop'});world.notice((type==='buy'?'ซื้อ ':'ขาย ')+itemLabel([{id,count:qty}])+' · เหลือเบี้ย '+local.coins);render();}catch(e){fail(e.message);}
  }
 
  // Menu button (appended to the travel-journal menu) and the bag window.

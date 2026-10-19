@@ -1,7 +1,7 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=70';
-import {createMentorUI} from './mentor-ui.js?v=73';
+import {createMentorUI} from './mentor-ui.js?v=98';
 import * as THREE from 'three';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=94';
 
@@ -9,7 +9,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
  const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0,lastBig=0;
- const mentors=createMentorUI({game,account});
+ const mentors=createMentorUI({game,account,inTown:()=>map.id==='ayutthaya'});
  function endTalk(){if(conversation)conversation.talking=false;conversation=null;$('npc-dialog').hidden=true;game.clearInput();}
  if(!account)try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}
  document.title=map.name+' · อโยธยา Folk Mystic';$('status').textContent=map.name+(map.safe?' · เขตปลอดภัย':' · นอกเมือง');

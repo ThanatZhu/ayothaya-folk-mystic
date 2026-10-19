@@ -63,6 +63,11 @@ export function dropInvalidGear(bag,gear,who){
 
 // Everything combat needs, from level + class + stats + worn gear. At Lv1 with no stats/gear it equals the
 // pre-0.43 numbers (140 HP, 100 MP, class damage, no defence), so existing balance is the floor.
+// 0.72 combat power for the leaderboard: one number from damage per second, survivability, evasion and level.
+export function combatPower(d,level=1){
+ if(!d)return 0;const dmg=Math.max(d.atk??0,d.matk??0)*(1+(d.crit??0)*.5)/Math.max(.5,d.delay??1);
+ return Math.round(dmg*6+(d.maxHp??0)*.6+(d.maxMp??0)*.2+(d.def??0)*12+(d.flee??0)*1500+level*25);
+}
 export function deriveStats({level=1,classId='novice',stats,gear,pet=null}){
  const s=normalizeStats(stats),g=normalizeGear(gear),worn=GEAR_SLOTS.map(k=>g[k]&&itemDef(g[k])).filter(Boolean);
  // Refine: weapons +max(2, 8% of base) ATK/MATK per level, armor +1 DEF per level.

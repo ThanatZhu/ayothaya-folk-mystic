@@ -49,3 +49,15 @@ test('server: a consignment shop keeps selling after its owner logs out, and the
  assert.equal(back.bag.coins-sellerCoins,291);assert.equal(back.bag.items['rat-tooth'],2);assert.equal(realm.shops.size,0);assert.ok(saved.includes('del'));
  assert.equal(realm.record(back,{state:initialSave()}).trade.xp,300);
 });
+
+test('0.72 leaderboard: ranked by combat power, offline players kept, my rank reported', async () => {
+ const {combatPower,deriveStats}=await import('../character-stats.js');
+ assert.ok(combatPower(deriveStats({level:20,classId:'swordsman'}),20)>combatPower(deriveStats({level:1,classId:'swordsman'}),1));
+ const realm=new RealmServer({catalog});const got=[];
+ const join=(uid,classId)=>realm.join({uid,serverId:'server-1',slotId:'slot-1',record:{character:{name:uid,gender:'male',classId},state:initialSave(),daily:{day:'2099-01-01',streak:1}},send:m=>got.push([uid,m])});
+ const a=join('aa','novice'),b=join('bb','swordsman');realm.snapshot(a);realm.snapshot(b);
+ b.world.baseXp=5000;realm.snapshot(b);realm.leave(b.id);
+ assert.equal(realm.receive(a.id,{type:'leaderboard',seq:1}),true);
+ const e=a.world.events.find(v=>v.type==='leaderboard');assert.ok(e);
+ assert.deepEqual(e.rows.map(r=>r.name),['bb','aa']);assert.equal(e.me.rank,2);assert.ok(e.rows[0].power>e.rows[1].power);
+});

@@ -12,7 +12,7 @@ const coins=n=>icon('cowrie','item-icon small')+(n??0).toLocaleString('th-TH');
 const TITLES={storage:'คลังเก็บของ · ลุงเรือง',pick:'แลกของกับผู้เล่น',ask:'คำขอแลกของ',trade:'แลกของ',stall:'ตั้งแผงขายของ',market:'ตลาด · แผงผู้เล่น'};
 
 export function createMarketUI({game,map,account,bagUI}){
- if(!document.querySelector('link[data-market-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='market-ui.css?v=70';css.dataset.marketUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-market-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='market-ui.css?v=72';css.dataset.marketUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-storage:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  let local;try{local=normalizeStorage(JSON.parse(localStorage.getItem(key)));}catch{local=normalizeStorage(null);}
  let remote=normalizeStorage(null),npc=null,view=null,trade=null,ask=null,players=[],stalls=[],shown='';

@@ -243,3 +243,5 @@ body.field-hud.hud63 .hud63-hidden{display:none!important}
 body.field-hud.hud63 #menu-market i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 60% 66.667%/600% 400% no-repeat}
 body.field-hud.hud63 #menu-market i{position:relative}
 body.field-hud.hud63.chat-typing #online-dock #dock-preview{display:none}
+body.field-hud.hud63 #menu-rank i{position:relative}
+body.field-hud.hud63 #menu-rank i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 100% 66.667%/600% 400% no-repeat}

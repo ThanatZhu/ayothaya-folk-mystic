@@ -32,6 +32,8 @@ export class LocalStore{
  async loadShops(){try{return JSON.parse(await readFile(path.join(this.directory,'shops.json'),'utf8'));}catch{return [];}}
  saveShop(){return writeFile(path.join(this.directory,'shops.json'),JSON.stringify([...(this.realmShops?.values()??[])]),{mode:0o600});}
  deleteShop(){return this.saveShop();}
+ async loadLeaders(){try{return JSON.parse(await readFile(path.join(this.directory,'leaders.json'),'utf8'));}catch{return {};}}
+ saveLeaders(serverId,rows){this.allLeaders={...(this.allLeaders??{}),[serverId]:rows};return writeFile(path.join(this.directory,'leaders.json'),JSON.stringify(this.allLeaders),{mode:0o600});}
  async loadPrices(){try{return JSON.parse(await readFile(path.join(this.directory,'prices.json'),'utf8'));}catch{return {};}}
  savePrices(serverId,prices){this.allPrices={...(this.allPrices??{}),[serverId]:prices};return writeFile(path.join(this.directory,'prices.json'),JSON.stringify(this.allPrices),{mode:0o600});}
  deleteGuild(){return this.flushGuilds();}
@@ -53,6 +55,8 @@ export class FirebaseStore{
  async loadShops(){return (await this.db.collection('multiplayerShops').get()).docs.map(d=>d.data());}
  saveShop(s){return this.db.collection('multiplayerShops').doc(s.id).set(s);}
  deleteShop(s){return this.db.collection('multiplayerShops').doc(s.id).delete();}
+ async loadLeaders(){const out={};for(const d of (await this.db.collection('multiplayerLeaders').get()).docs)out[d.id]=d.data().rows??{};return out;}
+ saveLeaders(serverId,rows){return this.db.collection('multiplayerLeaders').doc(serverId).set({rows});}
  async loadPrices(){const out={};for(const d of (await this.db.collection('multiplayerPrices').get()).docs)out[d.id]=d.data().prices??{};return out;}
  savePrices(serverId,prices){return this.db.collection('multiplayerPrices').doc(serverId).set({prices});}
  deleteGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).delete();}

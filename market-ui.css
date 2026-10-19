@@ -47,3 +47,15 @@
 .board-log{margin:4px 0;padding-left:16px;font-size:11px;color:#cfe0d4}
 #open-market-board{min-height:40px;border-radius:8px;border:1px solid #e9c46a;background:linear-gradient(#3b6656,#1f4339);color:#ffe5ab;font:700 12px Mali,Tahoma;display:flex;align-items:center;gap:6px;padding:0 12px}
 .shop-label{background:#163a2ee6!important;border-color:#d5b472!important;color:#ffe5ab!important}
+/* 0.72 leaderboard */
+#leaderboard[open]{position:fixed;inset:0;margin:auto;width:min(420px,calc(100vw - 24px));height:fit-content;max-height:calc(100dvh - 40px);overflow:auto;z-index:45;padding:0;border:1px solid #c6a16488;border-radius:10px;background:linear-gradient(135deg,#24382bf6,#152925f2);color:#fff0ce;font-family:Mali,Tahoma,sans-serif;box-shadow:0 10px 30px #000a}
+#leaderboard>header{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #af884f44;position:sticky;top:0;background:#1d322af2}
+#leaderboard>header h2{margin:0;flex:1;font-size:16px;color:#ffe5ab}
+#rank-body{padding:0 12px 12px}
+.rank-me{margin:6px 0 8px;padding:8px 10px;border-radius:8px;background:#3b6656;font-size:13px}
+.rank-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.rank-list li{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#0f2421cc}
+.rank-list li b{font-size:15px;text-align:center;color:#cfe0d4}.rank-list li strong{display:block;font-size:13px}.rank-list li small{font-size:10px;color:#cfe0d4}
+.rank-list li span{font-weight:700;color:#ffe5ab}
+.rank-list li.r1 b{color:#ffd24a}.rank-list li.r2 b{color:#d8dde0}.rank-list li.r3 b{color:#e0a36a}
+.rank-list li.me{outline:2px solid #e9c46a}

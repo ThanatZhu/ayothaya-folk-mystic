@@ -6,7 +6,7 @@ import {awardExperience,baseProgress,levelGifts} from '../experience.js';
 import {refineGear} from '../refine.js';
 import {STORAGE_SLOTS,STORAGE_NPC,normalizeStorage,normalizeOffer,moveOffer,hasOffer,swapOffers,normalizeStall,buyFromStall} from '../market.js';
 import {MARKET_ZONE,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,searchMarket,publicShop} from '../market-board.js';
-import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard} from '../character-stats.js';
+import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
 import {normalizeSkills,upgradeSkill,availablePoints} from '../skill-progress.js';
@@ -23,9 +23,9 @@ import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,SHOPS,ITEM_ERRORS,itemDef
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
-const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','hire']);
+const allowed=new Set(['input','skill','attack','select','auto','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','hire']);
 export class RealmServer{
- constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
+ constructor({catalog,capacity=50,now=()=>Date.now()}={}){this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
   let existing=[...this.peers.values()].find(p=>p.uid===uid);
@@ -124,6 +124,7 @@ export class RealmServer{
    let r;try{r=bountyClaim(p.bounty,now,m.index);}catch(e){return this.itemFail(p,e.message);}
    p.bounty=r.state;w.emit('experience',awardExperience(w,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins,items:[]});p.saveNow=true;w.notice('รับรางวัลค่าหัวแล้ว');return true;
   }
+  if(m.type==='leaderboard'){w.emit('leaderboard',this.leaderboard(p));return true;}
   if(m.type==='bubble'){if(!Number.isInteger(m.id)||m.id<1||m.id>24)return this.error(p,'invalid-emote');if(now-p.bubbleAt<1000)return false;p.bubbleAt=now;p.room.events.push({type:'bubble',actor:p.id,id:m.id});return true;}
   if(m.type==='insertCard'){
    if(now-p.gearAt<300)return this.itemFail(p,'gear-rate');p.gearAt=now;
@@ -234,6 +235,7 @@ export class RealmServer{
  }
  step(dt=.05){
   dt=Math.max(0,Math.min(.05,dt));this.clock+=dt;this.tickId++;
+  if(this.tickId%1200===0&&this.onLeaders)for(const id of this.leadersDirty){this.leadersDirty.delete(id);Promise.resolve(this.onLeaders(id,this.leaders.get(id))).catch(e=>console.error('leader-save',e.message));}
   if(this.tickId%1200===0&&this.onPrices)for(const id of this.pricesDirty){this.pricesDirty.delete(id);Promise.resolve(this.onPrices(id,this.prices.get(id))).catch(e=>console.error('price-save',e.message));}
   {const s=surge(this.now()); // 0.64 announce each field surge once, on every channel
    if(s.active&&this.surgeSlot!==s.slot){this.surgeSlot=s.slot;const name=this.catalog.maps.find(m=>m.id===s.map)?.name??s.map;for(const id of new Set([...this.peers.values()].map(p=>p.serverId)))this.announce(id,`🔥 ฝูงคลั่งที่ ${name}! · EXP ×2 และดรอป ×2 อีก 5 นาที`);}}
@@ -254,7 +256,7 @@ export class RealmServer{
      target.world.takeMonsterHit(type);
     }
    }
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p),events:copy(room.events)});}room.events=[];}
   }
  }
@@ -341,10 +343,17 @@ export class RealmServer{
  }
  who(p){return {classId:p.character.classId,level:baseProgress(p.world).level};}
  // Status + worn gear → combat numbers; cheap no-op unless level, class, stats or gear changed.
+ // 0.72 leaderboard: best combat power per character (offline characters keep their last entry); top 200 kept.
+ rank(p){const power=combatPower(p.derived,this.who(p).level),board=this.leaders.get(p.serverId)??{},old=board[p.key];
+  if(old&&old.power===power&&old.level===this.who(p).level&&old.name===p.character.name)return;
+  board[p.key]={name:p.character.name,classId:p.character.classId,gender:p.character.gender,level:this.who(p).level,power,t:this.now()};
+  const keep=Object.entries(board).sort((a,b)=>b[1].power-a[1].power).slice(0,200);this.leaders.set(p.serverId,Object.fromEntries(keep));this.leadersDirty.add(p.serverId);}
+ leaderboard(p){const rows=Object.entries(this.leaders.get(p.serverId)??{}).sort((a,b)=>b[1].power-a[1].power);
+  const mine=rows.findIndex(([k])=>k===p.key);return {rows:rows.slice(0,50).map(([k,v],i)=>({rank:i+1,me:k===p.key,...v})),me:mine<0?null:{rank:mine+1,...rows[mine][1]}};}
  refreshStats(p){
   const who=this.who(p),pet=petBonus(p.pet),sig=JSON.stringify([who,p.stats,p.gear,pet]);if(sig===p.statSig)return;
   const fit=dropInvalidGear(p.bag,p.gear,who);if(JSON.stringify(fit.gear)!==JSON.stringify(p.gear)){p.gear=fit.gear;this.setBag(p,fit.bag);}
-  p.statSig=JSON.stringify([who,p.stats,p.gear,pet]);p.derived=deriveStats({...who,stats:p.stats,gear:p.gear,pet});p.world.applyDerived(p.derived);
+  p.statSig=JSON.stringify([who,p.stats,p.gear,pet]);p.derived=deriveStats({...who,stats:p.stats,gear:p.gear,pet});p.world.applyDerived(p.derived);this.rank(p);
  }
  itemFail(p,code){p.world.emit('notice',{text:ITEM_ERRORS[code]??SOCIAL_ERRORS[code]??code});return false;}
  // ---- 0.49 timed MVP and party dungeon.

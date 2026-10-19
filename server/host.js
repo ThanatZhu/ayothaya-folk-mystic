@@ -23,6 +23,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  // 0.47 guilds: loaded once, written on each change (rare: create/join/leave/emblem), outside the per-player saves.
  // 0.70 market: shops stay open while their owners are offline, so they live outside the player saves.
  if(store?.loadShops){realm.shops=new Map((await store.loadShops()).map(s=>[s.id,s]));store.realmShops=realm.shops;realm.onShop=(s,deleted)=>deleted?store.deleteShop(s):store.saveShop(s);const prices=await store.loadPrices();store.allPrices=prices;realm.prices=new Map(Object.entries(prices));realm.onPrices=(id,p)=>store.savePrices(id,p);}
+ if(store?.loadLeaders){const l=await store.loadLeaders();store.allLeaders=l;realm.leaders=new Map(Object.entries(l));realm.onLeaders=(id,rows)=>store.saveLeaders(id,rows);}
  if(store?.loadGuilds){realm.guilds=new Map((await store.loadGuilds()).map(g=>[g.id,g]));store.realmGuilds=realm.guilds;realm.onGuild=(g,deleted)=>Promise.resolve(deleted?store.deleteGuild(g):store.saveGuild(g)).catch(e=>console.error('guild-save',e.message));}
  const allowedOrigin=origin=>origins.includes(origin);
  const server=http.createServer(async(req,res)=>{

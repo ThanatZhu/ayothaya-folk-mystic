@@ -4,13 +4,13 @@
 // 0.67 follows the approved desktop mockup (outputs/ui-hud63-desktop-mockup.png): four main buttons + เมนู.
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
-const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market'];
+const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63(){
  const $=id=>document.getElementById(id),body=document.body;
- const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=71';document.head.append(link); // last sheet wins ties
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=72';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
  deco(document.querySelector('.player-panel'),'f-profile');
@@ -32,6 +32,8 @@ export function createHud63(){
  if(nav){
   const market=document.createElement('button');market.type='button';market.id='menu-market';market.title='ตลาดกลาง';market.setAttribute('aria-label','ตลาดกลาง');
   market.innerHTML='<i aria-hidden="true"></i><span>ตลาด</span>';market.onclick=()=>$('open-market-board')?.click();nav.append(market);
+  const rank=document.createElement('button');rank.type='button';rank.id='menu-rank';rank.title='อันดับค่าพลัง';rank.setAttribute('aria-label','อันดับค่าพลัง');
+  rank.innerHTML='<i aria-hidden="true"></i><span>อันดับ</span>';rank.onclick=()=>window.__ayothayaRank?.open();nav.append(rank);
   for(const id of HIDDEN){const b=$(id);if(b){b.hidden=true;b.classList.add('hud63-hidden');}}
   for(const id of PRIMARY){const b=$(id);if(b)nav.append(b);}
   const more=document.createElement('button');more.type='button';more.id='menu-more';more.setAttribute('aria-expanded','false');more.setAttribute('aria-label','เมนูเพิ่มเติม');more.title='เพิ่มเติม';

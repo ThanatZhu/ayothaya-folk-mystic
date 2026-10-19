@@ -10,7 +10,7 @@ const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63(){
  const $=id=>document.getElementById(id),body=document.body;
- const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=70.1';document.head.append(link); // last sheet wins ties
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=71';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
  deco(document.querySelector('.player-panel'),'f-profile');
@@ -49,7 +49,7 @@ export function createHud63(){
   addEventListener('keydown',e=>{if(e.code==='Escape'){nav.classList.remove('more-open','phone-open');open(more,false);open(toggle,false);}});
  }
  // Desktop skill bar: one row of equal slots instead of the touch wheel (the wheel stays on touch screens).
- const bar=matchMedia('(pointer:fine) and (min-width:901px) and (min-height:601px)');
+ const bar=matchMedia('not all'); // 0.71: the straight desktop hotbar is retired; every screen uses the phone skill wheel
  // Desktop: potions sit at the start of the hotbar row and AUTO becomes a small toggle at the bottom right.
  const cc=document.querySelector('.combat-controls'),ac=document.querySelector('.attack-controls'),auto=$('auto-attack'),quick=$('quick-slots');
  const applyBar=()=>{body.classList.toggle('hud63-bar',bar.matches);

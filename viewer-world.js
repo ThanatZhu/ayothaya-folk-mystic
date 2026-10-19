@@ -4,11 +4,11 @@ import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
 import {createMultiplayer} from './multiplayer-ui.js?v=68.3';
 import {createEquipmentUI} from './equipment-ui.js?v=41.2';
-import {createCityLife,clearCourtTrees} from './city-life.js?v=79';
+import {createCityLife,clearCourtTrees} from './city-life.js?v=82';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=34';
 import {createMmoHud} from './mmo-hud.js?v=48.1';
-import {createSoftLook} from './soft-look.js?v=29';
+import {createSoftLook} from './soft-look.js?v=82';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=81';
 import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=80';
@@ -74,7 +74,7 @@ try {
  const softLook=createSoftLook({renderer,scene,camera});
  const night=map.procedural==='mill',dusk=map.mood==='dusk',mood=map.scene?MOODS[moodOf(map)]:null;scene.add(mood?new THREE.HemisphereLight(...mood.hemi):new THREE.HemisphereLight(night?'#b4d5dd':dusk?'#ffd2a8':'#fffdf4',night?'#4e6260':dusk?'#5d5a72':'#a3af84',night?(map.instance?.5:.85):dusk?1.05:1.35));
  const sun=mood?new THREE.DirectionalLight(...mood.sun):new THREE.DirectionalLight(night?'#bed9ed':'#ffefd2',night?.7:1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
- Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0005;sun.shadow.normalBias=.05;sun.shadow.radius=5;sun.shadow.intensity=.74;scene.add(sun);scene.add(sun.target);
+ Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0005;sun.shadow.normalBias=.05;sun.shadow.radius=4;sun.shadow.intensity=.84; // 0.82 a little deeper and crisper for depthscene.add(sun);scene.add(sun.target);
  // 0.71.2 the shadow box follows the hero but moves in whole shadow-map texels, so ground shadows no longer shimmer
  // ("flicker") while walking. Texel size = shadow box width / map size.
  const sunPoint=new THREE.Vector3(),sunTexel=64/shadowSize;

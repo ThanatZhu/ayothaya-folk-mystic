@@ -6,10 +6,11 @@ import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 
 // Soft "miniature diorama" finish, applied after tone mapping (display-referred colours):
-// a sharp band around the player with gentle tilt-shift blur above and below, lifted shadows,
+// a sharp band around the player with gentle tilt-shift blur above and below (0.82: wider band, half the blur, so
+// signs and labels near the screen edges stay readable), lifted shadows,
 // slightly lower contrast, warm highlights and a light vignette.
 const SoftLookShader={
- uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(1,1)},focus:{value:.48},band:{value:.2},blur:{value:2.4},warmth:{value:.05},vignette:{value:.32}},
+ uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(1,1)},focus:{value:.48},band:{value:.3},blur:{value:1.3},warmth:{value:.05},vignette:{value:.32}},
  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
  fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 resolution;uniform float focus,band,blur,warmth,vignette;varying vec2 vUv;
  void main(){

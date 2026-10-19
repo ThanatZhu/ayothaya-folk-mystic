@@ -6,7 +6,7 @@ import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
 import {MONSTER_TYPES} from './combat-core.js?v=72.1';
 import {monsterFrame} from './monster-catalog.js?v=38';
-import {createSoftLook} from './soft-look.js?v=29';
+import {createSoftLook} from './soft-look.js?v=82';
 const $=id=>document.getElementById(id),id=new URLSearchParams(location.search).get('map')??'rice-fields';
 $('map').value=id;$('map').onchange=()=>location.assign('?map='+$('map').value);
 try{

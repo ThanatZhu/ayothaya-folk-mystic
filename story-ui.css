@@ -18,3 +18,26 @@
 }
 /* 0.98 tutorial line: how to do the current step */
 #quest-how{display:block;margin-top:3px;font-style:normal;font-size:10.5px;line-height:1.35;color:#95efe2}#quest-how[hidden]{display:none}
+
+/* 0.99 tutorial coach (coach.js): popover so it shows above modal windows; only the tip's × takes clicks */
+#coach{position:fixed;inset:0 auto auto 0;width:0;height:0;margin:0;padding:0;border:0;background:none;overflow:visible;pointer-events:none;color:#2a2210}
+#coach[hidden]{display:none}
+#coach .coach-ring{position:fixed;border:3px solid #f4cf7a;border-radius:14px;box-shadow:0 0 0 4px #f4cf7a55,0 0 22px #f4cf7aaa;animation:coach-pulse 1.1s ease-in-out infinite}
+#coach .coach-arrow{position:fixed;transform:translateX(-50%);font-size:26px;line-height:1;color:#f4cf7a;text-shadow:0 2px 6px #000,0 0 10px #f4cf7a;animation:coach-bob .8s ease-in-out infinite}
+#coach .coach-arrow.below{animation-name:coach-bob-up}
+#coach .coach-tip{position:fixed;display:flex;align-items:center;gap:8px;margin:0;padding:8px 10px 8px 14px;border-radius:12px;background:linear-gradient(180deg,#f8dd95,#d9ae57);box-shadow:0 6px 18px #0008;font:700 13px/1.35 Mali,Tahoma,sans-serif;box-sizing:border-box}
+#coach .coach-tip span{flex:1}
+#coach .coach-tip button{pointer-events:auto;flex:none;width:24px;height:24px;border:0;border-radius:50%;background:#2a221022;color:#2a2210;font:700 15px/1 Mali,Tahoma,sans-serif;cursor:pointer}
+@keyframes coach-pulse{50%{box-shadow:0 0 0 8px #f4cf7a22,0 0 30px #f4cf7a}}
+@keyframes coach-bob{50%{transform:translate(-50%,8px)}}@keyframes coach-bob-up{50%{transform:translate(-50%,-8px)}}
+@media (prefers-reduced-motion:reduce){#coach .coach-ring,#coach .coach-arrow{animation:none}}
+#quest-tracker #quest-coach{position:absolute;top:6px;right:6px;z-index:1;width:28px;height:28px;border:1px solid #f4cf7a88;border-radius:50%;background:#0e2926;font-size:14px;line-height:1;cursor:pointer}
+#quest-coach.off{opacity:.45;filter:grayscale(1)}
+#welcome-card{width:min(440px,calc(100vw - 32px));box-sizing:border-box;padding:20px 22px;border:1px solid #f4cf7a;border-radius:18px;background:linear-gradient(135deg,#2e4a2c,#102b24);color:#fff0ca;font-family:Mali,Tahoma,sans-serif;box-shadow:0 20px 80px #0009}
+#welcome-card::backdrop{background:#041b1a99}
+#welcome-card small{color:#95efe2;font-weight:700}#welcome-card h2{margin:4px 0 10px;color:#f4cf7a;font-size:22px}
+#welcome-card ul{margin:0 0 16px;padding-left:18px;display:grid;gap:8px;font-size:14px}#welcome-card b{color:#f4cf7a}
+#welcome-go{display:block;width:100%;min-height:46px;border:0;border-radius:12px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 16px Mali,Tahoma,sans-serif;cursor:pointer}
+#quest-tracker #quest-chapter{padding-right:30px}
+#quest-tracker #quest-chapter,#quest-tracker #quest-title,#quest-tracker #quest-hint{grid-column:1}
+#quest-tracker #quest-how{grid-column:1/-1;grid-row:4}

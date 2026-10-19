@@ -1,6 +1,7 @@
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems} from './story-quests.js?v=98';
+import {createCoach} from './coach.js?v=99';
 import {MONSTER_TYPES} from './combat-core.js?v=97';
 import {awardExperience,baseProgress} from './experience.js?v=73';
 
@@ -38,10 +39,26 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  };
 
  // Tracker panel (own stylesheet, so game.html needs no edit).
- if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=98';css.dataset.storyUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=99.1';css.dataset.storyUi='';document.head.append(css);}
  const panel=document.createElement('section');panel.id='quest-tracker';panel.setAttribute('aria-label','เควสเนื้อเรื่อง');
- panel.innerHTML='<small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
+ panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ลูกศรแนะนำ">💡</button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
  document.body.append(panel);
+ // 0.99 arrows that point at the next button to press, and a welcome card for a brand-new character
+ const coach=createCoach({game,account,objective:()=>currentObjective(state()),paused:()=>!!document.querySelector('#welcome-card[open],#job-ready[open]')||[...document.querySelectorAll('.journey-loading,#travel-loading')].some(e=>!e.classList.contains('leaving')&&e.checkVisibility?.({checkVisibilityCSS:true}))});
+ const coachButton=()=>{$('quest-coach').setAttribute('aria-pressed',String(!coach.off));$('quest-coach').title=coach.off?'เปิดลูกศรแนะนำ':'ปิดลูกศรแนะนำ';$('quest-coach').classList.toggle('off',coach.off);};
+ $('quest-coach').onclick=e=>{e.stopPropagation();coach.setOff(!coach.off);coachButton();world.notice(coach.off?'ปิดลูกศรแนะนำแล้ว · กด 💡 ในกล่องเควสเพื่อเปิดใหม่':'เปิดลูกศรแนะนำแล้ว');};coachButton();
+ const welcomeKey='ayothaya-welcome:'+key;
+ function welcome(){
+  const s=state();if(s.quest!==0||s.step!==0)return;try{if(localStorage.getItem(welcomeKey))return;localStorage.setItem(welcomeKey,'1');}catch{}
+  const card=document.createElement('dialog');card.id='welcome-card';card.setAttribute('aria-labelledby','welcome-title');
+  card.innerHTML='<small>ยินดีต้อนรับสู่อโยธยา</small><h2 id="welcome-title">เริ่มการเดินทางของคุณ</h2><ul>'+
+   '<li><b>เดิน</b> กด WASD / ปุ่มลูกศร หรือแตะพื้นที่อยากไป · มือถือใช้จอยด้านซ้าย</li>'+
+   '<li><b>ตีมอน</b> แตะมอนเพื่อเลือกเป้า แล้วกดปุ่มดาบ (Space) · ปุ่มเลข 1–0 คือสกิล</li>'+
+   '<li><b>เควส</b> ดูกล่องเควสมุมขวา กด ▶ เดินไป แล้วตัวละครจะเดินไปเอง</li>'+
+   '<li><b>ลูกศรสีทอง</b> จะชี้ปุ่มที่ต้องกดทีละขั้น ปิดได้ที่ 💡 ในกล่องเควส</li></ul><button type="button" id="welcome-go">เริ่มผจญภัย</button>';
+  ($('game-shell')??document.body).append(card);card.querySelector('#welcome-go').onclick=()=>card.close();card.addEventListener('close',()=>card.remove());card.showModal();
+ }
+ setTimeout(welcome,game.online?2500:800); // online progress arrives with the first snapshot
  function hintText(obj){
   const s=obj.step,where=s.mapId!==map.id?' · '+(catalog.maps.find(m=>m.id===s.mapId)?.name??''):'';
   if(s.type==='defeat'){const name=MONSTER_TYPES.find(t=>t.id===s.monster)?.name??s.monster;return `${s.hint} ${name} ${obj.count}/${s.count}${where}`;}
@@ -90,7 +107,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   render();
  }
  $('quest-go').onclick=()=>{if(walking&&game.walking){game.cancelWalk();walking=false;render();}else go();};
- panel.addEventListener('click',e=>{if(e.target===panel||e.target.closest('#quest-title,#quest-hint'))$('quest-go').click();});
+ panel.addEventListener('click',e=>{if(e.target.id==='quest-coach')return;if(e.target===panel||e.target.closest('#quest-title,#quest-hint'))$('quest-go').click();});
 
  offline({type:'enter',mapId:map.id});
  render();
@@ -100,6 +117,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  // Offline only: do/level steps that are already true finish by themselves (the server does this online).
  let checked=0;
  const api={context:null,update(){if(walking&&!game.walking)walking=false;
+  coach.update();
   if(!game.online&&api.context&&performance.now()-checked>1000){checked=performance.now();for(let i=0;i<30&&offline({type:'check',ctx:api.context()})?.changed;i++);}
   render();}};
  return api;

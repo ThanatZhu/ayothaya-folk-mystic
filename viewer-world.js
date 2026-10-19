@@ -25,7 +25,7 @@ import {createGame} from './game-controls.js?v=97.4';
 import {atlasPath,className} from './classes.js?v=73';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=98';
-import {createStoryUI} from './story-ui.js?v=98';
+import {createStoryUI} from './story-ui.js?v=99';
 import {createBagUI} from './bag-ui.js?v=98';
 import {createStatusUI} from './status-ui.js?v=98';
 import {createProfileUI} from './profile-ui.js?v=85';

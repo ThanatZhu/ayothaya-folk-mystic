@@ -19,7 +19,7 @@ export function createLeaderboardUI({game}){
  // 0.96 weekly duel tournament: this week's points and last week's podium.
  function arena(a){
   if(!a)return '<p class="market-note">ยังไม่มีข้อมูล</p>';
-  const ends=new Date(a.endsAt).toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const ends=new Date(a.endsAt).toLocaleString(globalThis.I18N?.locale??'th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const row=r=>`<li class="${r.me?'me':''} r${Math.min(r.rank,4)}"><b>${r.rank}</b><div><strong>${esc(r.name)}</strong><small>${esc(className(r.classId))} · ชนะ ${r.wins} เสมอ ${r.draws} แพ้ ${r.losses}</small></div><span>${r.points} แต้ม</span></li>`;
   return `<p class="market-note">ท้าดวลผู้เล่นอื่นนอกเมือง · ชนะ +3 เสมอ +1 · คู่เดิมนับแต้มได้ 3 ครั้งต่อวัน · ปิดรอบ ${esc(ends)} · อันดับ 1–3 ได้เบี้ย ยันต์กันแตก และเหล็กไหล</p>`+
    (a.last?.length?`<p class="rank-me">สัปดาห์ก่อน: ${a.last.map(x=>['🥇','🥈','🥉'][x.place-1]+' '+esc(x.name)+' '+x.points).join(' · ')}</p>`:'')+

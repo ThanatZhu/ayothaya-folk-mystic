@@ -55,9 +55,9 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  function log(m,live=false){
   if(seenMessages.has(m.id))return;seenMessages.add(m.id);if(seenMessages.size>160)seenMessages.delete(seenMessages.values().next().value);
   const mine=m.actor===client?.id,p=el('p',['party','system','guild','whisper'].includes(m.channel)?m.channel:''),name=el('b','',m.channel==='whisper'&&mine?'ถึง '+m.to:m.name),time=el('time','',new Date(m.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
-  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.channel==='guild')p.append(el('span','mp-tag','กิลด์'));if(m.channel==='whisper')p.append(el('span','mp-tag','กระซิบ'));if(mine)p.classList.add('mine');p.append(name,document.createTextNode(' '+m.text),time);
+  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.channel==='guild')p.append(el('span','mp-tag','กิลด์'));if(m.channel==='whisper')p.append(el('span','mp-tag','กระซิบ'));if(mine)p.classList.add('mine');const said=el('span','',' '+m.text);if(m.channel!=='system'){name.dataset.i18nSkip='';said.dataset.i18nSkip='';}p.append(name,said,time);
   const box=$('online-messages'),atEnd=box.scrollHeight-box.scrollTop-box.clientHeight<40;box.append(p);while(box.children.length>80)box.firstChild.remove();if(atEnd)box.scrollTop=box.scrollHeight;
-  $('dock-preview').textContent=m.name+': '+m.text;
+  $('dock-preview').toggleAttribute('data-i18n-skip',m.channel!=='system');$('dock-preview').textContent=m.name+': '+m.text;
   if(live){if(dock.classList.contains('collapsed')){unread++;$('dock-unread').textContent=unread>9?'9+':String(unread);$('dock-unread').hidden=false;}if(m.channel==='room'||m.channel==='party')bubble(m);}
  }
  // Speech bubbles over the speaker; positioned every frame in update().
@@ -67,7 +67,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   $('online-players').replaceChildren();$('online-count').textContent=roster.length+' คน';
   for(const p of roster){
    const li=el('li',p.id===client?.id?'me':''),who=el('div','mp-who'),name=el('b','',p.name);who.append(name,el('small','',className(p.classId)+(p.id===client?.id?' · คุณ':'')+(p.partyId&&p.partyId===party?.id?' · ปาร์ตี้เรา':p.partyId?' · มีปาร์ตี้':'')));
-   if(party?.leader===p.id)name.prepend(el('span','mp-crown','♛ '));li.append(el('span','mp-avatar',className(p.classId).slice(0,1)),who);
+   if(party?.leader===p.id)name.prepend(el('span','mp-crown','♛ '));li.append(el('span','mp-avatar',(globalThis.I18N?.t(className(p.classId))??className(p.classId)).slice(0,1)),who);
    const action=(text,type,data,primary)=>{const b=el('button',primary?'mp-primary':'',text);b.onclick=()=>client?.command(type,data);li.append(b);};
    if(p.id!==client?.id&&!p.partyId&&(!party||party.leader===client.id))action('เชิญ','invite',{target:p.id},true);
    if(p.id!==client?.id)action('ท้าดวล','duel',{target:p.id});

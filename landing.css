@@ -61,3 +61,4 @@ footer{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;padding:40px 
  .news li{grid-template-columns:70px 1fr}.cta{margin:48px 16px 0}
 }
 @media (prefers-reduced-motion:reduce){.hero-cast img,.status i{animation:none}html{scroll-behavior:auto}.btn{transition:none}}
+.lang-toggle{font:inherit;font-size:.85em;padding:.3em .7em;border-radius:999px;border:1px solid currentColor;background:transparent;color:var(--soft,#f3e6c8);cursor:pointer}

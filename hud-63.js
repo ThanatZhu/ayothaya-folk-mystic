@@ -10,7 +10,7 @@ const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63(){
  const $=id=>document.getElementById(id),body=document.body;
- const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=97';document.head.append(link); // last sheet wins ties
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=99.11';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
  deco(document.querySelector('.player-panel'),'f-profile');

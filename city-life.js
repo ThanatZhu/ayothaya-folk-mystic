@@ -4,6 +4,7 @@ import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1'
 import {groundHeight} from './combat-core.js?v=97';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {citizenBodyHeight} from './npc-size.js?v=size1';
+const tr=s=>globalThis.I18N?.t(s)??s;
 
 // Whole painted poses, aligned at their feet. No skeletal cutouts or squash/stretch.
 export function clearCourtTrees(model,map){
@@ -45,7 +46,7 @@ export async function createCityLife({scene,map,shadow,paving}){
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(.035,.05,2.5,8),new THREE.MeshLambertMaterial({color:'#785330'}));pole.position.set(x,1.25,z);scene.add(pole);
   const flag=new THREE.Mesh(new THREE.PlaneGeometry(.55,1.05,4,5),new THREE.MeshLambertMaterial({color:n.color,side:THREE.DoubleSide}));flag.position.set(x+side*.28,1.8,z);scene.add(flag);banners.push(flag);
  }
- const sign=document.createElement('canvas');sign.width=768;sign.height=144;const ctx=sign.getContext('2d');ctx.fillStyle='#163a2eea';ctx.strokeStyle='#d5b472';ctx.lineWidth=7;ctx.beginPath();ctx.roundRect(5,5,758,134,22);ctx.fill();ctx.stroke();ctx.fillStyle='#ffe5ab';ctx.textAlign='center';ctx.font='bold 52px Mali,Tahoma';ctx.fillText('ลานครูแห่งอโยธยา',384,67);ctx.font='26px Mali,Tahoma';ctx.fillText('เปลี่ยนอาชีพเมื่อ Job ตัน  ·  Job 10 → อาชีพ  ·  Job 40 → Master',384,110);
+ const sign=document.createElement('canvas');sign.width=768;sign.height=144;const ctx=sign.getContext('2d');ctx.fillStyle='#163a2eea';ctx.strokeStyle='#d5b472';ctx.lineWidth=7;ctx.beginPath();ctx.roundRect(5,5,758,134,22);ctx.fill();ctx.stroke();ctx.fillStyle='#ffe5ab';ctx.textAlign='center';ctx.font='bold 52px Mali,Tahoma';ctx.fillText(tr('ลานครูแห่งอโยธยา'),384,67);ctx.font='26px Mali,Tahoma';ctx.fillText(tr('เปลี่ยนอาชีพเมื่อ Job ตัน  ·  Job 10 → อาชีพ  ·  Job 40 → Master'),384,110);
  const signTexture=new THREE.CanvasTexture(sign);signTexture.colorSpace=THREE.SRGBColorSpace;const plaque=new THREE.Sprite(new THREE.SpriteMaterial({map:signTexture,transparent:true,depthWrite:false,toneMapped:false,fog:false}));plaque.position.set(map.masterCourt.x,2.8,map.masterCourt.z-(map.scene?12.5:10));plaque.scale.set(6,1.125,1);scene.add(plaque);
  if(map.scene)addCourtProps(scene,map);
  function update(dt,player,camera){

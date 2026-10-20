@@ -21,6 +21,9 @@ export const raiseCost=x=>Math.floor((x-1)/10)+2;
 // Points earned by Base Level L: 3 + floor(level/5) for every level gained after 1.
 // 0.102 rebirth: each one (up to REBIRTH_MAX) adds REBIRTH_POINTS on top of what the levels earn
 export const REBIRTH_POINTS=40,REBIRTH_MAX=10;
+// 0.103.2 the title shown above a reborn character's name (index = times reborn)
+export const REBIRTH_RANKS=['','ผู้จุติ','ยอดฝีมือ','ขุนพล','จอมยุทธ์','ปรมาจารย์','ผู้วิเศษ','เทพยุทธ์','มหาเทพ','ราชันย์','ตำนานอโยธยา'];
+export const rebirthRank=n=>REBIRTH_RANKS[Math.min(REBIRTH_MAX,Math.max(0,n|0))]??'';
 export function earnedStatPoints(level,reborn=0){let n=0;for(let l=2;l<=level;l++)n+=3+Math.floor(l/5);return n+Math.min(REBIRTH_MAX,Math.max(0,reborn|0))*REBIRTH_POINTS;}
 export function spentStatPoints(stats){const s=normalizeStats(stats);let n=0;for(const k of STATS)for(let x=1;x<s[k];x++)n+=raiseCost(x);return n;}
 export const statPoints=(stats,level,reborn=0)=>earnedStatPoints(level,reborn)-spentStatPoints(stats);

@@ -72,3 +72,14 @@
 .ev-card{padding:10px 12px;border:1px solid #af884f55;border-radius:10px;background:#0e2926aa}.ev-card.live{border-color:#f4cf7a;box-shadow:0 0 0 1px #f4cf7a55}
 .ev-card h3{display:flex;align-items:center;gap:6px;margin:0 0 4px;font-size:15px;color:#f4cf7a}.ev-card h3 em{margin-left:auto;padding:1px 8px;border-radius:999px;background:#f4cf7a;color:#2a2210;font:700 11px Mali,Tahoma,sans-serif}
 .ev-card p{margin:0 0 4px;font-size:13px}.ev-card ul{margin:0;padding-left:18px;font-size:12px;color:#d9cba4;display:grid;gap:2px}
+
+/* 0.103.2 rebirth (จุติ) button: its own glowing button on the left edge, only when it can be used */
+#rebirth-btn{position:fixed;z-index:16;left:max(16px,env(safe-area-inset-left));top:46%;display:flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;border:2px solid #ffe08a;border-radius:999px;background:linear-gradient(135deg,#7a4b0a,#c48a1c);color:#fff6d8;font:700 15px Mali,Tahoma,sans-serif;cursor:pointer;box-shadow:0 0 0 0 #ffd56a99;animation:rebirth-pulse 1.4s ease-in-out infinite}
+#rebirth-btn[hidden]{display:none}
+#rebirth-btn i{font-style:normal;font-size:24px}#rebirth-btn span{display:grid;text-align:left}#rebirth-btn small{font-size:11px;font-weight:400;opacity:.9}
+@keyframes rebirth-pulse{0%,100%{box-shadow:0 0 0 0 #ffd56a99,0 0 12px #ffd56a66;filter:brightness(1)}50%{box-shadow:0 0 0 10px #ffd56a00,0 0 26px #ffd56acc;filter:brightness(1.25)}}
+@media (prefers-reduced-motion:reduce){#rebirth-btn{animation:none}}
+/* rebirth rank above a name */
+.hero-label .rank-title,.remote-player-label .rank-title{display:block;font-size:10px;line-height:1.1;color:#ffe08a;text-shadow:0 1px 2px #000,0 0 6px #ffb800aa;letter-spacing:.04em}
+.hero-label .rank-title[hidden],.remote-player-label .rank-title[hidden]{display:none}
+.hero-label b,.remote-player-label b{font-weight:inherit}

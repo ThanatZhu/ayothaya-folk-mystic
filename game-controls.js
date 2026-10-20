@@ -13,6 +13,7 @@ import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_
 import {createRouteWalker} from './route-walk.js?v=01';
 
 import {className} from './classes.js?v=101';
+import {rebirthRank} from './character-stats.js?v=94';
 import {normalizeAuto} from './auto-play.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
@@ -74,7 +75,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const targetRing=new THREE.Mesh(ringGeometry,new THREE.MeshBasicMaterial({color:'#ffd476',side:THREE.DoubleSide,transparent:true,opacity:.85}));targetRing.rotation.x=-Math.PI/2;scene.add(targetRing);
  const playerRing=new THREE.Mesh(ringGeometry,new THREE.MeshBasicMaterial({color:'#8de8d0',side:THREE.DoubleSide,transparent:true,opacity:.55}));playerRing.rotation.x=-Math.PI/2;playerRing.scale.setScalar(.78);scene.add(playerRing);
  const shield=new THREE.Mesh(new THREE.RingGeometry(.7,.74,40),new THREE.MeshBasicMaterial({color:'#edd592',side:THREE.DoubleSide,transparent:true,opacity:.55}));shield.rotation.x=-Math.PI/2;scene.add(shield);
- const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · '+(jobFor(world.profession.id,config.jobId)?.name??className(world.profession.id,config.gender));$('world-labels').append(playerLabel);
+ // 0.103.2 the hero shows its own name (players asked for it instead of "คุณ") and, once reborn, its rank above it
+ const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.innerHTML='<small class="rank-title" hidden></small><b data-i18n-skip></b>';
+ playerLabel.querySelector('b').textContent=config.name||className(world.profession.id,config.gender);let shownRank=-1;$('world-labels').append(playerLabel);
  const motionPreference=matchMedia('(prefers-reduced-motion:reduce)'),compactEffects=matchMedia('(pointer:coarse),(max-width:900px)');
  const floats=[],projection=new THREE.Vector3();let kick=0; // 0.99.3 impact shake (crits, heavy hits taken)
  // 0.91 the notice sits just under the target box whenever that box shows, so the two never overlap (every layout).
@@ -264,6 +267,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const follow=new THREE.Vector3(p.x,floor+1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
   controls.update();camera.updateMatrixWorld();
   project(playerLabel,p.x,2.0+hero.sprite.position.y,p.z);
+  if((world.rebirth??0)!==shownRank){shownRank=world.rebirth??0;const t=playerLabel.querySelector('.rank-title');t.hidden=!shownRank;t.textContent=shownRank?'✦ '+rebirthRank(shownRank)+' ✦':'';}
   mobViews.forEach((v,i)=>{
    const m=world.mobs[i],type=MONSTER_TYPES[m.type];
    if(m.hp<=0&&v.deathStart===null)v.deathStart=t;if(m.hp>0)v.deathStart=null;

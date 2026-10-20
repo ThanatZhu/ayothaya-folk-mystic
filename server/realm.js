@@ -34,7 +34,7 @@ const copy=v=>structuredClone(v);
 // 0.99.11 bandwidth: each player gets only the monsters within MOB_VIEW m, and of those only the fields that changed since
 // that player last got them (the client merges monsters with Object.assign). Server-only timers stay home; positions are
 // rounded to 1 cm, other numbers to 0.1, and the respawn countdown to whole seconds.
-const PLAYER_STATIC=['equipment','partyId','pet','stall','guild'],MOB_VIEW=50,MOB_SKIP=new Set(['home','attackCD','leapCD','step','strike','flee','justEnraged']);
+const PLAYER_STATIC=['equipment','partyId','pet','stall','guild','rebirth'],MOB_VIEW=50,MOB_SKIP=new Set(['home','attackCD','leapCD','step','strike','flee','justEnraged']);
 const mobValue=(k,v)=>typeof v!=='number'?v:k==='x'||k==='z'?Math.round(v*100)/100:k==='dead'?Math.ceil(v):Math.round(v*10)/10;
 // 0.93 duels: a challenge lasts 20 s, a bout 90 s; players hit each other for 35% of their monster damage (then the
 // target's dodge, shield and DEF apply as for a monster blow). Walking 20 m apart ends the bout as a draw.
@@ -635,7 +635,7 @@ export class RealmServer{
   const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:this.emoteView(a),partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
   // 0.99.11 during the snapshot broadcast each player's public entry is built and cloned once, then shared by every viewer
-  const entry=a=>{if(!this.broadcasting||a.entryTick!==this.tickId){const v=a.world.player;a.entryTick=this.tickId;a.entry=copy({id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,running:v.running===true,face:{x:round(v.face.x),z:round(v.face.z)}},emote:this.emoteView(a),partyId:a.partyId,connected:!a.suspended,pet:a.pet?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a)});a.entryKeys=Object.fromEntries(PLAYER_STATIC.map(k=>[k,JSON.stringify(a.entry[k]??null)]));}return a.entry;};
+  const entry=a=>{if(!this.broadcasting||a.entryTick!==this.tickId){const v=a.world.player;a.entryTick=this.tickId;a.entry=copy({id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,running:v.running===true,face:{x:round(v.face.x),z:round(v.face.z)}},emote:this.emoteView(a),partyId:a.partyId,connected:!a.suspended,pet:a.pet?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a),rebirth:a.rebirth??0});a.entryKeys=Object.fromEntries(PLAYER_STATIC.map(k=>[k,JSON.stringify(a.entry[k]??null)]));}return a.entry;};
   // a player already on this viewer's screen gets its position every time and its look (gear, party, pet, stall, guild)
   // only when that changed; the client merges entries into the remote player's state
   const sent=p.playerSent??=new Map();

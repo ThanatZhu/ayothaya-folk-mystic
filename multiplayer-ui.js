@@ -8,6 +8,7 @@ import {groundHeight} from './combat-core.js?v=103.1';
 import {MultiplayerClient} from './multiplayer-client.js?v=life1';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=101';
+import {rebirthRank} from './character-stats.js?v=94';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
 import {createPaintedAvatar} from './painted-avatar.js?v=life1';
@@ -107,7 +108,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   const id=state.id,generation=loadingGeneration,placeholder={loading:true,state};views.set(id,placeholder);
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
    const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createPaintedAvatar(frames[0],{directional:false,classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance,equipment:state.equipment});sprite.scale.set(CHARACTER_WORLD_SCALE,CHARACTER_WORLD_SCALE,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
-   const label=el('span','remote-player-label',state.character.name);labels.append(label);
+   const label=el('span','remote-player-label');label.append(el('small','rank-title'),el('b','',state.character.name));label.querySelector('b').dataset.i18nSkip='';label.querySelector('.rank-title').hidden=true;labels.append(label);
    views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null,equipmentKey:JSON.stringify(state.equipment)});
   }catch{if(views.get(id)===placeholder)placeholder.retryAt=performance.now()+5000;}
  }
@@ -210,6 +211,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    const pose=skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed,{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)});
    v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'?0:pose.y);const angle=controls.getAzimuthalAngle();{const side=p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle);if(Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
    v.sprite.userData.setFacing?.(p.face,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0;game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
+   if((state.rebirth??0)!==v.rankShown){v.rankShown=state.rebirth??0;const t=v.label.querySelector('.rank-title');if(t){t.hidden=!v.rankShown;t.textContent=v.rankShown?'✦ '+rebirthRank(v.rankShown)+' ✦':'';}}
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
    const tag=state.guild?state.guild.emblem+':'+(state.guild.castle?'👑 ':'')+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append((state.guild.castle?'👑 ':'')+state.guild.name);v.label.append(g);}}
    const up=camera.matrixWorld.elements,labelHeight=WORLD_BODY_HEIGHT+.14;

@@ -7,7 +7,7 @@ const trialReady=(s,bag,online)=>s.own&&s.progress>=s.target&&(!online||s.bossDo
 import {className} from './classes.js?v=73';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 const errors={'trainer-boss':'ยังไม่ได้ล้มบอสของบททดสอบ','trainer-items':'วัตถุดิบหรือเบี้ยยังไม่ครบ','trainer-level':'ระดับยังไม่ถึงเงื่อนไขของครู','trainer-distance':'เดินเข้าใกล้ครูก่อนนะ','trainer-active':'มีบททดสอบที่รับไว้แล้ว ให้กลับหาครูสายเดิมก่อน','trainer-incomplete':'ยังทำบททดสอบไม่ครบ','trainer-class':'ครูท่านนี้สอนอีกสายอาชีพ','trainer-finished':'คุณผ่านการเลื่อนขั้นแล้ว','trainer-quest':'ยังไม่ได้รับบททดสอบนี้','action-rate':'รอสักครู่แล้วลองอีกครั้ง','online-required':'ต้องเชื่อมต่อเซิร์ฟเวอร์ก่อนรับบททดสอบ','not-connected':'กำลังเชื่อมต่อเซิร์ฟเวอร์ กรุณารอสักครู่'};
-export function createMentorUI({game,account,inTown=()=>false}){
+export function createMentorUI({game,account,inTown=()=>false,recall=()=>false}){
  const panel=document.createElement('dialog');panel.id='mentor-panel';panel.setAttribute('aria-labelledby','mentor-name');
  panel.innerHTML='<header><div><small>ลานครูแห่งอโยธยา</small><h2 id="mentor-name"></h2></div><button id="mentor-close" aria-label="ปิดบทสนทนา">×</button></header><div class="mentor-content"><div class="mentor-portrait" role="img"></div><section><p id="mentor-role"></p><p id="mentor-story"></p><h3 id="mentor-quest"></h3><p id="mentor-objective"></p><progress id="mentor-progress"></progress><label id="mentor-branch-label">เลือกสาย Master<select id="mentor-branch"></select></label><p id="mentor-result" role="status"></p><div class="mentor-actions"><button id="mentor-accept">รับบททดสอบ</button><button id="mentor-complete">ส่งบททดสอบ</button><button id="mentor-cancel">ยกเลิกบททดสอบ</button></div></section></div>';
  document.getElementById('game-shell').append(panel);const $=id=>panel.querySelector('#'+id);let current=null,busy=false,last='';
@@ -36,14 +36,17 @@ export function createMentorUI({game,account,inTown=()=>false}){
  ready.innerHTML='<small>เควสเปลี่ยนอาชีพ</small><h2 id="job-ready-title"></h2><p id="job-ready-text"></p><ul id="job-ready-steps"></ul><div class="mentor-actions"><button id="job-ready-go">▶ ไปลานครู</button><button id="job-ready-later">ไว้ทีหลัง</button></div>';
  document.getElementById('game-shell').append(ready);
  ready.querySelector('#job-ready-later').onclick=()=>ready.close();
- ready.querySelector('#job-ready-go').onclick=()=>{ready.close();if(inTown())game.walkTo({x:MASTER_COURT.x,z:MASTER_COURT.z},{radius:3,kind:'quest'});else game.world.notice('กลับอยุธยาก่อน (ธูปกลับเมือง หรือวาร์ปจากแผนที่ M) แล้วเดินไปลานครูทางเหนือของตลาด');};
+ // 0.99.9 from the field: ride back to the capital, then keep walking to the court once the town has loaded
+ const WALK='ayothaya-job-walk',toCourt=()=>game.walkTo({x:MASTER_COURT.x,z:MASTER_COURT.z},{radius:3,kind:'quest'});
+ ready.querySelector('#job-ready-go').onclick=()=>{ready.close();if(inTown()){toCourt();return;}try{sessionStorage.setItem(WALK,'1');}catch{}if(!recall())game.world.notice('กลับอยุธยาไม่ได้ตอนนี้ ลองใหม่อีกครั้ง');};
+ try{if(inTown()&&sessionStorage.getItem(WALK)){sessionStorage.removeItem(WALK);setTimeout(toCourt,1600);}}catch{}
  let readyFor=null;
  function jobReady(){const c=account?.character;if(!c||c.jobId||account.training)return;const r=advanceReady(game.world,c.classId,c.jobId??'');if(!r.job.maxed)return;
   const key='ayothaya-job-ready:'+c.classId+':'+r.base+':'+r.ok;if(readyFor===key)return;readyFor=key;try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1');}catch{}
   const t=TRIAL[r.tier],first=r.tier==='class';ready.querySelector('#job-ready-title').textContent=first?'Job ตันแล้ว! ถึงเวลาเลือกอาชีพ':'Job ตันแล้ว! ถึงเวลาสู่ Master';
   ready.querySelector('#job-ready-text').textContent=r.ok?'ไปหาครูประจำสายที่ลานครูแห่งอโยธยา รับบททดสอบ แล้วทำให้ครบทั้ง 3 ด่าน':'ต้อง Base Lv.'+r.min+' ก่อน (ตอนนี้ Lv.'+r.base+') ระหว่างนี้เตรียมของสำหรับบททดสอบไว้ได้เลย';
   ready.querySelector('#job-ready-steps').innerHTML=['ล่ามอนสเตอร์ '+t.kills+' ตัว','ล้ม'+t.bossName,'นำ '+t.items.map(([id,n])=>itemDef(id).name+' '+n).join(' · ')+' และ '+t.coins.toLocaleString('th-TH')+' เบี้ย'].map(x=>'<li>'+x+'</li>').join('');
-  ready.querySelector('#job-ready-go').hidden=!r.ok;if(!ready.open)ready.showModal();}
+  ready.querySelector('#job-ready-go').textContent=inTown()?'▶ เดินไปหา Master':'▶ กลับอยุธยา ไปหา Master';if(!ready.open)ready.showModal();}
  function update(){jobReady();const q=account.training,key=JSON.stringify([q,game.world.kills,game.world.bag]);if(key===last)return;last=key;journal.hidden=!q;if(q){const m=mentorById(q.classId==='acolyte'?'monk-master':({swordsman:'sword-master',lancer:'spear-master',hunter:'hunt-master',boxer:'box-master',rogue:'shadow-master',shaman:'spirit-master'})[q.classId]);const s=trainingStatus(account.character,q,game.world,m.id);journal.querySelector('span').textContent=className(q.classId,account.character.gender)+' · '+trialLines(s,game.world.bag,game.online).join(' · ');journal.querySelector('small').textContent=trialReady(s,game.world.bag,game.online)?'กลับลานครูเพื่อส่งบททดสอบ':'ฝึกนอกเมือง · บันทึกอัตโนมัติ';}render();}
  return {open,update,get paused(){return panel.open;}};
 }

@@ -6,7 +6,7 @@ import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
 import {createMultiplayer} from './multiplayer-ui.js?v=106.0';
 import {createEquipmentUI} from './equipment-ui.js?v=size1';
-import {createCityLife,clearCourtTrees} from './city-life.js?v=106.0';
+import {createCityLife,clearCourtTrees} from './city-life.js?v=106.1-lablae';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=106.0';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=101';
@@ -47,8 +47,8 @@ import {createLeaderboardUI} from './leaderboard-ui.js?v=99.11';
 import {createMarketBoardUI} from './market-board-ui.js?v=99.11';
 import {createHud63} from './hud-63.js?v=99.11';
 import {resolveMap} from './world-state.js?v=101.5';
-import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=105.0';
-import {createRoofCutaway} from './roof-cutaway.js?v=103.5';
+import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=106.1-lablae';
+import {createRoofCutaway} from './roof-cutaway.js?v=106.1-lablae';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {prepareCloud} from './cloud-save.js?v=101.5';
 import {captureSave,applySave} from './save-state.js?v=101.5';
@@ -63,7 +63,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=105.0');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=106.1-lablae');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
@@ -106,7 +106,7 @@ try {
  const capitalLook=createCapitalLook({map,atlas:capitalAtlas,frame});tiles.roof=capitalLook.roof;
  // Painted look: smooth the tiled building textures instead of hard pixel edges.
  for(const t of Object.values(tiles)){t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.anisotropy=4;t.needsUpdate=true;}
- const sceneMotion=map.scene?prepareSceneV2({scene,model:gltf.scene,map}):null,roofCut=createRoofCutaway(gltf.scene);
+ const sceneMotion=map.scene?prepareSceneV2({scene,model:gltf.scene,map}):null,roofCut=createRoofCutaway(gltf.scene,{minFloor:map.id==='lablae'?.3:1});
  if(!map.scene)gltf.scene.traverse(o=>{if(o.isMesh){if(o.name.startsWith('Living_canopy')||o.name.startsWith('Living canopy')||o.name.startsWith('Market_pottery')||o.name.startsWith('Market pottery'))o.visible=false;o.castShadow=!/Water|River$|River_|Terrain|terrain|ground19|soil|fragment|Garden_canal/.test(o.name);o.receiveShadow=true;const name=o.material.name.replace(/\.\d+$/,''),colors=o.geometry.attributes.color,cacheKey=name+(colors?'|ao':'');
   // Blender-baked ambient occlusion (bake_building_ao.py) arrives as vertex colours; ease it so under-floor areas stay readable.
   if(colors&&!o.geometry.userData.aoEased){for(let i=0;i<colors.count;i++)for(let c=0;c<3;c++)colors.setComponent(i,c,1-(1-colors.getComponent(i,c))*.78);colors.needsUpdate=true;o.geometry.userData.aoEased=true;}

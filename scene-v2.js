@@ -22,6 +22,11 @@ const LAYERS=[[/^(Soil|Cellar)[ _]foundation/,-1],[/^(Ground|Island meadow)/,0],
 const TOP_RANK=Math.max(...LAYERS.map(([,r])=>r));
 export function prepareSceneV2({scene,model,map}){
  const mood=MOODS[moodOf(map)],converted=new Map(),water=[],wind={value:0};
+ // glTF can share one atlas texture between roofs, timber, foliage and water.
+ // Sliding that atlas changes every material's tile, even if the Texture is cloned.
+ // Keep shared image UVs fixed; only standalone water images may scroll.
+ const fixedImages=new Set();
+ model.traverse(o=>{if(o.isMesh)for(const m of [].concat(o.material??[]))if(!/water/i.test(m.name))for(const t of [m.map,m.normalMap])if(t)fixedImages.add(t.image);});
  scene.background=new THREE.Color(mood.sky);scene.fog=new THREE.Fog(mood.fog,map.mood==='summit'?100:60,map.mood==='summit'?250:150);
  // 1.01 guild hall: 'Guild upgrade <kind> <tier>' props stay hidden until the guild owns that tier (guildUpgrades).
  const upgrades=[];
@@ -57,10 +62,11 @@ export function prepareSceneV2({scene,model,map}){
   // above the ground stop writing depth, so the later strip always wins; the ground still writes depth for the rest.
   if(rank!==undefined){o.renderOrder=rank-30;if(rank>0){const key2=o.material.uuid+'|flat';if(!converted.has(key2)){const m=o.material.clone();m.depthWrite=false;converted.set(key2,m);if(water.includes(o.material))water.push(m);}o.material=converted.get(key2);}}
  });
- for(const m of water)for(const t of [m.map,m.normalMap])if(t){t.wrapS=t.wrapT=THREE.RepeatWrapping;}
+ const flowing=new Map();
+ for(const m of water)for(const [key,x,z] of [['map',-.004,.006],['normalMap',.012,.02]]){const t=m[key];if(t&&!fixedImages.has(t.image)){t.wrapS=t.wrapT=THREE.RepeatWrapping;flowing.set(t,{x,z,offset:t.offset.clone()});}}
  let running=!matchMedia('(prefers-reduced-motion:reduce)').matches,time=0;
  return {
-  update(dt){if(running)time+=Math.min(.08,Math.max(0,dt));wind.value=time;for(const m of water){if(m.normalMap)m.normalMap.offset.set(time*.012,time*.02);if(m.map)m.map.offset.set(-time*.004,time*.006);}return time;},
+  update(dt){if(running)time+=Math.min(.08,Math.max(0,dt));wind.value=time;for(const [t,v] of flowing)t.offset.set(v.offset.x+time*v.x,v.offset.y+time*v.z);return time;},
   toggle(){running=!running;return running;},
   guildUpgrades(owned){for(const [o,kind,tier] of upgrades)o.visible=(owned?.[kind]??0)>=tier;},get running(){return running;},
  };

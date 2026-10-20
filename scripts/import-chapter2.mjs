@@ -6,6 +6,7 @@ import {createHash} from 'node:crypto';
 import {walkable,findPath} from '../combat-core.js';
 import {moveBody} from '../combat-core.js';
 import {createRouteWalker} from '../route-walk.js';
+import {lablaeCitizens} from '../lablae-citizens.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const outputs=path.resolve(root,'../../outputs');
 const catalog=JSON.parse(fs.readFileSync(path.join(root,'maps/world.json'),'utf8'));
@@ -69,7 +70,7 @@ for(const [id,name,nameEn,color,mood] of definitions){
  const bridges=layout.bridges.map(([a,b,width])=>({x:Math.min(a[0],b[0])-(a[0]===b[0]?width/2:0),z:-Math.max(a[1],b[1])-(a[1]===b[1]?width/2:0),w:Math.abs(b[0]-a[0])||width,d:Math.abs(b[1]-a[1])||width}));
  catalog.maps.push({id,name,nameEn,subtitle:'พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด',exploration:true,safe:id==='lablae',kind:id==='lablae'?'town':'field',region:'chapter2',mood,color,
   spawn,bounds,nav,npcs,mobs:[],portals,districts,landmarks:districts.map(d=>[d.name,d.x,d.z]),roads,bridges,
-  plazas:layout.plazas,waterAreas:(layout.water??[]).map(rect),plants:[],decor:[],leafSources:[],citizens:[],
+  plazas:layout.plazas,waterAreas:(layout.water??[]).map(rect),plants:[],decor:[],leafSources:[],citizens:id==='lablae'?lablaeCitizens():[],
   scene:'maps/v4/'+id+'.glb',layoutRevision:id==='kailash-peak'?'kailash-v3':'chapter2-v2'});
  for(const [from,to] of [[id+'.glb','maps/v4/'+id+'.glb'],['loading.webp','assets/loading105/'+id+'.webp'],[id+'-layout.json','maps/chapter2-layouts/'+id+'.json']]){
   const dest=path.join(root,to);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(source,from),dest);

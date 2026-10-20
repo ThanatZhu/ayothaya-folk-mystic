@@ -2360,3 +2360,13 @@ Object.assign(globalThis.I18N_EN,{
 });
 
 Object.assign(globalThis.I18N_EN,{'อาวุธรูปลักษณ์พิเศษ':'Special weapon appearance'});
+Object.assign(globalThis.I18N_EN,{
+ 'เดินชมตลาดลับแลได้เลยจ้ะ ข้ามคลองตรงสะพานแล้วเดินตามทางไปนะ':'Enjoy Lablae market. Cross the canal at the bridge and follow the road.',
+ 'ข้ากำลังหาบของไปส่งอีกฟากคลอง ขอทางหน่อยนะ':'I am carrying a delivery across the canal. Coming through!',
+ 'ดอกไม้จากสวนฝั่งตะวันออก หอมชื่นใจดีนะ':'These flowers from the eastern garden smell lovely.',
+ 'เดินเหนื่อยแล้วพักชมเมืองก่อนก็ได้ ย่านตลาดอยู่ฝั่งตะวันตก':'Rest and enjoy the town when you get tired. The market is to the west.',
+ 'เมืองนี้สงบดี เดินตามถนนแล้วจะถึงย่านต่าง ๆ':'Our town is peaceful. The streets connect all its districts.',
+ 'คลองเส้นนี้มีสะพานสองแห่ง ข้ามตรงสะพานจะปลอดภัยกว่า':'This canal has two bridges. Use them to cross safely.',
+ 'ลับแลมีทั้งย่านช่าง สวนดอกไม้ และวัด ลองเดินชมให้ทั่วเถิด':'Lablae has an artisan quarter, a flower garden and a temple. Explore them all.',
+ 'กำลังเอางานสานไปส่งที่ตลาด ถ้าชอบงานฝีมือก็ลองไปชมย่านช่างนะ':'I am taking woven goods to the market. Visit the artisan quarter if you enjoy crafts.'
+});

@@ -26775,7 +26775,1418 @@
       "plants": [],
       "decor": [],
       "leafSources": [],
-      "citizens": [],
+      "citizens": [
+        {
+          "id": "lablae-citizen-1",
+          "style": 0,
+          "text": "เดินชมตลาดลับแลได้เลยจ้ะ ข้ามคลองตรงสะพานแล้วเดินตามทางไปนะ",
+          "speed": 0.9,
+          "pause": 3,
+          "offset": 0,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 32,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-2",
+          "style": 1,
+          "text": "ข้ากำลังหาบของไปส่งอีกฟากคลอง ขอทางหน่อยนะ",
+          "speed": 0.98,
+          "pause": 3,
+          "offset": 41.9039064395348,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 32,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-3",
+          "style": 2,
+          "text": "ดอกไม้จากสวนฝั่งตะวันออก หอมชื่นใจดีนะ",
+          "speed": 1.06,
+          "pause": 3,
+          "offset": 77.7091100202719,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 32,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-4",
+          "style": 3,
+          "text": "เดินเหนื่อยแล้วพักชมเมืองก่อนก็ได้ ย่านตลาดอยู่ฝั่งตะวันตก",
+          "speed": 1.1400000000000001,
+          "pause": 3,
+          "offset": 108.69954818616868,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 32,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-5",
+          "style": 4,
+          "text": "เมืองนี้สงบดี เดินตามถนนแล้วจะถึงย่านต่าง ๆ",
+          "speed": 0.9,
+          "pause": 3,
+          "offset": 181.98145915886266,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 32,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-6",
+          "style": 5,
+          "text": "คลองเส้นนี้มีสะพานสองแห่ง ข้ามตรงสะพานจะปลอดภัยกว่า",
+          "speed": 0.98,
+          "pause": 3,
+          "offset": 209.519532197674,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 32,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-7",
+          "style": 6,
+          "text": "ลับแลมีทั้งย่านช่าง สวนดอกไม้ และวัด ลองเดินชมให้ทั่วเถิด",
+          "speed": 1.06,
+          "pause": 3,
+          "offset": 0,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -50,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-8",
+          "style": 7,
+          "text": "กำลังเอางานสานไปส่งที่ตลาด ถ้าชอบงานฝีมือก็ลองไปชมย่านช่างนะ",
+          "speed": 1.1400000000000001,
+          "pause": 3,
+          "offset": 34.748538011695906,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -50,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-9",
+          "style": 0,
+          "text": "เดินชมตลาดลับแลได้เลยจ้ะ ข้ามคลองตรงสะพานแล้วเดินตามทางไปนะ",
+          "speed": 0.9,
+          "pause": 3,
+          "offset": 86.96296296296295,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -50,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-10",
+          "style": 1,
+          "text": "ข้ากำลังหาบของไปส่งอีกฟากคลอง ขอทางหน่อยนะ",
+          "speed": 0.98,
+          "pause": 3,
+          "offset": 120.28571428571429,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -50,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-11",
+          "style": 2,
+          "text": "ดอกไม้จากสวนฝั่งตะวันออก หอมชื่นใจดีนะ",
+          "speed": 1.06,
+          "pause": 3,
+          "offset": 148.88050314465409,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -50,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-12",
+          "style": 3,
+          "text": "เดินเหนื่อยแล้วพักชมเมืองก่อนก็ได้ ย่านตลาดอยู่ฝั่งตะวันตก",
+          "speed": 1.1400000000000001,
+          "pause": 3,
+          "offset": 173.74269005847952,
+          "route": [
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -50,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 0,
+              "rest": false
+            },
+            {
+              "x": -50,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-13",
+          "style": 4,
+          "text": "เมืองนี้สงบดี เดินตามถนนแล้วจะถึงย่านต่าง ๆ",
+          "speed": 0.9,
+          "pause": 3,
+          "offset": 0,
+          "route": [
+            {
+              "x": 0,
+              "z": -55,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 55,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-14",
+          "style": 5,
+          "text": "คลองเส้นนี้มีสะพานสองแห่ง ข้ามตรงสะพานจะปลอดภัยกว่า",
+          "speed": 0.98,
+          "pause": 3,
+          "offset": 39.414965986394556,
+          "route": [
+            {
+              "x": 0,
+              "z": -55,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 55,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-15",
+          "style": 6,
+          "text": "ลับแลมีทั้งย่านช่าง สวนดอกไม้ และวัด ลองเดินชมให้ทั่วเถิด",
+          "speed": 1.06,
+          "pause": 3,
+          "offset": 73.18238993710692,
+          "route": [
+            {
+              "x": 0,
+              "z": -55,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 55,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-16",
+          "style": 7,
+          "text": "กำลังเอางานสานไปส่งที่ตลาด ถ้าชอบงานฝีมือก็ลองไปชมย่านช่างนะ",
+          "speed": 1.1400000000000001,
+          "pause": 3,
+          "offset": 102.49122807017544,
+          "route": [
+            {
+              "x": 0,
+              "z": -55,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 55,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-17",
+          "style": 0,
+          "text": "เดินชมตลาดลับแลได้เลยจ้ะ ข้ามคลองตรงสะพานแล้วเดินตามทางไปนะ",
+          "speed": 0.9,
+          "pause": 3,
+          "offset": 170.96296296296296,
+          "route": [
+            {
+              "x": 0,
+              "z": -55,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 55,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-18",
+          "style": 1,
+          "text": "ข้ากำลังหาบของไปส่งอีกฟากคลอง ขอทางหน่อยนะ",
+          "speed": 0.98,
+          "pause": 3,
+          "offset": 197.07482993197277,
+          "route": [
+            {
+              "x": 0,
+              "z": -55,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 55,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": 49,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": 24,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -8,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": true
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-19",
+          "style": 2,
+          "text": "ดอกไม้จากสวนฝั่งตะวันออก หอมชื่นใจดีนะ",
+          "speed": 1.06,
+          "pause": 3,
+          "offset": 0,
+          "route": [
+            {
+              "x": -50,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-20",
+          "style": 3,
+          "text": "เดินเหนื่อยแล้วพักชมเมืองก่อนก็ได้ ย่านตลาดอยู่ฝั่งตะวันตก",
+          "speed": 1.1400000000000001,
+          "pause": 3,
+          "offset": 41.50653281879039,
+          "route": [
+            {
+              "x": -50,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-21",
+          "style": 4,
+          "text": "เมืองนี้สงบดี เดินตามถนนแล้วจะถึงย่านต่าง ๆ",
+          "speed": 0.9,
+          "pause": 3,
+          "offset": 104.08321647426901,
+          "route": [
+            {
+              "x": -50,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-22",
+          "style": 5,
+          "text": "คลองเส้นนี้มีสะพานสองแห่ง ข้ามตรงสะพานจะปลอดภัยกว่า",
+          "speed": 0.98,
+          "pause": 3,
+          "offset": 143.8697369798604,
+          "route": [
+            {
+              "x": -50,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-23",
+          "style": 6,
+          "text": "ลับแลมีทั้งย่านช่าง สวนดอกไม้ และวัด ลองเดินชมให้ทั่วเถิด",
+          "speed": 1.06,
+          "pause": 3,
+          "offset": 177.95263174875868,
+          "route": [
+            {
+              "x": -50,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            }
+          ]
+        },
+        {
+          "id": "lablae-citizen-24",
+          "style": 7,
+          "text": "กำลังเอางานสานไปส่งที่ตลาด ถ้าชอบงานฝีมือก็ลองไปชมย่านช่างนะ",
+          "speed": 1.1400000000000001,
+          "pause": 3,
+          "offset": 207.53266409395192,
+          "route": [
+            {
+              "x": -50,
+              "z": -28,
+              "rest": true
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 40,
+              "z": 0,
+              "rest": true
+            },
+            {
+              "x": 40,
+              "z": -35,
+              "rest": false
+            },
+            {
+              "x": 0,
+              "z": -38,
+              "rest": false
+            },
+            {
+              "x": -12,
+              "z": -38,
+              "rest": true
+            },
+            {
+              "x": -12,
+              "z": -28,
+              "rest": false
+            },
+            {
+              "x": -28,
+              "z": -28,
+              "rest": false
+            }
+          ]
+        }
+      ],
       "scene": "maps/v4/lablae.glb",
       "layoutRevision": "chapter2-v2"
     },

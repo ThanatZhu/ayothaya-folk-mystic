@@ -69,12 +69,15 @@ td.top{background:#1f3b31;color:var(--jade);font-weight:700}td.bottom{background
 .gift h4 input{width:70px;min-height:30px}
 .ico{position:relative;display:block;width:40px;height:40px;background-repeat:no-repeat;border-radius:8px}
 .coinico{display:grid;place-items:center;background:#f4cf7a;color:#2a2210;font-style:normal;font-weight:800}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
-.grid .cell{position:relative;display:grid;justify-items:center;gap:2px;padding:6px 4px;border:1px solid #f4cf7a2a;border-radius:10px;background:#ffffff08;color:inherit;font:inherit}
-.grid .cell em{position:absolute;right:4px;bottom:2px;font:700 11px/1 Mali,Tahoma,sans-serif;font-style:normal;color:#fff;text-shadow:0 1px 2px #000}
+/* fixed row heights: the button min-height above let a capped-height grid squash rows below the 40px icon;
+   max-heights are whole rows (rows×n + gaps + 2×4px padding) so no row is cut at the scroll edge */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;align-content:start}
+.grid .cell{box-sizing:border-box;position:relative;display:grid;justify-items:center;align-content:start;gap:2px;min-height:0;min-width:0;padding:6px 4px;border:1px solid #f4cf7a2a;border-radius:10px;background:#ffffff08;color:inherit;font:inherit}
+.grid .cell em{position:absolute;right:5px;bottom:3px;font:700 11px/1 Mali,Tahoma,sans-serif;font-style:normal;color:#fff;text-shadow:0 1px 2px #000}
 .grid .cell small{font-size:10px;line-height:1.2;text-align:center;opacity:.85;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.grid.bag{max-height:150px;overflow:auto}
-.grid.pick{max-height:300px;overflow:auto}.grid.pick .cell{cursor:pointer}.grid.pick .cell:hover{border-color:#f4cf7a;background:#f4cf7a1c}
+.grid.bag,.grid.pick{overflow:auto;padding:4px;scroll-padding:4px;scroll-snap-type:y proximity}.grid .cell{scroll-snap-align:start}
+.grid.bag{display:grid;gap:6px;grid-auto-rows:64px;max-height:212px}.grid.bag .cell{padding:6px 4px 16px;border-radius:10px}
+.grid.pick{grid-auto-rows:70px;max-height:306px}.grid.pick .cell{cursor:pointer}.grid.pick .cell:hover{border-color:#f4cf7a;background:#f4cf7a1c}
 .kinds{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.kinds button{min-height:30px;padding:0 12px;border-radius:999px;border:1px solid #f4cf7a55;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
 .kinds button.on{background:#f4cf7a;color:#2a2210;border-color:#f4cf7a}.kinds input{flex:1;min-width:140px}
 .qbtn{display:flex;align-items:center;gap:6px;min-height:40px;padding:2px 12px 2px 4px!important}.qbtn .ico{width:32px;height:32px}

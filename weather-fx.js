@@ -29,8 +29,9 @@ export function createWeather({scene,controls,sun,map,game,quality='mid',reduced
    level.rain+=(now.rain-level.rain)*k;level.dim+=(now.dim-level.dim)*k;level.fog+=(now.fog-level.fog)*k;
    if(now.lightning){nextFlash-=dt;if(nextFlash<=0){nextFlash=5+Math.random()*7;flash=1;}}
    flash=Math.max(0,flash-dt*4);const glow=flash>.5?1:flash*2;
-   if(hemi)hemi.intensity=base.hemi*level.dim+glow*2.4;sun.intensity=base.sun*level.dim;
-   const grey=1-level.dim;scene.background?.copy?.(base.sky).lerp(GREY,grey*1.6).offsetHSL(0,0,glow*.25);scene.fog.color.copy(base.fog).lerp(GREY,grey*1.6);
+   // 0.100.7 a softer flash: the old +2.4 washed the whole screen out white for a moment
+   if(hemi)hemi.intensity=base.hemi*level.dim+glow*.7;sun.intensity=base.sun*level.dim;
+   const grey=1-level.dim;scene.background?.copy?.(base.sky).lerp(GREY,grey*1.6).offsetHSL(0,0,glow*.08);scene.fog.color.copy(base.fog).lerp(GREY,grey*1.6);
    // the frame loop sets the haze distance first; weather only pulls the far edge closer
    scene.fog.far=scene.fog.near+(scene.fog.far-scene.fog.near)*level.fog;
    const count=Math.round(n*level.rain);rain.visible=count>0;if(!count)return;

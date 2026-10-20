@@ -164,3 +164,9 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
 .bag-actions button.danger,.bag-actions button+button.danger{background:#8a2a1e;border-color:#ff8f7a;color:#fff}
 .shop-list .qty .total{margin-left:4px;color:#f4cf7a;white-space:nowrap}
 .shop-list .deal:disabled{opacity:.45;cursor:not-allowed}
+
+/* 0.102 rebirth row in the status window */
+#status-rebirth{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 10px 8px;padding:6px 10px;border:1px solid #f4cf7a55;border-radius:8px;background:#f4cf7a12}
+#status-rebirth:empty{display:none}
+#status-rebirth p{margin:0;display:grid}#status-rebirth b{color:#f4cf7a}#status-rebirth small{font-size:11px;opacity:.85}
+#rebirth-go{flex:none;min-height:32px;padding:0 14px;border:1px solid #f4cf7a;border-radius:999px;background:#f4cf7a;color:#2a2210;font:700 13px Mali,Tahoma,sans-serif;cursor:pointer}

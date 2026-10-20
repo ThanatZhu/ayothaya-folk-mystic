@@ -84,7 +84,7 @@ export class FirebaseStore{
    if(!legacy.exists||legacy.data().revision!==session.mirrorRevision)throw new Error('save-conflict');
    const next={...copy(record),revision:session.mirrorRevision+1};delete next.slotId;
    // Skill levels stay in the private profile; the client-readable mirror keeps its rule-checked shape.
-   const mirror={...next};delete mirror.skills;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.daily;delete mirror.dungeonDay;delete mirror.pet;delete mirror.bounty;delete mirror.album;delete mirror.trade;delete mirror.stats;delete mirror.gear;
+   const mirror={...next};delete mirror.skills;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.daily;delete mirror.dungeonDay;delete mirror.pet;delete mirror.bounty;delete mirror.weekly;delete mirror.rebirth;delete mirror.album;delete mirror.trade;delete mirror.stats;delete mirror.gear;
    tx.set(session.refs.profile,{record:next,updatedAt:Date.now()});tx.set(session.refs.legacy,{...mirror,updatedAt:new Date()});
    if(release)tx.delete(session.refs.lease);else tx.update(session.refs.lease,{expires:Date.now()+ttl});return next.revision;
   });session.mirrorRevision=revision;

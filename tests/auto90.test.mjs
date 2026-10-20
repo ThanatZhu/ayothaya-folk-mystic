@@ -5,7 +5,7 @@ import {CombatWorld} from '../combat-core.js';
 import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 test('AUTO settings are cleaned and pick the strongest potion for the bar that fell',()=>{
- assert.deepEqual(normalizeAuto({skills:[0,0,3,12,'x',-1],hp:150,mp:-5}),{skills:[0,3],hp:90,mp:0});
+ assert.deepEqual(normalizeAuto({skills:[0,0,3,12,15,'x',-1],hp:150,mp:-5}),{skills:[0,3,12],hp:90,mp:0}); // 10-14 are Master skills
  assert.deepEqual(normalizeAuto(null),{skills:[0],hp:40,mp:0});
  const p={hp:30,maxHp:100,mp:100,maxMp:100},bag={items:{'hp-small':2,'hp-large':1,'mp-small':3}};
  assert.equal(pickPotion(bag,p,{hp:40,mp:0}),'hp-large');assert.equal(pickPotion(bag,{...p,hp:50},{hp:40,mp:0}),null);

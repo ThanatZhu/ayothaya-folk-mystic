@@ -1,18 +1,18 @@
 import {itemDef} from './items.js?v=95';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=73';
-import {applySkillArt} from './skill-art.js?v=21';
+import {applySkillArt} from './skill-art.js?v=101';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=life1';
 import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=life1';
 import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=101.4';
-import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=87';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=102.2';
+import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=101';
 import {createRouteWalker} from './route-walk.js?v=01';
 
-import {className} from './classes.js?v=73';
+import {className} from './classes.js?v=101';
 import {normalizeAuto} from './auto-play.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
@@ -135,16 +135,18 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // 0.90 hotbar: which skill sits on each of the ten buttons / keys 1-0 (dragged in the skill window), and the AUTO
  // settings (skills to cast, potion thresholds). Both are per path on this device; AUTO settings go to the server online.
  const HOT_KEY='ayothaya-hotbar:'+world.profession.id,AUTO_KEY='ayothaya-auto:'+world.profession.id;
- let hotbar=[0,1,2,3,4,5,6,7,8,9];try{const h=JSON.parse(localStorage.getItem(HOT_KEY));if(Array.isArray(h)&&h.length===10&&[...h].sort((a,b)=>a-b).join()==='0,1,2,3,4,5,6,7,8,9')hotbar=h;}catch{}
+ // 0.101 five more slots (keys Alt+1-5) hold the Master skills; a ten-slot hotbar saved before keeps its order.
+ const order=[...Array(SLOTS).keys()],isOrder=h=>Array.isArray(h)&&h.length===SLOTS&&[...h].sort((a,b)=>a-b).join()===order.join();
+ let hotbar=order;try{let h=JSON.parse(localStorage.getItem(HOT_KEY));if(Array.isArray(h)&&h.length===BASE_SLOTS)h=[...h,...order.slice(BASE_SLOTS)];if(isOrder(h))hotbar=h;}catch{}
  try{world.autoConfig=normalizeAuto(JSON.parse(localStorage.getItem(AUTO_KEY)));}catch{world.autoConfig=normalizeAuto(null);}
  let autoSent='';
- const skillButtons=SKILLS.map((s,i)=>{
-  const b=document.createElement('button');b.type='button';b.className='skill';b.setAttribute('aria-label',`สกิล ${s.key} ${s.name}`);b.title=`${s.key} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;
-  b.innerHTML=`<kbd>${s.key}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.style.setProperty('--skill-color',s.color);b.addEventListener('click',()=>{if(!isPaused())world.skill(hotbar[i]);});$('skills').append(b);return b;
+ const skillButtons=world.skills.map((s,i)=>{
+  const b=document.createElement('button');b.type='button';b.className='skill'+(isMaster(i)?' master-slot':'');b.hidden=isMaster(i);
+  b.innerHTML=`<kbd>${HOTBAR_KEYS[i]}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.addEventListener('click',()=>{if(!isPaused())world.skill(hotbar[i]);});$('skills').append(b);return b;
  });
- function paintHotbar(){skillButtons.forEach((b,i)=>{const s=world.skills[hotbar[i]];if(!s)return;b.querySelector('strong').textContent=s.icon;b.querySelector('span').textContent=s.short??s.name;b.setAttribute('aria-label',`สกิล ${SKILLS[i].key} ${s.name}`);b.title=`${SKILLS[i].key} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;b.style.setProperty('--skill-color',s.color);});applySkillArt(skillButtons,world.profession.id,hotbar);}
+ function paintHotbar(){skillButtons.forEach((b,i)=>{const s=world.skills[hotbar[i]];if(!s)return;b.querySelector('strong').textContent=s.icon;b.querySelector('span').textContent=s.short??s.name;b.setAttribute('aria-label',`สกิล ${HOTBAR_KEYS[i]} ${s.name}`);b.title=`${HOTBAR_KEYS[i]} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;b.style.setProperty('--skill-color',s.color);});applySkillArt(skillButtons,world.profession.id,hotbar);}
  paintHotbar();
- function setHotbar(order){if(!Array.isArray(order)||order.length!==10)return;hotbar=[...order];try{localStorage.setItem(HOT_KEY,JSON.stringify(hotbar));}catch{}paintHotbar();}
+ function setHotbar(order){if(!isOrder(order))return;hotbar=[...order];try{localStorage.setItem(HOT_KEY,JSON.stringify(hotbar));}catch{}paintHotbar();}
  function setAutoConfig(cfg){world.autoConfig=normalizeAuto(cfg);try{localStorage.setItem(AUTO_KEY,JSON.stringify(world.autoConfig));}catch{}autoSent='';}
 
  $('auto-attack').addEventListener('click',()=>{if(!isPaused())world.toggleAuto();});
@@ -155,6 +157,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  $('attack').addEventListener('click',e=>{if(e.detail===0&&!isPaused())world.basicAttack();});
  function editable(e){return e.target instanceof Element&&!!e.target.closest('input,textarea,select,[contenteditable=true]');}
  addEventListener('keydown',e=>{
+  if(e.altKey&&/^Digit[1-5]$/.test(e.code)&&!isPaused()&&!editable(e)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(!e.repeat)world.skill(hotbar[BASE_SLOTS+Number(e.code.slice(-1))-1]);return;}
   if(isPaused()||editable(e)||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.code==='Space'&&e.target.closest?.('[data-hud-panel] button,#account-panel button'))return;
   if(['KeyW','KeyA','KeyS','KeyD','Space','KeyF'].includes(e.code)||/^Digit[0-9]$/.test(e.code))e.preventDefault();
@@ -300,7 +303,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    $('target-fill').style.width=target?`${target.hp/target.maxHp*100}%`:'0%';
    if(!network)world.skillPoints=availablePoints(localSkills,progress());
    if(network){const j=JSON.stringify(world.autoConfig);if(j!==autoSent&&network.command('autoConfig',world.autoConfig))autoSent=j;}
-   skillButtons.forEach((b,i)=>{const cd=world.cooldowns[hotbar[i]],lv=world.skillLevels[hotbar[i]]??1;b.querySelector('.skill-level').textContent=lv?'Lv'+lv:'—';b.classList.toggle('locked',!lv);b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<SKILLS[i].cost);b.style.setProperty('--cooldown',`${cd/SKILLS[i].cd*100}%`);});
+   skillButtons.forEach((b,i)=>{const cd=world.cooldowns[hotbar[i]],lv=world.skillLevels[hotbar[i]]??1;const s=world.skills[hotbar[i]];b.hidden=isMaster(i)&&!lv;b.querySelector('.skill-level').textContent=lv?'Lv'+lv:'—';b.classList.toggle('locked',!lv);b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<s.cost);b.style.setProperty('--cooldown',`${cd/s.cd*100}%`);});
   }
  }
  function mobileLayout(){return innerWidth<=800||matchMedia('(pointer:coarse)').matches;}
@@ -314,7 +317,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   // 0.97 the AUTO button shows only what the server reports.
   world.skill=i=>{world.clearEmote();return client.command('skill',{index:i});};world.basicAttack=()=>{world.clearEmote();return client.command('attack');};world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=(on,hunt)=>client.command('auto',{on,hunt});world.questTalk=npc=>client.command('questTalk',{npc});world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard)=>client.command('refine',{slot,npc,lekLai,guard});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});world.discard=(item,count)=>client.command('discard',{item,count});
  }
- function applyNetworkSnapshot(snapshot){const s=snapshot.self;if(s.story)world.story=s.story;world.myStall=s.stall??null;world.myGuild=s.guild??null;world.status=s.status??{};world.mvp=s.mvp??null;world.pet=s.pet??null;world.bounty=s.bounty??null;world.mercLeft=s.merc??0;world.album=s.album??[];if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
+ function applyNetworkSnapshot(snapshot){const s=snapshot.self;world.weekly=s.weekly??null;world.rebirth=s.rebirth??0;if(s.story)world.story=s.story;world.myStall=s.stall??null;world.myGuild=s.guild??null;world.status=s.status??{};world.mvp=s.mvp??null;world.pet=s.pet??null;world.bounty=s.bounty??null;world.mercLeft=s.merc??0;world.album=s.album??[];if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
   serverSelf.running=s.player.running===true;world.emote=activeEmote(s.emote,snapshot.time);
   for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);}
  }

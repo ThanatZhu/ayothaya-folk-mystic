@@ -3,7 +3,7 @@ import {normalizeEquipment} from './equipment.js?v=41';
 import {trainingAction} from './city-life-data.js?v=98';
 import {CLASS_LEVEL,progression,validateJob,advanceReady} from './advancement.js?v=73';
 import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=62';
-import {validateSave,nextRevision} from './save-state.js?v=21';
+import {validateSave,nextRevision} from './save-state.js?v=101.5';
 
 export function validateCharacterChange(before,after,state){
  if(before.name!==after.name||before.gender!==after.gender)throw new Error('character-identity');

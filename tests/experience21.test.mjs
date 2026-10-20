@@ -34,6 +34,6 @@ test('creation always novice and separate slots retain XP; class and Master rese
  await assert.rejects(store.save('server-1',a,{...a.state,traveler:{...a.state.traveler,baseXp:0}}),/experience-regression/);
 });
 test('every existing skill in eight professions has an atlas with ten valid cells',()=>{
- for(const c of [NOVICE,...CLASSES]){const bytes=fs.readFileSync(new URL(skillAtlas(c.id)));assert.equal(bytes.toString('ascii',1,4),'PNG');assert.ok(bytes.readUInt32BE(16)>=500);assert.ok(bytes.readUInt32BE(20)>=200);assert.equal(new CombatWorld({classId:c.id}).skills.length,10);}
+ for(const c of [NOVICE,...CLASSES]){const bytes=fs.readFileSync(new URL(skillAtlas(c.id)));assert.equal(bytes.toString('ascii',1,4),'PNG');assert.ok(bytes.readUInt32BE(16)>=500);assert.ok(bytes.readUInt32BE(20)>=200);assert.equal(new CombatWorld({classId:c.id}).skills.length,15);} // Master skills (10-14) reuse their parent cell
  assert.throws(()=>skillAtlas('../secret'),/invalid-class/);
 });

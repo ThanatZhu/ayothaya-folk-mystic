@@ -2,7 +2,7 @@
 // Bounties: three per Thai day (easy · middle · hard), the same for everyone, paid out in a town.
 // Album: every card ever obtained is recorded once; milestones pay out automatically.
 import {ITEMS} from './items.js?v=95';
-import {MONSTER_TYPES} from './combat-core.js?v=97';
+import {MONSTER_TYPES} from './combat-core.js?v=101';
 import {thaiDay} from './daily.js?v=01';
 export const BOUNTY_POOL=[
  [{monster:'straw',count:15},{monster:'rat',count:15},{monster:'hopper',count:12}],
@@ -44,4 +44,24 @@ export function albumAdd(album,ids){
  const before=normalizeAlbum(album),after=normalizeAlbum([...before,...ids.map(i=>i.split(/[+~!]/)[0])]);
  const hit=ALBUM_MILESTONES.filter(m=>before.length<m.count&&after.length>=m.count);
  return {album:after,added:after.length-before.length,milestones:hit};
+}
+// ---- 0.102 weekly quests: the same three for everyone, reset Monday 00:00 Thai time, claimed in a town (online only)
+export const WEEKLY=[
+ {name:'ล่ามอนสเตอร์ 400 ตัว',count:400,reward:{coins:15000,items:[{id:'hp-large',count:10},{id:'mp-large',count:5}]}},
+ {name:'ล้มหัวหน้าฝูง 15 ตัว',count:15,reward:{coins:20000,items:[{id:'lek-lai',count:2}]}},
+ {name:'ล้มบอสหรือร่างทรง 5 ตัว',count:5,reward:{coins:30000,items:[{id:'break-guard',count:1},{id:'lek-lai',count:2}]}},
+];
+export const weekOf=now=>{const t=new Date(now+7*3600e3),back=(t.getUTCDay()+6)%7;return new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate()-back)).toISOString().slice(0,10);};
+export function normalizeWeekly(state,now){
+ const week=weekOf(now);if(state?.week!==week)return {week,progress:WEEKLY.map(()=>0),claimed:WEEKLY.map(()=>false)};
+ const n=(v,i)=>Number.isInteger(v?.[i])&&v[i]>=0?Math.min(v[i],9999):0;
+ return {week,progress:WEEKLY.map((_,i)=>n(state.progress,i)),claimed:WEEKLY.map((_,i)=>state.claimed?.[i]===true)};
+}
+export function weeklyDefeat(state,now,{leader=false,boss=false}={}){
+ const s=normalizeWeekly(state,now);[true,leader,boss].forEach((hit,i)=>{if(hit&&!s.claimed[i]&&s.progress[i]<WEEKLY[i].count)s.progress[i]++;});return s;
+}
+export function weeklyClaim(state,now,index){
+ const s=normalizeWeekly(state,now),q=WEEKLY[index];
+ if(!q)throw new Error('bounty-none');if(s.claimed[index])throw new Error('bounty-claimed');if(s.progress[index]<q.count)throw new Error('bounty-unfinished');
+ s.claimed[index]=true;return {state:s,reward:q.reward};
 }

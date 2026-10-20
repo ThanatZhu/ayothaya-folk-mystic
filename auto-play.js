@@ -1,11 +1,12 @@
 // 0.90 AUTO helpers shared by the browser and the realm server (owner: AUTO also casts skills and drinks potions,
 // set from the skill window). Pure functions: the caller owns the world, the bag and the timing.
 import {ITEMS} from './items.js?v=95';
+import {SLOTS} from './skill-progress.js?v=101';
 export const AUTO_DEFAULT={skills:[0],hp:40,mp:0};
 const SELF=new Set(['heal','shield','mana','focus','blessing']);
-// Clean a config from the client: skill slots 0-9 (unique, at most 10), potion thresholds 0-90 % (0 = off).
+// Clean a config from the client: skill slots 0-14 (unique; 10-14 are Master skills), potion thresholds 0-90 % (0 = off).
 export function normalizeAuto(raw){
- const skills=Array.isArray(raw?.skills)?[...new Set(raw.skills.filter(i=>Number.isInteger(i)&&i>=0&&i<10))]:AUTO_DEFAULT.skills;
+ const skills=Array.isArray(raw?.skills)?[...new Set(raw.skills.filter(i=>Number.isInteger(i)&&i>=0&&i<SLOTS))]:AUTO_DEFAULT.skills;
  const pct=v=>Number.isFinite(v)?Math.max(0,Math.min(90,Math.round(v))):0;
  return {skills,hp:raw&&'hp' in raw?pct(raw.hp):AUTO_DEFAULT.hp,mp:raw&&'mp' in raw?pct(raw.mp):AUTO_DEFAULT.mp};
 }

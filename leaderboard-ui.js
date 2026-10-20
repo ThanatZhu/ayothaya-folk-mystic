@@ -1,5 +1,5 @@
 // 0.72 leaderboard: top 50 characters of this server by combat power (server-side ranking, offline players included).
-import {className} from './classes.js?v=73';
+import {className} from './classes.js?v=101';
 import {openHudPanel} from './hud-panels.js?v=34';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 export function createLeaderboardUI({game}){

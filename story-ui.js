@@ -2,7 +2,7 @@
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems} from './story-quests.js?v=98';
 import {createCoach} from './coach.js?v=99.2';
-import {MONSTER_TYPES} from './combat-core.js?v=97';
+import {MONSTER_TYPES} from './combat-core.js?v=101';
 import {awardExperience,baseProgress} from './experience.js?v=73';
 
 const RESUME='ayothaya-story-autowalk';

@@ -1,7 +1,7 @@
 import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {BODY_HEIGHT,FRAME_SIZE,FRAME_FOOT,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {peoplePlacement,citizenBodyHeight} from './npc-size.js?v=size1';
-import {CLASSES,NOVICE,className} from './classes.js?v=73';
+import {CLASSES,NOVICE,className} from './classes.js?v=101';
 import {MENTORS,CITIZEN_STYLES} from './city-life-data.js?v=98';
 import {POSTURE_TRANSITIONS} from './character-action-state.js?v=life1';
 

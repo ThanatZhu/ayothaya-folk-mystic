@@ -1,4 +1,4 @@
-import {CLASSES,isClass} from './classes.js?v=73';
+import {CLASSES,isClass} from './classes.js?v=101';
 import {directionalBodyMetrics} from './directional-size.js';
 export const DIRECTIONAL_CLASSES=['novice',...CLASSES.map(c=>c.id)];
 export function directionalManifestPath(classId='shaman'){

@@ -18,7 +18,12 @@ export const FRONTIER_MONSTERS=[
  {id:'bog-hopper',name:'ตั๊กแตนหนองน้ำ',hp:320,speed:1.4,damage:18,baseXp:85,jobXp:48,level:28,sheet:'field-monsters',row:2,height:1.6},
  {id:'lotus-vine',name:'เถาบัวพันขา',hp:420,speed:.8,damage:20,baseXp:105,jobXp:60,level:30,sheet:'orchard-monsters',row:1,height:1.9},
  {id:'bog-lantern',name:'โคมผีบึง',hp:380,speed:1.15,damage:22,baseXp:120,jobXp:70,level:32,sheet:'orchard-monsters',row:2,height:2},
- {id:'marsh-ape',name:'พญาวานรบึง',hp:1400,speed:1.7,damage:30,baseXp:600,jobXp:340,level:34,sheet:'elite-monsters',row:1,height:2.7,elite:true,respawn:60}
+ {id:'marsh-ape',name:'พญาวานรบึง',hp:1400,speed:1.7,damage:30,baseXp:600,jobXp:340,level:34,sheet:'elite-monsters',row:1,height:2.7,elite:true,respawn:60},
+ // 0.102 ร่างทรง (awakened): the old camp bosses return at Lv.60–95, one per field map, every 30 minutes, announced server-wide
+ {id:'rat-chief-awakened',name:'ร่างทรงพญาหนูยุ้งข้าว',hp:20000,speed:1.4,damage:90,baseXp:1200,jobXp:700,level:60,sheet:'elite-monsters',row:0,height:3,boss:true,awakened:true,respawn:1800,reach:2.2,windup:.8},
+ {id:'monkey-chief-awakened',name:'ร่างทรงวานรเจ้าเล่ห์',hp:30000,speed:1.9,damage:115,baseXp:1600,jobXp:900,level:70,sheet:'elite-monsters',row:1,height:3.1,boss:true,awakened:true,respawn:1800,reach:2.2,windup:.8},
+ {id:'mill-keeper-awakened',name:'ร่างทรงเจ้าหุ่นฟางพันเชือก',hp:45000,speed:.9,damage:150,baseXp:2200,jobXp:1300,level:82,sheet:'elite-monsters',row:2,height:4.2,boss:true,awakened:true,respawn:1800,reach:3,windup:.9},
+ {id:'marsh-ape-awakened',name:'ร่างทรงพญาวานรบึง',hp:60000,speed:1.9,damage:190,baseXp:3000,jobXp:1800,level:95,sheet:'elite-monsters',row:1,height:3.6,boss:true,awakened:true,respawn:1800,reach:2.4,windup:.8}
 ];
 // Presentation timing is independent of frame rate and authoritative world position.
 export function monsterFrame(m,time){
@@ -38,7 +43,8 @@ export function markMonsterHit(m,source){
 //  skirmish: after landing a hit it runs away for a moment · leap: jumps in when the target is 3–6 away
 //  enrage: below 40% HP it moves faster and winds up sooner
 export const MONSTER_BEHAVIOUR={'bog-hopper':{leap:true},'bog-lantern':{aoe:2.4,windup:.9},'marsh-ape':{skirmish:1.2,enrage:true},lantern:{aoe:2.2,windup:.9},monkey:{skirmish:1.4},'monkey-chief':{skirmish:1.2,enrage:true},hopper:{leap:true},
- 'rat-chief':{enrage:true},'mill-keeper':{aoe:2.8,enrage:true},'lantern-lord':{aoe:3.2,windup:1,enrage:true},'straw-king':{aoe:3.4,windup:1.1,enrage:true}};
+ 'rat-chief':{enrage:true},'mill-keeper':{aoe:2.8,enrage:true},'lantern-lord':{aoe:3.2,windup:1,enrage:true},'straw-king':{aoe:3.4,windup:1.1,enrage:true},
+ 'rat-chief-awakened':{enrage:true},'monkey-chief-awakened':{skirmish:1.2,enrage:true},'mill-keeper-awakened':{aoe:3.2,windup:1,enrage:true},'marsh-ape-awakened':{skirmish:1.2,enrage:true}};
 export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear}){
  m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);m.strike=Math.max(0,(m.strike??0)-dt);m.moving=false;
  m.flee=Math.max(0,(m.flee??0)-dt);m.leapCD=Math.max(0,(m.leapCD??0)-dt);

@@ -54,7 +54,7 @@ export function createStatusUI({game,account,bagUI}){
  const nav=$('game-menu');if(nav)nav.insertBefore(menuButton,$('menu-bag')??$('menu-players')??null);
  const dot=document.createElement('b');dot.className='menu-dot';dot.hidden=true;menuButton.append(dot);
  const dialog=document.createElement('dialog');dialog.id='status-window';dialog.setAttribute('aria-labelledby','status-title');
- dialog.innerHTML='<header><h2 id="status-title">สถานะ</h2><b id="status-points"></b><button class="mp-icon" id="status-close" aria-label="ปิดหน้าสถานะ">×</button></header><ol id="status-stats"></ol><dl id="status-derived"></dl><h3>อุปกรณ์สวมใส่ <small>ค่าพลังจริง · ชุดแต่งกายเลือกแยกที่หน้าอุปกรณ์</small></h3><ul id="status-gear"></ul>';
+ dialog.innerHTML='<header><h2 id="status-title">สถานะ</h2><b id="status-points"></b><button class="mp-icon" id="status-close" aria-label="ปิดหน้าสถานะ">×</button></header><ol id="status-stats"></ol><dl id="status-derived"></dl><div id="status-rebirth"></div><h3>อุปกรณ์สวมใส่ <small>ค่าพลังจริง · ชุดแต่งกายเลือกแยกที่หน้าอุปกรณ์</small></h3><ul id="status-gear"></ul>';
  ($('game-shell')??document.body).append(dialog);
  dialog.querySelector('#status-close').onclick=()=>dialog.close();
  menuButton.onclick=()=>{if(dialog.open)dialog.close();else{game.clearInput();openHudPanel(dialog);render(true);}};
@@ -62,7 +62,7 @@ export function createStatusUI({game,account,bagUI}){
 
  let shown='';
  function render(force=false){
-  const v=view(),sig=JSON.stringify([v,dialog.open]);if(!force&&sig===shown)return;shown=sig;
+  const v=view(),sig=JSON.stringify([v,dialog.open,world.rebirth,who().level]);if(!force&&sig===shown)return;shown=sig;
   dot.hidden=!(v.points>0);
   if(!dialog.open)return;
   $('status-points').textContent='แต้มสถานะ '+v.points;
@@ -72,6 +72,13 @@ export function createStatusUI({game,account,bagUI}){
   $('status-stats').querySelectorAll('[data-stat]').forEach(b=>b.onclick=()=>raise(b.dataset.stat));
   const d=v.derived,pct=n=>Math.round(n*100)+'%';
   $('status-derived').innerHTML=[['HP สูงสุด',d.maxHp],['MP สูงสุด',d.maxMp],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)],['ความเร็วโจมตี',Math.round(100/d.delay)+'%']].map(([k,n])=>`<div><dt>${k}</dt><dd>${n}</dd></div>`).join('');
+  // 0.102 rebirth (online): at Base Lv.99, back to Lv.1 with +40 status points per rebirth, gear and skills kept
+  const reborn=world.rebirth??0,canReborn=game.online&&who().level>=99&&reborn<10;
+  $('status-rebirth').innerHTML=game.online?`<p><b>🌟 เกิดใหม่ ${reborn}/10</b><small>${reborn?`แต้มสถานะโบนัส +${reborn*40} · ใส่อุปกรณ์ได้ทุกเลเวล`:'ถึง Base Lv.99 แล้วเกิดใหม่ได้ที่เมือง'}</small></p>${canReborn?'<button type="button" id="rebirth-go">เกิดใหม่</button>':''}`:'';
+  const rb=$('rebirth-go');if(rb)rb.onclick=()=>{if(confirm(`เกิดใหม่ครั้งที่ ${reborn+1}?
+
+Base Lv. จะกลับเป็น 1 · แต้มสถานะคืนทั้งหมดให้แจกใหม่ (+${(reborn+1)*40} โบนัส)
+อาชีพ สกิล Job กระเป๋า และอุปกรณ์ยังอยู่ครบ · ต้องอยู่ในเมือง`))world.market?.('rebirth');};
   const bagItems=bagUI.bag().items??{};
   $('status-gear').innerHTML=GEAR_SLOTS.map(slot=>{const id=v.gear[slot],it=id&&itemDef(id);
    const cards=Object.keys(bagItems).filter(c=>itemDef(c)?.kind==='card'&&itemDef(c).slot===slot);

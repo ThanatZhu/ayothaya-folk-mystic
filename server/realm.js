@@ -8,14 +8,14 @@ import {awardExperience,baseProgress,levelGifts} from '../experience.js';
 import {refineGear} from '../refine.js';
 import {STORAGE_SLOTS,STORAGE_NPC,normalizeStorage,normalizeOffer,moveOffer,hasOffer,swapOffers,normalizeStall,buyFromStall} from '../market.js';
 import {MARKET_ZONE,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,searchMarket,publicShop} from '../market-board.js';
-import {normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
+import {REBIRTH_MAX,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
-import {normalizeSkills,upgradeSkill,availablePoints} from '../skill-progress.js';
+import {normalizeSkills,upgradeSkill,availablePoints,SLOTS} from '../skill-progress.js';
 import {normalizeStory,storyEvent,rewardItems} from '../story-quests.js';
 import {FRIEND_MAX,GUILD_MAX,GUILD_COST,SOCIAL_ERRORS,cleanName,validGuildName,validEmblem,normalizeFriends} from '../social.js';
 import {claimDaily,thaiDay} from '../daily.js';
-import {normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd} from '../bounty.js';
+import {normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd,normalizeWeekly,weeklyDefeat,weeklyClaim} from '../bounty.js';
 import {PETS,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from '../pets.js';
 import {activeEvent,expRate,surge,surgeOn} from '../events.js';
 // 0.49: the timed MVP returns an hour after it falls (first one 5 min after boot); dungeon clear pays once per Thai day.
@@ -39,7 +39,16 @@ const mobValue=(k,v)=>typeof v!=='number'?v:k==='x'||k==='z'?Math.round(v*100)/1
 // 0.93 duels: a challenge lasts 20 s, a bout 90 s; players hit each other for 35% of their monster damage (then the
 // target's dodge, shield and DEF apply as for a monster blow). Walking 20 m apart ends the bout as a draw.
 export const DUEL={ask:20000,time:90000,range:20,scale:.35};
-const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','hire']);
+export const WORLD_CHAT_COOLDOWN=8000;
+// World announcements for refines: only the rare ones (success at +7 or more, or a piece of +6 or more breaking),
+// so the common +1..+6 do not bury world chat.
+export const REFINE_ANNOUNCE=7;
+export function refineAnnouncement(who,r,before,after){
+ if(r.result==='success'&&r.level>=REFINE_ANNOUNCE)return `📣 ${who} ตีบวก ${after} สำเร็จ!`;
+ if(r.result==='broken'&&r.level+1>=REFINE_ANNOUNCE)return `💥 ${who} ตีบวก ${before} → +${r.level+1} ล้มเหลว อุปกรณ์แตก!`;
+ return null;
+}
+const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -73,7 +82,7 @@ export class RealmServer{
   peer.bag=normalizeBag(record.bag);peer.bagVersion=1;peer.bagSent=0;peer.itemAt=-Infinity;
   peer.key=uid+':'+slotId;peer.tradeXp=Number.isSafeInteger(record.trade?.xp)&&record.trade.xp>0?record.trade.xp:0;if(map.id===MARKET_ZONE.mapId)peer.world.emit('shops',{list:this.shopList(serverId)});
   peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;
-  peer.daily=record.daily??null;peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.pet=normalizePet(record.pet);peer.bounty=record.bounty??null;peer.album=normalizeAlbum(record.album);
+  peer.daily=record.daily??null;peer.weekly=record.weekly??null;peer.rebirth=Math.min(REBIRTH_MAX,Math.max(0,record.rebirth|0));peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.pet=normalizePet(record.pet);peer.bounty=record.bounty??null;peer.album=normalizeAlbum(record.album);
   if(party){party.pending.delete(uid);party.members.add(peer.id);peer.partyId=party.id;if(party.leaderPending===uid||!party.members.has(party.leader)){party.leader=peer.id;if(party.leaderPending===uid)party.leaderPending=null;}}
   peer.storage=normalizeStorage(record.storage);peer.trade=null;peer.stall=null;peer.saveNow=false;
   peer.stats=normalizeStats(record.stats);peer.gear=normalizeGear(record.gear);peer.statSig='';peer.gearAt=-Infinity;this.refreshStats(peer);
@@ -108,7 +117,9 @@ export class RealmServer{
    if(!npc||!SHOPS[npc.name]?.refine||SHOPS[npc.name].mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'refine-far');
    if(now-p.gearAt<600)return this.itemFail(p,'gear-rate');p.gearAt=now;
    let r;try{r=refineGear(p.bag,p.gear,m.slot,{lekLai:m.lekLai===true,guard:m.guard===true});}catch(e){return this.itemFail(p,e.message);}
-   p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});return true;
+   const before=itemDef(p.gear[m.slot])?.name;p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);
+   const shout=refineAnnouncement(p.character.name,r,before,itemDef(r.gear[m.slot])?.name);if(shout)this.worldSay(p.serverId,{actor:null,name:'ประกาศ',text:shout});
+   w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});return true;
   }
   if(m.type==='storageOpen'||m.type==='store'||m.type==='retrieve'){
    const npc=p.room.map.npcs?.find(n=>n.name===STORAGE_NPC);
@@ -160,6 +171,22 @@ export class RealmServer{
    let r;try{r=bountyClaim(p.bounty,now,m.index);}catch(e){return this.itemFail(p,e.message);}
    p.bounty=r.state;w.emit('experience',awardExperience(w,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins,items:[]});p.saveNow=true;w.notice('รับรางวัลค่าหัวแล้ว');return true;
   }
+  // 0.102 weekly quests: claimed in a town like the daily bounties; rewards are cowries and items
+  // 0.102 rebirth at Base Lv.99 in a town: Base level back to 1, stat points refunded (+40 for each rebirth),
+  // class, job, skills, gear and bag kept; gear level limits no longer apply. Up to REBIRTH_MAX times.
+  if(m.type==='rebirth'){
+   if(!p.room.map.safe)return this.itemFail(p,'rebirth-town');
+   if(baseProgress(w).level<99)return this.itemFail(p,'rebirth-level');
+   if((p.rebirth??0)>=REBIRTH_MAX)return this.itemFail(p,'rebirth-max');
+   p.rebirth=(p.rebirth??0)+1;w.baseXp=0;p.stats=normalizeStats(null);p.statSig=null;this.refreshStats(p);w.player.hp=w.player.maxHp;w.player.mp=w.player.maxMp;
+   p.saveNow=true;w.notice('เกิดใหม่ครั้งที่ '+p.rebirth+' · กลับสู่ Lv.1 พร้อมแต้มสเตตัสโบนัส +'+p.rebirth*40);
+   this.announce(p.serverId,'🌟 '+p.character.name+' เกิดใหม่เป็นครั้งที่ '+p.rebirth+'!');return true;
+  }
+  if(m.type==='weeklyClaim'){
+   if(!p.room.map.safe)return this.itemFail(p,'bounty-town');
+   let r;try{r=weeklyClaim(p.weekly,now,m.index);}catch(e){return this.itemFail(p,e.message);}
+   p.weekly=r.state;this.grantLoot(p,{coins:r.reward.coins,items:r.reward.items.map(i=>({...i}))});p.saveNow=true;w.notice('รับรางวัลภารกิจรายสัปดาห์แล้ว');return true;
+  }
   if(m.type==='leaderboard'){w.emit('leaderboard',this.leaderboard(p));return true;}
   if(m.type==='bubble'){if(!Number.isInteger(m.id)||m.id<1||m.id>24)return this.error(p,'invalid-emote');if(now-p.bubbleAt<1000)return false;p.bubbleAt=now;p.room.events.push({type:'bubble',actor:p.id,id:m.id});return true;}
   if(m.type==='insertCard'){
@@ -171,7 +198,7 @@ export class RealmServer{
    if(now-p.gearAt<200)return this.itemFail(p,'gear-rate');p.gearAt=now;
    const who=this.who(p);
    try{
-    if(m.type==='statUp')p.stats=raiseStat(p.stats,m.stat,who.level);
+    if(m.type==='statUp')p.stats=raiseStat(p.stats,m.stat,who.level,who.reborn);
     else{const r=m.type==='equip'?equipGear(p.bag,p.gear,m.item,who):unequipGear(p.bag,p.gear,m.slot);p.gear=r.gear;this.setBag(p,r.bag);if(m.type==='equip')w.notice('สวมใส่ '+itemDef(m.item).name);}
    }catch(e){return this.itemFail(p,e.message);}
    this.refreshStats(p);return true;
@@ -215,7 +242,7 @@ export class RealmServer{
   if(['skill','attack','select','auto','emote'].includes(m.type)){
    if(m.type!=='auto'){if(now-p.actionAt<70)return this.error(p,'action-rate');p.actionAt=now;} // 0.97 the AUTO switch is a state, never dropped behind a swing
    if(m.type==='select'){if(!integer(m.target,0,9999))return this.error(p,'invalid-target');w.select(m.target);return true;}
-   if(m.type==='skill'){if(!integer(m.index,0,9))return this.error(p,'invalid-skill');return w.skill(m.index);}
+   if(m.type==='skill'){if(!integer(m.index,0,SLOTS-1))return this.error(p,'invalid-skill');return w.skill(m.index);}
    if(m.type==='attack')return w.basicAttack();
    if(m.type==='auto'){if(typeof m.on==='boolean')w.setAuto(m.on,m.hunt);else w.toggleAuto();return true;}
    const name=canonicalAction(m.name);if(!EMOTE_ACTIONS.includes(name))return this.error(p,'invalid-emote');
@@ -225,11 +252,13 @@ export class RealmServer{
   }
   if(m.type==='chat'){
    if(now-p.chatAt<1200)return this.error(p,'chat-rate');
-   if(typeof m.text!=='string'||!['room','party','guild','whisper'].includes(m.channel))return this.error(p,'invalid-chat');
+   if(typeof m.text!=='string'||!['room','party','guild','whisper','world'].includes(m.channel))return this.error(p,'invalid-chat');
    const text=m.text.normalize('NFC').replace(/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/g,'').trim();
    if(!text||text.length>240)return this.error(p,'invalid-chat');
    // 0.47 whisper: one named player on this server, wherever they are; guild: every online member.
    if(m.channel==='whisper'){const o=this.byName(p,cleanName(m.to));if(!o)return this.itemFail(p,'whisper-offline');p.chatAt=now;const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,to:o.character.name,text,channel:'whisper',time:now};p.send(message);o.send(message);return true;}
+   // World: everyone online on this server, any map; its own slower cooldown so one player cannot flood it.
+   if(m.channel==='world'){if(now-(p.worldAt??-Infinity)<WORLD_CHAT_COOLDOWN)return this.error(p,'world-rate');p.chatAt=p.worldAt=now;this.worldSay(p.serverId,{actor:p.id,name:p.character.name,text});return true;}
    if(m.channel==='guild'){const g=this.guildOf(p);if(!g)return this.itemFail(p,'guild-none');p.chatAt=now;const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,text,channel:'guild',time:now};for(const x of g.members)this.online(x.key)?.send(message);return true;}
    const party=this.parties.get(p.partyId);if(m.channel==='party'&&!party)return this.error(p,'no-party');p.chatAt=now;
    const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,text,channel:m.channel,time:now};
@@ -383,7 +412,7 @@ export class RealmServer{
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
   const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort(),rate=expRate(this.now(),p.room.map.id)*mobXp(mob),event=activeEvent(this.now()),rolls=(mob.leader?LEADER.loot:1)*(surgeOn(this.now(),p.room.map.id)?2:1); // 0.50 event/weekend EXP + token drops
-  ids.forEach((id,i)=>{const a=this.peers.get(id);a.world.kills++;if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,split(Math.round(reward.baseXp*rate)),split(Math.round(reward.jobXp*rate))));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls);loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)));this.grantLoot(a,loot,mob);}});
+  ids.forEach((id,i)=>{const a=this.peers.get(id);a.world.kills++;if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,split(Math.round(reward.baseXp*rate)),split(Math.round(reward.jobXp*rate))));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});a.weekly=weeklyDefeat(a.weekly,this.now(),{leader:!!mob.leader,boss:!!reward.boss});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls);loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)));this.grantLoot(a,loot,mob);}});
   p.room.contributors.delete(mob.id);
   for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id){a.world.targetId=null;a.world.path=[];}}
  }
@@ -408,7 +437,7 @@ export class RealmServer{
     const type=MONSTER_TYPES[m.type];
     if(type.mvp&&m.hp<=0)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
     const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
-    if(result==='respawn'){room.contributors.delete(m.id);if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);}
+    if(result==='respawn'){room.contributors.delete(m.id);if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);else if(type.awakened)this.announce(room.serverId,`⚡ ${type.name} (Lv.${type.level}) ตื่นขึ้นที่ ${room.map.name}!`);}
     if(m.justEnraged){m.justEnraged=false;for(const id of room.peers)this.peers.get(id).world.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
     if(result==='burst')for(const id of room.peers){const a=this.peers.get(id);if(!a.suspended&&a.world.player.hp>0&&distance(a.world.player,m)<=MONSTER_BEHAVIOUR[type.id].aoe)a.world.takeMonsterHit(type);}
     if(result==='hit'&&target){
@@ -506,7 +535,7 @@ export class RealmServer{
    this.stallCommand(p,{type:'stallList'});return true;}
   return false;
  }
- who(p){return {classId:p.character.classId,level:baseProgress(p.world).level};}
+ who(p){return {classId:p.character.classId,level:baseProgress(p.world).level,reborn:p.rebirth??0};}
  // Status + worn gear → combat numbers; cheap no-op unless level, class, stats or gear changed.
  // 0.72 leaderboard: best combat power per character (offline characters keep their last entry); top 200 kept.
  rank(p){const power=combatPower(p.derived,this.who(p).level),board=this.leaders.get(p.serverId)??{},old=board[p.key];
@@ -534,6 +563,7 @@ export class RealmServer{
   if(winner){this.grantLoot(winner,{coins:0,items:[{id:'king-ember',count:1}]});winner.saveNow=true;winner.world.emit('mvp',{name:type.name});}
   this.herald(room.serverId,winner?`👑 ${winner.character.name} ได้ MVP ${type.name}! · กลับมาอีกใน 60 นาที`:`${type.name} ถูกปราบแล้ว · กลับมาอีกใน 60 นาที`);
  }
+ worldSay(serverId,{actor,name,text}){const message={type:'chat',id:randomUUID(),actor,name,text,channel:'world',time:this.now()};for(const o of this.peers.values())if(o.serverId===serverId&&!o.suspended)o.send(message);}
  announce(serverId,text){const message={type:'chat',id:randomUUID(),actor:null,name:'ประกาศ',text,channel:'system',time:this.now()};for(const o of this.peers.values())if(o.serverId===serverId&&!o.suspended)o.send(message);}
  dungeonClear(room){
   const today=thaiDay(this.now());
@@ -616,7 +646,7 @@ export class RealmServer{
    for(const k of PLAYER_STATIC)if(last[k]!==a.entryKeys[k]){last[k]=a.entryKeys[k];d[k]=e[k];}
    return d;});
   p.known=seen;
-  return {...copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})}}),players,mobs:copy(this.mobDelta(p))};
+  return {...copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),weekly:normalizeWeekly(p.weekly,this.now()),rebirth:p.rebirth??0,album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level,p.rebirth??0),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})}}),players,mobs:copy(this.mobDelta(p))};
  }
  mobDelta(p){
   if(p.mobRoom!==p.room.id){p.mobRoom=p.room.id;p.mobSeen=new Map();}
@@ -646,5 +676,5 @@ export class RealmServer{
   this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();p.world.player.running=false;
   return destination;
  }
- record(p,original){return {...copy(original),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),album:copy(p.album),trade:{xp:p.tradeXp??0},pet:copy(p.pet),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
+ record(p,original){return {...copy(original),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),weekly:copy(p.weekly),rebirth:p.rebirth??0,album:copy(p.album),trade:{xp:p.tradeXp??0},pet:copy(p.pet),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
 }

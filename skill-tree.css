@@ -38,3 +38,11 @@ html body #skill-window[data-hud-panel],html body #skill-window{position:fixed!i
 .auto-pots{display:grid;grid-template-columns:1fr 1fr;gap:10px}.auto-pots label{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:11px}
 .auto-pots input{accent-color:#f4cf7a}.auto-pots output{min-width:34px;text-align:right;color:#ffd98f;font-weight:700}
 @media (max-width:640px),(orientation:landscape) and (max-height:520px){#skill-hotbar{grid-template-columns:repeat(5,minmax(0,1fr))}.auto-pots{grid-template-columns:1fr}.skill-setup h3 small{display:none}}
+/* 0.101 Master tab: same tree grid, its own five skills */
+.skill-tabs{display:flex;gap:6px;margin:8px 14px 0}
+.skill-tabs button{padding:5px 14px;border:1px solid #6b5a3d;border-radius:999px;background:#11231cb3;color:#fff0ce;font:700 12px Mali,Tahoma,sans-serif;cursor:pointer}
+.skill-tabs button[aria-selected=true]{border-color:#f4cf7a;background:#4a3a1e;color:#ffe7a6}
+.skill-tabs small{font-weight:400;color:#d9c8a2;margin-left:4px}
+.skill-node[hidden]{display:none}
+.skill-node.master{border-color:#c9a35a}.skill-node.master.learned{background:linear-gradient(135deg,#2a2412ee,#11231cee)}
+.skill-art.master-art{box-shadow:0 0 0 2px #ffd77a,0 0 8px #ffcf6a99;border-radius:8px}

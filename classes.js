@@ -1,4 +1,5 @@
 import {patch} from './balance.js';
+import {MASTER_FROM} from './skill-progress.js?v=101';
 // Shared profession catalogue: lobby, persistence, combat and sprite renderer.
 export const CLASSES=[
  {id:'swordsman',name:'นักดาบ',icon:'⚔',role:'แนวหน้า · ดาบและโล่',description:'เข้าประชิด ฟันกวาด และตั้งรับด้วยโล่',color:'#e5b867',range:1.65,damage:21,delay:.8,speed:4.08,kind:'slash',names:['ฟันเปิดทาง','ดาบกวาด','ตีสกัด','โล่กระแทก','พักหายใจ','ตั้งโล่','ดาบผ่าเกราะ','พุ่งเข้าหา','รวบรวมแรง','วงดาบพิทักษ์']},
@@ -14,7 +15,30 @@ export const isClass=id=>id==='novice'||CLASSES.some(c=>c.id===id);
 export function getClass(id='shaman'){const c=id==='novice'?NOVICE:CLASSES.find(c=>c.id===id);if(!c)throw new Error('invalid-class');return c;}
 export const className=(id,gender)=>id==='acolyte'?(gender==='female'?'แม่ชี':'พระ'):getClass(id).name;
 export const atlasPath=id=>'./assets/classes/'+getClass(id).id+(id==='novice'?'-18.png':'-09.png');
+// 0.101 Master skills (slots 10-14, skill-progress.js MASTER_FROM): a stronger cast of the strike, area, recover,
+// heavy strike and ultimate, opened when that skill reaches Lv 10. Same type, so motion, art and AUTO carry over.
+export const MASTER_NAMES={
+ novice:['หมัดครูฝึก','กวาดลมกรด','ลมหายใจครู','หมัดสิบปี','ฮึดครั้งสุดท้าย'],
+ swordsman:['ดาบฟ้าผ่า','ดาบพายุหมุน','ปราณขุนศึก','ดาบผ่าภูผา','วงดาบเทพพิทักษ์'],
+ lancer:['ทวนสายฟ้า','ทวนวายุ','ปราณทวนหลวง','ทวนเจาะบาดาล','ทวนจักรผัน'],
+ hunter:['ศรพญาเหยี่ยว','ฝนศรพันดอก','ยาป่าหิมพานต์','ศรทะลวงฟ้า','วงศรพญานาค'],
+ boxer:['หนุมานถวายแหวน','เถรกวาดลาน','ลมปราณครูมวย','จระเข้ฟาดหาง','แม่ไม้ครูใหญ่'],
+ rogue:['มีดเงาพราย','พายุมีดเงา','ยาสมานเงา','มีดปลิดวิญญาณ','ระบำมีดราตรี'],
+ shaman:['พรายเพลิงพันดวง','อัคคีกัลป์','น้ำมนต์คืนชีพ','ยันต์ตรีนิสิงเห','มหาวงนวหรคุณ'],
+ acolyte:['แสงธรรมรัศมี','รัศมีพุทธคุณ','พรมหาเมตตา','แสงปราบมาร','มหารัศมีคุ้มครอง']
+};
+function masterSkill(s,name,n){
+ const m={...s,name,short:name,key:'Alt+'+n,master:true,cost:Math.round(s.cost*1.5),cd:Math.round(s.cd*1.5*10)/10};
+ if(s.damage)m.damage=Math.round(s.damage*1.6);
+ if(s.radius)m.radius=s.radius+1;
+ if(s.type==='heal')m.heal=Math.round((s.heal??48)*1.8);
+ return m;
+}
 export function classSkills(id,base){
+ const skills=baseSkills(id,base);
+ return [...skills,...MASTER_FROM.map((from,i)=>masterSkill(skills[from],MASTER_NAMES[id][i],i+1))];
+}
+function baseSkills(id,base){
  const c=getClass(id);if(id==='shaman')return base;
  return base.map((s,i)=>{
   const next={...s,name:c.names[i],short:c.names[i],color:c.color};

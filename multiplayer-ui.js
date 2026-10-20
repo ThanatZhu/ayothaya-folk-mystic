@@ -4,10 +4,10 @@ import {emblemId,emoteId} from './items.js?v=95';
 import {createPetView} from './pet-ui.js?v=98';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
-import {groundHeight} from './combat-core.js?v=101.4';
+import {groundHeight} from './combat-core.js?v=102.2';
 import {MultiplayerClient} from './multiplayer-client.js?v=life1';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
-import {atlasPath,className} from './classes.js?v=73';
+import {atlasPath,className} from './classes.js?v=101';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
 import {createPaintedAvatar} from './painted-avatar.js?v=life1';
@@ -15,8 +15,8 @@ import {characterMotion,attackDuration,gaitStep,walkView} from './character-moti
 import {activeEmote,actionChoice,supportsCharacterAction} from './character-action-state.js?v=life1';
 import {skillPose,skillTrack} from './skill-choreography.js?v=life1';
 import {createSkillEffects} from './skill-effects.js?v=74';
-const messages={'server-busy':'เซิร์ฟเวอร์กำลังบันทึกหรือสลับเครื่อง · ลองอีกครั้งในไม่กี่วินาที','stale-command':'คำสั่งซ้ำ/ล่าช้า · ลองกดใหม่อีกครั้ง','rate-limit':'กดเร็วเกินไป · รอสักครู่แล้วลองใหม่','duel-invalid':'ท้าดวลได้เฉพาะนอกเมือง กับผู้เล่นในแผนที่เดียวกัน','duel-busy':'มีคนกำลังประลองอยู่แล้ว','duel-far':'อยู่ห่างกันเกิน 20 ม. · เดินเข้าไปใกล้ก่อนท้าดวล','replaced':'บัญชีนี้เข้าเล่นจากอีกหน้าต่าง/อีกเครื่องแล้ว · หน้านี้ออฟไลน์','already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
-const chatErrors=new Set(['chat-rate','no-party','invalid-chat']);
+const messages={'server-busy':'เซิร์ฟเวอร์กำลังบันทึกหรือสลับเครื่อง · ลองอีกครั้งในไม่กี่วินาที','stale-command':'คำสั่งซ้ำ/ล่าช้า · ลองกดใหม่อีกครั้ง','rate-limit':'กดเร็วเกินไป · รอสักครู่แล้วลองใหม่','duel-invalid':'ท้าดวลได้เฉพาะนอกเมือง กับผู้เล่นในแผนที่เดียวกัน','duel-busy':'มีคนกำลังประลองอยู่แล้ว','duel-far':'อยู่ห่างกันเกิน 20 ม. · เดินเข้าไปใกล้ก่อนท้าดวล','replaced':'บัญชีนี้เข้าเล่นจากอีกหน้าต่าง/อีกเครื่องแล้ว · หน้านี้ออฟไลน์','already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','world-rate':'แชตโลกส่งได้ทุก 8 วินาที','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
+const chatErrors=new Set(['chat-rate','world-rate','no-party','invalid-chat']);
 const statusText={connecting:'กำลังเข้าห้อง… (ถ้าเซิร์ฟเวอร์ฟรีหลับอยู่ อาจรอราว 1 นาที)',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
 const editable=e=>e.target instanceof Element&&!!e.target.closest('input,textarea,select,button,a,[contenteditable=true]');
 function el(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
@@ -33,7 +33,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  shell.append(dialog);const $=id=>shell.querySelector('#'+id),status=text=>{$('online-status').lastChild.textContent=text;};
  // Chat dock: always visible while online and never pauses the game.
  const dock=el('section');dock.id='online-dock';dock.hidden=true;dock.dataset.channel='room';dock.setAttribute('aria-label','แชตออนไลน์');
- dock.innerHTML='<header><div class="mp-tabs" role="tablist" aria-label="ช่องสนทนา"><button role="tab" data-channel="room" aria-selected="true">ห้องนี้</button><button role="tab" data-channel="party" aria-selected="false" disabled>ปาร์ตี้</button><button role="tab" data-channel="guild" aria-selected="false" disabled>กิลด์</button><button role="tab" data-channel="system" aria-selected="false">ระบบ</button></div><button id="dock-toggle" class="mp-dock-bar" aria-expanded="true"><span id="dock-preview"></span><b id="dock-unread" hidden></b><i aria-hidden="true">▾</i></button></header><div id="online-messages" role="log" aria-label="ข้อความสนทนา" aria-live="polite"></div><p id="dock-note" role="status"></p><form id="online-chat"><input id="online-text" aria-label="ข้อความแชต" maxlength="240" autocomplete="off" enterkeyhint="send" placeholder=""><button type="submit">ส่ง</button></form>';
+ dock.innerHTML='<header><div class="mp-tabs" role="tablist" aria-label="ช่องสนทนา"><button role="tab" data-channel="room" aria-selected="true">ห้องนี้</button><button role="tab" data-channel="party" aria-selected="false" disabled>ปาร์ตี้</button><button role="tab" data-channel="guild" aria-selected="false" disabled>กิลด์</button><button role="tab" data-channel="world" aria-selected="false">โลก</button><button role="tab" data-channel="system" aria-selected="false">ระบบ</button></div><button id="dock-toggle" class="mp-dock-bar" aria-expanded="true"><span id="dock-preview"></span><b id="dock-unread" hidden></b><i aria-hidden="true">▾</i></button></header><div id="online-messages" role="log" aria-label="ข้อความสนทนา" aria-live="polite"></div><p id="dock-note" role="status"></p><form id="online-chat"><input id="online-text" aria-label="ข้อความแชต" maxlength="240" autocomplete="off" enterkeyhint="send" placeholder=""><button type="submit">ส่ง</button></form>';
  shell.append(dock);
  const partyFrame=el('section');partyFrame.id='party-frame';partyFrame.hidden=true;partyFrame.setAttribute('aria-label','สมาชิกปาร์ตี้');partyFrame.innerHTML='<h3>ปาร์ตี้ <small id="party-count"></small></h3><ol id="party-members"></ol>';shell.append(partyFrame);
  const invites=el('div');invites.id='online-invites';invites.setAttribute('aria-live','assertive');shell.append(invites);
@@ -46,7 +46,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  function setCollapsed(value){dock.classList.toggle('collapsed',value);$('dock-toggle').setAttribute('aria-expanded',String(!value));$('dock-toggle').setAttribute('aria-label',value?'เปิดแชต':'ย่อแชต');if(!value){unread=0;$('dock-unread').hidden=true;$('online-messages').scrollTop=$('online-messages').scrollHeight;}}
  setCollapsed(compact.matches);
  $('dock-toggle').onclick=()=>setCollapsed(!dock.classList.contains('collapsed'));
- function setChannel(channel){dock.dataset.channel=channel;for(const tab of dock.querySelectorAll('[role=tab]'))tab.setAttribute('aria-selected',String(tab.dataset.channel===channel));$('online-text').placeholder=(compact.matches?'':'Enter · ')+(channel==='party'?'พิมพ์ถึงปาร์ตี้…':channel==='guild'?'พิมพ์ถึงกิลด์…':'พิมพ์ถึงทุกคนในห้อง… (/w ชื่อ ข้อความ = กระซิบ)');$('online-messages').scrollTop=$('online-messages').scrollHeight;}
+ function setChannel(channel){dock.dataset.channel=channel;for(const tab of dock.querySelectorAll('[role=tab]'))tab.setAttribute('aria-selected',String(tab.dataset.channel===channel));$('online-text').placeholder=(compact.matches?'':'Enter · ')+(channel==='party'?'พิมพ์ถึงปาร์ตี้…':channel==='guild'?'พิมพ์ถึงกิลด์…':channel==='world'?'พิมพ์ถึงทุกคนในเซิร์ฟ…':'พิมพ์ถึงทุกคนในห้อง… (/w ชื่อ ข้อความ = กระซิบ)');$('online-messages').scrollTop=$('online-messages').scrollHeight;}
  for(const tab of dock.querySelectorAll('[role=tab]'))tab.onclick=()=>setChannel(tab.dataset.channel);
  setChannel('room');
  let noteTimer;const dockNote=text=>{$('dock-note').textContent=text;clearTimeout(noteTimer);noteTimer=setTimeout(()=>{$('dock-note').textContent='';},3500);};
@@ -55,8 +55,8 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  addEventListener('keydown',e=>{if(e.code!=='Enter'||e.repeat||!active||dock.hidden||editable(e)||document.querySelector('dialog[open]'))return;e.preventDefault();setCollapsed(false);$('online-text').focus();});
  function log(m,live=false){
   if(seenMessages.has(m.id))return;seenMessages.add(m.id);if(seenMessages.size>160)seenMessages.delete(seenMessages.values().next().value);
-  const mine=m.actor===client?.id,p=el('p',['party','system','guild','whisper'].includes(m.channel)?m.channel:''),name=el('b','',m.channel==='whisper'&&mine?'ถึง '+m.to:m.name),time=el('time','',new Date(m.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
-  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.channel==='guild')p.append(el('span','mp-tag','กิลด์'));if(m.channel==='whisper')p.append(el('span','mp-tag','กระซิบ'));if(mine)p.classList.add('mine');const said=el('span','',' '+m.text);if(m.channel!=='system'){name.dataset.i18nSkip='';said.dataset.i18nSkip='';}p.append(name,said,time);
+  const mine=m.actor===client?.id,p=el('p',['party','system','guild','whisper','world'].includes(m.channel)?m.channel:''),name=el('b','',m.channel==='whisper'&&mine?'ถึง '+m.to:m.name),time=el('time','',new Date(m.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.channel==='guild')p.append(el('span','mp-tag','กิลด์'));if(m.channel==='whisper')p.append(el('span','mp-tag','กระซิบ'));if(m.channel==='world')p.append(el('span','mp-tag','โลก'));if(mine)p.classList.add('mine');const said=el('span','',' '+m.text);if(m.channel!=='system'){name.dataset.i18nSkip='';said.dataset.i18nSkip='';}p.append(name,said,time);
   const box=$('online-messages'),atEnd=box.scrollHeight-box.scrollTop-box.clientHeight<40;box.append(p);while(box.children.length>80)box.firstChild.remove();if(atEnd)box.scrollTop=box.scrollHeight;
   $('dock-preview').toggleAttribute('data-i18n-skip',m.channel!=='system');$('dock-preview').textContent=m.name+': '+m.text;
   if(live){if(dock.classList.contains('collapsed')){unread++;$('dock-unread').textContent=unread>9?'9+':String(unread);$('dock-unread').hidden=false;}if(m.channel==='room'||m.channel==='party')bubble(m);}
@@ -162,7 +162,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   e.preventDefault();const input=$('online-text'),text=input.value.trim();if(!text){input.blur();return;}
   // '/w ชื่อ ข้อความ' (or /ก) whispers; the prefix stays in the box so a conversation can continue.
   const w=/^\/(?:w|ก)\s+(\S+)\s+([\s\S]+)$/.exec(text),channel=dock.dataset.channel;
-  if(!client?.command('chat',w?{channel:'whisper',to:w[1],text:w[2]}:{channel:channel==='party'||channel==='guild'?channel:'room',text})){dockNote('ต้องเชื่อมต่อออนไลน์ก่อนส่งข้อความ');return;}
+  if(!client?.command('chat',w?{channel:'whisper',to:w[1],text:w[2]}:{channel:['party','guild','world'].includes(channel)?channel:'room',text})){dockNote('ต้องเชื่อมต่อออนไลน์ก่อนส่งข้อความ');return;}
   input.value=w?'/w '+w[1]+' ':'';if(!compact.matches)input.blur();
  };
  // System lines (EXP, level ups, notices) appear only in this player's chat, never sent to others.

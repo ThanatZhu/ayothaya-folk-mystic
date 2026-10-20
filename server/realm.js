@@ -26,10 +26,16 @@ import {craft} from '../crafting.js';
 import {WAR,warWindow,warLabel} from '../guild-war.js';
 import {ARENA,arenaWeek,arenaDay,arenaEnds,byPoints} from '../arena.js';
 import {TRIAL} from '../city-life-data.js';
+import {advanceReady} from '../advancement.js';
 const SERVER_IDS=['server-1','server-2'],SERVER_NAME={'server-1':'เซิร์ฟ 1','server-2':'เซิร์ฟ 2'};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
 const copy=v=>structuredClone(v);
+// 0.99.11 bandwidth: each player gets only the monsters within MOB_VIEW m, and of those only the fields that changed since
+// that player last got them (the client merges monsters with Object.assign). Server-only timers stay home; positions are
+// rounded to 1 cm, other numbers to 0.1, and the respawn countdown to whole seconds.
+const PLAYER_STATIC=['equipment','partyId','pet','stall','guild'],MOB_VIEW=50,MOB_SKIP=new Set(['home','attackCD','leapCD','step','strike','flee','justEnraged']);
+const mobValue=(k,v)=>typeof v!=='number'?v:k==='x'||k==='z'?Math.round(v*100)/100:k==='dead'?Math.ceil(v):Math.round(v*10)/10;
 // 0.93 duels: a challenge lasts 20 s, a bout 90 s; players hit each other for 35% of their monster damage (then the
 // target's dodge, shield and DEF apply as for a monster blow). Walking 20 m apart ends the bout as a draw.
 export const DUEL={ask:20000,time:90000,range:20,scale:.35};
@@ -51,7 +57,7 @@ export class RealmServer{
   if(existing){
    if(!existing.suspended||existing.resumeUntil<this.now()||existing.serverId!==serverId||existing.slotId!==slotId)throw new Error('already-online');
    existing.suspended=false;existing.resumeUntil=0;existing.send=send;existing.seq=0;existing.known=new Set();existing.input={x:0,z:0,attack:false};existing.inputAt=this.now();
-   send({type:'welcome',id:existing.id,room:existing.room.id,capacity:this.capacity,history:copy(existing.room.history),snapshot:(existing.bagSent=0,this.snapshot(existing))});this.social(existing.room);return existing;
+   send({type:'welcome',id:existing.id,room:existing.room.id,capacity:this.capacity,history:copy(existing.room.history),snapshot:(existing.bagSent=0,existing.mobRoom=null,this.snapshot(existing))});this.social(existing.room);return existing;
   }
   const hero=character(record.character),map=this.catalog.maps.find(m=>m.id===record.state.mapId)??this.catalog.maps.find(m=>m.id===this.catalog.capital);
   // A party that travelled keeps its seat for a minute (0.49), so it can walk into the same dungeon instance together.
@@ -205,7 +211,7 @@ export class RealmServer{
    if(m.type==='select'){if(!integer(m.target,0,9999))return this.error(p,'invalid-target');w.select(m.target);return true;}
    if(m.type==='skill'){if(!integer(m.index,0,9))return this.error(p,'invalid-skill');return w.skill(m.index);}
    if(m.type==='attack')return w.basicAttack();
-   if(m.type==='auto'){if(typeof m.on==='boolean')w.setAuto(m.on);else w.toggleAuto();return true;}
+   if(m.type==='auto'){if(typeof m.on==='boolean')w.setAuto(m.on,m.hunt);else w.toggleAuto();return true;}
    const name=canonicalAction(m.name);if(!EMOTE_ACTIONS.includes(name))return this.error(p,'invalid-emote');
    if(!w.setEmote(name))return this.error(p,'invalid-emote');
    // Clear the last held input too: a sit command cannot keep steering until its next packet.
@@ -225,7 +231,7 @@ export class RealmServer{
    if(m.channel==='room'){p.room.history.push(message);if(p.room.history.length>40)p.room.history.shift();}return true;
   }
   if(m.type==='invite'){
-   const target=this.peers.get(m.target);if(!target||target===p||target.room!==p.room||target.partyId)return this.error(p,'invalid-invite');
+   const target=this.peers.get(m.target);if(!target||target===p||target.serverId!==p.serverId||target.partyId)return this.error(p,'invalid-invite');
    const party=this.parties.get(p.partyId);if(party&&(party.leader!==p.id||party.members.size>=5))return this.error(p,'party-full-or-leader');
    if(now-p.inviteAt<2000)return this.error(p,'invite-rate');p.inviteAt=now;
    const invitation={id:randomUUID(),from:p.id,to:target.id,expires:now+30000};this.invites.set(invitation.id,invitation);
@@ -233,7 +239,7 @@ export class RealmServer{
   }
   if(m.type==='answer'){
    const invite=this.invites.get(m.invite),leader=this.peers.get(invite?.from);
-   if(!invite||invite.to!==p.id||invite.expires<now||!leader||leader.room!==p.room||typeof m.accept!=='boolean')return this.error(p,'expired-invite');
+   if(!invite||invite.to!==p.id||invite.expires<now||!leader||leader.serverId!==p.serverId||typeof m.accept!=='boolean')return this.error(p,'expired-invite');
    this.invites.delete(invite.id);if(!m.accept)return true;if(p.partyId)return this.error(p,'already-in-party');
    let party=this.parties.get(leader.partyId);
    if(party&&(party.leader!==leader.id||party.members.size>=5))return this.error(p,'party-full-or-leader');
@@ -251,7 +257,9 @@ export class RealmServer{
   if(party.members.size+(party.pending?.size??0)<2){for(const id of party.members)this.peers.get(id).partyId=null;this.parties.delete(party.id);}
   else if(party.leader===p.id)party.leader=party.members.values().next().value;
  }
- social(room){for(const id of room.peers){const p=this.peers.get(id),party=this.parties.get(p.partyId);p.send({type:'social',players:[...room.peers].map(id=>{const a=this.peers.get(id);return {id,name:a.character.name,classId:a.character.classId,partyId:a.partyId};}),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
+ // 0.99.14 the roster covers the whole channel (every map of the server), so a party can be formed across maps;
+ // here = on the viewer's map (duels, trades and shared EXP still need the same map)
+ social(room){const all=[...this.peers.values()].filter(a=>a.serverId===room.serverId&&a.room);for(const p of all){const party=this.parties.get(p.partyId);p.send({type:'social',players:all.map(a=>({id:a.id,name:a.character.name,classId:a.character.classId,partyId:a.partyId,map:a.room.map.name,here:a.room===p.room})),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
  // ---- 0.95 weekly guild war (guild-war.js). One war state per channel; the stone is shared by everyone there.
  warState(serverId){let s=this.wars.get(serverId);if(!s){s={active:false,holder:null,stone:{id:'war:stone',pvp:true,name:WAR.stone.name,x:WAR.stone.x,z:WAR.stone.z,hp:WAR.stone.hp,maxHp:WAR.stone.hp}};this.wars.set(serverId,s);}return s;}
  castleOwner(serverId){return [...this.guilds.values()].find(g=>g.serverId===serverId&&g.castle)??null;}
@@ -387,9 +395,11 @@ export class RealmServer{
   if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
   for(const p of this.peers.values()){if(p.suspended)continue;petTick(p.pet,dt);p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);p.world.update(dt,p.input,{monsters:false});this.autoPotion(p);}
   for(const room of this.rooms.values()){
+   // 0.99.11 the living players of the room once per tick; each monster just takes the closest (no per-monster sort)
+   const alive=[...room.peers].map(id=>this.peers.get(id)).filter(p=>!p.suspended&&p.world.player.hp>0);
    for(const m of room.mobs){
-    const candidates=[...room.peers].map(id=>this.peers.get(id)).filter(p=>!p.suspended&&p.world.player.hp>0).sort((a,b)=>distance(a.world.player,m)-distance(b.world.player,m));
-    const target=candidates[0],type=MONSTER_TYPES[m.type];
+    let target=null,near=Infinity;for(const p of alive){const d=distance(p.world.player,m);if(d<near){near=d;target=p;}}
+    const type=MONSTER_TYPES[m.type];
     if(type.mvp&&m.hp<=0)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
     const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
     if(result==='respawn'){room.contributors.delete(m.id);if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);}
@@ -400,7 +410,7 @@ export class RealmServer{
     }
    }
    for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id};if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album','crafted'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
-   if(this.tickId%2===0){for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p),events:copy(room.events)});}room.events=[];}
+   if(this.tickId%2===0){this.broadcasting=true;const events=copy(room.events);for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p),events});}this.broadcasting=false;room.events=[];}
   }
  }
  storyProgress(p,event){
@@ -588,21 +598,45 @@ export class RealmServer{
   if(p.stall&&Math.hypot(p.world.player.x-p.stall.x,p.world.player.z-p.stall.z)>3){p.stall=null;p.world.notice('เดินออกจากแผง · ปิดแผงแล้ว');}
   const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:this.emoteView(a),partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
-  const players=visible.map(a=>{const v=a.world.player,result={id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,running:v.running===true,face:{x:round(v.face.x),z:round(v.face.z)}},emote:this.emoteView(a),partyId:a.partyId,connected:!a.suspended,pet:a.pet?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a)};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
-  return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})},players,mobs:p.room.mobs});
+  // 0.99.11 during the snapshot broadcast each player's public entry is built and cloned once, then shared by every viewer
+  const entry=a=>{if(!this.broadcasting||a.entryTick!==this.tickId){const v=a.world.player;a.entryTick=this.tickId;a.entry=copy({id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,running:v.running===true,face:{x:round(v.face.x),z:round(v.face.z)}},emote:this.emoteView(a),partyId:a.partyId,connected:!a.suspended,pet:a.pet?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a)});a.entryKeys=Object.fromEntries(PLAYER_STATIC.map(k=>[k,JSON.stringify(a.entry[k]??null)]));}return a.entry;};
+  // a player already on this viewer's screen gets its position every time and its look (gear, party, pet, stall, guild)
+  // only when that changed; the client merges entries into the remote player's state
+  const sent=p.playerSent??=new Map();
+  const players=visible.map(a=>{const e=entry(a);
+   if(!p.known.has(a.id)){sent.set(a.id,{...a.entryKeys});return {...e,character:copy(a.character)};}
+   // Posture is current state, including null cancellation, so every observer can recover without a transient event.
+   const last=sent.get(a.id)??{},d={id:e.id,player:e.player,emote:e.emote,connected:e.connected};sent.set(a.id,last);
+   for(const k of PLAYER_STATIC)if(last[k]!==a.entryKeys[k]){last[k]=a.entryKeys[k];d[k]=e[k];}
+   return d;});
+  p.known=seen;
+  return {...copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})}}),players,mobs:copy(this.mobDelta(p))};
+ }
+ mobDelta(p){
+  if(p.mobRoom!==p.room.id){p.mobRoom=p.room.id;p.mobSeen=new Map();}
+  const out=[],me=p.world.player;
+  for(const m of p.room.mobs){
+   if(distance(m,me)>MOB_VIEW)continue;
+   let last=p.mobSeen.get(m.id),d=null;if(!last)p.mobSeen.set(m.id,last={});
+   for(const k in m){if(MOB_SKIP.has(k))continue;const v=mobValue(k,m[k]),key=v!==null&&typeof v==='object'?JSON.stringify(v):v;if(last[k]!==key){last[k]=key;(d??={id:m.id})[k]=v;}}
+   if(d)out.push(d);
+  }
+  return out;
  }
  travelDestination(p,id,{warp=false}={}){
   const portal=p.room.map.portals?.find(v=>v.to===id&&distance(v,p.world.player)<2.6);
   const destination=this.catalog.maps.find(m=>m.id===id);
   // 0.46 ธูปกลับเมือง: from any map straight to the capital, spending one incense.
-  const recall=!portal&&id===this.catalog.capital&&p.room.map.id!==id&&(p.bag.items['return-incense']??0)>0;
+  // 0.99.11 the job-full card rides a maxed, not-yet-advanced player home for free (no incense)
+  const jobRecall=!p.character.jobId&&!p.training&&advanceReady(p.world,p.character.classId,'').job.maxed;
+  const recall=!portal&&id===this.catalog.capital&&p.room.map.id!==id&&((p.bag.items['return-incense']??0)>0||jobRecall);
   const townHop=!portal&&p.room.map.safe&&p.room.map.portals?.some(v=>v.to===id); // 0.53 town gates need no walk
   const fare=warp?warpCost(this.catalog,p.room.map.id,id):null;if(warp&&fare===null)throw new Error('travel-invalid');
   if(warp&&p.bag.coins<fare)throw new Error('no-coins');
   if((!portal&&!recall&&!townHop&&!warp)||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
   if(warp){const b=normalizeBag(p.bag);b.coins-=fare;this.setBag(p,b);}
-  else if(recall){const b=normalizeBag(p.bag);b.items['return-incense']--;if(!b.items['return-incense'])delete b.items['return-incense'];this.setBag(p,b);}
+  else if(recall&&!jobRecall){const b=normalizeBag(p.bag);b.items['return-incense']--;if(!b.items['return-incense'])delete b.items['return-incense'];this.setBag(p,b);}
   this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();p.world.player.running=false;
   return destination;
  }

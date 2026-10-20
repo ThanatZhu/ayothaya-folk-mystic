@@ -3,7 +3,7 @@
   "bodyHeight": 210,
   "frameSize": 320,
   "foot": 276,
-  "review": "preview-only",
+  "review": "owner-approved-for-release",
   "actors": {
     "novice-male": {
       "source": "player/novice-male.png",

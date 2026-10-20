@@ -94,7 +94,7 @@ export function createLifeUI({game,account,camera}){
  surgeChip.onclick=()=>{const s=surge(Date.now());world.notice(s.active?`ฝูงคลั่งที่ ${mapName(s.map)} · EXP ×2 และดรอป ×2 · กด M แล้วเลือก World เพื่อวาร์ป`:`ทุก 20 นาทีจะมีฝูงคลั่ง 5 นาทีในแผนที่นอกเมือง · ครั้งถัดไป ${mapName(s.nextMap)}`);};
  function drawEvent(){const e=activeEvent(Date.now());if(performance.now()>rateAt){rateAt=performance.now()+30000;world.expRate=expRate(Date.now(),document.body.dataset.map);}drawSurge();
   if((e?.id??null)===festId)return;festId=e?.id??null;fest.hidden=!e;if(!e)return;
-  const end=new Date(e.end+'T00:00:00+07:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  const end=new Date(e.end+'T00:00:00+07:00').toLocaleDateString(globalThis.I18N?.locale??'th-TH',{day:'numeric',month:'short'});
   fest.innerHTML=`${icon('krathong','item-icon small')}<span>${e.name}</span><b>ถึง ${end}</b>`;fest.onclick=()=>world.notice(e.name+' · '+e.text);
   setTimeout(()=>world.notice('🏮 '+e.name+' · '+e.text),6000);}
  return {update(){drawAilments();placeBubble();drawChip();drawEvent();drawActions();}};

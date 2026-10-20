@@ -6,12 +6,13 @@ import {TRADABLE} from './market.js?v=70';
 import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket} from './market-board.js?v=70';
 import {iconStyle} from './bag-ui.js?v=98';
 import {openHudPanel} from './hud-panels.js?v=34';
+const tr=s=>globalThis.I18N?.t(s)??s;
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 const money=n=>(n??0).toLocaleString('th-TH')+' เบี้ย';
-const when=t=>t?new Date(t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+const when=t=>t?new Date(t).toLocaleString(globalThis.I18N?.locale??'th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
 
 export function createMarketBoardUI({game,map,scene,camera,bagUI}){
  const world=game.world,cmd=(type,data)=>world.market?.(type,data),fail=c=>world.notice(ITEM_ERRORS[c]??c);
@@ -33,7 +34,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
  function sign(s){
   const c=document.createElement('canvas');c.width=320;c.height=96;const g=c.getContext('2d');
   g.fillStyle=s.kind==='buy'?'#1f3d52ee':'#163a2eee';g.strokeStyle='#d5b472';g.lineWidth=5;g.beginPath();g.roundRect(4,4,312,88,16);g.fill();g.stroke();
-  g.fillStyle='#ffe5ab';g.font='bold 30px Mali,Tahoma';g.textAlign='left';const t=(s.kind==='buy'?'รับซื้อ · ':'')+s.title;g.fillText(t,160-g.measureText(t).width/2,46);
+  g.fillStyle='#ffe5ab';g.font='bold 30px Mali,Tahoma';g.textAlign='left';const t=(s.kind==='buy'?tr('รับซื้อ · '):'')+s.title;g.fillText(t,160-g.measureText(t).width/2,46);
   g.fillStyle='#cfe0d4';g.font='22px Mali,Tahoma';const o=s.ownerName;g.fillText(o,160-g.measureText(o).width/2,78);
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));sp.scale.set(2.6,.78,1);sp.position.set(s.x,2.4,s.z);sp.renderOrder=5;
@@ -95,7 +96,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
   }
   if(tab==='mine'){
    body.innerHTML=`<p class="market-note">ทักษะการค้า Lv.${perks.level} · ${money(perks.xp)}${perks.next?' / '+money(perks.next):''} · ร้านค้าง ${perks.shops} · ${perks.slots} ชนิด/ร้าน · ภาษี ${Math.round(perks.tax*1000)/10}% · ส่วนลดร้าน NPC ${Math.round(perks.npcDiscount*100)}%</p>`+
-    (mine.shops.length?mine.shops.map(s=>`<section class="market-stall" data-shop="${esc(s.id)}"><h3>${s.kind==='buy'?'รับซื้อ · ':''}${esc(s.title)} <small>${s.kind==='buy'?'เบี้ยที่กันไว้ '+money(s.escrow):''}</small></h3>
+    (mine.shops.length?mine.shops.map(s=>`<section class="market-stall" data-shop="${esc(s.id)}"><h3>${s.kind==='buy'?tr('รับซื้อ · '):''}${esc(s.title)} <small>${s.kind==='buy'?'เบี้ยที่กันไว้ '+money(s.escrow):''}</small></h3>
      <ul class="market-list">${Object.entries(s.items).map(([id,r])=>listRow(id,r,'')).join('')||'<li class="empty">ขายหมดแล้ว</li>'}</ul>
      <p class="market-note">รอรับ: ${money(s.pouch?.coins)}${Object.entries(s.pouch?.items??{}).map(([id,n])=>' · '+esc(itemDef(id)?.name)+' ×'+n).join('')}</p>
      <details><summary>ประวัติการขาย (${s.log?.length??0})</summary><ul class="board-log">${(s.log??[]).map(l=>`<li>${when(l.t)} · ${esc(l.who)} ${l.kind==='sold'?'ซื้อ':'ขายให้'} ${esc(itemDef(l.item)?.name)} ×${l.count} · ${money(l.coins)}</li>`).join('')||'<li>ยังไม่มี</li>'}</ul></details>
@@ -104,7 +105,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
   }
   if(tab==='shop'){
    const s=shops.find(v=>v.id===counter);if(!s){body.innerHTML='<p class="market-note">ร้านนี้ปิดแล้ว</p>';return;}
-   body.innerHTML=`<h3>${s.kind==='buy'?'รับซื้อ · ':''}${esc(s.title)} <small>· ${esc(s.ownerName)}</small></h3><ul class="market-list">${Object.entries(s.items).map(([id,r])=>{const have=bag.items[id]??0,max=s.kind==='buy'?Math.min(r.count,have):r.count;
+   body.innerHTML=`<h3>${s.kind==='buy'?tr('รับซื้อ · '):''}${esc(s.title)} <small>· ${esc(s.ownerName)}</small></h3><ul class="market-list">${Object.entries(s.items).map(([id,r])=>{const have=bag.items[id]??0,max=s.kind==='buy'?Math.min(r.count,have):r.count;
     return listRow(id,r,max>0?qty(max)+`<button type="button" class="mp-primary deal">${s.kind==='buy'?'ขายให้':'ซื้อ'}</button>`:`<small>${s.kind==='buy'?'ไม่มีของ':'หมด'}</small>`);}).join('')||'<li class="empty">ร้านว่าง</li>'}</ul>`;
    wireQty(body);
    body.querySelectorAll('.deal').forEach(b=>b.onclick=()=>{const li=b.closest('li');cmd(s.kind==='buy'?'shopSell':'shopBuy',{shop:s.id,item:li.dataset.id,count:+li.querySelector('output').value});});

@@ -31,7 +31,7 @@ test('cloud saves remain scoped to UID and reject an account switch',async()=>{
 });
 test('all fourteen advanced jobs unlock at a maxed Job 40, alter combat, and reject cross-class choices',()=>{
  assert.equal(progression(1321).level,59);assert.equal(progression(1322).level,60);assert.equal(progression(Infinity).level,1);
- for(const [id,jobs] of Object.entries(JOBS))for(const job of jobs){assert.throws(()=>validateJob(id,job.id,{baseXp:13216,jobXp:17159}),/job-locked/);assert.throws(()=>validateJob(id,job.id,{baseXp:6117,jobXp:17160}),/job-locked/);assert.equal(validateJob(id,job.id,{baseXp:6118,jobXp:17160}).id,job.id);const base=new CombatWorld({classId:id}),advanced=new CombatWorld({classId:id,jobId:job.id});assert.ok(advanced.profession.damage>base.profession.damage);assert.equal(advanced.skills.length,10);}
+ for(const [id,jobs] of Object.entries(JOBS))for(const job of jobs){assert.throws(()=>validateJob(id,job.id,{baseXp:13216,jobXp:17159}),/job-locked/);assert.equal(validateJob(id,job.id,{baseXp:0,jobXp:17160}).id,job.id);assert.equal(validateJob(id,job.id,{baseXp:6118,jobXp:17160}).id,job.id);const base=new CombatWorld({classId:id}),advanced=new CombatWorld({classId:id,jobId:job.id});assert.ok(advanced.profession.damage>base.profession.damage);assert.equal(advanced.skills.length,10);}
  assert.throws(()=>validateJob('boxer','guardian',100),/invalid-job/);
 });
 test('job and appearance persist through save; chosen class and Master remain fixed',async()=>{

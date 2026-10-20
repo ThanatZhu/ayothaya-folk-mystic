@@ -9,12 +9,13 @@ export const JOBS={
  shaman:[{id:'spirit-master',name:'จ้าววิญญาณ',style:'มนตรารุนแรง',damage:1.3},{id:'yantra-master',name:'อาจารย์อาคม',style:'ยันต์คุ้มครอง',damage:1.1,shield:1.7}],
  acolyte:[{id:'healer',name:'ผู้บำเพ็ญเมตตา',style:'ฟื้นฟู',damage:1.1,heal:1.6},{id:'warder',name:'ผู้พิทักษ์ธรรม',style:'คุ้มครอง',damage:1.2,shield:1.7}]
 };
-// 0.73: advancing needs a maxed Job level (ผู้ฝึกตน Job 10 → a class; class Job 40 → master job). The base-level floors
-// stay because the production Firestore rules check them (baseXp ≥ 2,400 / 5,900: Base Lv.23 = 2,486, Lv.39 = 6,118).
+// 0.73: advancing needs a maxed Job level (ผู้ฝึกตน Job 10 → a class; class Job 40 → master job).
+// 0.99.10 owner rule: a maxed Job is enough, no Base-level floor. Online the realm server writes the class change with
+// admin rights; the old floors (Base Lv.23 / 39) remain only in firestore.rules for direct client writes.
 export const CLASS_LEVEL=23;
 export const JOB_LEVEL=39;
 export const jobMaxed=(saved,classId,jobId='')=>jobProgress(saved,classId,jobId).maxed;
-export function advanceReady(saved,classId,jobId=''){const tier=classId==='novice'?'class':'master',base=baseProgress(saved).level,min=tier==='class'?CLASS_LEVEL:JOB_LEVEL,job=jobProgress(saved,classId,jobId);return {tier,ok:job.maxed&&base>=min,job,base,min};}
+export function advanceReady(saved,classId,jobId=''){const tier=classId==='novice'?'class':'master',base=baseProgress(saved).level,min=tier==='class'?CLASS_LEVEL:JOB_LEVEL,job=jobProgress(saved,classId,jobId);return {tier,ok:job.maxed,job,base,min};}
 export const progression=(saved=0)=>baseProgress(saved);
 export function jobFor(classId,jobId){if(!jobId)return null;const j=JOBS[classId]?.find(j=>j.id===jobId);if(!j)throw new Error('invalid-job');return j;}
 export function validateJob(classId,jobId,kills){const j=jobFor(classId,jobId);if(j&&!advanceReady(kills,classId,'').ok)throw new Error('job-locked');return j;}

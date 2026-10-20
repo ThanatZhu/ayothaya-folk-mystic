@@ -62,7 +62,7 @@ export function createPerfSettings({renderer,scene,sun,softLook,resize,onApply=(
    const wrap=document.createElement('div');wrap.className='perf-settings';
    wrap.innerHTML=`<label>จำกัด FPS<select id="perf-fps">${FPS_CHOICES.map(f=>`<option value="${f}">${f?f+' FPS':'ตามหน้าจอ'}</option>`).join('')}</select></label>`+
     `<label>กราฟิก<select id="perf-quality">${Object.entries(QUALITY).map(([k,q])=>`<option value="${k}">${q.label}</option>`).join('')}</select></label>`+
-    '<small>เกมลดความละเอียดเองเมื่อ FPS ตก · ยังกระตุกลอง 30 FPS หรือกราฟิกต่ำ · ความหนาแน่นหญ้าเปลี่ยนตอนย้ายแมพ · 120 FPS ใช้ได้กับจอ 120Hz เท่านั้น</small>';
+    '<label>ภาษา · Language<button type="button" data-lang-toggle>TH / EN</button></label><small>เกมลดความละเอียดเองเมื่อ FPS ตก · ยังกระตุกลอง 30 FPS หรือกราฟิกต่ำ · ความหนาแน่นหญ้าเปลี่ยนตอนย้ายแมพ · 120 FPS ใช้ได้กับจอ 120Hz เท่านั้น</small>';
    const gpu=gpuName(renderer.getContext?.()),windows=/Windows/.test(navigator.userAgent);
    if(gpu){const p=document.createElement('div');p.className='perf-gpu';
     p.innerHTML=`<span>การ์ดจอที่ใช้อยู่: <b></b></span>`+(integratedGpu(gpu)&&windows?'<p>นี่คือการ์ดจอในตัว ถ้าเครื่องมีการ์ดจอแยก (NVIDIA / AMD) เกมจะลื่นกว่ามาก</p><a class="perf-open" href="ms-settings:display-advancedgraphics">เปิดตั้งค่าการ์ดจอของ Windows</a><ol><li>Browse หรือเลือกเบราว์เซอร์นี้ (Chrome / Edge)</li><li>Options › High performance › Save</li><li>ปิดเบราว์เซอร์ทุกหน้าต่างแล้วเปิดใหม่</li></ol>':'');

@@ -144,7 +144,7 @@ body.field-hud.hud63 .exp-track>span{inset:auto auto 6px 0;font-size:10px;line-h
  body.field-hud.hud63 #interact{bottom:calc(var(--exp-h) + 240px)}
 }
 @media (orientation:portrait) and (max-width:600px){body.field-hud.hud63 #online-dock.collapsed{min-width:140px}}
-@media (orientation:portrait) and (max-width:600px){#online-dock.collapsed #dock-preview:empty::before{content:"แชต";color:var(--ink,#fff3d6)}}
+@media (orientation:portrait) and (max-width:600px){#online-dock.collapsed #dock-preview:empty::before{content:var(--chat-label,"แชต");color:var(--ink,#fff3d6)}}
 
 /* 0.71 owner: desktop uses the same HUD as phones (framed profile/minimap, full menu row, skill wheel). */
 @media (pointer:fine) and (min-width:901px){body.field-hud.hud63 #menu-more{display:none!important}body.field-hud.hud63 #menu-drawer{display:contents!important}}

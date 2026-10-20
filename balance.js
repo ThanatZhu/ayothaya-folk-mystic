@@ -22,11 +22,27 @@ export function patch(group,key,target){
  return target;
 }
 // Check a whole override document from the dashboard before it is written to disk.
+// Names like __proto__ would write onto Object.prototype on the server, so only plain ids get through.
+const safe=k=>typeof k==='string'&&!['__proto__','constructor','prototype'].includes(k);
 export function cleanBalance(doc){
- const out={classes:{},skills:{},items:{},monsters:{}};
- for(const group of Object.keys(out))for(const [key,fields] of Object.entries(doc?.[group]??{})){
-  if(typeof key!=='string'||key.length>40||!fields||typeof fields!=='object')continue;
-  for(const [field,value] of Object.entries(fields)){const r=FIELDS[group][field];if(r&&typeof value==='number'&&Number.isFinite(value)){(out[group][key]??={})[field]=Math.min(r[1],Math.max(r[0],value));}}
+ const out={classes:{},skills:{},items:{},monsters:{},drops:{}};
+ for(const group of Object.keys(FIELDS))for(const [key,fields] of Object.entries(doc?.[group]??{})){
+  if(!safe(key)||key.length>40||!fields||typeof fields!=='object')continue;
+  for(const [field,value] of Object.entries(fields)){const r=Object.hasOwn(FIELDS[group],field)&&FIELDS[group][field];if(r&&typeof value==='number'&&Number.isFinite(value)){(out[group][key]??={})[field]=Math.min(r[1],Math.max(r[0],value));}}
+ }
+ // 0.103 drop chances: {drops:{monsterId:{itemId:chance 0-1}}}
+ for(const [monster,items] of Object.entries(doc?.drops??{})){
+  if(!safe(monster)||monster.length>40||!items||typeof items!=='object')continue;
+  for(const [id,chance] of Object.entries(items))if(safe(id)&&id.length<=60&&typeof chance==='number'&&Number.isFinite(chance))(out.drops[monster]??={})[id]=Math.min(1,Math.max(0,chance));
  }
  return out;
+}
+// Applies the drop chance overrides to items.js DROPS; only items already in that monster's list change.
+export function patchDrops(drops){
+ for(const [monster,over] of Object.entries(BALANCE.drops??{}))for(const entry of drops[monster]?.items??[]){
+  const value=over?.[entry[0]];if(typeof value!=='number'||!Number.isFinite(value))continue;
+  const id='drops.'+monster+'.'+entry[0];if(!(id in BASELINE))BASELINE[id]=entry[1];
+  entry[1]=Math.min(1,Math.max(0,value));
+ }
+ return drops;
 }

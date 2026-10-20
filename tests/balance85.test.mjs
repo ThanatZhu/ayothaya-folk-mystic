@@ -8,3 +8,7 @@ test('dashboard overrides keep only known numeric fields, clamped to their range
 test('patch leaves objects alone without overrides and remembers originals when it changes them',()=>{
  const target={damage:7};assert.equal(patch('skills','nobody:0',target).damage,7);assert.equal(Object.keys(BASELINE).length,0);
 });
+test('drop chance overrides are clamped to 0-1 and names like __proto__ are dropped',()=>{
+ const c=cleanBalance(JSON.parse('{"drops":{"rat":{"rat-tooth":0.9,"card-rat":5,"x":"1"},"__proto__":{"a":1}},"skills":{"__proto__":{"damage":5}}}'));
+ assert.deepEqual(c.drops,{rat:{'rat-tooth':.9,'card-rat':1}});assert.equal(({}).damage,undefined);assert.equal(({}).a,undefined);
+});

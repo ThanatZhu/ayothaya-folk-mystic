@@ -1,7 +1,7 @@
 // 0.85 back-office dashboard: every tunable game number in one place (paths, skills, items, monsters).
 // Edits are kept as overrides (balance.js FIELDS); "บันทึกเข้าเกม" posts them to the local dev server, which writes
 // balance-data.js for the next deploy. Player data is not touched here.
-import {ITEMS} from './items.js?v=94';
+import {ITEMS,DROPS} from './items.js?v=94';
 import {CLASSES,NOVICE,classSkills,className} from './classes.js?v=101';
 import {multiplayerURL} from './multiplayer-config.js';
 import {iconStyle} from './bag-ui.js?v=98';
@@ -16,7 +16,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const LABEL={damage:'พลัง',heal:'ฟื้นฟู',cost:'MP',cd:'คูลดาวน์',range:'ระยะ',radius:'รัศมี',duration:'นาน',delay:'หน่วง (วิ)',atk:'ATK',matk:'MATK',def:'DEF',level:'เลเวล',buy:'ราคาซื้อ',sell:'ราคาขาย',tokens:'เหรียญงาน',hp:'HP',mp:'MP',speed:'ความเร็ว',baseXp:'Base EXP',jobXp:'Job EXP',respawn:'เกิดใหม่ (วิ)',reach:'ระยะตี'};
 const KIND={potion:'ยา',gear:'อุปกรณ์',card:'การ์ด',loot:'วัตถุดิบ',scroll:'ม้วน',egg:'ไข่',lure:'เหยื่อ',petfood:'อาหารสัตว์'};
 const paths=[NOVICE,...CLASSES];
-let draft=JSON.parse(JSON.stringify(BALANCE));for(const g of Object.keys(FIELDS))draft[g]??={};
+let draft=JSON.parse(JSON.stringify(BALANCE));for(const g of [...Object.keys(FIELDS),'drops'])draft[g]??={};
 let tab='players',classId='swordsman',query='',kind='all',tableView='compare';
 // players tab state (declared up here: the first render may already be on that tab)
 const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
@@ -48,7 +48,7 @@ function set(r,f,v){
  showCount();
 }
 // 0.101.2 side menu: what each page is for, in one line
-const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นที่ออนไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน']};
+const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นที่ออนไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)']};
 function tabs(){
  $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();});
@@ -59,6 +59,7 @@ function filters(){
  if(tab==='skills')f.innerHTML=`<label>อาชีพ <select id="class-pick">${paths.map(c=>`<option value="${c.id}"${c.id===classId?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><small>ค่านี้คือค่าขั้น 1 ก่อนบวกโบนัส Master · ขั้นสูงขึ้นคำนวณจากค่านี้</small>`;
  else if(tab==='table')f.innerHTML=`<label>ดู <select id="table-pick"><option value="compare"${tableView==='compare'?' selected':''}>เทียบทุกอาชีพ</option>${paths.map(c=>`<option value="${c.id}"${c.id===tableView?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><small>ตัวเลขรวมค่าที่แก้ในแท็บสกิล (ยังไม่บันทึกก็เห็นผลทันที) · เขียว/แดง = สูงสุด/ต่ำสุดของแถว</small>`;
  else if(tab==='items')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อหรือรหัสไอเท็ม"></label><label>ประเภท <select id="kind-pick"><option value="all">ทั้งหมด</option>${Object.entries(KIND).map(([k,n])=>`<option value="${k}"${k===kind?' selected':''}>${n}</option>`).join('')}</select></label>`;
+ else if(tab==='drops')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อมอนหรือไอเท็ม"></label><small>100% = ดรอปทุกครั้ง · หัวหน้าฝูงและช่วงดรอป ×2 ยังทอยซ้ำตามเดิม</small>`;
  else if(tab==='monsters')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อหรือรหัสมอนสเตอร์"></label>`;
  else f.innerHTML='';
  $('class-pick')&&($('class-pick').onchange=e=>{classId=e.target.value;remember();render();});
@@ -77,6 +78,7 @@ function render(withFilters=true){
  if(tab==='table'){$('view').innerHTML=skillTable();return;}
  if(tab==='players'){playersTab();return;}
  if(tab==='formula'){formulaTab();return;}
+ if(tab==='drops'){dropsTab();return;}
  const rows=rowsFor(),cols=columns(rows);
  $('view').innerHTML=`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th>${cols.map(c=>`<th>${LABEL[c]??c}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-i="${i}"><td class="l"><span class="name">${r.group==='items'?`<i class="ico sm" data-item="${esc(r.key)}" style="${iconStyle(r.key)}"></i>`:r.group==='classes'?`<i class="face sm" style="background-image:url(assets/character-life100/player/${esc(r.key)}-male.png)"></i>`:''}<span><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></span></span></td>${cols.map(f=>{const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined;return `<td>${b==null&&!edited?'<span class="na">—</span>':`<input type="number" step="any" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`}</td>`;}).join('')}<td><button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button></td></tr>`).join('')}</tbody></table></div>`;
  $('view').querySelectorAll('tr[data-i]').forEach(tr=>{const r=rows[+tr.dataset.i];
@@ -97,6 +99,26 @@ function skillTable(){
  const all=paths.map(c=>({c,list:live(c.id)}));
  return `<div class="scroll"><table><thead><tr><th class="l">ช่อง · บทบาท</th>${all.map(a=>`<th>${esc(a.c.name)}</th>`).join('')}</tr></thead><tbody><tr><td class="l"><b>ตีธรรมดา</b><small>ATK อาชีพ · หน่วง</small></td>${all.map(a=>`<td>${num(a.c.damage)}<small>${num(a.c.delay)} วิ</small></td>`).join('')}</tr>${ROLE.map((role,slot)=>{const vals=all.map(a=>a.list[slot].damage??a.list[slot].heal??null),n=vals.filter(v=>v!=null),hi=Math.max(...n),lo=Math.min(...n);
   return `<tr><td class="l"><b>${slot===9?0:slot+1} · ${role}</b><small>${reqText(all[0].list,slot)}</small></td>${all.map((a,i)=>{const s=a.list[slot],v=vals[i],k=n.length>1&&hi!==lo&&v!=null?(v===hi?'top':v===lo?'bottom':''):'';return `<td class="${k}">${s.heal?'+'+num(s.heal):num(s.damage)}<small>MP ${num(s.cost)} · ${num(s.cd)} วิ</small></td>`;}).join('')}</tr>`;}).join('')}</tbody></table></div>`;
+}
+// 0.103 drop rates: one row per item a monster can drop, edited in % (stored 0-1 in balance-data.js drops).
+const pct=v=>Math.round(v*1e6)/1e4;
+const monName=id=>MONSTER_TYPES.find((m,i)=>monsterKey(m,i)===id)?.name??id;
+const dropBase=(mid,id,now)=>{const k='drops.'+mid+'.'+id;return k in BASELINE?BASELINE[k]:now;};
+function dropsTab(){
+ const list=Object.entries(DROPS).map(([mid,d])=>({mid,name:monName(mid),d})).filter(m=>!query||(m.name+m.mid+m.d.items.map(([id])=>itemName(id)+id).join()).toLowerCase().includes(query));
+ $('view').innerHTML=`<div class="scroll"><table class="drops"><thead><tr><th class="l">มอน · ไอเท็ม</th><th>ค่าเดิม</th><th>โอกาสดรอป %</th><th>จำนวน</th><th></th></tr></thead><tbody>${list.map(({mid,name,d})=>{const over=draft.drops[mid];
+  return `<tr class="mon"><td class="l" colspan="4"><b>${esc(name)}</b><small>${esc(mid)} · เบี้ย ${d.coins[0]}–${d.coins[1]}</small></td><td><button type="button" class="undo" data-undo-drop="${esc(mid)}" ${over?'':'hidden'}>คืนค่า</button></td></tr>`+
+  d.items.map(([id,now,n=1])=>{const b=dropBase(mid,id,now),edited=over?.[id]!==undefined,v=edited?over[id]:b;
+   return `<tr><td class="l"><span class="name"><i class="ico sm" data-item="${esc(id)}" style="${iconStyle(id)}"></i><span><b>${esc(itemName(id))}</b><small>${esc(id)}</small></span></span></td><td>${pct(b)}%</td><td><input type="number" min="0" max="100" step="any" data-mid="${esc(mid)}" data-id="${esc(id)}" value="${pct(v)}" class="${edited?'edited':''}" aria-label="${esc(name)} ${esc(itemName(id))} %" title="ค่าเดิม ${pct(b)}%"></td><td>×${n}</td><td></td></tr>`;}).join('');}).join('')||'<tr><td class="l" colspan="5">ไม่พบ</td></tr>'}</tbody></table></div>`;
+ $('view').querySelectorAll('input[data-mid]').forEach(inp=>inp.onchange=()=>{
+  const {mid,id}=inp.dataset,entry=DROPS[mid].items.find(e=>e[0]===id),b=dropBase(mid,id,entry[1]),v=inp.value===''?b:Math.min(100,Math.max(0,Number(inp.value)))/100;
+  if(!Number.isFinite(v)||pct(v)===pct(b)){if(draft.drops[mid]){delete draft.drops[mid][id];if(!Object.keys(draft.drops[mid]).length)delete draft.drops[mid];}}
+  else (draft.drops[mid]??={})[id]=v;
+  const edited=draft.drops[mid]?.[id]!==undefined;inp.classList.toggle('edited',edited);inp.value=pct(edited?v:b);
+  $('view').querySelector(`[data-undo-drop="${CSS.escape(mid)}"]`).hidden=!draft.drops[mid];showCount();
+ });
+ $('view').querySelectorAll('[data-undo-drop]').forEach(b=>b.onclick=()=>{const top=$('view').querySelector('.scroll').scrollTop;delete draft.drops[b.dataset.undoDrop];dropsTab();$('view').querySelector('.scroll').scrollTop=top;});
+ showCount();
 }
 const say=(t,ok=true)=>{$('status').textContent=t;$('status').className='status '+(ok?'ok':'bad');};
 $('reset-all').onclick=()=>{for(const g of Object.keys(draft))draft[g]={};render(false);say('คืนค่าทั้งหมดในหน้านี้แล้ว (ยังไม่บันทึก)');};

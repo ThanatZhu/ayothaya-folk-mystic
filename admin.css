@@ -138,3 +138,5 @@ td .name{display:flex;align-items:center;gap:10px}
 .fx-rules{margin-top:12px;padding:10px 14px;border:1px dashed var(--rule);border-radius:10px}.fx-rules summary{cursor:pointer;color:var(--gold)}
 .fx-rules li{margin:4px 0;font-size:13px;line-height:1.5}
 .formula .scroll{max-height:420px}
+/* 0.103 drop rates page: a monster heading row above its items */
+table.drops tr.mon td{background:#ffffff08;border-top:2px solid var(--rule)}table.drops tr.mon b{color:var(--gold)}

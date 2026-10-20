@@ -92,7 +92,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  function placeFloat(f,dt){
   f.off+=(f.slot*FLOAT_LINE-f.off)*Math.min(1,dt*16);const a=f.pos();projection.set(a.x,a.y,a.z).project(camera);
-  f.el.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth+f.side*Math.min(1,f.age*3)*14}px,${(-projection.y*.5+.5)*innerHeight-f.off-f.age*26}px)`;
+  // 0.99.8 position through `translate` (applied before the pop-in `scale`), so the pop grows in place over the head
+  f.el.style.translate=`calc(${(projection.x*.5+.5)*innerWidth+f.side*Math.min(1,f.age*3)*14}px - 50%) calc(${(-projection.y*.5+.5)*innerHeight-f.off-f.age*26}px - 100%)`;
   f.el.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';
  }
  function effect(e){

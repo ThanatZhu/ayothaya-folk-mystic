@@ -29,7 +29,7 @@
 .perf-open{display:block;text-align:center;padding:6px;border-radius:6px;background:#e0b65c;color:#1c241c;font-weight:bold;text-decoration:none}
 
 /* 0.99.3 stacked numbers: no sideways jitter, crits pop larger, heals a touch smaller */
-.damage-number{translate:none!important;white-space:nowrap;letter-spacing:.02em}
+.damage-number{white-space:nowrap;letter-spacing:.02em}
 .damage-number.heal{font-size:16px}
 /* 0.99.5 juicy numbers: thick outline, punch-in with a white flash, crits burst with light behind them */
 .damage-number{isolation:isolate;font:900 21px/1 Mali,Tahoma,sans-serif!important;-webkit-text-stroke:4px #1b0f07;paint-order:stroke fill;text-shadow:0 3px 0 #0009!important;animation:dmg-punch .26s cubic-bezier(.2,1.7,.35,1)!important}

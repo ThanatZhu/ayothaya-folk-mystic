@@ -1,4 +1,4 @@
-import {getLoadingScreen} from './loading-screen.js?v=39';
+import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=99.11';
 import {createMentorUI} from './mentor-ui.js?v=101.3';
@@ -61,7 +61,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  worldButton.onclick=()=>{worldPanel.hidden=!worldPanel.hidden;worldButton.classList.toggle('on',!worldPanel.hidden);if(!worldPanel.hidden)drawWorld();};
  function drawWorld(){
   const coins=api.coins?.()??0;
-  worldPanel.innerHTML='<h2>แผนที่โลก · วาร์ป</h2><p>วาร์ปไปเมืองหลวง 30 เบี้ย · ที่อื่น 50 เบี้ยต่อช่วงทาง · มีเบี้ย '+coins.toLocaleString('th-TH')+'</p><ol>'+catalog.maps.filter(m=>!m.guildHall).map(m=>{
+  worldPanel.innerHTML='<h2>แผนที่โลก · วาร์ป</h2><a class="world-atlas-link" href="world-atlas.html" target="_blank" rel="noopener"><img src="assets/world105/world-map.png" alt="ภาพแผนที่โลกอโยธยา"><span>เปิดภาพแผนที่โลกขนาดใหญ่</span></a><p>วาร์ปไปเมืองหลวง 30 เบี้ย · ที่อื่น 50 เบี้ยต่อช่วงทาง · มีเบี้ย '+coins.toLocaleString('th-TH')+'</p><ol>'+catalog.maps.filter(m=>!m.guildHall).map(m=>{
    const cost=warpCost(catalog,map.id,m.id),here=m.id===map.id,sub=(m.subtitle??'').split(' · ')[0];
    return `<li class="${here?'here':''}"><div><strong>${m.name}</strong><small>${here?'คุณอยู่ที่นี่':m.instance?'เข้าได้จากโรงสีใต้เงาจันทร์เท่านั้น':sub}</small></div>${here||cost===null?'':`<button type="button" data-warp="${m.id}" ${coins<cost?'disabled':''}>วาร์ป · ${cost} เบี้ย</button>`}</li>`;}).join('')+'</ol>';
   worldPanel.querySelectorAll('[data-warp]').forEach(b=>b.onclick=()=>{

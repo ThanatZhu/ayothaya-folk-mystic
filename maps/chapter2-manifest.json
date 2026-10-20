@@ -1,0 +1,60 @@
+{
+  "release": "0.105.0",
+  "mode": "exploration",
+  "maps": [
+    {
+      "id": "bamboo-grove",
+      "name": "ป่าไผ่ผีปอบ",
+      "scene": "maps/v4/bamboo-grove.glb",
+      "bytes": 4293920,
+      "sha256": "ae09c65d510637a847e55597c6ad6f373ced0f76da3faa48b11ab6531fab007e",
+      "source": "chapter2-v2",
+      "triangles": 243159
+    },
+    {
+      "id": "ruined-temple",
+      "name": "วัดร้างริมกรุงเก่า",
+      "scene": "maps/v4/ruined-temple.glb",
+      "bytes": 4441812,
+      "sha256": "03a7614e6458b8d0159c371a4c9baf258c626f2a214bf808da8ac22fda44174c",
+      "source": "chapter2-v2",
+      "triangles": 237785
+    },
+    {
+      "id": "lablae",
+      "name": "เมืองลับแล",
+      "scene": "maps/v4/lablae.glb",
+      "bytes": 4381108,
+      "sha256": "25d045774418eb987cb0a54442b0bb9ff50a9d755042c87cbf849836741b1d0c",
+      "source": "chapter2-v2",
+      "triangles": 229255
+    },
+    {
+      "id": "himmapan-edge",
+      "name": "ชายป่าหิมพานต์",
+      "scene": "maps/v4/himmapan-edge.glb",
+      "bytes": 4404668,
+      "sha256": "c017f930f7826fcebfedb20098c690b188b7af867bc0ab68ffd54828320f2709",
+      "source": "chapter2-v2",
+      "triangles": 243317
+    },
+    {
+      "id": "naga-cave",
+      "name": "ถ้ำพญานาค",
+      "scene": "maps/v4/naga-cave.glb",
+      "bytes": 4914924,
+      "sha256": "1014118690a83efd0d2591111de41138701bdf561014b1404ff48790b0373ba3",
+      "source": "chapter2-v2",
+      "triangles": 91344
+    },
+    {
+      "id": "kailash-peak",
+      "name": "ยอดเขาไกรลาส",
+      "scene": "maps/v4/kailash-peak.glb",
+      "bytes": 3580184,
+      "sha256": "c5c0e968b773e2320ec12902c60091ce7bc98680b8af79f45ad6b95200362c7a",
+      "source": "kailash-v3",
+      "triangles": 60540
+    }
+  ]
+}

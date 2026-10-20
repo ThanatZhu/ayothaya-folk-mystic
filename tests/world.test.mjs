@@ -6,7 +6,7 @@ import {resolveMap,destinations,restoreTraveler,serializeTraveler} from '../worl
 const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 const map=catalog.maps[0];
 test('rebuilt capital retains its districts and safe boundary while opening the starter route',()=>{
- assert.equal(catalog.maps.length,7);/* 1.01 + guild-hall */assert.equal(map.id,'ayutthaya');assert.equal(map.safe,true);
+ assert.equal(catalog.maps.length,13);/* 1.01 + guild-hall */assert.equal(map.id,'ayutthaya');assert.equal(map.safe,true);
  assert.deepEqual(map.portals.map(p=>p.to),['rice-fields']);assert.deepEqual(map.mobs,[]);assert.equal(map.districts.length,8);
  assert.equal(resolveMap(catalog,'bangsai').id,'ayutthaya');assert.equal(resolveMap(catalog,'bad-url').id,'ayutthaya');
  const files=fs.readdirSync(new URL('../maps/',import.meta.url)).filter(n=>n.endsWith('.glb'));

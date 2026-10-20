@@ -1,4 +1,4 @@
-import {loadingTheme,LOADING_STAGES} from './loading-theme.js?v=39';
+import {loadingTheme,LOADING_STAGES} from './loading-theme.js?v=105.0';
 let instance;
 export function getLoadingScreen(){
  if(instance)return instance;

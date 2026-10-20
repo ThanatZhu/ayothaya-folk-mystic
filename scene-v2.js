@@ -7,8 +7,10 @@ export const MOODS={
  dusk:{sky:'#5d6b6c',fog:'#66716c',hemi:['#ffd7b0','#3f4d4a',1.05],sun:['#ffb980',1.6],lamp:2.2},
  night:{sky:'#2c4246',fog:'#3a5153',hemi:['#b9d4e0','#3b4f4c',.95],sun:['#b9d3f0',.85],lamp:3},
  cellar:{sky:'#1f2f34',fog:'#23353a',hemi:['#a6d8d6','#273b3a',1.15],sun:['#cfe6ef',.55],lamp:3.4},
+ cave:{sky:'#172f37',fog:'#254149',hemi:['#bce9ef','#273c38',1.35],sun:['#9bdce5',1.1],lamp:2.4},
+ summit:{sky:'#a8b7c5',fog:'#c5d0da',hemi:['#d8e8ec','#59656e',1.7],sun:['#ffdbb2',2.3],lamp:1},
 };
-export const moodOf=map=>map.instance?'cellar':map.procedural==='mill'?'night':map.mood==='dusk'?'dusk':'day';
+export const moodOf=map=>map.instance?'cellar':map.procedural==='mill'?'night':Object.hasOwn(MOODS,map.mood)?map.mood:'day';
 const FLAT=/^(Ground|Soil foundation|Water surface|Damp canal|Streets|Tracks|Courtyard|Feathered|Island meadow|Wetland islands|Cellar foundation|Raised flagstone|Spirit arena|Earthen rice|Dense low rice|Stone moss|Fine meadow|Dense rice|Rice seed|Cupped floating|Lotus|Layered lotus|Arena inlays)/;
 
 // 0.64.1 ground layers are modelled at the same height (streets, tracks, shoulders, courtyards), which z-fights
@@ -20,7 +22,7 @@ const LAYERS=[[/^(Soil|Cellar)[ _]foundation/,-1],[/^(Ground|Island meadow)/,0],
 const TOP_RANK=Math.max(...LAYERS.map(([,r])=>r));
 export function prepareSceneV2({scene,model,map}){
  const mood=MOODS[moodOf(map)],converted=new Map(),water=[],wind={value:0};
- scene.background=new THREE.Color(mood.sky);scene.fog=new THREE.Fog(mood.fog,60,150);
+ scene.background=new THREE.Color(mood.sky);scene.fog=new THREE.Fog(mood.fog,map.mood==='summit'?100:60,map.mood==='summit'?250:150);
  // 1.01 guild hall: 'Guild upgrade <kind> <tier>' props stay hidden until the guild owns that tier (guildUpgrades).
  const upgrades=[];
  model.traverse(o=>{
@@ -35,6 +37,7 @@ export function prepareSceneV2({scene,model,map}){
    const m=new THREE.MeshStandardMaterial();
    for(const k of ['name','color','map','normalMap','normalScale','roughness','roughnessMap','metalness','metalnessMap','emissive','emissiveMap','emissiveIntensity','alphaTest','transparent','opacity','side','vertexColors','alphaMap','aoMap'])if(source[k]!==undefined)m[k]=source[k]?.clone&&!source[k].isTexture?source[k].clone():source[k];
    if(/water/i.test(m.name)){m.roughness=.22;m.metalness=.05;m.color.multiplyScalar(map.instance?.9:1);water.push(m);}
+   if(/cloud sea soft alpha/i.test(m.name)){m.depthWrite=false;o.castShadow=false;}
    if(m.emissive.getHex()&&(m.emissiveMap||m.emissiveIntensity>0))m.emissiveIntensity=Math.max(m.emissiveIntensity,1)*mood.lamp;
    // 0.75 rice, seed heads and meadow blades lean in a slow breeze (their meshes sit at the origin, so object space is
    // world space and position.y is the height above the field). They cast no shadows, so no depth shader is needed.

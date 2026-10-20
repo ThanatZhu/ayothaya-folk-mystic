@@ -7,6 +7,8 @@ const DISCORD_INVITE='https://discord.gg/Be9WwsX6'; // the Discord buttons and l
 const $=id=>document.getElementById(id);
 // 0.104.2 reduced motion: the promo stays on its poster frame
 if(matchMedia('(prefers-reduced-motion:reduce)').matches)for(const v of document.querySelectorAll('.hero-video')){v.removeAttribute('autoplay');v.pause();}
+// 0.105.1 sound toggle for the promo (autoplay has to start muted)
+{const v=document.querySelector('.hero-video'),b=$('hero-sound');if(v&&b)b.onclick=()=>{v.muted=!v.muted;if(!v.muted){v.volume=.8;v.play().catch(()=>{});}b.setAttribute('aria-pressed',String(!v.muted));b.querySelector('i').textContent=v.muted?'🔇':'🔊';b.querySelector('span').textContent=v.muted?'เปิดเสียง':'ปิดเสียง';};}
 if(DISCORD_INVITE)for(const a of document.querySelectorAll('[data-discord]')){a.href=DISCORD_INVITE;a.hidden=false;}
 
 // Server status from the realm's /health (players across both channels). Render's free tier sleeps when idle;

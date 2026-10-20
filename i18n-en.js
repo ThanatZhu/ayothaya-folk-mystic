@@ -1,5 +1,7 @@
 // English for every player-facing Thai string (Thai source -> English). Regenerate gaps with scripts/i18n-missing.mjs.
-globalThis.I18N_EN={"ผู้จุติ":"Reborn",
+globalThis.I18N_EN={"เปิดเสียง":"Sound on",
+"ปิดเสียง":"Sound off",
+"ผู้จุติ":"Reborn",
 "ยอดฝีมือ":"Adept",
 "ขุนพล":"Warlord",
 "จอมยุทธ์":"Champion",

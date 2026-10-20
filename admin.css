@@ -35,3 +35,50 @@ td.top{background:#1f3b31;color:var(--jade);font-weight:700}td.bottom{background
 .players tr.picked td{background:#f4cf7a22}
 .give{display:grid;gap:10px;max-width:520px;margin-top:16px;padding:16px;border:1px dashed #f4cf7a55;border-radius:12px}.give h3{margin:0}.give .bag{margin:0;font-size:13px;opacity:.85}
 .give label{display:grid;gap:4px}.give select,.give input{min-height:36px;padding:0 8px;border-radius:8px;border:1px solid #f4cf7a55;background:#0e1f19;color:inherit;font:inherit}
+,`
+/* 0.100.8 players tab: list on the left, gift basket on the right (stacked on phones) */
+.players-head{gap:10px}.players-head h2 small{font-size:14px;opacity:.7}.players-head .who{font-size:13px;opacity:.85}
+.players-head button{min-height:34px;padding:0 14px;border-radius:999px;border:1px solid #f4cf7a55;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.players-head button.primary{background:#f4cf7a;color:#2a2210;border-color:#f4cf7a}
+.players .hint{opacity:.75}
+.players-body{display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.players-body{grid-template-columns:1fr}}
+.plist{display:grid;gap:6px;max-height:calc(100dvh - 260px);overflow:auto}
+.plist input{min-height:38px;padding:0 12px;border-radius:10px;border:1px solid #f4cf7a55;background:#0e1f19;color:inherit;font:inherit}
+.prow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;border:1px solid #f4cf7a33;border-radius:12px;background:#0e1f19;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.prow b{grid-column:1/-1;font-size:15px}.prow span{font-size:12px;opacity:.8}.prow .coin{grid-column:2;grid-row:2;color:#f4cf7a;opacity:1}
+.prow:hover{border-color:#f4cf7a88}.prow.on{border-color:#f4cf7a;background:#f4cf7a1a}
+.gift form{display:grid;gap:12px;max-width:none;margin:0;padding:16px;border:1px solid #f4cf7a55;border-radius:14px;background:#0e1f19}
+.gift .bag{display:flex;flex-wrap:wrap;gap:4px 6px;margin:0;font-size:12px}.gift .bag span{padding:2px 8px;border-radius:999px;background:#ffffff10}
+.gift .quick{display:flex;flex-wrap:wrap;gap:6px}.gift .quick button{min-height:32px;padding:0 12px;border-radius:999px;border:1px solid #f4cf7a66;background:#f4cf7a14;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.gift .quick button:hover{background:#f4cf7a33}
+.gift .add{display:grid;grid-template-columns:1fr 80px auto;gap:6px}
+.gift input{min-height:36px;padding:0 10px;border-radius:8px;border:1px solid #f4cf7a55;background:#0b1814;color:inherit;font:inherit}
+.gift .add button{min-height:36px;padding:0 14px;border-radius:8px;border:1px solid #f4cf7a;background:transparent;color:#f4cf7a;font:inherit;cursor:pointer}
+.gift .coins{display:flex;align-items:center;gap:8px}.gift .coins input{width:160px}
+.gift .basket{list-style:none;margin:0;padding:0;display:grid;gap:4px}.gift .basket li{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-radius:8px;background:#ffffff0c}
+.gift .basket li.empty{opacity:.6}.gift .basket button{width:26px;height:26px;border:0;border-radius:50%;background:#ffffff18;color:inherit;cursor:pointer}
+.gift .send{min-height:44px;font-size:15px}.gift .send:disabled{opacity:.5;cursor:default}
+
+/* 0.100.9 players tab with pictures */
+.prow{grid-template-columns:56px 1fr auto;align-items:center;gap:0 12px}
+.prow .pinfo{display:grid;gap:2px}.prow .pinfo b{font-size:15px}.prow .pinfo span{font-size:12px;opacity:.8}
+.prow .coin{grid-column:auto;grid-row:auto;text-align:right;color:#f4cf7a;font-weight:700}.prow .coin small{display:block;font-weight:400;opacity:.7}
+.face{display:block;width:56px;height:56px;border-radius:12px;background-color:#ffffff0d;background-size:500% 100%;background-position:0 0;background-repeat:no-repeat;image-rendering:auto}
+.ghead{display:flex;align-items:center;gap:12px}.ghead .face{width:72px;height:72px}.ghead h3{margin:0;font-size:20px}.ghead small{opacity:.8}
+.gift h4{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 0;font-size:14px;color:#f4cf7a}.gift h4 small{font-weight:400;color:inherit;opacity:.7;font-size:12px}
+.gift h4 input{width:70px;min-height:30px}
+.ico{position:relative;display:block;width:40px;height:40px;background-repeat:no-repeat;border-radius:8px}
+.coinico{display:grid;place-items:center;background:#f4cf7a;color:#2a2210;font-style:normal;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.grid .cell{position:relative;display:grid;justify-items:center;gap:2px;padding:6px 4px;border:1px solid #f4cf7a2a;border-radius:10px;background:#ffffff08;color:inherit;font:inherit}
+.grid .cell em{position:absolute;right:4px;bottom:2px;font:700 11px/1 Mali,Tahoma,sans-serif;font-style:normal;color:#fff;text-shadow:0 1px 2px #000}
+.grid .cell small{font-size:10px;line-height:1.2;text-align:center;opacity:.85;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grid.bag{max-height:150px;overflow:auto}
+.grid.pick{max-height:300px;overflow:auto}.grid.pick .cell{cursor:pointer}.grid.pick .cell:hover{border-color:#f4cf7a;background:#f4cf7a1c}
+.kinds{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.kinds button{min-height:30px;padding:0 12px;border-radius:999px;border:1px solid #f4cf7a55;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.kinds button.on{background:#f4cf7a;color:#2a2210;border-color:#f4cf7a}.kinds input{flex:1;min-width:140px}
+.qbtn{display:flex;align-items:center;gap:6px;min-height:40px;padding:2px 12px 2px 4px!important}.qbtn .ico{width:32px;height:32px}
+.sendbar{display:grid;gap:8px;padding:12px;border:1px solid #f4cf7a88;border-radius:12px;background:#f4cf7a0d}
+.gift .basket li{gap:8px}.gift .basket li .ico{width:30px;height:30px}.gift .basket li span{flex:1}.gift .basket li b{color:#f4cf7a}
+.hint.big{font-size:15px;padding:24px 0}

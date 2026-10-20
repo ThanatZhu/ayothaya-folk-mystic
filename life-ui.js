@@ -3,7 +3,10 @@
 import {emoteId,itemDef} from './items.js?v=94';
 import {AILMENTS} from './ailments.js?v=01';
 import {claimDaily,DAILY} from './daily.js?v=01';
-import {activeEvent,expRate,surge} from './events.js?v=64';
+import {activeEvent,expRate,surge,WEEKEND_EXP} from './events.js?v=64';
+import {WAR,warWindow} from './guild-war.js?v=98';
+import {ARENA,arenaEnds} from './arena.js?v=98';
+import {SHOPS} from './items.js?v=94';
 import {iconStyle} from './bag-ui.js?v=98';
 import {openHudPanel} from './hud-panels.js?v=34';
 import * as THREE from 'three';
@@ -13,7 +16,7 @@ const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 const POSES=[['idle','ลุก / ยืน'],['sit','นั่งพัก'],['sleep','นอนพัก'],['bow','ไหว้'],['celebrate','ดีใจ'],['guard','ตั้งท่า']];
 
 export function createLifeUI({game,account,camera}){
- if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=64';css.dataset.lifeUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=100.5';css.dataset.lifeUi='';document.head.append(css);}
  const world=game.world;world.status??={};
 
  // Ailment row under the player frame.
@@ -91,11 +94,33 @@ export function createLifeUI({game,account,camera}){
  function drawSurge(){const now=Date.now(),s=surge(now),left=Math.max(0,Math.ceil(((s.active?s.endsAt:s.nextAt)-now)/1000)),mm=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
   const text=s.active?`🔥 ฝูงคลั่ง ${mapName(s.map)} · เหลือ ${mm}`:`🔥 ฝูงคลั่งถัดไป ${mapName(s.nextMap)} · อีก ${mm}`;
   if(text!==surgeText){surgeText=text;surgeChip.innerHTML=`<i aria-hidden="true">🔥</i><span>ฝูงคลั่ง${s.active?"":"ถัดไป"} ${mapName(s.active?s.map:s.nextMap)}</span><b>${s.active?"เหลือ ":"อีก "}${mm}</b>`;surgeChip.setAttribute("aria-label",text);surgeChip.classList.toggle("on",s.active);}}
- surgeChip.onclick=()=>{const s=surge(Date.now());world.notice(s.active?`ฝูงคลั่งที่ ${mapName(s.map)} · EXP ×2 และดรอป ×2 · กด M แล้วเลือก World เพื่อวาร์ป`:`ทุก 20 นาทีจะมีฝูงคลั่ง 5 นาทีในแผนที่นอกเมือง · ครั้งถัดไป ${mapName(s.nextMap)}`);};
+ surgeChip.onclick=openEvents;
  function drawEvent(){const e=activeEvent(Date.now());if(performance.now()>rateAt){rateAt=performance.now()+30000;world.expRate=expRate(Date.now(),document.body.dataset.map);}drawSurge();
   if((e?.id??null)===festId)return;festId=e?.id??null;fest.hidden=!e;if(!e)return;
   const end=new Date(e.end+'T00:00:00+07:00').toLocaleDateString(globalThis.I18N?.locale??'th-TH',{day:'numeric',month:'short'});
-  fest.innerHTML=`${icon('krathong','item-icon small')}<span>${e.name}</span><b>ถึง ${end}</b>`;fest.onclick=()=>world.notice(e.name+' · '+e.text);
+  fest.innerHTML=`${icon('krathong','item-icon small')}<span>${e.name}</span><b>ถึง ${end}</b>`;fest.onclick=openEvents;
   setTimeout(()=>world.notice('🏮 '+e.name+' · '+e.text),6000);}
- return {update(){drawAilments();placeBubble();drawChip();drawEvent();drawActions();}};
+  // 0.100.5 events window: every running and weekly event explained in one place, with live countdowns
+ const eventsChip=document.createElement('button');eventsChip.type='button';eventsChip.id='events-chip';eventsChip.innerHTML='<i aria-hidden="true">📜</i><span>กิจกรรม</span>';eventsChip.onclick=openEvents;chips.append(eventsChip);
+ const eventsWin=document.createElement('dialog');eventsWin.id='events-window';eventsWin.setAttribute('aria-labelledby','events-title');($('game-shell')??document.body).append(eventsWin);
+ const span=ms=>{const s=Math.max(0,Math.floor(ms/1000)),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?d+' วัน '+h+' ชม.':h?h+' ชม. '+m+' นาที':m+':'+String(s%60).padStart(2,'0');};
+ const day=(t,o={day:'numeric',month:'short'})=>new Date(t).toLocaleDateString(globalThis.I18N?.locale??'th-TH',{timeZone:'Asia/Bangkok',...o});
+ const loot=r=>[r.coins?r.coins.toLocaleString('th-TH')+' เบี้ย':'',...r.items.map(i=>(itemDef(i.id)?.name??i.id)+' ×'+i.count)].filter(Boolean).join(' · ');
+ function eventsHTML(){
+  const now=Date.now(),e=activeEvent(now),s=surge(now),w=warWindow(now),wd=new Date(now+7*36e5).getUTCDay(),weekend=wd===0||wd===6,mvp=world.mvp;
+  const card=(icn,title,badge,body)=>`<section class="ev-card${badge?' live':''}"><h3>${icn} ${title}${badge?`<em>${badge}</em>`:''}</h3>${body}</section>`;
+  const shop=e&&Object.entries(SHOPS).find(([,v])=>v.currency===e.token);
+  return `<header><h2 id="events-title">📜 กิจกรรม</h2><button type="button" id="events-close" aria-label="ปิด">×</button></header><div class="ev-list">${
+   e?card('🏮',e.name,'กำลังจัด',`<p>${day(e.start+'T00:00:00+07:00')} – ${day(e.end+'T00:00:00+07:00')} · เหลืออีก ${span(new Date(e.end+'T23:59:59+07:00')-now)}</p><ul><li>ตีมอนนอกเมือง มีโอกาสได้ <b>${itemDef(e.token)?.name}</b> (${Math.round(e.drop*100)}% ต่อตัว)</li><li>EXP ×${e.exp} ทุกแผนที่</li>${shop?`<li>นำเหรียญไปแลกที่ <b>${shop[0]}</b> ในอยุธยา: ${shop[1].stock.map(id=>itemDef(id)?.name).join(', ')}</li>`:''}</ul>`):''}${
+   card('🔥','ฝูงคลั่ง',s.active?'กำลังเกิด':'',`<p>${s.active?`ตอนนี้ที่ <b>${mapName(s.map)}</b> · เหลือ ${span(s.endsAt-now)}`:`ครั้งถัดไป <b>${mapName(s.nextMap)}</b> · อีก ${span(s.nextAt-now)}`}</p><ul><li>ทุก 20 นาที แผนที่นอกเมืองหนึ่งแผนที่จะคลั่ง 5 นาที</li><li>EXP ×2 และดรอป ×2 · กด M แล้วเลือก World เพื่อวาร์ปไป</li></ul>`)}${
+   card('🌙','EXP วันหยุด',weekend?'วันนี้':'',`<p>ทุกวันเสาร์–อาทิตย์ EXP อย่างน้อย ×${WEEKEND_EXP}${weekend?' · ได้อยู่ตอนนี้':''}</p>`)}${
+   card('👑','บอส MVP','',`<p>${!mvp?'เกิดเป็นรอบ ประกาศทั้งเซิร์ฟ':mvp.in>0?'เกิดอีก '+span(mvp.in*1000):'ปรากฏตัวแล้ว!'}</p><ul><li>${mvp?.name??'ราชาหุ่นฟางเพลิง'}ที่${mvp?.map??'โรงสีใต้เงาจันทร์'} · ตีพร้อมเพื่อนได้</li><li>คนทำดาเมจมากสุดได้รางวัล MVP</li></ul>`)}${
+   card('🏯','กิลด์วอร์ยึด'+WAR.name,w.active?'กำลังรบ':'',`<p>${w.active?'เหลือ '+span(w.endsAt-now):'ครั้งถัดไป '+day(w.nextAt,{weekday:'short',day:'numeric',month:'short'})+' 20:00 · อีก '+span(w.nextAt-now)}</p><ul><li>ทุกเสาร์ 20:00–20:30 ที่โรงสีใต้เงาจันทร์ · ต้องอยู่ในกิลด์</li><li>ทำลาย${WAR.stone.name}เพื่อยึดป้อม ศิลาจะฟื้นให้กิลด์อื่นแย่งต่อ</li><li>กิลด์ที่ยึดไว้ตอนหมดเวลาได้ครองป้อมทั้งสัปดาห์</li><li>รางวัล: ${loot(WAR.reward)}</li></ul>`)}${
+   card('🏆','ทัวร์นาเมนต์ประลอง','',`<p>ปิดรอบในอีก ${span(arenaEnds(now)-now)}</p><ul><li>ท้าดวลผู้เล่นอื่น ชนะ +${ARENA.win} แต้ม · เสมอ +${ARENA.draw} (คู่เดิมนับวันละ ${ARENA.pairDaily} ครั้ง)</li><li>อันดับ 1–3 ประจำสัปดาห์ได้รางวัล: ${ARENA.prizes.map((p,i)=>'#'+(i+1)+' '+loot(p)).join(' / ')}</li></ul>`)}
+  </div>`;
+ }
+ let eventsTimer=0;
+ function openEvents(){eventsWin.innerHTML=eventsHTML();eventsWin.querySelector('#events-close').onclick=()=>eventsWin.close();game.clearInput();openHudPanel(eventsWin);
+  clearInterval(eventsTimer);eventsTimer=setInterval(()=>{if(!eventsWin.open){clearInterval(eventsTimer);return;}const y=eventsWin.querySelector('.ev-list')?.scrollTop??0;eventsWin.innerHTML=eventsHTML();eventsWin.querySelector('#events-close').onclick=()=>eventsWin.close();eventsWin.querySelector('.ev-list').scrollTop=y;},1000);}
+ return {openEvents,update(){drawAilments();placeBubble();drawChip();drawEvent();drawActions();}};
 }

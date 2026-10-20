@@ -22,7 +22,7 @@ export function iconStyle(id){
 const icon=(id,cls='item-icon')=>`<i class="${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 
 export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
- if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=94';css.dataset.bagUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=100.1';css.dataset.bagUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-bag:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeBag(JSON.parse(localStorage.getItem(key)));}catch{return normalizeBag(null);}};
  let local=read();
@@ -80,6 +80,23 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  let quick=['hp-small','mp-small'];try{const q=JSON.parse(localStorage.getItem(QUICK_KEY));if(Array.isArray(q)&&q.length===2)quick=q.map(id=>itemDef(id)?.kind==='potion'?id:null);}catch{}
  const bar=document.createElement('div');bar.id='quick-slots';bar.innerHTML='<button type="button" id="quick-0"></button><button type="button" id="quick-1"></button>';document.body.append(bar);
  [0,1].forEach(i=>$('quick-'+i).onclick=()=>use(quick[i]));
+ // 0.99.17 drag a potion from the bag onto the Q / E slot at the bottom (mouse or finger)
+ let drag=null,dragged=false;
+ const slotAt=(x,y)=>[0,1].find(i=>{const r=$('quick-'+i).getBoundingClientRect();return x>=r.left-10&&x<=r.right+10&&y>=r.top-10&&y<=r.bottom+10;});
+ const marks=i=>{bar.classList.toggle('drop-ready',i!==null);[0,1].forEach(k=>$('quick-'+k).classList.toggle('drop-over',k===i));};
+ function dragStart(e,id){if(itemDef(id)?.kind==='potion'&&e.button<=0)drag={id,x:e.clientX,y:e.clientY,pointer:e.pointerId,ghost:null};}
+ addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.pointer)return;
+  if(!drag.ghost){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;drag.ghost=document.createElement('div');drag.ghost.className='bag-drag';drag.ghost.innerHTML=icon(drag.id,'item-icon big');dialog.append(drag.ghost);}
+  e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';marks(slotAt(e.clientX,e.clientY)??-1);
+ },{passive:false});
+ function dragEnd(e){
+  if(!drag||e.pointerId!==drag.pointer)return;const d=drag;drag=null;if(!d.ghost)return;
+  d.ghost.remove();marks(null);dragged=true;setTimeout(()=>{dragged=false;},60);
+  const i=e.type==='pointerup'?slotAt(e.clientX,e.clientY):undefined;if(i===undefined)return;
+  quick[i]=d.id;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}world.notice((i?'ปุ่มลัด E':'ปุ่มลัด Q')+' · '+itemDef(d.id).name);render(true);
+ }
+ addEventListener('pointerup',dragEnd);addEventListener('pointercancel',dragEnd);
  addEventListener('keydown',e=>{
   if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target.closest?.('input,textarea,select')||document.querySelector('dialog:modal'))return;
   if(e.code==='KeyB'){e.preventDefault();menuButton.click();}
@@ -121,8 +138,8 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    $('bag-space').textContent=`ช่องที่ใช้ ${all.length} / ${BAG_SLOTS}`;
    $('bag-gear').innerHTML=GEAR_PLACES.map(([slot,label])=>{const id=gear[slot],it=id&&itemDef(id);return `<button type="button" class="gear-slot g-${slot}${worn===slot?' on':''}${it?' r'+(it.rarity??0):''}" data-gear="${slot}" title="${label}${it?' · '+it.name:''}">${it?icon(id):''}<small>${label}</small></button>`;}).join('');
    $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.onclick=()=>{worn=el.dataset.gear;selected=null;render(true);});
-   $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:BAG_SLOTS,Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${id===selected?' on':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
-   $('bag-grid').querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{selected=el.dataset.id;worn=null;render(true);});
+   $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:BAG_SLOTS,Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
+   $('bag-grid').querySelectorAll('[data-id]').forEach(el=>{el.onclick=()=>{if(dragged)return;selected=el.dataset.id;worn=null;render(true);};el.onpointerdown=e=>dragStart(e,el.dataset.id);});
    const wornId=worn&&gear[worn],wornIt=wornId&&itemDef(wornId);
    if(worn){$('bag-detail').innerHTML=wornIt?`${icon(wornId,'item-icon big')}<div><strong class="r${wornIt.rarity??0}">${wornIt.name}${wornIt.refine?' +'+wornIt.refine:''}</strong><p>${wornIt.text??''}</p>${wornIt.card?`<small>การ์ด: ${itemDef(wornIt.card)?.text??''}</small>`:''}<div class="bag-actions"><button type="button" data-act="off">ถอด</button><button type="button" data-act="status">ใส่การ์ด · หน้าสถานะ</button></div></div>`:`<p class="bag-hint">ช่อง${GEAR_PLACES.find(g=>g[0]===worn)[1]}ว่าง · แตะอุปกรณ์ในแท็บ อุปกรณ์ แล้วกด สวมใส่</p>`;
     $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{if(el.dataset.act==='off'){api.onTakeOff?.(worn);}else{dialog.close();$('menu-status')?.click();}});}

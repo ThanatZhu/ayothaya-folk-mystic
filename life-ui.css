@@ -56,3 +56,19 @@
 @media (prefers-reduced-motion:reduce){#surge-chip.on{animation:none}}
 .mob-label.leader span{color:#ffd76a;font-weight:800}
 .mob-label.leader b{background:#e0a33a}
+
+/* 0.100.3 the picker never spills past its frame: columns may shrink below the icon size */
+#emote-window{box-sizing:border-box}
+.emote-grid{grid-template-columns:repeat(8,minmax(0,1fr))}
+.emote-grid button{min-width:0;min-height:0;box-sizing:border-box}
+
+/* 0.100.5 events window */
+#events-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #f4cf7a88;border-radius:999px;background:#13211bd8;color:#f4dfac;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
+#events-window[data-hud-panel]{position:fixed;inset:auto;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;padding:0;width:520px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;box-sizing:border-box;border:1px solid #f4cf7a;border-radius:12px;background:linear-gradient(135deg,#2c4130f8,#172b26f4);color:#fff0ce;z-index:45;font-family:Mali,Tahoma,sans-serif}
+#events-window:not([open]){display:none}
+#events-window header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #af884f44}#events-window h2{margin:0;font-size:17px;color:#f4cf7a}
+#events-close{width:30px;height:30px;border:1px solid #f4cf7a88;border-radius:50%;background:#0e2926;color:#f4dfac;font:700 16px/1 Mali,Tahoma,sans-serif;cursor:pointer}
+.ev-list{overflow:auto;padding:10px 14px 14px;display:grid;gap:10px}
+.ev-card{padding:10px 12px;border:1px solid #af884f55;border-radius:10px;background:#0e2926aa}.ev-card.live{border-color:#f4cf7a;box-shadow:0 0 0 1px #f4cf7a55}
+.ev-card h3{display:flex;align-items:center;gap:6px;margin:0 0 4px;font-size:15px;color:#f4cf7a}.ev-card h3 em{margin-left:auto;padding:1px 8px;border-radius:999px;background:#f4cf7a;color:#2a2210;font:700 11px Mali,Tahoma,sans-serif}
+.ev-card p{margin:0 0 4px;font-size:13px}.ev-card ul{margin:0;padding-left:18px;font-size:12px;color:#d9cba4;display:grid;gap:2px}

@@ -24,7 +24,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=103.2';
+import {createGame} from './game-controls.js?v=103.3';
 import {atlasPath,className} from './classes.js?v=101';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=101.5';
@@ -48,6 +48,7 @@ import {createMarketBoardUI} from './market-board-ui.js?v=99.11';
 import {createHud63} from './hud-63.js?v=99.11';
 import {resolveMap} from './world-state.js?v=101.5';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=92';
+import {createRoofCutaway} from './roof-cutaway.js?v=103.3';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {prepareCloud} from './cloud-save.js?v=101.5';
 import {captureSave,applySave} from './save-state.js?v=101.5';
@@ -105,7 +106,7 @@ try {
  const capitalLook=createCapitalLook({map,atlas:capitalAtlas,frame});tiles.roof=capitalLook.roof;
  // Painted look: smooth the tiled building textures instead of hard pixel edges.
  for(const t of Object.values(tiles)){t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.anisotropy=4;t.needsUpdate=true;}
- const sceneMotion=map.scene?prepareSceneV2({scene,model:gltf.scene,map}):null;
+ const sceneMotion=map.scene?prepareSceneV2({scene,model:gltf.scene,map}):null,roofCut=createRoofCutaway(gltf.scene);
  if(!map.scene)gltf.scene.traverse(o=>{if(o.isMesh){if(o.name.startsWith('Living_canopy')||o.name.startsWith('Living canopy')||o.name.startsWith('Market_pottery')||o.name.startsWith('Market pottery'))o.visible=false;o.castShadow=!/Water|River$|River_|Terrain|terrain|ground19|soil|fragment|Garden_canal/.test(o.name);o.receiveShadow=true;const name=o.material.name.replace(/\.\d+$/,''),colors=o.geometry.attributes.color,cacheKey=name+(colors?'|ao':'');
   // Blender-baked ambient occlusion (bake_building_ao.py) arrives as vertex colours; ease it so under-floor areas stay readable.
   if(colors&&!o.geometry.userData.aoEased){for(let i=0;i<colors.count;i++)for(let c=0;c<3;c++)colors.setComponent(i,c,1-(1-colors.getComponent(i,c))*.78);colors.needsUpdate=true;o.geometry.userData.aoEased=true;}
@@ -218,7 +219,7 @@ try {
  renderer.setAnimationLoop(ms=>{
   if(!perf.shouldDraw(ms))return;
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
-  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);meadow.update(t);game.update(dt);storyUI.update();bagUI.update();statusUI.update();profileUI.update();refineUI.update();craftUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
+  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);meadow.update(t);game.update(dt);{const p=game.world.player;roofCut.update(p.x,groundHeight(map.nav,p.x,p.z),p.z);}storyUI.update();bagUI.update();statusUI.update();profileUI.update();refineUI.update();craftUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
   const reducedCharacters=matchMedia('(prefers-reduced-motion:reduce)').matches;
   characters.slice(1).forEach((a,i)=>{
    const action=stationaryNPCAction(game.world.time,i,a.npc.talking);

@@ -27,3 +27,7 @@
 .perf-gpu{display:grid;gap:5px;padding:6px 8px;border-radius:6px;background:#00000022;line-height:1.45}
 .perf-gpu b{color:#f4cf7a}.perf-gpu p,.perf-gpu ol{margin:0}.perf-gpu ol{padding-left:18px}
 .perf-open{display:block;text-align:center;padding:6px;border-radius:6px;background:#e0b65c;color:#1c241c;font-weight:bold;text-decoration:none}
+
+/* 0.99.3 stacked numbers: no sideways jitter, crits pop larger, heals a touch smaller */
+.damage-number{translate:none!important;white-space:nowrap;letter-spacing:.02em}
+.damage-number.heal{font-size:19px}

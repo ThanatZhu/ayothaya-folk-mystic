@@ -12,7 +12,9 @@ export const giftable=id=>!!ITEMS[id]&&!['ui','reserved'].includes(ITEMS[id].kin
 // the key is matched loosely (ADMIN_EMAILS, admin_email, "ADMIN EMAILS "...) since it is typed by hand in the Render dashboard
 export const adminKey=env=>Object.keys(env).find(k=>/^admin[\s_-]*emails?$/i.test(k.trim()))??null;
 export const configKeys=env=>Object.keys(env).filter(k=>/admin|github/i.test(k));
-export function adminEmails(env=process.env){return new Set((env[adminKey(env)]??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean));}
+// the owner (asked for by name, 2026-10-20) is always an admin; ADMIN_EMAILS on Render adds more
+export const OWNER_EMAILS=['chokkungfn@gmail.com'];
+export function adminEmails(env=process.env){return new Set([...OWNER_EMAILS,...(env[adminKey(env)]??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean)]);}
 export function isAdmin(decoded,emails=adminEmails()){return !!decoded?.email&&decoded.email_verified===true&&emails.has(decoded.email.toLowerCase());}
 
 export function adminPlayers(realm){

@@ -18,6 +18,9 @@ let tab='skills',classId='swordsman',query='',kind='all',tableView='compare';
 // players tab state (declared up here: the first render may already be on that tab)
 const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
 let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
+let search='',basket=[],giftCoins=0,refreshTimer=0;
+const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
+const itemName=id=>ITEMS[id]?.name??id;
 try{const s=JSON.parse(localStorage.getItem('ayo-admin-view'));if(s){tab=s.tab??tab;classId=s.classId??classId;}}catch{}
 
 // Original value (code) and the value in effect for one field.
@@ -111,32 +114,57 @@ const ADMIN_ERRORS={'not-admin':'อีเมลนี้ไม่อยู่�
 // Firebase connects as soon as the tab opens, so the click below can open the Google popup straight away
 // (a popup opened after an await is no longer a click, and the browser blocks it).
 function warmFirebase(){if(LOCAL||fbWarm)return;fbWarm=import('./firebase-client.js').then(m=>m.deadline(m.connectFirebase())).then(c=>{fbConn=c;if(tab==='players')playersTab();}).catch(()=>{fbWarm=null;adminMsg='เชื่อมต่อ Google ไม่ได้ · ลองรีโหลดหน้า';if(tab==='players')playersTab();});}
-async function loadPlayers(){
- if(!LOCAL&&!fbConn?.auth.currentUser){
-  if(!fbConn){adminMsg='กำลังเชื่อมต่อ Google… กดอีกครั้งในอีกครู่';warmFirebase();playersTab();return;}
-  const provider=new fbConn.sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
-  try{await fbConn.sdk.signInWithPopup(fbConn.auth,provider);}catch(e){adminMsg='ล็อกอินไม่สำเร็จ · '+(e.code??e.message);playersTab();return;}
- }
- adminMsg='กำลังโหลด…';playersTab();try{players=(await adminFetch('/admin/players')).players;adminMsg='';if(picked&&!players.some(p=>p.id===picked))picked=null;}catch(e){adminMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}playersTab();}
+// 0.100.8 players tab, easier: signs in and loads by itself, refreshes every 15 s, search by name, a gift basket
+// (quick buttons or any item + count, plus cowries) sent in one go to the player picked on the left.
+async function signIn(){
+ if(LOCAL||fbConn?.auth.currentUser)return true;
+ if(!fbConn){adminMsg='กำลังเชื่อมต่อ Google… กดอีกครั้งในอีกครู่';warmFirebase();playersTab();return false;}
+ const provider=new fbConn.sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
+ try{await fbConn.sdk.signInWithPopup(fbConn.auth,provider);return true;}catch(e){adminMsg='ล็อกอินไม่สำเร็จ · '+(e.code??e.message);playersTab();return false;}
+}
+async function loadPlayers(quiet=false){
+ if(!LOCAL&&!fbConn?.auth.currentUser)return;
+ if(!quiet){adminMsg='กำลังโหลด…';playersTab();}
+ try{players=(await adminFetch('/admin/players')).players;if(!quiet)adminMsg='';if(picked&&!players.some(p=>p.id===picked))picked=null;}
+ catch(e){adminMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}
+ if(tab==='players')playersTab();
+}
+function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(document.activeElement?.closest?.('#give'))return;loadPlayers(true);},15000);}
 function playersTab(){
  warmFirebase();
- const item=id=>ITEMS[id]?.name??id,picks=Object.keys(ITEMS).filter(id=>!['ui','reserved'].includes(ITEMS[id].kind)).sort((a,b)=>item(a).localeCompare(item(b),'th'));
- const p=players?.find(x=>x.id===picked);
- $('view').innerHTML=`<div class="players">
-  <div class="players-head"><h2>ผู้เล่นออนไลน์${players?' · '+players.length+' คน':''}</h2><button type="button" id="load-players" class="primary">${players?'รีเฟรช':LOCAL||fbConn?.auth.currentUser?'โหลดรายชื่อผู้เล่น':'ล็อกอิน Google แล้วโหลด'}</button>${fbConn?.auth.currentUser?'<small>'+esc(fbConn.auth.currentUser.email)+'</small>':''}<span class="msg">${esc(adminMsg)}</span></div>
-  ${players?`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th><th>อาชีพ</th><th>Lv.</th><th>เซิร์ฟ</th><th class="l">แผนที่</th><th>เบี้ย</th><th></th></tr></thead><tbody>${players.map(x=>`<tr class="${x.id===picked?'picked':''}"><td class="l"><b>${esc(x.name)}</b>${x.online?'':'<small>หลุดการเชื่อมต่อ</small>'}</td><td>${esc(className(x.classId))}</td><td>${x.level}</td><td>${esc(x.server.replace('server-',''))}</td><td class="l">${esc(x.map)}</td><td>${x.coins.toLocaleString('th-TH')}</td><td><button type="button" data-pick="${esc(x.id)}">ส่งของ</button></td></tr>`).join('')||'<tr><td class="l" colspan="7">ยังไม่มีผู้เล่นออนไลน์</td></tr>'}</tbody></table></div>`:'<p>ดูผู้เล่นที่ออนไลน์อยู่ตอนนี้ และส่งไอเท็มหรือเบี้ยให้ · ต้องล็อกอิน Google ด้วยอีเมลแอดมิน</p>'}
-  ${p?`<form id="give" class="give"><h3>ส่งของให้ ${esc(p.name)}</h3>
-   <p class="bag">กระเป๋า: ${Object.entries(p.items).filter(([,n])=>n>0).map(([id,n])=>esc(item(id))+' ×'+n).join(' · ')||'ว่าง'}</p>
-   <label>ไอเท็ม <select id="give-item"><option value="">— ไม่ส่งไอเท็ม —</option>${picks.map(id=>`<option value="${esc(id)}">${esc(item(id))}</option>`).join('')}</select></label>
-   <label>จำนวน <input id="give-count" type="number" min="1" max="999" value="1"></label>
-   <label>เบี้ย <input id="give-coins" type="number" min="0" max="10000000" value="0"></label>
-   <button type="submit" class="primary">ส่งให้ผู้เล่น</button></form>`:''}
- </div>`;
- $('load-players').onclick=loadPlayers;
- $('view').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{picked=b.dataset.pick;adminMsg='';playersTab();});
- const form=$('give');if(form)form.onsubmit=async e=>{e.preventDefault();const id=$('give-item').value,count=Number($('give-count').value),coins=Number($('give-coins').value)||0;
-  form.querySelector('button').disabled=true;
-  try{const r=await adminFetch('/admin/give',{peer:p.id,coins,items:id?[{id,count}]:[]});adminMsg='ส่งให้ '+r.name+' แล้ว';Object.assign(p,{coins:r.coins,items:r.items});}
+ const user=LOCAL?'เครื่องตัวเอง (localhost)':fbConn?.auth.currentUser?.email??'';
+ if(user&&!players&&!adminMsg){loadPlayers();autoRefresh();}
+ const picks=Object.keys(ITEMS).filter(id=>!['ui','reserved'].includes(ITEMS[id].kind)).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
+ const list=(players??[]).filter(x=>!search||x.name.toLowerCase().includes(search.toLowerCase())),p=players?.find(x=>x.id===picked);
+ const head=`<div class="players-head"><h2>ผู้เล่นออนไลน์${players?' <small>'+players.length+' คน</small>':''}</h2>`+
+  (user?`<span class="who">👤 ${esc(user)}</span>${LOCAL?'':'<button type="button" id="sign-out">ออกจากระบบ</button>'}<button type="button" id="load-players">↻ รีเฟรช</button>`:'<button type="button" id="sign-in" class="primary">ล็อกอิน Google</button>')+
+  (adminMsg?`<span class="msg">${esc(adminMsg)}</span>`:'')+'</div>';
+ const row=x=>`<button type="button" class="prow${x.id===picked?' on':''}" data-pick="${esc(x.id)}"><b>${esc(x.name)}${x.online?'':' <small>(หลุด)</small>'}</b><span>${esc(className(x.classId))} · Lv.${x.level}</span><span>เซิร์ฟ ${esc(x.server.replace('server-',''))} · ${esc(x.map)}</span><span class="coin">${x.coins.toLocaleString('th-TH')} เบี้ย</span></button>`;
+ const plist=`<section class="plist"><input id="player-search" type="search" placeholder="ค้นหาชื่อผู้เล่น" value="${esc(search)}">${list.map(row).join('')||`<p class="hint">${players?'ไม่มีผู้เล่นออนไลน์':'กำลังโหลด…'}</p>`}</section>`;
+ const bag=p?Object.entries(p.items).filter(([,n])=>n>0).map(([id,n])=>`<span>${esc(itemName(id))} ×${n}</span>`).join('')||'ว่าง':'';
+ const quick=QUICK.map(([id,n],i)=>`<button type="button" data-quick="${i}">+ ${id==='coins'?n.toLocaleString('th-TH')+' เบี้ย':esc(itemName(id))+' ×'+n}</button>`).join('');
+ const lines=basket.map((l,i)=>`<li>${esc(itemName(l.id))} ×${l.count}<button type="button" data-drop="${i}" aria-label="เอาออก">×</button></li>`).join('')||'<li class="empty">ยังไม่มีไอเท็มในรายการ</li>';
+ const gift=!p?'<p class="hint">← เลือกผู้เล่นทางซ้ายเพื่อส่งของ</p>':
+  `<form id="give"><h3>ส่งของให้ ${esc(p.name)}</h3><p class="bag"><b>กระเป๋า</b> ${bag}</p><div class="quick">${quick}</div>`+
+  `<div class="add"><input id="give-item" list="give-items" placeholder="พิมพ์ชื่อไอเท็ม"><datalist id="give-items">${picks.map(id=>`<option value="${esc(itemName(id))}">`).join('')}</datalist><input id="give-count" type="number" min="1" max="999" value="1" aria-label="จำนวน"><button type="button" id="give-add">เพิ่ม</button></div>`+
+  `<label class="coins">เบี้ย <input id="give-coins" type="number" min="0" max="10000000" value="${giftCoins}"></label><ul class="basket">${lines}</ul>`+
+  `<button type="submit" class="primary send"${!basket.length&&!giftCoins?' disabled':''}>ส่งให้ ${esc(p.name)}</button></form>`;
+ $('view').innerHTML=`<div class="players">${head}${user?`<div class="players-body">${plist}<section class="gift">${gift}</section></div>`:'<p class="hint">ล็อกอินด้วยอีเมลแอดมินเพื่อดูผู้เล่นที่ออนไลน์อยู่ และส่งไอเท็มหรือเบี้ยให้</p>'}</div>`;
+ const on=(id,ev,fn)=>{const el=$(id);if(el)el[ev]=fn;};
+ on('sign-in','onclick',async()=>{if(await signIn()){adminMsg='';loadPlayers();autoRefresh();}});
+ on('sign-out','onclick',async()=>{await fbConn.sdk.signOut(fbConn.auth);players=null;picked=null;adminMsg='';playersTab();});
+ on('load-players','onclick',()=>loadPlayers());
+ on('player-search','oninput',e=>{search=e.target.value;const pos=e.target.selectionStart;playersTab();const el=$('player-search');el.focus();el.setSelectionRange(pos,pos);});
+ $('view').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{if(picked!==b.dataset.pick){picked=b.dataset.pick;basket=[];giftCoins=0;}adminMsg='';playersTab();});
+ const form=$('give');if(!form)return;
+ const keepCoins=()=>{giftCoins=Math.max(0,Math.min(1e7,Math.floor(Number($('give-coins').value)||0)));};
+ const addItem=(id,count)=>{const line=basket.find(l=>l.id===id);if(line)line.count=Math.min(999,line.count+count);else if(basket.length<20)basket.push({id,count});};
+ form.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{keepCoins();const [id,n]=QUICK[+b.dataset.quick];if(id==='coins')giftCoins=Math.min(1e7,giftCoins+n);else addItem(id,n);playersTab();});
+ form.querySelectorAll('[data-drop]').forEach(b=>b.onclick=()=>{keepCoins();basket.splice(+b.dataset.drop,1);playersTab();});
+ on('give-add','onclick',()=>{keepCoins();const name=$('give-item').value.trim(),id=picks.find(x=>itemName(x)===name||x===name),n=Math.max(1,Math.min(999,Math.floor(Number($('give-count').value)||1)));if(!id){adminMsg='ไม่พบไอเท็มชื่อนี้';playersTab();return;}addItem(id,n);adminMsg='';playersTab();});
+ on('give-coins','oninput',()=>{keepCoins();form.querySelector('.send').disabled=!basket.length&&!giftCoins;});
+ form.onsubmit=async e=>{e.preventDefault();keepCoins();const send=form.querySelector('.send');send.disabled=true;send.textContent='กำลังส่ง…';
+  try{const r=await adminFetch('/admin/give',{peer:p.id,coins:giftCoins,items:basket});adminMsg='✔ ส่งให้ '+r.name+' แล้ว';Object.assign(p,{coins:r.coins,items:r.items});basket=[];giftCoins=0;}
   catch(e){adminMsg=ADMIN_ERRORS[e.message]??'ส่งไม่สำเร็จ · '+e.message;}
   playersTab();};
 }

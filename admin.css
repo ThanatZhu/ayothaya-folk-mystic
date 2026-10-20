@@ -1,7 +1,7 @@
 /* 0.85 back office (admin.html): game jade + gold, dense editable tables. */
 :root{--bg:#102019;--panel:#172b23;--ink:#f3e7c9;--muted:#b4a784;--rule:#34483c;--gold:#f0c470;--jade:#7fd9c3;--bad:#ff9d84;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Sarabun,Tahoma,sans-serif;padding:16px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left))}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 14px/1.5 var(--font-game);padding:16px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left))}
 .bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 10px;border-bottom:1px solid var(--rule)}
 .bar small{font-size:10px;letter-spacing:.18em;color:var(--muted)}.bar h1{margin:0;font:700 24px Mali,Tahoma,sans-serif;color:var(--gold)}
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
@@ -80,6 +80,7 @@ td.top{background:#1f3b31;color:var(--jade);font-weight:700}td.bottom{background
 .grid.pick{grid-auto-rows:70px;max-height:306px}.grid.pick .cell{cursor:pointer}.grid.pick .cell:hover{border-color:#f4cf7a;background:#f4cf7a1c}
 .kinds{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.kinds button{min-height:30px;padding:0 12px;border-radius:999px;border:1px solid #f4cf7a55;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
 .kinds button.on{background:#f4cf7a;color:#2a2210;border-color:#f4cf7a}.kinds input{flex:1;min-width:140px}
+.kinds.sub{margin-top:6px}.kinds.sub button{min-height:26px;padding:0 10px;font-size:12px}
 .qbtn{display:flex;align-items:center;gap:6px;min-height:40px;padding:2px 12px 2px 4px!important}.qbtn .ico{width:32px;height:32px}
 .sendbar{display:grid;gap:8px;padding:12px;border:1px solid #f4cf7a88;border-radius:12px;background:#f4cf7a0d}
 .gift .basket li{gap:8px}.gift .basket li .ico{width:30px;height:30px}.gift .basket li span{flex:1}.gift .basket li b{color:#f4cf7a}

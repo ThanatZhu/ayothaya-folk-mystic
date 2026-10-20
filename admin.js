@@ -27,7 +27,7 @@ let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
 let fx={classId:'swordsman',level:50,str:40,agi:20,vit:20,int:1,dex:20,luk:10,watk:60,wmatk:0,skillLv:5};
 try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});}catch{}
 let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
-let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',itemQuery='',pickCount=1;
+let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',gearClass='all',itemQuery='',pickCount=1;
 const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
 const itemName=id=>ITEMS[id]?.name??id;
 try{const s=JSON.parse(localStorage.getItem('ayo-admin-view'));if(s){tab=s.tab??tab;classId=s.classId??classId;}}catch{}
@@ -194,7 +194,7 @@ function playersTab(){
  const pic=(id,n)=>`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>${n?`<em>${n}</em>`:''}`;
  const KINDS=[['all','ทั้งหมด'],['potion','ยา/อาหาร'],['gear','อุปกรณ์'],['card','การ์ด'],['loot','วัตถุดิบ'],['other','อื่น ๆ']];
  const kindOf=id=>['potion','gear','card','loot'].includes(ITEMS[id].kind)?ITEMS[id].kind:'other';
- const picks=Object.keys(ITEMS).filter(id=>!['ui','reserved'].includes(ITEMS[id].kind)&&(itemKind==='all'||kindOf(id)===itemKind)&&(!itemQuery||itemName(id).includes(itemQuery))).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
+ const picks=Object.keys(ITEMS).filter(id=>!['ui','reserved'].includes(ITEMS[id].kind)&&(itemKind==='all'||kindOf(id)===itemKind)&&(itemKind!=='gear'||gearClass==='all'||(ITEMS[id].classes?.includes(gearClass)??gearClass==='any'))&&(!itemQuery||itemName(id).includes(itemQuery))).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
  // 0.103 offline characters (from the saves) are listed too: filter chips with counts, online first, 50 rows at a time
  const isOn=x=>!x.offline,all=players??[],counts={all:all.length,online:all.filter(isOn).length,offline:all.filter(x=>x.offline).length};
  const list=all.filter(x=>(presence==='all'||(presence==='online')===isOn(x))&&(!search||x.name.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>isOn(b)-isOn(a)),p=players?.find(x=>x.id===picked);
@@ -217,6 +217,8 @@ function playersTab(){
    `<h4>ส่งด่วน</h4><div class="quick">${quick}</div>`+
    `<h4>เลือกไอเท็ม <small>แตะรูปเพื่อใส่ในรายการ · จำนวนต่อครั้ง</small> <input id="give-count" type="number" min="1" max="999" value="${pickCount}" aria-label="จำนวนต่อครั้ง"></h4>`+
    `<div class="kinds">${KINDS.map(([k,n])=>`<button type="button" data-kind="${k}" class="${k===itemKind?'on':''}">${n}</button>`).join('')}<input id="item-search" type="search" placeholder="🔍 ชื่อไอเท็ม" value="${esc(itemQuery)}"></div>`+
+   // equipment split per class (items.js `classes`); gear without `classes` fits everyone
+   (itemKind==='gear'?`<div class="kinds sub">${[['all','ทุกอาชีพ'],...paths.map(c=>[c.id,c.icon+' '+c.name]),['any','ใช้ได้ทุกอาชีพ']].map(([k,n])=>`<button type="button" data-gear="${k}" class="${k===gearClass?'on':''}">${esc(n)}</button>`).join('')}</div>`:'')+
    `<div class="grid pick">${picks.map(id=>`<button type="button" class="cell" data-add="${esc(id)}" title="${esc(itemName(id))}">${pic(id)}<small>${esc(itemName(id))}</small></button>`).join('')||'<span class="hint">ไม่พบไอเท็ม</span>'}</div>`+
    `<div class="sendbar"><h4>รายการที่จะส่ง</h4><ul class="basket">${lines||'<li class="empty">ยังว่าง · แตะรูปไอเท็มหรือปุ่มส่งด่วน</li>'}</ul>`+
    `<label class="coins">+ เบี้ย <input id="give-coins" type="number" min="0" max="10000000" value="${giftCoins}"></label>`+
@@ -238,6 +240,7 @@ function playersTab(){
  form.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{keep();const [id,n]=QUICK[+b.dataset.quick];if(id==='coins')giftCoins=Math.min(1e7,giftCoins+n);else addItem(id,n);playersTab();});
  form.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{keep();addItem(b.dataset.add,pickCount);playersTab();});
  form.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{keep();itemKind=b.dataset.kind;playersTab();});
+ form.querySelectorAll('[data-gear]').forEach(b=>b.onclick=()=>{keep();gearClass=b.dataset.gear;playersTab();});
  form.querySelectorAll('[data-drop]').forEach(b=>b.onclick=()=>{keep();if(b.dataset.drop==='coins')giftCoins=0;else basket.splice(+b.dataset.drop,1);playersTab();});
  refocus('item-search',v=>{keep();itemQuery=v.trim();});
  on('give-coins','onchange',()=>{keep();playersTab();});on('give-count','onchange',keep);

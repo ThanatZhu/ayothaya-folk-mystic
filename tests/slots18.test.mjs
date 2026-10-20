@@ -25,13 +25,13 @@ for(const mode of ['guest','cloud'])test(`${mode}: five total slots across serve
  await assert.rejects(store.save('server-2',saved,state),/character-scope/);
  assert.equal(await store.load('server-2',first.slotId),null);
 });
-test('a profession opens only at a maxed novice Job 10 (Base Lv.23+); Master only at a maxed Job 40 (Base Lv.39+)',async()=>{
+test('a profession opens only at a maxed novice Job 10; Master only at a maxed Job 40 (no Base-level floor)',async()=>{
  const {advanceReady}=await import('../advancement.js');assert.equal(advanceReady({baseXp:99999,jobXp:1259},'novice').ok,false);assert.equal(advanceReady({baseXp:99999,jobXp:17159},'boxer').ok,false);
  for(const c of CLASSES){const store=createRealmStore({catalog,storage:memory()});let r=await store.create('server-1',hero);
-  for(const [baseXp,jobXp] of [[0,0],[2485,1260]]){r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:240,baseXp,jobXp}});await assert.rejects(store.changeClass('server-1',r,c.id),/class-locked/);}
+  for(const [baseXp,jobXp] of [[0,0],[2000,1259]]){r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:240,baseXp,jobXp}});await assert.rejects(store.changeClass('server-1',r,c.id),/class-locked/);}
   r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:240,baseXp:2856,jobXp:1260}});r=await store.changeClass('server-1',r,c.id);assert.equal(r.character.classId,c.id);
   const {JOBS}=await import('../advancement.js');const job=JOBS[c.id][0].id;
-  r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:589,baseXp:6117,jobXp:17160}});await assert.rejects(store.customize('server-1',r,{},job),/job-locked/);
+  r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:589,baseXp:13000,jobXp:17159}});await assert.rejects(store.customize('server-1',r,{},job),/job-locked/);
   r=await store.save('server-1',r,{...r.state,traveler:{...r.state.traveler,kills:590,baseXp:13216,jobXp:17160}});r=await store.customize('server-1',r,{},job);assert.equal((await store.load('server-1',r.slotId)).character.jobId,job);
   await assert.rejects(store.customize('server-1',r,{},JOBS[c.id][1].id),/job-final/);
  }

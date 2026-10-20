@@ -226,7 +226,7 @@ export class RealmServer{
    if(m.channel==='room'){p.room.history.push(message);if(p.room.history.length>40)p.room.history.shift();}return true;
   }
   if(m.type==='invite'){
-   const target=this.peers.get(m.target);if(!target||target===p||target.room!==p.room||target.partyId)return this.error(p,'invalid-invite');
+   const target=this.peers.get(m.target);if(!target||target===p||target.serverId!==p.serverId||target.partyId)return this.error(p,'invalid-invite');
    const party=this.parties.get(p.partyId);if(party&&(party.leader!==p.id||party.members.size>=5))return this.error(p,'party-full-or-leader');
    if(now-p.inviteAt<2000)return this.error(p,'invite-rate');p.inviteAt=now;
    const invitation={id:randomUUID(),from:p.id,to:target.id,expires:now+30000};this.invites.set(invitation.id,invitation);
@@ -234,7 +234,7 @@ export class RealmServer{
   }
   if(m.type==='answer'){
    const invite=this.invites.get(m.invite),leader=this.peers.get(invite?.from);
-   if(!invite||invite.to!==p.id||invite.expires<now||!leader||leader.room!==p.room||typeof m.accept!=='boolean')return this.error(p,'expired-invite');
+   if(!invite||invite.to!==p.id||invite.expires<now||!leader||leader.serverId!==p.serverId||typeof m.accept!=='boolean')return this.error(p,'expired-invite');
    this.invites.delete(invite.id);if(!m.accept)return true;if(p.partyId)return this.error(p,'already-in-party');
    let party=this.parties.get(leader.partyId);
    if(party&&(party.leader!==leader.id||party.members.size>=5))return this.error(p,'party-full-or-leader');
@@ -252,7 +252,9 @@ export class RealmServer{
   if(party.members.size+(party.pending?.size??0)<2){for(const id of party.members)this.peers.get(id).partyId=null;this.parties.delete(party.id);}
   else if(party.leader===p.id)party.leader=party.members.values().next().value;
  }
- social(room){for(const id of room.peers){const p=this.peers.get(id),party=this.parties.get(p.partyId);p.send({type:'social',players:[...room.peers].map(id=>{const a=this.peers.get(id);return {id,name:a.character.name,classId:a.character.classId,partyId:a.partyId};}),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
+ // 0.99.14 the roster covers the whole channel (every map of the server), so a party can be formed across maps;
+ // here = on the viewer's map (duels, trades and shared EXP still need the same map)
+ social(room){const all=[...this.peers.values()].filter(a=>a.serverId===room.serverId&&a.room);for(const p of all){const party=this.parties.get(p.partyId);p.send({type:'social',players:all.map(a=>({id:a.id,name:a.character.name,classId:a.character.classId,partyId:a.partyId,map:a.room.map.name,here:a.room===p.room})),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
  // ---- 0.95 weekly guild war (guild-war.js). One war state per channel; the stone is shared by everyone there.
  warState(serverId){let s=this.wars.get(serverId);if(!s){s={active:false,holder:null,stone:{id:'war:stone',pvp:true,name:WAR.stone.name,x:WAR.stone.x,z:WAR.stone.z,hp:WAR.stone.hp,maxHp:WAR.stone.hp}};this.wars.set(serverId,s);}return s;}
  castleOwner(serverId){return [...this.guilds.values()].find(g=>g.serverId===serverId&&g.castle)??null;}

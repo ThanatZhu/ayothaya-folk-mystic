@@ -66,11 +66,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  function drawRoster(){
   $('online-players').replaceChildren();$('online-count').textContent=roster.length+' คน';
   for(const p of roster){
-   const li=el('li',p.id===client?.id?'me':''),who=el('div','mp-who'),name=el('b','',p.name);who.append(name,el('small','',className(p.classId)+(p.id===client?.id?' · คุณ':'')+(p.partyId&&p.partyId===party?.id?' · ปาร์ตี้เรา':p.partyId?' · มีปาร์ตี้':'')));
+   const li=el('li',p.id===client?.id?'me':''),who=el('div','mp-who'),name=el('b','',p.name);who.append(name,el('small','',className(p.classId)+(p.id===client?.id?' · คุณ':'')+(p.partyId&&p.partyId===party?.id?' · ปาร์ตี้เรา':p.partyId?' · มีปาร์ตี้':'')+(p.here===false?' · '+p.map:'')));
    if(party?.leader===p.id)name.prepend(el('span','mp-crown','♛ '));li.append(el('span','mp-avatar',(globalThis.I18N?.t(className(p.classId))??className(p.classId)).slice(0,1)),who);
    const action=(text,type,data,primary)=>{const b=el('button',primary?'mp-primary':'',text);b.onclick=()=>client?.command(type,data);li.append(b);};
    if(p.id!==client?.id&&!p.partyId&&(!party||party.leader===client.id))action('เชิญ','invite',{target:p.id},true);
-   if(p.id!==client?.id)action('ท้าดวล','duel',{target:p.id});
+   if(p.id!==client?.id&&p.here!==false)action('ท้าดวล','duel',{target:p.id});
    if(p.id!==client?.id&&party?.leader===client?.id&&party.members.includes(p.id)){action('หัวหน้า','leader',{target:p.id});action('นำออก','kick',{target:p.id});}
    $('online-players').append(li);
   }

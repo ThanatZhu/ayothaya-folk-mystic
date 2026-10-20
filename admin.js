@@ -17,7 +17,7 @@ let draft=JSON.parse(JSON.stringify(BALANCE));for(const g of Object.keys(FIELDS)
 let tab='skills',classId='swordsman',query='',kind='all',tableView='compare';
 // players tab state (declared up here: the first render may already be on that tab)
 const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
-let players=null,picked=null,adminMsg='';
+let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
 try{const s=JSON.parse(localStorage.getItem('ayo-admin-view'));if(s){tab=s.tab??tab;classId=s.classId??classId;}}catch{}
 
 // Original value (code) and the value in effect for one field.
@@ -95,17 +95,27 @@ tabs();render();
 // Production asks for a Google sign-in; the server only answers emails listed in ADMIN_EMAILS on Render.
 async function adminFetch(path,body){
  const headers={'Content-Type':'application/json'};
- if(!LOCAL){const {connectFirebase}=await import('./firebase-client.js');const c=await connectFirebase();if(!c.auth.currentUser)await c.sdk.signInWithPopup(c.auth,new c.sdk.GoogleAuthProvider());headers.Authorization='Bearer '+await c.auth.currentUser.getIdToken();}
+ if(!LOCAL){if(!fbConn?.auth.currentUser)throw new Error('need-login');headers.Authorization='Bearer '+await fbConn.auth.currentUser.getIdToken();}
  const r=await fetch(API+path,{method:body?'POST':'GET',headers,body:body&&JSON.stringify(body)}),j=await r.json().catch(()=>({}));
  if(!r.ok)throw new Error(j.error??String(r.status));return j;
 }
-const ADMIN_ERRORS={'not-admin':'อีเมลนี้ไม่ใช่แอดมิน (ตั้ง ADMIN_EMAILS บน Render)','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย'};
-async function loadPlayers(){adminMsg='กำลังโหลด…';playersTab();try{players=(await adminFetch('/admin/players')).players;adminMsg='';if(picked&&!players.some(p=>p.id===picked))picked=null;}catch(e){adminMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}playersTab();}
+const ADMIN_ERRORS={'not-admin':'อีเมลนี้ไม่ใช่แอดมิน (ตั้ง ADMIN_EMAILS บน Render)','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน'};
+// Firebase connects as soon as the tab opens, so the click below can open the Google popup straight away
+// (a popup opened after an await is no longer a click, and the browser blocks it).
+function warmFirebase(){if(LOCAL||fbWarm)return;fbWarm=import('./firebase-client.js').then(m=>m.deadline(m.connectFirebase())).then(c=>{fbConn=c;if(tab==='players')playersTab();}).catch(()=>{fbWarm=null;adminMsg='เชื่อมต่อ Google ไม่ได้ · ลองรีโหลดหน้า';if(tab==='players')playersTab();});}
+async function loadPlayers(){
+ if(!LOCAL&&!fbConn?.auth.currentUser){
+  if(!fbConn){adminMsg='กำลังเชื่อมต่อ Google… กดอีกครั้งในอีกครู่';warmFirebase();playersTab();return;}
+  const provider=new fbConn.sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
+  try{await fbConn.sdk.signInWithPopup(fbConn.auth,provider);}catch(e){adminMsg='ล็อกอินไม่สำเร็จ · '+(e.code??e.message);playersTab();return;}
+ }
+ adminMsg='กำลังโหลด…';playersTab();try{players=(await adminFetch('/admin/players')).players;adminMsg='';if(picked&&!players.some(p=>p.id===picked))picked=null;}catch(e){adminMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}playersTab();}
 function playersTab(){
+ warmFirebase();
  const item=id=>ITEMS[id]?.name??id,picks=Object.keys(ITEMS).filter(id=>!['ui','reserved'].includes(ITEMS[id].kind)).sort((a,b)=>item(a).localeCompare(item(b),'th'));
  const p=players?.find(x=>x.id===picked);
  $('view').innerHTML=`<div class="players">
-  <div class="players-head"><h2>ผู้เล่นออนไลน์${players?' · '+players.length+' คน':''}</h2><button type="button" id="load-players" class="primary">${players?'รีเฟรช':'โหลดรายชื่อผู้เล่น'}</button><span class="msg">${esc(adminMsg)}</span></div>
+  <div class="players-head"><h2>ผู้เล่นออนไลน์${players?' · '+players.length+' คน':''}</h2><button type="button" id="load-players" class="primary">${players?'รีเฟรช':LOCAL||fbConn?.auth.currentUser?'โหลดรายชื่อผู้เล่น':'ล็อกอิน Google แล้วโหลด'}</button>${fbConn?.auth.currentUser?'<small>'+esc(fbConn.auth.currentUser.email)+'</small>':''}<span class="msg">${esc(adminMsg)}</span></div>
   ${players?`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th><th>อาชีพ</th><th>Lv.</th><th>เซิร์ฟ</th><th class="l">แผนที่</th><th>เบี้ย</th><th></th></tr></thead><tbody>${players.map(x=>`<tr class="${x.id===picked?'picked':''}"><td class="l"><b>${esc(x.name)}</b>${x.online?'':'<small>หลุดการเชื่อมต่อ</small>'}</td><td>${esc(className(x.classId))}</td><td>${x.level}</td><td>${esc(x.server.replace('server-',''))}</td><td class="l">${esc(x.map)}</td><td>${x.coins.toLocaleString('th-TH')}</td><td><button type="button" data-pick="${esc(x.id)}">ส่งของ</button></td></tr>`).join('')||'<tr><td class="l" colspan="7">ยังไม่มีผู้เล่นออนไลน์</td></tr>'}</tbody></table></div>`:'<p>ดูผู้เล่นที่ออนไลน์อยู่ตอนนี้ และส่งไอเท็มหรือเบี้ยให้ · ต้องล็อกอิน Google ด้วยอีเมลแอดมิน</p>'}
   ${p?`<form id="give" class="give"><h3>ส่งของให้ ${esc(p.name)}</h3>
    <p class="bag">กระเป๋า: ${Object.entries(p.items).filter(([,n])=>n>0).map(([id,n])=>esc(item(id))+' ×'+n).join(' · ')||'ว่าง'}</p>

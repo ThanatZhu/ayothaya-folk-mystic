@@ -16,7 +16,10 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const LABEL={damage:'พลัง',heal:'ฟื้นฟู',cost:'MP',cd:'คูลดาวน์',range:'ระยะ',radius:'รัศมี',duration:'นาน',delay:'หน่วง (วิ)',atk:'ATK',matk:'MATK',def:'DEF',level:'เลเวล',buy:'ราคาซื้อ',sell:'ราคาขาย',tokens:'เหรียญงาน',hp:'HP',mp:'MP',speed:'ความเร็ว',baseXp:'Base EXP',jobXp:'Job EXP',respawn:'เกิดใหม่ (วิ)',reach:'ระยะตี'};
 const KIND={potion:'ยา',gear:'อุปกรณ์',card:'การ์ด',loot:'วัตถุดิบ',scroll:'ม้วน',egg:'ไข่',lure:'เหยื่อ',petfood:'อาหารสัตว์'};
 const paths=[NOVICE,...CLASSES];
-let draft=JSON.parse(JSON.stringify(BALANCE));for(const g of [...Object.keys(FIELDS),'drops'])draft[g]??={};
+let draft=JSON.parse(JSON.stringify(BALANCE));
+// what is already in the game: the counter shows only edits made since the last save
+let saved=JSON.parse(JSON.stringify(BALANCE));
+for(const g of [...Object.keys(FIELDS),'drops'])draft[g]??={};
 let tab='players',classId='swordsman',query='',kind='all',tableView='compare';
 // players tab state (declared up here: the first render may already be on that tab)
 const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
@@ -41,7 +44,7 @@ const round=v=>typeof v==='number'?Math.round(v*1000)/1000:v;
 const value=(r,f)=>{const o=draft[r.group][r.key]?.[f];if(o!==undefined)return o;return round(r.skill?r.src[f]:original(r.group,r.key,f,r.src[f]));};
 const base=(r,f)=>r.skill?r.src[f]:original(r.group,r.key,f,r.src[f]);
 function columns(rows){const fields=Object.keys(FIELDS[rows[0]?.group??'skills']);return fields.filter(f=>rows.some(r=>base(r,f)!=null||draft[r.group][r.key]?.[f]!==undefined));}
-function count(){return Object.values(draft).reduce((n,g)=>n+Object.values(g).reduce((m,f)=>m+Object.keys(f).length,0),0);}
+function count(){let n=0;for(const g of Object.keys(draft))for(const k of new Set([...Object.keys(draft[g]),...Object.keys(saved[g]??{})]))for(const f of new Set([...Object.keys(draft[g][k]??{}),...Object.keys(saved[g]?.[k]??{})]))if(draft[g][k]?.[f]!==saved[g]?.[k]?.[f])n++;return n;}
 function set(r,f,v){
  const b=base(r,f);if(v===''||v===null||Number(v)===b){if(draft[r.group][r.key]){delete draft[r.group][r.key][f];if(!Object.keys(draft[r.group][r.key]).length)delete draft[r.group][r.key];}}
  else{const [min,max]=FIELDS[r.group][f];(draft[r.group][r.key]??={})[f]=Math.min(max,Math.max(min,Number(v)));}
@@ -121,7 +124,7 @@ function dropsTab(){
  showCount();
 }
 const say=(t,ok=true)=>{$('status').textContent=t;$('status').className='status '+(ok?'ok':'bad');};
-$('reset-all').onclick=()=>{for(const g of Object.keys(draft))draft[g]={};render(false);say('คืนค่าทั้งหมดในหน้านี้แล้ว (ยังไม่บันทึก)');};
+$('reset-all').onclick=()=>{draft=JSON.parse(JSON.stringify(saved));for(const g of [...Object.keys(FIELDS),'drops'])draft[g]??={};render(false);say('ยกเลิกที่แก้แล้ว · กลับเป็นค่าที่บันทึกไว้');};
 $('copy-json').onclick=async()=>{const text=JSON.stringify(draft,null,1);try{await navigator.clipboard.writeText(text);say('คัดลอก JSON แล้ว · ส่งให้ Claude ได้เลย');}catch{say('คัดลอกไม่ได้ · เลือกข้อความจากกล่องด้านล่าง',false);$('view').insertAdjacentHTML('afterbegin',`<textarea class="dump" readonly>${esc(text)}</textarea>`);}};
 // 0.100.6 save: on the live site the server commits balance-data.js to GitHub (game and server redeploy in ~3 minutes);
 // locally it writes the file. The Google popup has to open straight from this click, so Firebase is connected at load.
@@ -132,7 +135,7 @@ $('save').onclick=async()=>{
   try{await fbConn.sdk.signInWithPopup(fbConn.auth,provider);}catch(e){say('ล็อกอินไม่สำเร็จ · '+(e.code??e.message),false);return;}
  }
  say('กำลังบันทึก…');
- try{const j=await adminFetch('/admin/balance',draft);$('changes').textContent=`บันทึกแล้ว ${j.changes} ช่อง`;
+ try{const j=await adminFetch('/admin/balance',draft);saved=JSON.parse(JSON.stringify(draft));showCount();$('changes').textContent=`บันทึกแล้ว ${j.changes} ช่อง`;
   say(j.local?`บันทึกแล้ว ${j.changes} ช่อง · รีโหลดเกมเพื่อเห็นผล`:j.unchanged?'ค่าเหล่านี้อยู่ในเกมแล้ว':`ส่งเข้าเกมแล้ว ${j.changes} ช่อง · เกมและเซิร์ฟเวอร์จะอัปเดตเองในราว 3 นาที (ผู้เล่นหลุดสั้น ๆ ตอนเซิร์ฟเวอร์รีสตาร์ต)`);}
  catch(e){say(ADMIN_ERRORS[e.message]??'บันทึกไม่สำเร็จ · '+e.message,false);}
 };

@@ -31,6 +31,14 @@
 /* 0.99.3 stacked numbers: no sideways jitter, crits pop larger, heals a touch smaller */
 .damage-number{translate:none!important;white-space:nowrap;letter-spacing:.02em}
 .damage-number.heal{font-size:16px}
-/* 0.99.4 calmer numbers: smaller, crits only a little larger, quick pop */
-.damage-number{font-size:17px!important;animation-duration:.18s!important}
-.damage-number.crit{font-size:24px!important}
+/* 0.99.5 juicy numbers: thick outline, punch-in with a white flash, crits burst with light behind them */
+.damage-number{isolation:isolate;font:900 21px/1 Mali,Tahoma,sans-serif!important;-webkit-text-stroke:4px #1b0f07;paint-order:stroke fill;text-shadow:0 3px 0 #0009!important;animation:dmg-punch .26s cubic-bezier(.2,1.7,.35,1)!important}
+.damage-number.big{font-size:27px!important}
+.damage-number.heal{font-size:17px!important;-webkit-text-stroke:3px #0b2a12}
+.damage-number.crit{font-size:33px!important;color:#ffb12e!important;-webkit-text-stroke:5px #3a0900;text-shadow:0 0 14px #ff7a1a,0 3px 0 #000a!important;animation:crit-punch .36s cubic-bezier(.2,1.9,.35,1)!important}
+.damage-number.crit::before{content:"";position:absolute;z-index:-1;left:50%;top:50%;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;
+ background:radial-gradient(circle,#fffbe0 0,#ffd25acc 22%,#ff8a1f55 46%,transparent 68%);animation:crit-burst .42s ease-out forwards}
+@keyframes dmg-punch{0%{scale:.35;filter:brightness(3.2)}45%{scale:1.5;filter:brightness(1.6)}100%{scale:1;filter:none}}
+@keyframes crit-punch{0%{scale:.3;filter:brightness(4)}40%{scale:1.9;rotate:-6deg;filter:brightness(1.8)}70%{scale:.92;rotate:3deg}100%{scale:1;rotate:0deg;filter:none}}
+@keyframes crit-burst{0%{scale:.2;opacity:1}100%{scale:1.6;opacity:0}}
+@media(prefers-reduced-motion:reduce){.damage-number,.damage-number.crit,.damage-number.crit::before{animation:none!important}}

@@ -8,7 +8,7 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=life1';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=101.4';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=87';
 import {createRouteWalker} from './route-walk.js?v=01';
 
@@ -80,15 +80,18 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // 0.91 the notice sits just under the target box whenever that box shows, so the two never overlap (every layout).
  function placeNotice(){const n=$('notice'),t=document.querySelector('.target-panel'),r=t&&getComputedStyle(t).display!=='none'?t.getBoundingClientRect():null;n.style.top=r&&r.height?Math.round(r.bottom+8)+'px':'';}
  function toast(text){placeNotice();$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
+ // 0.101.4 the city's roofs are one batched mesh and cannot fade per building, so a character on a raised floor
+ // (the sala deck, under its roof) draws on top instead of vanishing.
+ function xray(sprite,floor){const raised=floor>1;if(sprite.userData.raised===raised)return;sprite.userData.raised=raised;sprite.traverse(o=>{o.renderOrder=raised?6:0;if(o.material)o.material.depthTest=!raised;});}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  // 0.99.3 numbers rise from the head of whoever was hit and stack: each new one pushes the older ones of that
  // target up a line, they drift upward together and fade out. Anchors follow the target while it moves.
  const FLOAT_LINE=22,FLOAT_LIFE=1.05,FLOAT_STACK=4;
  function anchorOf(e){
   if(e.type==='damage'&&Number.isInteger(e.id)&&world.mobs[e.id]){const m=world.mobs[e.id],v=mobViews[e.id];return {key:'m'+e.id,pos:()=>({x:m.x,y:(v?.height??1.4)+.3,z:m.z})};}
-  if(e.type==='damage'&&typeof e.id==='string'){const id=e.id;return {key:id,pos:()=>{const f=world.foes?.().find(o=>o.id===id);return {x:f?.x??e.x,y:2.2,z:f?.z??e.z};}};}
+  if(e.type==='damage'&&typeof e.id==='string'){const id=e.id;return {key:id,pos:()=>{const f=world.foes?.().find(o=>o.id===id);const x=f?.x??e.x,z=f?.z??e.z;return {x,y:2.2+groundHeight(world.nav,x,z),z};}};}
   if(['playerHit','heal','dodge'].includes(e.type))return {key:'self',pos:()=>({x:world.player.x,y:2.2+hero.sprite.position.y,z:world.player.z})};
-  return {key:'at'+Math.round(e.x)+':'+Math.round(e.z),pos:()=>({x:e.x,y:1.9,z:e.z})};
+  return {key:'at'+Math.round(e.x)+':'+Math.round(e.z),pos:()=>({x:e.x,y:1.9+groundHeight(world.nav,e.x,e.z),z:e.z})};
  }
  function popup(e,positive=false,anchor=anchorOf(e)){
   const crit=!positive&&e.color==='#ffd27a',el=document.createElement('span');const mob=Number.isInteger(e.id)?world.mobs[e.id]:null,big=!positive&&!crit&&mob&&typeof e.amount==='number'&&e.amount>=mob.maxHp*.2;
@@ -188,7 +191,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(uv){tex.transformUv(uv);const img=tex.image,c=img.getContext?.('2d');if(c&&c.getImageData(Math.min(img.width-1,Math.max(0,Math.floor(uv.x*img.width))),Math.min(img.height-1,Math.max(0,Math.floor(uv.y*img.height))),1,1).data[3]<40)continue;}
    world.select(id);return;
   }
-  if(raycaster.ray.intersectPlane(groundPlane,groundHit))walkTo({x:groundHit.x,z:groundHit.z});
+  // 0.101.4 raised floors (the sala deck): re-aim at the floor height under the last hit until it settles
+  let hit=null;groundPlane.constant=0;for(let i=0;i<4;i++){hit=raycaster.ray.intersectPlane(groundPlane,groundHit);if(!hit)break;groundPlane.constant=-groundHeight(world.nav,hit.x,hit.z);}
+  if(hit)walkTo({x:hit.x,z:hit.z});
  }
  function pinchSpan(){const a=[...touches.values()];return a.length===2?Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y):0;}
  canvas.addEventListener('pointerdown',e=>{
@@ -236,8 +241,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   else for(const key of Object.keys(pose))visualPose[key]=typeof pose[key]!=='number'||['frame','artFrame','stand','time','phase'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
-  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,groundHeight(world.nav,p.x,p.z)+.06+(hero.sprite.userData.directionalActive&&mode==='walk'?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
-  hero.sprite.scale.set(heroSize,heroSize,1);
+  const floor=groundHeight(world.nav,p.x,p.z);
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
+  hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);
   const azimuth=controls.getAzimuthalAngle();
   if(hero.frames)hero.sprite.material.map=hero.frames[0];
   hero.sprite.userData.setFacing?.(p.face,azimuth,{mode,time:poseTime,phase:locomotion?gait:null,reduced});
@@ -246,12 +252,12 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   hero.sprite.userData.pose?.(visualPose,heroFlip);
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   footDust.update(dt);
-  if(locomotion&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,p.z>4.25?.44:.09,p.z-p.face.z/faceLength*.25);}}
+  if(locomotion&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,floor+(!world.nav.grid&&p.z>4.25?.44:.09),p.z-p.face.z/faceLength*.25);}}
   let flash=0,shake=0;for(const s of strikes){const d=t-s.at;if(d>=0&&d<.45){flash=Math.max(flash,s.power*Math.exp(-d*9));if(d<.25)shake=Math.max(shake,s.power*Math.exp(-d*16));}}strikes=strikes.filter(s=>t-s.at<.5);
-  castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,1.3,p.z);kick*=Math.exp(-dt*14);shakeAmount=reduced?0:Math.max(shake*.11,kick*.07);
-  const floor=groundHeight(world.nav,p.x,p.z);hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
+  castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,floor+1.3,p.z);kick*=Math.exp(-dt*14);shakeAmount=reduced?0:Math.max(shake*.11,kick*.07);
+  hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,floor+.1,p.z);shield.visible=p.shield>0;
   // Camera follows the player while preserving user-controlled azimuth and zoom.
-  const follow=new THREE.Vector3(p.x,1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
+  const follow=new THREE.Vector3(p.x,floor+1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
   controls.update();camera.updateMatrixWorld();
   project(playerLabel,p.x,2.0+hero.sprite.position.y,p.z);
   mobViews.forEach((v,i)=>{
@@ -314,5 +320,5 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
- return {set playerTap(f){playerTap=f;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
+ return {xray,set playerTap(f){playerTap=f;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

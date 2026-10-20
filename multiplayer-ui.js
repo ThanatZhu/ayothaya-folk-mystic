@@ -4,7 +4,7 @@ import {emblemId,emoteId} from './items.js?v=95';
 import {createPetView} from './pet-ui.js?v=98';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
-import {groundHeight} from './combat-core.js?v=life1';
+import {groundHeight} from './combat-core.js?v=101.4';
 import {MultiplayerClient} from './multiplayer-client.js?v=life1';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=73';
@@ -118,7 +118,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   for(const e of s.events??[]){if(e.actor===client.id){game.world.events.push(e);continue;}
    const v=views.get(e.actor);if(!v||v.loading)continue;
    if(e.type==='damage'&&Number.isInteger(e.id))game.popup?.(e); // 0.99.3 everyone's numbers float over the monster they hit
-   if(e.type==='playerHit')game.popup?.({...e,color:'#ff987e'},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2,z:v.state.player.z})});
+   if(e.type==='playerHit')game.popup?.({...e,color:'#ff987e'},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2+v.sprite.position.y,z:v.state.player.z})});
    if(e.type==='cast'){
     const id=v.state.character.classId,skill=skillTrack(id,e.skillIndex),current=skillTrack(id,v.action?.index);
     if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock};
@@ -209,7 +209,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    v.label.dataset.animationPending=['sit','sleep','run'].includes(chosen)&&!supported?chosen:'';
    const pose=skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed,{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)});
    v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'?0:pose.y);const angle=controls.getAzimuthalAngle();{const side=p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle);if(Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
-   v.sprite.userData.setFacing?.(p.face,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0;
+   v.sprite.userData.setFacing?.(p.face,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0;game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
    const tag=state.guild?state.guild.emblem+':'+(state.guild.castle?'👑 ':'')+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append((state.guild.castle?'👑 ':'')+state.guild.name);v.label.append(g);}}
    const up=camera.matrixWorld.elements,labelHeight=WORLD_BODY_HEIGHT+.14;
@@ -221,7 +221,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   for(const [id,b] of bubbles){
    if(now>b.until){b.node.remove();bubbles.delete(id);continue;}
    const v=views.get(id),hero=game.world.player;
-   if(id===client?.id)b.node.hidden=!place(b.node,hero.x,2.75,hero.z);
+   if(id===client?.id)b.node.hidden=!place(b.node,hero.x,2.75+groundHeight(game.world.nav,hero.x,hero.z),hero.z);
    else b.node.hidden=!v||v.loading||!v.sprite.visible||!place(b.node,v.sprite.position.x,v.sprite.position.y+2.6,v.sprite.position.z);
   }
  }};

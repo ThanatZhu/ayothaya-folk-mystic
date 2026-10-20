@@ -1,5 +1,9 @@
 // English for every player-facing Thai string (Thai source -> English). Regenerate gaps with scripts/i18n-missing.mjs.
 globalThis.I18N_EN={"ใช้":"Use",
+"ชวนเข้าปาร์ตี้":"Invite to Party",
+"ชวนเข้ากิลด์":"Invite to Guild",
+"ชวนกิลด์":"Guild Invite",
+"แลกเปลี่ยนของ":"Trade",
 "ปุ่มลัด Q":"Hotkey Q",
 "ปุ่มลัด E":"Hotkey E",
 "จุดธูป · กลับเมือง":"Light Incense · Return to Town",

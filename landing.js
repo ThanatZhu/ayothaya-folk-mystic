@@ -5,6 +5,8 @@ import {MULTIPLAYER_URL} from './multiplayer-config.js';
 
 const DISCORD_INVITE='https://discord.gg/Be9WwsX6'; // the Discord buttons and links show only when this is set
 const $=id=>document.getElementById(id);
+// 0.104.2 reduced motion: the promo stays on its poster frame
+if(matchMedia('(prefers-reduced-motion:reduce)').matches)for(const v of document.querySelectorAll('.hero-video')){v.removeAttribute('autoplay');v.pause();}
 if(DISCORD_INVITE)for(const a of document.querySelectorAll('[data-discord]')){a.href=DISCORD_INVITE;a.hidden=false;}
 
 // Server status from the realm's /health (players across both channels). Render's free tier sleeps when idle;

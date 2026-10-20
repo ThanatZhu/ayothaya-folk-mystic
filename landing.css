@@ -13,7 +13,10 @@ a{color:inherit}img{max-width:100%;display:block}
 .btn[hidden]{display:none}.btn{white-space:nowrap}
 .btn.small{min-height:38px;padding:0 18px;font-size:14px}
 .hero{position:relative;min-height:min(88vh,860px);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center;gap:24px;padding:48px max(16px,6vw);
- background:linear-gradient(90deg,#071512f2 0%,#0a1c18cc 38%,#0a1c1833 70%,#0a1c1855 100%),linear-gradient(0deg,var(--bg) 0%,transparent 22%),url('assets/landing98/hero.webp') center/cover no-repeat}
+ isolation:isolate;overflow:hidden;background:var(--bg) url('assets/landing98/promo-poster.webp') center/cover no-repeat}
+/* 0.104.2 gameplay promo loop behind the copy (real footage: town, quest walk, boss, PvP, refine); dark on the left for the text */
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.hero::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,#071512f0 0%,#0a1c18d0 30%,#0a1c1840 46%,transparent 58%),linear-gradient(0deg,var(--bg) 0%,transparent 18%)}
 .hero-copy{max-width:620px}
 .chip{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:#0b1c19b3;font-size:13px;color:var(--soft)}
 .hero h1{margin:14px 0 6px}.hero h1 img{width:min(520px,100%);height:auto;filter:drop-shadow(0 8px 24px #000a)}
@@ -22,9 +25,6 @@ a{color:inherit}img{max-width:100%;display:block}
 .status{display:flex;align-items:center;gap:8px;margin:18px 0 0;font-size:14px;color:var(--soft)}
 .status i{width:10px;height:10px;border-radius:50%;background:#8a8a8a}.status[data-state=on] i{background:#58e07a;box-shadow:0 0 10px #58e07a}.status[data-state=wake] i{background:var(--gold);animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:.3}}
-.hero-cast{position:relative;height:min(62vh,560px)}
-.hero-cast img{position:absolute;width:min(46%,260px);height:auto;filter:drop-shadow(0 12px 18px #000c);animation:float 5s ease-in-out infinite}
-.hero-cast .c1{left:30%;top:6%}.hero-cast .c2{left:2%;top:38%;animation-delay:-1.6s}.hero-cast .c3{right:0;top:44%;animation-delay:-3.2s}
 @keyframes float{50%{transform:translateY(-12px)}}
 .block{padding:64px max(16px,6vw) 8px;max-width:1200px;margin:0 auto}
 .block h2,.cta h2{margin:0;font-size:clamp(26px,3.4vw,36px);color:var(--gold)}
@@ -55,10 +55,10 @@ footer{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;padding:40px 
 @media (max-width:720px){
  .nav nav{display:none}.nav .btn{margin-left:auto}.mark{font-size:11px;letter-spacing:.04em}.mark img{width:32px;height:32px}
  .hero{grid-template-columns:1fr;min-height:auto;padding:28px 16px 40px;background-position:62% center}
- .hero-cast{display:none}.lead{font-size:16px}.actions .btn{flex:1 1 140px}
+ .hero::before{background:linear-gradient(0deg,var(--bg) 0%,#0a1c18cc 45%,#0a1c1866 100%)}.lead{font-size:16px}.actions .btn{flex:1 1 140px}
  .block{padding:48px 16px 4px}.features{grid-template-columns:1fr 1fr;gap:10px}.features li{padding:14px}
  .classes{grid-template-columns:repeat(2,minmax(0,1fr))}.maps,.events{grid-template-columns:1fr}
  .news li{grid-template-columns:70px 1fr}.cta{margin:48px 16px 0}
 }
-@media (prefers-reduced-motion:reduce){.hero-cast img,.status i{animation:none}html{scroll-behavior:auto}.btn{transition:none}}
+@media (prefers-reduced-motion:reduce){.status i{animation:none}html{scroll-behavior:auto}.btn{transition:none}}
 .lang-toggle{font:inherit;font-size:.85em;padding:.3em .7em;border-radius:999px;border:1px solid currentColor;background:transparent;color:var(--soft,#f3e6c8);cursor:pointer}

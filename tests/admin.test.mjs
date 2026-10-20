@@ -9,6 +9,7 @@ test('only verified emails listed in ADMIN_EMAILS are admins',()=>{
  assert.equal(isAdmin({email:'boss@example.com',email_verified:false},emails),false);
  assert.equal(isAdmin({email:'other@example.com',email_verified:true},emails),false);
  assert.equal(isAdmin({email:'boss@example.com',email_verified:true},adminEmails({})),false);
+ assert.equal(adminEmails({'admin_email ':'boss@example.com'}).size,1);assert.equal(adminEmails({'Admin Emails':'boss@example.com'}).size,1);assert.equal(adminEmails({ADMIN_EMAILS_X:'a@b.c'}).size,0);
  assert.equal(isAdmin({email:'boss@example.com',email_verified:true},adminEmails({ADMIN_EMAILS:'"Boss@Example.com"; other@x.y'})),true);
 });
 test('admin lists online players and gives items and cowries with checks',()=>{

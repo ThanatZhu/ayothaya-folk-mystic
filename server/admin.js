@@ -9,7 +9,10 @@ const MAX_COINS=10_000_000,MAX_COUNT=999,MAX_LINES=20;
 export const giftable=id=>!!ITEMS[id]&&!['ui','reserved'].includes(ITEMS[id].kind);
 
 // commas, semicolons or spaces between addresses; stray quotes from the dashboard are ignored
-export function adminEmails(env=process.env){return new Set((env.ADMIN_EMAILS??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean));}
+// the key is matched loosely (ADMIN_EMAILS, admin_email, "ADMIN EMAILS "...) since it is typed by hand in the Render dashboard
+export const adminKey=env=>Object.keys(env).find(k=>/^admin[\s_-]*emails?$/i.test(k.trim()))??null;
+export const configKeys=env=>Object.keys(env).filter(k=>/admin|github/i.test(k));
+export function adminEmails(env=process.env){return new Set((env[adminKey(env)]??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean));}
 export function isAdmin(decoded,emails=adminEmails()){return !!decoded?.email&&decoded.email_verified===true&&emails.has(decoded.email.toLowerCase());}
 
 export function adminPlayers(realm){

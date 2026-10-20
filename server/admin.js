@@ -18,7 +18,7 @@ export function adminEmails(env=process.env){return new Set([...OWNER_EMAILS,...
 export function isAdmin(decoded,emails=adminEmails()){return !!decoded?.email&&decoded.email_verified===true&&emails.has(decoded.email.toLowerCase());}
 
 export function adminPlayers(realm){
- return [...realm.peers.values()].map(p=>({id:p.id,name:p.character.name,classId:p.character.classId,jobId:p.character.jobId??'',level:baseProgress(p.world).level,server:p.serverId,map:p.room?.map?.name??'',online:!p.suspended,coins:p.bag?.coins??0,items:{...(p.bag?.items??{})}}))
+ return [...realm.peers.values()].map(p=>({id:p.id,name:p.character.name,classId:p.character.classId,gender:p.character.gender,jobId:p.character.jobId??'',level:baseProgress(p.world).level,server:p.serverId,map:p.room?.map?.name??'',online:!p.suspended,coins:p.bag?.coins??0,items:{...(p.bag?.items??{})}}))
   .sort((a,b)=>a.server.localeCompare(b.server)||a.name.localeCompare(b.name));
 }
 

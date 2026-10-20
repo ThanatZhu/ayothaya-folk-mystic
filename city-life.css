@@ -11,3 +11,6 @@
 #job-ready ul{margin:0 0 14px;padding-left:20px;font-size:13px;display:grid;gap:4px}
 #job-ready .mentor-actions button{padding:9px 16px;border:1px solid #f4cf7a;border-radius:999px;font:700 13px Mali,Tahoma,sans-serif;cursor:pointer;background:#0e2926;color:#f4dfac}
 #job-ready #job-ready-go{background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210}
+
+/* 0.99.12 trial journal: one line per part of the trial */
+#training-journal span{white-space:pre-line;line-height:1.6}

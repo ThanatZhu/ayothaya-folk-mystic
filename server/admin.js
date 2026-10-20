@@ -8,7 +8,8 @@ const MAX_COINS=10_000_000,MAX_COUNT=999,MAX_LINES=20;
 // icons and reserved entries in ITEMS are not things a player can hold
 export const giftable=id=>!!ITEMS[id]&&!['ui','reserved'].includes(ITEMS[id].kind);
 
-export function adminEmails(env=process.env){return new Set((env.ADMIN_EMAILS??'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean));}
+// commas, semicolons or spaces between addresses; stray quotes from the dashboard are ignored
+export function adminEmails(env=process.env){return new Set((env.ADMIN_EMAILS??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean));}
 export function isAdmin(decoded,emails=adminEmails()){return !!decoded?.email&&decoded.email_verified===true&&emails.has(decoded.email.toLowerCase());}
 
 export function adminPlayers(realm){

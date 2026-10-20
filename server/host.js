@@ -10,7 +10,7 @@ import {equipItem} from '../equipment.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
-import {isAdmin,adminPlayers,adminGive} from './admin.js';
+import {isAdmin,adminEmails,adminPlayers,adminGive} from './admin.js';
 import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
@@ -42,7 +42,12 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    // a same-origin GET carries no Origin header: only the local server (bound to 127.0.0.1) lets that through
    if(origin?!allowedOrigin(origin):mode!=='local'){reply(403,{error:'origin'});return;}
    let who='local';
-   if(mode==='firebase'){try{const d=await authenticate(String(req.headers.authorization??'').replace(/^Bearer /,''));if(!isAdmin(d))throw new Error('not-admin');who=d.email;}catch{reply(403,{error:'not-admin'});return;}}
+   if(mode==='firebase'){
+    // distinct answers so the page can say what is wrong: no list on the server, a bad sign-in, or an address not on it
+    if(!adminEmails().size){reply(403,{error:'admin-unset'});return;}
+    let d;try{d=await authenticate(String(req.headers.authorization??'').replace(/^Bearer /,''));}catch{reply(401,{error:'bad-token'});return;}
+    if(!isAdmin(d)){console.warn('admin-denied',d.email??d.uid);reply(403,{error:'not-admin'});return;}who=d.email;
+   }
    if(url.pathname==='/admin/players'&&req.method==='GET'){reply(200,{players:adminPlayers(realm)});return;}
    if(url.pathname==='/admin/give'&&req.method==='POST'){
     let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>4096){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}

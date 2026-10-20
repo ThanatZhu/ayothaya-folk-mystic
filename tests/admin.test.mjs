@@ -9,6 +9,7 @@ test('only verified emails listed in ADMIN_EMAILS are admins',()=>{
  assert.equal(isAdmin({email:'boss@example.com',email_verified:false},emails),false);
  assert.equal(isAdmin({email:'other@example.com',email_verified:true},emails),false);
  assert.equal(isAdmin({email:'boss@example.com',email_verified:true},adminEmails({})),false);
+ assert.equal(isAdmin({email:'boss@example.com',email_verified:true},adminEmails({ADMIN_EMAILS:'"Boss@Example.com"; other@x.y'})),true);
 });
 test('admin lists online players and gives items and cowries with checks',()=>{
  const map={id:'f',name:'ทุ่ง',safe:false,nav:{zones:[{x:-20,z:-20,w:40,d:40}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[]};

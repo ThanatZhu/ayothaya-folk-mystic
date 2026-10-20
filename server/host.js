@@ -11,6 +11,7 @@ import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
 import {isAdmin,adminEmails,adminPlayers,adminGive} from './admin.js';
+import {balanceText,commitBalance} from './github-balance.js';
 import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
@@ -35,7 +36,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size});return;}
   // 0.99.16 back-office (admin.html): online players and gifts. Production needs a Google ID token whose verified
   // email is in ADMIN_EMAILS; the local server trusts its own origin. Every gift is logged.
   if(url.pathname.startsWith('/admin/')){
@@ -52,6 +53,17 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(url.pathname==='/admin/give'&&req.method==='POST'){
     let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>4096){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
     try{const body=JSON.parse(data),result=adminGive(realm,body);console.log('admin-give',who,result.name,JSON.stringify({coins:body.coins??0,items:body.items??[]}));reply(200,result);}catch(e){reply(400,{error:e.message});}
+    return;
+   }
+   // 0.100.6 balance edits: production commits balance-data.js to GitHub (redeploys game and server); local writes the file
+   if(url.pathname==='/admin/balance'&&req.method==='POST'){
+    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>200000){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
+    let clean;try{clean=cleanBalance(JSON.parse(data));}catch{reply(400,{error:'invalid'});return;}
+    const text=balanceText(clean),changes=Object.values(clean).reduce((n,g)=>n+Object.values(g).reduce((m,f)=>m+Object.keys(f).length,0),0);
+    try{
+     if(mode==='local'){await writeFile(path.join(root,'balance-data.js'),text);await writeFile(path.join(root,'dist','balance-data.js'),text).catch(()=>{});reply(200,{ok:true,changes,local:true});}
+     else{const r=await commitBalance(text);console.log('admin-balance',who,changes,r.commit??'unchanged');reply(200,{ok:true,changes,...r});}
+    }catch(e){console.error('admin-balance',e.message);reply(502,{error:e.message});}
     return;
    }
    reply(404,{error:'not-found'});return;

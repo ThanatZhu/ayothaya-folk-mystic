@@ -24,3 +24,11 @@ test('admin lists online players and gives items and cowries with checks',()=>{
  assert.throws(()=>adminGive(realm,{peer:'nobody',coins:1}),/player-offline/);
  assert.throws(()=>adminGive(realm,{peer:p.id}),/nothing/);
 });
+test('balance save commits balance-data.js through the GitHub contents API, skipping identical content',async()=>{
+ const {balanceText,commitBalance}=await import('../server/github-balance.js');
+ const text=balanceText({items:{'hp-small':{heal:99}}}),calls=[];let stored='old';
+ const fetch=async(url,o={})=>{calls.push([o.method??'GET',url]);if(!o.method)return {ok:true,json:async()=>({sha:'abc',content:Buffer.from(stored).toString('base64')})};const b=JSON.parse(o.body);assert.equal(b.sha,'abc');stored=Buffer.from(b.content,'base64').toString();return {ok:true,json:async()=>({commit:{sha:'1234567890'}})};};
+ await assert.rejects(commitBalance(text,{token:'',fetch}),/github-unset/);
+ assert.deepEqual(await commitBalance(text,{token:'t',fetch}),{commit:'1234567'});assert.equal(stored,text);assert.match(calls[1][1],/contents\/balance-data\.js$/);
+ assert.deepEqual(await commitBalance(text,{token:'t',fetch}),{unchanged:true});
+});

@@ -159,10 +159,12 @@ export class CombatWorld{
  applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=d.maxHp;p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
  notice(text){this.emit('notice',{text});}
  select(id){const mob=this.foes().find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
- nearest(range=AUTO_RANGE){return this.foes().filter(m=>m.hp>0&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
+ nearest(range=AUTO_RANGE){return this.foes().filter(m=>m.hp>0&&this.prey(m)&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
  // 0.91 explicit on/off (the button and quests send the state they want, so two quick taps can no longer cross).
- setAuto(on){return on===this.auto?true:this.toggleAuto();}
- toggleAuto(){if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
+ // 0.99.7 hunt = a monster type index: AUTO started by a quest only goes after that kind (cleared by any other switch).
+ prey(m){return this.hunt==null||m.type===this.hunt;}
+ setAuto(on,hunt=null){const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;return ok;}
+ toggleAuto(){this.hunt=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0||mob.pvp)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
@@ -215,10 +217,10 @@ export class CombatWorld{
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);
   if(this.auto&&!stop&&!manual&&this.manualGrace===0){
-   let m=this.target;if(!m||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_SEEK+2){m=this.nearest(AUTO_RANGE);
+   let m=this.target;if(!m||!this.prey(m)||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_SEEK+2){m=this.nearest(AUTO_RANGE);
     // 0.91 nothing left near where AUTO was switched on (e.g. turned on at the respawn yard): take the closest monster
     // within 30 m of the player and move the hunting spot there.
-    if(!m){m=this.mobs.filter(x=>x.hp>0&&distance(x,p)<=AUTO_SEEK).sort((a,b)=>distance(a,p)-distance(b,p))[0]??null;if(m)this.anchor={x:m.x,z:m.z};}
+    if(!m){m=this.mobs.filter(x=>x.hp>0&&this.prey(x)&&distance(x,p)<=AUTO_SEEK).sort((a,b)=>distance(a,p)-distance(b,p))[0]??null;if(m)this.anchor={x:m.x,z:m.z};}
     this.targetId=m?.id??null;this.path=[];}
    // 0.97 nothing to hunt within 30 m for 25 s: AUTO switches itself off and says why, so the button never shows on while idle.
    if(m)this.autoIdle=0;else if((this.autoIdle+=dt)>25){this.auto=false;this.autoIdle=0;this.notice('ปิด AUTO · ไม่พบมอนสเตอร์ในระยะ 30 ม.');}

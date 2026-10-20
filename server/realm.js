@@ -202,7 +202,7 @@ export class RealmServer{
    if(m.type==='select'){if(!integer(m.target,0,9999))return this.error(p,'invalid-target');w.select(m.target);return true;}
    if(m.type==='skill'){if(!integer(m.index,0,9))return this.error(p,'invalid-skill');return w.skill(m.index);}
    if(m.type==='attack')return w.basicAttack();
-   if(m.type==='auto'){if(typeof m.on==='boolean')w.setAuto(m.on);else w.toggleAuto();return true;}
+   if(m.type==='auto'){if(typeof m.on==='boolean')w.setAuto(m.on,m.hunt);else w.toggleAuto();return true;}
    if(!['bow','celebrate','rest','guard'].includes(m.name))return this.error(p,'invalid-emote');
    p.emote={name:m.name,time:this.clock};p.room.events.push({type:'emote',actor:p.id,name:m.name});return true;
   }

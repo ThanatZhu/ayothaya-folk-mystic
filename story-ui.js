@@ -102,7 +102,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
    const index=MONSTER_TYPES.findIndex(t=>t.id===s.monster);
    const near=()=>world.mobs.filter(m=>m.type===index&&m.hp>0).sort((a,b)=>Math.hypot(a.x-world.player.x,a.z-world.player.z)-Math.hypot(b.x-world.player.x,b.z-world.player.z))[0];
    const first=near();if(!first){done();world.notice('รอมอนสเตอร์เกิดใหม่สักครู่');return;}
-   game.walkTo(()=>{const m=near();return m&&{x:m.x,z:m.z};},{radius:2.4,kind:'quest',onArrive:()=>{done();const m=near();if(m)world.select(m.id);setTimeout(()=>world.setAuto(true),150);},onFail:()=>{done();world.notice('เดินไปหามอนสเตอร์ไม่ได้');}});
+   game.walkTo(()=>{const m=near();return m&&{x:m.x,z:m.z};},{radius:2.4,kind:'quest',onArrive:()=>{done();const m=near();if(m)world.select(m.id);setTimeout(()=>world.setAuto(true,index),150);},onFail:()=>{done();world.notice('เดินไปหามอนสเตอร์ไม่ได้');}});
   }else done();
   render();
  }

@@ -39,3 +39,11 @@ test('the AUTO switch is never dropped by the attack rate limit',()=>{
  const peer=realm.join({uid:'u',serverId:'server-1',slotId:'slot-1',record:{character:{name:'auto',gender:'male',classId:'novice'},state:initialSave(),bag:{coins:0,items:{}}},send:()=>{}});
  realm.receive(peer.id,{type:'attack',seq:1});time+=10;assert.equal(realm.receive(peer.id,{type:'auto',seq:2,on:true}),true);assert.equal(peer.world.auto,true);
 });
+test('AUTO started by a quest hunts only the quest monster; switching it by hand hunts anything',()=>{
+ const w=new CombatWorld({classId:'swordsman'});w.safe=false;
+ const near=w.mobs[0],quest=w.mobs.find(m=>m.type!==near.type);assert.ok(quest);
+ for(const m of w.mobs)if(m!==near&&m!==quest){m.hp=0;m.dead=999;}
+ Object.assign(near,{x:w.player.x+1.5,z:w.player.z});Object.assign(quest,{x:w.player.x+4,z:w.player.z});
+ w.setAuto(true,quest.type);w.update(.05,{x:0,z:0,attack:false});assert.equal(w.targetId,quest.id);
+ w.toggleAuto();w.toggleAuto();assert.equal(w.hunt,null);
+});

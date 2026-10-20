@@ -20,6 +20,7 @@ export function restoreTraveler(world,saved){
  world.kills=Math.floor(bounded(saved.kills,1e7,0));
  Object.assign(world,experienceOf(saved));
  if(typeof saved.food?.id==='string'&&saved.food.left>0)world.food={id:saved.food.id,left:Math.min(600,saved.food.left)}; // 0.94 meal buff crosses maps
- if(Array.isArray(saved.cooldowns)&&saved.cooldowns.length===world.cooldowns.length)world.cooldowns=saved.cooldowns.map(v=>bounded(v,60,0));
+ if(Array.isArray(saved.cooldowns)&&saved.cooldowns.length===10)saved.cooldowns.forEach((v,i)=>{world.cooldowns[i]=bounded(v,60,0);});
 }
-export function serializeTraveler(world){return {version:5,hp:world.player.hp,mp:world.player.mp,kills:world.kills,...experienceOf(world),cooldowns:[...world.cooldowns],food:world.food?{...world.food}:null};}
+// 0.101 saves (and firestore.rules) keep the ten base cooldowns; ponytail: Master cooldowns reset on reload, save them if that gets abused.
+export function serializeTraveler(world){return {version:5,hp:world.player.hp,mp:world.player.mp,kills:world.kills,...experienceOf(world),cooldowns:world.cooldowns.slice(0,10),food:world.food?{...world.food}:null};}

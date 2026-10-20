@@ -7,7 +7,7 @@ import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=siz
 import {groundHeight} from './combat-core.js?v=life1';
 import {MultiplayerClient} from './multiplayer-client.js?v=life1';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
-import {atlasPath,className} from './classes.js?v=73';
+import {atlasPath,className} from './classes.js?v=101';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
 import {createPaintedAvatar} from './painted-avatar.js?v=life1';

@@ -3,6 +3,7 @@ import {skillFrame} from './animation-frames.js?v=37';
 import {characterMotion} from './character-motion.js?v=life1';
 import {JOINT_CHANNELS} from './character-rig.js?v=37';
 import {gestureJoints} from './joint-gestures.js?v=37';
+import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=101';
 const gestures={
  ready:{lean:-.032,crouch:.027,armL:.016,armR:-.025},
  jab:{lean:.055,armR:.065,armL:-.014,legR:.025,x:.16},
@@ -147,7 +148,8 @@ export const SKILL_TRACKS=Object.fromEntries(Object.entries(tracks).map(([id,row
  const strikes=sequence.flatMap((g,n)=>['jab','cross','sweep','chop','shove','thrust','kick','elbow','release','palm','plant','seal','ward','open'].includes(g)?[times[n]]:[]);
  return {id:`${id}-${index}`,classId:id,index,duration,label,sequence,times,fx,strikes:strikes.length?strikes:[.53],weight:weights[id]};
 })]));
-export function skillTrack(classId,index){return SKILL_TRACKS[classId]?.[index]??null;}
+// 0.101 a Master skill (slot 10+) moves like the skill it grew from.
+export function skillTrack(classId,index){return SKILL_TRACKS[classId]?.[isMaster(index)?MASTER_FROM[index-BASE_SLOTS]:index]??null;}
 export function skillPose(classId,index,time,{reduced=false}={}){
  // Clip metadata is not a joint channel. Keep cast at both neutral endpoints so
  // a painted idle clip cannot replace the first or recovery frame of a skill.

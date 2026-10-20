@@ -40,3 +40,6 @@ body.mmo-hud .control-hint{display:none}
 }
 @media (max-width:760px){#online-meta{display:none}}
 @media (max-height:520px){#mini-meta{display:none}}
+/* 0.101 Master slots (outer arc): hidden until a Master skill is learned, gold ring when shown */
+.skill[hidden]{display:none!important}
+body.mmo-hud .combat-controls.wheel .skill.master-slot{border-color:#ffd77a;box-shadow:0 0 10px #ffcf6a88,0 3px 9px #000a}

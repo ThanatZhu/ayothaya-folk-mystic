@@ -50,5 +50,5 @@ test('corrupt legacy data blocks migration before writes; invalid slot cannot en
 });
 test('novice artwork and basic combat are available',()=>{
  const png=readFileSync(new URL('../'+atlasPath('novice'),import.meta.url));assert.equal(png.readUInt32BE(16)/png.readUInt32BE(20),2);
- const w=new CombatWorld({classId:NOVICE.id});assert.equal(w.profession.id,'novice');assert.equal(w.skills.length,10);assert.ok(w.profession.damage>0);
+ const w=new CombatWorld({classId:NOVICE.id});assert.equal(w.profession.id,'novice');assert.equal(w.skills.length,15);assert.ok(w.profession.damage>0); // 10 base + 5 Master (0.101)
 });

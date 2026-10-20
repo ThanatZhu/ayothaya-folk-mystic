@@ -16,10 +16,10 @@ test('all fourteen appearances have valid identities and shipped 4 x 2 atlases',
  assert.equal(className('acolyte','male'),'พระ');assert.equal(className('acolyte','female'),'แม่ชี');
  assert.throws(()=>getClass('fake'));
 });
-test('all seven classes have usable ten-slot skill sets with damage/resource effects',()=>{
- for(const c of CLASSES){const w=world(c.id);assert.equal(w.skills.length,10);
- for(let i=0;i<10;i++){const w=world(c.id);w.player.hp=10;w.select(0);assert.equal(w.skill(i),true,c.id+':'+i);assert.ok(w.cooldowns[i]>0);assert.ok(w.player.mp>=0&&w.player.mp<=100);
- if(i===4)assert.ok(w.player.hp>10);if([0,1,2,3,6,9].includes(i))assert.ok(w.mobs[0].hp<78,c.id+': damage '+i);}
+test('all seven classes have usable ten base and five Master skills with damage/resource effects',()=>{
+ for(const c of CLASSES){const w=world(c.id);assert.equal(w.skills.length,15);
+ for(let i=0;i<15;i++){const w=world(c.id);w.skillLevels[i]=1;w.player.hp=10;w.select(0);assert.equal(w.skill(i),true,c.id+':'+i);assert.ok(w.cooldowns[i]>0);assert.ok(w.player.mp>=0&&w.player.mp<=100);
+ if(i===4||i===12)assert.ok(w.player.hp>10);if([0,1,2,3,6,9,10,11,13,14].includes(i))assert.ok(w.mobs[0].hp<78,c.id+': damage '+i);}
  }
 });
 test('melee cannot hit at bow range; attack visuals and timing reflect each class',()=>{

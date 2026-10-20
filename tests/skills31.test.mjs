@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {earnedPoints,normalizeSkills,spentPoints,availablePoints,upgradeSkill,scaledSkill,OPEN_MAX} from '../skill-progress.js';
+import {earnedPoints,normalizeSkills,spentPoints,availablePoints,upgradeSkill,scaledSkill,SKILL_MAX,START_LEVELS} from '../skill-progress.js';
 import {CombatWorld,SKILLS} from '../combat-core.js';
 import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
@@ -14,23 +14,25 @@ test('skill points: one per Job Level, carried across Novice, class and Master',
 });
 test('every path starts on the tree; pre-tree saves reset once (points return), marked saves are kept',()=>{
  const skills=normalizeSkills(undefined,'hunter');
- assert.deepEqual(skills.hunter,[1,0,0,0,1,0,0,0,0,0]);assert.equal(spentPoints(skills),0);
+ assert.deepEqual(skills.hunter,START_LEVELS);assert.equal(spentPoints(skills),0);
  assert.equal(availablePoints(skills,{classId:'novice',jobXp:0}),0);
  const old=normalizeSkills({hunter:[4,4,3,2,4,1,3,1,2,3],novice:[2,1,1,1,1,1,1,1,1,1]},'hunter');
- assert.deepEqual(old.hunter,[1,0,0,0,1,0,0,0,0,0]);assert.deepEqual(old.novice,[1,0,0,0,1,0,0,0,0,0]);assert.equal(spentPoints(old),0);
+ assert.deepEqual(old.hunter,START_LEVELS);assert.deepEqual(old.novice,START_LEVELS);assert.equal(spentPoints(old),0);
  assert.deepEqual(normalizeSkills(old,'hunter'),old,'the reset happens only once');
  const bad=normalizeSkills({_tree84:Array(10).fill(0),hunter:[1,2,'x',99,-1,1,1,1,1,1],junk:[1]},'hunter');
- assert.deepEqual(bad.hunter,[1,2,1,1,1,1,1,1,1,1]);assert.equal(bad.junk,undefined);
+ assert.deepEqual(bad.hunter,[1,2,1,1,1,1,1,1,1,1,0,0,0,0,0]);assert.equal(bad.junk,undefined); // a ten-level save gains unlearned Master slots
 });
-test('upgrades need points, stop at the trial gate, and never mutate the input',()=>{
+test('upgrades need points, run to Lv 10, and never mutate the input',()=>{
  const progress={classId:'novice',jobXp:jobXpFor('novice','',4)};let skills=normalizeSkills(null,'novice');
  assert.equal(availablePoints(skills,progress),3);
  const before=JSON.stringify(skills);skills=upgradeSkill(skills,'novice',0,progress);assert.equal(JSON.stringify(normalizeSkills(null,'novice')),before);
  skills=upgradeSkill(skills,'novice',0,progress);skills=upgradeSkill(skills,'novice',0,progress);
- assert.equal(skills.novice[0],OPEN_MAX);assert.equal(availablePoints(skills,progress),0);
- assert.throws(()=>upgradeSkill(skills,'novice',0,{classId:'novice',jobXp:jobXpFor('novice','',10)}),/skill-trial-required/);
+ assert.equal(skills.novice[0],4);assert.equal(availablePoints(skills,progress),0);
+ // 0.101: no trial gate at 5 — with points a skill climbs to 10 and stops there
+ let rich=skills;const all={classId:'novice',jobXp:jobXpFor('novice','',10)};for(let l=4;l<SKILL_MAX;l++)rich=upgradeSkill(rich,'novice',0,all);
+ assert.equal(rich.novice[0],SKILL_MAX);assert.throws(()=>upgradeSkill(rich,'novice',0,all),/skill-max/);
  assert.throws(()=>upgradeSkill(skills,'novice',4,progress),/no-skill-points/);
- assert.throws(()=>upgradeSkill(skills,'novice',10,progress),/invalid-skill/);
+ assert.throws(()=>upgradeSkill(skills,'novice',15,progress),/invalid-skill/);
  assert.equal(upgradeSkill(skills,'novice',1,progress).novice[1],1); // opened by strike Lv2+: learning is free
 });
 test('the skill tree opens each skill only after its requirements and the ultimate last',()=>{
@@ -52,7 +54,7 @@ test('an unlearned skill cannot be cast, offline or on the server',()=>{
  const record={character:{name:'tester',gender:'male',classId:'novice'},state:initialSave(),skills:{_tree84:Array(10).fill(0),novice:[1,1,1,1,0,1,1,1,1,1]}};
  const peer=realm.join({uid:'u',serverId:'server-1',slotId:'slot-1',record,send:()=>{}});
  time+=100;assert.equal(realm.receive(peer.id,{type:'skill',seq:1,index:4}),false);
- assert.deepEqual(realm.record(peer,record).skills.novice,[1,1,1,1,0,1,1,1,1,1]);
+ assert.deepEqual(realm.record(peer,record).skills.novice,[1,1,1,1,0,1,1,1,1,1,0,0,0,0,0]);
 });
 test('the server applies upgrades only with points and saves them with the character',()=>{
  const map={id:'c',safe:true,nav:{zones:[{x:-20,z:-20,w:40,d:40}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[]};
@@ -67,4 +69,21 @@ test('the server applies upgrades only with points and saves them with the chara
  assert.equal(realm.record(peer,record).skills.novice[0],3);assert.equal(realm.record(peer,record).skills.novice[2],1);
  assert.equal(realm.snapshot(peer).self.skillPoints,0);assert.equal(realm.snapshot(peer).self.skillLevels[0],3);
  assert.equal(send('upgradeSkill',{index:'x'}),false);
+});
+test('a skill at Lv 10 opens its Master skill; old skills keep working; the server checks the same rule',()=>{
+ const map={id:'f',safe:false,nav:{zones:[{x:-20,z:-20,w:40,d:40}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[[1,0,0]]};
+ let time=1e4;const realm=new RealmServer({catalog:{capital:'f',maps:[map]},now:()=>time});
+ const state=initialSave();state.traveler.jobXp=jobXpFor('shaman','spirit-master',40);
+ const record={character:{name:'tester',gender:'male',classId:'shaman',jobId:'spirit-master'},state};
+ const peer=realm.join({uid:'u',serverId:'server-1',slotId:'slot-1',record,send:()=>{}});
+ const send=(type,data)=>{time+=100;return realm.receive(peer.id,{type,seq:peer.seq+1,...data});};
+ assert.equal(peer.world.skills.length,15);assert.ok(peer.world.skills[10].master&&peer.world.skills[10].damage>peer.world.skills[0].damage);
+ assert.equal(send('upgradeSkill',{index:10}),false,'Master strike is locked until the strike is Lv 10');
+ assert.equal(send('skill',{index:10}),false,'an unlearned Master skill cannot be cast');
+ for(let l=1;l<SKILL_MAX;l++)assert.equal(send('upgradeSkill',{index:0}),true);
+ assert.equal(send('upgradeSkill',{index:10}),true,'learning the opened Master skill is free');
+ assert.equal(realm.record(peer,record).skills.shaman[10],1);
+ assert.equal(send('skill',{index:10}),true);assert.equal(send('skill',{index:0}),true,'the base strike still casts');
+ assert.equal(send('skill',{index:15}),false);
+ assert.ok(peer.world.cooldowns[10]>0&&peer.world.cooldowns[0]>0);
 });

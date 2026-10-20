@@ -1,4 +1,5 @@
-import {isClass} from './classes.js?v=73';
+import {isClass} from './classes.js?v=101';
+import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=101';
 export const skillAtlas=id=>{if(!isClass(id))throw new Error('invalid-class');return new URL('./assets/skills/'+id+'-21.png',import.meta.url).href;};
 export async function applySkillArt(buttons,classId,order=null){ // order[i] = skill shown on button i (0.90 hotbar)
  const image=new Image(),url=skillAtlas(classId);image.src=url;
@@ -6,7 +7,8 @@ export async function applySkillArt(buttons,classId,order=null){ // order[i] = s
  // Hunter's source atlas has a slightly higher row divider; sample its actual bounds.
  const split=classId==='hunter'?375/793:.5;
  buttons.forEach((button,i)=>{
-  const k=order?.[i]??i,icon=button.querySelector('strong'),row=k<5?0:1,h=row?1-split:split;
+  const slot=order?.[i]??i,k=isMaster(slot)?MASTER_FROM[slot-BASE_SLOTS]:slot,icon=button.querySelector('strong'),row=k<5?0:1,h=row?1-split:split; // a Master skill wears its parent's art
+  icon.classList.toggle('master-art',isMaster(slot));
   icon.classList.add('skill-art');icon.setAttribute('aria-hidden','true');
   icon.style.backgroundImage=`url("${url}")`;icon.style.backgroundSize=`500% ${100/h}%`;
   icon.style.backgroundPosition=`${k%5*25}% ${row?100:0}%`;

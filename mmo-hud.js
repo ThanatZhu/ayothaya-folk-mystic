@@ -3,7 +3,8 @@
 const $=id=>document.getElementById(id);
 const compactQuery=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)');
 // Inner arc holds skills 1-4, outer arc 5-0, evenly spread from left of the attack button to above it.
-const INNER=[180,150,120,90],OUTER=[186,166.4,146.8,127.2,107.6,88];
+// 0.101 a third arc outside both holds the Master slots (Alt+1-5), shown once a Master skill is learned.
+const INNER=[180,150,120,90],OUTER=[186,166.4,146.8,127.2,107.6,88],MASTER=[182,159,136,113,90];
 function layoutWheel(){
  const box=document.querySelector('.combat-controls');if(!box)return;
  const compact=compactQuery.matches;
@@ -17,7 +18,7 @@ function layoutWheel(){
  if(auto){auto.style.right=Math.round(cx+outer+slot/2+8)+'px';auto.style.bottom='4px';box.style.width=Math.round(cx+outer+slot/2+8+autoSize+4)+'px';}
  document.documentElement.style.setProperty('--wheel-width',box.style.width);
  [...document.querySelectorAll('#skills .skill')].forEach((b,i)=>{
-  const a=(i<4?INNER[i]:OUTER[i-4])*Math.PI/180,r=i<4?inner:outer;
+  const a=(i<4?INNER[i]:i<10?OUTER[i-4]:MASTER[i-10])*Math.PI/180,r=i<4?inner:i<10?outer:outer+slot+8;
   b.style.right=Math.round(cx-Math.cos(a)*r-slot/2)+'px';b.style.bottom=Math.round(cy+Math.sin(a)*r-slot/2)+'px';
  });
 }

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {poseChannels} from './pose-test-helpers.mjs';
 import {SKILL_TRACKS,skillTrack,skillPose} from '../skill-choreography.js';
 import {deformPoint} from '../character-motion.js';
 import {CLASSES,NOVICE} from '../classes.js';
@@ -10,10 +11,10 @@ const classes=[NOVICE,...CLASSES];
 test('80 skills have distinct timed body tracks, with a neutral start and recovery',()=>{
  const signatures=new Set();
  for(const {id} of classes){assert.equal(SKILL_TRACKS[id].length,10);
-  for(let i=0;i<10;i++){const t=skillTrack(id,i),neutral=skillPose(id,i,0);assert.deepEqual(skillPose(id,i,t.duration),neutral);assert.deepEqual(skillPose(id,i,NaN),neutral);
+  for(let i=0;i<10;i++){const t=skillTrack(id,i),neutral=skillPose(id,i,0),recovery=skillPose(id,i,t.duration);assert.deepEqual(poseChannels(recovery),poseChannels(neutral));assert.equal(recovery.mode,'cast');assert.equal(recovery.time,t.duration);assert.deepEqual(skillPose(id,i,NaN),neutral);
    const samples=Array.from({length:41},(_,n)=>skillPose(id,i,t.duration*n/40));
-   for(const p of samples)assert.ok(Object.values(p).every(Number.isFinite));
-   signatures.add(JSON.stringify(samples));assert.ok(t.strikes.every(q=>q>0&&q<1));
+   for(const [n,p] of samples.entries()){assert.ok(Object.values(poseChannels(p)).every(Number.isFinite));assert.equal(p.mode,'cast');assert.equal(p.time,t.duration*n/40);assert.equal(p.phase,null);assert.equal(p.reduced,false);}
+   signatures.add(JSON.stringify(samples.map(poseChannels)));assert.ok(t.strikes.every(q=>q>0&&q<1));
   }
  }assert.equal(signatures.size,80);assert.equal(skillTrack('invalid',0),null);
 });
@@ -29,7 +30,7 @@ test('every skill preserves a connected non-inverted rig throughout motion',()=>
 });
 test('reduced motion retains a skill cue without translation or mesh deformation',()=>{
  for(const {id} of classes)for(let i=0;i<10;i++)for(const q of [.2,.5,.8]){
-  const p=skillPose(id,i,skillTrack(id,i).duration*q,{reduced:true});assert.equal(p.x+p.y+p.rotation,0);
+  const p=skillPose(id,i,skillTrack(id,i).duration*q,{reduced:true});assert.equal(p.mode,'cast');assert.equal(p.reduced,true);assert.equal(p.x+p.y+p.rotation,0);
   const point=deformPoint(.5,.5,p);assert.deepEqual(point,{x:.5,y:.5});if(q===.5)assert.equal(p.frame,3);
  }
 });

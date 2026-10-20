@@ -1,7 +1,7 @@
 import {motionFrame} from './animation-frames.js?v=37';
 import {neutralJoints} from './character-rig.js?v=37';
 // Joint targets drive fixed-length arms/legs. Root motion is translation, not scale.
-export const MOTION_MODES=['idle','walk','attack','cast','guard','hit','dash','bow','celebrate','rest'];
+export const MOTION_MODES=['idle','walk','run','sit','sleep','attack','cast','guard','hit','dash','bow','celebrate','rest'];
 const clamp=v=>Math.max(0,Math.min(1,v));
 const ease=v=>{v=clamp(v);return v*v*(3-2*v);};
 // World units walked per full 8-frame walk cycle, measured from the art so the planted foot does not slide:
@@ -19,7 +19,7 @@ export function walkView(face,azimuth,previous='side'){
 // Owner: steps looked too quick. At town pace the art's short stride needs ~4 cycles/s (8-9 steps/s, a sprint), so the
 // cadence is capped: up to WALK_CADENCE cycles per second the planted foot keeps pace, above it the feet slide a little.
 export const WALK_CADENCE=2;
-export const gaitStep=(distance,dt,classId)=>Math.min(distance/walkCycle(classId),Math.max(0,dt)*WALK_CADENCE);
+export const gaitStep=(distance,dt,classId,mode='walk')=>Math.min(Math.max(0,distance)/(walkCycle(classId)*(mode==='run'?1.45:1)),Math.max(0,dt)*(mode==='run'?1.7:WALK_CADENCE));
 // 0.56.2: the redrawn side walks (outputs/walk-handoff, scripts/import-walk056.py) step 20 px per frame (acolyte 16, robe).
 // 0.61.3 owner chose the original character art again; its walk strides ~2.1 world units per cycle for every class.
 // Per-class values return here if a redrawn walk in the original style is added later.
@@ -27,9 +27,9 @@ const WALK_CYCLE={};
 export const walkCycle=classId=>WALK_CYCLE[classId]??2.1;
 export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side'}={}){
- const t=Math.max(0,Number.isFinite(time)?time:0),p={artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
+ const t=Math.max(0,Number.isFinite(time)?time:0),p={mode,time:Math.max(0,Number.isFinite(time)?time:0),phase,reduced,artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
  if(reduced)return p;
- if(mode==='walk'){
+ if(mode==='walk'||mode==='run'){
   // 0.29: livelier gait. Bigger stride and arm swing, a forward lean, a rise while the feet pass,
   // with planted stance feet and a lifted swing leg.
   const a=(phase??t*1.65)*Math.PI*2,s=Math.sin(a),c=Math.cos(a),step=Math.max(0,-Math.cos(a*2))**2;
@@ -68,7 +68,7 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
  else if(mode==='celebrate'){const q=t%1.2,up=Math.sin(clamp((q-.16)/.7)*Math.PI);p.y=up*.14;p.crouch=q<.16?Math.sin(q/.16*Math.PI)*.025:0;p.armL=-up*.04;p.armR=up*.04;}
  else if(mode==='rest'){p.crouch=ease(t/.6)*.06;p.armL=.012;p.armR=-.012;p.head=.006;}
  else{p.body=Math.sin(t*2.1)*.003;p.armL=Math.sin(t*2.1-.3)*.002;p.armR=-p.armL;}
- if(!['walk','attack'].includes(mode)){
+ if(!['walk','run','attack'].includes(mode)){
   p.handLX=p.armL;p.handRX=p.armR;p.handLY=-(p.armLY??0)-p.armL*.5;p.handRY=-(p.armRY??0)-p.armR*.5;
   p.footLX=p.legL;p.footRX=p.legR;p.footLY=-p.liftL;p.footRY=-p.liftR;
  }

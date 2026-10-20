@@ -10,7 +10,7 @@ import * as THREE from 'three';
 
 const $=id=>document.getElementById(id);
 const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
-const POSES=[['bow','ไหว้'],['celebrate','ดีใจ'],['rest','นั่งพัก'],['guard','ตั้งท่า']];
+const POSES=[['idle','ลุก / ยืน'],['sit','นั่งพัก'],['sleep','นอนพัก'],['bow','ไหว้'],['celebrate','ดีใจ'],['guard','ตั้งท่า']];
 
 export function createLifeUI({game,account,camera}){
  if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=64';css.dataset.lifeUi='';document.head.append(css);}
@@ -26,14 +26,25 @@ export function createLifeUI({game,account,camera}){
  // Emote picker beside the quick slots; own bubble floats over the hero.
  const button=document.createElement('button');button.type='button';button.id='emote-open';button.title='อีโมต';button.setAttribute('aria-label','อีโมต');button.innerHTML=icon(emoteId(3));
  ($('quick-slots')??document.body).append(button);
+ const runButton=document.createElement('button');runButton.id='run-toggle';runButton.type='button';runButton.textContent='วิ่ง';runButton.setAttribute('aria-label','เปิดโหมดวิ่ง');runButton.setAttribute('aria-pressed','false');($('quick-slots')??document.body).append(runButton);
+ runButton.onclick=()=>{game.setRunning(!game.runningRequested);drawActions();};
  const picker=document.createElement('dialog');picker.id='emote-window';picker.setAttribute('aria-label','อีโมต');
- picker.innerHTML='<div class="emote-grid">'+Array.from({length:24},(_,i)=>`<button type="button" data-b="${i+1}" aria-label="อีโมต ${i+1}">${icon(emoteId(i+1))}</button>`).join('')+'</div><div class="emote-poses">'+POSES.map(([k,n])=>`<button type="button" data-pose="${k}">${n}</button>`).join('')+'</div>';
+ picker.innerHTML='<div class="emote-grid">'+Array.from({length:24},(_,i)=>`<button type="button" data-b="${i+1}" aria-label="อีโมต ${i+1}">${icon(emoteId(i+1))}</button>`).join('')+'</div><div class="emote-poses" style="flex-wrap:wrap">'+POSES.map(([k,n])=>`<button type="button" data-pose="${k}" style="flex:1 0 28%" aria-pressed="false">${n}</button>`).join('')+'</div><p class="animation-availability" aria-live="polite"></p>';
  ($('game-shell')??document.body).append(picker);
  button.onclick=()=>{if(picker.open)picker.close();else{game.clearInput();openHudPanel(picker);}};
  const bubble=document.createElement('span');bubble.className='emote-bubble';bubble.hidden=true;($('world-labels')??document.body).append(bubble);let bubbleUntil=0;
  const showBubble=id=>{bubble.innerHTML=icon(emoteId(id));bubbleUntil=performance.now()+3000;};
  picker.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{const id=+b.dataset.b;picker.close();showBubble(id);if(game.online)world.market?.('bubble',{id});});
- picker.querySelectorAll('[data-pose]').forEach(b=>b.onclick=()=>{picker.close();dispatchEvent(new CustomEvent('hero-emote',{detail:b.dataset.pose}));});
+ picker.querySelectorAll('[data-pose]').forEach(b=>b.onclick=()=>{picker.close();game.requestEmote(b.dataset.pose);drawActions();});
+ let actionSignature='';
+ function drawActions(){
+  const missing=['run','sit','sleep'].filter(k=>!game.supportsAction(k)),active=world.emote?.name??'idle',signature=missing.join(',')+'/'+active+'/'+game.runningRequested;
+  if(signature===actionSignature)return;actionSignature=signature;
+  for(const b of picker.querySelectorAll('[data-pose]')){b.disabled=!game.supportsAction(b.dataset.pose);b.title=b.disabled?'กำลังรอภาพแอนิเมชันของตัวละครชุดนี้':'';b.setAttribute('aria-pressed',String(active===b.dataset.pose));}
+  runButton.disabled=!game.supportsAction('run');runButton.setAttribute('aria-pressed',String(game.runningRequested));runButton.setAttribute('aria-label',game.runningRequested?'เปลี่ยนกลับเป็นเดิน':'เปิดโหมดวิ่ง');runButton.textContent=game.runningRequested?'เดิน':'วิ่ง';runButton.title=runButton.disabled?'ท่าวิ่งกำลังรอภาพแอนิเมชันของตัวละครชุดนี้':'แตะสลับเดิน / วิ่ง · คีย์บอร์ดกด Shift ค้าง';
+  picker.querySelector('.animation-availability').textContent=missing.length?'รอภาพของตัวละครชุดนี้: '+missing.map(k=>({run:'วิ่ง',sit:'นั่ง',sleep:'นอน'}[k])).join(' · '):'เดินหรือโจมตีเพื่อลุกจากท่านั่ง / นอน';
+ }
+ addEventListener('character-animation-capabilities',drawActions);drawActions();
  const at=new THREE.Vector3();
  function placeBubble(){
   if(performance.now()>bubbleUntil){bubble.hidden=true;return;}
@@ -86,5 +97,5 @@ export function createLifeUI({game,account,camera}){
   const end=new Date(e.end+'T00:00:00+07:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});
   fest.innerHTML=`${icon('krathong','item-icon small')}<span>${e.name}</span><b>ถึง ${end}</b>`;fest.onclick=()=>world.notice(e.name+' · '+e.text);
   setTimeout(()=>world.notice('🏮 '+e.name+' · '+e.text),6000);}
- return {update(){drawAilments();placeBubble();drawChip();drawEvent();}};
+ return {update(){drawAilments();placeBubble();drawChip();drawEvent();drawActions();}};
 }

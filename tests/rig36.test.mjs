@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {poseChannels} from './pose-test-helpers.mjs';
 import {rigDefinition,sampleRig,transformPoint,solveLimb,JOINT_CHANNELS} from '../character-rig.js';
 import {characterMotion,MOTION_MODES} from '../character-motion.js';
 import {skillPose,skillTrack,SKILL_TRACKS} from '../skill-choreography.js';
@@ -44,7 +45,7 @@ test('stance feet stay near ground, swing feet lift and blocked movement freezes
   for(let step=0;step<20;step++){
    const phase=step/20,p=characterMotion({classId:id,mode:'walk',phase}),m=sampleRig(rig,p);
    for(const side of ['L','R']){const foot=transformPoint(m['foot'+side],rig.nodes['foot'+side].at);if(p['foot'+side+'Y']===0)near(foot.y,rig.sole,.025);else assert.ok(foot.y<rig.sole+.01);}
-   assert.deepEqual(p,characterMotion({classId:id,mode:'walk',phase,time:999}));assert.equal(p.sx,1);assert.equal(p.sy,1);
+   const later=characterMotion({classId:id,mode:'walk',phase,time:999});assert.deepEqual(poseChannels(p),poseChannels(later));assert.equal(later.phase,phase);assert.equal(later.time,999);assert.equal(p.sx,1);assert.equal(p.sy,1);
   }
  }
 });

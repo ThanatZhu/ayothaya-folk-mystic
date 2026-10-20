@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {poseChannels} from './pose-test-helpers.mjs';
 import fs from 'node:fs';
 import {character} from '../realm-state.js';
 import {createRealmStore} from '../realm-store.js';
@@ -39,5 +40,5 @@ test('job and appearance persist through save; chosen class and Master remain fi
  await assert.rejects(store.changeClass('server-1',a,'hunter'),/class-final/);assert.deepEqual(a.character.appearance,hero.appearance);assert.equal(a.state.traveler.kills,590);
 });
 test('motion states stay finite and bounded and respect reduced motion',()=>{
- for(const mode of MOTION_MODES)for(const classId of Object.keys(JOBS))for(const time of [0,.1,1,3,8]){const s=characterMotion({time,mode,classId});assert.ok(s.frame>=0&&s.frame<=3);assert.ok(Object.values(s).every(Number.isFinite));assert.ok(s.sx>0&&s.sy>0);const r=characterMotion({time,mode,classId,reduced:true});assert.equal(r.rotation,0);assert.equal(r.x,0);assert.equal(r.y,0);}
+ for(const mode of MOTION_MODES)for(const classId of Object.keys(JOBS))for(const time of [0,.1,1,3,8]){const s=characterMotion({time,mode,classId});assert.equal(s.mode,mode);assert.equal(s.time,time);assert.equal(s.phase,null);assert.equal(s.reduced,false);assert.ok(s.frame>=0&&s.frame<=3);assert.ok(Object.values(poseChannels(s)).every(Number.isFinite));assert.ok(s.sx>0&&s.sy>0);const r=characterMotion({time,mode,classId,reduced:true});assert.equal(r.reduced,true);assert.equal(r.rotation,0);assert.equal(r.x,0);assert.equal(r.y,0);}
 });

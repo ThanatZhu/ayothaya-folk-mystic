@@ -1,6 +1,6 @@
 import {skillFrame} from './animation-frames.js?v=37';
 // Authored skill tracks over the existing sprite rig. Timing is visual, not combat balance.
-import {characterMotion} from './character-motion.js?v=37';
+import {characterMotion} from './character-motion.js?v=life1';
 import {JOINT_CHANNELS} from './character-rig.js?v=37';
 import {gestureJoints} from './joint-gestures.js?v=37';
 const gestures={
@@ -149,13 +149,15 @@ export const SKILL_TRACKS=Object.fromEntries(Object.entries(tracks).map(([id,row
 })]));
 export function skillTrack(classId,index){return SKILL_TRACKS[classId]?.[index]??null;}
 export function skillPose(classId,index,time,{reduced=false}={}){
- const p={...characterMotion({reduced:true}),armLY:0,armRY:0},track=skillTrack(classId,index);
+ // Clip metadata is not a joint channel. Keep cast at both neutral endpoints so
+ // a painted idle clip cannot replace the first or recovery frame of a skill.
+ const p={...characterMotion({reduced:true}),mode:'cast',time:Number.isFinite(time)?Math.max(0,time):0,phase:null,reduced,armLY:0,armRY:0},track=skillTrack(classId,index);
  if(!track||!Number.isFinite(time)||time<=0||time>=track.duration)return p;
  const q=time/track.duration;
  if(reduced){p.frame=q>.25&&q<.8?3:0;return p;}
  const times=[0,...track.times,1],poses=[{},...track.sequence.map(g=>({...gestures[g],...gestureJoints(g,classId)})),{}];
  const j=times.findIndex(t=>t>q),a=poses[j-1],b=poses[j];let f=(q-times[j-1])/(times[j]-times[j-1]);f=f*f*(3-2*f);
- for(const key of Object.keys(p))if(!['frame','artFrame','sx','sy'].includes(key))p[key]=((a[key]??0)*(1-f)+(b[key]??0)*f)*(JOINT_CHANNELS.includes(key)?1:track.weight);
+ for(const key of Object.keys(p))if(!['mode','time','phase','reduced','frame','artFrame','sx','sy'].includes(key))p[key]=((a[key]??0)*(1-f)+(b[key]??0)*f)*(JOINT_CHANNELS.includes(key)?1:track.weight);
  // A kick, guard or recovery must not borrow the extended-punch illustration.
  const nearest=track.times.reduce((best,t,n)=>Math.abs(t-q)<Math.abs(track.times[best]-q)?n:best,0);
  p.frame=q>=.22&&q<.85&&attackArt.has(track.sequence[nearest])?3:0;

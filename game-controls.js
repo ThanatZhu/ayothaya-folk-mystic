@@ -2,12 +2,13 @@ import {itemDef} from './items.js?v=94';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=73';
 import {applySkillArt} from './skill-art.js?v=21';
-import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
-import {skillTrack,skillPose} from './skill-choreography.js?v=37';
+import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=life1';
+import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction} from './character-action-state.js?v=life1';
+import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=97';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=life1';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints} from './skill-progress.js?v=87';
 import {createRouteWalker} from './route-walk.js?v=01';
 
@@ -34,8 +35,17 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function pillar(x,z,rarity){const m=new THREE.Mesh(new THREE.CylinderGeometry(.18,.42,6,12,1,true),new THREE.MeshBasicMaterial({color:RARITY_COLOR[rarity],transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));m.position.set(x,3,z);scene.add(m);pillars.push({m,age:0});}const footDust=createFootDust(scene);
  let strikes=[],shakeAmount=0,lastStep=0;
  let heroView='side',heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
- const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,emoteUntil=0,emote='idle';
- addEventListener('hero-emote',e=>{if(['bow','celebrate','rest','guard'].includes(e.detail)){network?.command('emote',{name:e.detail});castUntil=0;activeSkill=null;emote=e.detail;emoteUntil=world.time+4;actionStart=world.time;world.auto=false;clearInput();}});
+ const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,runToggled=false,capabilitySignature='';
+ const supportsAction=action=>supportsCharacterAction(action,hero.sprite.userData.supportsAction?.bind(hero.sprite.userData));
+ function refreshAnimationCapabilities(){const actions=CHARACTER_ACTIONS.filter(supportsAction),signature=actions.join(',');if(signature!==capabilitySignature){capabilitySignature=signature;if(!supportsAction('run'))runToggled=false;dispatchEvent(new CustomEvent('character-animation-capabilities',{detail:{actions}}));}return actions;}
+ function setRunning(value){runToggled=value===true&&supportsAction('run');return runToggled;}
+ function requestEmote(action){
+  const name=canonicalAction(action);if(!EMOTE_ACTIONS.includes(name)||world.player.hp<=0)return false;
+  if(!supportsAction(name)){world.notice('ท่านี้กำลังรอภาพแอนิเมชันของตัวละครชุดนี้');return false;}
+  if(network&&!network.command('emote',{name}))return false;
+  clearInput();network?.setInput({x:0,z:0,attack:false,run:false});castUntil=0;activeSkill=null;actionStart=world.time;return world.setEmote(name);
+ }
+ addEventListener('hero-emote',e=>requestEmote(e.detail));
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),touches=new Map();let pinchDistance=0,mouseStart=null;
  // Click / tap to move (Ragnarok style): a route walker feeds the joystick direction; a gold ring marks the spot.
  const walker=createRouteWalker(()=>world.nav),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),groundHit=new THREE.Vector3();
@@ -97,7 +107,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    // Basic auto-attacks must not replace a skill's active pose mid-animation.
    if(track||world.time>=castUntil||activeSkill===null){
     activeSkill=track?e.skillIndex:null;castUntil=world.time+(track?.duration??attackDuration(world.profession.id));
-    actionStart=world.time;emoteUntil=0;actionMode=!track?'attack':e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
+    actionStart=world.time;world.clearEmote();actionMode=!track?'attack':e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    }
    const beats=track?track.strikes.map(b=>world.time+b*track.duration):[world.time+.12];strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    const presentation=track??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
@@ -137,7 +147,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(isPaused()||editable(e)||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.code==='Space'&&e.target.closest?.('[data-hud-panel] button,#account-panel button'))return;
   if(['KeyW','KeyA','KeyS','KeyD','Space','KeyF'].includes(e.code)||/^Digit[0-9]$/.test(e.code))e.preventDefault();
-  if(['KeyW','KeyA','KeyS','KeyD','Space'].includes(e.code))keys.add(e.code);
+  if(['KeyW','KeyA','KeyS','KeyD','Space','ShiftLeft','ShiftRight'].includes(e.code))keys.add(e.code);
   if(e.repeat)return;
   if(e.code==='KeyF')world.toggleAuto();
   if(e.code==='Space')world.basicAttack();
@@ -198,31 +208,34 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   let direction=screenDirection(x,y,controls.getAzimuthalAngle());
   // Keys / joystick always win over a tapped route; otherwise the route steers like a held joystick.
   if(Math.hypot(x,y)>.08||world.player.hp<=0)walker.cancel();else if(!paused){const routed=walker.step(world.player,dt);if(routed)direction=routed;}
-  if(marker.visible){markerAge+=dt;if(walker.active){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}if(network){network.setInput(paused?{x:0,z:0,attack:false}:{...direction,attack:input.attack||keys.has('Space')});world.time+=dt;predictMove(world,serverSelf,dt,paused?{x:0,z:0}:direction);}else if(!paused)world.update(dt,{...direction,attack:input.attack||keys.has('Space')});
+  refreshAnimationCapabilities();
+  const steering=paused?{x:0,z:0,attack:false,run:false}:{...direction,attack:input.attack||keys.has('Space'),run:supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'))};
+  if(marker.visible){markerAge+=dt;if(walker.active){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}if(network){network.setInput(steering);world.time+=dt;predictMove(world,serverSelf,dt,steering);}else if(!paused)world.update(dt,steering);
   world.events.splice(0).forEach(e=>{effect(e);for(const fn of listeners)fn(e);});
   const p=world.player,t=world.time,reduced=motionPreference.matches;
-  if(p.moving)emoteUntil=0;
-  const mode=t<hitUntil?'hit':t<castUntil?actionMode:t<emoteUntil?emote:p.moving?'walk':p.shield>0?'guard':'idle';
+  if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
+  const chosen=actionChoice({time:t,dead:p.hp<=0,hit:t<hitUntil,cast:t<castUntil?actionMode:false,moving:p.moving,running:p.running,emote:world.emote,guard:p.shield>0});
+  const mode=['sit','sleep','run'].includes(chosen)&&!supportsAction(chosen)?(chosen==='run'?'walk':'idle'):chosen;
   const distanceMoved=Math.hypot(p.x-lastX,p.z-lastZ);lastX=p.x;lastZ=p.z;
-  if(distanceMoved<1)gait+=gaitStep(distanceMoved,dt,world.profession.id); // No steps while blocked; teleports do not advance the gait.
+  if(distanceMoved<1)gait+=gaitStep(distanceMoved,dt,world.profession.id,mode); // No steps while blocked; teleports do not advance the gait.
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
-  const poseTime=mode==='walk'||mode==='idle'?t:mode==='hit'?t-hitStart:t-actionStart;
-  const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:poseTime,phase:mode==='walk'?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
+  const locomotion=mode==='walk'||mode==='run',poseTime=locomotion||mode==='idle'?t:mode==='hit'?t-hitStart:world.emote?.name===mode?t-world.emote.time:t-actionStart;
+  const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
   if(!visualPose||reduced)visualPose={...pose};
-  else for(const key of Object.keys(pose))visualPose[key]=['frame','artFrame','stand'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
+  else for(const key of Object.keys(pose))visualPose[key]=typeof pose[key]!=='number'||['frame','artFrame','stand','time','phase'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,groundHeight(world.nav,p.x,p.z)+.06+(hero.sprite.userData.directionalActive&&mode==='walk'?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
   hero.sprite.scale.set(heroSize,heroSize,1);
   const azimuth=controls.getAzimuthalAngle();
   if(hero.frames)hero.sprite.material.map=hero.frames[0];
-  hero.sprite.userData.setFacing?.(p.face,azimuth,{mode,time:poseTime,phase:mode==='walk'?gait:null,reduced});
+  hero.sprite.userData.setFacing?.(p.face,azimuth,{mode,time:poseTime,phase:locomotion?gait:null,reduced});
   const facing=p.face.x*Math.cos(azimuth)-p.face.z*Math.sin(azimuth);
   if(Math.abs(facing)/faceLength>.3)heroFlip=facing<0; // hysteresis: keep the last side until clearly turning
   hero.sprite.userData.pose?.(visualPose,heroFlip);
   hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   footDust.update(dt);
-  if(mode==='walk'&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,p.z>4.25?.44:.09,p.z-p.face.z/faceLength*.25);}}
+  if(locomotion&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,p.z>4.25?.44:.09,p.z-p.face.z/faceLength*.25);}}
   let flash=0,shake=0;for(const s of strikes){const d=t-s.at;if(d>=0&&d<.45){flash=Math.max(flash,s.power*Math.exp(-d*9));if(d<.25)shake=Math.max(shake,s.power*Math.exp(-d*16));}}strikes=strikes.filter(s=>t-s.at<.5);
   castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,1.3,p.z);kick*=Math.exp(-dt*14);shakeAmount=reduced?0:Math.max(shake*.11,kick*.07);
   const floor=groundHeight(world.nav,p.x,p.z);hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
@@ -277,19 +290,20 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  function mobileLayout(){return innerWidth<=800||matchMedia('(pointer:coarse)').matches;}
  function updateHelp(){
-  document.querySelector('.control-hint').textContent=mobileLayout()?'ลากจอยซ้ายเพื่อเดิน · แตะมอนเลือกเป้า · ลากด้านขวาหมุนกล้อง':'WASD เดิน · Space โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E ใช้ยา';
+  document.querySelector('.control-hint').textContent=mobileLayout()?'ลากจอยซ้ายเพื่อเดิน'+(supportsAction('run')?' · แตะปุ่มวิ่งเพื่อสลับจังหวะ':'')+' · แตะมอนเลือกเป้า · ลากด้านขวาหมุนกล้อง':'WASD เดิน'+(supportsAction('run')?' · Shift วิ่ง':'')+' · Space โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E ใช้ยา';
   document.querySelector('.player-foot span:last-child').textContent=mobileLayout()?'จอยซ้าย · เดิน':'W A S D · เดิน';
  }
  updateHelp();addEventListener('resize',updateHelp);
  toast(mobileLayout()?'ลากจอยเดิน · แตะมอนและสกิลด้านขวา':'WASD เดิน · คลิกมอนเลือกเป้า · Space โจมตี · F ออโต้');
  function setNetwork(client){network=client;clearInput();world.auto=false;autoSent='';client.addEventListener('welcome',()=>{autoSent='';}); // a fresh server world starts on default AUTO settings
   // 0.97 the AUTO button shows only what the server reports.
-  world.skill=i=>client.command('skill',{index:i});world.basicAttack=()=>client.command('attack');world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=on=>client.command('auto',{on});world.questTalk=npc=>client.command('questTalk',{npc});world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard)=>client.command('refine',{slot,npc,lekLai,guard});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});
+  world.skill=i=>{world.clearEmote();return client.command('skill',{index:i});};world.basicAttack=()=>{world.clearEmote();return client.command('attack');};world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=on=>client.command('auto',{on});world.questTalk=npc=>client.command('questTalk',{npc});world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard)=>client.command('refine',{slot,npc,lekLai,guard});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});
  }
  function applyNetworkSnapshot(snapshot){const s=snapshot.self;if(s.story)world.story=s.story;world.myStall=s.stall??null;world.myGuild=s.guild??null;world.status=s.status??{};world.mvp=s.mvp??null;world.pet=s.pet??null;world.bounty=s.bounty??null;world.mercLeft=s.merc??0;world.album=s.album??[];if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
+  serverSelf.running=s.player.running===true;world.emote=activeEmote(s.emote,snapshot.time);
   for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);}
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
- return {popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;}};
+ return {popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

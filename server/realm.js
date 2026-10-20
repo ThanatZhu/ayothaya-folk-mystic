@@ -1,4 +1,5 @@
 import {normalizeAuto,pickPotion} from '../auto-play.js';
+import {activeEmote,canonicalAction,EMOTE_ACTIONS} from '../character-action-state.js';
 import {markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from '../monster-catalog.js';
 import {normalizeEquipment} from '../equipment.js';
 import {randomUUID} from 'node:crypto';
@@ -41,7 +42,7 @@ function autoPotionFor(realm,p){
 }
 export class RealmServer{
  autoPotion(p){autoPotionFor(this,p);}
- constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false}={}){this.wars=new Map();this.warAlways=warAlways;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
+ constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false}={}){this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
   let existing=[...this.peers.values()].find(p=>p.uid===uid);
@@ -87,7 +88,7 @@ export class RealmServer{
   p.room.contributors.forEach(set=>set.delete(id));this.social(p.room);
   if(!p.room.peers.size)this.rooms.delete(p.room.id);
  }
- suspend(id){const p=this.peers.get(id);if(!p)return;this.endTrade(p,'อีกฝ่ายหลุดการเชื่อมต่อ');p.stall=null;p.suspended=true;p.resumeUntil=this.now()+20000;p.input={x:0,z:0,attack:false};p.world.auto=false;p.world.player.moving=false;this.social(p.room);}
+ suspend(id){const p=this.peers.get(id);if(!p)return;this.endTrade(p,'อีกฝ่ายหลุดการเชื่อมต่อ');p.stall=null;p.suspended=true;p.resumeUntil=this.now()+20000;p.input={x:0,z:0,attack:false,run:false};p.world.auto=false;p.world.clearEmote();p.world.player.moving=false;p.world.player.running=false;this.social(p.room);}
  error(p,code){p.send({type:'error',code});return false;}
  receive(id,m){
   const p=this.peers.get(id);if(!p||p.suspended)return false;
@@ -193,8 +194,10 @@ export class RealmServer{
    w.skillLevels=[...p.skills[p.character.classId]];return true;
   }
   if(m.type==='input'){
-   if(!Number.isFinite(m.x)||!Number.isFinite(m.z)||Math.abs(m.x)>1||Math.abs(m.z)>1||typeof m.attack!=='boolean')return this.error(p,'invalid-input');
-   const n=Math.max(1,Math.hypot(m.x,m.z));p.input={x:m.x/n,z:m.z/n,attack:m.attack};p.inputAt=now;return true;
+   if(!Number.isFinite(m.x)||!Number.isFinite(m.z)||Math.abs(m.x)>1||Math.abs(m.z)>1||typeof m.attack!=='boolean'||(m.run!==undefined&&typeof m.run!=='boolean'))return this.error(p,'invalid-input');
+   // Sprint remains closed until a server release enables the reviewed art.
+   // Client capability flags and hand-written input packets cannot unlock it.
+   const distance=Math.hypot(m.x,m.z),n=Math.max(1,distance);p.input={x:m.x/n,z:m.z/n,attack:m.attack,run:this.runEnabled&&m.run===true&&distance>.08};p.inputAt=now;if(distance>.08||m.attack)w.clearEmote();return true;
   }
   if(m.type==='autoConfig'){w.autoConfig=normalizeAuto(m);return true;} // 0.90 skills + potion thresholds for AUTO
   if(['skill','attack','select','auto','emote'].includes(m.type)){
@@ -203,8 +206,10 @@ export class RealmServer{
    if(m.type==='skill'){if(!integer(m.index,0,9))return this.error(p,'invalid-skill');return w.skill(m.index);}
    if(m.type==='attack')return w.basicAttack();
    if(m.type==='auto'){if(typeof m.on==='boolean')w.setAuto(m.on);else w.toggleAuto();return true;}
-   if(!['bow','celebrate','rest','guard'].includes(m.name))return this.error(p,'invalid-emote');
-   p.emote={name:m.name,time:this.clock};p.room.events.push({type:'emote',actor:p.id,name:m.name});return true;
+   const name=canonicalAction(m.name);if(!EMOTE_ACTIONS.includes(name))return this.error(p,'invalid-emote');
+   if(!w.setEmote(name))return this.error(p,'invalid-emote');
+   // Clear the last held input too: a sit command cannot keep steering until its next packet.
+   p.input={x:0,z:0,attack:false,run:false};p.inputAt=now;p.room.events.push({type:'emote',actor:p.id,name,time:this.clock});return true;
   }
   if(m.type==='chat'){
    if(now-p.chatAt<1200)return this.error(p,'chat-rate');
@@ -577,12 +582,13 @@ export class RealmServer{
   if(cards.length){const al=albumAdd(p.album,cards);if(al.added){p.album=al.album;p.saveNow=true;for(const m of al.milestones){p.world.emit('album',{count:m.count});this.grantLoot(p,structuredClone(m.reward));}}}
  }
  progress(p){return {classId:p.character.classId,jobId:p.character.jobId??'',jobXp:p.world.jobXp};}
+ emoteView(p){const emote=activeEmote(p.world.emote,p.world.time);return emote?{name:emote.name,time:this.clock-Math.max(0,p.world.time-emote.time)}:null;}
  snapshot(p){
   this.refreshStats(p);
   if(p.stall&&Math.hypot(p.world.player.x-p.stall.x,p.world.player.z-p.stall.z)>3){p.stall=null;p.world.notice('เดินออกจากแผง · ปิดแผงแล้ว');}
-  const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:a.emote,partyId:a.partyId});
+  const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:this.emoteView(a),partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
-  const players=visible.map(a=>{const v=a.world.player,result={id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,face:{x:round(v.face.x),z:round(v.face.z)}},partyId:a.partyId,connected:!a.suspended,pet:a.pet?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a)};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
+  const players=visible.map(a=>{const v=a.world.player,result={id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,moving:v.moving,running:v.running===true,face:{x:round(v.face.x),z:round(v.face.z)}},emote:this.emoteView(a),partyId:a.partyId,connected:!a.suspended,pet:a.pet?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a)};if(!p.known.has(a.id))result.character=a.character;return result;});p.known=seen;
   return copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})},players,mobs:p.room.mobs});
  }
  travelDestination(p,id,{warp=false}={}){
@@ -597,7 +603,7 @@ export class RealmServer{
   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
   if(warp){const b=normalizeBag(p.bag);b.coins-=fare;this.setBag(p,b);}
   else if(recall){const b=normalizeBag(p.bag);b.items['return-incense']--;if(!b.items['return-incense'])delete b.items['return-incense'];this.setBag(p,b);}
-  this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;
+  this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();p.world.player.running=false;
   return destination;
  }
  record(p,original){return {...copy(original),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),story:copy(p.story),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),album:copy(p.album),trade:{xp:p.tradeXp??0},pet:copy(p.pet),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}

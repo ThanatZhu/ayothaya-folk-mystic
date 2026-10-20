@@ -1,5 +1,6 @@
 import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js';
+import {activeEmote,canonicalAction,EMOTE_ACTIONS,movementSpeed} from './character-action-state.js?v=life1';
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
 import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=73';
@@ -117,7 +118,7 @@ export class CombatWorld{
  constructor(config={}){
   this.profession=advanceStats(getClass(config.classId??'shaman'),config.jobId);this.skills=advanceSkills(classSkills(this.profession.id,SKILLS).map((s,i)=>patch('skills',this.profession.id+':'+i,{...s})),this.profession.id,config.jobId);
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
-  this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,face:{x:1,z:0}};
+  this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,running:false,face:{x:1,z:0}};this.emote=null;
   this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack,leader],id)=>({id,type,pack,leader:!!leader,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),maxHp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
   this.autoConfig=normalizeAuto(null);this.autoCast=0;this.autoIdle=0;this.foe=null;this.rivals=[];this.food=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=SKILLS.map(()=>0);this.skillLevels=SKILLS.map(()=>1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
  }
@@ -134,10 +135,16 @@ export class CombatWorld{
  // 0.95 guild war: rivals are enemy-guild players and the guardian stone, kept in step by the server the same way.
  foes(){return this.foe||this.rivals.length?[...this.mobs,...(this.foe?[this.foe]:[]),...this.rivals]:this.mobs;}
  get target(){return this.foes().find(m=>m.id===this.targetId&&m.hp>0)??null;}
- emit(type,extra={}){this.events.push({type,...extra});}
+ emit(type,extra={}){if(type==='cast'||type==='playerHit')this.clearEmote();this.events.push({type,...extra});}
+ clearEmote(){this.emote=null;}
+ setEmote(action){
+  const name=canonicalAction(action);if(!EMOTE_ACTIONS.includes(name)||this.player.hp<=0)return false;
+  if(name==='idle'){this.clearEmote();return true;}
+  this.emote={name,time:this.time};this.auto=false;this.path=[];this.pathTimer=0;this.player.moving=false;this.player.running=false;return true;
+ }
  // 0.48 ailments: blind and curse weaken every hit; stun/sleep stop acting; silence stops skills.
- // One walking speed for the world, the server and client prediction: class × curse × town pace.
- walkSpeed(){return this.profession.speed*(this.status?.curse?.6:1)*(this.safe?TOWN_PACE:1);}
+ // One movement rule for authority and prediction; sprint is an explicit modifier and never changes default pace.
+ walkSpeed(run=false){return movementSpeed(this.profession.speed*(this.status?.curse?.6:1)*(this.safe?TOWN_PACE:1),run);}
  weakness(){return (this.status.blind?.7:1)*(this.status.curse?.75:1);}
  inflict(name){if(!name||!AILMENTS[name])return;const fresh=!this.status[name];this.status[name]=AILMENTS[name].time;if(fresh)this.notice(AILMENTS[name].name+'! · '+AILMENTS[name].text);}
  // One monster blow, shared by the offline world and the realm server: damage, ailment roll, or going down (+ death penalty).
@@ -145,7 +152,7 @@ export class CombatWorld{
   const p=this.player,damage=monsterHit(this,type.damage,Math.random,type.id);if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
   p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});delete this.status.sleep;
   if(p.hp>0){this.inflict(rollAilment(type.id));return true;}
-  p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;this.status={};
+  p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;p.running=false;this.status={};
   const lost=deathPenalty(this);this.notice('หมดแรง · กลับลานใน 3 วินาที'+(lost?' · Base EXP -'+lost:''));return true;
  }
  // 0.58 combo: a skill on a rooted monster hits 30% harder.
@@ -171,13 +178,14 @@ export class CombatWorld{
  // 0.68 a point in front of the player (toward `toward` when given): where an attack or skill lands with no target.
  airPoint(range,toward=null){const p=this.player;if(toward){const dx=toward.x-p.x,dz=toward.z-p.z;if(Math.hypot(dx,dz)>.01)p.face={x:dx,z:dz};}const n=Math.hypot(p.face.x,p.face.z)||1;return {x:p.x+p.face.x/n*range,z:p.z+p.face.z/n*range};}
  basicAttack(quiet=false){
-  const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;
+  this.clearEmote();const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   // 0.68 no target in reach: swing at the air (auto-chase still uses AUTO / walking to the target).
   if(!m||distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(quiet||this.safe)return false;p.attackCD=this.profession.delay*(this.derived?.delay??1);this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:this.airPoint(Math.min(this.profession.range,2.4),m),color:this.profession.color,kind:this.profession.kind,air:true});return true;}
   p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?1.5:1)*this.affinity(m,true))),crit?'#ffd27a':undefined);}return true;
  }
  skill(index){
+  if(Number.isInteger(index)&&this.skills[index])this.clearEmote();
   const level=this.skillLevels[index]??1;if(this.skills[index]&&level<1){this.notice('ยังไม่ได้เรียนสกิลนี้');return false;}
   const s=scaledSkill(this.skills[index],level),p=this.player;if(!s||p.hp<=0||held(this.status))return false;
   if(this.status.silence){this.notice('ใบ้ · ใช้สกิลไม่ได้');return false;}
@@ -202,14 +210,15 @@ export class CombatWorld{
  }
  update(dt,input={x:0,z:0,attack:false},{monsters=true}={}){
   dt=Math.min(.05,Math.max(0,dt));this.time+=dt;const p=this.player;
+  this.emote=activeEmote(this.emote,this.time);if(Math.hypot(input.x,input.z)>.08||input.attack||this.auto||p.hp<=0)this.clearEmote();
   p.attackCD=Math.max(0,p.attackCD-dt);p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt*(this.derived?.mpRegen??1));
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;
   for(const k in this.status){this.status[k]-=dt;if(this.status[k]<=0)delete this.status[k];}
   if(this.food&&(this.food.left-=dt)<=0){this.food=null;this.notice('ฤทธิ์อาหารหมดแล้ว');}
   if(this.status.poison&&p.hp>1&&(this.poisonTick+=dt)>=1){this.poisonTick=0;const n=Math.min(p.hp-1,Math.max(1,Math.round(p.maxHp*.03)));p.hp-=n;this.emit('playerHit',{x:p.x,z:p.z,amount:n});}
-  const stop=held(this.status),speed=this.walkSpeed();
+  const stop=held(this.status),wantsRun=input.run===true&&Math.hypot(input.x,input.z)>.08,speed=this.walkSpeed(wantsRun);
   this.mercStep(dt);
-  if(p.hp<=0){p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
+  if(p.hp<=0){p.moving=false;p.running=false;p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
   if(this.safe)p.hp=Math.min(p.maxHp,p.hp+8*dt);
   const ox=p.x,oz=p.z,manual=!stop&&Math.hypot(input.x,input.z)>.08;
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
@@ -234,7 +243,7 @@ export class CombatWorld{
     }
    }
   }
-  p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;
+  p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;p.running=p.moving&&manual&&wantsRun;
   if(!monsters)return; // Shared-room servers advance each monster exactly once per tick.
   for(const m of this.mobs){
    const type=MONSTER_TYPES[m.type],outcome=advanceMonster(m,p,type,dt,this.nav,{moveBody,lineClear});
@@ -253,10 +262,11 @@ export class CombatWorld{
 // ease onto the server position whenever we are not steering (stopping, auto-pathing).
 export function predictMove(world,server,dt,dir){
  const p=world.player;if(!server||p.hp<=0)return;
- const manual=!held(world.status)&&Math.hypot(dir.x,dir.z)>.08,ox=p.x,oz=p.z,speed=world.walkSpeed();
+ const manual=!held(world.status)&&Math.hypot(dir.x,dir.z)>.08,ox=p.x,oz=p.z,speed=world.walkSpeed(dir.run===true);
+ if(Math.hypot(dir.x,dir.z)>.08||dir.attack)world.clearEmote();
  if(manual){const n=Math.max(1,Math.hypot(dir.x,dir.z));moveBody(p,dir.x/n*speed*dt,dir.z/n*speed*dt,world.nav);p.face={x:dir.x,z:dir.z};}
  const ex=server.x-p.x,ez=server.z-p.z,error=Math.hypot(ex,ez);
  if(error>2.5){p.x=server.x;p.z=server.z;}
  else if(!manual&&error>.002){const f=1-Math.exp(-dt*10);p.x+=ex*f;p.z+=ez*f;if(server.moving)p.face=server.face;}
- p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;
+ p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;p.running=p.moving&&(manual?dir.run===true:server.running===true);
 }

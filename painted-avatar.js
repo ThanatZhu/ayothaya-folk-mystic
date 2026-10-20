@@ -1,4 +1,4 @@
-import {createRiggedSprite} from './rigged-sprite.js?v=size1';
+import {createRiggedSprite} from './rigged-sprite.js?v=life1';
 import {loadDirectionalArt} from './directional-sprite.js?v=size1';
 import {createDirectionalActor} from './directional-actor.js?v=size1';
 import {stableViewDirection} from './directional-motion.js';
@@ -22,7 +22,8 @@ export function createPaintedAvatar(texture,options={}){
  const loadArt=options.directionalArtLoader??loadDirectionalArt;
  let actor=null,generation=0,disposed=false,preparing=false,pending=null,wanted=options.directional!==false,context={direction:'S',mode:'idle',time:0};
  function visible(){
-  const active=!!(!disposed&&!preparing&&wanted&&actor&&!mesh.userData.directionalReason);
+  const paintedAction=['run','sit','sleep','rest'].includes(context.mode);
+  const active=!!(!paintedAction&&!disposed&&!preparing&&wanted&&actor&&!mesh.userData.directionalReason);
   mesh.material.visible=!active;if(actor)actor.visible=active;
   mesh.userData.directionalActive=active;return active;
  }
@@ -54,6 +55,9 @@ export function createPaintedAvatar(texture,options={}){
  mesh.userData.setDirectional=value=>{wanted=!!value;if(!wanted)return Promise.resolve(visible());if(preparing)return pending.then(()=>visible());return actor&&!mesh.userData.directionalReason?Promise.resolve(visible()):requestPreparation();};
  mesh.userData.setFacing=(face,azimuth,options={})=>{context={...context,...options,direction:stableViewDirection(face,azimuth,context.direction)};};
  mesh.userData.pose=(pose={},flip=false)=>{
+  // Direct pose callers (preview/NPCs) may not call setFacing first. The authored
+  // action still decides when to leave the optional directional mesh.
+  if(typeof pose.mode==='string')context={...context,mode:pose.mode,time:pose.time??context.time,phase:pose.phase,reduced:pose.reduced??false};
   if(visible()){
    actor.material.color.copy(mesh.material.color);
    actor.userData.pose(pose,context);

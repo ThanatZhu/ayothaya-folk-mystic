@@ -1,0 +1,1492 @@
+{
+  "actors": {
+    "novice-male": {
+      "source": "player/novice-male.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 455,
+        "scale": 0.46153846153846156,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "novice-rest.png"
+    },
+    "novice-female": {
+      "source": "player/novice-female.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 459,
+        "scale": 0.45751633986928103,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "novice-rest.png"
+    },
+    "swordsman-male": {
+      "source": "player/swordsman-male.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 431,
+        "scale": 0.4872389791183295,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "swordsman-rest-v3.png"
+    },
+    "swordsman-female": {
+      "source": "player/swordsman-female.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 432,
+        "scale": 0.4861111111111111,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "swordsman-rest-v3.png"
+    },
+    "lancer-male": {
+      "source": "player/lancer-male.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 420,
+        "scale": 0.5,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "lancer-rest.png"
+    },
+    "lancer-female": {
+      "source": "player/lancer-female.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 414,
+        "scale": 0.5072463768115942,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "lancer-rest.png"
+    },
+    "hunter-male": {
+      "source": "player/hunter-male.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 430,
+        "scale": 0.4883720930232558,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "hunter-rest.png"
+    },
+    "hunter-female": {
+      "source": "player/hunter-female.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 424,
+        "scale": 0.49528301886792453,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "hunter-rest.png"
+    },
+    "boxer-male": {
+      "source": "player/boxer-male.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 432,
+        "scale": 0.4861111111111111,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "boxer-rest.png"
+    },
+    "boxer-female": {
+      "source": "player/boxer-female.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 437,
+        "scale": 0.4805491990846682,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "boxer-rest.png"
+    },
+    "rogue-male": {
+      "source": "player/rogue-male.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 427,
+        "scale": 0.4918032786885246,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "rogue-rest.png"
+    },
+    "rogue-female": {
+      "source": "player/rogue-female.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 422,
+        "scale": 0.4976303317535545,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "rogue-rest.png"
+    },
+    "shaman-male": {
+      "source": "player/shaman-male.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 408,
+        "scale": 0.5147058823529411,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "shaman-rest.png"
+    },
+    "shaman-female": {
+      "source": "player/shaman-female.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 412,
+        "scale": 0.5097087378640777,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "shaman-rest.png"
+    },
+    "acolyte-male": {
+      "source": "player/acolyte-male.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 445,
+        "scale": 0.47191011235955055,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "acolyte-rest.png"
+    },
+    "acolyte-female": {
+      "source": "player/acolyte-female.png",
+      "facing": "right",
+      "review": "draft",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            0
+          ],
+          "frameDurations": [
+            4.6,
+            0.14,
+            0.36
+          ],
+          "loop": true,
+          "note": "ท่ายืนเดิมสลับกะพริบตาเบา ๆ · ใช้สเกลส่วนสูงเดิม"
+        },
+        "sit": {
+          "frames": [
+            2,
+            3,
+            2
+          ],
+          "frameDurations": [
+            4.6,
+            0.16,
+            0.34
+          ],
+          "loop": true,
+          "note": "ภาพนั่งที่วาดใหม่ · คงขนาดศีรษะและสัดส่วนจากท่ายืน"
+        },
+        "sleep": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true,
+          "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        }
+      },
+      "calibration": {
+        "standingBodyHeight": 210,
+        "sourceBodyHeight": 445,
+        "scale": 0.47191011235955055,
+        "foot": 276,
+        "frameSize": 320
+      },
+      "sourceSheet": "acolyte-rest.png"
+    }
+  }
+}

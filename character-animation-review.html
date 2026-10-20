@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>ลองท่าทางตัวละคร · Ayothaya Folk Mystic</title>
+  <link rel="stylesheet" href="./character-animation-review.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="wrap header-content">
+      <div><p class="eyebrow">AYOTHAYA FOLK MYSTIC</p><h1>ชีวิตเล็ก ๆ ในอโยธยา</h1><p class="lede">ลองท่าเดิน วิ่ง และพักผ่อนของตัวละคร ดูช้า ๆ หรือหยุดตรวจทีละเฟรมได้</p></div>
+      <a class="size-link" href="./character-size-review.html">ดูขนาดตัวละคร <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main class="wrap">
+    <div id="error-box" class="error-box" role="alert" hidden></div>
+    <section class="review" aria-label="พื้นที่ลองแอนิเมชัน">
+      <div class="stage-panel">
+        <div class="stage-heading"><span class="tag">ห้องลองท่าทาง</span><span id="stage-state" class="subtle">กำลังเตรียมภาพ…</span></div>
+        <div class="stage">
+          <canvas id="main-canvas" width="960" height="640" role="img" aria-label="ภาพตัวละครที่เลือก"></canvas>
+          <div id="missing-clip" class="missing-clip" hidden><span aria-hidden="true">◌</span><strong id="missing-title">ยังไม่มีภาพท่านี้</strong><p id="missing-note">เลือกท่าอื่นที่มีภาพแล้วได้จากปุ่มด้านข้าง</p></div>
+          <div class="stage-footer"><span>สเกลเดียวกับภาพที่ปรับส่วนสูงแล้ว</span><span id="frame-counter">—</span></div>
+        </div>
+        <div class="transport">
+          <div class="playback">
+            <button id="play-toggle" type="button" class="primary" aria-pressed="true"><span id="play-icon" aria-hidden="true">Ⅱ</span><span id="play-label">หยุดดู</span></button>
+            <button id="frame-prev" type="button" class="icon-button" aria-label="เฟรมก่อนหน้า" title="เฟรมก่อนหน้า">‹</button>
+            <button id="frame-next" type="button" class="icon-button" aria-label="เฟรมถัดไป" title="เฟรมถัดไป">›</button>
+          </div>
+          <div class="speed-controls" role="group" aria-label="ความเร็วในการดู">
+            <button type="button" data-speed="0.5" aria-pressed="true">0.5×</button>
+            <button type="button" data-speed="1" aria-pressed="false">1×</button>
+          </div>
+        </div>
+        <div class="timeline-row"><input id="frame-scrubber" type="range" min="0" max="0" value="0" step="1" aria-label="เลือกเฟรม"><span id="clip-duration">—</span></div>
+      </div>
+      <aside class="details">
+        <p id="selected-group" class="eyebrow">ตัวละคร</p>
+        <h2 id="selected-name">กำลังอ่านภาพเดิม</h2>
+        <p id="selected-description" class="character-description">ผู้เล่นและ NPC ทุกแบบจะปรากฏที่นี่เมื่อภาพพร้อม</p>
+        <label class="field-label" for="character-select">เลือกตัวละคร</label>
+        <select id="character-select" disabled><option>กำลังโหลด…</option></select>
+        <div class="action-picker" role="group" aria-label="เลือกท่าทาง">
+          <button type="button" data-action="idle" aria-pressed="true"><span>ยืน</span><small>ขยับเบา ๆ</small><i></i></button>
+          <button type="button" data-action="walk" aria-pressed="false"><span>เดิน</span><small>ก้าวสบาย ๆ</small><i></i></button>
+          <button type="button" data-action="run" aria-pressed="false"><span>วิ่ง</span><small>ก้าวและส่งตัว</small><i></i></button>
+          <button type="button" data-action="sit" aria-pressed="false"><span>นั่ง</span><small>พักบนพื้น</small><i></i></button>
+          <button type="button" data-action="sleep" aria-pressed="false"><span>นอน</span><small>พักผ่อน</small><i></i></button>
+        </div>
+        <div class="clip-description"><span id="clip-badge" class="badge">กำลังโหลด</span><p id="clip-note">กำลังเตรียมภาพและจังหวะของตัวละคร</p></div>
+        <div class="view-options">
+          <label><input id="show-ruler" type="checkbox" checked><span>เส้นพื้นและส่วนสูงอ้างอิง</span></label>
+          <label><input id="show-ghost" type="checkbox"><span>ซ้อนเงาท่ายืนเดิม</span></label>
+        </div>
+        <p class="scale-note">ส่วนสูงท่ายืน 210 px · ท่านั่งและนอนคงสัดส่วนเดิม จึงต่ำกว่าเส้นศีรษะ</p>
+      </aside>
+    </section>
+    <section class="library" aria-labelledby="library-title">
+      <div class="library-heading">
+        <div><p class="eyebrow">ตัวละครทั้งหมด</p><h2 id="library-title">เลือกคนที่อยากลองดู</h2><p id="library-status" role="status" aria-live="polite">กำลังเตรียมตัวละคร 36 แบบ…</p></div>
+        <label class="filter-label"><span class="field-label">กลุ่มตัวละคร</span><select id="group-filter"><option value="all">ทุกกลุ่ม</option><option value="players">ผู้เล่น</option><option value="story">NPC เนื้อเรื่อง</option><option value="mentors">ครูอาชีพ</option><option value="citizens">ชาวเมือง</option></select></label>
+      </div>
+      <div class="legend"><span><i class="available"></i> มีภาพเคลื่อนไหว</span><span><i class="static"></i> มีภาพท่าทาง 1 เฟรม</span><span><i class="pending"></i> รอภาพท่าใหม่</span></div>
+      <div id="character-grid" class="character-grid"><p class="loading">กำลังโหลดภาพจากเกม…</p></div>
+    </section>
+  </main>
+  <footer class="wrap"><p>ภาพด้านล่างแสดงสถานะตามไฟล์ที่มีจริง · ปุ่ม 0.5× ใช้ดูรายละเอียดให้ช้าลง · ไม่มีการเปลี่ยนความเร็วเกมจากหน้านี้</p></footer>
+  <script type="module" src="./character-animation-review.js"></script>
+</body>
+</html>

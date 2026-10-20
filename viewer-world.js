@@ -1,12 +1,13 @@
 import {drawCharacterFrame,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {peoplePlacement} from './npc-size.js?v=size1';
-import {groundHeight} from './combat-core.js?v=97';
+import {groundHeight} from './combat-core.js?v=life1';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {createMultiplayer} from './multiplayer-ui.js?v=size1';
+import {createMultiplayer} from './multiplayer-ui.js?v=life1';
 import {createEquipmentUI} from './equipment-ui.js?v=size1';
-import {createCityLife,clearCourtTrees} from './city-life.js?v=size1';
+import {createCityLife,clearCourtTrees} from './city-life.js?v=life1';
+import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=life1';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=90';
 import {createMmoHud} from './mmo-hud.js?v=48.1';
@@ -15,7 +16,7 @@ import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=81';
 import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=80';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
-import {createPaintedAvatar} from './painted-avatar.js?v=size1';
+import {createPaintedAvatar} from './painted-avatar.js?v=life1';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
@@ -23,7 +24,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=99.5';
+import {createGame} from './game-controls.js?v=life1';
 import {atlasPath,className} from './classes.js?v=73';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=size1';
@@ -36,11 +37,11 @@ import {createCraftUI} from './craft-ui.js?v=98';
 import {createWeather} from './weather-fx.js?v=97';
 import {createMarketUI} from './market-ui.js?v=97.4';
 import {createSocialUI} from './social-ui.js?v=95';
-import {createLifeUI} from './life-ui.js?v=68';
+import {createLifeUI} from './life-ui.js?v=life1';
 import {createPetUI} from './pet-ui.js?v=98';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=64';
-import {createLifeNPC} from './life-npc.js?v=size1';
+import {createLifeNPC} from './life-npc.js?v=life1';
 import {createFeedback} from './feedback.js?v=99.5';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=96';
 import {createMarketBoardUI} from './market-board-ui.js?v=97.4';
@@ -156,7 +157,7 @@ try {
   const ground=groundHeight(map.nav,n.x,n.z),actor=sprite(tex,n.x,-n.z,p.width,p.height,ground+.06);actor.center.set(p.centerX,p.centerY);
   n.visualHeight=WORLD_BODY_HEIGHT;
   const shade=shadow(n.x,-n.z,.4);shade.position.y=ground+.072;
-  characters.push({sprite:actor,shadow:shade,height:p.height,ground});
+  characters.push({sprite:actor,shadow:shade,height:p.height,ground,npc:n,basePlacement:p,baseTexture:tex,life:await loadNPCLife(`people-${n.texture}`)});
  }
  const cityLife=await createCityLife({scene,map,shadow,paving:tiles.paving});
  const flames=[];for(const [x,z] of []){const l=new THREE.PointLight('#ffb53f',6,3.3,1.6);l.position.set(x,1.6,z);scene.add(l);flames.push(l);}
@@ -192,7 +193,7 @@ try {
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
  multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu({game,account});createSkillWindow({game,classId:account.character.classId});createMmoHud({game,account});
  const equipmentUI=createEquipmentUI({account,game,hero:heroMesh,onArtwork:(canvas,gear)=>{
-  directionalStatus();
+  directionalStatus();game.refreshAnimationCapabilities();
   const icon=document.createElement('canvas');icon.width=icon.height=256;drawCharacterFrame(icon.getContext('2d'),canvas,0,0);
   portrait.style.backgroundImage=`url("${icon.toDataURL()}")`;portrait.style.backgroundSize='contain';portrait.style.backgroundPosition='center';portrait.style.backgroundRepeat='no-repeat';
  }});
@@ -218,6 +219,17 @@ try {
   if(!perf.shouldDraw(ms))return;
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
   const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);meadow.update(t);game.update(dt);storyUI.update();bagUI.update();statusUI.update();profileUI.update();refineUI.update();craftUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
+  const reducedCharacters=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  characters.slice(1).forEach((a,i)=>{
+   const action=stationaryNPCAction(game.world.time,i,a.npc.talking);
+   if(!applyNPCLife(a.sprite,a.life,action,game.world.time+i*1.7,{reduced:reducedCharacters})){
+    delete a.sprite.userData.lifeAction;delete a.sprite.userData.lifeFrame;
+    const p=a.basePlacement;a.sprite.material.map=a.baseTexture;a.sprite.center.set(p.centerX,p.centerY);
+    const breath=reducedCharacters?1:1+Math.sin((game.world.time+i)*Math.PI*2/4.1)*.0025;
+    a.sprite.scale.set(p.width,p.height*breath,1);
+   }
+   a.sprite.position.set(a.npc.x,a.ground+.06,a.npc.z);
+  });
   flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;followSun(game.world.player);
   const viewDistance=camera.position.distanceTo(controls.target);scene.fog.near=viewDistance+14;scene.fog.far=viewDistance+102; // haze follows the camera (overview moves it 6x further)
   weather.update(document.hidden||landscape.blocked?0:dt);

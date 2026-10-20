@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {poseChannels} from './pose-test-helpers.mjs';
 import {characterMotion,deformPoint,attackDuration,MOTION_MODES} from '../character-motion.js';
 import {CLASSES} from '../classes.js';
 test('walk follows distance and alternates supporting feet',()=>{
- const a=characterMotion({mode:'walk',phase:0}),b=characterMotion({mode:'walk',phase:.5});assert.ok(a.liftL>0);assert.equal(a.liftR,0);assert.ok(b.liftR>0);assert.equal(b.liftL,0);assert.deepEqual(a,characterMotion({mode:'walk',phase:0,time:100}));assert.equal(deformPoint(.75,.98,a).y,.98);
+ const a=characterMotion({mode:'walk',phase:0}),b=characterMotion({mode:'walk',phase:.5}),later=characterMotion({mode:'walk',phase:0,time:100});assert.ok(a.liftL>0);assert.equal(a.liftR,0);assert.ok(b.liftR>0);assert.equal(b.liftL,0);assert.deepEqual(poseChannels(a),poseChannels(later));assert.equal(later.phase,a.phase);assert.equal(later.time,100);assert.equal(deformPoint(.75,.98,a).y,.98);
 });
 test('attacks wind up, strike once, and recover for every profession',()=>{
  for(const {id} of CLASSES){const d=attackDuration(id);assert.ok(characterMotion({mode:'attack',classId:id,time:d*.2}).lean<0);assert.equal(characterMotion({mode:'attack',classId:id,time:d*.45}).frame,3);assert.equal(characterMotion({mode:'attack',classId:id,time:d+1}).frame,0);}

@@ -39,6 +39,7 @@ test('English mode translates exact, templated and pieced-together text; Thai mo
  assert.equal(t('Novice · ชาย'),'Novice · Male');
  assert.equal(t('เซิร์ฟเวอร์ 1 · อยุธยา · ริมเจ้าพระยา'),'Realm 1 · Ayutthaya · Chao Phraya Riverside');
  assert.equal(t('ตั้งแผง'),'Set Up Stall');
+ assert.equal(t('ประกาศ: 🔥 ฝูงคลั่งที่ บึงบัวต้องมนตร์! · EXP ×2 และดรอป ×2 อีก 5 นาที'),'Announcement: 🔥 Frenzy swarm at Enchanted Lotus Marsh! · EXP ×2 and drop ×2 for 5 min');
  assert.equal(t('HP 10'),'HP 10');
  const th=load('th');
  assert.equal(th.lang,'th');

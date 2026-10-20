@@ -15,8 +15,11 @@ export function warpCost(catalog,from,to){
 const bounded=(v,max,fallback)=>Number.isFinite(v)?Math.max(0,Math.min(max,v)):fallback;
 export function restoreTraveler(world,saved){
  if(!saved||saved.version!==5)return;
- world.player.hp=bounded(saved.hp,world.player.maxHp,world.player.maxHp)||world.player.maxHp;
- world.player.mp=bounded(saved.mp,world.player.maxMp,world.player.maxMp);
+ // 0.101.5 the world still has the bare 140 / 100 body here; level, stats and gear raise the max later and
+ // applyDerived clamps then, so clamping now cut a full 1520 HP down to 140 on every map change.
+ const hp=bounded(saved.hp,1e7,0),mp=bounded(saved.mp,1e7,world.player.maxMp);
+ world.player.maxHp=Math.max(world.player.maxHp,hp);world.player.maxMp=Math.max(world.player.maxMp,mp);
+ world.player.hp=hp||world.player.maxHp;world.player.mp=mp;
  world.kills=Math.floor(bounded(saved.kills,1e7,0));
  Object.assign(world,experienceOf(saved));
  if(typeof saved.food?.id==='string'&&saved.food.left>0)world.food={id:saved.food.id,left:Math.min(600,saved.food.left)}; // 0.94 meal buff crosses maps

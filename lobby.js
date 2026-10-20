@@ -8,7 +8,7 @@ import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
-import {createRealmStore} from './realm-store.js?v=73';
+import {createRealmStore} from './realm-store.js?v=101.5';
 import {wakeServer} from './multiplayer-config.js?v=27';
 wakeServer();
 const $=id=>document.getElementById(id);

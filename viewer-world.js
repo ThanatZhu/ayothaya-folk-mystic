@@ -27,7 +27,7 @@ import {createAmbientMotion} from './ambient-motion.js?v=size1';
 import {createGame} from './game-controls.js?v=101';
 import {atlasPath,className} from './classes.js?v=101';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=101.3';
+import {createWorldUI} from './world-ui.js?v=101.5';
 import {createStoryUI} from './story-ui.js?v=99.7';
 import {createBagUI} from './bag-ui.js?v=99';
 import {createStatusUI} from './status-ui.js?v=98';
@@ -46,11 +46,11 @@ import {createFeedback} from './feedback.js?v=99.8';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=99.11';
 import {createMarketBoardUI} from './market-board-ui.js?v=99.11';
 import {createHud63} from './hud-63.js?v=99.11';
-import {resolveMap} from './world-state.js?v=94';
+import {resolveMap} from './world-state.js?v=101.5';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=92';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
-import {prepareCloud} from './cloud-save.js?v=98';
-import {captureSave,applySave} from './save-state.js?v=21';
+import {prepareCloud} from './cloud-save.js?v=101.5';
+import {captureSave,applySave} from './save-state.js?v=101.5';
 const $=id=>document.getElementById(id),loading=getLoadingScreen(),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
 function frame(image,rect,repeat=false){

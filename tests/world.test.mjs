@@ -42,3 +42,12 @@ test('travel retains resources, kills and cooldowns, while rejecting corrupt val
  restoreTraveler(b,{version:5,hp:Infinity,mp:-50,kills:NaN,cooldowns:Array(10).fill(-7)});
  assert.equal(b.player.hp,140);assert.equal(b.player.mp,0);assert.equal(b.kills,0);assert.ok(b.cooldowns.every(c=>c===0));
 });
+
+test('0.101.5 travel keeps HP / MP above the bare level-1 body until the real max (level, stats, gear) is applied', () => {
+ const w=new CombatWorld(resolveMap(catalog,'ayutthaya'));
+ restoreTraveler(w,{version:5,hp:1400,mp:900,kills:0,cooldowns:Array(10).fill(0)});
+ w.applyDerived({maxHp:1520,maxMp:1230});
+ assert.equal(w.player.hp,1400);assert.equal(w.player.mp,900);
+ w.applyDerived({maxHp:500,maxMp:300});
+ assert.equal(w.player.hp,500,'a lower real max still clamps');assert.equal(w.player.mp,300);
+});

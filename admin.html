@@ -1,16 +1,24 @@
 <!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>หลังบ้านอโยธยา</title>
-<link rel="stylesheet" href="./admin.css?v=100.9">
+<link rel="stylesheet" href="./admin.css?v=101.2">
 </head><body>
-<header class="bar">
- <div><small>AYOTHAYA · BACK OFFICE</small><h1>หลังบ้านอโยธยา</h1></div>
- <div class="actions"><span id="changes" aria-live="polite"></span><button type="button" id="reset-all">ยกเลิกทั้งหมด</button><button type="button" id="copy-json">คัดลอก JSON</button><button type="button" id="save" class="primary">บันทึกเข้าเกม</button></div>
-</header>
-<p id="status" class="status" role="status"></p>
-<nav class="tabs" id="tabs" aria-label="หมวดข้อมูล"></nav>
-<section class="filters" id="filters"></section>
-<main id="view"></main>
-<p class="foot">กด "บันทึกเข้าเกม" แล้วค่าจะเข้าไฟล์ balance-data.js ที่ทั้งเกมและเซิร์ฟเวอร์อ่าน · บนเว็บจริงต้องล็อกอินด้วยอีเมลแอดมิน แล้วเกมจะอัปเดตเองในราว 3 นาที · ช่องสีทอง = แก้จากค่าเดิม</p>
-<script type="module" src="./admin.js?v=100.9"></script>
+<div class="app">
+ <aside class="side">
+  <div class="brand"><small>AYOTHAYA · BACK OFFICE</small><b>หลังบ้านอโยธยา</b></div>
+  <nav class="tabs" id="tabs" aria-label="หมวดข้อมูล"></nav>
+  <p class="side-note">💡 ชี้เมาส์ที่รูปไอเท็มเพื่อดูค่าสเตตัส</p>
+ </aside>
+ <div class="main">
+  <header class="bar">
+   <div class="page"><h1 id="page-title">หลังบ้านอโยธยา</h1><p id="page-help"></p></div>
+   <div class="actions" id="save-actions"><span id="changes" aria-live="polite"></span><button type="button" id="reset-all">ยกเลิกที่แก้</button><button type="button" id="copy-json" title="คัดลอกค่าที่แก้เป็นข้อความ">คัดลอก JSON</button><button type="button" id="save" class="primary">💾 บันทึกเข้าเกม</button></div>
+  </header>
+  <p id="status" class="status" role="status"></p>
+  <section class="filters" id="filters"></section>
+  <main id="view"></main>
+ </div>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+<script type="module" src="./admin.js?v=101.2"></script>
 </body></html>

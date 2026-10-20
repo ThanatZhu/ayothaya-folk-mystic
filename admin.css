@@ -35,7 +35,6 @@ td.top{background:#1f3b31;color:var(--jade);font-weight:700}td.bottom{background
 .players tr.picked td{background:#f4cf7a22}
 .give{display:grid;gap:10px;max-width:520px;margin-top:16px;padding:16px;border:1px dashed #f4cf7a55;border-radius:12px}.give h3{margin:0}.give .bag{margin:0;font-size:13px;opacity:.85}
 .give label{display:grid;gap:4px}.give select,.give input{min-height:36px;padding:0 8px;border-radius:8px;border:1px solid #f4cf7a55;background:#0e1f19;color:inherit;font:inherit}
-,`
 /* 0.100.8 players tab: list on the left, gift basket on the right (stacked on phones) */
 .players-head{gap:10px}.players-head h2 small{font-size:14px;opacity:.7}.players-head .who{font-size:13px;opacity:.85}
 .players-head button{min-height:34px;padding:0 14px;border-radius:999px;border:1px solid #f4cf7a55;background:transparent;color:inherit;font:inherit;cursor:pointer}
@@ -82,3 +81,43 @@ td.top{background:#1f3b31;color:var(--jade);font-weight:700}td.bottom{background
 .sendbar{display:grid;gap:8px;padding:12px;border:1px solid #f4cf7a88;border-radius:12px;background:#f4cf7a0d}
 .gift .basket li{gap:8px}.gift .basket li .ico{width:30px;height:30px}.gift .basket li span{flex:1}.gift .basket li b{color:#f4cf7a}
 .hint.big{font-size:15px;padding:24px 0}
+
+/* 0.101.2 layout: side menu + page header; save bar only on editable pages; item stat tooltip */
+body{padding:0}
+.app{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100dvh}
+.side{position:sticky;top:0;height:100dvh;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:18px 12px;border-right:1px solid var(--rule);background:#0c1a14}
+.brand small{display:block;font-size:10px;letter-spacing:.18em;color:var(--muted)}.brand b{font:700 21px Mali,Tahoma,sans-serif;color:var(--gold)}
+.side .tabs{display:grid;gap:4px;margin:0}
+.side .tabs button{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 10px;border:1px solid transparent;border-radius:12px;background:transparent;text-align:left}
+.side .tabs button i{font-style:normal;font-size:20px;width:28px;text-align:center}
+.side .tabs button span{display:grid}.side .tabs button b{font-size:15px}.side .tabs button small{font-size:11px;color:var(--muted);line-height:1.3}
+.side .tabs button:hover{background:#ffffff0a}
+.side .tabs button[aria-pressed=true]{background:#f0c47022;border-color:#f0c47088;color:var(--ink);font-weight:400}
+.side .tabs button[aria-pressed=true] b{color:var(--gold)}
+.side-note{margin-top:auto;font-size:12px;color:var(--muted)}
+.main{min-width:0;padding:14px 22px 40px}
+.bar{position:sticky;top:0;z-index:5;padding:8px 0 12px}
+.page h1{margin:0;font:700 24px Mali,Tahoma,sans-serif;color:var(--gold)}.page p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+#changes{min-width:0;padding:4px 12px;border-radius:999px;color:var(--muted)}
+#changes.dirty{background:#f0c47022;color:var(--gold);font-weight:700}
+button:disabled{opacity:.45;cursor:default}
+#save-actions[hidden]{display:none}
+td .name{display:flex;align-items:center;gap:10px}
+.ico.sm{width:34px;height:34px;flex:none}
+.face.sm{width:40px;height:40px;flex:none;border-radius:10px}
+.scroll{max-height:calc(100dvh - 210px)}
+[data-item]{cursor:help}
+#tip{position:fixed;z-index:50;width:260px;padding:10px 12px;border:1px solid var(--gold);border-radius:12px;background:#0b1712f5;box-shadow:0 12px 30px #000a;pointer-events:none;font-size:13px}
+#tip[hidden]{display:none}
+.tip-head{display:flex;gap:10px;align-items:center}.tip-head .ico{width:44px;height:44px;flex:none}.tip-head b{display:block;color:var(--gold);font-size:15px}.tip-head small{color:var(--muted)}
+#tip p{margin:8px 0 6px;line-height:1.4}
+#tip ul{list-style:none;margin:0;padding:6px 0 0;border-top:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;gap:2px 10px}
+#tip li{display:flex;justify-content:space-between;gap:6px}#tip li span{color:var(--muted)}#tip li b{color:var(--jade)}
+.tip-id{display:block;margin-top:6px;color:var(--rule);font-size:10px}
+@media (max-width:860px){
+ .app{grid-template-columns:1fr}
+ .side{position:static;height:auto;padding:12px;border-right:0;border-bottom:1px solid var(--rule)}
+ .side .tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .side .tabs button{flex-direction:column;justify-content:center;min-height:58px;text-align:center;gap:2px}.side .tabs button small{display:none}
+ .side-note{display:none}.main{padding:10px 12px 40px}
+}

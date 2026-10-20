@@ -15,7 +15,7 @@ const LABEL={damage:'พลัง',heal:'ฟื้นฟู',cost:'MP',cd:'ค�
 const KIND={potion:'ยา',gear:'อุปกรณ์',card:'การ์ด',loot:'วัตถุดิบ',scroll:'ม้วน',egg:'ไข่',lure:'เหยื่อ',petfood:'อาหารสัตว์'};
 const paths=[NOVICE,...CLASSES];
 let draft=JSON.parse(JSON.stringify(BALANCE));for(const g of Object.keys(FIELDS))draft[g]??={};
-let tab='skills',classId='swordsman',query='',kind='all',tableView='compare';
+let tab='players',classId='swordsman',query='',kind='all',tableView='compare';
 // players tab state (declared up here: the first render may already be on that tab)
 const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
 let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
@@ -41,10 +41,12 @@ function count(){return Object.values(draft).reduce((n,g)=>n+Object.values(g).re
 function set(r,f,v){
  const b=base(r,f);if(v===''||v===null||Number(v)===b){if(draft[r.group][r.key]){delete draft[r.group][r.key][f];if(!Object.keys(draft[r.group][r.key]).length)delete draft[r.group][r.key];}}
  else{const [min,max]=FIELDS[r.group][f];(draft[r.group][r.key]??={})[f]=Math.min(max,Math.max(min,Number(v)));}
- $('changes').textContent=count()?`แก้ไว้ ${count()} ช่อง (ยังไม่บันทึก)`:'ยังไม่มีการแก้';
+ showCount();
 }
+// 0.101.2 side menu: what each page is for, in one line
+const PAGES={players:['👥','ผู้เล่น','ดูผู้เล่นที่ออนไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน']};
 function tabs(){
- $('tabs').innerHTML=[['classes','อาชีพ'],['skills','สกิล'],['table','ตารางสกิล'],['items','ไอเท็ม'],['monsters','มอนสเตอร์'],['players','ผู้เล่น']].map(([id,n])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}">${n}</button>`).join('');
+ $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();});
 }
 const remember=()=>{try{localStorage.setItem('ayo-admin-view',JSON.stringify({tab,classId}));}catch{}};
@@ -60,16 +62,22 @@ function filters(){
  $('kind-pick')&&($('kind-pick').onchange=e=>{kind=e.target.value;render(false);});
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
+function pageHead(){
+ const [icon,name,help]=PAGES[tab],editable=!['players','table'].includes(tab);
+ $('page-title').textContent=icon+' '+name;$('page-help').textContent=help+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
+ $('save-actions').hidden=!editable;showCount();
+}
+function showCount(){const n=count();$('changes').textContent=n?`แก้ไว้ ${n} ช่อง · ยังไม่บันทึก`:'ยังไม่มีการแก้';$('changes').classList.toggle('dirty',!!n);$('save').disabled=!n;$('reset-all').disabled=!n;}
 function render(withFilters=true){
- if(withFilters)filters();
+ if(withFilters)filters();pageHead();
  if(tab==='table'){$('view').innerHTML=skillTable();return;}
  if(tab==='players'){playersTab();return;}
  const rows=rowsFor(),cols=columns(rows);
- $('view').innerHTML=`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th>${cols.map(c=>`<th>${LABEL[c]??c}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-i="${i}"><td class="l"><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></td>${cols.map(f=>{const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined;return `<td>${b==null&&!edited?'<span class="na">—</span>':`<input type="number" step="any" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`}</td>`;}).join('')}<td><button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button></td></tr>`).join('')}</tbody></table></div>`;
+ $('view').innerHTML=`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th>${cols.map(c=>`<th>${LABEL[c]??c}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-i="${i}"><td class="l"><span class="name">${r.group==='items'?`<i class="ico sm" data-item="${esc(r.key)}" style="${iconStyle(r.key)}"></i>`:r.group==='classes'?`<i class="face sm" style="background-image:url(assets/character-life100/player/${esc(r.key)}-male.png)"></i>`:''}<span><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></span></span></td>${cols.map(f=>{const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined;return `<td>${b==null&&!edited?'<span class="na">—</span>':`<input type="number" step="any" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`}</td>`;}).join('')}<td><button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button></td></tr>`).join('')}</tbody></table></div>`;
  $('view').querySelectorAll('tr[data-i]').forEach(tr=>{const r=rows[+tr.dataset.i];
   tr.querySelectorAll('input').forEach(inp=>inp.onchange=()=>{set(r,inp.dataset.f,inp.value);const edited=draft[r.group][r.key]?.[inp.dataset.f]!==undefined;inp.classList.toggle('edited',edited);if(!edited)inp.value=base(r,inp.dataset.f)??'';tr.querySelector('.undo').hidden=!draft[r.group][r.key];});
   tr.querySelector('.undo').onclick=()=>{delete draft[r.group][r.key];set(r,'',null);render(false);};});
- $('changes').textContent=count()?`แก้ไว้ ${count()} ช่อง`:'ยังไม่มีการแก้';
+ showCount();
 }
 // 0.89 skill table (owner): the balance view from the game numbers, including unsaved edits from the skill tab.
 const ROLE=['โจมตี','วงกว้าง','ตรึง','ผลัก','ฟื้นตัว','ตั้งรับ','โจมตีหนัก','พุ่ง','รวมสมาธิ','ไม้ตาย'];
@@ -101,6 +109,21 @@ $('save').onclick=async()=>{
   say(j.local?`บันทึกแล้ว ${j.changes} ช่อง · รีโหลดเกมเพื่อเห็นผล`:j.unchanged?'ค่าเหล่านี้อยู่ในเกมแล้ว':`ส่งเข้าเกมแล้ว ${j.changes} ช่อง · เกมและเซิร์ฟเวอร์จะอัปเดตเองในราว 3 นาที (ผู้เล่นหลุดสั้น ๆ ตอนเซิร์ฟเวอร์รีสตาร์ต)`);}
  catch(e){say(ADMIN_ERRORS[e.message]??'บันทึกไม่สำเร็จ · '+e.message,false);}
 };
+// 0.101.2 point at an item picture: name, kind, what it does, its numbers and price
+const STAT={atk:'ATK',matk:'MATK',def:'DEF',hp:'ฟื้น HP',mp:'ฟื้น MP',level:'ใช้ได้ตั้งแต่ Lv.',buy:'ราคาซื้อ',sell:'ขายได้',tokens:'เหรียญงานวัด',time:'นาน (วิ)'};
+const SLOT={weapon:'อาวุธ',armor:'เสื้อเกราะ',head:'หมวก',garment:'ผ้าคลุม',shoes:'รองเท้า',accessory:'เครื่องประดับ'};
+function tipHTML(id){
+ const it=ITEMS[id];if(!it)return '';
+ const stats=Object.entries(STAT).filter(([k])=>typeof it[k]==='number').map(([k,n])=>`<li><span>${n}</span><b>${it[k].toLocaleString('th-TH')}</b></li>`).join('');
+ const bonus=Object.entries(it.bonus??it.effect?.bonus??{}).map(([k,v])=>`<li><span>${esc(k.toUpperCase())}</span><b>+${v}</b></li>`).join('');
+ const sub=[KIND[it.kind]??it.kind,it.slot&&(SLOT[it.slot]??it.slot),it.classes?.map(c=>className(c)).join(', ')].filter(Boolean).map(esc).join(' · ');
+ return `<div class="tip-head"><i class="ico" style="${iconStyle(id)}"></i><div><b>${esc(it.name)}</b><small>${sub}</small></div></div>${it.text?`<p>${esc(it.text)}</p>`:''}${stats||bonus?`<ul>${stats}${bonus}</ul>`:''}<small class="tip-id">${esc(id)}</small>`;
+}
+const tip=$('tip');let tipFor=null;
+function placeTip(x,y){const w=tip.offsetWidth,h=tip.offsetHeight;tip.style.left=Math.max(8,Math.min(innerWidth-w-8,x+14))+'px';tip.style.top=(y+14+h>innerHeight?Math.max(8,y-h-10):y+14)+'px';}
+document.addEventListener('pointerover',e=>{const el=e.target.closest?.('[data-item]');if(!el){tip.hidden=true;tipFor=null;return;}if(el.dataset.item!==tipFor){tipFor=el.dataset.item;tip.innerHTML=tipHTML(tipFor);}tip.hidden=false;placeTip(e.clientX,e.clientY);});
+document.addEventListener('pointermove',e=>{if(!tip.hidden)placeTip(e.clientX,e.clientY);});
+document.addEventListener('scroll',()=>{tip.hidden=true;tipFor=null;},true);
 tabs();render();warmFirebase();
 
 // 0.99.16 players tab: who is online right now (from the realm server) and gifts of items or cowries.
@@ -137,7 +160,7 @@ function playersTab(){
  if(user&&!players&&!adminMsg){loadPlayers();autoRefresh();}
  // 0.100.9 pictures: the character's first standing frame, item icons from the game's atlases, an item grid to click
  const face=x=>`<i class="face" style="background-image:url(assets/character-life100/player/${esc(x.classId)}-${x.gender==='female'?'female':'male'}.png)"></i>`;
- const pic=(id,n)=>`<i class="ico" style="${iconStyle(id)}"></i>${n?`<em>${n}</em>`:''}`;
+ const pic=(id,n)=>`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>${n?`<em>${n}</em>`:''}`;
  const KINDS=[['all','ทั้งหมด'],['potion','ยา/อาหาร'],['gear','อุปกรณ์'],['card','การ์ด'],['loot','วัตถุดิบ'],['other','อื่น ๆ']];
  const kindOf=id=>['potion','gear','card','loot'].includes(ITEMS[id].kind)?ITEMS[id].kind:'other';
  const picks=Object.keys(ITEMS).filter(id=>!['ui','reserved'].includes(ITEMS[id].kind)&&(itemKind==='all'||kindOf(id)===itemKind)&&(!itemQuery||itemName(id).includes(itemQuery))).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
@@ -150,7 +173,7 @@ function playersTab(){
  let gift='<p class="hint big">← เลือกผู้เล่นทางซ้ายเพื่อดูกระเป๋าและส่งของ</p>';
  if(p){
   const bag=Object.entries(p.items).filter(([id,n])=>n>0&&ITEMS[id]).map(([id,n])=>`<span class="cell" title="${esc(itemName(id))} ×${n}">${pic(id,n)}</span>`).join('')||'<span class="hint">ว่าง</span>';
-  const quick=QUICK.map(([id,n],i)=>`<button type="button" class="qbtn" data-quick="${i}">${id==='coins'?`<i class="ico" style="${iconStyle('cowrie')}"></i>`:`<i class="ico" style="${iconStyle(id)}"></i>`}<span>+${id==='coins'?n.toLocaleString('th-TH')+' เบี้ย':esc(itemName(id))+' ×'+n}</span></button>`).join('');
+  const quick=QUICK.map(([id,n],i)=>`<button type="button" class="qbtn" data-quick="${i}">${id==='coins'?`<i class="ico" style="${iconStyle('cowrie')}"></i>`:`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>`}<span>+${id==='coins'?n.toLocaleString('th-TH')+' เบี้ย':esc(itemName(id))+' ×'+n}</span></button>`).join('');
   const lines=basket.map((l,i)=>`<li>${pic(l.id)}<span>${esc(itemName(l.id))}</span><b>×${l.count}</b><button type="button" data-drop="${i}" aria-label="เอาออก">×</button></li>`).join('')+(giftCoins?`<li><i class="ico" style="${iconStyle('cowrie')}"></i><span>เบี้ย</span><b>${giftCoins.toLocaleString('th-TH')}</b><button type="button" data-drop="coins" aria-label="เอาออก">×</button></li>`:'');
   gift=`<form id="give"><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small></div></div>`+
    `<h4>กระเป๋า</h4><div class="grid bag">${bag}</div>`+

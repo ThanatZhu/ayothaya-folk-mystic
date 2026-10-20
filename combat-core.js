@@ -8,6 +8,7 @@ import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=73';
 import {getClass,classSkills} from './classes.js?v=101';
 import {scaledSkill} from './skill-progress.js?v=101';
+import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[
  {key:'1',name:'ลูกไฟวิญญาณ',short:'ลูกไฟ',icon:'✦',cost:8,cd:2,range:6,damage:24,type:'bolt',color:'#70ead9'},
@@ -74,9 +75,13 @@ export function screenDirection(horizontal,vertical,azimuth){
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 // 0.43: a monster hit after guard, AGI/LUK dodge and DEF (world.derived from character-stats.js). 0 = dodged.
 export function monsterHit(world,raw,rand=Math.random,monsterId=null){
- const p=world.player,d=world.derived;if(d&&rand()<d.flee*(world.status?.blind?.5:1))return 0;
+ // 0.103 dodge from FLEE against this monster's HIT; magic monsters (lanterns) go through MDEF instead of DEF
+ const p=world.player,d=world.derived,t=monsterId?MONSTER_TYPES.find(x=>x.id===monsterId):null;
+ const dodge=d?(t&&d.fleeStat!=null?dodgeChance(d.fleeStat,monsterHitStat(t),d.total?.luk??1):d.flee):0;
+ if(d&&rand()<dodge*(world.status?.blind?.5:1))return 0;
  const base=p.shield>0?Math.ceil(raw*.35):raw,resist=d&&monsterId?1-Math.min(.8,d.resist?.[affinityOf(monsterId).element]??0):1;
- return d?Math.max(1,Math.round(base*resist*100/(100+d.def*4))):base;
+ const guard=d?(magicMonster(t)?(d.mdef??0):(d.def??0)):0;
+ return d?Math.max(1,Math.round(base*resist*100/(100+guard*4))):base;
 }
 // Grid A* routes auto-chase around houses. Manual movement always overrides it.
 export function findPath(start,goal,nav=DEFAULT_NAV){
@@ -160,7 +165,9 @@ export class CombatWorld{
   const lost=deathPenalty(this);this.notice('หมดแรง · กลับลานใน 3 วินาที'+(lost?' · Base EXP -'+lost:''));return true;
  }
  // 0.58 combo: a skill on a rooted monster hits 30% harder.
- power(n,mob=null){const combo=mob?.root>0&&mob.hp>0;if(combo)this.emit('combo',{x:mob.x,z:mob.z});return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false):1)*(combo?1.3:1));}
+ // 0.103 skill damage also passes the monster's DEF (MDEF for magic classes); duels and war targets are handled elsewhere
+ guardOf(mob,magic){if(!mob||mob.pvp)return 1;const t=MONSTER_TYPES[mob.type];return defFactor(magic?monsterMdef(t):monsterDef(t));}
+ power(n,mob=null){const combo=mob?.root>0&&mob.hp>0;if(combo)this.emit('combo',{x:mob.x,z:mob.z});return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false)*this.guardOf(mob,!!this.derived?.magic):1)*(combo?1.3:1));}
  // 0.44 element + size (affinity.js). Basic attacks: weapon element, physical. Skills: class element; magic classes ignore size.
  affinity(mob,basic){if(mob.pvp)return this.weakness();const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
   const element=basic?(d?.weaponElement??'neutral'):(CLASS_SKILL_ELEMENT[cls]??d?.weaponElement??'neutral');
@@ -188,8 +195,12 @@ export class CombatWorld{
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   // 0.68 no target in reach: swing at the air (auto-chase still uses AUTO / walking to the target).
   if(!m||distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(quiet||this.safe)return false;p.attackCD=this.profession.delay*(this.derived?.delay??1);this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:this.airPoint(Math.min(this.profession.range,2.4),m),color:this.profession.color,kind:this.profession.kind,air:true});return true;}
-  p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;// 0.102.1 a magic class's basic hit is magic damage: class element, no size penalty, violet number
-   const magic=!!d?.magic;this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?1.5:1)*this.affinity(m,!magic))),crit?'#ffd27a':magic?'#c9a8ff':undefined);}return true;
+  p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;
+   // 0.102.1 a magic class's basic hit is magic damage: class element, no size penalty, violet number
+   // 0.103 a physical swing can miss (HIT vs the monster's FLEE); a crit goes straight through DEF
+   const magic=!!d?.magic,t=MONSTER_TYPES[m.type];
+   if(d&&!magic&&!m.pvp&&d.hit!=null&&Math.random()>=hitChance(d.hit,monsterFlee(t))){this.emit('miss',{id:m.id,x:m.x,z:m.z});return true;}
+   this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),crit?'#ffd27a':magic?'#c9a8ff':undefined);}return true;
  }
  skill(index){
   if(Number.isInteger(index)&&this.skills[index])this.clearEmote();

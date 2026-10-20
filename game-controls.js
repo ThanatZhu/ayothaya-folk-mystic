@@ -8,7 +8,7 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=102.2';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=103.1';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=101';
 import {createRouteWalker} from './route-walk.js?v=01';
 
@@ -124,6 +124,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    const presentation=track??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
    const from=e.from??world.player,to=e.to??from;
    skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});
+  }else if(e.type==='miss'){popup({...e,type:'damage',amount:'MISS',color:'#d8d8d8'});
   }else if(e.type==='damage'){popup(e);const v=mobViews[e.id];if(v)v.flashAt=world.time;if(e.color==='#ffd27a')kick=Math.max(kick,1);}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff9b83');}

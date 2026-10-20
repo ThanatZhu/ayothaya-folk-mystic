@@ -8,6 +8,8 @@ import {iconStyle} from './bag-ui.js?v=98';
 import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=101';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
 import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=101';
+import {deriveStats} from './character-stats.js';
+import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
@@ -19,6 +21,8 @@ let tab='players',classId='swordsman',query='',kind='all',tableView='compare';
 // players tab state (declared up here: the first render may already be on that tab)
 const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
 let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
+let fx={classId:'swordsman',level:50,str:40,agi:20,vit:20,int:1,dex:20,luk:10,watk:60,wmatk:0,skillLv:5};
+try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});}catch{}
 let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',itemQuery='',pickCount=1;
 const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
 const itemName=id=>ITEMS[id]?.name??id;
@@ -44,7 +48,7 @@ function set(r,f,v){
  showCount();
 }
 // 0.101.2 side menu: what each page is for, in one line
-const PAGES={players:['👥','ผู้เล่น','ดูผู้เล่นที่ออนไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน']};
+const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นที่ออนไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน']};
 function tabs(){
  $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();});
@@ -63,7 +67,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table'].includes(tab);
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula'].includes(tab);
  $('page-title').textContent=icon+' '+name;$('page-help').textContent=help+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -72,6 +76,7 @@ function render(withFilters=true){
  if(withFilters)filters();pageHead();
  if(tab==='table'){$('view').innerHTML=skillTable();return;}
  if(tab==='players'){playersTab();return;}
+ if(tab==='formula'){formulaTab();return;}
  const rows=rowsFor(),cols=columns(rows);
  $('view').innerHTML=`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th>${cols.map(c=>`<th>${LABEL[c]??c}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-i="${i}"><td class="l"><span class="name">${r.group==='items'?`<i class="ico sm" data-item="${esc(r.key)}" style="${iconStyle(r.key)}"></i>`:r.group==='classes'?`<i class="face sm" style="background-image:url(assets/character-life100/player/${esc(r.key)}-male.png)"></i>`:''}<span><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></span></span></td>${cols.map(f=>{const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined;return `<td>${b==null&&!edited?'<span class="na">—</span>':`<input type="number" step="any" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`}</td>`;}).join('')}<td><button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button></td></tr>`).join('')}</tbody></table></div>`;
  $('view').querySelectorAll('tr[data-i]').forEach(tr=>{const r=rows[+tr.dataset.i];
@@ -206,4 +211,36 @@ function playersTab(){
   try{const r=await adminFetch('/admin/give',{peer:p.id,coins:giftCoins,items:basket});adminMsg='✔ ส่งให้ '+r.name+' แล้ว';Object.assign(p,{coins:r.coins,items:r.items});basket=[];giftCoins=0;}
   catch(e){adminMsg=ADMIN_ERRORS[e.message]??'ส่งไม่สำเร็จ · '+e.message;}
   playersTab();};
+}
+
+// 0.103 damage formula page: try a character build and read what it does against every monster (same rules as the game)
+function formulaTab(){
+ const keep=()=>{try{localStorage.setItem('ayo-admin-formula',JSON.stringify(fx));}catch{}};
+ const d=deriveStats({level:fx.level,classId:fx.classId,stats:{str:fx.str,agi:fx.agi,vit:fx.vit,int:fx.int,dex:fx.dex,luk:fx.luk}});
+ const atk=d.atk+fx.watk,matk=d.matk+fx.wmatk,power=d.magic?matk:atk,cls=paths.find(c=>c.id===fx.classId)??paths[0];
+ const basic=(cls.damage??0)+(d.magic?matk:atk),skills=classSkills(fx.classId,SKILLS).map(s=>scaledSkill(s,fx.skillLv)).filter(s=>s&&(s.damage??0)>0);
+ const pct=n=>Math.round(n*100)+'%',num=n=>Math.round(n).toLocaleString('th-TH');
+ const field=(k,label,min,max)=>`<label>${label}<input type="number" data-fx="${k}" min="${min}" max="${max}" value="${fx[k]}"></label>`;
+ const rows=MONSTER_TYPES.map((t,i)=>{
+  const guard=defFactor(d.magic?monsterMdef(t):monsterDef(t)),hit=d.magic?1:hitChance(d.hit,monsterFlee(t));
+  const hitDmg=basic*guard,critDmg=basic*CRIT_MULT,avg=hit*((1-d.crit)*hitDmg+d.crit*critDmg);
+  const blowGuard=magicMonster(t)?d.mdef:d.def,taken=(t.damage??0)*100/(100+blowGuard*4),dodge=dodgeChance(d.fleeStat,monsterHitStat(t),fx.luk);
+  return `<tr><td class="l"><b>${esc(t.name)}</b><small>Lv.${t.level??'?'} · HP ${num(t.hp)}${magicMonster(t)?' · ตีเวท':''}</small></td><td>${monsterDef(t)} / ${monsterMdef(t)}</td><td>${monsterFlee(t)} / ${monsterHitStat(t)}</td><td>${pct(hit)}</td><td>${num(hitDmg)}<small>คริ ${num(critDmg)}</small></td><td>${avg>0?num(Math.ceil(t.hp/avg)):'—'}</td><td>${num(taken)}</td><td>${pct(dodge)}</td></tr>`;}).join('');
+ const sk=skills.map(s=>{const p=1+power/40;return `<tr><td class="l"><b>${esc(s.key??'')} · ${esc(s.name)}</b><small>${esc(s.type)}</small></td><td>${num(s.damage)}</td><td>${pct(s.damage/40)}</td><td>${num(s.damage*p)}</td><td>${num(s.damage*p*defFactor(30))}</td></tr>`;}).join('');
+ $('view').innerHTML=`<div class="formula">
+  <section class="fx-in"><h3>ลองตัวละคร</h3><label>อาชีพ<select data-fx="classId">${paths.map(c=>`<option value="${c.id}"${c.id===fx.classId?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+   ${field('level','Base Lv.',1,99)}${field('str','STR',1,99)}${field('agi','AGI',1,99)}${field('vit','VIT',1,99)}${field('int','INT',1,99)}${field('dex','DEX',1,99)}${field('luk','LUK',1,99)}${field('watk','ATK อาวุธ',0,999)}${field('wmatk','MATK อาวุธ',0,999)}${field('skillLv','ขั้นสกิล',1,10)}</section>
+  <section class="fx-out"><h3>ค่าที่ได้ ${d.magic?'(สายเวท · ใช้ MATK)':'(สายกายภาพ · ใช้ ATK)'}</h3><dl>
+   ${[['ATK',atk],['MATK',matk],['HIT',d.hit],['FLEE',d.fleeStat],['DEF',d.def],['MDEF',d.mdef],['คริ',pct(d.crit)],['HP',d.maxHp],['MP',d.maxMp],['ตีธรรมดา',basic]].map(([k,v])=>`<div><dt>${k}</dt><dd>${typeof v==='number'?num(v):v}</dd></div>`).join('')}</dl></section>
+  <details class="fx-rules"><summary>สูตรที่ใช้ (ตัวเกมใช้สูตรเดียวกันนี้)</summary><ul>
+   <li><b>ATK</b> = STR + (STR÷10)² + DEX÷5 + LUK÷3 + ATK อาวุธ (สายธนูสลับ STR ↔ DEX) · <b>MATK</b> = (INT−1)×1.5 + (INT÷7)² + MATK อาวุธ</li>
+   <li><b>ตีธรรมดา</b> = ดาเมจพื้นฐานอาชีพ + ATK (สายเวทใช้ MATK) · <b>สกิล</b> = ค่าสกิล × (1 + พลัง÷40) คือได้ค่าสกิล + พลัง × (ค่าสกิล÷40)</li>
+   <li><b>เกราะมอน</b>: ดาเมจ × 100 ÷ (100 + DEF) · สายเวทชน MDEF แทน · <b>คริ</b> (โอกาสจาก LUK) ×1.5 และทะลุ DEF · มอน DEF = Lv×0.5, MDEF = Lv×0.4</li>
+   <li><b>โอกาสตีโดน</b> = 90% + HIT − FLEE มอน (30–100%) · HIT = Lv + DEX + LUK÷3 · FLEE มอน = Lv×0.6 · เวทโดนเสมอ</li>
+   <li><b>หลบ</b> = FLEE − HIT มอน + 20% (5–70%) + LUK×0.1% · FLEE = Lv + AGI + LUK÷5 · HIT มอน = Lv×1.5 + 20</li>
+   <li><b>โดนมอนตี</b> = ดาเมจมอน × 100 ÷ (100 + DEF×4) · โคม/ผีตีเวทชน MDEF (INT÷2 + ของ)</li></ul></details>
+  <h3>สกิล (ขั้น ${fx.skillLv}) เทียบมอน DEF 30</h3><div class="scroll"><table><thead><tr><th class="l">สกิล</th><th>ค่าสกิล</th><th>% ของพลัง</th><th>ดาเมจเต็ม</th><th>ผ่าน DEF 30</th></tr></thead><tbody>${sk||'<tr><td class="l" colspan="5">อาชีพนี้ไม่มีสกิลโจมตี</td></tr>'}</tbody></table></div>
+  <h3>เทียบกับมอนทุกตัว (ตีธรรมดา)</h3><div class="scroll"><table><thead><tr><th class="l">มอน</th><th>DEF / MDEF</th><th>FLEE / HIT</th><th>ตีโดน</th><th>ดาเมจต่อครั้ง</th><th>ตีกี่ครั้งตาย</th><th>โดนตีครั้งละ</th><th>หลบได้</th></tr></thead><tbody>${rows}</tbody></table></div>
+ </div>`;
+ $('view').querySelectorAll('[data-fx]').forEach(el=>el.onchange=()=>{const k=el.dataset.fx;fx[k]=k==='classId'?el.value:Math.max(+el.min||0,Math.min(+el.max||999,Math.floor(Number(el.value)||0)));keep();formulaTab();});
 }

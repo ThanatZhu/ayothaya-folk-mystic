@@ -13,7 +13,7 @@ const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 const POSES=[['idle','ลุก / ยืน'],['sit','นั่งพัก'],['sleep','นอนพัก'],['bow','ไหว้'],['celebrate','ดีใจ'],['guard','ตั้งท่า']];
 
 export function createLifeUI({game,account,camera}){
- if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=64';css.dataset.lifeUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=100.3';css.dataset.lifeUi='';document.head.append(css);}
  const world=game.world;world.status??={};
 
  // Ailment row under the player frame.

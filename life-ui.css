@@ -56,3 +56,8 @@
 @media (prefers-reduced-motion:reduce){#surge-chip.on{animation:none}}
 .mob-label.leader span{color:#ffd76a;font-weight:800}
 .mob-label.leader b{background:#e0a33a}
+
+/* 0.100.3 the picker never spills past its frame: columns may shrink below the icon size */
+#emote-window{box-sizing:border-box}
+.emote-grid{grid-template-columns:repeat(8,minmax(0,1fr))}
+.emote-grid button{min-width:0;min-height:0;box-sizing:border-box}

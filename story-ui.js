@@ -3,7 +3,7 @@
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems} from './story-quests.js?v=98';
 import {createCoach} from './coach.js?v=104.1';
 import {MONSTER_TYPES} from './combat-core.js?v=101';
-import {awardExperience,baseProgress} from './experience.js?v=73';
+import {awardExperience,baseProgress} from './experience.js?v=105.3';
 
 const RESUME='ayothaya-story-autowalk';
 const $=id=>document.getElementById(id);

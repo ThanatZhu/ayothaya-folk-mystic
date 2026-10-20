@@ -1,6 +1,6 @@
 import {itemDef} from './items.js?v=95';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
-import {jobProgress} from './experience.js?v=73';
+import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=101';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=life1';
 import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=life1';

@@ -8,11 +8,23 @@ export function validExperience(saved){
  const present='baseXp' in saved||'jobXp' in saved;
  return !present||(safe(saved.baseXp)&&safe(saved.jobXp));
 }
-// 0.57 growing curve: level L→L+1 needs 50 + 6·(L−1) EXP (Lv.1 50, Lv.24 188, Lv.98 632). Early levels come quicker
+// 0.57 growing curve: level L→L+1 needs 50 + 6·(L−1) EXP (Lv.1 50, Lv.24 188). Early levels come quicker
 // than the old flat 100 and later ones mean more. Lv.25 = 2,856 and Lv.60 = 13,216 total stay above the Firestore
 // class/job thresholds (2,400 / 5,900), so the rules need no change.
-export const levelNeed=l=>50+6*(l-1);
+// 0.105.2 owner rule: Lv.1-50 easy (the 0.57 curve as it was), reaching 51-70 costs ×5 and 71-99 ×15 per level.
+// [highest level reached, multiplier]: tune here.
+export const LEVEL_BANDS=[[50,1],[70,5],[99,15]];
+const baseNeed=l=>50+6*(l-1);
+export const levelNeed=l=>baseNeed(l)*LEVEL_BANDS.find(([top])=>l+1<=top)[1];
 const START=[0,0];for(let l=1;l<99;l++)START[l+1]=START[l]+levelNeed(l); // START[l] = total EXP at the start of level l
+// Saves from before 0.105.2 (record.xpCurve missing) keep their level and the share of it they had filled.
+export const XP_CURVE=2;
+const OLD_START=[0,0];for(let l=1;l<99;l++)OLD_START[l+1]=OLD_START[l]+baseNeed(l);
+export function migrateXp(total){
+ if(!safe(total))return 0;if(total>=OLD_START[99])return START[99]+(total-OLD_START[99]);
+ let l=1;while(l<99&&total>=OLD_START[l+1])l++;
+ return START[l]+Math.floor((total-OLD_START[l])/baseNeed(l)*levelNeed(l));
+}
 export function baseProgress(saved){
  const total=experienceOf(typeof saved==='number'?{kills:saved}:saved).baseXp;
  let level=1;while(level<99&&total>=START[level+1])level++;

@@ -2,7 +2,7 @@
 // stat-gear slots. Online the server validates and owns everything; offline guests keep it in this browser.
 import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=94';
 import {ITEMS,ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=95';
-import {baseProgress} from './experience.js?v=73';
+import {baseProgress} from './experience.js?v=105.3';
 import {iconStyle} from './bag-ui.js?v=99';
 import {openHudPanel} from './hud-panels.js?v=34';
 

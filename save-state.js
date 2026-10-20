@@ -1,4 +1,4 @@
-import {validExperience} from './experience.js?v=73';
+import {validExperience} from './experience.js?v=105.3';
 import {walkable} from './combat-core.js?v=101';
 import {serializeTraveler,restoreTraveler} from './world-state.js?v=101.5';
 

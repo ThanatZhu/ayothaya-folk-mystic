@@ -2,7 +2,7 @@
 // own gear button. The settings panel is the old account panel (sync status, controls, sound, FPS / graphics,
 // lobby, logout), so every module that adds to it keeps working; only its trigger changes.
 import {STATS,STAT_LABEL,combatPower} from './character-stats.js?v=94';
-import {baseProgress,jobProgress} from './experience.js?v=73';
+import {baseProgress,jobProgress} from './experience.js?v=105.3';
 import {className} from './classes.js?v=101';
 import {jobFor} from './advancement.js?v=73';
 import {openHudPanel} from './hud-panels.js?v=34';

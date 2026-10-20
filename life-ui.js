@@ -9,7 +9,7 @@ import {ARENA,arenaEnds} from './arena.js?v=98';
 import {SHOPS} from './items.js?v=95';
 import {iconStyle} from './bag-ui.js?v=99';
 import {openHudPanel} from './hud-panels.js?v=34';
-import {baseProgress} from './experience.js?v=73';
+import {baseProgress} from './experience.js?v=105.3';
 import {rebirthRank,REBIRTH_POINTS,REBIRTH_MAX} from './character-stats.js?v=94';
 import * as THREE from 'three';
 

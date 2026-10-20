@@ -1,6 +1,6 @@
 // Skill levels 1-10 and skill points (docs/LIVE-SERVICE.md section 1). Pure functions shared by the
 // browser and the authoritative realm server; the server is the only writer for Google accounts.
-import {jobProgress} from './experience.js?v=73';
+import {jobProgress} from './experience.js?v=105.3';
 export const SKILL_MAX=10;
 // 0.101 owner: every skill levels to 10 with points (the planned trial quests for 5 and 10 were never built and
 // held every skill at 4). Slots 10-14 are the Master skills: each opens when its MASTER_FROM skill reaches 10.

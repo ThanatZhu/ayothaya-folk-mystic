@@ -1,4 +1,4 @@
-import {experienceOf} from './experience.js?v=73';
+import {experienceOf} from './experience.js?v=105.3';
 import {normalizeEquipment} from './equipment.js?v=41';
 import {trainingAction} from './city-life-data.js?v=98';
 import {CLASS_LEVEL,progression,validateJob,advanceReady} from './advancement.js?v=73';

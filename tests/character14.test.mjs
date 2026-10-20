@@ -7,6 +7,7 @@ import {createRealmStore} from '../realm-store.js';
 import {DEFAULT_APPEARANCE,validateAppearance} from '../appearance-state.js';
 import {JOBS,progression,validateJob} from '../advancement.js';
 import {CombatWorld} from '../combat-core.js';
+import {levelStart} from '../experience.js';
 import {characterMotion,MOTION_MODES} from '../character-motion.js';
 const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url)));
 const hero={name:'ทดสอบ',gender:'male',classId:'boxer',appearance:{...DEFAULT_APPEARANCE,outfit:'crimson',hair:'braid',eyes:'green',tattoo:'forehead'},jobId:''};
@@ -30,7 +31,7 @@ test('cloud saves remain scoped to UID and reject an account switch',async()=>{
  await assert.rejects(alice.load('server-1'),/account-changed/);connection.auth.currentUser={uid:'alice'};assert.equal((await alice.load('server-1')).character.appearance.hair,'braid');
 });
 test('all fourteen advanced jobs unlock at a maxed Job 40, alter combat, and reject cross-class choices',()=>{
- assert.equal(progression(1321).level,59);assert.equal(progression(1322).level,60);assert.equal(progression(Infinity).level,1);
+ assert.equal(progression(Math.floor((levelStart(60)-1)/10)).level,59);assert.equal(progression(Math.ceil(levelStart(60)/10)).level,60);assert.equal(progression(Infinity).level,1);
  for(const [id,jobs] of Object.entries(JOBS))for(const job of jobs){assert.throws(()=>validateJob(id,job.id,{baseXp:13216,jobXp:17159}),/job-locked/);assert.equal(validateJob(id,job.id,{baseXp:0,jobXp:17160}).id,job.id);assert.equal(validateJob(id,job.id,{baseXp:6118,jobXp:17160}).id,job.id);const base=new CombatWorld({classId:id}),advanced=new CombatWorld({classId:id,jobId:job.id});assert.ok(advanced.profession.damage>base.profession.damage);assert.equal(advanced.skills.length,15);}
  assert.throws(()=>validateJob('boxer','guardian',100),/invalid-job/);
 });

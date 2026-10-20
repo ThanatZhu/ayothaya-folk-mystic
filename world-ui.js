@@ -1,4 +1,5 @@
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
+import {createWorldAtlas} from './world-atlas-ui.js?v=105.2';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=99.11';
 import {createMentorUI} from './mentor-ui.js?v=101.3';
@@ -55,22 +56,18 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   }catch(e){console.warn('map photo',e);photo=false;}
   return photo||null;
  }
- // World button: every map with its warp fare; the party dungeon is entered on foot from the mill.
- const worldPanel=document.createElement('section');worldPanel.id='world-warp';worldPanel.hidden=true;dialog.append(worldPanel);
+ // The illustrated atlas is modal so movement cannot continue behind the destination picker.
+ const atlas=createWorldAtlas({catalog,currentId:map.id,coins:()=>api.coins?.()??0,
+  onClose:()=>{game.clearInput();$('mini-open').focus();},
+  onWarp:id=>{
+   const cost=warpCost(catalog,map.id,id);
+   if(cost===null||traveling||world.player.hp<=0){atlas.close();return;}
+   if(!game.online&&!api.payWarp?.(cost)){atlas.close();world.notice('เบี้ยไม่พอ');return;}
+   atlas.close();travel(id,false,true);
+  }});
  const worldButton=document.createElement('button');worldButton.type='button';worldButton.id='world-toggle';worldButton.textContent='World';dialog.append(worldButton);
- worldButton.onclick=()=>{worldPanel.hidden=!worldPanel.hidden;worldButton.classList.toggle('on',!worldPanel.hidden);if(!worldPanel.hidden)drawWorld();};
- function drawWorld(){
-  const coins=api.coins?.()??0;
-  worldPanel.innerHTML='<h2>แผนที่โลก · วาร์ป</h2><a class="world-atlas-link" href="world-atlas.html" target="_blank" rel="noopener"><img src="assets/world105/world-map.png" alt="ภาพแผนที่โลกอโยธยา"><span>เปิดภาพแผนที่โลกขนาดใหญ่</span></a><p>วาร์ปไปเมืองหลวง 30 เบี้ย · ที่อื่น 50 เบี้ยต่อช่วงทาง · มีเบี้ย '+coins.toLocaleString('th-TH')+'</p><ol>'+catalog.maps.filter(m=>!m.guildHall).map(m=>{
-   const cost=warpCost(catalog,map.id,m.id),here=m.id===map.id,sub=(m.subtitle??'').split(' · ')[0];
-   return `<li class="${here?'here':''}"><div><strong>${m.name}</strong><small>${here?'คุณอยู่ที่นี่':m.instance?'เข้าได้จากโรงสีใต้เงาจันทร์เท่านั้น':sub}</small></div>${here||cost===null?'':`<button type="button" data-warp="${m.id}" ${coins<cost?'disabled':''}>วาร์ป · ${cost} เบี้ย</button>`}</li>`;}).join('')+'</ol>';
-  worldPanel.querySelectorAll('[data-warp]').forEach(b=>b.onclick=()=>{
-   const id=b.dataset.warp,cost=warpCost(catalog,map.id,id);
-   if(!game.online&&!api.payWarp?.(cost))return world.notice('เบี้ยไม่พอ');
-   dialog.close();travel(id,false,true);
-  });
- }
- function openMap(){if(account?.paused||mentors.paused)return;endTalk();openHudPanel(dialog);worldPanel.hidden=true;worldButton.classList.remove('on');drawCityMap();}
+ worldButton.onclick=()=>{game.clearInput();atlas.show();};
+ function openMap(){if(account?.paused||mentors.paused||atlas.open)return;endTalk();openHudPanel(dialog);drawCityMap();}
  $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{game.clearInput();$('mini-open').focus();});
  const views=map.portals.map(p=>{
@@ -95,9 +92,9 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  $('interact').onclick=()=>{if(nearest)travel(nearest.to);else if(nearNPC)talk(nearNPC);};
  addEventListener('keydown',e=>{
   if($('settings-panel')?.open||e.repeat||e.ctrlKey||e.altKey||e.metaKey||e.target.closest?.('input,textarea,select'))return;
-  if(e.code==='KeyM'){e.preventDefault();dialog.open?dialog.close():openMap();}
+  if(e.code==='KeyM'){e.preventDefault();atlas.open?atlas.close():dialog.open?dialog.close():openMap();}
   if(e.code==='Escape'&&conversation)endTalk();
-  if(e.code==='KeyR'&&!dialog.open&&!conversation&&!mentors.paused){e.preventDefault();$('interact').click();}
+  if(e.code==='KeyR'&&!atlas.open&&!dialog.open&&!conversation&&!mentors.paused){e.preventDefault();$('interact').click();}
  });
  const mini=$('mini-map');
  const markers=()=>({mobs:world.mobs,npcs:map.npcs});
@@ -114,7 +111,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   $('mini-area').textContent=(area?.name??'ระหว่างทาง')+' · '+(map.safe?'ปลอดภัย':'นอกเมือง');
   for(const v of views){const d=Math.hypot(p.x-v.p.x,p.z-v.p.z);if(d<best){best=d;nearest=v.p;}v.ring.material.opacity=.52+Math.sin(t*2)*.2;position(v.label,v.p.x,v.p.z,.36);v.label.classList.toggle('near',d<2);}
   let npcDistance=2.3;for(const v of npcViews){const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
-  mentors.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!mentors.paused;
+  mentors.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!atlas.open&&!mentors.paused;
   $('interact').hidden=!canInteract;
   if(canInteract)$('interact').textContent=nearest?'เดินทางไป '+lookup(nearest.to).name:'คุยกับ '+nearNPC.name;
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
@@ -122,7 +119,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   if(dialog.open&&now-lastBig>250){lastBig=now;drawCityMap();} // 0.64.1 the open map follows you live
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
- const api={update,get paused(){return !!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),
+ const api={update,get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),
   guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
   // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
   recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},

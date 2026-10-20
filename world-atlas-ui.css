@@ -1,0 +1,38 @@
+#world-atlas-dialog{position:fixed;inset:0;box-sizing:border-box;margin:auto;width:96vw;max-width:1600px;height:96dvh;max-height:96dvh;padding:0;border:1px solid #c6a164;border-radius:14px;background:#14251f;color:#fff0ce;font-family:var(--font-game);box-shadow:0 20px 90px #000b;overflow:hidden;transform:none}
+#world-atlas-dialog[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+#world-atlas-dialog::backdrop{background:#071510d9}
+#world-atlas-dialog *{box-sizing:border-box}
+#world-atlas-dialog button,#world-atlas-dialog select{font:inherit;color:inherit;border:1px solid #b7985c88;background:#21392d;border-radius:7px;cursor:pointer}
+#world-atlas-dialog button:focus-visible,#world-atlas-dialog select:focus-visible,.atlas-viewport:focus-visible{outline:3px solid #b5ffe4;outline-offset:2px}
+.atlas-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;border-bottom:1px solid #b7985c66;background:linear-gradient(120deg,#243c2f,#14251f)}
+#world-atlas-dialog h2{font-size:20px;line-height:1.4;margin:0;color:#f4cf7a}
+.atlas-header p{margin:3px 0 0;font-size:12px;color:#d0cbb5}
+.atlas-header nav{display:flex;align-items:center;gap:6px}
+.atlas-header button{min-width:44px;height:44px;padding:0 10px}
+#atlas-close{margin-left:12px}
+.atlas-viewport{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-color:#b7985c #14251f;touch-action:pan-x pan-y;background:radial-gradient(ellipse,#253e30,#0c1914);user-select:none}
+.atlas-stage{display:grid;place-items:center;min-width:100%;min-height:100%;width:max-content}
+.atlas-surface{position:relative;flex-shrink:0;aspect-ratio:3/2}
+.atlas-surface>img{display:block;width:100%;height:100%;max-width:none;pointer-events:none}
+#world-atlas-dialog .atlas-place{position:absolute;transform:translate(-50%,-50%);width:12%;min-width:44px;height:44px;padding:0;border:2px solid transparent;border-radius:50%;background:transparent;box-shadow:none;transition:background .15s,border-color .15s}
+#world-atlas-dialog .atlas-place:hover{border-color:#fff0bb;background:#fff0bb22}
+#world-atlas-dialog .atlas-place[aria-pressed="true"]{border-color:#fff4c3;box-shadow:0 0 0 3px #3a2e1677,0 0 18px #ffdb73aa;background:#ffdb7318}
+#world-atlas-dialog .atlas-place.is-current{border-color:#85f3d0}
+.atlas-here{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);padding:3px 9px;border:1px solid #85f3d0;border-radius:20px;background:#143c31;color:#c4ffe9;font-size:11px;font-weight:bold;white-space:nowrap;pointer-events:none}
+.atlas-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px;border-top:1px solid #b7985c66;background:linear-gradient(120deg,#243c2f,#14251f)}
+.atlas-destination-info{min-width:0;flex:1}
+#atlas-destination{max-width:100%;padding:5px 10px;font-size:16px;min-height:40px}
+#atlas-detail{margin:4px 0 0;font-size:12px;color:#dbd1b5;line-height:1.5}
+.atlas-travel{display:flex;align-items:center;gap:16px;flex-shrink:0}
+#atlas-wallet{font-size:12px;color:#e9d9a6}
+#world-atlas-dialog #atlas-warp{min-height:44px;min-width:160px;padding:8px 18px;background:linear-gradient(#f6db94,#d5aa55);color:#29220e;border-color:#f4cf7a;font-weight:bold}
+#world-atlas-dialog button:disabled{opacity:.5;cursor:default}
+@media(max-width:700px),(max-height:550px){
+ #world-atlas-dialog{width:98vw;height:98dvh;max-height:98dvh;border-radius:9px}
+ .atlas-header{padding:5px 10px;gap:6px}.atlas-header p{display:none}#world-atlas-dialog h2{font-size:16px}
+ .atlas-header nav{gap:3px}.atlas-header button{padding:0 7px}#atlas-close{margin-left:2px}
+ .atlas-footer{padding:5px 10px;gap:8px}#atlas-destination{font-size:13px;min-height:36px;padding:3px 6px}#atlas-detail{font-size:10px;margin-top:2px}
+ .atlas-travel{gap:3px;flex-direction:column}#atlas-wallet{font-size:10px}#world-atlas-dialog #atlas-warp{min-width:128px;padding:5px 10px;font-size:12px}
+ .atlas-here{font-size:10px;padding:1px 5px}
+}
+@media(prefers-reduced-motion:reduce){#world-atlas-dialog .atlas-place{transition:none}}

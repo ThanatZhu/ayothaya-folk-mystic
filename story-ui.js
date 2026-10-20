@@ -44,7 +44,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ลูกศรแนะนำ"><b>💡</b><span>ลูกศร</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
  document.body.append(panel);
  // 0.99 arrows that point at the next button to press, and a welcome card for a brand-new character
- const coach=createCoach({game,account,objective:()=>currentObjective(state()),paused:()=>!!document.querySelector('#welcome-card[open],#job-ready[open]')||[...document.querySelectorAll('.journey-loading,#travel-loading')].some(e=>!e.classList.contains('leaving')&&e.checkVisibility?.({checkVisibilityCSS:true}))});
+ const coach=createCoach({game,account,objective:()=>currentObjective(state()),paused:()=>!!document.querySelector('#welcome-card[open],#job-ready[open],#world-atlas-dialog[open]')||[...document.querySelectorAll('.journey-loading,#travel-loading')].some(e=>!e.classList.contains('leaving')&&e.checkVisibility?.({checkVisibilityCSS:true}))});
  const coachButton=()=>{$('quest-coach').setAttribute('aria-pressed',String(!coach.off));$('quest-coach').title=coach.off?'เปิดลูกศรแนะนำ':'ปิดลูกศรแนะนำ';$('quest-coach').classList.toggle('off',coach.off);};
  $('quest-coach').onclick=e=>{e.stopPropagation();coach.setOff(!coach.off);coachButton();world.notice(coach.off?'ปิดลูกศรแนะนำแล้ว · กด 💡 ในกล่องเควสเพื่อเปิดใหม่':'เปิดลูกศรแนะนำแล้ว');};coachButton();
  const welcomeKey='ayothaya-welcome:'+key;

@@ -2339,3 +2339,22 @@ Object.assign(globalThis.I18N_EN,{
  "ลานวิมาน":"Celestial Courtyard"
 }
 );
+
+// 0.105.2 interactive world atlas.
+Object.assign(globalThis.I18N_EN,{
+ 'แตะชื่อเมืองบนภาพ แล้วเลือกวาร์ป':'Select a city on the map, then choose Warp',
+ 'วาร์ป':'Warp',
+ 'ควบคุมแผนที่โลก':'World map controls',
+ 'ย่อแผนที่โลก':'Zoom out on world map',
+ 'แสดงแผนที่โลกทั้งหมด':'Fit entire world map',
+ 'ขยายแผนที่โลก':'Zoom in on world map',
+ 'ปิดแผนที่โลก':'Close world map',
+ 'ภาพแผนที่โลก เลื่อนเพื่อสำรวจเมื่อขยาย':'World map. Scroll to explore when zoomed in',
+ 'เลือกจุดหมาย':'Choose destination',
+ 'เข้าผ่านหน้ากิลด์หรือขุนพลชุมพล เมื่อเป็นสมาชิกกิลด์':'Guild members enter through the Guild panel or Chumphon Commander',
+ 'ดันเจี้ยนปาร์ตี้ · เข้าจากโรงสีใต้เงาจันทร์':'Party dungeon · Enter from Moonlit Mill',
+ 'ยังไม่มีเส้นทางวาร์ปไปที่นี่':'No warp route is available to this destination',
+ 'เบี้ยไม่พอสำหรับการเดินทาง':'Not enough cowries for this journey',
+ 'มี {0} เบี้ย':'You have {0} cowries',
+ 'วาร์ป · {0} เบี้ย':'Warp · {0} cowries'
+});

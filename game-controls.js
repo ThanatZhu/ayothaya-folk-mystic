@@ -86,7 +86,14 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   el.textContent=typeof e.amount==='string'?e.amount:(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');
   const same=floats.filter(f=>f.key===anchor.key);for(const f of same)f.slot+=crit?1.3:1;
   if(same.length>=FLOAT_STACK){const old=same[0];old.el.remove();floats.splice(floats.indexOf(old),1);}
-  $('world-labels').append(el);floats.push({el,key:anchor.key,pos:anchor.pos,age:0,slot:0,off:0,side:same.length%2?1:-1}); // popcorn: alternate left / right as they rise
+  const f={el,key:anchor.key,pos:anchor.pos,age:0,slot:0,off:0,side:same.length%2?1:-1}; // popcorn: alternate left / right as they rise
+  // 0.99.6 place it over the head before it is shown, so it never flashes at the screen corner first
+  placeFloat(f,0);$('world-labels').append(el);floats.push(f);
+ }
+ function placeFloat(f,dt){
+  f.off+=(f.slot*FLOAT_LINE-f.off)*Math.min(1,dt*16);const a=f.pos();projection.set(a.x,a.y,a.z).project(camera);
+  f.el.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth+f.side*Math.min(1,f.age*3)*14}px,${(-projection.y*.5+.5)*innerHeight-f.off-f.age*26}px)`;
+  f.el.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';
  }
  function effect(e){
   if(e.type==='experience'){
@@ -253,9 +260,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   skillEffects.update(dt,camera);
   for(let i=pillars.length-1;i>=0;i--){const p=pillars[i];p.age+=dt;p.m.material.opacity=.7*Math.max(0,1-p.age/2.6);p.m.scale.x=p.m.scale.z=1+Math.sin(p.age*6)*.08;if(p.age>2.6){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();pillars.splice(i,1);}}
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>FLOAT_LIFE){f.el.remove();floats.splice(i,1);continue;}
-   f.off+=(f.slot*FLOAT_LINE-f.off)*Math.min(1,dt*16);const a=f.pos();projection.set(a.x,a.y,a.z).project(camera);
-   f.el.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth+f.side*Math.min(1,f.age*3)*14}px,${(-projection.y*.5+.5)*innerHeight-f.off-f.age*26}px)`;
-   f.el.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';f.el.style.opacity=String(f.age<.55?1:Math.max(0,1-(f.age-.55)/(FLOAT_LIFE-.55)));}
+   placeFloat(f,dt);f.el.style.opacity=String(f.age<.55?1:Math.max(0,1-(f.age-.55)/(FLOAT_LIFE-.55)));}
   if(performance.now()>noticeUntil)$('notice').classList.remove('visible');else placeNotice();
   if(t-lastHUD>.08){lastHUD=t;
    $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`Lv. ${progression(world).level} · ปราบมอน ${world.kills} ตัว`;if($('hero-level'))$('hero-level').textContent='Lv. '+progression(world).level;

@@ -3,6 +3,8 @@ import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=70';
 import {createMentorUI} from './mentor-ui.js?v=98';
 import * as THREE from 'three';
+import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
+import {groundHeight} from './combat-core.js?v=97';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=94';
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
@@ -104,7 +106,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  $('map-plus').onclick=()=>zoomMap(.5);$('map-minus').onclick=()=>zoomMap(-.5);
  function minimap(){drawMap(mini,map,world.player,{photo:photo||null,...markers()});}
  function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
- function npcPosition(label,n){const e=camera.matrixWorld.elements,h=(n.visualHeight??1.65)+.14;point.set(n.x+e[4]*h,.07+e[5]*h,n.z+e[6]*h).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
+ function npcPosition(label,n){const e=camera.matrixWorld.elements,h=(n.visualHeight??WORLD_BODY_HEIGHT)+.14;point.set(n.x+e[4]*h,groundHeight(map.nav,n.x,n.z)+.07+e[5]*h,n.z+e[6]*h).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function update(t){
   const p=world.player;nearest=null;nearNPC=null;let best=2;
   const area=(map.districts??[]).find(d=>Math.hypot(p.x-d.x,p.z-d.z)<14);$('district-description').textContent=area?area.name+' · '+(map.safe?'เขตปลอดภัย':'นอกเมือง'):map.subtitle;

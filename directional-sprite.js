@@ -1,4 +1,5 @@
 import {CLASSES,isClass} from './classes.js?v=73';
+import {directionalBodyMetrics} from './directional-size.js';
 export const DIRECTIONAL_CLASSES=['novice',...CLASSES.map(c=>c.id)];
 export function directionalManifestPath(classId='shaman'){
  if(!DIRECTIONAL_CLASSES.includes(classId))throw new Error('invalid-class');
@@ -34,14 +35,15 @@ async function loadArt(classId){
  await Promise.all(Object.entries(manifest.sources).map(async([key,source])=>{
   const image=new Image();image.src=source.path;await image.decode();images[key]=image;
  }));
- const frames={};
+ const frames={},sizing={};
  for(const gender of ['male','female']){
-  frames[gender]={};
+  frames[gender]={};sizing[gender]={};
   for(const direction of DIRECTIONS){
    const f=manifest.frames[gender][direction],c=document.createElement('canvas');c.width=c.height=manifest.cell;
    const ctx=c.getContext('2d'),dest=placement(f,manifest.cell,manifest.anchor);ctx.imageSmoothingEnabled=false;
    ctx.drawImage(images[f.source],...f.rect,dest.x,dest.y,dest.w,dest.h);frames[gender][direction]=c;
+   sizing[gender][direction]=directionalBodyMetrics(classId,gender,direction,f,dest,manifest.cell);
   }
  }
- return {manifest,frames,footV:manifest.anchor[1]/manifest.cell};
+ return {manifest,frames,sizing,footV:manifest.anchor[1]/manifest.cell};
 }

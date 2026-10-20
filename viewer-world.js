@@ -1,10 +1,12 @@
-import {drawCharacterFrame} from './character-size.js?v=41.2';
+import {drawCharacterFrame,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
+import {peoplePlacement} from './npc-size.js?v=size1';
+import {groundHeight} from './combat-core.js?v=97';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {createMultiplayer} from './multiplayer-ui.js?v=99.4';
-import {createEquipmentUI} from './equipment-ui.js?v=83';
-import {createCityLife,clearCourtTrees} from './city-life.js?v=98';
+import {createMultiplayer} from './multiplayer-ui.js?v=size1';
+import {createEquipmentUI} from './equipment-ui.js?v=size1';
+import {createCityLife,clearCourtTrees} from './city-life.js?v=size1';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=90';
 import {createMmoHud} from './mmo-hud.js?v=48.1';
@@ -13,18 +15,18 @@ import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=81';
 import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=80';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
-import {createPaintedAvatar} from './painted-avatar.js?v=63';
+import {createPaintedAvatar} from './painted-avatar.js?v=size1';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {createAmbientMotion} from './ambient-motion.js?v=21';
+import {createAmbientMotion} from './ambient-motion.js?v=size1';
 import {createGame} from './game-controls.js?v=99.4';
 import {atlasPath,className} from './classes.js?v=73';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=98';
+import {createWorldUI} from './world-ui.js?v=size1';
 import {createStoryUI} from './story-ui.js?v=99.2';
 import {createBagUI} from './bag-ui.js?v=98';
 import {createStatusUI} from './status-ui.js?v=98';
@@ -38,7 +40,7 @@ import {createLifeUI} from './life-ui.js?v=68';
 import {createPetUI} from './pet-ui.js?v=98';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=64';
-import {createLifeNPC} from './life-npc.js?v=62';
+import {createLifeNPC} from './life-npc.js?v=size1';
 import {createFeedback} from './feedback.js?v=99.4';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=96';
 import {createMarketBoardUI} from './market-board-ui.js?v=97.4';
@@ -127,7 +129,7 @@ try {
  function plant(kind,x,y,w,h,flip=false){const s=sprite(botanic[kind],x,y,w,h);if(flip){s.material.map=botanic[kind].clone();s.material.map.repeat.x=-1;s.material.map.offset.x=1;}plants.push({sprite:s,kind});return s;}
  for(const [kind,x,z,w,h,flip] of map.plants){if(['canopy19','shrub19'].includes(kind))continue;plant(kind,x,-z,w,h,flip);if(kind==='tree')shadow(x,-z,w*.3);}
  const customized=customizeAtlas(heroAtlas.image,account.character.appearance,account.character.classId);
- const heroHeight=2.1,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
+ const heroHeight=CHARACTER_WORLD_SCALE,heroFrames=Array.from({length:4},(_,i)=>frame(customized,atlasCell(account.character.gender,i)));
  // 0.68.3 the original full-bodied art is the default again (the 8-direction side views read as paper-thin);
  // the 8-direction art stays one tap away in settings and the choice is remembered on this device.
  let eightWay=false;try{eightWay=localStorage.getItem('ayothaya-eight-way')==='1';}catch{}
@@ -149,7 +151,13 @@ try {
   pilotToggle.disabled=true;try{localStorage.setItem('ayothaya-eight-way',pilotToggle.checked?'1':'0');}catch{}await heroMesh.userData.setDirectional(pilotToggle.checked);directionalStatus();
  };
 
- for(const n of map.npcs.filter(n=>!n.mentorId)){const h=1.65;characters.push({sprite:sprite(personTextures[n.texture],n.x,-n.z,h,h,.06),shadow:shadow(n.x,-n.z,.4),height:h});}
+ for(const n of map.npcs.filter(n=>!n.mentorId)){
+  const tex=personTextures[n.texture],p=peoplePlacement(n.texture,tex.image.width,tex.image.height);
+  const ground=groundHeight(map.nav,n.x,n.z),actor=sprite(tex,n.x,-n.z,p.width,p.height,ground+.06);actor.center.set(p.centerX,p.centerY);
+  n.visualHeight=WORLD_BODY_HEIGHT;
+  const shade=shadow(n.x,-n.z,.4);shade.position.y=ground+.072;
+  characters.push({sprite:actor,shadow:shade,height:p.height,ground});
+ }
  const cityLife=await createCityLife({scene,map,shadow,paving:tiles.paving});
  const flames=[];for(const [x,z] of []){const l=new THREE.PointLight('#ffb53f',6,3.3,1.6);l.position.set(x,1.6,z);scene.add(l);flames.push(l);}
  const geo=new THREE.BufferGeometry(),positions=new Float32Array(90);let seed=2026;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}

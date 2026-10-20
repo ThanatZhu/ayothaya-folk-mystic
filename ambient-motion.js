@@ -136,7 +136,7 @@ export function createAmbientMotion({scene,world,waterMaterial,plants,characters
   const rp=ropeGeometry.attributes.position;
   for(let i=0;i<9;i++){const f=i/8;rp.setXYZ(i,THREE.MathUtils.lerp(ropeStart.x,ropeEnd.x,f),THREE.MathUtils.lerp(ropeStart.y,ropeEnd.y,f)-Math.sin(f*Math.PI)*.13,THREE.MathUtils.lerp(ropeStart.z,ropeEnd.z,f));}rp.needsUpdate=true;
   floating.forEach((o,i)=>{o.position.y=.009*Math.sin(t*1.35+i*.7);});
-  characters.forEach(({sprite,height},i)=>{sprite.scale.y=height*(1+.016*Math.sin(t*1.65+i*1.3));sprite.material.rotation=.014*Math.sin(t*.85+i*1.7);sprite.position.y=.06+.01*(1+Math.sin(t*1.1+i));});
+  characters.forEach(({sprite,height,ground=0},i)=>{sprite.scale.y=height;sprite.material.rotation=.008*Math.sin(t*.85+i*1.7);sprite.position.y=ground+.06+.005*(1+Math.sin(t*1.1+i));});
   leaves.forEach((leaf,i)=>{
    const age=(t+leaf.phase)%leaf.duration,f=age/leaf.duration;
    dummy.position.set(leaf.x+age*.32+Math.sin(age*1.9+i)*.23,.12+leaf.y*(1-f),leaf.z+age*.095+Math.sin(age*1.2+i)*.28);

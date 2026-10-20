@@ -1,6 +1,6 @@
 import {drawCharacterFrame} from './character-size.js?v=41.2';
 import {starterEquipment,equipItem,equipmentItem} from './equipment.js?v=41';
-import {loadPaintedCharacter} from './painted-character.js?v=41.2';
+import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {motionFrame} from './animation-frames.js?v=37';
 import {className} from './classes.js?v=73';
 import {openHudPanel} from './hud-panels.js';

@@ -1,7 +1,8 @@
 // 0.61 a livelier world when playing alone: the hired mercenary (rules in combat-core / realm 'hire') and a few
 // wandering adventurer NPCs on field maps. Both are drawn with the painted class art; NPCs are clearly labelled NPCs.
 import * as THREE from 'three';
-import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
+import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
+import {createRiggedSprite} from './rigged-sprite.js?v=size1';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
 import {walkable,groundHeight} from './combat-core.js?v=97';
 const MERC_COST=200,MERC_TIME=1200;
@@ -12,14 +13,15 @@ const blank=()=>{const t=new THREE.Texture();t.image=document.createElement('can
 export function createLifeNPC({game,map,scene,camera,controls,bagUI}){
  const world=game.world,labels=document.getElementById('world-labels'),at=new THREE.Vector3();
  function actor(classId,gender,label){
-  const sprite=createRiggedSprite(blank(),{classId,gender});sprite.scale.set(2.1,2.1,1);scene.add(sprite);
+  const sprite=createRiggedSprite(blank(),{classId,gender});sprite.scale.set(CHARACTER_WORLD_SCALE,CHARACTER_WORLD_SCALE,1);scene.add(sprite);
   const tag=document.createElement('span');tag.className='npc-label life-label';tag.textContent=label;labels.append(tag);
   return {classId,sprite,tag,x:0,z:0,face:{x:1,z:0},gait:0,view:'side',flip:false,moving:false,attackAt:-9,
    place(dt,t){
     const p=characterMotion({classId,mode:t-this.attackAt<attackDuration(classId)?'attack':this.moving?'walk':'idle',time:t-this.attackAt<attackDuration(classId)?t-this.attackAt:t,phase:this.gait,view:this.view=walkView(this.face,controls.getAzimuthalAngle(),this.view)});
     const side=this.face.x*Math.cos(controls.getAzimuthalAngle())-this.face.z*Math.sin(controls.getAzimuthalAngle());if(Math.abs(side)>.3)this.flip=side<0;
     sprite.position.set(this.x,groundHeight(game.world.nav,this.x,this.z)+.06,this.z);sprite.userData.pose(p,this.flip);
-    at.set(this.x,2.25,this.z).project(camera);tag.hidden=Math.abs(at.x)>1.05||Math.abs(at.y)>1.05||at.z>=1||!sprite.visible;
+    const e=camera.matrixWorld.elements,h=WORLD_BODY_HEIGHT+.14;
+    at.set(this.x+e[4]*h,sprite.position.y+e[5]*h,this.z+e[6]*h).project(camera);tag.hidden=Math.abs(at.x)>1.05||Math.abs(at.y)>1.05||at.z>=1||!sprite.visible;
     tag.style.transform=`translate(-50%,-100%) translate(${(at.x*.5+.5)*innerWidth}px,${(-at.y*.5+.5)*innerHeight}px)`;
    },
    step(tx,tz,speed,dt){const dx=tx-this.x,dz=tz-this.z,d=Math.hypot(dx,dz);this.moving=d>.15;if(!this.moving)return;const s=Math.min(d,speed*dt);this.x+=dx/d*s;this.z+=dz/d*s;this.face={x:dx/d,z:dz/d};this.gait+=gaitStep(s,dt,classId);}};

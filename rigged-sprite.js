@@ -1,6 +1,6 @@
-import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=41.2';
+import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=size1';
 import * as THREE from './vendor/build/three.module.js';
-import {loadPaintedCharacter} from './painted-character.js?v=41.2';
+import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {FRAME_COUNT} from './animation-frames.js?v=37';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
 export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null}={}){

@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import {CITIZEN_STYLES} from './city-life-data.js?v=98';
 import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1';
 import {groundHeight} from './combat-core.js?v=97';
+import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
+import {citizenBodyHeight} from './npc-size.js?v=size1';
 
 // Whole painted poses, aligned at their feet. No skeletal cutouts or squash/stretch.
 export function clearCourtTrees(model,map){
@@ -20,7 +22,7 @@ export async function createCityLife({scene,map,shadow,paving}){
  await Promise.all(Object.keys(metadata).map(async id=>{const tex=await loader.loadAsync('./assets/citizens40/'+id+'.png');tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.LinearFilter;tex.minFilter=THREE.LinearMipmapLinearFilter;sheets[id]=tex;}));
  const citizens=(map.citizens??[]).map(c=>({...c,...CITIZEN_STYLES[c.style],citizen:true,x:c.route[0].x,z:c.route[0].z,talking:false}));
  const actors=[...map.npcs.filter(n=>n.mentorId),...citizens].map(n=>{
-  const meta=metadata[n.sheet],rects=meta.rects.slice(n.row*meta.columns,(n.row+1)*meta.columns),maxHeight=Math.max(...rects.map(r=>r[3]));
+  const meta=metadata[n.sheet],rects=meta.rects.slice(n.row*meta.columns,(n.row+1)*meta.columns),bodyHeight=citizenBodyHeight(n.sheet,n.row);
   // Isolate each connected silhouette before filtering: atlas neighbours cannot bleed into a head/foot.
   const frames=rects.map((r,i)=>{const pad=3,c=document.createElement('canvas');c.width=r[2]+pad*2;c.height=r[3]+pad*2;
    c.getContext('2d').drawImage(sheets[n.sheet].image,...r,pad,pad,r[2],r[3]);
@@ -28,8 +30,8 @@ export async function createCityLife({scene,map,shadow,paving}){
    return {texture,w:c.width,h:c.height,anchor:meta.anchors[n.row*meta.columns+i]+pad,pad};});
   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:frames[0].texture,alphaTest:.5,transparent:false,depthWrite:true,color:'#fff5e7'}));scene.add(sprite);
   const walk=n.citizen?createCitizenMotion(n,Date.now()/1000+n.offset):null;if(walk){n.x=walk.pose.x;n.z=walk.pose.z;}
-  n.visualHeight=n.citizen?1.85:2.1;
-  return {n,frames,maxHeight,sprite,walk,shadow:shadow(n.x,-n.z,.38),frame:-1,flip:false};
+  n.visualHeight=WORLD_BODY_HEIGHT;
+  return {n,frames,bodyHeight,sprite,walk,shadow:shadow(n.x,-n.z,.38),frame:-1,flip:false};
  });
  // v2 scenes model their own sparring court; the painted floor only dresses the legacy capital.
  if(!map.scene){const pavingTexture=paving.clone();pavingTexture.repeat.set(9,10);pavingTexture.needsUpdate=true;
@@ -52,7 +54,7 @@ export async function createCityLife({scene,map,shadow,paving}){
    if(n.citizen){const e=camera.matrixWorld.elements,pose=stepCitizenMotion(a.walk,n,dt,{rightX:e[0],rightZ:e[2],viewX:e[8],viewZ:e[10]});n.x=pose.x;n.z=pose.z;frame=pose.frame;flip=pose.flip;
    }else {const cycle=(time+n.row*1.7)%18;frame=n.talking?2:cycle>15?3:cycle<.45?1:0;}
    const f=a.frames[frame];if(frame!==a.frame||flip!==a.flip){const tex=f.texture;tex.repeat.x=flip?-1:1;tex.offset.x=flip?1:0;a.sprite.material.map=tex;
-    const scale=n.visualHeight/a.maxHeight;a.sprite.scale.set(f.w*scale,f.h*scale,1);
+    const scale=n.visualHeight/a.bodyHeight;a.sprite.scale.set(f.w*scale,f.h*scale,1);
     a.sprite.center.set(flip?1-f.anchor/f.w:f.anchor/f.w,f.pad/f.h);a.frame=frame;a.flip=flip;}
 
    // 0.79 stand on the walk grid's height like the hero, so feet stay on bridge decks and raised floors.

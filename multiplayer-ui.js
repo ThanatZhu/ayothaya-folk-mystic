@@ -3,13 +3,14 @@ import {iconStyle} from './bag-ui.js?v=98';
 import {emblemId,emoteId} from './items.js?v=94';
 import {createPetView} from './pet-ui.js?v=98';
 import * as THREE from 'three';
+import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=97';
 import {MultiplayerClient} from './multiplayer-client.js?v=97.3';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=73';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
-import {createPaintedAvatar} from './painted-avatar.js?v=63';
+import {createPaintedAvatar} from './painted-avatar.js?v=size1';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=37';
 import {skillPose,skillTrack} from './skill-choreography.js?v=37';
 import {createSkillEffects} from './skill-effects.js?v=74';
@@ -103,7 +104,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  async function addRemote(state){
   const id=state.id,generation=loadingGeneration,placeholder={loading:true,state};views.set(id,placeholder);
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
-   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createPaintedAvatar(frames[0],{directional:false,classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance,equipment:state.equipment});sprite.scale.set(2.1,2.1,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
+   const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createPaintedAvatar(frames[0],{directional:false,classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance,equipment:state.equipment});sprite.scale.set(CHARACTER_WORLD_SCALE,CHARACTER_WORLD_SCALE,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
    const label=el('span','remote-player-label',state.character.name);labels.append(label);
    views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null,equipmentKey:JSON.stringify(state.equipment)});
   }catch{if(views.get(id)===placeholder)placeholder.retryAt=performance.now()+5000;}
@@ -181,7 +182,8 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    v.sprite.userData.setFacing?.(p.face,angle,{mode,time:poseTime,phase:mode==='walk'?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0;
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
    const tag=state.guild?state.guild.emblem+':'+(state.guild.castle?'👑 ':'')+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append((state.guild.castle?'👑 ':'')+state.guild.name);v.label.append(g);}}
-   v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x,v.sprite.position.y+2.1,v.sprite.position.z);
+   const up=camera.matrixWorld.elements,labelHeight=WORLD_BODY_HEIGHT+.14;
+   v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x+up[4]*labelHeight,v.sprite.position.y+up[5]*labelHeight,v.sprite.position.z+up[6]*labelHeight);
    if((state.pet??null)!==(v.pet?.id??null)){v.pet?.dispose();v.pet=state.pet?createPetView(scene,state.pet):null;}v.pet?.follow(v.sprite.position,Math.min(.05,dt));
    if(v.emoteBubble)v.emoteBubble.hidden=performance.now()>v.emoteUntil||!v.sprite.visible||!place(v.emoteBubble,v.sprite.position.x,v.sprite.position.y+2.9,v.sprite.position.z);
   }

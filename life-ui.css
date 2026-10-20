@@ -83,3 +83,5 @@
 .hero-label .rank-title,.remote-player-label .rank-title{display:block;font-size:10px;line-height:1.1;color:#ffe08a;text-shadow:0 1px 2px #000,0 0 6px #ffb800aa;letter-spacing:.04em}
 .hero-label .rank-title[hidden],.remote-player-label .rank-title[hidden]{display:none}
 .hero-label b,.remote-player-label b{font-weight:inherit}
+/* 0.103.8 rebirth button sits beside the character frame (top-left) on wide screens */
+@media (min-width:901px) and (min-height:601px){#rebirth-btn{top:28px;left:calc(max(16px,env(safe-area-inset-left)) + 284px)}}

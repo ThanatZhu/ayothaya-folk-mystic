@@ -44,7 +44,9 @@ test('all professions use server-authorized skills against the same shared monst
  for(const c of [NOVICE,...CLASSES]){
   const {realm,add,send,step}=fixture({safe:false});const a=add('playerOne',c.id),b=add('playerTwo');assert.equal(a.peer.world.mobs,b.peer.world.mobs);
   const hp=a.peer.world.mobs[0].hp;send(a.peer,'select',{target:0});send(a.peer,'skill',{index:0});step(2);
-  assert.ok(realm.snapshot(b.peer).mobs[0].hp<hp,c.id);assert.equal(realm.snapshot(b.peer).mobs[0].hp,realm.snapshot(a.peer).mobs[0].hp);
+  // snapshots carry only changed monster fields: merge what playerTwo received, as the client does
+  const seen=Object.assign({},...b.messages.flatMap(m=>m.mobs??m.snapshot?.mobs??[]).filter(m=>m.id===0));
+  assert.ok(seen.hp<hp,c.id);assert.equal(seen.hp,a.peer.world.mobs[0].hp);
   assert.ok(b.messages.some(m=>m.events?.some(e=>e.type==='cast'&&e.actor===a.peer.id)),c.id);
  }
 });
@@ -63,7 +65,7 @@ test('party XP rewards are awarded once, split without inflation, and exclude di
  for(const target of [b,far]){advance(2100);send(a.peer,'invite',{target:target.peer.id});const invite=target.messages.findLast(m=>m.type==='invite');send(target.peer,'answer',{invite:invite.id,accept:true});}
  Object.assign(far.peer.world.player,{x:-19,z:-19});const mob=a.peer.world.mobs[0];a.peer.world.hurt(mob,100);a.peer.world.hurt(mob,100);
  assert.equal(a.peer.world.baseXp+b.peer.world.baseXp,MONSTER_TYPES[0].baseXp);assert.equal(a.peer.world.jobXp+b.peer.world.jobXp,MONSTER_TYPES[0].jobXp);assert.equal(far.peer.world.baseXp,0);
- assert.equal(a.peer.world.kills,1);assert.equal(b.peer.world.kills,1);assert.equal(realm.snapshot(b.peer).mobs[0].hp,0);
+ assert.equal(a.peer.world.kills,1);assert.equal(b.peer.world.kills,1);assert.equal(realm.snapshot(b.peer).mobs.find(m=>m.id===0).hp,0);
 });
 test('chat and command floods are bounded; empty/oversized text rejected',()=>{
  const {realm,add,send}=fixture();const {peer:p}=add('playerOne');

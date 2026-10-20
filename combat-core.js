@@ -230,7 +230,8 @@ export class CombatWorld{
     if(this.autoCast===0&&lineClear(p,m,this.nav)){const i=pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0){this.autoCast=.5;this.skill(i);}}
     if(distance(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
-     if(this.pathTimer<=0){this.path=findPath(p,m,this.nav);this.pathTimer=.65;}
+     // 0.99.11 open ground (nothing between us): walk straight at it and skip the grid search, which is the costly part
+     if(this.pathTimer<=0){this.path=lineClear(p,m,this.nav)?[{x:m.x,z:m.z}]:findPath(p,m,this.nav);this.pathTimer=.65;}
      while(this.path.length&&distance(p,this.path[0])<.16)this.path.shift();
      const next=this.path[0];if(next){const d=distance(p,next)||1;const step=Math.min(d,speed*dt);p.face={x:(next.x-p.x)/d,z:(next.z-p.z)/d};moveBody(p,p.face.x*step,p.face.z*step,this.nav);}
     }

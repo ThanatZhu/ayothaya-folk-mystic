@@ -3,15 +3,17 @@ import {BODY_HEIGHT,FRAME_SIZE,FRAME_FOOT,WORLD_BODY_HEIGHT} from './character-s
 import {peoplePlacement,citizenBodyHeight} from './npc-size.js?v=size1';
 import {CLASSES,NOVICE,className} from './classes.js?v=73';
 import {MENTORS,CITIZEN_STYLES} from './city-life-data.js?v=98';
+import {POSTURE_TRANSITIONS} from './character-action-state.js?v=life1';
 
-const ACTIONS=['idle','walk','run','sit','sleep'];
-const ACTION_NAMES={idle:'ยืน',walk:'เดิน',run:'วิ่ง',sit:'นั่ง',sleep:'นอน'};
+const ACTIONS=['idle','walk','run','sit','sleep','sitDown','standUp'];
+const ACTION_NAMES={idle:'ยืน',walk:'เดิน',run:'วิ่ง',sit:'นั่ง',sleep:'นอน',sitDown:'นั่งลง',standUp:'ลุกขึ้น'};
+const POSTURE_CYCLE=['idle','sitDown','sit','standUp'];
 const GROUP_NAMES={players:'ผู้เล่น',story:'NPC เนื้อเรื่อง',mentors:'ครูอาชีพ',citizens:'ชาวเมือง'};
 const PIXELS_PER_WORLD=BODY_HEIGHT/WORLD_BODY_HEIGHT;
 const rows=[],images=new Map(),cards=new Map();
 const $=id=>document.getElementById(id);
 const query=new URLSearchParams(location.search);
-const state={id:query.get('id')??'novice-male',action:ACTIONS.includes(query.get('action'))?query.get('action'):'walk',group:'all',speed:.5,playing:!matchMedia('(prefers-reduced-motion: reduce)').matches,elapsed:0,frame:0,ghost:false,ruler:true};
+const state={id:query.get('id')??'novice-male',action:ACTIONS.includes(query.get('action'))?query.get('action'):'walk',group:'all',speed:.5,playing:!matchMedia('(prefers-reduced-motion: reduce)').matches,elapsed:0,frame:0,ghost:false,ruler:true,cycle:false};
 const audit=window.characterAnimationAudit={ready:false,errors:[],rows,selected:null,available:[],frame:0,frameCount:0,targetBodyPixels:BODY_HEIGHT,frameSize:FRAME_SIZE,frameFoot:FRAME_FOOT};
 const makeCanvas=(w=FRAME_SIZE,h=FRAME_SIZE)=>Object.assign(document.createElement('canvas'),{width:w,height:h});
 async function json(path){const r=await fetch(path);if(!r.ok)throw new Error(`${path}: HTTP ${r.status}`);return r.json();}
@@ -88,7 +90,7 @@ function hasBreath(){return !!currentClip()&&['idle','sit','sleep'].includes(sta
 function availability(clip){return clip?.frames?.length>1?'animated':clip?.frames?.length?'static':'pending';}
 function updateAudit(){
   const row=currentRow(),clip=currentClip();
-  audit.selected={id:state.id,action:state.action,group:state.group,speed:state.speed,playing:state.playing,ghost:state.ghost,ruler:state.ruler};
+  audit.selected={id:state.id,action:state.action,group:state.group,speed:state.speed,playing:state.playing,ghost:state.ghost,ruler:state.ruler,cycle:state.cycle};
   audit.available=ACTIONS.filter(a=>row?.clips[a]?.frames?.length);
   audit.frame=state.frame;audit.frameCount=clip?.frames.length??0;
 }
@@ -118,6 +120,10 @@ function syncSelection(){
     b.setAttribute('aria-pressed',String(b.dataset.action===state.action));b.dataset.availability=availability(row.clips[b.dataset.action]);
     b.title=`${ACTION_NAMES[b.dataset.action]} · ${row.clips[b.dataset.action]?.frames.length??0} เฟรม`;
   });
+  const canCycle=POSTURE_CYCLE.every(action=>row.clips[action]?.frames.length);
+  $('posture-cycle').disabled=!canCycle;$('posture-cycle').setAttribute('aria-pressed',String(state.cycle));
+  $('posture-cycle').textContent=state.cycle?'หยุดวงรอบ ยืน → นั่ง → ลุก':'เล่นต่อเนื่อง: ยืน → นั่ง → ลุก';
+  $('cycle-note').textContent=!canCycle?'รอภาพนั่งลงและลุกขึ้นของตัวละครนี้':state.cycle?'เล่นเปลี่ยนท่าครั้งเดียว พักนั่ง แล้วลุกกลับมายืน':'ท่านั่งลงและลุกขึ้นเล่นครั้งเดียว แล้วค้างท่านั่งหรือยืน';
   for(const [id,card] of cards)card.setAttribute('aria-pressed',String(id===state.id));
   syncPlayback();drawMain();
 }
@@ -175,6 +181,7 @@ function populateSelect(){
 }
 function setSelection(next={}){
   let reset=false;
+  if(next.id||next.action||Number.isFinite(next.frame))state.cycle=false;
   if(next.id&&rows.some(r=>r.id===next.id)&&next.id!==state.id){state.id=next.id;reset=true;}
   if(next.action&&ACTIONS.includes(next.action)&&next.action!==state.action){state.action=next.action;reset=true;}
   if(next.group&&['all',...Object.keys(GROUP_NAMES)].includes(next.group)){state.group=next.group;$('group-filter').value=next.group;renderLibrary();}
@@ -187,8 +194,33 @@ function setSelection(next={}){
   if(Number.isFinite(next.frame)&&clip){state.frame=Math.min(clip.frames.length-1,Math.max(0,Math.round(next.frame)));state.elapsed=frameStart(clip,state.frame);state.playing=false;}
   syncSelection();return audit.selected;
 }
+function setCycle(value){
+  if(value&&!POSTURE_CYCLE.every(action=>currentRow()?.clips[action]?.frames.length))return false;
+  state.cycle=!!value;
+  if(state.cycle){state.action='idle';state.elapsed=0;state.frame=0;state.playing=true;}
+  syncSelection();return state.cycle;
+}
+function advancePlayback(seconds){
+  const clip=currentClip();if(!clip)return;
+  state.elapsed+=Math.max(0,seconds)*state.speed;
+  let changed=false;
+  // Transitions never loop on their own. A selected transition ends in its
+  // authored resting pose; the optional cycle also holds each rest for 2.4 s.
+  for(let guard=0;guard<32;guard++){
+    const active=currentClip(),duration=state.cycle&&!POSTURE_TRANSITIONS[state.action]?2.4:clipDuration(active);
+    if(!(duration>0)||state.elapsed<duration)break;
+    let next;
+    if(state.cycle)next=POSTURE_CYCLE[(POSTURE_CYCLE.indexOf(state.action)+1)%POSTURE_CYCLE.length];
+    else next=POSTURE_TRANSITIONS[state.action];
+    if(!next||!currentRow()?.clips[next]?.frames.length)break;
+    state.elapsed-=duration;state.action=next;changed=true;
+  }
+  state.frame=frameAt(currentClip(),state.elapsed);
+  if(changed)syncSelection();else drawMain();
+}
 audit.setSelection=setSelection;audit.select=setSelection;
 audit.frameAt=frameAt;
+audit.setCycle=setCycle;audit.advance=advancePlayback;
 $('character-select').addEventListener('change',e=>setSelection({id:e.target.value}));
 $('group-filter').addEventListener('change',e=>setSelection({group:e.target.value}));
 document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>setSelection({action:b.dataset.action})));
@@ -198,10 +230,11 @@ for(const [id,step] of [['frame-prev',-1],['frame-next',1]])$(id).addEventListen
 $('frame-scrubber').addEventListener('input',e=>setSelection({frame:Number(e.target.value)}));
 $('show-ruler').addEventListener('change',e=>setSelection({ruler:e.target.checked}));
 $('show-ghost').addEventListener('change',e=>setSelection({ghost:e.target.checked}));
+$('posture-cycle').addEventListener('click',()=>setCycle(!state.cycle));
 let previous=performance.now();
 function tick(now){
   const dt=Math.min(.1,(now-previous)/1000);previous=now;
-  if(audit.ready&&state.playing&&!document.hidden){const clip=currentClip();if(clip&&(clip.frames.length>1||hasBreath())){state.elapsed+=dt*state.speed;const frame=frameAt(clip,state.elapsed);if(frame!==state.frame||hasBreath()){state.frame=frame;drawMain();}}}
+  if(audit.ready&&state.playing&&!document.hidden){const clip=currentClip();if(clip&&(clip.frames.length>1||hasBreath()))advancePlayback(dt);}
   requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);

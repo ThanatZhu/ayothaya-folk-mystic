@@ -68,3 +68,27 @@ test('directional avatars use authored run/sit/sleep even when pose is called wi
  }
  mesh.userData.pose(characterMotion({mode:'idle'}));assert.equal(mesh.userData.directionalActive,true);assert.equal(mesh.material.visible,false);mesh.userData.dispose();
 });
+
+test('authored walking replaces the directional mesh only while compatible walking art exists',async()=>{
+ const mesh=createPaintedAvatar(null,{...loaders,directional:true,directionalArtLoader:async()=>directional(),
+  lifeArtLoader:async(id,options)=>options.equipment?.weapon?.endsWith('-crafted')?{clips:{}}:{
+   clips:{walk:{frames:[cell(id+'/walk0'),cell(id+'/walk1')],fps:2}}
+  }});await mesh.userData.ready;
+ mesh.userData.pose(characterMotion({mode:'walk',phase:.75,time:1}));
+ assert.equal(mesh.userData.supportsAuthoredAction('walk'),true);
+ assert.equal(mesh.userData.directionalActive,false);
+ assert.equal(mesh.material.visible,true);
+ assert.equal(mesh.userData.lifeAction,'walk');
+ assert.equal(mesh.material.map.image.label,'novice-male/walk1');
+ await mesh.userData.setEquipment({weapon:'novice-weapon-crafted'});
+ mesh.userData.pose(characterMotion({mode:'walk',phase:.75,time:2}));
+ assert.equal(mesh.userData.supportsAuthoredAction('walk'),false);
+ assert.equal(mesh.userData.lifeAction,null);
+ assert.equal(mesh.material.visible,true,'crafted equipment keeps its original painted renderer');
+ mesh.userData.dispose();
+ const legacy=createPaintedAvatar(null,{...loaders,directional:true,directionalArtLoader:async()=>directional()});
+ await legacy.userData.ready;legacy.userData.pose(characterMotion({mode:'walk',time:1}));
+ assert.equal(legacy.userData.supportsAuthoredAction('walk'),false);
+ assert.equal(legacy.userData.directionalActive,true,'missing authored walk retains legacy directional art');
+ legacy.userData.dispose();
+});

@@ -6,7 +6,7 @@ const ROOT='./assets/character-life100/';
 const images=new Map(),actors=new Map();
 let manifest;
 async function catalog(){
- if(!manifest)manifest=fetch(ROOT+'manifest.json?v=life1').then(async r=>{
+ if(!manifest)manifest=fetch(ROOT+'manifest.json?v=life101').then(async r=>{
   if(!r.ok)throw new Error('โหลดรายการท่าทางตัวละครไม่ได้');
   return r.json();
  }).catch(error=>{manifest=null;throw error;});
@@ -14,7 +14,7 @@ async function catalog(){
 }
 function image(path){
  if(!images.has(path))images.set(path,(async()=>{
-  const img=new Image();img.src=ROOT+path;await img.decode();return img;
+  const img=new Image();img.src=/^(?:\.\/)?assets\//.test(path)||path.startsWith('/')?path:ROOT+path;await img.decode();return img;
  })().catch(error=>{images.delete(path);throw error;}));
  return images.get(path);
 }
@@ -61,12 +61,17 @@ export async function loadLifeArt(id,{classId=null,appearance={},equipment=null}
  const key=id+':'+dye;
  if(actors.has(key))return actors.get(key);
  const pending=(async()=>{
-  const img=await image(entry.source),frames=entry.frames.map(frame=>{
+  // A frame can point at an appended atlas while old rest frames keep using the
+  // actor's original source. Image caching shares each atlas across its frames.
+  const frames=await Promise.all(entry.frames.map(async frame=>{
+   const source=frame.source??entry.source;
+   if(typeof source!=='string'||!source)throw new Error(`Missing frame source: ${id}`);
+   const img=await image(source);
    const canvas=document.createElement('canvas');canvas.width=canvas.height=FRAME_SIZE;
    const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
    ctx.drawImage(img,...frame.rect,0,0,FRAME_SIZE,FRAME_SIZE);
    return dyeOutfit(canvas,dye);
-  });
+  }));
   const clips=Object.fromEntries(Object.entries(entry.clips).map(([action,clip])=>[
    action,{...clip,frames:clip.frames.map(index=>frames[index]),source:'authored'}
   ]));

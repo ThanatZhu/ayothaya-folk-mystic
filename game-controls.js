@@ -3,7 +3,7 @@ import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=73';
 import {applySkillArt} from './skill-art.js?v=21';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=life1';
-import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction} from './character-action-state.js?v=life1';
+import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=life1';
 import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
@@ -36,7 +36,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  let strikes=[],shakeAmount=0,lastStep=0;
  let heroView='side',heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
  const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,runToggled=false,capabilitySignature='';
- const supportsAction=action=>supportsCharacterAction(action,hero.sprite.userData.supportsAction?.bind(hero.sprite.userData));
+ const supportsAction=action=>(action!=='run'||GAMEPLAY_RUN_ENABLED)&&supportsCharacterAction(action,hero.sprite.userData.supportsAction?.bind(hero.sprite.userData));
  function refreshAnimationCapabilities(){const actions=CHARACTER_ACTIONS.filter(supportsAction),signature=actions.join(',');if(signature!==capabilitySignature){capabilitySignature=signature;if(!supportsAction('run'))runToggled=false;dispatchEvent(new CustomEvent('character-animation-capabilities',{detail:{actions}}));}return actions;}
  function setRunning(value){runToggled=value===true&&supportsAction('run');return runToggled;}
  function requestEmote(action){

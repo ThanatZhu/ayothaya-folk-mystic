@@ -4,7 +4,7 @@ import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1'
 import {groundHeight} from './combat-core.js?v=97';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {citizenBodyHeight} from './npc-size.js?v=size1';
-import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=life1';
+import {loadNPCLife,applyNPCLife,stationaryNPCAction,resetNPCLife,npcLifeFlip,npcLifePreservesGesture} from './npc-life-animation.js?v=life1';
 
 // Whole painted poses, aligned at their feet. No skeletal cutouts or squash/stretch.
 export function clearCourtTrees(model,map){
@@ -55,11 +55,13 @@ export async function createCityLife({scene,map,shadow,paving}){
   const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
   for(const a of actors){const n=a.n;let frame=0,flip=false,action='idle',phase=null;
    if(n.citizen){const e=camera.matrixWorld.elements,pose=stepCitizenMotion(a.walk,n,dt,{rightX:e[0],rightZ:e[2],viewX:e[8],viewZ:e[10]});n.x=pose.x;n.z=pose.z;frame=pose.frame;flip=pose.flip;
+    if(pose.moving)a.lifeFlip=npcLifeFlip(pose.dx*e[0]+pose.dz*e[2],a.lifeFlip??false,a.life?.facing);
     action=pose.moving?'walk':n.talking?'idle':'sit';phase=a.walk.distance/1.5;
    }else {const cycle=(time+n.row*1.7)%18;frame=n.talking?2:cycle>15?3:cycle<.45?1:0;}
    if(!n.citizen)action=stationaryNPCAction(time,n.row,n.talking);
-   const preserveGesture=n.talking||(!n.citizen&&action==='idle'&&frame>0);
-   const authored=!preserveGesture&&applyNPCLife(a.sprite,a.life,action,time+n.row*1.7,{flip:action==='walk'?flip:false,reduced,phase});
+   const preserveGesture=npcLifePreservesGesture(n.talking,!n.citizen&&action==='idle'&&frame>0,a.sprite.userData.lifeAction);
+   if(preserveGesture)resetNPCLife(a.sprite);
+   const authored=!preserveGesture&&applyNPCLife(a.sprite,a.life,action,time+n.row*1.7,{flip:n.citizen?(a.lifeFlip??false):false,reduced,phase});
    const f=a.frames[frame];if(!authored){delete a.sprite.userData.lifeAction;delete a.sprite.userData.lifeFrame;
     const tex=f.texture;tex.repeat.x=flip?-1:1;tex.offset.x=flip?1:0;a.sprite.material.map=tex;
     const scale=n.visualHeight/a.bodyHeight;a.sprite.scale.set(f.w*scale,f.h*scale,1);

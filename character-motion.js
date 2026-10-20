@@ -1,7 +1,7 @@
 import {motionFrame} from './animation-frames.js?v=37';
 import {neutralJoints} from './character-rig.js?v=37';
 // Joint targets drive fixed-length arms/legs. Root motion is translation, not scale.
-export const MOTION_MODES=['idle','walk','run','sit','sleep','attack','cast','guard','hit','dash','bow','celebrate','rest'];
+export const MOTION_MODES=['idle','walk','run','sit','sleep','sitDown','standUp','attack','cast','guard','hit','dash','bow','celebrate','rest'];
 const clamp=v=>Math.max(0,Math.min(1,v));
 const ease=v=>{v=clamp(v);return v*v*(3-2*v);};
 // World units walked per full 8-frame walk cycle, measured from the art so the planted foot does not slide:

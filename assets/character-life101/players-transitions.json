@@ -1,0 +1,1886 @@
+{
+  "actors": {
+    "acolyte-male": {
+      "source": "transitions/acolyte-male.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            103,
+            66,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            75,
+            65,
+            239,
+            450
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            98,
+            95,
+            217,
+            276
+          ],
+          "sourceBounds": [
+            457,
+            137,
+            255,
+            388
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            93,
+            94,
+            222,
+            276
+          ],
+          "sourceBounds": [
+            827,
+            144,
+            277,
+            389
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            92,
+            108,
+            227,
+            276
+          ],
+          "sourceBounds": [
+            1205,
+            160,
+            289,
+            360
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.4666666666666667,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "acolyte-transition.png"
+      },
+      "notes": [
+        "Knees fold beneath the original saffron or white robe and prayer beads settle into the lap.",
+        "Four distinct painted poses at a fixed scale; covered legs remain anatomically connected beneath the robe."
+      ]
+    },
+    "acolyte-female": {
+      "source": "transitions/acolyte-female.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            100,
+            66,
+            218,
+            276
+          ],
+          "sourceBounds": [
+            70,
+            545,
+            250,
+            446
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            96,
+            87,
+            219,
+            276
+          ],
+          "sourceBounds": [
+            455,
+            581,
+            262,
+            402
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            90,
+            88,
+            224,
+            276
+          ],
+          "sourceBounds": [
+            822,
+            581,
+            285,
+            399
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            89,
+            103,
+            231,
+            276
+          ],
+          "sourceBounds": [
+            1199,
+            609,
+            302,
+            367
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.47085201793721976,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "acolyte-transition.png"
+      },
+      "notes": [
+        "Knees fold beneath the original saffron or white robe and prayer beads settle into the lap.",
+        "Four distinct painted poses at a fixed scale; covered legs remain anatomically connected beneath the robe."
+      ]
+    },
+    "boxer-male": {
+      "source": "transitions/boxer-male.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            76,
+            66,
+            223,
+            276
+          ],
+          "sourceBounds": [
+            26,
+            59,
+            314,
+            448
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            68,
+            86,
+            220,
+            276
+          ],
+          "sourceBounds": [
+            404,
+            108,
+            324,
+            406
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            71,
+            95,
+            223,
+            276
+          ],
+          "sourceBounds": [
+            794,
+            137,
+            325,
+            386
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            70,
+            97,
+            223,
+            276
+          ],
+          "sourceBounds": [
+            1161,
+            145,
+            327,
+            381
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.46875,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "boxer-transition.png"
+      },
+      "notes": [
+        "Two wrapped arms move from guard to knees; near hand supports the kneeling stage before returning to knee.",
+        "Headband tails and clothing stay on their original anatomical sides.",
+        "Four authored poses retain one fixed drawing scale; sitting height may differ slightly from the existing endpoint."
+      ]
+    },
+    "boxer-female": {
+      "source": "transitions/boxer-female.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            73,
+            66,
+            228,
+            276
+          ],
+          "sourceBounds": [
+            21,
+            522,
+            341,
+            461
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            65,
+            84,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            399,
+            564,
+            329,
+            422
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            71,
+            93,
+            218,
+            276
+          ],
+          "sourceBounds": [
+            794,
+            591,
+            323,
+            402
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            73,
+            106,
+            227,
+            276
+          ],
+          "sourceBounds": [
+            1166,
+            622,
+            339,
+            374
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.455531453362256,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "boxer-transition.png"
+      },
+      "notes": [
+        "Two wrapped arms move from guard to knees; near hand supports the kneeling stage before returning to knee.",
+        "Headband tails and clothing stay on their original anatomical sides.",
+        "Four authored poses retain one fixed drawing scale; sitting height may differ slightly from the existing endpoint."
+      ]
+    },
+    "hunter-male": {
+      "source": "transitions/hunter-male.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            93,
+            66,
+            227,
+            276
+          ],
+          "sourceBounds": [
+            62,
+            51,
+            289,
+            452
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            83,
+            90,
+            220,
+            276
+          ],
+          "sourceBounds": [
+            431,
+            113,
+            294,
+            401
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            79,
+            100,
+            217,
+            276
+          ],
+          "sourceBounds": [
+            804,
+            141,
+            297,
+            378
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            82,
+            118,
+            229,
+            276
+          ],
+          "sourceBounds": [
+            1170,
+            175,
+            317,
+            340
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.4646017699115044,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "hunter-transition.png"
+      },
+      "notes": [
+        "Bow remains at viewer-right and quiver stays attached at viewer-left throughout the lowering motion.",
+        "Four authored poses retain one fixed drawing scale; the crouch and kneeling frames are not inflated."
+      ]
+    },
+    "hunter-female": {
+      "source": "transitions/hunter-female.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            92,
+            66,
+            228,
+            276
+          ],
+          "sourceBounds": [
+            59,
+            527,
+            295,
+            455
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            87,
+            91,
+            223,
+            276
+          ],
+          "sourceBounds": [
+            441,
+            584,
+            294,
+            401
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            85,
+            93,
+            224,
+            276
+          ],
+          "sourceBounds": [
+            821,
+            591,
+            302,
+            396
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            87,
+            117,
+            231,
+            276
+          ],
+          "sourceBounds": [
+            1197,
+            644,
+            311,
+            345
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.46153846153846156,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "hunter-transition.png"
+      },
+      "notes": [
+        "Bow remains at viewer-right and quiver stays attached at viewer-left throughout the lowering motion.",
+        "Four authored poses retain one fixed drawing scale; the crouch and kneeling frames are not inflated."
+      ]
+    },
+    "lancer-male": {
+      "source": "transitions/lancer-male.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            78,
+            60,
+            217,
+            276
+          ],
+          "sourceBounds": [
+            45,
+            68,
+            282,
+            439
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            54,
+            87,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            394,
+            126,
+            328,
+            384
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            47,
+            88,
+            211,
+            276
+          ],
+          "sourceBounds": [
+            758,
+            142,
+            334,
+            382
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            55,
+            99,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            1139,
+            182,
+            325,
+            359
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.4918032786885246,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "lancer-transition.png"
+      },
+      "notes": [
+        "Original spear gradually tilts from upright to the same resting diagonal with spearhead at viewer-left.",
+        "Standing-equivalent body calibration excludes the spear tip; the first slightly crouched figure remains at most 210 body pixels.",
+        "Four authored poses with a fixed scale across each row. Source columns shift to retain complete spear tips."
+      ]
+    },
+    "lancer-female": {
+      "source": "transitions/lancer-female.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            77,
+            61,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            42,
+            540,
+            280,
+            438
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            60,
+            86,
+            213,
+            276
+          ],
+          "sourceBounds": [
+            401,
+            592,
+            312,
+            386
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            48,
+            92,
+            213,
+            276
+          ],
+          "sourceBounds": [
+            759,
+            612,
+            335,
+            375
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            59,
+            107,
+            219,
+            276
+          ],
+          "sourceBounds": [
+            1151,
+            658,
+            325,
+            344
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.4918032786885246,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "lancer-transition.png"
+      },
+      "notes": [
+        "Original spear gradually tilts from upright to the same resting diagonal with spearhead at viewer-left.",
+        "Standing-equivalent body calibration excludes the spear tip; the first slightly crouched figure remains at most 210 body pixels.",
+        "Four authored poses with a fixed scale across each row. Source columns shift to retain complete spear tips."
+      ]
+    },
+    "novice-male": {
+      "source": "transitions/novice-male.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            107,
+            66,
+            217,
+            276
+          ],
+          "sourceBounds": [
+            88,
+            56,
+            240,
+            460
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            99,
+            89,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            457,
+            109,
+            248,
+            409
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            87,
+            103,
+            210,
+            276
+          ],
+          "sourceBounds": [
+            820,
+            141,
+            270,
+            379
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            102,
+            116,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            1210,
+            172,
+            242,
+            351
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.45652173913043476,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "novice-transition.png"
+      },
+      "notes": [
+        "Four distinct lowering poses, both knees bend, then one knee folds to the ground, then cross-legged settling.",
+        "Bag remains at the original anatomical right hip (viewer-left) in all eight frames.",
+        "Use one fixed scale per gender row, never resize each crouching silhouette to standing height.",
+        "Male scale is capped by the first pose's 460px source height to avoid exceeding the established 210px body height."
+      ]
+    },
+    "novice-female": {
+      "source": "transitions/novice-female.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            109,
+            69,
+            218,
+            276
+          ],
+          "sourceBounds": [
+            93,
+            543,
+            239,
+            453
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            102,
+            88,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            470,
+            585,
+            241,
+            412
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            89,
+            101,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            824,
+            614,
+            268,
+            383
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            103,
+            115,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            1219,
+            643,
+            238,
+            351
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.45751633986928103,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "novice-transition.png"
+      },
+      "notes": [
+        "Four distinct lowering poses, both knees bend, then one knee folds to the ground, then cross-legged settling.",
+        "Bag remains at the original anatomical right hip (viewer-left) in all eight frames.",
+        "Use one fixed scale per gender row, never resize each crouching silhouette to standing height.",
+        "Male scale is capped by the first pose's 460px source height to avoid exceeding the established 210px body height."
+      ]
+    },
+    "rogue-male": {
+      "source": "transitions/rogue-male.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            84,
+            66,
+            229,
+            276
+          ],
+          "sourceBounds": [
+            55,
+            73,
+            294,
+            426
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            65,
+            95,
+            245,
+            276
+          ],
+          "sourceBounds": [
+            402,
+            133,
+            365,
+            368
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            55,
+            99,
+            237,
+            276
+          ],
+          "sourceBounds": [
+            772,
+            149,
+            370,
+            360
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            73,
+            107,
+            250,
+            276
+          ],
+          "sourceBounds": [
+            1174,
+            164,
+            360,
+            344
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.4918032786885246,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "rogue-transition.png"
+      },
+      "notes": [
+        "Both daggers lower toward their corresponding sides; the burgundy scarf and ribbon remain at viewer-left.",
+        "Four distinct body poses use one fixed scale per actor; exactly two arms and legs remain visible or naturally occluded."
+      ]
+    },
+    "rogue-female": {
+      "source": "transitions/rogue-female.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            84,
+            66,
+            229,
+            276
+          ],
+          "sourceBounds": [
+            53,
+            549,
+            296,
+            429
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            64,
+            89,
+            243,
+            276
+          ],
+          "sourceBounds": [
+            401,
+            596,
+            365,
+            382
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            56,
+            96,
+            239,
+            276
+          ],
+          "sourceBounds": [
+            774,
+            617,
+            374,
+            368
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            72,
+            107,
+            250,
+            276
+          ],
+          "sourceBounds": [
+            1171,
+            640,
+            363,
+            345
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.48951048951048953,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "rogue-transition.png"
+      },
+      "notes": [
+        "Both daggers lower toward their corresponding sides; the burgundy scarf and ribbon remain at viewer-left.",
+        "Four distinct body poses use one fixed scale per actor; exactly two arms and legs remain visible or naturally occluded."
+      ]
+    },
+    "shaman-male": {
+      "source": "transitions/shaman-male.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            76,
+            66,
+            221,
+            276
+          ],
+          "sourceBounds": [
+            49,
+            75,
+            303,
+            438
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            70,
+            99,
+            213,
+            276
+          ],
+          "sourceBounds": [
+            441,
+            146,
+            299,
+            369
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            66,
+            96,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            818,
+            151,
+            305,
+            376
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            63,
+            108,
+            207,
+            276
+          ],
+          "sourceBounds": [
+            1177,
+            169,
+            300,
+            350
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.4794520547945205,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "shaman-transition.png"
+      },
+      "notes": [
+        "Staff, bell, red tassel and paper talismans lower together; the staff head stays at viewer-left.",
+        "Four genuine painted transition poses preserve one fixed scale rather than enlarging crouches."
+      ]
+    },
+    "shaman-female": {
+      "source": "transitions/shaman-female.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            76,
+            66,
+            221,
+            276
+          ],
+          "sourceBounds": [
+            48,
+            540,
+            303,
+            438
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            68,
+            94,
+            214,
+            276
+          ],
+          "sourceBounds": [
+            435,
+            597,
+            305,
+            379
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            67,
+            90,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            818,
+            605,
+            302,
+            387
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            62,
+            106,
+            208,
+            276
+          ],
+          "sourceBounds": [
+            1176,
+            632,
+            305,
+            355
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.4794520547945205,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "shaman-transition.png"
+      },
+      "notes": [
+        "Staff, bell, red tassel and paper talismans lower together; the staff head stays at viewer-left.",
+        "Four genuine painted transition poses preserve one fixed scale rather than enlarging crouches."
+      ]
+    },
+    "swordsman-male": {
+      "source": "transitions/swordsman-male.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            78,
+            66,
+            224,
+            276
+          ],
+          "sourceBounds": [
+            41,
+            82,
+            301,
+            433
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            61,
+            92,
+            236,
+            276
+          ],
+          "sourceBounds": [
+            405,
+            143,
+            360,
+            380
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            71,
+            97,
+            233,
+            276
+          ],
+          "sourceBounds": [
+            801,
+            171,
+            334,
+            369
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            63,
+            114,
+            244,
+            276
+          ],
+          "sourceBounds": [
+            1151,
+            216,
+            373,
+            335
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.48498845265588914,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "swordsman-transition.png"
+      },
+      "notes": [
+        "Sword stays at viewer-left and shield at viewer-right through all poses; hands gradually lower both props.",
+        "Four authored body poses; crouches keep the same drawing scale rather than being enlarged.",
+        "Actual alpha bounds use irregular column/row cuts to retain complete weapon tips."
+      ]
+    },
+    "swordsman-female": {
+      "source": "transitions/swordsman-female.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            78,
+            68,
+            224,
+            276
+          ],
+          "sourceBounds": [
+            41,
+            535,
+            300,
+            428
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            61,
+            90,
+            238,
+            276
+          ],
+          "sourceBounds": [
+            406,
+            586,
+            365,
+            382
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            70,
+            91,
+            235,
+            276
+          ],
+          "sourceBounds": [
+            799,
+            603,
+            340,
+            381
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            69,
+            117,
+            245,
+            276
+          ],
+          "sourceBounds": [
+            1162,
+            666,
+            362,
+            328
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "loop": false,
+      "calibration": {
+        "scale": 0.4861111111111111,
+        "foot": 276,
+        "frameSize": 320,
+        "standingBodyHeight": 210,
+        "source": "swordsman-transition.png"
+      },
+      "notes": [
+        "Sword stays at viewer-left and shield at viewer-right through all poses; hands gradually lower both props.",
+        "Four authored body poses; crouches keep the same drawing scale rather than being enlarged.",
+        "Actual alpha bounds use irregular column/row cuts to retain complete weapon tips."
+      ]
+    }
+  }
+}

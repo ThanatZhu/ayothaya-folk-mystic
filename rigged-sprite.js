@@ -3,11 +3,13 @@ import * as THREE from './vendor/build/three.module.js';
 import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {FRAME_COUNT} from './animation-frames.js?v=37';
 import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=life1';
+import {createPosturePlayback} from './character-action-state.js?v=life1';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
 export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt}={}){
  const geometry=new THREE.PlaneGeometry(1,1);geometry.translate(0,.5,0);
  const material=new THREE.MeshBasicMaterial({map:texture,alphaTest:.45,transparent:false,depthWrite:true,side:THREE.DoubleSide,color:'#fff1da'});
  const mesh=new THREE.Mesh(geometry,material);mesh.frustumCulled=false;
+ const posture=createPosturePlayback();let transitionFlip=null;
  let frames=null,life=null,version=0,disposed=false,currentClass=classId,currentGender=gender,currentAppearance=appearance,loadedClass=null,appearanceDirty=false;
  const textureFor=cell=>{const t=new THREE.CanvasTexture(cell);t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;return t;};
  function release(){
@@ -38,7 +40,8 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   const [art,result]=await Promise.all([paintedArtLoader(id,look,gear),loadLife(id,look,gear).then(value=>({value}),error=>({error}))]);
   return {art,newLife:result.value??null,lifeError:result.error?.message??null};
  }
- mesh.userData.supportsAction=action=>['idle','walk'].includes(action)||!!life?.[currentGender]?.clips[action]?.frames.length;
+ mesh.userData.supportsAuthoredAction=action=>!!life?.[currentGender]?.clips[action]?.frames.length;
+ mesh.userData.supportsAction=action=>['idle','walk'].includes(action)||mesh.userData.supportsAuthoredAction(action);
  mesh.userData.setRig=(id,g)=>{
   if(disposed)return Promise.resolve(false);
   currentGender=g;
@@ -64,9 +67,12 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  mesh.onBeforeRender=(_r,_s,camera)=>{mesh.quaternion.copy(camera.quaternion);mesh.updateMatrixWorld();};
  mesh.userData.pose=(pose,flip=false)=>{
   if(disposed)return;
-  const action=pose.mode==='rest'?'sit':pose.mode??'idle',clip=life?.[currentGender]?.clips[action];
+  const requested=pose.mode==='rest'?'sit':pose.mode??'idle';
+  const resolved=posture.sample(requested,pose.time??0,{clips:life?.[currentGender]?.clips??{},reduced:pose.reduced});
+  const action=resolved.mode,clip=life?.[currentGender]?.clips[action];
+  if(resolved.transition){transitionFlip??=flip;flip=transitionFlip;}else transitionFlip=null;
   const clipDuration=clip?.frameDurations?.reduce((a,b)=>a+b,0)??(clip?.frames.length??0)/(clip?.fps??1);
-  const clipTime=['run','walk'].includes(action)&&Number.isFinite(pose.phase)?(((pose.phase%1)+1)%1)*clipDuration:pose.time??0;
+  const clipTime=['run','walk'].includes(action)&&Number.isFinite(pose.phase)?(((pose.phase%1)+1)%1)*clipDuration:resolved.time;
   const lifeIndex=lifeFrameAt(clip,clipTime,pose.reduced);
   let frame=Math.max(0,Math.min(FRAME_COUNT-1,Math.round(pose.artFrame??0)));
   // Front/back walk only where that art exists; otherwise the side cycle (with its left/right flip).
@@ -75,7 +81,7 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   if(frame>=20&&lifeIndex<0)flip=false; // front/back walk art is drawn facing the camera / away from it
   if(!mesh.userData.directional&&frames){
    material.map=lifeIndex>=0?clip.frames[lifeIndex]:frames[currentGender][frame];
-   mesh.userData.artFrame=frame;mesh.userData.lifeAction=lifeIndex>=0?action:null;mesh.userData.lifeFrame=lifeIndex;
+   mesh.userData.artFrame=frame;mesh.userData.lifeAction=lifeIndex>=0?action:null;mesh.userData.lifeFrame=lifeIndex;mesh.userData.lifeTransition=resolved.transition;
   }
   const painted=frames&&!mesh.userData.directional,extent=painted?FRAME_SIZE/LOGICAL_SIZE:1;
   const positions=geometry.attributes.position,foot=mesh.userData.directional?(mesh.userData.footV??1):painted?FRAME_FOOT/LOGICAL_SIZE:1;

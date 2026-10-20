@@ -1,0 +1,424 @@
+{
+  "actors": {
+    "masters-arms-0": {
+      "source": "locomotion/masters-arms-0.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "walk": {
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        }
+      },
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
+    },
+    "masters-arms-1": {
+      "source": "locomotion/masters-arms-1.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "walk": {
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        }
+      },
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
+    },
+    "masters-arms-2": {
+      "source": "locomotion/masters-arms-2.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "walk": {
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        }
+      },
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
+    },
+    "masters-arms-3": {
+      "source": "locomotion/masters-arms-3.png",
+      "review": "draft",
+      "facing": "right",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "clips": {
+        "walk": {
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        }
+      },
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
+    }
+  }
+}

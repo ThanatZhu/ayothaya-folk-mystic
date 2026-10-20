@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>ลองท่าทางตัวละคร · Ayothaya Folk Mystic</title>
-  <link rel="stylesheet" href="./character-animation-review.css">
+  <link rel="stylesheet" href="./character-animation-review.css?v=101">
 </head>
 <body>
   <header class="masthead">
@@ -49,6 +49,12 @@
           <button type="button" data-action="run" aria-pressed="false"><span>วิ่ง</span><small>ก้าวและส่งตัว</small><i></i></button>
           <button type="button" data-action="sit" aria-pressed="false"><span>นั่ง</span><small>พักบนพื้น</small><i></i></button>
           <button type="button" data-action="sleep" aria-pressed="false"><span>นอน</span><small>พักผ่อน</small><i></i></button>
+          <button type="button" data-action="sitDown" aria-pressed="false"><span>นั่งลง</span><small>ค่อย ๆ ย่อตัว</small><i></i></button>
+          <button type="button" data-action="standUp" aria-pressed="false"><span>ลุกขึ้น</span><small>ส่งตัวแล้วยืน</small><i></i></button>
+        </div>
+        <div class="cycle-controls">
+          <button id="posture-cycle" type="button" aria-pressed="false" disabled>เล่นต่อเนื่อง: ยืน → นั่ง → ลุก</button>
+          <p id="cycle-note">รอภาพนั่งลงและลุกขึ้นของตัวละครนี้</p>
         </div>
         <div class="clip-description"><span id="clip-badge" class="badge">กำลังโหลด</span><p id="clip-note">กำลังเตรียมภาพและจังหวะของตัวละคร</p></div>
         <div class="view-options">
@@ -67,7 +73,7 @@
       <div id="character-grid" class="character-grid"><p class="loading">กำลังโหลดภาพจากเกม…</p></div>
     </section>
   </main>
-  <footer class="wrap"><p>ภาพด้านล่างแสดงสถานะตามไฟล์ที่มีจริง · ปุ่ม 0.5× ใช้ดูรายละเอียดให้ช้าลง · ไม่มีการเปลี่ยนความเร็วเกมจากหน้านี้</p></footer>
-  <script type="module" src="./character-animation-review.js"></script>
+  <footer class="wrap"><p>ภาพด้านล่างแสดงสถานะตามไฟล์ที่มีจริง · ปุ่ม 0.5× ใช้ดูรายละเอียดให้ช้าลง · ท่าวิ่งเป็นตัวอย่างสำหรับตรวจภาพ ยังไม่เปิดความเร็ววิ่งในเกม</p></footer>
+  <script type="module" src="./character-animation-review.js?v=101"></script>
 </body>
 </html>

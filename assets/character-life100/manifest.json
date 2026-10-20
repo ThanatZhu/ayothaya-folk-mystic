@@ -1,8 +1,9 @@
 {
-  "version": 1,
+  "version": 2,
   "bodyHeight": 210,
   "frameSize": 320,
   "foot": 276,
+  "review": "preview-only",
   "actors": {
     "novice-male": {
       "source": "player/novice-male.png",
@@ -48,6 +49,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            107,
+            66,
+            217,
+            276
+          ],
+          "sourceBounds": [
+            88,
+            56,
+            240,
+            460
+          ],
+          "source": "../character-life101/transitions/novice-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            99,
+            89,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            457,
+            109,
+            248,
+            409
+          ],
+          "source": "../character-life101/transitions/novice-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            87,
+            103,
+            210,
+            276
+          ],
+          "sourceBounds": [
+            820,
+            141,
+            270,
+            379
+          ],
+          "source": "../character-life101/transitions/novice-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            102,
+            116,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            1210,
+            172,
+            242,
+            351
+          ],
+          "source": "../character-life101/transitions/novice-male.png"
         }
       ],
       "clips": {
@@ -86,6 +243,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -95,7 +314,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "novice-rest.png"
+      "sourceSheet": "novice-rest.png",
+      "life101Sources": [
+        "g01-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "novice-female": {
       "source": "player/novice-female.png",
@@ -141,6 +374,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            109,
+            69,
+            218,
+            276
+          ],
+          "sourceBounds": [
+            93,
+            543,
+            239,
+            453
+          ],
+          "source": "../character-life101/transitions/novice-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            102,
+            88,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            470,
+            585,
+            241,
+            412
+          ],
+          "source": "../character-life101/transitions/novice-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            89,
+            101,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            824,
+            614,
+            268,
+            383
+          ],
+          "source": "../character-life101/transitions/novice-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            103,
+            115,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            1219,
+            643,
+            238,
+            351
+          ],
+          "source": "../character-life101/transitions/novice-female.png"
         }
       ],
       "clips": {
@@ -179,6 +568,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -188,7 +639,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "novice-rest.png"
+      "sourceSheet": "novice-rest.png",
+      "life101Sources": [
+        "g01-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "swordsman-male": {
       "source": "player/swordsman-male.png",
@@ -234,6 +699,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            78,
+            66,
+            224,
+            276
+          ],
+          "sourceBounds": [
+            41,
+            82,
+            301,
+            433
+          ],
+          "source": "../character-life101/transitions/swordsman-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            61,
+            92,
+            236,
+            276
+          ],
+          "sourceBounds": [
+            405,
+            143,
+            360,
+            380
+          ],
+          "source": "../character-life101/transitions/swordsman-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            71,
+            97,
+            233,
+            276
+          ],
+          "sourceBounds": [
+            801,
+            171,
+            334,
+            369
+          ],
+          "source": "../character-life101/transitions/swordsman-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            63,
+            114,
+            244,
+            276
+          ],
+          "sourceBounds": [
+            1151,
+            216,
+            373,
+            335
+          ],
+          "source": "../character-life101/transitions/swordsman-male.png"
         }
       ],
       "clips": {
@@ -272,6 +893,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -281,7 +964,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "swordsman-rest-v3.png"
+      "sourceSheet": "swordsman-rest-v3.png",
+      "life101Sources": [
+        "g01-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "swordsman-female": {
       "source": "player/swordsman-female.png",
@@ -327,6 +1024,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            78,
+            68,
+            224,
+            276
+          ],
+          "sourceBounds": [
+            41,
+            535,
+            300,
+            428
+          ],
+          "source": "../character-life101/transitions/swordsman-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            61,
+            90,
+            238,
+            276
+          ],
+          "sourceBounds": [
+            406,
+            586,
+            365,
+            382
+          ],
+          "source": "../character-life101/transitions/swordsman-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            70,
+            91,
+            235,
+            276
+          ],
+          "sourceBounds": [
+            799,
+            603,
+            340,
+            381
+          ],
+          "source": "../character-life101/transitions/swordsman-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            69,
+            117,
+            245,
+            276
+          ],
+          "sourceBounds": [
+            1162,
+            666,
+            362,
+            328
+          ],
+          "source": "../character-life101/transitions/swordsman-female.png"
         }
       ],
       "clips": {
@@ -365,6 +1218,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -374,7 +1289,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "swordsman-rest-v3.png"
+      "sourceSheet": "swordsman-rest-v3.png",
+      "life101Sources": [
+        "g01-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "lancer-male": {
       "source": "player/lancer-male.png",
@@ -420,6 +1349,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            78,
+            60,
+            217,
+            276
+          ],
+          "sourceBounds": [
+            45,
+            68,
+            282,
+            439
+          ],
+          "source": "../character-life101/transitions/lancer-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            54,
+            87,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            394,
+            126,
+            328,
+            384
+          ],
+          "source": "../character-life101/transitions/lancer-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            47,
+            88,
+            211,
+            276
+          ],
+          "sourceBounds": [
+            758,
+            142,
+            334,
+            382
+          ],
+          "source": "../character-life101/transitions/lancer-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            55,
+            99,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            1139,
+            182,
+            325,
+            359
+          ],
+          "source": "../character-life101/transitions/lancer-male.png"
         }
       ],
       "clips": {
@@ -458,6 +1543,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -467,7 +1614,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "lancer-rest.png"
+      "sourceSheet": "lancer-rest.png",
+      "life101Sources": [
+        "g02-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "lancer-female": {
       "source": "player/lancer-female.png",
@@ -513,6 +1674,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            77,
+            61,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            42,
+            540,
+            280,
+            438
+          ],
+          "source": "../character-life101/transitions/lancer-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            60,
+            86,
+            213,
+            276
+          ],
+          "sourceBounds": [
+            401,
+            592,
+            312,
+            386
+          ],
+          "source": "../character-life101/transitions/lancer-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            48,
+            92,
+            213,
+            276
+          ],
+          "sourceBounds": [
+            759,
+            612,
+            335,
+            375
+          ],
+          "source": "../character-life101/transitions/lancer-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            59,
+            107,
+            219,
+            276
+          ],
+          "sourceBounds": [
+            1151,
+            658,
+            325,
+            344
+          ],
+          "source": "../character-life101/transitions/lancer-female.png"
         }
       ],
       "clips": {
@@ -551,6 +1868,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -560,7 +1939,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "lancer-rest.png"
+      "sourceSheet": "lancer-rest.png",
+      "life101Sources": [
+        "g02-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "hunter-male": {
       "source": "player/hunter-male.png",
@@ -606,6 +1999,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            93,
+            66,
+            227,
+            276
+          ],
+          "sourceBounds": [
+            62,
+            51,
+            289,
+            452
+          ],
+          "source": "../character-life101/transitions/hunter-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            83,
+            90,
+            220,
+            276
+          ],
+          "sourceBounds": [
+            431,
+            113,
+            294,
+            401
+          ],
+          "source": "../character-life101/transitions/hunter-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            79,
+            100,
+            217,
+            276
+          ],
+          "sourceBounds": [
+            804,
+            141,
+            297,
+            378
+          ],
+          "source": "../character-life101/transitions/hunter-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            82,
+            118,
+            229,
+            276
+          ],
+          "sourceBounds": [
+            1170,
+            175,
+            317,
+            340
+          ],
+          "source": "../character-life101/transitions/hunter-male.png"
         }
       ],
       "clips": {
@@ -644,6 +2193,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -653,7 +2264,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "hunter-rest.png"
+      "sourceSheet": "hunter-rest.png",
+      "life101Sources": [
+        "g02-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "hunter-female": {
       "source": "player/hunter-female.png",
@@ -699,6 +2324,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            92,
+            66,
+            228,
+            276
+          ],
+          "sourceBounds": [
+            59,
+            527,
+            295,
+            455
+          ],
+          "source": "../character-life101/transitions/hunter-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            87,
+            91,
+            223,
+            276
+          ],
+          "sourceBounds": [
+            441,
+            584,
+            294,
+            401
+          ],
+          "source": "../character-life101/transitions/hunter-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            85,
+            93,
+            224,
+            276
+          ],
+          "sourceBounds": [
+            821,
+            591,
+            302,
+            396
+          ],
+          "source": "../character-life101/transitions/hunter-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            87,
+            117,
+            231,
+            276
+          ],
+          "sourceBounds": [
+            1197,
+            644,
+            311,
+            345
+          ],
+          "source": "../character-life101/transitions/hunter-female.png"
         }
       ],
       "clips": {
@@ -737,6 +2518,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -746,7 +2589,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "hunter-rest.png"
+      "sourceSheet": "hunter-rest.png",
+      "life101Sources": [
+        "g02-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "boxer-male": {
       "source": "player/boxer-male.png",
@@ -792,6 +2649,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            76,
+            66,
+            223,
+            276
+          ],
+          "sourceBounds": [
+            26,
+            59,
+            314,
+            448
+          ],
+          "source": "../character-life101/transitions/boxer-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            68,
+            86,
+            220,
+            276
+          ],
+          "sourceBounds": [
+            404,
+            108,
+            324,
+            406
+          ],
+          "source": "../character-life101/transitions/boxer-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            71,
+            95,
+            223,
+            276
+          ],
+          "sourceBounds": [
+            794,
+            137,
+            325,
+            386
+          ],
+          "source": "../character-life101/transitions/boxer-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            70,
+            97,
+            223,
+            276
+          ],
+          "sourceBounds": [
+            1161,
+            145,
+            327,
+            381
+          ],
+          "source": "../character-life101/transitions/boxer-male.png"
         }
       ],
       "clips": {
@@ -830,6 +2843,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -839,7 +2914,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "boxer-rest.png"
+      "sourceSheet": "boxer-rest.png",
+      "life101Sources": [
+        "g03-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "boxer-female": {
       "source": "player/boxer-female.png",
@@ -885,6 +2974,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            73,
+            66,
+            228,
+            276
+          ],
+          "sourceBounds": [
+            21,
+            522,
+            341,
+            461
+          ],
+          "source": "../character-life101/transitions/boxer-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            65,
+            84,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            399,
+            564,
+            329,
+            422
+          ],
+          "source": "../character-life101/transitions/boxer-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            71,
+            93,
+            218,
+            276
+          ],
+          "sourceBounds": [
+            794,
+            591,
+            323,
+            402
+          ],
+          "source": "../character-life101/transitions/boxer-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            73,
+            106,
+            227,
+            276
+          ],
+          "sourceBounds": [
+            1166,
+            622,
+            339,
+            374
+          ],
+          "source": "../character-life101/transitions/boxer-female.png"
         }
       ],
       "clips": {
@@ -923,6 +3168,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -932,7 +3239,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "boxer-rest.png"
+      "sourceSheet": "boxer-rest.png",
+      "life101Sources": [
+        "g03-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "rogue-male": {
       "source": "player/rogue-male.png",
@@ -978,6 +3299,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            84,
+            66,
+            229,
+            276
+          ],
+          "sourceBounds": [
+            55,
+            73,
+            294,
+            426
+          ],
+          "source": "../character-life101/transitions/rogue-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            65,
+            95,
+            245,
+            276
+          ],
+          "sourceBounds": [
+            402,
+            133,
+            365,
+            368
+          ],
+          "source": "../character-life101/transitions/rogue-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            55,
+            99,
+            237,
+            276
+          ],
+          "sourceBounds": [
+            772,
+            149,
+            370,
+            360
+          ],
+          "source": "../character-life101/transitions/rogue-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            73,
+            107,
+            250,
+            276
+          ],
+          "sourceBounds": [
+            1174,
+            164,
+            360,
+            344
+          ],
+          "source": "../character-life101/transitions/rogue-male.png"
         }
       ],
       "clips": {
@@ -1016,6 +3493,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -1025,7 +3564,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "rogue-rest.png"
+      "sourceSheet": "rogue-rest.png",
+      "life101Sources": [
+        "g03-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "rogue-female": {
       "source": "player/rogue-female.png",
@@ -1071,6 +3624,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            84,
+            66,
+            229,
+            276
+          ],
+          "sourceBounds": [
+            53,
+            549,
+            296,
+            429
+          ],
+          "source": "../character-life101/transitions/rogue-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            64,
+            89,
+            243,
+            276
+          ],
+          "sourceBounds": [
+            401,
+            596,
+            365,
+            382
+          ],
+          "source": "../character-life101/transitions/rogue-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            56,
+            96,
+            239,
+            276
+          ],
+          "sourceBounds": [
+            774,
+            617,
+            374,
+            368
+          ],
+          "source": "../character-life101/transitions/rogue-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            72,
+            107,
+            250,
+            276
+          ],
+          "sourceBounds": [
+            1171,
+            640,
+            363,
+            345
+          ],
+          "source": "../character-life101/transitions/rogue-female.png"
         }
       ],
       "clips": {
@@ -1109,6 +3818,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -1118,7 +3889,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "rogue-rest.png"
+      "sourceSheet": "rogue-rest.png",
+      "life101Sources": [
+        "g03-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "shaman-male": {
       "source": "player/shaman-male.png",
@@ -1164,6 +3949,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            76,
+            66,
+            221,
+            276
+          ],
+          "sourceBounds": [
+            49,
+            75,
+            303,
+            438
+          ],
+          "source": "../character-life101/transitions/shaman-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            70,
+            99,
+            213,
+            276
+          ],
+          "sourceBounds": [
+            441,
+            146,
+            299,
+            369
+          ],
+          "source": "../character-life101/transitions/shaman-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            66,
+            96,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            818,
+            151,
+            305,
+            376
+          ],
+          "source": "../character-life101/transitions/shaman-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            63,
+            108,
+            207,
+            276
+          ],
+          "sourceBounds": [
+            1177,
+            169,
+            300,
+            350
+          ],
+          "source": "../character-life101/transitions/shaman-male.png"
         }
       ],
       "clips": {
@@ -1202,6 +4143,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -1211,7 +4214,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "shaman-rest.png"
+      "sourceSheet": "shaman-rest.png",
+      "life101Sources": [
+        "g04-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "shaman-female": {
       "source": "player/shaman-female.png",
@@ -1257,6 +4274,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            76,
+            66,
+            221,
+            276
+          ],
+          "sourceBounds": [
+            48,
+            540,
+            303,
+            438
+          ],
+          "source": "../character-life101/transitions/shaman-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            68,
+            94,
+            214,
+            276
+          ],
+          "sourceBounds": [
+            435,
+            597,
+            305,
+            379
+          ],
+          "source": "../character-life101/transitions/shaman-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            67,
+            90,
+            212,
+            276
+          ],
+          "sourceBounds": [
+            818,
+            605,
+            302,
+            387
+          ],
+          "source": "../character-life101/transitions/shaman-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            62,
+            106,
+            208,
+            276
+          ],
+          "sourceBounds": [
+            1176,
+            632,
+            305,
+            355
+          ],
+          "source": "../character-life101/transitions/shaman-female.png"
         }
       ],
       "clips": {
@@ -1295,6 +4468,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -1304,7 +4539,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "shaman-rest.png"
+      "sourceSheet": "shaman-rest.png",
+      "life101Sources": [
+        "g04-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "acolyte-male": {
       "source": "player/acolyte-male.png",
@@ -1350,6 +4599,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            103,
+            66,
+            215,
+            276
+          ],
+          "sourceBounds": [
+            75,
+            65,
+            239,
+            450
+          ],
+          "source": "../character-life101/transitions/acolyte-male.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            98,
+            95,
+            217,
+            276
+          ],
+          "sourceBounds": [
+            457,
+            137,
+            255,
+            388
+          ],
+          "source": "../character-life101/transitions/acolyte-male.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            93,
+            94,
+            222,
+            276
+          ],
+          "sourceBounds": [
+            827,
+            144,
+            277,
+            389
+          ],
+          "source": "../character-life101/transitions/acolyte-male.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            92,
+            108,
+            227,
+            276
+          ],
+          "sourceBounds": [
+            1205,
+            160,
+            289,
+            360
+          ],
+          "source": "../character-life101/transitions/acolyte-male.png"
         }
       ],
       "clips": {
@@ -1388,6 +4793,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -1397,7 +4864,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "acolyte-rest.png"
+      "sourceSheet": "acolyte-rest.png",
+      "life101Sources": [
+        "g04-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "acolyte-female": {
       "source": "player/acolyte-female.png",
@@ -1443,6 +4924,162 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            100,
+            66,
+            218,
+            276
+          ],
+          "sourceBounds": [
+            70,
+            545,
+            250,
+            446
+          ],
+          "source": "../character-life101/transitions/acolyte-female.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            96,
+            87,
+            219,
+            276
+          ],
+          "sourceBounds": [
+            455,
+            581,
+            262,
+            402
+          ],
+          "source": "../character-life101/transitions/acolyte-female.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            90,
+            88,
+            224,
+            276
+          ],
+          "sourceBounds": [
+            822,
+            581,
+            285,
+            399
+          ],
+          "source": "../character-life101/transitions/acolyte-female.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "paintedBounds": [
+            89,
+            103,
+            231,
+            276
+          ],
+          "sourceBounds": [
+            1199,
+            609,
+            302,
+            367
+          ],
+          "source": "../character-life101/transitions/acolyte-female.png"
         }
       ],
       "clips": {
@@ -1481,6 +5118,68 @@
           "fps": 1,
           "loop": true,
           "note": "ภาพท่านอน 1 เฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม"
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
       "calibration": {
@@ -1490,7 +5189,21 @@
         "foot": 276,
         "frameSize": 320
       },
-      "sourceSheet": "acolyte-rest.png"
+      "sourceSheet": "acolyte-rest.png",
+      "life101Sources": [
+        "g04-locomotion.json",
+        "players-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "people-0": {
       "source": "npc/people-0.png",
@@ -1534,6 +5247,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-0.png"
         }
       ],
       "clips": {
@@ -1571,9 +5392,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g05-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "people-1": {
       "source": "npc/people-1.png",
@@ -1617,6 +5514,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-1.png"
         }
       ],
       "clips": {
@@ -1654,9 +5659,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g05-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "people-2": {
       "source": "npc/people-2.png",
@@ -1700,6 +5781,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-2.png"
         }
       ],
       "clips": {
@@ -1737,9 +5926,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g05-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "people-3": {
       "source": "npc/people-3.png",
@@ -1783,6 +6048,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/people-3.png"
         }
       ],
       "clips": {
@@ -1820,9 +6193,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g05-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "masters-arms-0": {
       "source": "npc/masters-arms-0.png",
@@ -1866,6 +6315,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-0.png"
         }
       ],
       "clips": {
@@ -1903,9 +6460,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g06-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "masters-arms-1": {
       "source": "npc/masters-arms-1.png",
@@ -1949,6 +6582,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-1.png"
         }
       ],
       "clips": {
@@ -1986,9 +6727,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g06-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "masters-arms-2": {
       "source": "npc/masters-arms-2.png",
@@ -2032,6 +6849,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-2.png"
         }
       ],
       "clips": {
@@ -2069,9 +6994,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g06-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "masters-arms-3": {
       "source": "npc/masters-arms-3.png",
@@ -2115,6 +7116,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-arms-3.png"
         }
       ],
       "clips": {
@@ -2152,9 +7261,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g06-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "masters-mystic-0": {
       "source": "npc/masters-mystic-0.png",
@@ -2198,6 +7383,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-0.png"
         }
       ],
       "clips": {
@@ -2235,9 +7528,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g07-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "masters-mystic-1": {
       "source": "npc/masters-mystic-1.png",
@@ -2281,6 +7650,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-1.png"
         }
       ],
       "clips": {
@@ -2318,9 +7795,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g07-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "masters-mystic-2": {
       "source": "npc/masters-mystic-2.png",
@@ -2364,6 +7917,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-2.png"
         }
       ],
       "clips": {
@@ -2401,9 +8062,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g07-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "masters-mystic-3": {
       "source": "npc/masters-mystic-3.png",
@@ -2447,6 +8184,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/masters-mystic-3.png"
         }
       ],
       "clips": {
@@ -2484,9 +8329,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g07-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "citizens-market-0": {
       "source": "npc/citizens-market-0.png",
@@ -2530,6 +8451,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-0.png"
         }
       ],
       "clips": {
@@ -2567,9 +8596,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g08-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "citizens-market-1": {
       "source": "npc/citizens-market-1.png",
@@ -2613,6 +8718,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-1.png"
         }
       ],
       "clips": {
@@ -2650,9 +8863,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g08-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "citizens-market-2": {
       "source": "npc/citizens-market-2.png",
@@ -2696,6 +8985,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-2.png"
         }
       ],
       "clips": {
@@ -2733,9 +9130,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g08-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "citizens-market-3": {
       "source": "npc/citizens-market-3.png",
@@ -2779,6 +9252,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-market-3.png"
         }
       ],
       "clips": {
@@ -2816,9 +9397,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g08-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "citizens-river-0": {
       "source": "npc/citizens-river-0.png",
@@ -2862,6 +9519,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-0.png"
         }
       ],
       "clips": {
@@ -2899,9 +9664,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g09-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "citizens-river-1": {
       "source": "npc/citizens-river-1.png",
@@ -2945,6 +9786,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-1.png"
         }
       ],
       "clips": {
@@ -2982,9 +9931,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g09-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "citizens-river-2": {
       "source": "npc/citizens-river-2.png",
@@ -3028,6 +10053,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-2.png"
         }
       ],
       "clips": {
@@ -3065,9 +10198,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g09-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     },
     "citizens-river-3": {
       "source": "npc/citizens-river-3.png",
@@ -3111,6 +10320,114 @@
             320,
             320
           ]
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            1280,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            1600,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            1920,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/transitions/citizens-river-3.png"
         }
       ],
       "clips": {
@@ -3148,9 +10465,85 @@
           ],
           "fps": 1,
           "loop": true
+        },
+        "walk": {
+          "frames": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 3.6,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "run": {
+          "frames": [
+            9,
+            10,
+            11,
+            12
+          ],
+          "fps": 5.5,
+          "loop": true,
+          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            2
+          ],
+          "frameDurations": [
+            0.08,
+            0.14,
+            0.18,
+            0.2,
+            0.2,
+            0.15
+          ],
+          "loop": false,
+          "note": "ย่อเข่า → นั่งยอง → พับเข่าลงพื้น → นั่งพัก · ภาพวาดต่อเนื่อง คงฝั่งกระเป๋า"
+        },
+        "standUp": {
+          "frames": [
+            2,
+            16,
+            15,
+            14,
+            13,
+            0
+          ],
+          "frameDurations": [
+            0.1,
+            0.2,
+            0.2,
+            0.18,
+            0.14,
+            0.1
+          ],
+          "loop": false,
+          "note": "คลายขา → ใช้เท้ารับน้ำหนัก → เหยียดเข่า → ยืน · ใช้ลำดับภาพย้อนจากท่านั่งลง"
         }
       },
-      "review": "draft"
+      "review": "draft",
+      "life101Sources": [
+        "g09-locomotion.json",
+        "npcs-transitions.json"
+      ],
+      "gaitReview": {
+        "phaseOrder": [
+          "near-contact",
+          "far-pass",
+          "far-contact",
+          "near-pass"
+        ],
+        "method": "individual whole-character painted phases; no mirrored phase substitution",
+        "status": "visual-preview"
+      }
     }
   }
 }

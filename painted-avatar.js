@@ -22,7 +22,8 @@ export function createPaintedAvatar(texture,options={}){
  const loadArt=options.directionalArtLoader??loadDirectionalArt;
  let actor=null,generation=0,disposed=false,preparing=false,pending=null,wanted=options.directional!==false,context={direction:'S',mode:'idle',time:0};
  function visible(){
-  const paintedAction=['run','sit','sleep','rest'].includes(context.mode);
+  const authoredWalk=context.mode==='walk'&&mesh.userData.supportsAuthoredAction('walk');
+  const paintedAction=authoredWalk||['run','sit','sleep','rest','sitDown','standUp'].includes(context.mode)||mesh.userData.lifeTransition;
   const active=!!(!paintedAction&&!disposed&&!preparing&&wanted&&actor&&!mesh.userData.directionalReason);
   mesh.material.visible=!active;if(actor)actor.visible=active;
   mesh.userData.directionalActive=active;return active;
@@ -58,10 +59,13 @@ export function createPaintedAvatar(texture,options={}){
   // Direct pose callers (preview/NPCs) may not call setFacing first. The authored
   // action still decides when to leave the optional directional mesh.
   if(typeof pose.mode==='string')context={...context,mode:pose.mode,time:pose.time??context.time,phase:pose.phase,reduced:pose.reduced??false};
+  // Update the base posture state even while the optional directional actor is
+  // visible. Leaving sit for idle must finish standUp before returning to it.
+  mesh.userData.directional=false;base.pose(pose,flip);
   if(visible()){
    actor.material.color.copy(mesh.material.color);
    actor.userData.pose(pose,context);
-  }else{mesh.userData.directional=false;base.pose(pose,flip);}
+  }
  };
  mesh.userData.setRig=(id,g)=>{classId=id;gender=g;const load=base.setRig(id,g);return mesh.userData.ready=Promise.all([load,requestPreparation()]);};
  mesh.userData.setEquipment=async gear=>{const changed=await base.setEquipment(gear);if(!changed||disposed)return false;equipment=gear;await requestPreparation();return true;};

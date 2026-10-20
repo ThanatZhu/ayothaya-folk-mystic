@@ -8,9 +8,25 @@ import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE,CHARACTER_WORLD_SCALE} from '../chara
 // Node without substituting the renderer or the frame-selection implementation.
 const url=new URL('../npc-life-animation.js',import.meta.url);
 const source=(await readFile(url,'utf8')).replace(/from '([^']+)'/g,(_,specifier)=>`from '${new URL(specifier==='three'?'./vendor/build/three.module.js':specifier,url).href}'`);
-const {applyNPCLife,stationaryNPCAction}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const {applyNPCLife,stationaryNPCAction,resetNPCLife,npcLifeFlip,npcLifePreservesGesture}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const makeSprite=()=>new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.Texture()}));
 const art=()=>({clips:Object.fromEntries(['idle','sit','sleep','walk'].map(action=>[action,{fps:2,frames:[new THREE.Texture(),new THREE.Texture()]}]))});
+
+test('authored right-facing citizens follow screen travel and keep their side when stopping',()=>{
+ assert.equal(npcLifeFlip(.707,false),false);
+ assert.equal(npcLifeFlip(-.707,false),true);
+ assert.equal(npcLifeFlip(0,true),true);
+ assert.equal(npcLifeFlip(.08,true),true);
+ assert.equal(npcLifeFlip(.707,false,'left'),true);
+});
+
+test('a scheduled mentor greeting waits for standing up, while a conversation interrupts',()=>{
+ for(const prior of ['sit','sitDown','standUp','sleep'])
+  assert.equal(npcLifePreservesGesture(false,true,prior),false);
+ assert.equal(npcLifePreservesGesture(false,true,'idle'),true);
+ assert.equal(npcLifePreservesGesture(true,true,'sit'),true);
+ assert.equal(npcLifePreservesGesture(false,false,'idle'),false);
+});
 
 test('NPC poses retain their ground anchor and normalized body scale while breathing',()=>{
  const sprite=makeSprite(),life=art();sprite.position.set(8,.07,12);
@@ -55,4 +71,25 @@ test('talk wakes each resting stationary NPC without changing its route or ancho
   assert.equal(stationaryNPCAction(restTime,index,true),'idle');
   assert.equal(stationaryNPCAction(restTime+20,index),'idle');
  }
+});
+
+test('NPCs lower and rise independently, hold their hip side and interrupt for locomotion',()=>{
+ const life=art(),a=makeSprite(),b=makeSprite();
+ for(const action of ['sitDown','standUp'])life.clips[action]={frames:[new THREE.Texture(),new THREE.Texture()],fps:2,loop:false};
+ applyNPCLife(a,life,'idle',0);applyNPCLife(b,life,'idle',0);
+ applyNPCLife(a,life,'sit',1,{flip:true});applyNPCLife(b,life,'idle',1);
+ assert.equal(a.userData.lifeAction,'sitDown');assert.equal(b.userData.lifeAction,'idle');
+ applyNPCLife(a,life,'sit',1.6,{flip:false});
+ assert.equal(a.material.map.repeat.x,-1,'a posture cannot mirror its bag midway');
+ applyNPCLife(a,life,'sit',2.1);
+ assert.equal(a.userData.lifeAction,'sit');
+ applyNPCLife(a,life,'idle',3);
+ assert.equal(a.userData.lifeAction,'standUp');
+ applyNPCLife(a,life,'walk',3.2,{phase:.75});
+ assert.equal(a.userData.lifeAction,'walk');
+ resetNPCLife(a);
+ applyNPCLife(a,life,'idle',4);
+ assert.equal(a.userData.lifeAction,'idle','conversation reset must not replay a stale rise');
+ applyNPCLife(a,life,'sit',5,{reduced:true});
+ assert.equal(a.userData.lifeAction,'sit');
 });

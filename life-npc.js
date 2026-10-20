@@ -2,7 +2,7 @@
 // wandering adventurer NPCs on field maps. Both are drawn with the painted class art; NPCs are clearly labelled NPCs.
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
-import {createRiggedSprite} from './rigged-sprite.js?v=life1';
+import {createRiggedSprite} from './rigged-sprite.js?v=106.0';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=life1';
 import {walkable,groundHeight} from './combat-core.js?v=101';
 const MERC_COST=200,MERC_TIME=1200;

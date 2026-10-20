@@ -44,7 +44,7 @@ test('reduced motion and missing transition art select the real final resting po
  }
  p.reset();assert.equal(p.sample('sit',0,{clips:{}}).mode,'sit');
  assert.equal(p.sample('idle',3,{clips:{}}).mode,'idle');
- assert.equal(GAMEPLAY_RUN_ENABLED,false,'review artwork must not enable released gameplay');
+ assert.equal(GAMEPLAY_RUN_ENABLED,true,'the gameplay release explicitly enables reviewed running');
 });
 
 test('renderer samples authored transitions, locks facing during a transition and does not mirror per frame',async()=>{

@@ -2,8 +2,8 @@ import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=size1';
 import * as THREE from './vendor/build/three.module.js';
 import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {FRAME_COUNT} from './animation-frames.js?v=37';
-import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=life1';
-import {createPosturePlayback} from './character-action-state.js?v=life1';
+import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=106.0';
+import {createPosturePlayback} from './character-action-state.js?v=106.0';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
 export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt}={}){
  const geometry=new THREE.PlaneGeometry(1,1);geometry.translate(0,.5,0);

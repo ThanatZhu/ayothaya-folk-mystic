@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {WebSocketServer,WebSocket} from 'ws';
 import {RealmServer} from './realm.js';
 import {equipItem} from '../equipment.js';
+import {GAMEPLAY_RUN_ENABLED} from '../character-action-state.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
@@ -24,7 +25,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
  let savedList={at:0,rows:[]};
- const realm=new RealmServer({catalog,capacity,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set();let closing=false;
+ const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set();let closing=false;
  const toDiscord=discordPoster();if(toDiscord)realm.onAnnounce=toDiscord; // 0.96 war + tournament news (DISCORD_WEBHOOK_URL)
  // 0.47 guilds: loaded once, written on each change (rare: create/join/leave/emblem), outside the per-player saves.
  // 0.70 market: shops stay open while their owners are offline, so they live outside the player saves.

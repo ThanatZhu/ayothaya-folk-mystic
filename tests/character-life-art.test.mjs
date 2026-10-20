@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {lifeFrameAt,lifeAppearanceCompatibility} from '../character-life-art.js';
+import {lifeFrameAt,lifeAppearanceCompatibility,lifeAssetVariant} from '../character-life-art.js';
 import {GAMEPLAY_RUN_ENABLED} from '../character-action-state.js';
 
 test('authored posture sampling retains the chosen posture with reduced motion',()=>{
@@ -73,5 +73,31 @@ test('every human design has complete authored life clips with valid per-frame a
   }
   assert.equal(art.review,'draft',id);
  }
- assert.equal(GAMEPLAY_RUN_ENABLED,false,'reviewing authored run clips must not enable gameplay sprint');
+ assert.equal(GAMEPLAY_RUN_ENABLED,true,'reviewed running is enabled by the gameplay release');
+});
+
+test('special shaman and rogue weapons retain authored poses without sharing the basic cache entry',()=>{
+ for(const id of ['shaman','rogue']){
+  const gear={weapon:id+'-weapon-crafted'};
+  assert.equal(lifeAppearanceCompatibility(id,{},gear),null);
+  assert.equal(lifeAssetVariant(id,gear),'crafted106');
+  assert.equal(lifeAssetVariant(id,null),'basic');
+  assert.equal(lifeAppearanceCompatibility(id,{garment:'cloak'},gear),'appearance');
+ }
+ assert.equal(lifeAppearanceCompatibility('hunter',{}, {weapon:'hunter-weapon-crafted'}),'weapon');
+});
+
+test('four equipped actors cover every life action with intact transparent atlases',async()=>{
+ const root=new URL('../assets/character-life106/',import.meta.url),manifest=JSON.parse(await readFile(new URL('manifest.json',root)));
+ assert.deepEqual(Object.keys(manifest.actors).sort(),['rogue-female','rogue-male','shaman-female','shaman-male']);
+ for(const [id,actor] of Object.entries(manifest.actors)){
+  const png=await readFile(new URL(id+'.png',root));
+  assert.equal(png.readUInt32BE(16),1280);assert.equal(png.readUInt32BE(20),1600);assert.equal(png[25],6,'RGBA PNG');
+  assert.equal(actor.equipment,id.split('-')[0]+'-weapon-crafted');
+  for(const action of ['idle','walk','run','sit','sleep','sitDown','standUp']){
+   const clip=actor.clips[action];assert.ok(clip.frames.length);
+   for(const n of clip.frames){assert.ok(n>=0&&n<actor.frames.length);const [x,y,w,h]=actor.frames[n].rect;assert.equal(w,320);assert.equal(h,320);assert.ok(x>=0&&y>=0&&x+w<=1280&&y+h<=1600);}
+   if(['walk','run'].includes(action))assert.equal(new Set(clip.frames).size,4);
+  }
+ }
 });

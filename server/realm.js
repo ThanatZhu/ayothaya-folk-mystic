@@ -238,7 +238,7 @@ export class RealmServer{
   }
   if(m.type==='input'){
    if(!Number.isFinite(m.x)||!Number.isFinite(m.z)||Math.abs(m.x)>1||Math.abs(m.z)>1||typeof m.attack!=='boolean'||(m.run!==undefined&&typeof m.run!=='boolean'))return this.error(p,'invalid-input');
-   // Sprint remains closed until a server release enables the reviewed art.
+   // The host owns the sprint gate; bare realms stay closed by default.
    // Client capability flags and hand-written input packets cannot unlock it.
    const distance=Math.hypot(m.x,m.z),n=Math.max(1,distance);p.input={x:m.x/n,z:m.z/n,attack:m.attack,run:this.runEnabled&&m.run===true&&distance>.08};p.inputAt=now;if(distance>.08||m.attack)w.clearEmote();return true;
   }

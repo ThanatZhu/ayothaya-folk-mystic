@@ -3,7 +3,7 @@ import {BODY_HEIGHT,FRAME_SIZE,FRAME_FOOT,WORLD_BODY_HEIGHT} from './character-s
 import {peoplePlacement,citizenBodyHeight} from './npc-size.js?v=size1';
 import {CLASSES,NOVICE,className} from './classes.js?v=101';
 import {MENTORS,CITIZEN_STYLES} from './city-life-data.js?v=98';
-import {POSTURE_TRANSITIONS} from './character-action-state.js?v=life1';
+import {POSTURE_TRANSITIONS} from './character-action-state.js?v=106.0';
 
 const ACTIONS=['idle','walk','run','sit','sleep','sitDown','standUp'];
 const ACTION_NAMES={idle:'ยืน',walk:'เดิน',run:'วิ่ง',sit:'นั่ง',sleep:'นอน',sitDown:'นั่งลง',standUp:'ลุกขึ้น'};
@@ -33,16 +33,18 @@ function cropFrame(img,rect,{scale=1,anchor=rect[2]/2,cutoff=128}={}){
 }
 const still=frame=>({frames:[frame],fps:1,loop:true,source:'original',note:'ภาพยืนเดิมหนึ่งเฟรม พร้อมจังหวะหายใจเบา ๆ แบบเดียวกับในเกม'});
 async function loadPlayers(){
-  const classes=[NOVICE,...CLASSES];
+  const crafted=query.get('equipment')==='crafted';
+  const classes=crafted?CLASSES.filter(c=>['shaman','rogue'].includes(c.id)):[NOVICE,...CLASSES];
   await Promise.all(classes.map(async(item,order)=>{
-    const art=await loadPaintedCharacter(item.id,{}, {weapon:`${item.id}-weapon-basic`});
+    const equipment={weapon:`${item.id}-weapon-${crafted?'crafted':'basic'}`};
+    const art=await loadPaintedCharacter(item.id,{},equipment);
     for(const [sexOrder,gender] of ['male','female'].entries()){
       const frames=art[gender],idle=still(frames[0]);
       const clips={idle};
       if(frames.length>=20)clips.walk={frames:frames.slice(12,20),fps:8,loop:true,source:'original',note:'ท่าเดินเดิม 8 เฟรม · ดูที่ 0.5× เพื่อตรวจขา แขน และตำแหน่งกระเป๋า'};
-      rows.push({id:`${item.id}-${gender}`,group:'players',order:order*2+sexOrder,classId:item.id,gender,
+      rows.push({id:`${item.id}-${gender}`,group:'players',order:order*2+sexOrder,classId:item.id,gender,equipment,
         name:className(item.id,gender)+(item.id==='acolyte'?'':gender==='male'?' · ชาย':' · หญิง'),
-        detail:'อุปกรณ์ชุดเริ่มต้น',standing:frames[0],clips});
+        detail:crafted?'อาวุธรูปลักษณ์พิเศษ':'อุปกรณ์ชุดเริ่มต้น',standing:frames[0],clips});
     }
   }));
 }
@@ -240,13 +242,13 @@ function tick(now){
 requestAnimationFrame(tick);
 try{
   const [world,cityMeta]=await Promise.all([json('./maps/world.json'),json('./assets/citizens40/frames.json')]);
-  const loaded=await Promise.allSettled([loadPlayers(),loadPeople(world),loadCity(cityMeta)]);
+  const loaded=await Promise.allSettled(query.get('equipment')==='crafted'?[loadPlayers()]:[loadPlayers(),loadPeople(world),loadCity(cityMeta)]);
   for(const item of loaded)if(item.status==='rejected')audit.errors.push(String(item.reason?.message??item.reason));
   rows.sort((a,b)=>a.order-b.order);
   // A missing authored clip remains visibly unavailable; it is never replaced by a distorted standing image.
-  const {loadLifeArt}=await import('./character-life-art.js');
+  const {loadLifeArt}=await import('./character-life-art.js?v=106.0');
   const newArt=await Promise.allSettled(rows.map(async row=>{
-    const art=await loadLifeArt(row.id);if(!art?.clips)return;
+    const art=await loadLifeArt(row.id,{classId:row.classId,equipment:row.equipment});if(!art?.clips)return;
     for(const action of ACTIONS){const clip=art.clips[action];if(clip?.frames?.length)row.clips[action]={...clip,source:'authored'};}
     row.lifeArt=art;
   }));

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=life1';
+import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=106.0';
 import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE,CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
-import {createPosturePlayback} from './character-action-state.js?v=life1';
+import {createPosturePlayback} from './character-action-state.js?v=106.0';
 
 const cache=new Map(),flipped=new WeakMap(),owned=new Set(),postures=new WeakMap();
 if(typeof addEventListener==='function')addEventListener('pagehide',()=>{owned.forEach(t=>t.dispose());owned.clear();cache.clear();});

@@ -5,9 +5,9 @@ export const POSTURE_ACTIONS=Object.freeze(['sit','sleep']);
 export const EMOTE_ACTIONS=Object.freeze(['idle','bow','celebrate','guard','sit','sleep']);
 export const EMOTE_SECONDS=4;
 export const RUN_MULTIPLIER=1.35;
-// Authored runs may be reviewed in the gallery before the gameplay release.
-// The realm has a separate, server-owned gate; client artwork cannot open it.
-export const GAMEPLAY_RUN_ENABLED=false;
+// 0.106 reviewed run clips are live. The host explicitly opts in to the server
+// gate too; an input packet cannot enable a realm whose gate is closed.
+export const GAMEPLAY_RUN_ENABLED=true;
 export const POSTURE_TRANSITIONS=Object.freeze({sitDown:'sit',standUp:'idle'});
 
 export function animationClipDuration(clip){

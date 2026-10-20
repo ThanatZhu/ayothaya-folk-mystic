@@ -4,13 +4,16 @@ import {normalizeEquipment,equipmentAppearance} from './equipment.js?v=41';
 
 const ROOT='./assets/character-life100/';
 const images=new Map(),actors=new Map();
-let manifest;
-async function catalog(){
- if(!manifest)manifest=fetch(ROOT+'manifest.json?v=life101').then(async r=>{
+const manifests=new Map();
+export function lifeAssetVariant(classId,equipment=null){
+ return classId&&['shaman','rogue'].includes(classId)&&normalizeEquipment(equipment,classId).weapon.endsWith('-crafted')?'crafted106':'basic';
+}
+async function catalog(variant='basic'){
+ if(!manifests.has(variant))manifests.set(variant,fetch(variant==='crafted106'?'./assets/character-life106/manifest.json?v=106':ROOT+'manifest.json?v=life101').then(async r=>{
   if(!r.ok)throw new Error('โหลดรายการท่าทางตัวละครไม่ได้');
   return r.json();
- }).catch(error=>{manifest=null;throw error;});
- return manifest;
+ }).catch(error=>{manifests.delete(variant);throw error;}));
+ return manifests.get(variant);
 }
 function image(path){
  if(!images.has(path))images.set(path,(async()=>{
@@ -23,7 +26,7 @@ function image(path){
 export function lifeAppearanceCompatibility(classId,appearance={},equipment=null){
  if(!classId)return null;
  const gear=normalizeEquipment(equipment,classId),a=validateAppearance(equipmentAppearance(appearance,gear,classId));
- if(gear.weapon.endsWith('-crafted'))return 'weapon';
+ if(gear.weapon.endsWith('-crafted')&&lifeAssetVariant(classId,gear)==='basic')return 'weapon';
  if(['garment','hair','hairColor','eyes'].some(key=>a[key]!=='original')||a.beard!=='none'||a.tattoo!=='none')return 'appearance';
  if(classId==='acolyte'&&a.outfit!=='original')return 'appearance';
  return null;
@@ -54,11 +57,11 @@ export function lifeFrameAt(clip,time=0,reduced=false){
  return clip.frames.length-1;
 }
 export async function loadLifeArt(id,{classId=null,appearance={},equipment=null}={}){
- const data=await catalog(),entry=data.actors[id];if(!entry)return null;
  const reason=lifeAppearanceCompatibility(classId,appearance,equipment);
  if(reason)return {id,clips:{},unavailableReason:reason};
+ const variant=lifeAssetVariant(classId,equipment),data=await catalog(variant),entry=data.actors[id];if(!entry)return null;
  const dye=classId?equipmentAppearance(appearance,equipment,classId).outfit??'original':'original';
- const key=id+':'+dye;
+ const key=id+':'+variant+':'+dye;
  if(actors.has(key))return actors.get(key);
  const pending=(async()=>{
   // A frame can point at an appended atlas while old rest frames keep using the

@@ -2358,3 +2358,5 @@ Object.assign(globalThis.I18N_EN,{
  'มี {0} เบี้ย':'You have {0} cowries',
  'วาร์ป · {0} เบี้ย':'Warp · {0} cowries'
 });
+
+Object.assign(globalThis.I18N_EN,{'อาวุธรูปลักษณ์พิเศษ':'Special weapon appearance'});

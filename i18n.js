@@ -22,7 +22,10 @@
     return;
    }
    const order=[...th.matchAll(/\{(\d+)\}/g)].map(m=>+m[1]);
-   templates.push({re:new RegExp('^'+esc(th).replace(/\\\{\d+\\\}/g,'(.+?)')+'$'),en,order,weight:th.replace(/\{\d+\}/g,'').length});
+   const body=esc(th).replace(/\\\{\d+\\\}/g,'(.+?)'),weight=th.replace(/\{\d+\}/g,'').length;
+   // Fixed text at both ends: the template can also be found inside a longer line ("ประกาศ: 🔥 ...").
+   const inner=/^[^{].*[^}]$/.test(th)&&weight>=6?new RegExp(body,'g'):null;
+   templates.push({re:new RegExp('^'+body+'$'),inner,en,order,weight});
    // `${icon(...)}ตั้งแผง` puts the icon in its own node: also learn the text without that edge slot.
    const head=/^\{\d+\}/.exec(th)?.[0],tail=/\{\d+\}$/.exec(th)?.[0];
    if(head&&en.startsWith(head))add(th.slice(head.length).trim(),en.slice(head.length).trim());
@@ -40,13 +43,14 @@
   if(out!==undefined)return out;
   const core=s.trim();
   out=exact.get(core);
+  const fill=(tp,parts)=>{
+   const values={};
+   tp.order.forEach((n,i)=>values[n]=t(parts[i]));
+   return tp.en.replace(/\{(\d+)\}/g,(_,n)=>values[n]??'');
+  };
   if(out===undefined)for(const tp of templates){
    const m=tp.re.exec(core);
-   if(!m)continue;
-   const values={};
-   tp.order.forEach((n,i)=>values[n]=t(m[i+1]));
-   out=tp.en.replace(/\{(\d+)\}/g,(_,n)=>values[n]??'');
-   break;
+   if(m){out=fill(tp,m.slice(1));break;}
   }
   if(out===undefined){
    const piece=(m,at,str)=>{
@@ -54,7 +58,9 @@
     if(en===undefined)return m;
     return (en&&word(str[at-1])?' ':'')+en+(en&&word(str[at+m.length])?' ':'');
    };
-   out=phrases?core.replace(phrases,piece):core;
+   out=core;
+   for(const tp of templates)if(tp.inner&&THAI.test(out))out=out.replace(tp.inner,(...m)=>fill(tp,m.slice(1,tp.order.length+1)));
+   if(phrases)out=out.replace(phrases,piece);
    out=out.replace(/[฀-๿]+/g,piece).replace(/ {2,}/g,' ').trim();
   }
   out=s.slice(0,s.length-s.trimStart().length)+(out??core)+s.slice(s.trimEnd().length);

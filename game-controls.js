@@ -80,9 +80,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // 0.91 the notice sits just under the target box whenever that box shows, so the two never overlap (every layout).
  function placeNotice(){const n=$('notice'),t=document.querySelector('.target-panel'),r=t&&getComputedStyle(t).display!=='none'?t.getBoundingClientRect():null;n.style.top=r&&r.height?Math.round(r.bottom+8)+'px':'';}
  function toast(text){placeNotice();$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
- // 0.101.4 the city's roofs are one batched mesh and cannot fade per building, so a character on a raised floor
- // (the sala deck, under its roof) draws on top instead of vanishing.
- function xray(sprite,floor){const raised=floor>1;if(sprite.userData.raised===raised)return;sprite.userData.raised=raised;sprite.traverse(o=>{o.renderOrder=raised?6:0;if(o.material)o.material.depthTest=!raised;});}
+ // 0.101.4 the city's roofs are one batched mesh and cannot fade per building, so a character on a raised floor or stairs
+ // (the sala deck under its roof; on the steps its camera-facing quad leans into the higher treads) draws on top.
+ function xray(sprite,floor){const raised=floor>.2;if(sprite.userData.raised===raised)return;sprite.userData.raised=raised;sprite.traverse(o=>{o.renderOrder=raised?6:0;if(o.material)o.material.depthTest=!raised;});}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  // 0.99.3 numbers rise from the head of whoever was hit and stack: each new one pushes the older ones of that
  // target up a line, they drift upward together and fade out. Anchors follow the target while it moves.

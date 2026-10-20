@@ -184,7 +184,8 @@ export class CombatWorld{
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   // 0.68 no target in reach: swing at the air (auto-chase still uses AUTO / walking to the target).
   if(!m||distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(quiet||this.safe)return false;p.attackCD=this.profession.delay*(this.derived?.delay??1);this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:this.airPoint(Math.min(this.profession.range,2.4),m),color:this.profession.color,kind:this.profession.kind,air:true});return true;}
-  p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?1.5:1)*this.affinity(m,true))),crit?'#ffd27a':undefined);}return true;
+  p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;// 0.102.1 a magic class's basic hit is magic damage: class element, no size penalty, violet number
+   const magic=!!d?.magic;this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?1.5:1)*this.affinity(m,!magic))),crit?'#ffd27a':magic?'#c9a8ff':undefined);}return true;
  }
  skill(index){
   if(Number.isInteger(index)&&this.skills[index])this.clearEmote();

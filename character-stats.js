@@ -89,7 +89,8 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
   maxMp:Math.round((100+(level-1)*5)*(1+(S.int-1)*.02)),
   def:worn.reduce((n,it)=>n+(it.def?it.def+it.refine:0),0)+Math.floor((S.vit-1)/2)+sum(e=>e.def),
   weaponElement:worn.find(it=>it.slot==='weapon')?.element??'neutral',
-  basicBonus:magic?Math.round(matk*.5):atk,
+  // 0.102.1 magic classes hit with their full MATK on basic attacks too (owner)
+  basicBonus:magic?matk:atk,
   skillPower:1+(magic?matk:atk)/40,
   flee:Math.min(.5,(S.agi-1)*.008+(S.luk-1)*.002+sum(e=>e.flee)),
   crit:Math.min(.4,.01+(S.luk-1)*.004+sum(e=>e.crit)),

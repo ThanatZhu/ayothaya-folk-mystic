@@ -150,3 +150,17 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
 .bag-drag{position:fixed;z-index:60;pointer-events:none;translate:-50% -50%;scale:1.15;filter:drop-shadow(0 6px 10px #000a)}
 #quick-slots.drop-ready button{box-shadow:0 0 0 3px #f4cf7a66,0 0 14px #f4cf7a88}
 #quick-slots button.drop-over{scale:1.18;box-shadow:0 0 0 4px #f4cf7a,0 0 22px #f4cf7a}
+/* 0.100.10 drag any item to the trash zone (or out of the window) to discard; a small prompt asks how many */
+.bag-grid .slot:not(.potion){touch-action:pan-y}
+.bag-trash{margin-top:6px;padding:6px;border:1px dashed #d77a6a66;border-radius:7px;color:#e6b4a8;font-size:10px;text-align:center;transition:background .15s,border-color .15s}
+#bag-window.dragging .bag-trash{border-color:#ff8f7a;background:#5a1d1655}
+.bag-trash.over{border-style:solid;background:#8a2a1e99!important;color:#fff;scale:1.03}
+.bag-discard{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:#0008;border-radius:inherit}
+.bag-discard[hidden]{display:none}
+.bag-discard>div{display:grid;justify-items:center;gap:6px;min-width:220px;max-width:calc(100% - 32px);padding:14px 16px;border:1px solid #f4cf7a;border-radius:10px;background:#12302b;color:#f4dfac;text-align:center}
+.bag-discard strong{color:#fff0ce;font-size:13px}.bag-discard small{color:#c9b98f;font-size:10px}
+.bag-discard label{display:flex;align-items:center;gap:6px;font-size:12px}
+.bag-discard input,.shop-list .qty input{width:56px;padding:3px 4px;border:1px solid #af884f88;border-radius:6px;background:#0b1f1c;color:#fff0ce;font:12px Mali,Tahoma,sans-serif;text-align:center}
+.bag-actions button.danger,.bag-actions button+button.danger{background:#8a2a1e;border-color:#ff8f7a;color:#fff}
+.shop-list .qty .total{margin-left:4px;color:#f4cf7a;white-space:nowrap}
+.shop-list .deal:disabled{opacity:.45;cursor:not-allowed}

@@ -1,6 +1,6 @@
 import {openHudPanel} from './hud-panels.js?v=34';
-import {iconStyle} from './bag-ui.js?v=98';
-import {emblemId,emoteId} from './items.js?v=94';
+import {iconStyle} from './bag-ui.js?v=99';
+import {emblemId,emoteId} from './items.js?v=95';
 import {createPetView} from './pet-ui.js?v=98';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';

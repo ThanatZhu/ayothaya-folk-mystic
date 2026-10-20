@@ -1,6 +1,6 @@
 // 0.90 AUTO helpers shared by the browser and the realm server (owner: AUTO also casts skills and drinks potions,
 // set from the skill window). Pure functions: the caller owns the world, the bag and the timing.
-import {ITEMS} from './items.js?v=94';
+import {ITEMS} from './items.js?v=95';
 export const AUTO_DEFAULT={skills:[0],hp:40,mp:0};
 const SELF=new Set(['heal','shield','mana','focus','blessing']);
 // Clean a config from the client: skill slots 0-9 (unique, at most 10), potion thresholds 0-90 % (0 = off).

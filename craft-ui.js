@@ -1,7 +1,7 @@
 // 0.94 craft window, opened from the bag header. Online the server crafts; offline the local bag does.
-import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=94';
+import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=95';
 import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=94';
-import {iconStyle} from './bag-ui.js?v=98';
+import {iconStyle} from './bag-ui.js?v=99';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

@@ -21,7 +21,7 @@ import {activeEvent,expRate,surge,surgeOn} from '../events.js';
 // 0.49: the timed MVP returns an hour after it falls (first one 5 min after boot); dungeon clear pays once per Thai day.
 export const MERC_COST=200,MERC_TIME=1200;
 export const MVP_INTERVAL=3600e3,MVP_FIRST=300e3,DUNGEON_REWARD={coins:800,items:[{id:'lek-lai',count:1},{id:'green-herb',count:3},{id:'hp-large',count:3}]};
-import {normalizeBag,addLoot,rollLoot,buy,sell,useItem,foodBuff,SHOPS,ITEM_ERRORS,itemDef,RARITY_NAME} from '../items.js';
+import {normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,foodBuff,SHOPS,ITEM_ERRORS,itemDef,RARITY_NAME} from '../items.js';
 import {craft} from '../crafting.js';
 import {WAR,warWindow,warLabel} from '../guild-war.js';
 import {ARENA,arenaWeek,arenaDay,arenaEnds,byPoints} from '../arena.js';
@@ -39,7 +39,7 @@ const mobValue=(k,v)=>typeof v!=='number'?v:k==='x'||k==='z'?Math.round(v*100)/1
 // 0.93 duels: a challenge lasts 20 s, a bout 90 s; players hit each other for 35% of their monster damage (then the
 // target's dodge, shield and DEF apply as for a monster blow). Walking 20 m apart ends the bout as a draw.
 export const DUEL={ask:20000,time:90000,range:20,scale:.35};
-const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','hire']);
+const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','hire']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -180,6 +180,12 @@ export class RealmServer{
    if(now-p.itemAt<800)return this.itemFail(p,'item-rate');
    let r;try{r=useItem(p.bag,m.item,w.player,w.status);}catch(e){return this.itemFail(p,e.message);}
    p.itemAt=now;w.player.hp=r.hp;w.player.mp=r.mp;w.status=r.status;this.setBag(p,r.bag);if(r.food){w.food=r.food;w.notice('อิ่มอร่อย · '+itemDef(m.item).text);}w.emit('used',{item:m.item});return true;
+  }
+  if(m.type==='discard'){
+   // Items offered in a locked trade stay put; equipped gear lives in p.gear, not the bag, so it cannot be thrown away.
+   if(p.trade?.locked)return this.itemFail(p,'trade-locked');
+   try{this.setBag(p,discard(p.bag,m.item,m.count));}catch(e){return this.itemFail(p,e.message);}
+   w.notice('ทิ้ง '+(itemDef(m.item)?.name??m.item)+' ×'+m.count+' แล้ว');return true;
   }
   if(m.type==='buy'||m.type==='sell'){
    // Trading only next to that shop's NPC in its own map; the shared rules check coins, stock and bag room.

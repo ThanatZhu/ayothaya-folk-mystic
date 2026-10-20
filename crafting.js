@@ -1,6 +1,6 @@
 // 0.94 crafting: monster drops + a few cowries become potions, food and refine stones. Shared by the realm server
 // and the offline bag, so the recipes and checks are the same everywhere. Crafting works anywhere (from the bag).
-import {normalizeBag,addLoot} from './items.js?v=94';
+import {normalizeBag,addLoot} from './items.js?v=95';
 
 export const CRAFT_GROUPS=[['potion','ยา'],['food','อาหาร'],['refine','หินตีบวก']];
 // out: item made, count: how many per craft, needs: materials used, coins: cowries spent.

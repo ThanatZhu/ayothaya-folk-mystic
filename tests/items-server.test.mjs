@@ -50,3 +50,22 @@ test('defeating a monster auto-loots coins and its drops into the bag', () => {
  assert.ok(peer.bag.coins>=400,'boss coins');assert.equal(peer.bag.items['spirit-rope'],1,'boss always drops its rope');
  assert.ok(peer.world.events.some(e=>e.type==='loot'&&e.items.some(i=>i.id==='spirit-rope')));
 });
+
+test('0.100.10 discard is validated on the server; a quantity buy is one atomic purchase', () => {
+ const {realm,peer,send,record}=setup(city,{coins:1000,items:{'rat-tooth':5}});
+ assert.equal(send('discard',{item:'rat-tooth',count:6}),false,'more than the stack');
+ assert.equal(send('discard',{item:'rat-tooth',count:'2'}),false,'not an integer');
+ assert.equal(send('discard',{item:'hp-large',count:1}),false,'not in the bag');
+ assert.equal(send('discard',{item:'rat-tooth',count:2}),true);
+ assert.equal(peer.bag.items['rat-tooth'],3);
+ peer.trade={locked:true};assert.equal(send('discard',{item:'rat-tooth',count:1}),false,'offer is locked in a trade');peer.trade=null;
+ assert.equal(send('discard',{item:'rat-tooth',count:3}),true);
+ assert.equal(peer.bag.items['rat-tooth'],undefined);
+ Object.assign(peer.world.player,{x:4,z:0});
+ assert.equal(send('buy',{npc:'แม่บัว',item:'hp-small',count:1.5}),false);
+ assert.equal(send('buy',{npc:'แม่บัว',item:'hp-small',count:41}),false,'41 × 25 is more than 1000 Bia');
+ assert.deepEqual(peer.bag,{coins:1000,items:{}},'a refused buy changes nothing');
+ assert.equal(send('buy',{npc:'แม่บัว',item:'hp-small',count:40}),true);
+ assert.equal(realm.record(peer,record).bag.items['hp-small'],40);
+ assert.ok(peer.bag.coins<1000);
+});

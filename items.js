@@ -241,7 +241,7 @@ export function rollLoot(monsterId,rand=Math.random,event=null,rolls=1){
 export function buy(bag,shopNpc,id,qty=1){
  const shop=SHOPS[shopNpc],item=ITEMS[id],price=shop?.currency?item?.tokens:item?.buy;
  if(!shop||!shop.stock.includes(id)||!price)throw new Error('not-sold');
- if(!Number.isSafeInteger(qty)||qty<1||qty>99)throw new Error('bad-count');
+ if(!Number.isSafeInteger(qty)||qty<1||qty>MAX_STACK)throw new Error('bad-count');
  const b=normalizeBag(bag),cost=price*qty;
  if(shop.currency){if((b.items[shop.currency]??0)<cost)throw new Error('no-tokens');b.items[shop.currency]-=cost;if(!b.items[shop.currency])delete b.items[shop.currency];}
  else if(b.coins<cost)throw new Error('no-coins');
@@ -256,6 +256,14 @@ export function sell(bag,id,qty=1){
  const b=normalizeBag(bag);if((b.items[id]??0)<qty)throw new Error('no-item');
  b.items[id]-=qty;if(!b.items[id])delete b.items[id];
  b.coins=Math.min(MAX_COINS,b.coins+item.sell*qty);
+ return b;
+}
+
+// 0.100.10 throwing items away from the bag (drag out of the bag window); qty must be 1..what the bag holds.
+export function discard(bag,id,qty=1){
+ const b=normalizeBag(bag);if(!Number.isSafeInteger(qty)||qty<1)throw new Error('bad-count');
+ if(!b.items[id])throw new Error('no-item');if(b.items[id]<qty)throw new Error('bad-count');
+ b.items[id]-=qty;if(!b.items[id])delete b.items[id];
  return b;
 }
 

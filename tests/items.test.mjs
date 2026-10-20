@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {ITEMS,DROPS,SHOPS,BAG_SLOTS,MAX_STACK,normalizeBag,addLoot,rollLoot,buy,sell,useItem} from '../items.js';
+import {ITEMS,DROPS,SHOPS,BAG_SLOTS,MAX_STACK,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem} from '../items.js';
 import {MONSTER_TYPES} from '../combat-core.js';
 
 const world=JSON.parse(readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
@@ -56,4 +56,18 @@ test('loot rolls stay inside the table', () => {
  for(let i=0;i<300;i++){const l=rollLoot('straw',rand);assert.ok(l.coins>=3&&l.coins<=7);for(const it of l.items)assert.ok(DROPS.straw.items.some(([id])=>id===it.id));}
  const boss=rollLoot('mill-keeper',()=>0);assert.ok(boss.items.some(i=>i.id==='spirit-rope'));
  assert.deepEqual(rollLoot('unknown'),{coins:0,items:[]});
+});
+
+test('0.100.10 discard removes 1..stack of an item; buy takes one quantity up to MAX_STACK in a single step', () => {
+ const bag={coins:0,items:{'rat-tooth':5,'hp-small':1}};
+ assert.deepEqual(discard(bag,'rat-tooth',3),{coins:0,items:{'rat-tooth':2,'hp-small':1}});
+ assert.deepEqual(discard(bag,'rat-tooth',5).items,{'hp-small':1},'the whole stack frees the slot');
+ for(const n of [0,-1,1.5,6,'2',NaN])assert.throws(()=>discard(bag,'rat-tooth',n),/bad-count/);
+ assert.throws(()=>discard(bag,'hp-large',1),/no-item/);
+ const rich={coins:1e6,items:{}};
+ assert.equal(buy(rich,'แม่บัว','hp-small',150).items['hp-small'],150,'more than the old 99 cap');
+ assert.equal(buy({coins:1e6,items:{'hp-small':990}},'แม่บัว','hp-small',9).items['hp-small'],MAX_STACK);
+ assert.throws(()=>buy({coins:1e6,items:{'hp-small':990}},'แม่บัว','hp-small',10),/bag-full/,'stack cap, nothing is charged');
+ assert.throws(()=>buy(rich,'แม่บัว','hp-small',MAX_STACK+1),/bad-count/);
+ assert.throws(()=>buy({coins:ITEMS['hp-small'].buy*3-1,items:{}},'แม่บัว','hp-small',3),/no-coins/);
 });

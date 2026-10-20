@@ -56,7 +56,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const bar=document.createElement('i'),fill=document.createElement('b');bar.append(fill);label.append(bar);$('world-labels').append(label);
   label.addEventListener('click',()=>world.select(m.id));
   const warning=new THREE.Mesh(new THREE.RingGeometry(.15,MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe??MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe?'#ff4a4a':'#ed9b59',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));warning.rotation.x=-Math.PI/2;scene.add(warning);
-  return {sprite:s,shadow:sh,height:h,label,fill,frames,frame:-1,warning,deathStart:null,flashAt:-9};
+  const charge=new THREE.Mesh(new THREE.CircleGeometry(MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe??MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe?'#ff3b3b':'#ff8a3d',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));charge.rotation.x=-Math.PI/2;charge.visible=false;scene.add(charge);
+  return {sprite:s,shadow:sh,height:h,label,fill,frames,frame:-1,warning,charge,deathStart:null,flashAt:-9};
  });
  hero.sprite.material.map=hero.sprite.material.map.clone();
  const ringGeometry=new THREE.RingGeometry(.47,.51,40);
@@ -65,12 +66,27 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const shield=new THREE.Mesh(new THREE.RingGeometry(.7,.74,40),new THREE.MeshBasicMaterial({color:'#edd592',side:THREE.DoubleSide,transparent:true,opacity:.55}));shield.rotation.x=-Math.PI/2;scene.add(shield);
  const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.textContent='คุณ · '+(jobFor(world.profession.id,config.jobId)?.name??className(world.profession.id,config.gender));$('world-labels').append(playerLabel);
  const motionPreference=matchMedia('(prefers-reduced-motion:reduce)'),compactEffects=matchMedia('(pointer:coarse),(max-width:900px)');
- const floats=[],projection=new THREE.Vector3();
+ const floats=[],projection=new THREE.Vector3();let kick=0; // 0.99.3 impact shake (crits, heavy hits taken)
  // 0.91 the notice sits just under the target box whenever that box shows, so the two never overlap (every layout).
  function placeNotice(){const n=$('notice'),t=document.querySelector('.target-panel'),r=t&&getComputedStyle(t).display!=='none'?t.getBoundingClientRect():null;n.style.top=r&&r.height?Math.round(r.bottom+8)+'px':'';}
  function toast(text){placeNotice();$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
- function popup(e,positive=false){const el=document.createElement('span');el.className='damage-number'+(!positive&&e.color==='#ffd27a'?' crit':'');el.textContent=typeof e.amount==='string'?e.amount:(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');el.style.setProperty('--dx',`${Math.round((Math.random()-.5)*44)}px`);$('world-labels').append(el);floats.push({el,x:e.x,z:e.z,age:0});}
+ // 0.99.3 numbers rise from the head of whoever was hit and stack: each new one pushes the older ones of that
+ // target up a line, they drift upward together and fade out. Anchors follow the target while it moves.
+ const FLOAT_LINE=17,FLOAT_LIFE=.95,FLOAT_STACK=4;
+ function anchorOf(e){
+  if(e.type==='damage'&&Number.isInteger(e.id)&&world.mobs[e.id]){const m=world.mobs[e.id],v=mobViews[e.id];return {key:'m'+e.id,pos:()=>({x:m.x,y:(v?.height??1.4)+.3,z:m.z})};}
+  if(e.type==='damage'&&typeof e.id==='string'){const id=e.id;return {key:id,pos:()=>{const f=world.foes?.().find(o=>o.id===id);return {x:f?.x??e.x,y:2.2,z:f?.z??e.z};}};}
+  if(['playerHit','heal','dodge'].includes(e.type))return {key:'self',pos:()=>({x:world.player.x,y:2.2+hero.sprite.position.y,z:world.player.z})};
+  return {key:'at'+Math.round(e.x)+':'+Math.round(e.z),pos:()=>({x:e.x,y:1.9,z:e.z})};
+ }
+ function popup(e,positive=false,anchor=anchorOf(e)){
+  const crit=!positive&&e.color==='#ffd27a',el=document.createElement('span');el.className='damage-number'+(crit?' crit':'')+(positive?' heal':'');
+  el.textContent=typeof e.amount==='string'?e.amount:(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');
+  const same=floats.filter(f=>f.key===anchor.key);for(const f of same)f.slot+=crit?1.3:1;
+  if(same.length>=FLOAT_STACK){const old=same[0];old.el.remove();floats.splice(floats.indexOf(old),1);}
+  $('world-labels').append(el);floats.push({el,key:anchor.key,pos:anchor.pos,age:0,slot:0,off:0});
+ }
  function effect(e){
   if(e.type==='experience'){
    toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');
@@ -86,9 +102,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    const presentation=track??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
    const from=e.from??world.player,to=e.to??from;
    skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});
-  }else if(e.type==='damage'){popup(e);const v=mobViews[e.id];if(v)v.flashAt=world.time;}
+  }else if(e.type==='damage'){popup(e);const v=mobViews[e.id];if(v)v.flashAt=world.time;if(e.color==='#ffd27a')kick=Math.max(kick,1);}
   else if(e.type==='heal'){popup(e,true);}
-  else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});hero.sprite.material.color.set('#ff9b83');}
+  else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff9b83');}
   else if(e.type==='notice')toast(e.text);
   else if(e.type==='combo')popup({x:e.x,z:e.z,amount:'คอมโบ!',color:'#7ee8ff'},true);
   else if(e.type==='drop'){const best=Math.max(...e.items.map(i=>itemDef(i.id)?.rarity??0));if(best>=2&&Number.isFinite(e.x))pillar(e.x,e.z,best);}
@@ -207,7 +223,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   footDust.update(dt);
   if(mode==='walk'&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,p.z>4.25?.44:.09,p.z-p.face.z/faceLength*.25);}}
   let flash=0,shake=0;for(const s of strikes){const d=t-s.at;if(d>=0&&d<.45){flash=Math.max(flash,s.power*Math.exp(-d*9));if(d<.25)shake=Math.max(shake,s.power*Math.exp(-d*16));}}strikes=strikes.filter(s=>t-s.at<.5);
-  castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,1.3,p.z);shakeAmount=reduced?0:shake*.11;
+  castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,1.3,p.z);kick*=Math.exp(-dt*14);shakeAmount=reduced?0:Math.max(shake*.11,kick*.07);
   const floor=groundHeight(world.nav,p.x,p.z);hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,.1,p.z);shield.visible=p.shield>0;
   // Camera follows the player while preserving user-controlled azimuth and zoom.
   const follow=new THREE.Vector3(p.x,1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
@@ -218,7 +234,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(m.hp<=0&&v.deathStart===null)v.deathStart=t;if(m.hp>0)v.deathStart=null;
    const deadAge=v.deathStart===null?0:t-v.deathStart,visible=m.hp>0||deadAge<1.25;
    v.sprite.visible=v.shadow.visible=visible;v.label.hidden=m.hp<=0;v.warning.visible=m.hp>0&&m.windup>0;
-   v.warning.position.set(m.x,.09,m.z);v.warning.material.opacity=.12+.25*(1-(m.windup??0)/(MONSTER_BEHAVIOUR[type.id]?.windup??type.windup??.45));
+   {const charge=Math.min(1,Math.max(0,1-(m.windup??0)/(MONSTER_BEHAVIOUR[type.id]?.windup??type.windup??.45)));const aoe=!!MONSTER_BEHAVIOUR[type.id]?.aoe;v.warning.position.set(m.x,.09,m.z);v.warning.material.opacity=aoe?.3+.35*charge:.12+.25*charge;
+    v.charge.visible=aoe&&v.warning.visible;v.charge.position.set(m.x,.092,m.z);v.charge.scale.setScalar(Math.max(.05,charge));v.charge.material.opacity=.1+.14*charge;} // 0.99.3 area bursts fill up until they land
    if(!visible)return;
    const f=monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
    const recoil=reduced?0:Math.sin(Math.PI*Math.min(1,m.hit/.34))*.18;
@@ -234,7 +251,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}
   skillEffects.update(dt,camera);
   for(let i=pillars.length-1;i>=0;i--){const p=pillars[i];p.age+=dt;p.m.material.opacity=.7*Math.max(0,1-p.age/2.6);p.m.scale.x=p.m.scale.z=1+Math.sin(p.age*6)*.08;if(p.age>2.6){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();pillars.splice(i,1);}}
-  for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>1){f.el.remove();floats.splice(i,1);}else{project(f.el,f.x,1.6+f.age*.8,f.z);f.el.style.opacity=String(1-f.age*.8);}}
+  for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=dt;if(f.age>FLOAT_LIFE){f.el.remove();floats.splice(i,1);continue;}
+   f.off+=(f.slot*FLOAT_LINE-f.off)*Math.min(1,dt*16);const a=f.pos();projection.set(a.x,a.y,a.z).project(camera);
+   f.el.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight-f.off-f.age*22}px)`;
+   f.el.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';f.el.style.opacity=String(f.age<.55?1:Math.max(0,1-(f.age-.55)/(FLOAT_LIFE-.55)));}
   if(performance.now()>noticeUntil)$('notice').classList.remove('visible');else placeNotice();
   if(t-lastHUD>.08){lastHUD=t;
    $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`Lv. ${progression(world).level} · ปราบมอน ${world.kills} ตัว`;if($('hero-level'))$('hero-level').textContent='Lv. '+progression(world).level;
@@ -270,5 +290,5 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
- return {get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;}};
+ return {popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;}};
 }

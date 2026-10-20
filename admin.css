@@ -29,3 +29,9 @@ td input.edited{border-color:var(--gold);background:#3b3219;color:var(--gold);fo
 /* 0.89 skill table tab */
 td small{display:block;color:var(--muted);font-size:11px}td.req{white-space:normal;min-width:170px;font-size:12px;color:var(--muted)}
 td.top{background:#1f3b31;color:var(--jade);font-weight:700}td.bottom{background:#3d2620;color:var(--bad)}
+
+/* 0.99.16 players tab */
+.players-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0 12px}.players-head h2{margin:0}.players .msg{opacity:.85}
+.players tr.picked td{background:#f4cf7a22}
+.give{display:grid;gap:10px;max-width:520px;margin-top:16px;padding:16px;border:1px dashed #f4cf7a55;border-radius:12px}.give h3{margin:0}.give .bag{margin:0;font-size:13px;opacity:.85}
+.give label{display:grid;gap:4px}.give select,.give input{min-height:36px;padding:0 8px;border-radius:8px;border:1px solid #f4cf7a55;background:#0e1f19;color:inherit;font:inherit}

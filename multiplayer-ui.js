@@ -71,6 +71,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(party?.leader===p.id)name.prepend(el('span','mp-crown','♛ '));li.append(el('span','mp-avatar',(globalThis.I18N?.t(className(p.classId))??className(p.classId)).slice(0,1)),who);
    const action=(text,type,data,primary)=>{const b=el('button',primary?'mp-primary':'',text);b.onclick=()=>client?.command(type,data);li.append(b);};
    if(p.id!==client?.id&&!p.partyId&&(!party||party.leader===client.id))action('เชิญ','invite',{target:p.id},true);
+   if(p.id!==client?.id&&game.world.myGuild)action('ชวนกิลด์','guildInvite',{name:p.name});
    if(p.id!==client?.id&&p.here!==false)action('ท้าดวล','duel',{target:p.id});
    if(p.id!==client?.id&&party?.leader===client?.id&&party.members.includes(p.id)){action('หัวหน้า','leader',{target:p.id});action('นำออก','kick',{target:p.id});}
    $('online-players').append(li);
@@ -167,6 +168,31 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  // System lines (EXP, level ups, notices) appear only in this player's chat, never sent to others.
  addEventListener('game-notice',({detail})=>{if(!active||typeof detail!=='string')return;log({id:'sys-'+performance.now()+Math.random(),channel:'system',name:'ระบบ',text:detail,time:Date.now()});});
  addEventListener('pagehide',()=>client?.stop());
+ // 0.99.15 tap another player's character: a small menu with party, trade, friend, whisper and duel
+ const tapRay=new THREE.Raycaster(),tapPoint=new THREE.Vector2(),playerMenu=el('div');playerMenu.id='player-menu';playerMenu.hidden=true;shell.append(playerMenu);
+ const closeMenu=()=>{playerMenu.hidden=true;};
+ addEventListener('pointerdown',e=>{if(!playerMenu.hidden&&!playerMenu.contains(e.target))closeMenu();},true);
+ addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+ function openPlayerMenu(s,x,y){
+  const name=s.character?.name??'ผู้เล่น',info=roster.find(p=>p.id===s.id),title=el('b','',name);title.dataset.i18nSkip='';playerMenu.replaceChildren(title);
+  const add=(text,fn)=>{const b=el('button','',text);b.type='button';b.onclick=()=>{closeMenu();fn();};playerMenu.append(b);};
+  if(!(info?.partyId??s.partyId)&&(!party||party.leader===client.id))add('ชวนเข้าปาร์ตี้',()=>client.command('invite',{target:s.id}));
+  // guild invites go by name; the server checks that we lead a guild with room and that they have none
+  if(game.world.myGuild&&!s.guild)add('ชวนเข้ากิลด์',()=>game.world.market?.('guildInvite',{name}));
+  add('แลกเปลี่ยนของ',()=>game.world.market?.('tradeRequest',{target:s.id}));
+  add('เพิ่มเพื่อน',()=>game.world.market?.('friendAdd',{name}));
+  if(!/\s/.test(name))add('กระซิบ',()=>{dock.hidden=false;setCollapsed(false);const input=$('online-text');input.value='/w '+name+' ';input.focus();});
+  if(document.body.dataset.safe!=='true')add('ท้าดวล',()=>client.command('duel',{target:s.id}));
+  playerMenu.hidden=false;const r=playerMenu.getBoundingClientRect();
+  playerMenu.style.left=Math.max(8,Math.min(x+10,innerWidth-r.width-8))+'px';playerMenu.style.top=Math.max(8,Math.min(y+10,innerHeight-r.height-8))+'px';
+ }
+ game.playerTap=(x,y)=>{
+  if(!client)return false;
+  tapPoint.set(x/innerWidth*2-1,-y/innerHeight*2+1);tapRay.setFromCamera(tapPoint,camera);
+  const list=[...views.values()].filter(v=>!v.loading&&v.sprite),hit=tapRay.intersectObjects(list.map(v=>v.sprite))[0];if(!hit)return false;
+  const v=list.find(v=>{for(let o=hit.object;o;o=o.parent)if(o===v.sprite)return true;return false;});if(!v)return false;
+  openPlayerMenu(v.state,x,y);return true;
+ };
  return {get paused(){return false;},update(dt){
   if(!active)return;clock+=Math.min(.05,dt);fx.update(Math.min(.05,dt),camera);
   const guildTab=dock.querySelector('[data-channel=guild]');guildTab.disabled=!game.world.myGuild;if(guildTab.disabled&&dock.dataset.channel==='guild')setChannel('room');

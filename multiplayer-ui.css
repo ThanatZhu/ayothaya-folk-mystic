@@ -140,3 +140,10 @@
  #online-players{max-height:130px}.online-note{margin:8px 14px 10px;font-size:10px}
  .mp-invite-icon{width:34px;height:34px;font-size:17px}
 }
+
+/* 0.99.15 menu for another player's character (tap the character) */
+#player-menu{position:fixed;z-index:45;display:grid;gap:6px;min-width:180px;padding:10px;border:2px solid #d1a75b;border-radius:14px;background:var(--mp-wood-solid);box-shadow:0 10px 30px #000a,var(--mp-ring);font-family:Mali,Tahoma,system-ui,sans-serif;color:var(--mp-ink)}
+#player-menu[hidden]{display:none}
+#player-menu b{padding:0 4px 6px;border-bottom:1px solid #d1a75b55;color:#f4cf7a;font-size:15px}
+#player-menu button{min-height:40px;padding:0 12px;border:1px solid #b28c4d;border-radius:10px;background:#0e2926;color:inherit;font:600 14px Mali,Tahoma,sans-serif;text-align:left;cursor:pointer}
+#player-menu button:hover,#player-menu button:focus-visible{background:#1c4a3f;outline:none}

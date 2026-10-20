@@ -9,6 +9,8 @@ import {ARENA,arenaEnds} from './arena.js?v=98';
 import {SHOPS} from './items.js?v=95';
 import {iconStyle} from './bag-ui.js?v=99';
 import {openHudPanel} from './hud-panels.js?v=34';
+import {baseProgress} from './experience.js?v=73';
+import {rebirthRank,REBIRTH_POINTS,REBIRTH_MAX} from './character-stats.js?v=94';
 import * as THREE from 'three';
 
 const $=id=>document.getElementById(id);
@@ -16,7 +18,7 @@ const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 const POSES=[['idle','ลุก / ยืน'],['sit','นั่งพัก'],['sleep','นอนพัก'],['bow','ไหว้'],['celebrate','ดีใจ'],['guard','ตั้งท่า']];
 
 export function createLifeUI({game,account,camera}){
- if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=100.5';css.dataset.lifeUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=103.2';css.dataset.lifeUi='';document.head.append(css);}
  const world=game.world;world.status??={};
 
  // Ailment row under the player frame.
@@ -122,5 +124,13 @@ export function createLifeUI({game,account,camera}){
  let eventsTimer=0;
  function openEvents(){eventsWin.innerHTML=eventsHTML();eventsWin.querySelector('#events-close').onclick=()=>eventsWin.close();game.clearInput();openHudPanel(eventsWin);
   clearInterval(eventsTimer);eventsTimer=setInterval(()=>{if(!eventsWin.open){clearInterval(eventsTimer);return;}const y=eventsWin.querySelector('.ev-list')?.scrollTop??0;eventsWin.innerHTML=eventsHTML();eventsWin.querySelector('#events-close').onclick=()=>eventsWin.close();eventsWin.querySelector('.ev-list').scrollTop=y;},1000);}
- return {openEvents,update(){drawAilments();placeBubble();drawChip();drawEvent();drawActions();}};
+ // 0.103.2 rebirth (จุติ) has its own glowing button, shown only once it can be used: online, Base Lv.99, under 10 rebirths
+ const rebirthBtn=document.createElement('button');rebirthBtn.type='button';rebirthBtn.id='rebirth-btn';rebirthBtn.hidden=true;($('game-shell')??document.body).append(rebirthBtn);
+ rebirthBtn.onclick=()=>{const n=(world.rebirth??0)+1;
+  if(document.body.dataset.safe!=='true'){world.notice('จุติได้เฉพาะในเมือง');return;}
+  if(confirm(`จุติครั้งที่ ${n} · ยศ "${rebirthRank(n)}"\n\nBase Lv. กลับเป็น 1 · แต้มสถานะคืนทั้งหมดให้แจกใหม่ (+${n*REBIRTH_POINTS} โบนัส)\nอาชีพ สกิล Job กระเป๋า และอุปกรณ์ยังอยู่ครบ`))world.market?.('rebirth');};
+ let rebirthShown='';
+ function drawRebirth(){const n=world.rebirth??0,on=game.online&&baseProgress(world).level>=99&&n<REBIRTH_MAX,key=on+':'+n;if(key===rebirthShown)return;rebirthShown=key;
+  rebirthBtn.hidden=!on;if(on)rebirthBtn.innerHTML=`<i aria-hidden="true">🌟</i><span><b>จุติ</b><small>ครั้งที่ ${n+1} · ${rebirthRank(n+1)}</small></span>`;}
+ return {openEvents,update(){drawAilments();placeBubble();drawChip();drawEvent();drawActions();drawRebirth();}};
 }

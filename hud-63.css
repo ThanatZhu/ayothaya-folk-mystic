@@ -257,3 +257,11 @@ body.field-hud.hud63 #menu-rank i::after{display:block;content:"";position:absol
 #weather-chip{display:flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #9cc6d688;border-radius:999px;background:#14262ad8;color:#d6eef5;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
 #weather-chip i{font-style:normal}#weather-chip b{font-weight:400;opacity:.85}
 #weather-chip[data-weather=storm]{border-color:#b9a4ff;background:#241d3ae8;color:#efe6ff;box-shadow:0 0 10px #8f7bff66}
+/* 0.106.2 short landscape phones: the quest card keeps one line (title + Go) so the Master skill arc stays clear;
+   the hint and how-to are still in the Quests window. */
+@media (pointer:coarse) and (max-height:500px){
+ body.field-hud.hud63 #quest-tracker :is(#quest-chapter,#quest-hint,#quest-how){display:none!important}
+ body.field-hud.hud63 #quest-tracker #quest-title{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+ body.field-hud.hud63 #hud-right #quest-tracker{padding-top:0!important;padding-bottom:0!important;min-height:0!important;row-gap:0!important;margin-top:-8px!important}
+ body.field-hud.hud63 #quest-go{min-height:30px!important;padding:0 10px!important}
+}

@@ -11,7 +11,10 @@ function layoutWheel(){
  const box=document.querySelector('.combat-controls');if(!box)return;
  const compact=compactQuery.matches;
  // A 44px touch target needs at least 85px/130px radii to keep adjacent buttons apart.
- const slot=compact?44:54,attack=compact?66:92,inner=compact?88:106,outer=compact?136:182;
+ // 0.106.2 short landscape phones (≤440px tall): a smaller wheel keeps the Master arc clear of the quest card.
+ const short=compact&&innerHeight<=440;
+ const k=short?Math.max(.85,Math.min(1,(innerHeight-180)/230)):1,z=n=>Math.round(n*k); // under 410px tall it shrinks a little more
+ const slot=short?z(38):compact?44:54,attack=short?z(58):compact?66:92,inner=short?z(76):compact?88:106,outer=short?z(118):compact?136:182;
  const cx=attack/2+6,cy=attack/2+6;
  box.style.setProperty('--wheel-slot',slot+'px');box.style.setProperty('--wheel-attack',attack+'px');
  box.style.width=Math.round(cx+outer+slot/2+4)+'px';box.style.height=Math.round(cy+outer+slot/2+4)+'px';

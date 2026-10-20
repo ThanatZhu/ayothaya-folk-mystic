@@ -1,7 +1,7 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=99.11';
-import {createMentorUI} from './mentor-ui.js?v=99.13';
+import {createMentorUI} from './mentor-ui.js?v=101.3';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=97';

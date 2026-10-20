@@ -10,7 +10,7 @@ import {equipItem} from '../equipment.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
-import {isAdmin,adminEmails,configKeys,adminPlayers,adminGive} from './admin.js';
+import {isAdmin,adminEmails,configKeys,adminPlayers,adminGive,adminGiveOffline} from './admin.js';
 import {balanceText,commitBalance} from './github-balance.js';
 import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -23,6 +23,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  let renewing=false,authorityError='';
  const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
+ let savedList={at:0,rows:[]};
  const realm=new RealmServer({catalog,capacity,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set();let closing=false;
  const toDiscord=discordPoster();if(toDiscord)realm.onAnnounce=toDiscord; // 0.96 war + tournament news (DISCORD_WEBHOOK_URL)
  // 0.47 guilds: loaded once, written on each change (rare: create/join/leave/emblem), outside the per-player saves.
@@ -49,10 +50,16 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     let d;try{d=await authenticate(String(req.headers.authorization??'').replace(/^Bearer /,''));}catch{reply(401,{error:'bad-token'});return;}
     if(!isAdmin(d)){console.warn('admin-denied',d.email??d.uid);reply(403,{error:'not-admin'});return;}who=d.email;
    }
-   if(url.pathname==='/admin/players'&&req.method==='GET'){reply(200,{players:adminPlayers(realm)});return;}
+   // 0.103 saved characters come from the store at most every 2 minutes (Firestore bills a read per character);
+   // ?fresh=1 (the refresh button) reads again at once.
+   if(url.pathname==='/admin/players'&&req.method==='GET'){
+    if(store?.listProfiles&&(url.searchParams.get('fresh')==='1'||Date.now()-savedList.at>120000)){try{savedList={at:Date.now(),rows:await store.listProfiles()};}catch(e){console.error('admin-list',e.message);}}
+    reply(200,{players:adminPlayers(realm,savedList.rows),savedAt:savedList.at||null});return;
+   }
    if(url.pathname==='/admin/give'&&req.method==='POST'){
     let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>4096){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
-    try{const body=JSON.parse(data),result=adminGive(realm,body);console.log('admin-give',who,result.name,JSON.stringify({coins:body.coins??0,items:body.items??[]}));reply(200,result);}catch(e){reply(400,{error:e.message});}
+    try{const body=JSON.parse(data),offline=String(body?.peer??'').startsWith('off:'),result=offline?await adminGiveOffline(realm,store,body):adminGive(realm,body);
+     if(offline)savedList.at=0;console.log('admin-give',who,offline?'offline':'online',result.name,JSON.stringify({coins:body.coins??0,items:body.items??[]}));reply(200,result);}catch(e){reply(400,{error:e.message});}
     return;
    }
    // 0.100.6 balance edits: production commits balance-data.js to GitHub (redeploys game and server); local writes the file

@@ -140,3 +140,10 @@ td .name{display:flex;align-items:center;gap:10px}
 .formula .scroll{max-height:420px}
 /* 0.103 drop rates page: a monster heading row above its items */
 table.drops tr.mon td{background:#ffffff08;border-top:2px solid var(--rule)}table.drops tr.mon b{color:var(--gold)}
+/* 0.103 players list: online / offline chips, a status tag after the name, "show more" */
+.plist .presence{margin:2px 0 4px}
+.pstate{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;font:500 11px/1.5 var(--font-game,Mali,Tahoma,sans-serif);font-style:normal;vertical-align:middle;white-space:nowrap}
+.pstate.on{background:#6fbf6a2e;color:#b9e8a4;border:1px solid #8fd18a66}
+.pstate.off{background:#ffffff0d;color:#cdbf9f;border:1px solid #c6a16444}
+.plist .more{min-height:36px;border-radius:10px;border:1px dashed #f4cf7a66;background:transparent;color:#f4cf7a;font:inherit;cursor:pointer}
+.offline-note{margin:0;padding:8px 12px;border-radius:10px;background:#f4cf7a14;border:1px solid #f4cf7a44;font-size:13px}

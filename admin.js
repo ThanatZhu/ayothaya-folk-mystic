@@ -26,6 +26,7 @@ const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':m
 let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
 let fx={classId:'swordsman',level:50,str:40,agi:20,vit:20,int:1,dex:20,luk:10,watk:60,wmatk:0,skillLv:5};
 try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});}catch{}
+let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
 let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',itemQuery='',pickCount=1;
 const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
 const itemName=id=>ITEMS[id]?.name??id;
@@ -51,7 +52,7 @@ function set(r,f,v){
  showCount();
 }
 // 0.101.2 side menu: what each page is for, in one line
-const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นที่ออนไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)']};
+const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)']};
 function tabs(){
  $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();});
@@ -164,7 +165,7 @@ async function adminFetch(path,body){
  const r=await fetch(API+path,{method:body?'POST':'GET',headers,body:body&&JSON.stringify(body)}),j=await r.json().catch(()=>({}));
  if(!r.ok)throw new Error(j.error??String(r.status));return j;
 }
-const ADMIN_ERRORS={'not-admin':'อีเมลนี้ไม่อยู่ในรายชื่อ ADMIN_EMAILS บน Render','admin-unset':'เซิร์ฟเวอร์ยังไม่เห็นค่า ADMIN_EMAILS · ตั้งที่ Render แล้วกด Save, rebuild and deploy','bad-token':'ตรวจการล็อกอิน Google ไม่ผ่าน · ออกแล้วล็อกอินใหม่','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน','github-unset':'เซิร์ฟเวอร์ยังไม่มี GITHUB_TOKEN (ตั้งที่ Render)','github-failed':'ส่งขึ้น GitHub ไม่สำเร็จ · ตรวจสิทธิ์ของ GITHUB_TOKEN','github-conflict':'ไฟล์บน GitHub เพิ่งเปลี่ยน · กดบันทึกอีกครั้ง','invalid':'ข้อมูลไม่ถูกต้อง'};
+const ADMIN_ERRORS={'player-online':'ผู้เล่นคนนี้เพิ่งเข้าเกม · กดรีเฟรชแล้วส่งใหม่','bag-full':'กระเป๋าผู้เล่นเต็ม · ส่งของน้อยลงหรือส่งเป็นเบี้ยแทน','character-not-found':'ไม่พบตัวละครนี้ในเซฟ','not-admin':'อีเมลนี้ไม่อยู่ในรายชื่อ ADMIN_EMAILS บน Render','admin-unset':'เซิร์ฟเวอร์ยังไม่เห็นค่า ADMIN_EMAILS · ตั้งที่ Render แล้วกด Save, rebuild and deploy','bad-token':'ตรวจการล็อกอิน Google ไม่ผ่าน · ออกแล้วล็อกอินใหม่','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน','github-unset':'เซิร์ฟเวอร์ยังไม่มี GITHUB_TOKEN (ตั้งที่ Render)','github-failed':'ส่งขึ้น GitHub ไม่สำเร็จ · ตรวจสิทธิ์ของ GITHUB_TOKEN','github-conflict':'ไฟล์บน GitHub เพิ่งเปลี่ยน · กดบันทึกอีกครั้ง','invalid':'ข้อมูลไม่ถูกต้อง'};
 // Firebase connects as soon as the tab opens, so the click below can open the Google popup straight away
 // (a popup opened after an await is no longer a click, and the browser blocks it).
 function warmFirebase(){if(LOCAL||fbWarm)return;fbWarm=import('./firebase-client.js').then(m=>m.deadline(m.connectFirebase())).then(c=>{fbConn=c;if(tab==='players')playersTab();}).catch(()=>{fbWarm=null;adminMsg='เชื่อมต่อ Google ไม่ได้ · ลองรีโหลดหน้า';if(tab==='players')playersTab();});}
@@ -176,10 +177,10 @@ async function signIn(){
  const provider=new fbConn.sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
  try{await fbConn.sdk.signInWithPopup(fbConn.auth,provider);return true;}catch(e){adminMsg='ล็อกอินไม่สำเร็จ · '+(e.code??e.message);playersTab();return false;}
 }
-async function loadPlayers(quiet=false){
+async function loadPlayers(quiet=false,fresh=false){
  if(!LOCAL&&!fbConn?.auth.currentUser)return;
  if(!quiet){adminMsg='กำลังโหลด…';playersTab();}
- try{players=(await adminFetch('/admin/players')).players;if(!quiet)adminMsg='';if(picked&&!players.some(p=>p.id===picked))picked=null;}
+ try{players=(await adminFetch('/admin/players'+(fresh?'?fresh=1':''))).players;if(!quiet)adminMsg='';if(picked&&!players.some(p=>p.id===picked))picked=null;}
  catch(e){adminMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}
  if(tab==='players')playersTab();
 }
@@ -194,18 +195,24 @@ function playersTab(){
  const KINDS=[['all','ทั้งหมด'],['potion','ยา/อาหาร'],['gear','อุปกรณ์'],['card','การ์ด'],['loot','วัตถุดิบ'],['other','อื่น ๆ']];
  const kindOf=id=>['potion','gear','card','loot'].includes(ITEMS[id].kind)?ITEMS[id].kind:'other';
  const picks=Object.keys(ITEMS).filter(id=>!['ui','reserved'].includes(ITEMS[id].kind)&&(itemKind==='all'||kindOf(id)===itemKind)&&(!itemQuery||itemName(id).includes(itemQuery))).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
- const list=(players??[]).filter(x=>!search||x.name.toLowerCase().includes(search.toLowerCase())),p=players?.find(x=>x.id===picked);
- const head=`<div class="players-head"><h2>ผู้เล่นออนไลน์${players?' <small>'+players.length+' คน</small>':''}</h2>`+
+ // 0.103 offline characters (from the saves) are listed too: filter chips with counts, online first, 50 rows at a time
+ const isOn=x=>!x.offline,all=players??[],counts={all:all.length,online:all.filter(isOn).length,offline:all.filter(x=>x.offline).length};
+ const list=all.filter(x=>(presence==='all'||(presence==='online')===isOn(x))&&(!search||x.name.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>isOn(b)-isOn(a)),p=players?.find(x=>x.id===picked);
+ const ago=t=>{const m=Math.max(0,(Date.now()-t)/60000);return m<1?'เมื่อสักครู่':m<60?Math.floor(m)+' นาทีที่แล้ว':m<1440?Math.floor(m/60)+' ชม.ที่แล้ว':Math.floor(m/1440)+' วันที่แล้ว';};
+ const state=x=>x.offline?`<em class="pstate off">ออฟไลน์${x.lastSeen?' · '+ago(x.lastSeen):''}</em>`:x.online?'<em class="pstate on">ออนไลน์</em>':'<em class="pstate off">หลุด</em>';
+ const chips=`<div class="kinds presence">${[['all','ทั้งหมด'],['online','ออนไลน์'],['offline','ออฟไลน์']].map(([k,n])=>`<button type="button" data-presence="${k}" class="${k===presence?'on':''}">${n} ${counts[k]}</button>`).join('')}</div>`;
+ const head=`<div class="players-head"><h2>ผู้เล่น${players?' <small>'+counts.online+' ออนไลน์ · '+counts.offline+' ออฟไลน์</small>':''}</h2>`+
   (user?`<span class="who">👤 ${esc(user)}</span>${LOCAL?'':'<button type="button" id="sign-out">ออกจากระบบ</button>'}<button type="button" id="load-players">↻ รีเฟรช</button>`:'<button type="button" id="sign-in" class="primary">ล็อกอิน Google</button>')+
   (adminMsg?`<span class="msg">${esc(adminMsg)}</span>`:'')+'</div>';
- const row=x=>`<button type="button" class="prow${x.id===picked?' on':''}" data-pick="${esc(x.id)}">${face(x)}<span class="pinfo"><b>${esc(x.name)}${x.online?'':' <small>(หลุด)</small>'}</b><span>${esc(className(x.classId))} · Lv.${x.level}</span><span>เซิร์ฟ ${esc(x.server.replace('server-',''))} · ${esc(x.map)}</span></span><span class="coin">${x.coins.toLocaleString('th-TH')}<small>เบี้ย</small></span></button>`;
- const plist=`<section class="plist"><input id="player-search" type="search" placeholder="🔍 ค้นหาชื่อผู้เล่น" value="${esc(search)}">${list.map(row).join('')||`<p class="hint">${players?'ไม่มีผู้เล่นออนไลน์':'กำลังโหลด…'}</p>`}</section>`;
+ const row=x=>`<button type="button" class="prow${x.id===picked?' on':''}" data-pick="${esc(x.id)}">${face(x)}<span class="pinfo"><b>${esc(x.name)} ${state(x)}</b><span>${esc(className(x.classId))} · Lv.${x.level}</span><span>เซิร์ฟ ${esc(x.server.replace('server-',''))} · ${esc(x.map)}</span></span><span class="coin">${x.coins.toLocaleString('th-TH')}<small>เบี้ย</small></span></button>`;
+ const plist=`<section class="plist"><input id="player-search" type="search" placeholder="🔍 ค้นหาชื่อผู้เล่น" value="${esc(search)}">${chips}${list.slice(0,shownRows).map(row).join('')||`<p class="hint">${players?'ไม่พบผู้เล่น':'กำลังโหลด…'}</p>`}${list.length>shownRows?`<button type="button" id="more-players" class="more">แสดงเพิ่ม (อีก ${list.length-shownRows} คน)</button>`:''}</section>`;
  let gift='<p class="hint big">← เลือกผู้เล่นทางซ้ายเพื่อดูกระเป๋าและส่งของ</p>';
  if(p){
   const bag=Object.entries(p.items).filter(([id,n])=>n>0&&ITEMS[id]).map(([id,n])=>`<span class="cell" title="${esc(itemName(id))} ×${n}">${pic(id,n)}</span>`).join('')||'<span class="hint">ว่าง</span>';
   const quick=QUICK.map(([id,n],i)=>`<button type="button" class="qbtn" data-quick="${i}">${id==='coins'?`<i class="ico" style="${iconStyle('cowrie')}"></i>`:`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>`}<span>+${id==='coins'?n.toLocaleString('th-TH')+' เบี้ย':esc(itemName(id))+' ×'+n}</span></button>`).join('');
   const lines=basket.map((l,i)=>`<li>${pic(l.id)}<span>${esc(itemName(l.id))}</span><b>×${l.count}</b><button type="button" data-drop="${i}" aria-label="เอาออก">×</button></li>`).join('')+(giftCoins?`<li><i class="ico" style="${iconStyle('cowrie')}"></i><span>เบี้ย</span><b>${giftCoins.toLocaleString('th-TH')}</b><button type="button" data-drop="coins" aria-label="เอาออก">×</button></li>`:'');
-  gift=`<form id="give"><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small></div></div>`+
+  gift=`<form id="give"><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small> ${state(p)}</div></div>`+
+   (p.offline?'<p class="hint offline-note">ผู้เล่นออฟไลน์อยู่ · ของที่ส่งจะเข้ากระเป๋าในเซฟทันที และเห็นตอนเข้าเกมครั้งถัดไป</p>':'')+
    `<h4>กระเป๋า</h4><div class="grid bag">${bag}</div>`+
    `<h4>ส่งด่วน</h4><div class="quick">${quick}</div>`+
    `<h4>เลือกไอเท็ม <small>แตะรูปเพื่อใส่ในรายการ · จำนวนต่อครั้ง</small> <input id="give-count" type="number" min="1" max="999" value="${pickCount}" aria-label="จำนวนต่อครั้ง"></h4>`+
@@ -220,8 +227,10 @@ function playersTab(){
  const refocus=(id,fn)=>on(id,'oninput',e=>{fn(e.target.value);const pos=e.target.selectionStart;playersTab();const el=$(id);el.focus();el.setSelectionRange(pos,pos);});
  on('sign-in','onclick',async()=>{if(await signIn()){adminMsg='';loadPlayers();autoRefresh();}});
  on('sign-out','onclick',async()=>{await fbConn.sdk.signOut(fbConn.auth);players=null;picked=null;adminMsg='';playersTab();});
- on('load-players','onclick',()=>loadPlayers());
- refocus('player-search',v=>{search=v;});
+ on('load-players','onclick',()=>loadPlayers(false,true));
+ on('more-players','onclick',()=>{shownRows+=50;playersTab();});
+ $('view').querySelectorAll('[data-presence]').forEach(b=>b.onclick=()=>{presence=b.dataset.presence;shownRows=50;playersTab();});
+ refocus('player-search',v=>{search=v;shownRows=50;});
  $('view').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{if(picked!==b.dataset.pick){picked=b.dataset.pick;basket=[];giftCoins=0;}adminMsg='';playersTab();});
  const form=$('give');if(!form)return;
  const keep=()=>{giftCoins=Math.max(0,Math.min(1e7,Math.floor(Number($('give-coins').value)||0)));pickCount=Math.max(1,Math.min(999,Math.floor(Number($('give-count').value)||1)));};
@@ -233,7 +242,7 @@ function playersTab(){
  refocus('item-search',v=>{keep();itemQuery=v.trim();});
  on('give-coins','onchange',()=>{keep();playersTab();});on('give-count','onchange',keep);
  form.onsubmit=async e=>{e.preventDefault();keep();const send=form.querySelector('.send');send.disabled=true;send.textContent='กำลังส่ง…';
-  try{const r=await adminFetch('/admin/give',{peer:p.id,coins:giftCoins,items:basket});adminMsg='✔ ส่งให้ '+r.name+' แล้ว';Object.assign(p,{coins:r.coins,items:r.items});basket=[];giftCoins=0;}
+  try{const r=await adminFetch('/admin/give',{peer:p.id,coins:giftCoins,items:basket});adminMsg='✔ ส่งให้ '+r.name+' แล้ว'+(p.offline?' (เข้าเซฟแล้ว เห็นตอนเข้าเกม)':'');Object.assign(p,{coins:r.coins,items:r.items});basket=[];giftCoins=0;}
   catch(e){adminMsg=ADMIN_ERRORS[e.message]??'ส่งไม่สำเร็จ · '+e.message;}
   playersTab();};
 }

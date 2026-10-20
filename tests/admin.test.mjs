@@ -34,3 +34,28 @@ test('balance save commits balance-data.js through the GitHub contents API, skip
  assert.deepEqual(await commitBalance(text,{token:'t',fetch}),{commit:'1234567'});assert.equal(stored,text);assert.match(calls[1][1],/contents\/balance-data\.js$/);
  assert.deepEqual(await commitBalance(text,{token:'t',fetch}),{unchanged:true});
 });
+test('admin lists offline characters from the saves and gifts them only while no game holds them',async()=>{
+ const {LocalStore}=await import('../server/storage.js');const {adminGiveOffline}=await import('../server/admin.js');
+ const {mkdtemp}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const path=await import('node:path');
+ const {BAG_SLOTS,ITEMS}=await import('../items.js');
+ const store=await new LocalStore(await mkdtemp(path.join(tmpdir(),'ayo-admin-'))).init();
+ const {uid,record}=await store.createLocal({name:'ออฟไลน์'});
+ const map={id:'f',name:'ทุ่ง',safe:false,nav:{zones:[{x:-20,z:-20,w:40,d:40}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[]};
+ const realm=new RealmServer({catalog:{capital:'f',maps:[map]},now:()=>1e4});
+ const list=adminPlayers(realm,await store.listProfiles());assert.equal(list.length,1);assert.equal(list[0].offline,true);assert.equal(list[0].id,'off:'+uid+':slot-1');
+ const r=await adminGiveOffline(realm,store,{peer:list[0].id,coins:50,items:[{id:'hp-small',count:2}]});
+ assert.equal(r.coins,(record.bag?.coins??0)+50);assert.equal(store.rows.get(uid).bag.items['hp-small'],2);
+ await assert.rejects(adminGiveOffline(realm,store,{peer:list[0].id,items:[{id:'no-such-item',count:1}]}),/bad-item/);
+ await assert.rejects(adminGiveOffline(realm,store,{peer:'off:'+uid+':slot-9',coins:1}),/player-offline/);
+ // a live lease (a game in progress or a map change) refuses; so does a character the realm has right now
+ const lease=await store.acquire({uid,serverId:'server-1',slotId:'slot-1'},'L1');
+ await assert.rejects(adminGiveOffline(realm,store,{peer:list[0].id,coins:1}),/player-online/);
+ realm.join({uid,serverId:'server-1',slotId:'slot-1',record:lease.record,send:()=>{}});
+ assert.equal(adminPlayers(realm,await store.listProfiles()).length,1,'shown once, as online');
+ await assert.rejects(adminGiveOffline(realm,store,{peer:list[0].id,coins:1}),/player-online/);
+ // a full bag refuses the whole gift instead of losing part of it
+ const store2=await new LocalStore(await mkdtemp(path.join(tmpdir(),'ayo-admin-'))).init(),c2=await store2.createLocal({name:'เต็ม'});
+ const loot=Object.keys(ITEMS).filter(id=>['loot','card','gear'].includes(ITEMS[id].kind)).slice(0,BAG_SLOTS);assert.equal(loot.length,BAG_SLOTS);store2.rows.get(c2.uid).bag={coins:0,items:Object.fromEntries(loot.map(id=>[id,1]))};
+ const other=Object.keys(ITEMS).find(id=>ITEMS[id].kind==='potion'&&!loot.includes(id));
+ await assert.rejects(adminGiveOffline(new RealmServer({catalog:{capital:'f',maps:[map]}}),store2,{peer:'off:'+c2.uid+':slot-1',items:[{id:other,count:1}]}),/bag-full/);
+});

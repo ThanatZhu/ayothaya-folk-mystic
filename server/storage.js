@@ -21,9 +21,16 @@ export class LocalStore{
  }
  async checkpoint(session,record,{release=false}={}){
   const lock=this.leases.get(session.identity.uid);if(!lock||lock.id!==session.leaseId||lock.expires<Date.now())throw new Error('session-lost');
-  this.rows.set(session.identity.uid,copy({...record,revision:(this.rows.get(session.identity.uid)?.revision??0)+1}));
+  this.rows.set(session.identity.uid,copy({...record,revision:(this.rows.get(session.identity.uid)?.revision??0)+1,savedAt:Date.now()}));
   if(release)this.leases.delete(session.identity.uid);else lock.expires=Date.now()+ttl;
   await this.flush();
+ }
+ // 0.103 back office: every saved character, and a gift written into one that is not in a game right now.
+ async listProfiles(){return [...this.rows].map(([uid,r])=>({uid,slotId:'slot-1',record:copy(r),savedAt:r.savedAt??null}));}
+ async giveOffline(identity,apply){
+  const row=this.rows.get(identity.uid);if(!row||identity.slotId!=='slot-1')throw new Error('character-not-found');
+  const lock=this.leases.get(identity.uid);if(lock&&lock.expires>Date.now())throw new Error('player-online');
+  const next=apply(copy(row));this.rows.set(identity.uid,{...next,revision:(row.revision??0)+1,savedAt:row.savedAt});await this.flush();return copy(next);
  }
  // 0.47 guilds live beside the profiles; the realm keeps them in memory and calls these on change.
  async loadGuilds(){try{return JSON.parse(await readFile(path.join(this.directory,'guilds.json'),'utf8'));}catch{return [];}}
@@ -60,6 +67,24 @@ export class FirebaseStore{
  async loadPrices(){const out={};for(const d of (await this.db.collection('multiplayerPrices').get()).docs)out[d.id]=d.data().prices??{};return out;}
  savePrices(serverId,prices){return this.db.collection('multiplayerPrices').doc(serverId).set({prices});}
  deleteGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).delete();}
+ // 0.103 back office. The private profiles sit in multiplayerProfiles/{uid}/characters; the collection group also
+ // matches the legacy players/{uid}/characters mirror, which is skipped. One read per document: the host caches it.
+ async listProfiles(limit=2000){
+  const snap=await this.db.collectionGroup('characters').limit(limit).get();
+  return snap.docs.filter(d=>d.ref.parent.parent?.parent?.id==='multiplayerProfiles'&&d.data().record).map(d=>({uid:d.ref.parent.parent.id,slotId:d.id,record:d.data().record,savedAt:d.data().updatedAt??null}));
+ }
+ // Same lease rule as acquire(): a live lease means the character is in a game, and the transaction re-runs if
+ // the lease or the profile changes underneath it, so a login in between cannot be overwritten.
+ async giveOffline(identity,apply){
+  const refs=this.refs(identity);
+  return this.db.runTransaction(async tx=>{
+   await this.checkAuthority(tx);
+   const [profile,lease]=await Promise.all([tx.get(refs.profile),tx.get(refs.lease)]);
+   if(lease.exists&&lease.data().expires>Date.now())throw new Error('player-online');
+   if(!profile.exists)throw new Error('character-not-found');
+   const record=apply(copy(profile.data().record));tx.set(refs.profile,{record,updatedAt:profile.data().updatedAt??Date.now()});return copy(record);
+  });
+ }
  refs(identity){const root=this.db.collection('multiplayerProfiles').doc(identity.uid);return {profile:root.collection('characters').doc(identity.slotId),lease:this.db.collection('multiplayerLeases').doc(identity.uid),legacy:this.db.collection('players').doc(identity.uid).collection('characters').doc(identity.slotId)};}
  async acquire(identity,leaseId){
   const refs=this.refs(identity);return this.db.runTransaction(async tx=>{

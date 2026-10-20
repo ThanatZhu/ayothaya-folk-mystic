@@ -18,14 +18,16 @@ export function normalizeStats(stats){
 // Cost to raise a stat from x to x+1 (Ragnarok curve: 2 points up to 10, then +1 every 10).
 export const raiseCost=x=>Math.floor((x-1)/10)+2;
 // Points earned by Base Level L: 3 + floor(level/5) for every level gained after 1.
-export function earnedStatPoints(level){let n=0;for(let l=2;l<=level;l++)n+=3+Math.floor(l/5);return n;}
+// 0.102 rebirth: each one (up to REBIRTH_MAX) adds REBIRTH_POINTS on top of what the levels earn
+export const REBIRTH_POINTS=40,REBIRTH_MAX=10;
+export function earnedStatPoints(level,reborn=0){let n=0;for(let l=2;l<=level;l++)n+=3+Math.floor(l/5);return n+Math.min(REBIRTH_MAX,Math.max(0,reborn|0))*REBIRTH_POINTS;}
 export function spentStatPoints(stats){const s=normalizeStats(stats);let n=0;for(const k of STATS)for(let x=1;x<s[k];x++)n+=raiseCost(x);return n;}
-export const statPoints=(stats,level)=>earnedStatPoints(level)-spentStatPoints(stats);
+export const statPoints=(stats,level,reborn=0)=>earnedStatPoints(level,reborn)-spentStatPoints(stats);
 
-export function raiseStat(stats,stat,level){
+export function raiseStat(stats,stat,level,reborn=0){
  if(!STATS.includes(stat))throw new Error('bad-stat');
  const s=normalizeStats(stats);if(s[stat]>=STAT_MAX)throw new Error('stat-max');
- if(statPoints(s,level)<raiseCost(s[stat]))throw new Error('no-stat-points');
+ if(statPoints(s,level,reborn)<raiseCost(s[stat]))throw new Error('no-stat-points');
  return {...s,[stat]:s[stat]+1};
 }
 
@@ -34,10 +36,11 @@ export function normalizeGear(gear){
  for(const slot of GEAR_SLOTS){const id=g[slot];out[slot]=itemDef(id)?.kind==='gear'&&itemDef(id).slot===slot?id:null;}
  return out;
 }
-export function canWear(id,{classId,level}){
+export function canWear(id,{classId,level,reborn=0}){
  const it=itemDef(id);if(it?.kind!=='gear')return 'not-gear';
  if(it.classes&&!it.classes.includes(classId))return 'wrong-class';
- if((it.level??1)>level)return 'low-level';
+ // a reborn character keeps wearing the gear it earned before going back to Lv.1
+ if(!reborn&&(it.level??1)>level)return 'low-level';
  return null;
 }
 // Equip from the bag; whatever was in that slot goes back into the bag.

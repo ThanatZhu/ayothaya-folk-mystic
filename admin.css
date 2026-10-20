@@ -124,3 +124,17 @@ td .name{display:flex;align-items:center;gap:10px}
  .side .tabs button{flex-direction:column;justify-content:center;min-height:58px;text-align:center;gap:2px}.side .tabs button small{display:none}
  .side-note{display:none}.main{padding:10px 12px 40px}
 }
+
+/* 0.103 damage formula page */
+.formula h3{margin:16px 0 8px;color:var(--gold)}
+.fx-in{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:end;padding:12px;border:1px solid var(--rule);border-radius:12px;background:var(--panel)}
+.fx-in h3{flex-basis:100%;margin:0}
+.fx-in label{display:grid;gap:2px;font-size:12px;color:var(--muted)}
+.fx-in input,.fx-in select{width:88px;min-height:34px;padding:2px 8px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.fx-in select{width:140px}
+.fx-out dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;margin:0}
+.fx-out dl div{padding:8px 10px;border:1px solid var(--rule);border-radius:10px;background:var(--panel)}
+.fx-out dt{font-size:11px;color:var(--muted)}.fx-out dd{margin:0;font:700 18px Mali,Tahoma,sans-serif;color:var(--jade)}
+.fx-rules{margin-top:12px;padding:10px 14px;border:1px dashed var(--rule);border-radius:10px}.fx-rules summary{cursor:pointer;color:var(--gold)}
+.fx-rules li{margin:4px 0;font-size:13px;line-height:1.5}
+.formula .scroll{max-height:420px}

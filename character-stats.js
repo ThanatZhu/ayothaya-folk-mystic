@@ -2,6 +2,7 @@
 // Pure rules shared by the client (offline guests + UI) and the realm server. Gear lives in the bag until
 // equipped; it is separate from the cosmetic look in equipment.js, so costumes stay free choices.
 import {BAG_SLOTS,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=95';
+import {dodgeChance,monsterHit} from './combat-formulas.js';
 
 export const STATS=['str','agi','vit','int','dex','luk'];
 export const STAT_LABEL={str:'STR',agi:'AGI',vit:'VIT',int:'INT',dex:'DEX',luk:'LUK'};
@@ -81,7 +82,9 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
  for(const k of STATS)S[k]=s[k]+add(k);
  const atkStat=RANGED.has(classId)?S.dex:S.str;
  const weaponAtk=worn.reduce((n,it)=>n+up(it,'atk'),0),weaponMatk=worn.reduce((n,it)=>n+up(it,'matk'),0);
- const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+weaponAtk)*(1+sum(e=>e.atkPct))),matk=Math.round((S.int-1)*1.5)+Math.floor(S.int/7)**2+weaponMatk;
+ // 0.103 status ATK: the main stat (STR, or DEX for ranged) plus small help from the other one and from LUK
+ const sideStat=RANGED.has(classId)?S.str:S.dex;
+ const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+Math.floor(sideStat/5)+Math.floor(S.luk/3)+weaponAtk)*(1+sum(e=>e.atkPct))),matk=Math.round((S.int-1)*1.5)+Math.floor(S.int/7)**2+weaponMatk;
  const magic=MAGIC.has(classId);
  return {
   total:S,magic,atk,matk,
@@ -92,7 +95,11 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
   // 0.102.1 magic classes hit with their full MATK on basic attacks too (owner)
   basicBonus:magic?matk:atk,
   skillPower:1+(magic?matk:atk)/40,
-  flee:Math.min(.5,(S.agi-1)*.008+(S.luk-1)*.002+sum(e=>e.flee)),
+  // 0.103 HIT (DEX) against monster FLEE, FLEE (AGI) against monster HIT, MDEF (INT) against magic blows;
+  // flee = the dodge chance against a monster of the same level, for the status window
+  hit:level+S.dex+Math.floor(S.luk/3)+sum(e=>e.hit),fleeStat:level+S.agi+Math.floor(S.luk/5),
+  mdef:Math.floor((S.int-1)/2)+worn.reduce((n,it)=>n+(it.mdef??0),0)+sum(e=>e.mdef),
+  flee:Math.min(.75,dodgeChance(level+S.agi+Math.floor(S.luk/5),monsterHit({level}),S.luk)+sum(e=>e.flee)),
   crit:Math.min(.4,.01+(S.luk-1)*.004+sum(e=>e.crit)),
   delay:Math.max(.5,(1-(S.agi-1)*.006-(S.dex-1)*.002)*(1-sum(e=>e.delay))),
   // card specials: extra damage vs size/element, damage taken from an element, coin bonus

@@ -170,3 +170,20 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
 #status-rebirth:empty{display:none}
 #status-rebirth p{margin:0;display:grid}#status-rebirth b{color:#f4cf7a}#status-rebirth small{font-size:11px;opacity:.85}
 #rebirth-go{flex:none;min-height:32px;padding:0 14px;border:1px solid #f4cf7a;border-radius:999px;background:#f4cf7a;color:#2a2210;font:700 13px Mali,Tahoma,sans-serif;cursor:pointer}
+
+/* 0.103.5 desktop status window: wide, two columns (stats + numbers on the left, worn gear on the right), larger text */
+@media (pointer:fine) and (min-width:1100px) and (min-height:600px){
+ html body #status-window[data-hud-panel][open]{display:grid;width:min(920px,calc(100vw - 64px));max-height:calc(100dvh - 120px);overflow:auto;
+  grid-template-columns:minmax(380px,430px) 1fr;grid-template-rows:auto auto 1fr;grid-template-areas:"head head" "stats gear" "derived gear";column-gap:4px}
+ #status-window>header{grid-area:head;padding:10px 14px}#status-window h2{font-size:19px}#status-points{font-size:14px}
+ #status-stats{grid-area:stats;padding:12px 14px 8px;gap:6px}
+ #status-stats li{grid-template-columns:52px 64px 1fr auto;padding:7px 10px}
+ #status-stats b{font-size:15px}#status-stats span{font-size:17px}#status-stats small{font-size:12px}
+ #status-stats button{min-width:48px;padding:5px 9px;font-size:13px}
+ #status-derived{grid-area:derived;align-self:start;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 14px 14px}
+ #status-derived div{padding:8px 4px}#status-derived dt{font-size:11px}#status-derived dd{font-size:16px}
+ #status-window h3{grid-area:gear;align-self:start;margin:12px 14px 6px;font-size:15px}#status-window h3 small{font-size:11px}
+ #status-gear{grid-area:gear;align-self:start;padding:44px 14px 14px;gap:6px}
+ #status-gear li{padding:8px 10px;align-items:flex-start}#status-gear strong{font-size:14px}#status-gear em{font-size:11px}#status-gear small{font-size:10px}
+ #status-gear .item-icon{width:40px;height:40px;flex:none}
+}

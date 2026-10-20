@@ -5,6 +5,7 @@ const compactQuery=matchMedia('(pointer:coarse),(max-width:900px),(max-height:60
 // Inner arc holds skills 1-4, outer arc 5-0, evenly spread from left of the attack button to above it.
 // 0.101 a third arc outside both holds the Master slots (Alt+1-5), shown once a Master skill is learned.
 // 0.103.7 the Master arc starts just above AUTO (which sits at ~185° on the same radius) and curves up to the top
+// 0.103.8 learned Master skills fill that arc in order from its first spot, so a skill not learned yet leaves no gap
 const INNER=[180,150,120,90],OUTER=[186,166.4,146.8,127.2,107.6,88],MASTER=[164,145,126,107,88];
 function layoutWheel(){
  const box=document.querySelector('.combat-controls');if(!box)return;
@@ -18,8 +19,10 @@ function layoutWheel(){
  const auto=$('auto-attack'),autoSize=compact?44:54;
  if(auto){auto.style.right=Math.round(cx+outer+slot/2+8)+'px';auto.style.bottom='4px';box.style.width=Math.round(cx+outer+slot/2+8+autoSize+4)+'px';}
  document.documentElement.style.setProperty('--wheel-width',box.style.width);
+ let m=0;
  [...document.querySelectorAll('#skills .skill')].forEach((b,i)=>{
-  const a=(i<4?INNER[i]:i<10?OUTER[i-4]:MASTER[i-10])*Math.PI/180,r=i<4?inner:i<10?outer:outer+slot+8;
+  if(i>=10&&b.hidden)return;
+  const a=(i<4?INNER[i]:i<10?OUTER[i-4]:MASTER[m++])*Math.PI/180,r=i<4?inner:i<10?outer:outer+slot+8;
   b.style.right=Math.round(cx-Math.cos(a)*r-slot/2)+'px';b.style.bottom=Math.round(cy+Math.sin(a)*r-slot/2)+'px';
  });
 }
@@ -27,6 +30,9 @@ export function createMmoHud({game,account}){
  document.body.dataset.skillBank='all';document.body.classList.add('mmo-hud');
  document.querySelector('.combat-controls')?.classList.add('wheel');
  layoutWheel();addEventListener('resize',layoutWheel);compactQuery.addEventListener?.('change',layoutWheel);
+ // The game loop re-sets each Master slot's hidden flag every frame; lay out again only when the shown set changes.
+ let shown='';const skillsBox=$('skills');
+ if(skillsBox)new MutationObserver(()=>{const now=[...skillsBox.querySelectorAll('.master-slot')].map(b=>b.hidden?0:1).join('');if(now!==shown){shown=now;layoutWheel();}}).observe(skillsBox,{subtree:true,attributes:true,attributeFilter:['hidden']});
  // Status line inside the online chip.
  const meta=document.createElement('span');meta.id='online-meta';$('online-button')?.append(meta);
  const realm='เซิร์ฟ '+String(account.serverId||'').slice(-1);

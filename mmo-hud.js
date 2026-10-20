@@ -4,7 +4,8 @@ const $=id=>document.getElementById(id);
 const compactQuery=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)');
 // Inner arc holds skills 1-4, outer arc 5-0, evenly spread from left of the attack button to above it.
 // 0.101 a third arc outside both holds the Master slots (Alt+1-5), shown once a Master skill is learned.
-const INNER=[180,150,120,90],OUTER=[186,166.4,146.8,127.2,107.6,88],MASTER=[182,159,136,113,90];
+// 0.103.7 the Master arc starts just above AUTO (which sits at ~185° on the same radius) and curves up to the top
+const INNER=[180,150,120,90],OUTER=[186,166.4,146.8,127.2,107.6,88],MASTER=[164,145,126,107,88];
 function layoutWheel(){
  const box=document.querySelector('.combat-controls');if(!box)return;
  const compact=compactQuery.matches;

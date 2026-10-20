@@ -150,7 +150,7 @@ export class CombatWorld{
  // One monster blow, shared by the offline world and the realm server: damage, ailment roll, or going down (+ death penalty).
  takeMonsterHit(type){
   const p=this.player,damage=monsterHit(this,type.damage,Math.random,type.id);if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
-  p.hp=Math.max(0,p.hp-damage);this.emit('playerHit',{x:p.x,z:p.z,amount:damage});delete this.status.sleep;
+  p.hp=Math.max(0,p.hp-damage);this.calm=0;this.emit('playerHit',{x:p.x,z:p.z,amount:damage});delete this.status.sleep;
   if(p.hp>0){this.inflict(rollAilment(type.id));return true;}
   p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;p.running=false;this.status={};
   const lost=deathPenalty(this);this.notice('หมดแรง · กลับลานใน 3 วินาที'+(lost?' · Base EXP -'+lost:''));return true;
@@ -173,7 +173,7 @@ export class CombatWorld{
  setAuto(on,hunt=null){const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;return ok;}
  toggleAuto(){this.hunt=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0||mob.pvp)return;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
+  if(!mob||mob.hp<=0||mob.pvp)return;this.calm=0;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
@@ -221,7 +221,9 @@ export class CombatWorld{
   const stop=held(this.status),wantsRun=input.run===true&&Math.hypot(input.x,input.z)>.08,speed=this.walkSpeed(wantsRun);
   this.mercStep(dt);
   if(p.hp<=0){p.moving=false;p.running=false;p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
-  if(this.safe)p.hp=Math.min(p.maxHp,p.hp+8*dt);
+  // 0.100.11 HP comes back on its own: towns 4 % of max HP a second, the field 1 % a second after 6 s out of combat
+  this.calm=this.status.poison?0:(this.calm??0)+dt;
+  if(p.hp>0&&p.hp<p.maxHp&&(this.safe||this.calm>6))p.hp=Math.min(p.maxHp,p.hp+Math.max(8,p.maxHp*(this.safe?.04:.01))*dt);
   const ox=p.x,oz=p.z,manual=!stop&&Math.hypot(input.x,input.z)>.08;
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);

@@ -144,3 +144,9 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
 .craft-go{display:grid;gap:4px}
 .craft-go button,#bag-craft{padding:6px 12px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
 .craft-go button:disabled{opacity:.4;cursor:default}
+
+/* 0.99.17 drag a potion onto Q / E: the item follows the pointer, the slots light up */
+.bag-grid .slot.potion{touch-action:none}
+.bag-drag{position:fixed;z-index:60;pointer-events:none;translate:-50% -50%;scale:1.15;filter:drop-shadow(0 6px 10px #000a)}
+#quick-slots.drop-ready button{box-shadow:0 0 0 3px #f4cf7a66,0 0 14px #f4cf7a88}
+#quick-slots button.drop-over{scale:1.18;box-shadow:0 0 0 4px #f4cf7a,0 0 22px #f4cf7a}

@@ -143,7 +143,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   if(active)return;wakeServer();
   try{await account.beginOnline();active=true;client=new MultiplayerClient({url,identity});game.setNetwork(client);account.setOnline(client);
    client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;const waking=detail==='reconnecting'&&!client.everOnline;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':waking?'กำลังปลุกเซิร์ฟเวอร์…':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':detail==='connecting'?'กำลังเข้าห้อง…':detail==='error'?'เชื่อมต่อไม่ได้':'ผู้เล่นออนไลน์');status(waking?'เซิร์ฟเวอร์ฟรีหลับอยู่ · กำลังปลุก อาจใช้ถึง 1–2 นาที':statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();if(detail==='error'&&!dialog.open){game.clearInput();openHudPanel(dialog);}});
-   client.addEventListener('welcome',({detail})=>{for(const m of detail.history)log(m);});
+   client.addEventListener('welcome',({detail})=>{for(const m of detail.history)log(m);
+    // 1.01 the server decides the map (someone no longer in a guild wakes up in the capital, not the hall): follow it.
+    const mapId=String(detail.room??'').split(':')[1];if(mapId&&document.body.dataset.map&&mapId!==document.body.dataset.map){const go=()=>location.assign('?server='+account.serverId+'&map='+encodeURIComponent(mapId));
+     // the page opens the saved map first, so save the server's choice before reloading (else it would loop)
+     Promise.resolve(account.data&&account.save?.({...account.data,mapId,position:null})).catch(()=>{}).finally(go);}});
    client.addEventListener('snapshot',({detail})=>acceptSnapshot(detail));
    client.addEventListener('events',({detail})=>game.world.events.push(...detail.events));
    client.addEventListener('chat',({detail})=>log(detail,true));

@@ -1,7 +1,7 @@
 // Friends and guild window (0.47). Online only: the realm server owns both lists.
 // Whisper: "/w ชื่อ ข้อความ" in chat, or the กระซิบ button here (multiplayer-ui.js sends it).
 import {emblemId} from './items.js?v=95';
-import {GUILD_COST,EMBLEMS} from './social.js?v=01';
+import {GUILD_COST,EMBLEMS,GUILD_LEVELS,GUILD_UPGRADES,GUILD_RITE,GUILD_GOAL,NOTICE_MAX,DONATE_MIN} from './social.js?v=101';
 import {iconStyle} from './bag-ui.js?v=99';
 import {openHudPanel} from './hud-panels.js?v=34';
 
@@ -10,10 +10,10 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 export const emblemIcon=(n,c='item-icon small')=>icon(emblemId(n),c);
 
-export function createSocialUI({game,account}){
- if(!document.querySelector('link[data-social-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='social-ui.css?v=01';css.dataset.socialUi='';document.head.append(css);}
+export function createSocialUI({game,account,worldUI=null,map=null,hall=null}){
+ if(!document.querySelector('link[data-social-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='social-ui.css?v=101';css.dataset.socialUi='';document.head.append(css);}
  const world=game.world,cmd=(type,data)=>world.market?.(type,data);
- let tab='friends',friends=[],guild=null,asks=[],pick=1,shown='';
+ let tab='friends',gtab='home',friends=[],guild=null,guildAt=0,asks=[],pick=1,shown='';const hereHall=!!map?.guildHall;
  const menu=document.createElement('button');menu.id='menu-social';menu.type='button';menu.title='เพื่อน · กิลด์';menu.setAttribute('aria-label','เพื่อน และ กิลด์');
  menu.innerHTML='<i>'+icon('friend','item-icon menu-item-icon')+'</i><span>สังคม</span>';
  const nav=$('game-menu');if(nav)nav.insertBefore(menu,$('menu-players')??null);
@@ -24,11 +24,16 @@ export function createSocialUI({game,account}){
  menu.onclick=()=>dialog.open?dialog.close():open();
  dialog.querySelector('#social-close').onclick=()=>dialog.close();
  dialog.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render(true);});
+ // 1.01 the hall NPC in the capital (role guild-hall) walks members to their guild hall.
+ if(worldUI){const prev=worldUI.afterTalk;worldUI.afterTalk=n=>{prev?.(n);$('npc-guild-hall')?.remove();if(n.role!=='guild-hall')return;
+  const b=document.createElement('button');b.id='npc-guild-hall';b.type='button';b.innerHTML=icon('guild-flag','item-icon small')+' ไปทุ่งชุมพลของกิลด์';
+  b.onclick=()=>{$('close-npc')?.click();if(!game.online)world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');else if(!guild)world.notice('ต้องเป็นสมาชิกกิลด์ก่อน · ก่อตั้งหรือรับคำเชิญได้ที่หน้าสังคม');else worldUI.guildHall();};$('close-npc')?.before(b);};}
  const whisper=name=>{dialog.close();const input=$('online-text');if(!input)return;input.value='/w '+name+' ';input.focus();};
 
  game.onEvent(e=>{
   if(e.type==='friends'){friends=e.list;render(true);}
-  if(e.type==='guild'){guild=e.guild;render(true);}
+  if(e.type==='guild'){guild=e.guild;guildAt=Date.now();hall?.guildUpgrades?.(guild?.upgrades??{});render(true);}
+  if(e.type==='guildHallExit')worldUI?.travelTo?.('ayutthaya'); // 1.01 no longer a member: out of the hall
   if(e.type==='friendAsk')asks.push({kind:'friend',from:e.from,text:`<b>${esc(e.name)}</b> ขอเป็นเพื่อน`});
   if(e.type==='guildAsk')asks.push({kind:'guild',guild:e.guild,text:`<b>${esc(e.from)}</b> ชวนเข้ากิลด์ ${emblemIcon(e.emblem)}<b>${esc(e.name)}</b>`});
   if(e.type==='friendAsk'||e.type==='guildAsk'){if(!dialog.open)open();else render(true);}
@@ -36,7 +41,7 @@ export function createSocialUI({game,account}){
 
  function render(force=false){
   if(!dialog.open)return;
-  const sig=JSON.stringify([tab,friends,guild,asks.length,pick,game.online]);if(!force&&sig===shown)return;shown=sig;
+  const sig=JSON.stringify([tab,gtab,friends,guild,asks.length,pick,game.online]);if(!force&&sig===shown)return;shown=sig;
   dialog.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
   $('social-asks').innerHTML=asks.map((a,i)=>`<p class="social-ask" data-i="${i}">${a.text}<button type="button" class="mp-primary" data-ok="1">ยอมรับ</button><button type="button" data-ok="">ปฏิเสธ</button></p>`).join('');
   $('social-asks').querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const i=+b.closest('[data-i]').dataset.i,a=asks[i],accept=!!b.dataset.ok;asks.splice(i,1);
@@ -57,14 +62,46 @@ export function createSocialUI({game,account}){
    body.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{pick=+b.dataset.e;body.querySelectorAll('[data-e]').forEach(x=>x.classList.toggle('on',x===b));});
    return;
   }
-  const me=account?.character?.name??null,lead=guild.members.find(m=>m.leader)?.name,leader=!!me&&lead===me;
-  body.innerHTML=`<div class="guild-head">${emblemIcon(guild.emblem,'item-icon big')}<div><strong>${esc(guild.name)}</strong><small>หัวหน้า ${esc(lead)} · สมาชิก ${guild.members.length}/30</small></div></div>`+(game.world.war?`<p class="social-note">🏯 ป้อมโรงสี · ผู้ครอง: ${esc(game.world.war.owner??'ยังไม่มี')} · กิลด์วอร์ ${esc(game.world.war.next)} ที่โรงสีใต้เงาจันทร์ · ทำลายศิลาราชสีห์เพื่อยึดป้อม</p>`:'')+
-   (leader?`<form class="social-add" id="guild-invite"><input id="invite-name" maxlength="24" placeholder="ชื่อผู้เล่นที่จะชวน" aria-label="ชวนเข้ากิลด์"><button type="submit">ชวนเข้ากิลด์</button></form>`:'')+
-   `<ul class="social-list">${guild.members.map(m=>`<li class="${m.online?'on':''}" data-name="${esc(m.name)}"><i class="dot"></i><div><strong>${m.leader?'♛ ':''}${esc(m.name)}</strong><small>${m.online?esc(m.map):'ออฟไลน์'}</small></div>${m.name!==me&&m.online?`<button type="button" data-a="whisper">กระซิบ</button>`:''}${leader&&m.name!==me?'<button type="button" data-a="kick">เชิญออก</button>':''}</li>`).join('')}</ul>`+
-   (leader?`<details class="guild-emblem"><summary>เปลี่ยนตรากิลด์</summary><div class="emblem-grid">${emblems}</div></details>`:'')+
-   `<div class="social-actions"><span>คุยในกิลด์: แท็บ <b>กิลด์</b> ในแชต</span><button type="button" id="guild-leave">ออกจากกิลด์</button></div>`;
+  // 1.01 guild page: overview (level, notice, daily goal, rite, hall), members (ranks, contribution), treasury and upgrades.
+  const me=account?.character?.name??null,mine=guild.members.find(m=>m.name===me),rank=mine?.rank??'member',leader=rank==='leader',staff=leader||rank==='deputy';
+  const lead=guild.members.find(m=>m.leader)?.name,num=n=>Number(n??0).toLocaleString('th-TH'),bar=(v,max)=>`<i class="guild-bar"><b style="width:${Math.min(100,max?v/max*100:100).toFixed(1)}%"></b></i>`;
+  const RANK={leader:'♛ หัวหน้า',deputy:'★ รองหัวหน้า',member:'สมาชิก'},riteLeft=Math.max(0,guild.rite-Math.floor((Date.now()-guildAt)/1000));
+  const head=`<div class="guild-head">${emblemIcon(guild.emblem,'item-icon big')}<div><strong>${esc(guild.name)} <span class="guild-lv">Lv.${guild.level}</span></strong><small>หัวหน้า ${esc(lead)} · สมาชิก ${guild.members.length}/${guild.seats}</small>${bar(guild.exp-(GUILD_LEVELS[guild.level-1]??0),guild.next?guild.next-(GUILD_LEVELS[guild.level-1]??0):0)}<small class="num">${guild.next?`EXP ${num(guild.exp)} / ${num(guild.next)}`:'ระดับสูงสุด'}</small></div></div>`+
+   `<div class="social-tabs guild-tabs" role="tablist">${[['home','ภาพรวม'],['members','สมาชิก'],['treasury','คลัง · อัปเกรด']].map(([k,t])=>`<button role="tab" data-gtab="${k}" aria-selected="${gtab===k}">${t}</button>`).join('')}</div>`;
+  let page='';
+  if(gtab==='home'){
+   page=`<section class="guild-card notice"><h3>📜 กระดานประกาศ</h3><p>${guild.notice?esc(guild.notice):'<span class="muted">ยังไม่มีประกาศ</span>'}</p>`+
+    (staff?`<form class="social-add" id="guild-notice"><input id="notice-text" maxlength="${NOTICE_MAX}" value="${esc(guild.notice)}" placeholder="ประกาศถึงสมาชิก (ไม่เกิน ${NOTICE_MAX} ตัว)" aria-label="ประกาศกิลด์"><button type="submit">บันทึก</button></form>`:'')+`</section>`+
+    `<section class="guild-card"><h3>🏯 ทุ่งชุมพล · หอกิลด์</h3><p>ลานรวมพลข้างวัด ที่ไพร่พลอโยธยามาชุมนุม รับน้ำพระพุทธมนต์ และรอฤกษ์ยามก่อนเคลื่อนทัพ · เข้าได้เฉพาะสมาชิก</p><button type="button" id="guild-hall"${hereHall?' disabled':''}>${hereHall?'อยู่ที่ทุ่งชุมพลแล้ว':'ไปทุ่งชุมพล'}</button></section>`+
+    `<section class="guild-card"><h3>⚔️ เป้าหมายวันนี้ · ล่ามอนสเตอร์ร่วมกัน</h3>${bar(guild.goal.kills,guild.goal.need)}<p class="num">${num(Math.min(guild.goal.kills,guild.goal.need))} / ${num(guild.goal.need)} ตัว ${guild.goal.done?'· <b class="ok">สำเร็จแล้ว ✓</b>':`· สำเร็จได้ กิลด์ EXP +${GUILD_GOAL.exp} · คลัง +${num(GUILD_GOAL.treasury)}`}</p></section>`+
+    `<section class="guild-card"><h3>🪷 ${GUILD_RITE.name}</h3><p>EXP +${GUILD_RITE.exp*100}% ทั้งกิลด์ ${GUILD_RITE.minutes} นาที · ใช้คลัง ${num(GUILD_RITE.cost)} เบี้ย · กิลด์ Lv.${GUILD_RITE.level}+</p>`+
+    (riteLeft>0?`<p class="ok">กำลังมีผล · เหลืออีกราว ${Math.ceil(riteLeft/60)} นาที</p>`:staff?`<button type="button" id="guild-rite"${guild.level<GUILD_RITE.level||guild.treasury<GUILD_RITE.cost?' disabled':''}>ประกอบพิธี</button>`:'<p class="muted">หัวหน้าหรือรองหัวหน้าเป็นผู้ประกอบพิธี</p>')+`</section>`+
+    (game.world.war?`<p class="social-note">🏯 ป้อมโรงสี · ผู้ครอง: ${esc(game.world.war.owner??'ยังไม่มี')} · กิลด์วอร์ ${esc(game.world.war.next)} ที่โรงสีใต้เงาจันทร์ · ทำลายศิลาราชสีห์เพื่อยึดป้อม</p>`:'');
+  }else if(gtab==='members'){
+   const list=[...guild.members].sort((a,b)=>({leader:0,deputy:1,member:2}[a.rank]-{leader:0,deputy:1,member:2}[b.rank])||b.contrib-a.contrib);
+   const manage=m=>{if(m.name===me||!staff)return '';if(!leader)return m.rank==='member'?'<button type="button" data-a="kick">เชิญออก</button>':'';
+    return `<select data-a="manage" aria-label="จัดการ ${esc(m.name)}"><option value="">จัดการ</option>${m.rank==='deputy'?'<option value="member">ลดเป็นสมาชิก</option>':'<option value="deputy">ตั้งเป็นรองหัวหน้า</option>'}<option value="leader">มอบตำแหน่งหัวหน้า</option><option value="kick">เชิญออกจากกิลด์</option></select>`;};
+   page=(staff?`<form class="social-add" id="guild-invite"><input id="invite-name" maxlength="24" placeholder="ชื่อผู้เล่นที่จะชวน" aria-label="ชวนเข้ากิลด์"><button type="submit">ชวนเข้ากิลด์</button></form>`:'')+
+    `<p class="social-note">เรียงตามยศ แล้วตามแต้มช่วยกิลด์ (บริจาค 10 เบี้ย = 1 แต้ม · ล่ามอน 1 ตัว = 1 แต้ม)</p>`+
+    `<ul class="social-list">${list.map(m=>`<li class="${m.online?'on':''}" data-name="${esc(m.name)}"><i class="dot"></i><div><strong>${esc(m.name)}</strong><small>${RANK[m.rank]} · ${m.online?esc(m.map):'ออฟไลน์'}</small></div><b class="contrib num" title="แต้มช่วยกิลด์">${num(m.contrib)}</b>${m.name!==me&&m.online?'<button type="button" data-a="whisper">กระซิบ</button>':''}${manage(m)}</li>`).join('')}</ul>`+
+    (leader?`<details class="guild-emblem"><summary>เปลี่ยนตรากิลด์</summary><div class="emblem-grid">${emblems}</div></details>`:'');
+  }else{
+   page=`<section class="guild-card"><h3>💰 คลังกิลด์</h3><p class="treasury num">${num(guild.treasury)} เบี้ย</p><form class="social-add" id="guild-donate"><input id="donate-coins" type="number" inputmode="numeric" min="${DONATE_MIN}" step="100" value="1000" aria-label="จำนวนเบี้ยที่บริจาค"><button type="submit">บริจาค</button></form><p class="muted">ขั้นต่ำ ${num(DONATE_MIN)} เบี้ย · ทุก 10 เบี้ยได้กิลด์ EXP 1 และแต้มช่วยกิลด์ 1</p></section>`+
+    Object.entries(GUILD_UPGRADES).map(([id,u])=>{const t=guild.upgrades[id]??0,max=t>=u.costs.length;
+     return `<section class="guild-card upgrade"><h3>${esc(u.name)} <span class="tier">${'◆'.repeat(t)}${'◇'.repeat(u.costs.length-t)}</span></h3><p>${esc(u.text)} · ปรากฏที่ทุ่งชุมพล</p>`+
+      (max?'<p class="ok">สร้างครบทุกขั้นแล้ว</p>':`<p class="muted">ขั้น ${t+1}: ${num(u.costs[t])} เบี้ยจากคลัง · ต้องการกิลด์ Lv.${u.levels[t]}</p>`+(leader?`<button type="button" data-up="${id}"${guild.level<u.levels[t]||guild.treasury<u.costs[t]?' disabled':''}>สร้างขั้น ${t+1}</button>`:''))+`</section>`;}).join('');
+  }
+  body.innerHTML=head+page+`<div class="social-actions"><span>คุยในกิลด์: แท็บ <b>กิลด์</b> ในแชต</span><button type="button" id="guild-leave">ออกจากกิลด์</button></div>`;
+  body.querySelectorAll('[data-gtab]').forEach(b=>b.onclick=()=>{gtab=b.dataset.gtab;render(true);});
   body.querySelector('#guild-invite')?.addEventListener('submit',e=>{e.preventDefault();const n=body.querySelector('#invite-name').value.trim();if(n)cmd('guildInvite',{name:n});});
-  body.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const n=b.closest('li').dataset.name;if(b.dataset.a==='whisper')whisper(n);else if(confirm('เชิญ '+n+' ออกจากกิลด์?'))cmd('guildKick',{name:n});});
+  body.querySelector('#guild-notice')?.addEventListener('submit',e=>{e.preventDefault();cmd('guildNotice',{text:body.querySelector('#notice-text').value});});
+  body.querySelector('#guild-donate')?.addEventListener('submit',e=>{e.preventDefault();const n=Math.floor(+body.querySelector('#donate-coins').value);if(n>=DONATE_MIN&&confirm('บริจาค '+num(n)+' เบี้ยเข้าคลังกิลด์?'))cmd('guildDonate',{coins:n});});
+  body.querySelector('#guild-rite')?.addEventListener('click',()=>{if(confirm(GUILD_RITE.name+' ใช้คลัง '+num(GUILD_RITE.cost)+' เบี้ย?'))cmd('guildRite');});
+  body.querySelector('#guild-hall')?.addEventListener('click',()=>{dialog.close();worldUI?.guildHall?.();});
+  body.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const u=GUILD_UPGRADES[b.dataset.up];if(confirm('สร้าง'+u.name+' ด้วยเบี้ยจากคลัง?'))cmd('guildUpgrade',{id:b.dataset.up});});
+  body.querySelectorAll('[data-a]').forEach(b=>{const n=b.closest('li')?.dataset.name;
+   if(b.dataset.a==='manage')b.onchange=()=>{const v=b.value;b.value='';if(v==='kick'){if(confirm('เชิญ '+n+' ออกจากกิลด์?'))cmd('guildKick',{name:n});}else if(v&&(v!=='leader'||confirm('มอบตำแหน่งหัวหน้ากิลด์ให้ '+n+'? คุณจะเป็นรองหัวหน้าแทน')))cmd('guildRank',{name:n,rank:v});};
+   else b.onclick=()=>{if(b.dataset.a==='whisper')whisper(n);else if(confirm('เชิญ '+n+' ออกจากกิลด์?'))cmd('guildKick',{name:n});};});
   body.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>cmd('guildEmblem',{emblem:+b.dataset.e}));
   body.querySelector('#guild-leave').onclick=()=>{if(confirm('ออกจากกิลด์ '+guild.name+'?'))cmd('guildLeave');};
  }

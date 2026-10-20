@@ -35,3 +35,16 @@
 .album-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;padding:0 10px}.album-grid span{aspect-ratio:1;border:1px solid #af884f44;border-radius:6px;background:#0e2926;display:grid;place-items:center}
 .album-grid span .item-icon{width:90%;height:90%}.album-grid span:not(.got){filter:grayscale(1) brightness(.4)}.album-grid span.got{border-color:#c27bffaa}
 @media (orientation:landscape) and (max-height:520px){#quests-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(400px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}}
+/* 1.01 guild page: level bar, sub-tabs, cards (notice, hall, daily goal, rite, treasury, upgrades), member ranks */
+.guild-head>div{flex:1;min-width:0}.guild-lv{margin-left:4px;padding:1px 7px;border:1px solid #c6a16488;border-radius:999px;background:#0e2926;color:#f6edd6;font:700 11px var(--font-game);font-variant-numeric:tabular-nums}
+.guild-bar{display:block;height:6px;margin:4px 0 2px;border:1px solid #c6a16466;border-radius:999px;background:#0d1f1b;overflow:hidden}.guild-bar b{display:block;height:100%;background:linear-gradient(90deg,#d9ae57,#f8dd95)}
+#social-window .num{font-variant-numeric:tabular-nums}
+.guild-tabs{padding-top:0}
+.guild-card{margin:8px 10px 0;padding:7px 9px;border:1px solid #af884f44;border-radius:7px;background:#0e292688;font:500 12px var(--font-game);color:#f6edd6}
+.guild-card h3{margin:0 0 4px;font:700 13px var(--font-game);color:#f4cf7a}.guild-card p{margin:3px 0}.guild-card .social-add{margin:6px 0 0}
+.guild-card .muted,#social-window .muted{color:#c9b98f;font-size:11px}.guild-card .ok{color:#9be88f;font-weight:700}
+.guild-card.notice p{white-space:pre-wrap;overflow-wrap:anywhere}
+.guild-card .treasury{font:700 18px var(--font-game);color:#fff0ce}.guild-card .tier{color:#f4cf7a;letter-spacing:1px}
+.guild-card input[type=number]{flex:1;min-width:0;padding:5px 7px;border:1px solid #af884f88;border-radius:5px;background:#0d1f1b;color:#fff0ce;font:700 12px var(--font-game);font-variant-numeric:tabular-nums}
+.social-list .contrib{font:700 12px var(--font-game);color:#f4cf7a;min-width:34px;text-align:right}
+.social-list select{max-width:84px;padding:3px 4px;border:1px solid #c6a16488;border-radius:5px;background:#0d1f1b;color:#fff0ce;font:700 11px var(--font-game)}

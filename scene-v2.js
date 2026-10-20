@@ -21,8 +21,11 @@ const TOP_RANK=Math.max(...LAYERS.map(([,r])=>r));
 export function prepareSceneV2({scene,model,map}){
  const mood=MOODS[moodOf(map)],converted=new Map(),water=[],wind={value:0};
  scene.background=new THREE.Color(mood.sky);scene.fog=new THREE.Fog(mood.fog,60,150);
+ // 1.01 guild hall: 'Guild upgrade <kind> <tier>' props stay hidden until the guild owns that tier (guildUpgrades).
+ const upgrades=[];
  model.traverse(o=>{
   if(!o.isMesh)return;
+  const up=map.guildHall&&/^Guild[ _]upgrade[ _]([a-z]+)[ _](\d)/.exec(o.name);if(up){upgrades.push([o,up[1],+up[2]]);o.visible=false;}
   // Ground layers and dense scatter receive shadows only: casting them costs a lot and adds nothing from above.
   // 0.75 match the Blender names (GLTFLoader turns spaces into underscores), so flat ground and field scatter really
   // stop casting shadows; that also keeps the swaying rice and grass from leaving still shadows behind.
@@ -55,7 +58,8 @@ export function prepareSceneV2({scene,model,map}){
  let running=!matchMedia('(prefers-reduced-motion:reduce)').matches,time=0;
  return {
   update(dt){if(running)time+=Math.min(.08,Math.max(0,dt));wind.value=time;for(const m of water){if(m.normalMap)m.normalMap.offset.set(time*.012,time*.02);if(m.map)m.map.offset.set(-time*.004,time*.006);}return time;},
-  toggle(){running=!running;return running;},get running(){return running;},
+  toggle(){running=!running;return running;},
+  guildUpgrades(owned){for(const [o,kind,tier] of upgrades)o.visible=(owned?.[kind]??0)>=tier;},get running(){return running;},
  };
 }
 // Release GPU memory of the current scene (geometry, materials, textures) before the page moves to another map.

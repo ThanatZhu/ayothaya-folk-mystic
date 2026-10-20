@@ -22,6 +22,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
  async function travel(id,recall=false,warp=false){
   if(traveling||!(reachable.has(id)||recall||warp)||world.player.hp<=0)return;
+  if(lookup(id)?.guildHall&&!game.online){world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');return;}
   if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return;}
   traveling=true;game.clearInput();
   getLoadingScreen().show(id,{travel:true});
@@ -60,7 +61,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  worldButton.onclick=()=>{worldPanel.hidden=!worldPanel.hidden;worldButton.classList.toggle('on',!worldPanel.hidden);if(!worldPanel.hidden)drawWorld();};
  function drawWorld(){
   const coins=api.coins?.()??0;
-  worldPanel.innerHTML='<h2>แผนที่โลก · วาร์ป</h2><p>วาร์ปไปเมืองหลวง 30 เบี้ย · ที่อื่น 50 เบี้ยต่อช่วงทาง · มีเบี้ย '+coins.toLocaleString('th-TH')+'</p><ol>'+catalog.maps.map(m=>{
+  worldPanel.innerHTML='<h2>แผนที่โลก · วาร์ป</h2><p>วาร์ปไปเมืองหลวง 30 เบี้ย · ที่อื่น 50 เบี้ยต่อช่วงทาง · มีเบี้ย '+coins.toLocaleString('th-TH')+'</p><ol>'+catalog.maps.filter(m=>!m.guildHall).map(m=>{
    const cost=warpCost(catalog,map.id,m.id),here=m.id===map.id,sub=(m.subtitle??'').split(' · ')[0];
    return `<li class="${here?'here':''}"><div><strong>${m.name}</strong><small>${here?'คุณอยู่ที่นี่':m.instance?'เข้าได้จากโรงสีใต้เงาจันทร์เท่านั้น':sub}</small></div>${here||cost===null?'':`<button type="button" data-warp="${m.id}" ${coins<cost?'disabled':''}>วาร์ป · ${cost} เบี้ย</button>`}</li>`;}).join('')+'</ol>';
   worldPanel.querySelectorAll('[data-warp]').forEach(b=>b.onclick=()=>{
@@ -122,6 +123,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
  const api={update,get paused(){return !!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),
+  guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
   // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
   recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},
   talkTo:name=>{const n=npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.n;if(n)talk(n);return !!n;},

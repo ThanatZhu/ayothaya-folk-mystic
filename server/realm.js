@@ -13,7 +13,7 @@ import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
 import {normalizeSkills,upgradeSkill,availablePoints,SLOTS} from '../skill-progress.js';
 import {normalizeStory,storyEvent,rewardItems} from '../story-quests.js';
-import {FRIEND_MAX,GUILD_MAX,GUILD_COST,SOCIAL_ERRORS,cleanName,validGuildName,validEmblem,normalizeFriends} from '../social.js';
+import {FRIEND_MAX,GUILD_COST,SOCIAL_ERRORS,cleanName,validGuildName,validEmblem,normalizeFriends,GUILD_HALL,DEPUTY_MAX,DONATE_MIN,DONATE_MAX,GUILD_LEVELS,guildLevel,GUILD_UPGRADES,GUILD_RITE,GUILD_GOAL,guildSeats,cleanNotice} from '../social.js';
 import {claimDaily,thaiDay} from '../daily.js';
 import {normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd,normalizeWeekly,weeklyDefeat,weeklyClaim} from '../bounty.js';
 import {PETS,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from '../pets.js';
@@ -48,7 +48,7 @@ export function refineAnnouncement(who,r,before,after){
  if(r.result==='broken'&&r.level+1>=REFINE_ANNOUNCE)return `💥 ${who} ตีบวก ${before} → +${r.level+1} ล้มเหลว อุปกรณ์แตก!`;
  return null;
 }
-const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
+const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -57,7 +57,7 @@ function autoPotionFor(realm,p){
 }
 export class RealmServer{
  autoPotion(p){autoPotionFor(this,p);}
- constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false}={}){this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
+ constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false}={}){this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;}
  join({uid,serverId,slotId,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
   let existing=[...this.peers.values()].find(p=>p.uid===uid);
@@ -68,20 +68,24 @@ export class RealmServer{
    existing.suspended=false;existing.resumeUntil=0;existing.send=send;existing.seq=0;existing.known=new Set();existing.input={x:0,z:0,attack:false};existing.inputAt=this.now();
    send({type:'welcome',id:existing.id,room:existing.room.id,capacity:this.capacity,history:copy(existing.room.history),snapshot:(existing.bagSent=0,existing.mobRoom=null,this.snapshot(existing))});this.social(existing.room);return existing;
   }
-  const hero=character(record.character),map=this.catalog.maps.find(m=>m.id===record.state.mapId)??this.catalog.maps.find(m=>m.id===this.catalog.capital);
+  const hero=character(record.character),capital=this.catalog.maps.find(m=>m.id===this.catalog.capital);
+  let map=this.catalog.maps.find(m=>m.id===record.state.mapId)??capital;
+  // 1.01 each guild has its own hall room; someone no longer in a guild (kicked while offline) wakes up in the capital.
+  const hallGuild=map.guildHall?[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===uid+':'+slotId)):null,evicted=map.guildHall&&!hallGuild;
+  if(evicted)map=capital;
   // A party that travelled keeps its seat for a minute (0.49), so it can walk into the same dungeon instance together.
   const party=[...this.parties.values()].find(v=>v.pending?.has(uid));
-  const roomId=serverId+':'+map.id+(map.instance?':'+(party?.id??'solo-'+uid):'');
+  const roomId=serverId+':'+map.id+(map.instance?':'+(party?.id??'solo-'+uid):'')+(hallGuild?':'+hallGuild.id:'');
   let room=this.rooms.get(roomId);if(room&&room.peers.size>=this.capacity)throw new Error('room-full');
   if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,serverId,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);this.wakeMvp(room);}
   const world=new CombatWorld({...map,classId:hero.classId,jobId:hero.jobId});restoreTraveler(world,record.state.traveler);world.mobs=room.mobs;
   const skills=normalizeSkills(record.skills,hero.classId);world.skillLevels=[...skills[hero.classId]];
-  const position=record.state.position;if(position&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
+  const position=record.state.position;if(position&&!evicted&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
   const peer={id:randomUUID(),uid,serverId,slotId,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
   peer.equipment=normalizeEquipment(record.equipment,hero.classId);
   peer.bag=normalizeBag(record.bag);peer.bagVersion=1;peer.bagSent=0;peer.itemAt=-Infinity;
   peer.key=uid+':'+slotId;peer.tradeXp=Number.isSafeInteger(record.trade?.xp)&&record.trade.xp>0?record.trade.xp:0;if(map.id===MARKET_ZONE.mapId)peer.world.emit('shops',{list:this.shopList(serverId)});
-  peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;
+  peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;if(peer.guildId)world.emit('guild',{guild:this.guildView(this.guilds.get(peer.guildId))}); // 1.01 hall props + NPC know the guild at once
   peer.daily=record.daily??null;peer.weekly=record.weekly??null;peer.rebirth=Math.min(REBIRTH_MAX,Math.max(0,record.rebirth|0));peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.pet=normalizePet(record.pet);peer.bounty=record.bounty??null;peer.album=normalizeAlbum(record.album);
   if(party){party.pending.delete(uid);party.members.add(peer.id);peer.partyId=party.id;if(party.leaderPending===uid||!party.members.has(party.leader)){party.leader=peer.id;if(party.leaderPending===uid)party.leaderPending=null;}}
   peer.storage=normalizeStorage(record.storage);peer.trade=null;peer.stall=null;peer.saveNow=false;
@@ -412,7 +416,7 @@ export class RealmServer{
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
   const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort(),rate=expRate(this.now(),p.room.map.id)*mobXp(mob),event=activeEvent(this.now()),rolls=(mob.leader?LEADER.loot:1)*(surgeOn(this.now(),p.room.map.id)?2:1); // 0.50 event/weekend EXP + token drops
-  ids.forEach((id,i)=>{const a=this.peers.get(id);a.world.kills++;if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,split(Math.round(reward.baseXp*rate)),split(Math.round(reward.jobXp*rate))));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});a.weekly=weeklyDefeat(a.weekly,this.now(),{leader:!!mob.leader,boss:!!reward.boss});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls);loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)));this.grantLoot(a,loot,mob);}});
+  ids.forEach((id,i)=>{const a=this.peers.get(id),gx=1+this.guildBonus(a).exp;a.world.kills++;this.guildKill(a);if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,Math.round(split(Math.round(reward.baseXp*rate))*gx),Math.round(split(Math.round(reward.jobXp*rate))*gx)));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});a.weekly=weeklyDefeat(a.weekly,this.now(),{leader:!!mob.leader,boss:!!reward.boss});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls);loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)+this.guildBonus(a).coins));this.grantLoot(a,loot,mob);}});
   p.room.contributors.delete(mob.id);
   for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id){a.world.targetId=null;a.world.path=[];}}
  }
@@ -420,6 +424,7 @@ export class RealmServer{
   dt=Math.max(0,Math.min(.05,dt));this.clock+=dt;this.tickId++;
   if(this.tickId%1200===0&&this.onLeaders)for(const id of this.leadersDirty){this.leadersDirty.delete(id);Promise.resolve(this.onLeaders(id,this.leaders.get(id))).catch(e=>console.error('leader-save',e.message));}
   if(this.tickId%1200===0&&this.onPrices)for(const id of this.pricesDirty){this.pricesDirty.delete(id);Promise.resolve(this.onPrices(id,this.prices.get(id))).catch(e=>console.error('price-save',e.message));}
+  if(this.tickId%1200===0)for(const g of this.guildsDirty){this.guildsDirty.delete(g);if(this.guilds.get(g.id)===g)this.onGuild?.(g,false);} // 1.01 kill counts, once a minute
   {const s=surge(this.now()); // 0.64 announce each field surge once, on every channel
    if(s.active&&this.surgeSlot!==s.slot){this.surgeSlot=s.slot;const name=this.catalog.maps.find(m=>m.id===s.map)?.name??s.map;for(const id of new Set([...this.peers.values()].map(p=>p.serverId)))this.announce(id,`🔥 ฝูงคลั่งที่ ${name}! · EXP ×2 และดรอป ×2 อีก 5 นาที`);}}
   for(const p of this.peers.values())if(p.suspended&&p.resumeUntil&&p.resumeUntil<this.now())this.leave(p.id);
@@ -577,11 +582,28 @@ export class RealmServer{
  guildOf(p){const g=p.guildId&&this.guilds.get(p.guildId);return g&&g.members.some(x=>x.key===p.key)?g:null;}
  guildTag(p){const g=this.guildOf(p);return g?{name:g.name,emblem:g.emblem,...(g.castle?{castle:true}:{})}:null;}
  sendFriends(p){p.world.emit('friends',{list:p.friends.map(f=>{const o=this.online(f.key);return {name:f.name,online:!!o,map:o?.room.map.name??null};})});}
- guildView(g){return g?{name:g.name,emblem:g.emblem,members:g.members.map(x=>{const o=this.online(x.key);return {name:x.name,leader:x.key===g.leader,online:!!o,map:o?.room.map.name??null};})}:null;}
- guildChanged(g){this.onGuild?.(g,false);for(const x of g.members){const o=this.online(x.key);if(o){o.guildId=g.id;o.world.emit('guild',{guild:this.guildView(g)});}}}
+ guildView(g){if(!g)return null;const exp=g.exp??0,level=guildLevel(exp),goal=this.guildGoal(g);
+  return {name:g.name,emblem:g.emblem,level,exp,next:GUILD_LEVELS[level]??null,treasury:g.treasury??0,notice:g.notice??'',upgrades:{flag:0,armory:0,stable:0,...g.upgrades},seats:guildSeats(g),
+   rite:Math.max(0,Math.ceil(((g.rite??0)-this.now())/1000)),goal:{kills:goal.kills,need:GUILD_GOAL.kills,done:goal.done},
+   members:g.members.map(x=>{const o=this.online(x.key);return {name:x.name,leader:x.key===g.leader,rank:this.guildRank(g,x.key),contrib:x.contrib??0,online:!!o,map:o?.room.map.name??null};})};}
+ guildChanged(g){this.guildsDirty.delete(g);this.onGuild?.(g,false);for(const x of g.members){const o=this.online(x.key);if(o){o.guildId=g.id;o.world.emit('guild',{guild:this.guildView(g)});}}}
  guildChat(g,text){const message={type:'chat',id:randomUUID(),actor:null,name:'กิลด์',text,channel:'guild',time:this.now()};for(const x of g.members)this.online(x.key)?.send(message);}
+ // ---- 1.01 guild progression. Ranks: leader > deputy > member; every rule below is checked here, never on the client.
+ guildRank(g,key){return key===g.leader?'leader':g.members.find(x=>x.key===key)?.rank==='deputy'?'deputy':'member';}
+ guildGoal(g){const day=thaiDay(this.now());if(g.goal?.day!==day)g.goal={day,kills:0,done:false};return g.goal;}
+ // Guild EXP (and the member's contribution) with a guild-chat line on level up. Returns true on level up.
+ guildGain(g,exp,member){const before=guildLevel(g.exp??0);g.exp=Math.min(GUILD_LEVELS.at(-1),(g.exp??0)+exp);if(member)member.contrib=(member.contrib??0)+exp;
+  const after=guildLevel(g.exp);if(after>before)this.guildChat(g,`🎉 กิลด์ขึ้นเป็นระดับ ${after}!`);return after>before;}
+ guildBonus(p){const g=this.guildOf(p);if(!g)return {exp:0,coins:0};const u=g.upgrades??{};
+  return {exp:(u.flag??0)*GUILD_UPGRADES.flag.exp+((g.rite??0)>this.now()?GUILD_RITE.exp:0),coins:(u.armory??0)*GUILD_UPGRADES.armory.coins};}
+ // Every member kill: 1 guild EXP + 1 contribution, and one step of the shared daily goal. Saved once a minute.
+ guildKill(p){const g=this.guildOf(p);if(!g)return;const goal=this.guildGoal(g),up=this.guildGain(g,1,g.members.find(x=>x.key===p.key));goal.kills++;
+  if(!goal.done&&goal.kills>=GUILD_GOAL.kills){goal.done=true;g.treasury=(g.treasury??0)+GUILD_GOAL.treasury;this.guildGain(g,GUILD_GOAL.exp);this.guildChat(g,`⚔️ เป้าหมายวันนี้สำเร็จ! ล่าครบ ${GUILD_GOAL.kills} ตัว · กิลด์ EXP +${GUILD_GOAL.exp} · คลัง +${GUILD_GOAL.treasury} เบี้ย`);this.guildChanged(g);}
+  else if(up)this.guildChanged(g);else this.guildsDirty.add(g);}
+ // Someone who is no longer a member is sent out of the hall (the client travels them to the capital).
+ guildEvict(o){if(o?.room.map.guildHall){o.world.emit('guildHallExit',{});o.world.notice('ออกจากทุ่งชุมพล · ไม่ได้เป็นสมาชิกกิลด์นี้แล้ว');}}
  socialCommand(p,m){
-  const w=p.world,fail=c=>this.itemFail(p,c),g=this.guildOf(p);
+  const w=p.world,fail=c=>this.itemFail(p,c),g=this.guildOf(p),rank=g?this.guildRank(g,p.key):null,staff=rank==='leader'||rank==='deputy';
   if(m.type==='friendList'){this.sendFriends(p);return true;}
   if(m.type==='friendAdd'){const o=this.byName(p,cleanName(m.name));if(!o)return fail('whisper-offline');if(o.key===p.key)return fail('friend-self');
    if(p.friends.some(f=>f.key===o.key))return fail('friend-already');if(p.friends.length>=FRIEND_MAX)return fail('friend-full');
@@ -598,20 +620,40 @@ export class RealmServer{
    if(p.bag.coins<GUILD_COST)return fail('no-coins');const b=normalizeBag(p.bag);b.coins-=GUILD_COST;this.setBag(p,b);p.saveNow=true;
    const ng={id:randomUUID(),serverId:p.serverId,name,emblem:m.emblem,leader:p.key,members:[{key:p.key,name:p.character.name}],created:this.now()};
    this.guilds.set(ng.id,ng);this.guildChanged(ng);w.notice('ก่อตั้งกิลด์ '+name+' แล้ว');return true;}
-  if(m.type==='guildInvite'){if(!g)return fail('guild-none');if(g.leader!==p.key)return fail('guild-leader');if(g.members.length>=GUILD_MAX)return fail('guild-full');
+  if(m.type==='guildInvite'){if(!g)return fail('guild-none');if(!staff)return fail('guild-rank');if(g.members.length>=guildSeats(g))return fail('guild-full');
    const o=this.byName(p,cleanName(m.name));if(!o)return fail('whisper-offline');if(this.guildOf(o))return fail('guild-target');
    o.guildAsk=g.id;o.world.emit('guildAsk',{guild:g.id,name:g.name,emblem:g.emblem,from:p.character.name});w.notice('ส่งคำเชิญเข้ากิลด์ถึง '+o.character.name+' แล้ว');return true;}
   if(m.type==='guildAnswer'){const ng=this.guilds.get(m.guild);if(!ng||p.guildAsk!==ng.id)return fail('guild-invite');p.guildAsk=null;
-   if(!m.accept)return true;if(g)return fail('guild-already');if(ng.members.length>=GUILD_MAX)return fail('guild-full');
+   if(!m.accept)return true;if(g)return fail('guild-already');if(ng.members.length>=guildSeats(ng))return fail('guild-full');
    ng.members.push({key:p.key,name:p.character.name});this.guildChanged(ng);this.guildChat(ng,p.character.name+' เข้าร่วมกิลด์');return true;}
-  if(m.type==='guildLeave'||m.type==='guildKick'){if(!g)return fail('guild-none');if(m.type==='guildKick'&&g.leader!==p.key)return fail('guild-leader');
+  if(m.type==='guildLeave'||m.type==='guildKick'){if(!g)return fail('guild-none');if(m.type==='guildKick'&&!staff)return fail('guild-rank');
    const gone=m.type==='guildLeave'?g.members.find(x=>x.key===p.key):g.members.find(x=>x.name===m.name&&x.key!==p.key);if(!gone)return fail('guild-none');
+   // A deputy may only remove plain members; the leader may remove anyone.
+   if(m.type==='guildKick'&&rank==='deputy'&&this.guildRank(g,gone.key)!=='member')return fail('guild-rank');
    g.members=g.members.filter(x=>x!==gone);
-   const o=this.online(gone.key);if(o){o.guildId=null;o.world.emit('guild',{guild:null});o.world.notice(m.type==='guildLeave'?'ออกจากกิลด์แล้ว':'ถูกเชิญออกจากกิลด์ '+g.name);}
-   if(!g.members.length){this.guilds.delete(g.id);this.onGuild?.(g,true);return true;}
-   if(g.leader===gone.key)g.leader=g.members[0].key;
+   const o=this.online(gone.key);if(o){o.guildId=null;o.world.emit('guild',{guild:null});o.world.notice(m.type==='guildLeave'?'ออกจากกิลด์แล้ว':'ถูกเชิญออกจากกิลด์ '+g.name);this.guildEvict(o);}
+   if(!g.members.length){this.guilds.delete(g.id);this.guildsDirty.delete(g);this.onGuild?.(g,true);return true;}
+   if(g.leader===gone.key){const next=g.members.find(x=>x.rank==='deputy')??g.members[0];g.leader=next.key;delete next.rank;}
    this.guildChanged(g);this.guildChat(g,gone.name+(m.type==='guildLeave'?' ออกจากกิลด์':' ถูกเชิญออกจากกิลด์'));return true;}
-  if(m.type==='guildEmblem'){if(!g)return fail('guild-none');if(g.leader!==p.key)return fail('guild-leader');if(!validEmblem(m.emblem))return fail('bad-count');g.emblem=m.emblem;this.guildChanged(g);return true;}
+  if(m.type==='guildEmblem'){if(!g)return fail('guild-none');if(rank!=='leader')return fail('guild-leader');if(!validEmblem(m.emblem))return fail('bad-count');g.emblem=m.emblem;this.guildChanged(g);return true;}
+  // Leader only: make someone deputy / member, or hand leadership over (the old leader becomes a deputy).
+  if(m.type==='guildRank'){if(!g)return fail('guild-none');if(rank!=='leader')return fail('guild-leader');
+   const t=g.members.find(x=>x.name===m.name&&x.key!==p.key);if(!t||!['deputy','member','leader'].includes(m.rank))return fail('guild-none');
+   if(m.rank==='deputy'&&t.rank!=='deputy'&&g.members.filter(x=>x.rank==='deputy').length>=DEPUTY_MAX)return fail('guild-deputies');
+   if(m.rank==='leader'){g.leader=t.key;delete t.rank;g.members.find(x=>x.key===p.key).rank='deputy';}else if(m.rank==='deputy')t.rank='deputy';else delete t.rank;
+   this.guildChanged(g);this.guildChat(g,t.name+(m.rank==='leader'?' เป็นหัวหน้ากิลด์คนใหม่':m.rank==='deputy'?' เป็นรองหัวหน้ากิลด์':' เป็นสมาชิกกิลด์'));return true;}
+  if(m.type==='guildNotice'){if(!g)return fail('guild-none');if(!staff)return fail('guild-rank');if(typeof m.text!=='string')return fail('bad-count');
+   g.notice=cleanNotice(m.text);this.guildChanged(g);if(g.notice)this.guildChat(g,'📜 ประกาศใหม่: '+g.notice);return true;}
+  // Donations: เบี้ย leave the bag for the treasury; 10 เบี้ย = 1 guild EXP and 1 contribution point.
+  if(m.type==='guildDonate'){if(!g)return fail('guild-none');const n=m.coins;if(!Number.isSafeInteger(n)||n<DONATE_MIN||n>DONATE_MAX)return fail('bad-count');if(p.bag.coins<n)return fail('no-coins');
+   const b=normalizeBag(p.bag);b.coins-=n;this.setBag(p,b);p.saveNow=true;g.treasury=(g.treasury??0)+n;
+   this.guildGain(g,Math.floor(n/10),g.members.find(x=>x.key===p.key));this.guildChanged(g);this.guildChat(g,`${p.character.name} บริจาค ${n.toLocaleString('th-TH')} เบี้ยเข้าคลังกิลด์`);return true;}
+  if(m.type==='guildUpgrade'){if(!g)return fail('guild-none');if(rank!=='leader')return fail('guild-leader');if(!Object.hasOwn(GUILD_UPGRADES,m.id))return fail('bad-count');const u=GUILD_UPGRADES[m.id];
+   const tier=g.upgrades?.[m.id]??0;if(tier>=u.costs.length)return fail('guild-max');if(guildLevel(g.exp??0)<u.levels[tier])return fail('guild-level');if((g.treasury??0)<u.costs[tier])return fail('guild-treasury');
+   g.treasury-=u.costs[tier];g.upgrades={...g.upgrades,[m.id]:tier+1};this.guildChanged(g);this.guildChat(g,`🏯 สร้าง${u.name} ขั้น ${tier+1} ที่ทุ่งชุมพลแล้ว · ${u.text}`);return true;}
+  if(m.type==='guildRite'){if(!g)return fail('guild-none');if(!staff)return fail('guild-rank');if((g.rite??0)>this.now())return fail('guild-rite');
+   if(guildLevel(g.exp??0)<GUILD_RITE.level)return fail('guild-level');if((g.treasury??0)<GUILD_RITE.cost)return fail('guild-treasury');
+   g.treasury-=GUILD_RITE.cost;g.rite=this.now()+GUILD_RITE.minutes*6e4;this.guildChanged(g);this.guildChat(g,`🪷 ${p.character.name} ประกอบ${GUILD_RITE.name} · EXP +${GUILD_RITE.exp*100}% ทั้งกิลด์ ${GUILD_RITE.minutes} นาที`);return true;}
   return false;
  }
 
@@ -667,9 +709,12 @@ export class RealmServer{
   const jobRecall=!p.character.jobId&&!p.training&&advanceReady(p.world,p.character.classId,'').job.maxed;
   const recall=!portal&&id===this.catalog.capital&&p.room.map.id!==id&&((p.bag.items['return-incense']??0)>0||jobRecall);
   const townHop=!portal&&p.room.map.safe&&p.room.map.portals?.some(v=>v.to===id); // 0.53 town gates need no walk
+  // 1.01 guild hall: members only, free, from anywhere outside a duel or the running guild war.
+  const hall=destination?.guildHall===true;
+  if(hall){if(!this.guildOf(p))throw new Error('guild-hall');if(p.duel||(this.wars.get(p.serverId)?.active&&p.room.map.id===WAR.map))throw new Error('guild-busy');warp=false;}
   const fare=warp?warpCost(this.catalog,p.room.map.id,id):null;if(warp&&fare===null)throw new Error('travel-invalid');
   if(warp&&p.bag.coins<fare)throw new Error('no-coins');
-  if((!portal&&!recall&&!townHop&&!warp)||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
+  if((!portal&&!recall&&!townHop&&!warp&&!hall)||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
   if(warp){const b=normalizeBag(p.bag);b.coins-=fare;this.setBag(p,b);}
   else if(recall&&!jobRecall){const b=normalizeBag(p.bag);b.items['return-incense']--;if(!b.items['return-incense'])delete b.items['return-incense'];this.setBag(p,b);}

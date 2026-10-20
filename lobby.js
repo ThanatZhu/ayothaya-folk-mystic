@@ -28,7 +28,7 @@ function report(error){
  const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
  say(code==='character-exists'?'มีตัวละครในเซิร์ฟเวอร์นี้แล้ว กดเปลี่ยนเซิร์ฟเวอร์แล้วเลือกอีกครั้ง':code==='auth/popup-blocked'?'กรุณาอนุญาตป๊อปอัป แล้วกด Google อีกครั้ง':code==='auth/popup-closed-by-user'?'ยังไม่ได้ล็อกอิน ลองใหม่ได้ครับ':code==='permission-denied'?'ยังเข้าถึงเซฟไม่ได้ กรุณาลองอีกครั้ง':String(code).startsWith('ชื่อ')||String(code).startsWith('กรุณา')?code:'เชื่อมต่อไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง');
 }
-const catalogReady=fetch('./maps/world.json?v=29').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
+const catalogReady=fetch('./maps/world.json?v=104.0').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
 catalogReady.catch(()=>say('โหลดข้อมูลโลกไม่ได้ กรุณาโหลดหน้าใหม่'));
 async function selectIdentity(id){
  lock(true);say('กำลังเตรียมรายชื่อเซิร์ฟเวอร์…');

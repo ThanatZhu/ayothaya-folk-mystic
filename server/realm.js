@@ -39,6 +39,15 @@ const mobValue=(k,v)=>typeof v!=='number'?v:k==='x'||k==='z'?Math.round(v*100)/1
 // 0.93 duels: a challenge lasts 20 s, a bout 90 s; players hit each other for 35% of their monster damage (then the
 // target's dodge, shield and DEF apply as for a monster blow). Walking 20 m apart ends the bout as a draw.
 export const DUEL={ask:20000,time:90000,range:20,scale:.35};
+export const WORLD_CHAT_COOLDOWN=8000;
+// World announcements for refines: only the rare ones (success at +7 or more, or a piece of +6 or more breaking),
+// so the common +1..+6 do not bury world chat.
+export const REFINE_ANNOUNCE=7;
+export function refineAnnouncement(who,r,before,after){
+ if(r.result==='success'&&r.level>=REFINE_ANNOUNCE)return `📣 ${who} ตีบวก ${after} สำเร็จ!`;
+ if(r.result==='broken'&&r.level+1>=REFINE_ANNOUNCE)return `💥 ${who} ตีบวก ${before} → +${r.level+1} ล้มเหลว อุปกรณ์แตก!`;
+ return null;
+}
 const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','bubble','tame','hatch','petFeed','petReturn','bountyClaim','hire']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
@@ -108,7 +117,9 @@ export class RealmServer{
    if(!npc||!SHOPS[npc.name]?.refine||SHOPS[npc.name].mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'refine-far');
    if(now-p.gearAt<600)return this.itemFail(p,'gear-rate');p.gearAt=now;
    let r;try{r=refineGear(p.bag,p.gear,m.slot,{lekLai:m.lekLai===true,guard:m.guard===true});}catch(e){return this.itemFail(p,e.message);}
-   p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});return true;
+   const before=itemDef(p.gear[m.slot])?.name;p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);
+   const shout=refineAnnouncement(p.character.name,r,before,itemDef(r.gear[m.slot])?.name);if(shout)this.worldSay(p.serverId,{actor:null,name:'ประกาศ',text:shout});
+   w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});return true;
   }
   if(m.type==='storageOpen'||m.type==='store'||m.type==='retrieve'){
    const npc=p.room.map.npcs?.find(n=>n.name===STORAGE_NPC);
@@ -225,11 +236,13 @@ export class RealmServer{
   }
   if(m.type==='chat'){
    if(now-p.chatAt<1200)return this.error(p,'chat-rate');
-   if(typeof m.text!=='string'||!['room','party','guild','whisper'].includes(m.channel))return this.error(p,'invalid-chat');
+   if(typeof m.text!=='string'||!['room','party','guild','whisper','world'].includes(m.channel))return this.error(p,'invalid-chat');
    const text=m.text.normalize('NFC').replace(/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/g,'').trim();
    if(!text||text.length>240)return this.error(p,'invalid-chat');
    // 0.47 whisper: one named player on this server, wherever they are; guild: every online member.
    if(m.channel==='whisper'){const o=this.byName(p,cleanName(m.to));if(!o)return this.itemFail(p,'whisper-offline');p.chatAt=now;const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,to:o.character.name,text,channel:'whisper',time:now};p.send(message);o.send(message);return true;}
+   // World: everyone online on this server, any map; its own slower cooldown so one player cannot flood it.
+   if(m.channel==='world'){if(now-(p.worldAt??-Infinity)<WORLD_CHAT_COOLDOWN)return this.error(p,'world-rate');p.chatAt=p.worldAt=now;this.worldSay(p.serverId,{actor:p.id,name:p.character.name,text});return true;}
    if(m.channel==='guild'){const g=this.guildOf(p);if(!g)return this.itemFail(p,'guild-none');p.chatAt=now;const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,text,channel:'guild',time:now};for(const x of g.members)this.online(x.key)?.send(message);return true;}
    const party=this.parties.get(p.partyId);if(m.channel==='party'&&!party)return this.error(p,'no-party');p.chatAt=now;
    const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,text,channel:m.channel,time:now};
@@ -534,6 +547,7 @@ export class RealmServer{
   if(winner){this.grantLoot(winner,{coins:0,items:[{id:'king-ember',count:1}]});winner.saveNow=true;winner.world.emit('mvp',{name:type.name});}
   this.herald(room.serverId,winner?`👑 ${winner.character.name} ได้ MVP ${type.name}! · กลับมาอีกใน 60 นาที`:`${type.name} ถูกปราบแล้ว · กลับมาอีกใน 60 นาที`);
  }
+ worldSay(serverId,{actor,name,text}){const message={type:'chat',id:randomUUID(),actor,name,text,channel:'world',time:this.now()};for(const o of this.peers.values())if(o.serverId===serverId&&!o.suspended)o.send(message);}
  announce(serverId,text){const message={type:'chat',id:randomUUID(),actor:null,name:'ประกาศ',text,channel:'system',time:this.now()};for(const o of this.peers.values())if(o.serverId===serverId&&!o.suspended)o.send(message);}
  dungeonClear(room){
   const today=thaiDay(this.now());

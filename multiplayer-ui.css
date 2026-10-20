@@ -65,6 +65,9 @@
 .mp-tag{display:inline-block;margin-right:5px;padding:0 6px;border-radius:7px;background:#7cc6e633;font-size:9px;vertical-align:1px}
 #online-dock[data-channel=party] #online-messages p:not(.party):not(.whisper){display:none}
 #online-dock[data-channel=guild] #online-messages p:not(.guild):not(.whisper){display:none}
+#online-dock[data-channel=world] #online-messages p:not(.world):not(.whisper){display:none}
+#online-messages p.world{color:#ffe0a3}#online-messages p.world .mp-tag{background:#f0a94a33;color:#ffe2b0}
+.mp-tabs [data-channel=world][aria-selected=true]{background:#f0a94a33;border-color:#ffc77a88;color:#ffe9c4}
 #online-messages p.whisper{color:#ffc8e6}#online-messages p.whisper .mp-tag{background:#ff8fc833;color:#ffd1ea}
 #online-messages p.guild{color:#d7f5b8}#online-messages p.guild .mp-tag{background:#9fd96b33;color:#dcf7c4}
 .mp-tabs [data-channel=guild][aria-selected=true]{background:#9fd96b33;border-color:#c5f0a088;color:#e4ffd0}

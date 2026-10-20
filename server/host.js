@@ -10,6 +10,7 @@ import {equipItem} from '../equipment.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
+import {isAdmin,adminPlayers,adminGive} from './admin.js';
 import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
@@ -32,9 +33,24 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const server=http.createServer(async(req,res)=>{
   const origin=req.headers.origin;if(origin&&allowedOrigin(origin))res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
-  if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
+  if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
   if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity});return;}
+  // 0.99.16 back-office (admin.html): online players and gifts. Production needs a Google ID token whose verified
+  // email is in ADMIN_EMAILS; the local server trusts its own origin. Every gift is logged.
+  if(url.pathname.startsWith('/admin/')){
+   // a same-origin GET carries no Origin header: only the local server (bound to 127.0.0.1) lets that through
+   if(origin?!allowedOrigin(origin):mode!=='local'){reply(403,{error:'origin'});return;}
+   let who='local';
+   if(mode==='firebase'){try{const d=await authenticate(String(req.headers.authorization??'').replace(/^Bearer /,''));if(!isAdmin(d))throw new Error('not-admin');who=d.email;}catch{reply(403,{error:'not-admin'});return;}}
+   if(url.pathname==='/admin/players'&&req.method==='GET'){reply(200,{players:adminPlayers(realm)});return;}
+   if(url.pathname==='/admin/give'&&req.method==='POST'){
+    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>4096){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
+    try{const body=JSON.parse(data),result=adminGive(realm,body);console.log('admin-give',who,result.name,JSON.stringify({coins:body.coins??0,items:body.items??[]}));reply(200,result);}catch(e){reply(400,{error:e.message});}
+    return;
+   }
+   reply(404,{error:'not-found'});return;
+  }
   if(mode==='local'&&url.pathname==='/dev/session'&&req.method==='POST'){
    if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>1024){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}

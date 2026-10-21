@@ -27,6 +27,10 @@ const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':m
 let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
 let fx={classId:'swordsman',level:50,str:40,agi:20,vit:20,int:1,dex:20,luk:10,watk:60,wmatk:0,skillLv:5};
 try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});}catch{}
+// 0.110.7 weather / world-boss tab state lives up here: the first render() runs at load and may open either tab
+// (the last tab is remembered), so declaring it further down left it uninitialised and crashed the whole page.
+let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',mapId:'',minutes:30};
+let bossMsg='',bossMaps=null,bx={serverId:'server-1',mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
 let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',gearClass='all',itemQuery='',pickCount=1;
 const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
@@ -189,7 +193,6 @@ async function loadPlayers(quiet=false,fresh=false){
 }
 function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(document.activeElement?.closest?.('#give'))return;loadPlayers(true);},15000);}
 // 0.109.7 weather tab: set rain / mist / storm (or clear) on a realm for some minutes, or hand it back to the clock.
-let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',mapId:'',minutes:30};
 async function loadWeather(){try{weatherState=(await adminFetch('/admin/weather')).servers;weatherMsg='';}catch(e){weatherMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}if(tab==='weather')weatherTab();}
 async function setWeather(weather){
  weatherMsg='กำลังเปลี่ยน…';weatherTab();
@@ -215,7 +218,6 @@ function weatherTab(){
  $('view').querySelectorAll('[data-wx]').forEach(b=>b.onclick=()=>setWeather(b.dataset.wx));
 }
 // 0.109.8 world boss tab: pick a realm, a field map and a boss, then summon it (one at a time per map; it does not respawn).
-let bossMsg='',bossMaps=null,bx={serverId:'server-1',mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 async function summonBoss(){
  if(!bx.mapId){bossMsg='เลือกแผนที่ก่อน';bossTab();return;}
  bossMsg='กำลังเสก…';bossTab();

@@ -24,7 +24,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=110.3';
+import {createGame} from './game-controls.js?v=110.5';
 import {atlasPath,className} from './classes.js?v=101';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=107';

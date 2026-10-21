@@ -36,7 +36,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function pillar(x,z,rarity){const m=new THREE.Mesh(new THREE.CylinderGeometry(.18,.42,6,12,1,true),new THREE.MeshBasicMaterial({color:RARITY_COLOR[rarity],transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));m.position.set(x,3,z);scene.add(m);pillars.push({m,age:0});}const footDust=createFootDust(scene);
  let strikes=[],shakeAmount=0,lastStep=0;
  let heroView='side',heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
- const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let hitTintUntil=0,strikeAt=0,swingScale=1,heldHits=[],attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,runToggled=false,capabilitySignature='';
+ const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let hitTintUntil=0,skillScale=1,strikeAt=0,swingScale=1,heldHits=[],attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,runToggled=false,capabilitySignature='';
  const supportsAction=action=>(action!=='run'||GAMEPLAY_RUN_ENABLED)&&supportsCharacterAction(action,hero.sprite.userData.supportsAction?.bind(hero.sprite.userData));
  function refreshAnimationCapabilities(){const actions=CHARACTER_ACTIONS.filter(supportsAction),signature=actions.join(',');if(signature!==capabilitySignature){capabilitySignature=signature;if(!supportsAction('run'))runToggled=false;dispatchEvent(new CustomEvent('character-animation-capabilities',{detail:{actions}}));}return actions;}
  function setRunning(value){runToggled=value===true&&supportsAction('run');return runToggled;}
@@ -124,18 +124,21 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(e.type==='cast'){
    const track=Number.isInteger(e.skillIndex)?skillTrack(world.profession.id,e.skillIndex):null;
    // Basic auto-attacks must not replace a skill's active pose mid-animation.
+   // 1.10.4 owner: skills play fast enough that the first blow lands within ~0.25 s and the cast ends within ~0.7 s
+   // (shaman skills were 1-2 s long and the hit landed 0.6-1.3 s in, long after the server had dealt it)
+   const k=track?Math.max(1,track.strikes[0]*track.duration/.25,track.duration/.7):1,fast=track?{...track,duration:track.duration/k}:null,lag=Math.min(.4,Math.max(0,e.lag??0));
    if(track||world.time>=castUntil||activeSkill===null){
     // 1.10 owner: the swing keeps pace with the attack speed (AGI/DEX make attacks faster than the base swing)
-    const interval=world.profession.delay*((world.derived??world.derivedView)?.delay??1);swingScale=track?1:Math.max(1,attackDuration(world.profession.id)/Math.max(.2,interval*.95));
+    const interval=world.profession.delay*((world.derived??world.derivedView)?.delay??1);swingScale=track?1:Math.max(1,attackDuration(world.profession.id)/Math.max(.2,interval*.95),.42*attackDuration(world.profession.id)/.2); // and the blow lands within 0.2 s
     // 1.10.2 online: the swing began e.lag seconds ago on the server; start it that far in so the blow lands on time
-    const swingStart=world.time-Math.min(.4,Math.max(0,e.lag??0));
-    activeSkill=track?e.skillIndex:null;castUntil=swingStart+(track?.duration??attackDuration(world.profession.id)/swingScale);
+    const swingStart=world.time-lag;skillScale=k;
+    activeSkill=track?e.skillIndex:null;castUntil=swingStart+(fast?.duration??attackDuration(world.profession.id)/swingScale);
     actionStart=swingStart;world.clearEmote();actionMode=!track?'attack':e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    }
-   const beats=track?track.strikes.map(b=>world.time+b*track.duration):[world.time+.12];
+   const beats=fast?fast.strikes.map(b=>world.time-lag+b*fast.duration):[world.time+.12];
    // 1.10 owner: numbers, the hit flash and the death wait for the moment the swing / spell connects
-   strikeAt=world.time-Math.min(.4,Math.max(0,e.lag??0))+(track?track.strikes[0]*track.duration:.42*attackDuration(world.profession.id)/swingScale);strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
-   const presentation=track??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
+   strikeAt=world.time-lag+(fast?fast.strikes[0]*fast.duration:.42*attackDuration(world.profession.id)/swingScale);strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
+   const presentation=fast??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
    const from=e.from??world.player,to=e.to??from;
    skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});
   }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
@@ -255,7 +258,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(distanceMoved<1)gait+=gaitStep(distanceMoved,dt,world.profession.id,mode); // No steps while blocked; teleports do not advance the gait.
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
   const locomotion=mode==='walk'||mode==='run',poseTime=locomotion||mode==='idle'?t:mode==='hit'?t-hitStart:world.emote?.name===mode?t-world.emote.time:mode==='attack'?(t-actionStart)*swingScale:t-actionStart;
-  const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
+  const pose=skillActive?skillPose(world.profession.id,activeSkill,(t-actionStart)*skillScale,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
   if(!visualPose||reduced)visualPose={...pose};
   else for(const key of Object.keys(pose))visualPose[key]=typeof pose[key]!=='number'||['frame','artFrame','stand','time','phase'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;

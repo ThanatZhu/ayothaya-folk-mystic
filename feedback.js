@@ -16,7 +16,7 @@ const rng=seed=>()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
 const seedOf=s=>[...s].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7);
 
 export function createFeedback({game,map}){
- if(!document.querySelector('link[data-feedback]')){const css=document.createElement('link');css.rel='stylesheet';css.href='feedback.css?v=99.8';css.dataset.feedback='';document.head.append(css);}
+ if(!document.querySelector('link[data-feedback]')){const css=document.createElement('link');css.rel='stylesheet';css.href='feedback.css?v=106.5';css.dataset.feedback='';document.head.append(css);}
  const world=game.world;let settings={music:.35,sfx:.7};try{settings={...settings,...JSON.parse(localStorage.getItem(KEY))};}catch{}
  let ctx=null,master,musicBus,sfxBus,noise,timer=null;
  function start(){ // browsers only allow audio after a tap / key press
@@ -93,7 +93,7 @@ export function createFeedback({game,map}){
   else if(e.type==='defeat')play('defeat');
   else if(e.type==='used')play('potion');
   else if(e.type==='heal')play('potion');
-  else if(e.type==='experience'&&(e.baseUp||e.jobUp)){play('level');banner(`<strong>${e.baseUp?'LEVEL UP!':'JOB LEVEL UP!'}</strong><span>${e.baseUp?'Base Lv. '+e.baseLevel:'Job Lv. '+e.jobLevel}</span>${e.baseUp?gains(e.baseLevel):''}`,'levelup');levelGlow();}
+  else if(e.type==='experience'&&(e.baseUp||e.jobUp)){play('level');levelUp(e);}
   else if(e.type==='drop'){const best=e.items.map(i=>itemDef(i.id)).filter(Boolean).sort((a,b)=>b.rarity-a.rarity)[0];if(best?.rarity>=2){play('rare');world.notice(`✦ ของ${RARITY_NAME[best.rarity]}! ${best.name}`);if(best.rarity>=3)banner(`<strong>✦ ${RARITY_NAME[best.rarity]}!</strong><span>${best.name}</span>`,'levelup rare-drop');}}
   else if(['mvp','dungeonClear'].includes(e.type))play('fanfare');
   else if(['daily','tamed','stallSold','refined'].includes(e.type))play('chime');
@@ -104,8 +104,23 @@ export function createFeedback({game,map}){
   const unlocked=Object.values(ITEMS).filter(it=>it.kind==='gear'&&it.level===level&&(!it.classes||it.classes.includes(cls))).map(it=>it.name);
   return `<em>+${pts} แต้มสถานะ · กด สถานะ (C) เพื่ออัปค่า</em>${unlocked.length?`<em>ใส่ได้แล้ว: ${unlocked.join(' · ')}</em>`:''}`;
  }
- // A ring of light on the hero for level ups (DOM, follows nothing: it is short).
- function levelGlow(){const g=document.createElement('div');g.className='level-glow';document.body.append(g);setTimeout(()=>g.remove(),1400);}
+ // Level ups: Thai lettering between gold kanok scrolls above the hero's name tag with an
+ // English line, a ring of light and lotus petals rising from the feet (~2.6 s), and a note under the HP panel with
+ // what the new Base level gave. No box over the action.
+ const KANOK='<svg viewBox="0 0 64 30" aria-hidden="true"><path class="k-line" d="M64 18C52 18 46 8 34 8 22 8 15 16 19 23 23 29 33 26 31 18 30 13 24 14 25 19"/><path d="M38 9C37 3 42 0 47 0 44 3 45 6 42 10Z M27 9C24 4 26 0 30-1 29 3 31 6 30 9Z M50 13C51 8 56 6 60 7 56 9 56 12 53 15Z"/><circle cx="64" cy="18" r="2.4"/></svg>';
+ function levelUp(e){
+  const fx=document.createElement('div');fx.className='rank-up';
+  const en=globalThis.I18N?.lang==='en'?'':`<span class="rank-en">${e.baseUp?'Level Up':'Job Level Up'}</span>`; // English mode already translates the title
+  const petals=Array.from({length:10},(_,i)=>`<i class="petal" style="--x:${(i-4.5)*13+Math.round(Math.random()*10-5)}px;--r:${Math.round(Math.random()*300+60)}deg;animation-delay:${(i%3)*.09}s"></i>`).join('');
+  fx.innerHTML=`<div class="rank-banner"><strong>${KANOK}<b>${e.baseUp?'ขึ้นระดับ':'Job ขึ้นระดับ'}</b>${KANOK}</strong>${en}<i class="rank-rule"></i><span class="rank-lv">${e.baseUp?'Base Lv. '+e.baseLevel:'Job Lv. '+e.jobLevel}</span></div><i class="ring"></i>${petals}`;
+  const tag=document.querySelector('#world-labels .hero-label:has(.rank-title)'); // the player's own name tag (game-controls.js)
+  const follow=()=>{const r=tag?.getBoundingClientRect();if(r?.width){fx.style.left=r.left+r.width/2+'px';fx.style.top=r.top+'px';}if(fx.isConnected)requestAnimationFrame(follow);};
+  document.body.append(fx);follow();setTimeout(()=>fx.remove(),2700);
+  if(!e.baseUp)return;
+  const note=document.createElement('div'),panel=(document.getElementById('online-button')??document.querySelector('.player-panel'))?.getBoundingClientRect();note.className='rank-note';
+  if(panel?.width){note.style.left=panel.left+'px';note.style.top=panel.bottom+6+'px';}
+  note.innerHTML=gains(e.baseLevel);document.body.append(note);setTimeout(()=>note.remove(),4300);
+ }
 
  // ---- settings in the profile panel
  const box=document.createElement('div');box.id='audio-settings';

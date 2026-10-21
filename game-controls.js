@@ -59,7 +59,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(opts.marker!==false&&typeof target!=='function'){marker.position.set(target.x,.12,target.z);marker.visible=true;markerAge=0;}else marker.visible=false;
   return true;
  }
- const mobViews=world.mobs.map(m=>{
+ const makeMobView=m=>{
   const h=(MONSTER_TYPES[m.type].height??1.45)*(m.leader?1.35:1),frames=monsterArt[m.type]?.map(t=>t.clone()),tex=frames?.[0]??monsterTextures[m.type%4].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
   s.userData.monsterId=m.id;
   const label=document.createElement('button');label.className='mob-label'+(m.leader?' leader':'');label.type='button';label.setAttribute('aria-label','เลือกเป้า '+MONSTER_TYPES[m.type].name+' '+(m.id+1));
@@ -69,7 +69,16 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const warning=new THREE.Mesh(new THREE.RingGeometry(.15,MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe??MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe?'#ff4a4a':'#ed9b59',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));warning.rotation.x=-Math.PI/2;scene.add(warning);
   const charge=new THREE.Mesh(new THREE.CircleGeometry(MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe??MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe?'#ff3b3b':'#ff8a3d',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));charge.rotation.x=-Math.PI/2;charge.visible=false;scene.add(charge);
   return {sprite:s,shadow:sh,height:h,label,fill,frames,frame:-1,warning,charge,deathStart:null,flashAt:-9};
- });
+ };
+ const mobViews=world.mobs.map(makeMobView);
+ // 0.110.9 monsters the server adds after we joined (back-office world bosses) arrive whole on first sight: make them
+ // here. Ids are list positions, so any gap before them is filled with a far-away dead placeholder.
+ function addNetworkMob(mob){
+  if(!Number.isInteger(mob.id)||mob.id<0||mob.id>5000||!MONSTER_TYPES[mob.type])return;
+  while(world.mobs.length<=mob.id){const i=world.mobs.length,live=i===mob.id;
+   const m=live?{pack:null,leader:false,attackCD:0,root:0,hit:0,aggro:false,step:0,dead:0,...mob,home:{x:mob.x,z:mob.z}}:{id:i,type:mob.type,pack:null,leader:false,x:1e5,z:1e5,home:{x:1e5,z:1e5},hp:0,maxHp:1,dead:1e9,attackCD:0,root:0,hit:0,aggro:false,step:0};
+   world.mobs.push(m);mobViews.push(makeMobView(m));}
+ }
  hero.sprite.material.map=hero.sprite.material.map.clone();
  const ringGeometry=new THREE.RingGeometry(.47,.51,40);
  const targetRing=new THREE.Mesh(ringGeometry,new THREE.MeshBasicMaterial({color:'#ffd476',side:THREE.DoubleSide,transparent:true,opacity:.85}));targetRing.rotation.x=-Math.PI/2;scene.add(targetRing);
@@ -342,7 +351,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function applyNetworkSnapshot(snapshot){const s=snapshot.self;{const o=snapshot.weather;world.weatherOverride=o?{id:o.id,mapId:o.mapId??null,endsAt:Date.now()+o.left}:null;} // 0.109.7 admin weather
  world.weekly=s.weekly??null;world.rebirth=s.rebirth??0;if(s.story)world.story=s.story;world.myStall=s.stall??null;world.myGuild=s.guild??null;world.status=s.status??{};world.mvp=s.mvp??null;world.pet=s.pet??null;world.bounty=s.bounty??null;world.mercLeft=s.merc??0;world.album=s.album??[];if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
   serverSelf.running=s.player.running===true;world.emote=activeEmote(s.emote,snapshot.time);
-  for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);}
+  for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);else if('type' in mob)addNetworkMob(mob);}
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}

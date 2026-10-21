@@ -30,8 +30,8 @@ const L={
   plazas:[[-24,-29,11,7.5],[36,-39,7.5,7.5]],
   districts:{'ศาลริมคลอง':[-24,-31],'สวนมะม่วง':[-44,14],'ดงโคมหลง':[36,-34]},npcs:{'ยายสาย':[-4,58]}},
  'moonlit-mill':{spawn:[-1,60],portals:{'old-orchard':[-1,66],'mill-cellar':[-6,-20],'lotus-marsh':[49,63]},
-  water:[B(27,0,24,144)],bridges:[bridge([5,-24],[49,-24],8),bridge([49,-24],[49,-60],8)],
-  roads:[...road([[-1,-69],[-1,-27],[-8,1],[-5,18]],10),...road([[-8,1],[-31,23],[-34,52]],8),...road([[-8,1],[-42,-18],[-50,-39]],7)],
+  water:[B(27,0,24,144)],bridges:[bridge([13,-24],[41,-24],6)],
+  roads:[...road([[-1,-69],[-1,-27],[-8,1],[-5,18]],10),...road([[-1,-24],[14,-24]],7),...road([[40,-24],[49,-27],[49,-66]],7),...road([[-8,1],[-31,23],[-34,52]],8),...road([[-8,1],[-42,-18],[-50,-39]],7)],
   plazas:[[-8,-5,18,14.5]],
   districts:{'ท่าโรงสี':[2,24],'ลานหุ่นฟาง':[-16,-4],'โรงสีร้าง':[-6,-26]},npcs:{'จ้อย':[-5,57]}},
  'mill-cellar':{spawn:[0,58],portals:{'moonlit-mill':[0,63]},
@@ -41,7 +41,8 @@ const L={
   mobs:[[0,24],[-30,30],[-30,24],[30,30],[30,24],[-30,-20],[-30,-26],[30,-20],[30,-26],[0,-4],[0,-30]]},
  'lotus-marsh':{spawn:[0,46],portals:{'moonlit-mill':[0,62]},
   water:[B(0,0,140,140)],
-  bridges:[[[-7,-46],[-24,-33]],[[8,-46],[19,-31]],[[-33,-14],[-31,11]],[[29,-9],[30,10]],[[-19,32],[-11,43]],[[19,40],[12,46]],[[-19,-25],[13,-23]],[[-15,25],[13,27]]].map(([a,b])=>bridge(a,b,7)),
+  // v5: boardwalks run island-centre to island-centre, ends 2 m inside each rim, 4 m wide (outputs/maps-v5/recipes/lotus-marsh.py)
+  bridges:[[[-7.21,-47.89],[-23.81,-33.8]],[[5.94,-47.21],[19.38,-31.85]],[[-32.34,-15.01],[-30.72,12.01]],[[28.72,-10.01],[30.04,12.02]],[[-20.01,32.99],[-12.34,39.89]],[[17.17,38.26],[13.79,40.77]],[[-20.04,-25.15],[13.05,-22.98]],[[-15.05,24.98],[13.05,26.82]]].map(([a,b])=>bridge(a,b,4)),
   roads:[],plazas:[[0,54,13,10],[-33,26,15,13],[28,22,17,14],[-30,-24,17,14],[31,-28,20,18],[0,-51,22,16]],
   districts:{'ศาลริมคลอง':[31,-24],'สวนมะม่วง':[-30,-20],'ดงโคมหลง':[0,-46]},npcs:{'ยายบัวผัน':[5,48]},
   mobs:[[-33,22],[-37,30],[26,18],[32,26],[-27,-20],[-34,-28],[28,-24],[36,-32],[-28,30],[23,26],[6,-46]]},
@@ -54,13 +55,16 @@ L['guild-hall']={spawn:[0,58],portals:{ayutthaya:[0,64]},water:[],bridges:[],
  npcs:{'พระครูชุมพล':[-25,-15],'ขุนพลชุมพล':[5,50]}};
 const fail=id=>{throw new Error("Blocked: "+id);};
 const nearest=(nav,[x,z],ok)=>{for(let r=0;r<=8;r+=.5)for(let a=0;a<Math.max(1,r*8);a++){const p={x:Math.round((x+r*Math.cos(a/(r*8)*Math.PI*2))*2)/2,z:Math.round((z+r*Math.sin(a/(r*8)*Math.PI*2))*2)/2};if(ok(p))return p;}throw new Error('No walkable spot near '+x+','+z);};
+// v5: SCENE_VERSION=v5 MAPS=rice-fields,old-orchard node scripts/build-scenes-v2.mjs rebinds only those maps to maps/<version>/
+const VERSION=process.env.SCENE_VERSION??'v2',ONLY=process.env.MAPS?new Set(process.env.MAPS.split(',')):null;
 for(const m of catalog.maps){
- const l=L[m.id],grid=JSON.parse(await readFile(new URL('./nav-v2/'+m.id+'.json',import.meta.url),'utf8'));
- m.scene='maps/v2/'+m.id+'.glb';delete m.model;delete m.triangles;delete m.clearedCourtTrees;
+ const l=L[m.id];if(!l||(ONLY&&!ONLY.has(m.id)))continue;
+ const grid=JSON.parse(await readFile(new URL('./nav-'+VERSION+'/'+m.id+'.json',import.meta.url),'utf8'));
+ m.scene='maps/'+VERSION+'/'+m.id+'.glb';delete m.model;delete m.triangles;delete m.clearedCourtTrees;
  m.bounds={x:-70,z:-70,w:140,d:140};m.nav={zones:[{...m.bounds}],obstacles:[],props:[],grid};
  const reach=p=>walkable(p.x,p.z,.6,m.nav)&&(!m.spawn||findPath(m.spawn,p,m.nav).length>0);
  m.spawn=nearest(m.nav,l.spawn,p=>walkable(p.x,p.z,.6,m.nav));
- m.portals=m.portals.map(p=>({...p,...nearest(m.nav,l.portals[p.to],reach)}));
+ m.portals=m.portals.map(p=>({...p,...nearest(m.nav,l.portals[p.to]??[p.x,p.z],reach)}));
  m.waterAreas=l.water;m.bridges=l.bridges;m.roads=l.roads;m.plazas=l.plazas;m.plants=[];m.decor=[];m.leafSources=[];
  m.districts=m.districts.map(d=>({...d,...nearest(m.nav,l.districts[d.name],reach)}));
  if(m.landmarks?.length)m.landmarks=m.districts.map(d=>[d.name,d.x,d.z]);
@@ -71,7 +75,7 @@ for(const m of catalog.maps){
   const spot=n.mentorId?MENTORS.find(a=>a.id===n.mentorId&&(walkable(a.x,a.z,.6,m.nav)||fail(a.id))):nearest(m.nav,l.npcs[n.name],p=>walkable(p.x,p.z,1,m.nav)&&approach(p));
   return {...n,x:spot.x,z:spot.z};
  });
- if(l.mobs)m.mobs=m.mobs.map((mob,i)=>[...Object.values(nearest(m.nav,l.mobs[i],reach)),mob[2]]);
+ if(l.mobs)m.mobs=m.mobs.map((mob,i)=>[...Object.values(nearest(m.nav,l.mobs[i]??[mob[0],mob[1]],reach)),mob[2]]);
  else m.mobs=m.mobs.map(([x,z,type])=>[...Object.values(nearest(m.nav,[x,z],reach)),type]);
  if(!m.safe&&!m.instance)m.packs=true; // 0.63 camps of 4-5 (combat-core packSpawns)
  m.nav.props=m.npcs.map(n=>[n.x,n.z,n.mentorId?.43:.45]);
@@ -84,5 +88,5 @@ for(const m of catalog.maps){
   });
  }
 }
-catalog.version=62;await writeFile(path,JSON.stringify(catalog,null,2)+'\n');
+catalog.version=Math.max(62,(catalog.version|0)+1);await writeFile(path,JSON.stringify(catalog,null,2)+'\n');
 console.log(catalog.maps.map(m=>m.id+': spawn '+m.spawn.x+','+m.spawn.z+' · '+m.npcs.length+' NPC · '+m.mobs.length+' mobs · '+m.portals.map(p=>p.to+'@'+p.x+','+p.z).join(' ')).join('\n'));

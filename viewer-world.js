@@ -13,7 +13,7 @@ import {createSkillWindow} from './skill-window.js?v=101';
 import {createMmoHud} from './mmo-hud.js?v=106.2';
 import {createSoftLook} from './soft-look.js?v=82';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
-import {createMeadow,MEADOW_MAPS} from './meadow.js?v=81';
+import {createMeadow,MEADOW_MAPS} from './meadow.js?v=108';
 import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=99.11';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
 import {createPaintedAvatar} from './painted-avatar.js?v=106.0';
@@ -63,7 +63,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=106.1-lablae');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=108.0');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));

@@ -48,7 +48,7 @@ function paddyMask(model,map){
  const {x:bx,z:bz,w,d}=map.bounds,cols=Math.ceil(w),mask=new Uint8Array(cols*Math.ceil(d)),v=new THREE.Vector3();
  model.updateMatrixWorld(true);
  const seen=new Set(); // tiles of one Blender mesh share a vertex buffer: read each buffer once
- model.traverse(o=>{if(!o.isMesh||!/^Dense rice blades/.test(o.name)||seen.has(o.geometry.attributes.position))return;const pos=o.geometry.attributes.position;seen.add(pos);
+ model.traverse(o=>{if(!o.isMesh||!/^Dense[ _]rice[ _]blades/.test(o.name)||seen.has(o.geometry.attributes.position))return;const pos=o.geometry.attributes.position;seen.add(pos);
   for(let i=0;i<pos.count;i+=3){v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld);const cx=Math.floor(v.x-bx),cz=Math.floor(v.z-bz);
    for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const x=cx+dx,z=cz+dz;if(x>=0&&z>=0&&x<cols&&z<d)mask[z*cols+x]=1;}}});
  return (x,z)=>mask[Math.floor(z-bz)*cols+Math.floor(x-bx)]===1;
@@ -78,7 +78,10 @@ export function createMeadow({scene,map,model,quality='high',reduced=false}){
   chunks.get(key).push({matrix:dummy.matrix.clone(),tile,color:tint.clone()});
  };
  const shore=(x,z)=>map.nav.grid&&[[1.6,0],[-1.6,0],[0,1.6],[0,-1.6]].some(([dx,dz])=>!walkableCell(map.nav.grid,x+dx,z+dz));
- const water=(x,z,m)=>!mix.islands&&map.waterAreas.some(a=>x>a.x-m&&x<a.x+a.w+m&&z>a.z-m&&z<a.z+a.d+m),bridge=(x,z)=>(map.bridges??[]).some(a=>x>a.x-a.w/2-.5&&x<a.x+a.w/2+.5&&z>a.z-a.d/2-.5&&z<a.z+a.d/2+.5);
+ const water=(x,z,m)=>!mix.islands&&map.waterAreas.some(a=>x>a.x-m&&x<a.x+a.w+m&&z>a.z-m&&z<a.z+a.d+m),bridge=(x,z)=>(map.bridges??[]).some(a=>x>a.x-.5&&x<a.x+a.w+.5&&z>a.z-.5&&z<a.z+a.d+.5)||deck(x,z);
+ // 1.08 bridge rects are corner-based (x,z = min corner, like waterAreas): the old centre test missed half of every
+ // bridge and grass grew on the boardwalks. Any raised walk floor (decks, piers, bridges: >= .28 m) is skipped too.
+ const deck=(x,z)=>{const g=map.nav.grid;if(!g)return false;const c=g.rows[Math.round((z-g.z0)/g.cell)]?.[Math.round((x-g.x0)/g.cell)];return !!c&&c!=='.'&&(c.charCodeAt(0)-97)*.05>=.28;};
  for(let cz=Math.ceil(bz)+1;cz<bz+d-1;cz++)for(let cx=Math.ceil(bx)+1;cx<bx+w-1;cx++){
   const per=(mix.density??2.6)*scale,n=Math.floor(per)+(r()<per%1?1:0);
   for(let k=0;k<n;k++){

@@ -12,8 +12,8 @@
 
 /* Window frame: painted wood + gold with lotus corners, jade body */
 :root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#emote-window,#mentor-panel,#job-ready,#welcome-card,#settings-panel,#equipment-panel,#online-panel,#controls-editor,#npc-dialog,#world-atlas-dialog){
- border:3px solid transparent!important;border-image:var(--uk-frame)!important;border-radius:10px!important;
- background:var(--uk-surface)!important;background-clip:padding-box!important;
+ border:3px solid transparent!important;border-image:var(--uk-frame)!important;border-radius:4px!important;
+ background:var(--uk-surface)!important;background-clip:border-box!important;
  color:var(--uk-ink)!important;box-shadow:0 12px 34px #000a!important;
  scrollbar-color:#c9a35a #0b1c19!important;backdrop-filter:none!important}
 

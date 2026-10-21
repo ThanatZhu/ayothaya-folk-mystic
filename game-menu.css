@@ -25,6 +25,7 @@ body.field-hud .combat-controls.wheel #auto-attack{border:2px solid #bd9f62;bord
 body.field-hud .combat-controls.wheel #auto-attack.active{background:#567943;color:#fff2bd;border-color:#e4da91}
 /* Shared nonmodal utility windows, one at a time. No backdrop or page inertness. */
 body.field-hud :is(#skill-window,#online-panel,#settings-panel,#world-map)[data-hud-panel]{position:fixed;inset:auto;top:85px;right:200px;left:auto;bottom:auto;margin:0;width:330px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 360px);padding:0;border:1px solid var(--hud-rim);border-radius:7px;background:var(--hud-surface);color:#fff0ce;box-shadow:0 6px 24px #0006;z-index:40;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
+body.field-hud #online-panel[data-hud-panel]{width:460px;max-height:calc(100dvh - 200px)} /* player rows with invite buttons need room; phone rules below still win */
 body.field-hud :is(#skill-window,#online-panel)>header{padding:8px 10px;gap:7px;background:#b5924520}
 body.field-hud :is(#skill-window,#online-panel) h2{font-size:16px}body.field-hud :is(#skill-window,#online-panel) header small{display:none}
 body.field-hud #skill-list{padding:0 8px 8px}body.field-hud #skill-list li{padding:6px 3px;gap:5px}body.field-hud #skill-list li strong{font-size:11px}body.field-hud #skill-list li small{font-size:9px}body.field-hud #skill-list li b{font-size:9px;white-space:nowrap}body.field-hud #skill-list li button{min-width:44px;min-height:44px}

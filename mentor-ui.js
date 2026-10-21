@@ -50,7 +50,8 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
  // 0.101.3 the trial journal sits under the party frame and the ailment row (whichever reach lower), so they never overlap
  function stackJournal(){
   if(journal.hidden)return;let below=0;
-  for(const id of ['party-frame','ailment-row']){const el=document.getElementById(id);if(el&&!el.hidden&&el.childElementCount){const r=el.getBoundingClientRect();if(r.height&&r.left<journal.getBoundingClientRect().right)below=Math.max(below,r.bottom);}}
+  // 1.12.6 also below the event chips and the rebirth button (they covered the trial journal on phones)
+  for(const id of ['party-frame','ailment-row','hud-chips','rebirth-btn']){const el=document.getElementById(id);if(el&&!el.hidden&&(el.childElementCount||id==='rebirth-btn')&&getComputedStyle(el).display!=='none'){const r=el.getBoundingClientRect();if(r.height&&r.left<journal.getBoundingClientRect().right)below=Math.max(below,r.bottom);}}
   const top=below?Math.round(below+8-(journal.offsetParent?.getBoundingClientRect().top??0))+'px':'';if(journal.style.top!==top)journal.style.top=top;
  }
  function update(){jobReady();stackJournal();const q=account.training,key=JSON.stringify([q,game.world.kills,game.world.bag]);if(key===last)return;last=key;journal.hidden=!q;if(q){const m=mentorById(q.classId==='acolyte'?'monk-master':({swordsman:'sword-master',lancer:'spear-master',hunter:'hunt-master',boxer:'box-master',rogue:'shadow-master',shaman:'spirit-master'})[q.classId]);const s=trainingStatus(account.character,q,game.world,m.id);journal.querySelector('span').textContent=className(q.classId,account.character.gender)+'\n'+trialLines(s,game.world.bag,game.online).join('\n');journal.querySelector('small').textContent=trialReady(s,game.world.bag,game.online)?'กลับลานครูเพื่อส่งบททดสอบ':'ฝึกนอกเมือง · บันทึกอัตโนมัติ';}render();}

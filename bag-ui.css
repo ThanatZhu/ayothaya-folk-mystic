@@ -204,3 +204,5 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
  html body.field-hud #bag-window .bag-grid{grid-template-columns:repeat(auto-fill,minmax(54px,1fr));max-height:none;min-height:0;overflow:auto;gap:4px;padding:5px}
  #bag-window .bag-trash{padding:3px;font-size:9px}
 }
+/* 0.109.4 four quick slots: an empty one reads as an open socket waiting for an item, not a broken button */
+#quick-slots button.empty:disabled{opacity:.8;border-style:dashed;border-color:#c6a164aa;background:#15292599}

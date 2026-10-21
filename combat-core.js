@@ -60,6 +60,13 @@ export function walkable(x,z,r=.28,nav=DEFAULT_NAV){
  for(const b of nav.obstacles){if(x>b.x-r&&x<b.x+b.w+r&&z>b.z-r&&z<b.z+b.d+r)return false;}
  return !nav.props.some(([px,pz,pr])=>Math.hypot(x-px,z-pz)<r+pr);
 }
+// 0.109.4 wind wing: a random walkable spot on the map, zones picked by area so big fields get most landings.
+export function randomSpot(nav=DEFAULT_NAV,rand=Math.random,tries=300){
+ const zones=nav.zones??[],total=zones.reduce((n,z)=>n+z.w*z.d,0);if(!total)return null;
+ for(let t=0;t<tries;t++){let r=rand()*total,z=zones[0];for(const c of zones){if(r<c.w*c.d){z=c;break;}r-=c.w*c.d;}
+  const x=z.x+rand()*z.w,y=z.z+rand()*z.d;if(walkable(x,y,.28,nav))return {x,z:y};}
+ return null;
+}
 export function moveBody(body,dx,dz,nav=DEFAULT_NAV){
  const steps=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.12)),sx=dx/steps,sz=dz/steps;
  for(let i=0;i<steps;i++){

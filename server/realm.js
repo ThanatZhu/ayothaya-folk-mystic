@@ -3,7 +3,7 @@ import {activeEmote,canonicalAction,EMOTE_ACTIONS} from '../character-action-sta
 import {markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from '../monster-catalog.js';
 import {normalizeEquipment} from '../equipment.js';
 import {randomUUID} from 'node:crypto';
-import {CombatWorld,monsterHit,MONSTER_TYPES,moveBody,lineClear,walkable,rallyPack,LEADER,mobXp,mobRespawn} from '../combat-core.js';
+import {CombatWorld,monsterHit,MONSTER_TYPES,moveBody,lineClear,walkable,rallyPack,LEADER,mobXp,mobRespawn,randomSpot} from '../combat-core.js';
 import {awardExperience,baseProgress,levelGifts,migrateXp,XP_CURVE} from '../experience.js';
 import {refineGear} from '../refine.js';
 import {STORAGE_SLOTS,STORAGE_NPC,normalizeStorage,normalizeOffer,moveOffer,hasOffer,swapOffers,normalizeStall,buyFromStall} from '../market.js';
@@ -214,6 +214,16 @@ export class RealmServer{
   }
   if(m.type==='useItem'){
    if(now-p.itemAt<800)return this.itemFail(p,'item-rate');
+   // 0.109.4 wind wing (like RO's Fly Wing): a random walkable spot on this map, not in instances, the guild hall,
+   // the war map while the war is on, or a duel; the client snaps to the jump on the next snapshot
+   if(itemDef(m.item)?.kind==='wing'){
+    const map=p.room.map;if((p.bag.items?.[m.item]??0)<1)return this.itemFail(p,'no-item');
+    if(w.player.hp<=0)return this.itemFail(p,'defeated');if(w.status?.stun||w.status?.sleep)return this.itemFail(p,'held');
+    if(map.instance||map.guildHall||p.duel||(this.wars.get(p.serverId)?.active&&map.id===WAR.map))return this.itemFail(p,'wing-blocked');
+    const spot=randomSpot(w.nav);if(!spot)return this.itemFail(p,'not-usable');
+    const b=normalizeBag(p.bag);b.items[m.item]--;if(!b.items[m.item])delete b.items[m.item];p.itemAt=now;this.setBag(p,b);
+    Object.assign(w.player,spot,{moving:false});w.path=[];w.notice('ปีกเหินลมพาวาร์ปไปจุดใหม่');w.emit('used',{item:m.item});return true;
+   }
    let r;try{r=useItem(p.bag,m.item,w.player,w.status);}catch(e){return this.itemFail(p,e.message);}
    p.itemAt=now;w.player.hp=r.hp;w.player.mp=r.mp;w.status=r.status;this.setBag(p,r.bag);if(r.food){w.food=r.food;w.notice('อิ่มอร่อย · '+itemDef(m.item).text);}w.emit('used',{item:m.item});return true;
   }

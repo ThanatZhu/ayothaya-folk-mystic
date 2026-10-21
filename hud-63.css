@@ -71,8 +71,8 @@ body.field-hud.hud63 #hud-right #hud-chips{position:static;flex-direction:column
 body.field-hud.hud63 #hud-chips>button{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
 
 /* ---------- target (under the menu, centred, small) and notices ---------- */
-body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 58px + var(--g));left:50%;transform:translateX(-50%);width:220px}
-body.field-hud.hud63 #notice{top:calc(var(--edge-t) + 58px + 64px)}
+body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 72px + 2 * var(--g));left:50%;transform:translateX(-50%);width:220px}
+body.field-hud.hud63 #notice{top:calc(var(--edge-t) + 72px + 92px)}
 
 /* ---------- chat (bottom-left): readable jade glass, folds to a bar ---------- */
 body.field-hud.hud63 #online-dock{border-radius:12px;background:#0d1f1cf0;box-shadow:0 6px 18px #0008}

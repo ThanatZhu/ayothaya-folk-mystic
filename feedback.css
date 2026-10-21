@@ -39,13 +39,13 @@
 @keyframes crit-punch{0%{scale:.3;filter:brightness(4)}40%{scale:1.9;rotate:-6deg;filter:brightness(1.8)}70%{scale:.92;rotate:3deg}100%{scale:1;rotate:0deg;filter:none}}
 @keyframes crit-burst{0%{scale:.2;opacity:1}100%{scale:1.6;opacity:0}}
 @media(prefers-reduced-motion:reduce){.damage-number,.damage-number.crit,.damage-number.crit::before{animation:none!important}}
-/* 0.106.5 level up: Thai lettering between gold kanok scrolls + an English line over the hero, a ring and lotus petals
+/* 0.106.5 level up (0.106.6: room above the line so stacked Thai marks like the ้ in ขึ้น keep the gold fill): Thai lettering between gold kanok scrolls + an English line over the hero, a ring and lotus petals
    from the feet, a note under the HP panel */
 .rank-up{position:fixed;z-index:40;left:50%;top:45%;width:0;height:0;pointer-events:none;font-family:var(--font-game);color:#fff0ce}
 .rank-banner{position:absolute;left:0;bottom:6px;translate:-50% 0;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;animation:rank-in 2.6s ease-out forwards}
 .rank-banner::before{content:"";position:absolute;z-index:-1;inset:-18px -40px -10px;background:radial-gradient(closest-side,#1529259e,#15292555 60%,transparent)}
 .rank-banner strong{display:flex;align-items:center;gap:8px;white-space:nowrap}
-.rank-banner strong b{font-weight:700;font-size:34px;line-height:1.15;letter-spacing:.5px;color:#ffe7a8;background:linear-gradient(100deg,#f2c25a 20%,#fff6d8 45%,#f2c25a 60%) 0 0/250% 100%;
+.rank-banner strong b{font-weight:700;font-size:34px;line-height:1.15;padding:.45em .1em .15em;margin:-.35em 0 -.1em;letter-spacing:.5px;color:#ffe7a8;background:linear-gradient(100deg,#f2c25a 20%,#fff6d8 45%,#f2c25a 60%) 0 0/250% 100%;
  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 1px #3a2208) drop-shadow(0 2px 0 #3a2208) drop-shadow(0 0 10px #ffcf5a77);animation:rank-shine 1.6s .3s ease-in-out}
 .rank-banner strong svg{width:58px;height:27px;fill:#f2c25a;filter:drop-shadow(0 1px 0 #3a2208) drop-shadow(0 0 4px #ffcf5a66);animation:rank-scroll .7s .05s ease-out backwards}
 .rank-banner strong svg:first-child{scale:-1 1}

@@ -8,6 +8,7 @@ import {iconStyle} from './bag-ui.js?v=107';
 import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=109.4';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
 import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=101';
+import {WEATHERS} from './weather.js?v=97';
 import {deriveStats} from './character-stats.js';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 
@@ -52,7 +53,7 @@ function set(r,f,v){
  showCount();
 }
 // 0.101.2 side menu: what each page is for, in one line
-const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)']};
+const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว']};
 function tabs(){
  $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();});
@@ -72,7 +73,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula'].includes(tab);
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather'].includes(tab);
  $('page-title').textContent=icon+' '+name;$('page-help').textContent=help+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -83,6 +84,7 @@ function render(withFilters=true){
  if(tab==='players'){playersTab();return;}
  if(tab==='formula'){formulaTab();return;}
  if(tab==='drops'){dropsTab();return;}
+ if(tab==='weather'){weatherTab();return;}
  const rows=rowsFor(),cols=columns(rows);
  $('view').innerHTML=`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th>${cols.map(c=>`<th>${LABEL[c]??c}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-i="${i}"><td class="l"><span class="name">${r.group==='items'?`<i class="ico sm" data-item="${esc(r.key)}" style="${iconStyle(r.key)}"></i>`:r.group==='classes'?`<i class="face sm" style="background-image:url(assets/character-life100/player/${esc(r.key)}-male.png)"></i>`:''}<span><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></span></span></td>${cols.map(f=>{const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined;return `<td>${b==null&&!edited?'<span class="na">—</span>':`<input type="number" step="any" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`}</td>`;}).join('')}<td><button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button></td></tr>`).join('')}</tbody></table></div>`;
  $('view').querySelectorAll('tr[data-i]').forEach(tr=>{const r=rows[+tr.dataset.i];
@@ -185,6 +187,32 @@ async function loadPlayers(quiet=false,fresh=false){
  if(tab==='players')playersTab();
 }
 function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(document.activeElement?.closest?.('#give'))return;loadPlayers(true);},15000);}
+// 0.109.7 weather tab: set rain / mist / storm (or clear) on a realm for some minutes, or hand it back to the clock.
+let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',mapId:'',minutes:30};
+async function loadWeather(){try{weatherState=(await adminFetch('/admin/weather')).servers;weatherMsg='';}catch(e){weatherMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}if(tab==='weather')weatherTab();}
+async function setWeather(weather){
+ weatherMsg='กำลังเปลี่ยน…';weatherTab();
+ try{const r=await adminFetch('/admin/weather',{serverId:wx.serverId,weather,minutes:wx.minutes,mapId:wx.mapId||null});(weatherState??={})[r.serverId]=r.weather;
+  weatherMsg=weather==='auto'?'กลับเป็นสภาพอากาศตามเวลาแล้ว':'เปลี่ยนเป็น '+WEATHERS[weather].icon+' '+WEATHERS[weather].name+' แล้ว · ผู้เล่นเห็นภายในไม่กี่วินาที';}
+ catch(e){weatherMsg=ADMIN_ERRORS[e.message]??'เปลี่ยนไม่สำเร็จ · '+e.message;}weatherTab();
+}
+function weatherTab(){
+ warmFirebase();const user=LOCAL||fbConn?.auth.currentUser;
+ if(!weatherMaps){weatherMaps=[];fetch('maps/world.json').then(r=>r.json()).then(w=>{weatherMaps=w.maps.filter(m=>!m.instance).map(m=>({id:m.id,name:m.name}));if(tab==='weather')weatherTab();}).catch(()=>{});}
+ if(user&&!weatherState&&!weatherMsg)loadWeather();
+ const mapName=id=>weatherMaps?.find(m=>m.id===id)?.name??id;
+ const now=id=>{const o=weatherState?.[id];return o?`${WEATHERS[o.id].icon} ${WEATHERS[o.id].name} · ${o.mapId?esc(mapName(o.mapId)):'ทุกแผนที่'} · อีก ${Math.ceil(o.left/6e4)} นาที`:'ตามเวลา (สุ่มทุก 15 นาที)';};
+ $('view').innerHTML=!user?`<div class="wx"><p>ต้องล็อกอิน Google ด้วยบัญชีแอดมินก่อน</p><button type="button" id="wx-login" class="wx-auto">ล็อกอิน</button></div>`:
+  `<div class="wx"><p class="wx-now">ตอนนี้ · เซิร์ฟ 1: <b>${now('server-1')}</b> · เซิร์ฟ 2: <b>${now('server-2')}</b></p>
+  <div class="wx-pick"><label>เซิร์ฟ <select id="wx-server"><option value="server-1"${wx.serverId==='server-1'?' selected':''}>เซิร์ฟ 1</option><option value="server-2"${wx.serverId==='server-2'?' selected':''}>เซิร์ฟ 2</option></select></label>
+  <label>แผนที่ <select id="wx-map"><option value="">ทุกแผนที่กลางแจ้ง</option>${(weatherMaps??[]).map(m=>`<option value="${esc(m.id)}"${m.id===wx.mapId?' selected':''}>${esc(m.name)}</option>`).join('')}</select></label>
+  <label>นาน <select id="wx-min">${[15,30,60,120,240].map(n=>`<option value="${n}"${n===wx.minutes?' selected':''}>${n} นาที</option>`).join('')}</select></label></div>
+  <div class="wx-grid">${Object.entries(WEATHERS).map(([id,w])=>`<button type="button" data-wx="${id}"><i>${w.icon}</i><b>${w.name}</b><small>${w.text}</small></button>`).join('')}</div>
+  <button type="button" class="wx-auto" data-wx="auto">↺ กลับเป็นตามเวลา</button><p class="wx-msg" role="status">${esc(weatherMsg)}</p><small>ดันเจี้ยนไม่มีฝนเสมอ · หมดเวลาแล้วกลับเป็นตามเวลาเอง</small></div>`;
+ $('wx-login')&&($('wx-login').onclick=async()=>{if(await signIn())loadWeather();});
+ $('wx-server')&&($('wx-server').onchange=e=>{wx.serverId=e.target.value;});$('wx-map')&&($('wx-map').onchange=e=>{wx.mapId=e.target.value;});$('wx-min')&&($('wx-min').onchange=e=>{wx.minutes=+e.target.value;});
+ $('view').querySelectorAll('[data-wx]').forEach(b=>b.onclick=()=>setWeather(b.dataset.wx));
+}
 function playersTab(){
  warmFirebase();
  const user=LOCAL?'เครื่องตัวเอง (localhost)':fbConn?.auth.currentUser?.email??'';

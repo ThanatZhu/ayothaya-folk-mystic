@@ -4,7 +4,9 @@ import * as THREE from 'three';
 import {weatherAt,WEATHERS} from './weather.js?v=97';
 // ?weather=storm (or drizzle / mist / clear) previews one weather on this page only.
 const forced=WEATHERS[new URLSearchParams(location.search).get('weather')]?new URLSearchParams(location.search).get('weather'):null;
-const pick=(t,map)=>forced?{id:forced,...WEATHERS[forced],endsAt:weatherAt(t,map).endsAt}:weatherAt(t,map);
+// 0.109.7 a back-office override (sent with every snapshot) wins over the clock roll on outdoor maps until it ends
+const overrideFor=(o,t,map)=>o&&WEATHERS[o.id]&&!map?.instance&&(!o.mapId||o.mapId===map?.id)&&t<o.endsAt?{id:o.id,...WEATHERS[o.id],endsAt:o.endsAt,admin:true}:null;
+const pick=(t,map,o)=>forced?{id:forced,...WEATHERS[forced],endsAt:weatherAt(t,map).endsAt}:overrideFor(o,t,map)??weatherAt(t,map);
 
 const DROPS={low:500,mid:1200,high:2200},BOX={w:72,h:28,d:72},GREY=new THREE.Color('#59646a');
 export function createWeather({scene,controls,sun,map,game,quality='mid',reduced=false}){
@@ -14,7 +16,7 @@ export function createWeather({scene,controls,sun,map,game,quality='mid',reduced
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(pos,3).setUsage(THREE.DynamicDrawUsage));
  const rain=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:'#c9dbe6',transparent:true,opacity:.5,depthWrite:false,fog:false}));
  rain.frustumCulled=false;rain.renderOrder=20;rain.visible=false;scene.add(rain);
- let now=pick(Date.now(),map),level={rain:0,dim:1,fog:1},flash=0,nextFlash=6,wind=.25;
+ let overrideKey='',now=pick(Date.now(),map,game.world.weatherOverride),level={rain:0,dim:1,fog:1},flash=0,nextFlash=6,wind=.25;
  // HUD chip under the minimap, beside the MVP / surge chips.
  const chip=document.createElement('button');chip.type='button';chip.id='weather-chip';let chipText='';
  const place=()=>{const row=document.getElementById('hud-chips');if(row&&chip.parentElement!==row)row.prepend(chip);};
@@ -23,7 +25,9 @@ export function createWeather({scene,controls,sun,map,game,quality='mid',reduced
  return {
   get current(){return now;},
   update(dt){
-   place();if(Date.now()>=now.endsAt){const before=now.id;now=pick(Date.now(),map);if(now.id!==before)game.world.notice(`${now.icon} สภาพอากาศเปลี่ยน · ${now.name}`);}
+   // re-pick when the slot ends or an admin override starts / changes / is cleared
+   const o=game.world.weatherOverride,key=o?o.id+':'+(o.mapId??'')+':'+Math.round(o.endsAt/5e3):'';
+   place();if(Date.now()>=now.endsAt||key!==overrideKey){overrideKey=key;const before=now.id;now=pick(Date.now(),map,o);if(now.id!==before)game.world.notice(`${now.icon} สภาพอากาศเปลี่ยน · ${now.name}`);}
    paintChip();
    const k=Math.min(1,dt/3); // ~3 s ease toward the target weather
    level.rain+=(now.rain-level.rain)*k;level.dim+=(now.dim-level.dim)*k;level.fog+=(now.fog-level.fog)*k;

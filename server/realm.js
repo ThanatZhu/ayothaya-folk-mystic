@@ -27,6 +27,7 @@ import {WAR,warWindow,warLabel} from '../guild-war.js';
 import {ARENA,arenaWeek,arenaDay,arenaEnds,byPoints} from '../arena.js';
 import {TRIAL} from '../city-life-data.js';
 import {advanceReady} from '../advancement.js';
+import {WEATHERS} from '../weather.js';
 const SERVER_IDS=['server-1','server-2'],SERVER_NAME={'server-1':'เซิร์ฟ 1','server-2':'เซิร์ฟ 2'};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
@@ -581,6 +582,18 @@ export class RealmServer{
  mvpState(serverId){let s=this.mvps.get(serverId);if(!s){s={nextAt:this.born+MVP_FIRST};this.mvps.set(serverId,s);}return s;}
  // A fresh room hides its MVP until the server-wide timer is due, so leaving and re-entering cannot reset it.
  wakeMvp(room){const wait=(this.mvpState(room.serverId).nextAt-this.now())/1000;for(const m of room.mobs)if(MONSTER_TYPES[m.type].mvp&&wait>0){m.hp=0;m.dead=wait;}}
+ // 0.109.7 back-office weather: an override per realm (all outdoor maps, or one map) for some minutes; clients get the
+ // time left with every snapshot and fall back to the clock-rolled weather when it runs out or is cleared.
+ setWeather({serverId='server-1',weather,minutes=30,mapId=null}={}){
+  this.weatherOverrides??=new Map();
+  if(weather==='auto'){this.weatherOverrides.delete(serverId);return null;}
+  if(!WEATHERS[weather])throw new Error('bad-weather');
+  const mins=Math.min(24*60,Math.max(1,Math.round(Number(minutes)||30)));
+  if(mapId!==null&&!this.catalog.maps.some(m=>m.id===mapId&&!m.instance))throw new Error('bad-map');
+  const o={id:weather,mapId,until:this.now()+mins*60e3};this.weatherOverrides.set(serverId,o);return this.weatherState(serverId);
+ }
+ weatherState(serverId){const o=this.weatherOverrides?.get(serverId);if(!o)return null;const left=o.until-this.now();
+  if(left<=0){this.weatherOverrides.delete(serverId);return null;}return {id:o.id,mapId:o.mapId,left};}
  mvpInfo(serverId){const s=this.mvpState(serverId),type=MONSTER_TYPES.find(t=>t.mvp),map=this.catalog.maps.find(m=>m.mobs?.some(([,,t])=>MONSTER_TYPES[t]?.mvp));
   return type&&map?{name:type.name,map:map.name,in:Math.max(0,Math.ceil((s.nextAt-this.now())/1000))}:null;}
  mvpDown(room,mob){
@@ -710,7 +723,7 @@ export class RealmServer{
    for(const k of PLAYER_STATIC)if(last[k]!==a.entryKeys[k]){last[k]=a.entryKeys[k];d[k]=e[k];}
    return d;});
   p.known=seen;
-  return {...copy({tick:this.tickId,time:this.clock,self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),weekly:normalizeWeekly(p.weekly,this.now()),rebirth:p.rebirth??0,album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level,p.rebirth??0),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})}}),players,mobs:copy(this.mobDelta(p))};
+  return {...copy({tick:this.tickId,time:this.clock,weather:this.weatherState(p.serverId),self:{...publicPlayer(p),training:p.training,cooldowns:p.world.cooldowns,kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,skillLevels:p.world.skillLevels,skillPoints:availablePoints(p.skills,this.progress(p)),story:p.story,merc:p.world.merc?Math.ceil(p.world.merc.left):0,bounty:normalizeBounty(p.bounty,this.now()),weekly:normalizeWeekly(p.weekly,this.now()),rebirth:p.rebirth??0,album:p.album,status:p.world.status,pet:p.pet,mvp:this.mvpInfo(p.serverId),stall:p.stall?.title??null,guild:this.guildTag(p),stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level,p.rebirth??0),derived:p.derived,...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})}}),players,mobs:copy(this.mobDelta(p))};
  }
  mobDelta(p){
   if(p.mobRoom!==p.room.id){p.mobRoom=p.room.id;p.mobSeen=new Map();}

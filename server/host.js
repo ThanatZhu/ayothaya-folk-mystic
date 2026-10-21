@@ -74,6 +74,15 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     }catch(e){console.error('admin-balance',e.message);reply(502,{error:e.message});}
     return;
    }
+   // 0.109.7 weather override from the back office: GET the current state per realm, POST {serverId, weather|'auto', minutes, mapId}
+   if(url.pathname==='/admin/weather'&&req.method==='GET'){reply(200,{servers:Object.fromEntries(['server-1','server-2'].map(id=>[id,realm.weatherState(id)]))});return;}
+   if(url.pathname==='/admin/weather'&&req.method==='POST'){
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>1024){reply(413,{error:'too-large'});return;}}
+    try{const b=JSON.parse(data),serverId=['server-1','server-2'].includes(b?.serverId)?b.serverId:'server-1';
+     const state=realm.setWeather({serverId,weather:b?.weather,minutes:b?.minutes,mapId:typeof b?.mapId==='string'&&b.mapId?b.mapId:null});
+     console.log('admin-weather',who,serverId,b?.weather,b?.minutes??'',b?.mapId??'all');reply(200,{serverId,weather:state});}catch(e){reply(400,{error:e.message});}
+    return;
+   }
    reply(404,{error:'not-found'});return;
   }
   if(mode==='local'&&url.pathname==='/dev/session'&&req.method==='POST'){

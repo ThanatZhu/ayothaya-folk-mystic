@@ -148,3 +148,13 @@ table.drops tr.mon td{background:#ffffff08;border-top:2px solid var(--rule)}tabl
 .pstate.off{background:#ffffff0d;color:#cdbf9f;border:1px solid #c6a16444}
 .plist .more{min-height:36px;border-radius:10px;border:1px dashed #f4cf7a66;background:transparent;color:#f4cf7a;font:inherit;cursor:pointer}
 .offline-note{margin:0;padding:8px 12px;border-radius:10px;background:#f4cf7a14;border:1px solid #f4cf7a44;font-size:13px}
+/* 0.109.7 weather tab */
+.wx{display:grid;gap:14px;max-width:760px;padding:4px 0}
+.wx-now{margin:0;font-size:14px}.wx-now b{color:#f4cf7a}
+.wx-pick{display:flex;flex-wrap:wrap;gap:12px}.wx-pick label{display:grid;gap:4px;font-size:12px;color:#c9b98f}
+.wx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.wx-grid button{display:grid;justify-items:center;gap:4px;padding:14px 10px;border:1px solid #c6a16488;border-radius:10px;background:#0e2926cc;color:#fff0ce;font:inherit;cursor:pointer}
+.wx-grid button:hover{border-color:#f4cf7a;background:#163a33}
+.wx-grid i{font-style:normal;font-size:30px}.wx-grid b{font-size:15px}.wx-grid small{font-size:11px;color:#c9b98f;text-align:center}
+.wx-auto{justify-self:start;min-height:40px;padding:6px 16px;border:1px solid #f4cf7a;border-radius:999px;background:#24382b;color:#f4dfac;font:700 13px var(--font-game,Mali),sans-serif;cursor:pointer}
+.wx-msg{margin:0;min-height:1.4em;color:#9be88f}

@@ -1,6 +1,6 @@
 // Storage, player trade and vending stalls (0.46). Pure rules shared by client and realm server.
 // Offers are {coins, items:{[id]:count}}; every move is all-or-nothing and never creates or loses items.
-import {BAG_SLOTS,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
+import {BAG_SLOTS,bagCap,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
 
 export const STORAGE_SLOTS=100,STORAGE_NPC='ลุงเรือง',STALL_MAX=8,PRICE_MAX=9999999;
 export const TRADABLE=id=>['loot','potion','gear','card','scroll'].includes(itemDef(id)?.kind);
@@ -13,7 +13,7 @@ export function normalizeOffer(o){
 }
 const slots=(bag,cap)=>id=>id in bag.items||Object.keys(bag.items).length<cap;
 // Move `offer` out of `from` and into `to`; throws when `from` lacks it or `to` has no room.
-export function moveOffer(from,to,offer,{fromCap=BAG_SLOTS,toCap=BAG_SLOTS}={}){
+export function moveOffer(from,to,offer,{fromCap=bagCap(from),toCap=bagCap(to)}={}){
  const a=normalizeBag(from,fromCap),b=normalizeBag(to,toCap),o=normalizeOffer(offer);
  if(a.coins<o.coins)throw new Error('no-coins');
  if(b.coins+o.coins>MAX_COINS)throw new Error('coin-cap');

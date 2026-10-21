@@ -21,7 +21,7 @@ import {activeEvent,expRate,surge,surgeOn} from '../events.js';
 // 0.49: the timed MVP returns an hour after it falls (first one 5 min after boot); dungeon clear pays once per Thai day.
 export const MERC_COST=200,MERC_TIME=1200;
 export const MVP_INTERVAL=3600e3,MVP_FIRST=300e3,DUNGEON_REWARD={coins:800,items:[{id:'lek-lai',count:1},{id:'green-herb',count:3},{id:'hp-large',count:3}]};
-import {normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,foodBuff,SHOPS,ITEM_ERRORS,itemDef,RARITY_NAME} from '../items.js';
+import {normalizeBag,expandBag,addLoot,rollLoot,buy,sell,discard,useItem,foodBuff,SHOPS,ITEM_ERRORS,itemDef,RARITY_NAME} from '../items.js';
 import {craft} from '../crafting.js';
 import {WAR,warWindow,warLabel} from '../guild-war.js';
 import {ARENA,arenaWeek,arenaDay,arenaEnds,byPoints} from '../arena.js';
@@ -48,7 +48,7 @@ export function refineAnnouncement(who,r,before,after){
  if(r.result==='broken'&&r.level+1>=REFINE_ANNOUNCE)return `💥 ${who} ตีบวก ${before} → +${r.level+1} ล้มเหลว อุปกรณ์แตก!`;
  return null;
 }
-const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
+const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -232,6 +232,13 @@ export class RealmServer{
    if(p.trade?.locked)return this.itemFail(p,'trade-locked');
    try{this.setBag(p,discard(p.bag,m.item,m.count));}catch(e){return this.itemFail(p,e.message);}
    w.notice('ทิ้ง '+(itemDef(m.item)?.name??m.item)+' ×'+m.count+' แล้ว');return true;
+  }
+  // 0.109.6 bag expansion is a service at a shop that offers it (Mae Bua), standing next to her like buying
+  if(m.type==='bagExpand'){
+   const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null,shop=npc&&SHOPS[npc.name];
+   if(!shop?.expand||shop.mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'shop-too-far');
+   try{this.setBag(p,expandBag(p.bag));}catch(e){return this.itemFail(p,e.message);}
+   w.notice('ขยายกระเป๋าแล้ว · '+p.bag.slots+' ช่อง');return true;
   }
   if(m.type==='buy'||m.type==='sell'){
    // Trading only next to that shop's NPC in its own map; the shared rules check coins, stock and bag room.

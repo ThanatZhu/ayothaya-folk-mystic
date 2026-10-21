@@ -2,7 +2,7 @@
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
 import {activeEvent,surgeOn} from './events.js?v=64';
 import {levelGifts} from './experience.js?v=105.3';
-import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=107';
+import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=107';
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=109.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {pickPotion} from './auto-play.js';
@@ -29,7 +29,7 @@ export function iconStyle(id){
 const icon=(id,cls='item-icon')=>`<i class="${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 
 export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
- if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=109.4';css.dataset.bagUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=109.6';css.dataset.bagUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-bag:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeBag(JSON.parse(localStorage.getItem(key)));}catch{return normalizeBag(null);}};
  let local=read();
@@ -139,7 +139,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
 
  // Shop: the NPC dialog gets a button; the shop window closes if the player walks away.
  const shopDialog=document.createElement('dialog');shopDialog.id='shop-window';shopDialog.setAttribute('aria-labelledby','shop-title');
- shopDialog.innerHTML='<header><h2 id="shop-title"></h2><b class="coins" id="shop-coins"></b><button class="mp-icon" id="shop-close" aria-label="ปิดร้าน">×</button></header><div class="shop-tabs" role="tablist"><button type="button" role="tab" data-tab="buy" aria-selected="true">ซื้อ</button><button type="button" role="tab" data-tab="sell" aria-selected="false">ขาย</button></div><ol class="shop-list" id="shop-list"></ol>';
+ shopDialog.innerHTML='<header><h2 id="shop-title"></h2><b class="coins" id="shop-coins"></b><button class="mp-icon" id="shop-close" aria-label="ปิดร้าน">×</button></header><div class="shop-tabs" role="tablist"><button type="button" role="tab" data-tab="buy" aria-selected="true">ซื้อ</button><button type="button" role="tab" data-tab="sell" aria-selected="false">ขาย</button></div><ol class="shop-list" id="shop-list"></ol><div class="shop-expand" id="shop-expand" hidden></div>';
  ($('game-shell')??document.body).append(shopDialog);
  let shopNpc=null,tab='buy';
  shopDialog.querySelector('#shop-close').onclick=()=>shopDialog.close();
@@ -168,10 +168,10 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    $('bag-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');
    const all=Object.keys(b.items),kinds=TABS.find(t=>t[0]===category)[2],ids=kinds?all.filter(id=>kinds.includes(itemDef(id)?.kind)):all;if(selected&&!b.items[selected])selected=null;
    tabs.querySelectorAll('[data-cat]').forEach(t=>{const k=TABS.find(x=>x[0]===t.dataset.cat)[2],n=k?all.filter(id=>k.includes(itemDef(id)?.kind)).length:all.length;t.setAttribute('aria-selected',String(t.dataset.cat===category));t.dataset.count=n;});
-   $('bag-space').textContent=`ช่องที่ใช้ ${all.length} / ${BAG_SLOTS}`;
+   $('bag-space').textContent=`ช่องที่ใช้ ${all.length} / ${bagCap(b)}`;
    $('bag-gear').innerHTML=GEAR_PLACES.map(([slot,label])=>{const id=gear[slot],it=id&&itemDef(id);return `<button type="button" class="gear-slot g-${slot}${worn===slot?' on':''}${it?' r'+(it.rarity??0):''}" data-gear="${slot}" title="${label}${it?' · '+it.name:''}">${it?icon(id):''}<small>${label}</small></button>`;}).join('');
    $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.onclick=()=>{worn=el.dataset.gear;selected=null;render(true);});
-   $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:BAG_SLOTS,Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
+   $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:bagCap(b),Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
    $('bag-grid').querySelectorAll('[data-id]').forEach(el=>{el.onclick=()=>{if(dragged)return;selected=el.dataset.id;worn=null;render(true);};el.onpointerdown=e=>dragStart(e,el.dataset.id);});
    const wornId=worn&&gear[worn],wornIt=wornId&&itemDef(wornId);
    if(worn){$('bag-detail').innerHTML=wornIt?`${icon(wornId,'item-icon big')}<div><strong class="r${wornIt.rarity??0}">${wornIt.name}${wornIt.refine?' +'+wornIt.refine:''}</strong><p>${wornIt.text??''}</p>${wornIt.card?`<small>การ์ด: ${itemDef(wornIt.card)?.text??''}</small>`:''}<div class="bag-actions"><button type="button" data-act="off">ถอด</button><button type="button" data-act="status">ใส่การ์ด · หน้าสถานะ</button></div></div>`:`<p class="bag-hint">ช่อง${GEAR_PLACES.find(g=>g[0]===worn)[1]}ว่าง · แตะอุปกรณ์ในแท็บ อุปกรณ์ แล้วกด สวมใส่</p>`;
@@ -183,13 +183,17 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
   if(shopDialog.open&&shopNpc){
    const shop=SHOPS[shopNpc.name];$('shop-title').textContent=shop.title;$('shop-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');
    shopDialog.querySelectorAll('[data-tab]').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===tab)));
+   // 0.109.6 bag expansion at shops that offer it: +BAG_STEP slots for a price that rises each time, up to BAG_MAX
+   {const box=$('shop-expand'),cost=expandCost(b),cap=bagCap(b);box.hidden=!shop.expand||tab!=='buy';
+    if(!box.hidden){box.innerHTML=cost===null?`<small>กระเป๋าขยายเต็มที่แล้ว · ${BAG_MAX} ช่อง</small>`:`<div><strong>ขยายกระเป๋า +${BAG_STEP} ช่อง</strong><small>${cap} → ${cap+BAG_STEP} ช่อง · สูงสุด ${BAG_MAX}</small></div><button type="button" class="deal"${b.coins<cost?' disabled':''}>${cost.toLocaleString('th-TH')} เบี้ย</button>`;
+     const btn=box.querySelector('button');if(btn)btn.onclick=()=>{if(game.online){world.market?.('bagExpand',{npc:shopNpc.name});return;}try{local=expandBag(local);save();world.notice('ขยายกระเป๋าแล้ว · '+local.slots+' ช่อง');render(true);}catch(e){fail(e.message);}};}}
    const myClass=account?.character?.classId??world.profession.id;
    const rows=tab==='buy'?shop.stock.filter(id=>!itemDef(id).classes||itemDef(id).classes.includes(myClass)).map(id=>({id,price:shop.currency?itemDef(id).tokens:itemDef(id).buy,have:b.items[id]??0})):Object.keys(b.items).filter(id=>itemDef(id).sell).map(id=>({id,price:itemDef(id).sell,have:b.items[id]}));
    $('shop-list').innerHTML=rows.length?rows.map(r=>`<li data-id="${r.id}">${icon(r.id)}<div><strong>${itemDef(r.id).name}</strong><small>${tab==='buy'?itemDef(r.id).text+' · มี '+r.have:'มี '+r.have+' ชิ้น'}</small></div><b>${r.price} ${tab==='buy'&&shop.currency?'เหรียญ':'เบี้ย'}</b><span class="qty"><button type="button" data-q="-1" aria-label="ลด">−</button><input type="number" min="1" step="1" value="1" inputmode="numeric" aria-label="จำนวน"><button type="button" data-q="1" aria-label="เพิ่ม">+</button><small class="total"></small></span><button type="button" class="deal">${tab==='buy'?'ซื้อ':'ขาย'}</button></li>`).join(''):'<li class="empty">ยังไม่มีของที่ขายได้</li>';
    $('shop-list').querySelectorAll('li[data-id]').forEach((li,k)=>{
     const inp=li.querySelector('input'),total=li.querySelector('.total'),deal=li.querySelector('.deal'),{id,price,have}=rows[k],cur=tab==='buy'&&shop.currency;
     // 0.100.10 the most this row allows: buy = what the purse pays for and the bag holds; sell = what the bag holds.
-    const funds=cur?b.items[shop.currency]??0:b.coins,room=have||Object.keys(b.items).length<BAG_SLOTS?MAX_STACK-have:0;
+    const funds=cur?b.items[shop.currency]??0:b.coins,room=have||Object.keys(b.items).length<bagCap(b)?MAX_STACK-have:0;
     const max=tab==='buy'?Math.min(room,Math.floor(funds/price)):have,n=()=>Math.min(max,Math.max(1,Math.floor(+inp.value)||1));
     const show=()=>{total.textContent=max<1?ITEM_ERRORS[room<1?'bag-full':cur?'no-tokens':'no-coins']:'รวม '+(n()*price).toLocaleString('th-TH')+(cur?' เหรียญ':' เบี้ย');};
     inp.max=String(Math.max(1,max));deal.disabled=max<1;inp.disabled=max<1;show();

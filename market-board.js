@@ -2,7 +2,7 @@
 // stores, server-wide search (RO @whosell), sales tax, reference prices and the trade skill (merchant perks).
 // Pure rules shared by the realm server and the UI. A shop holds its goods (sell) or its coins (buy) in escrow,
 // so a purchase never touches an offline player's save: proceeds wait in the shop's pouch until collected.
-import {BAG_SLOTS,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
+import {BAG_SLOTS,bagCap,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
 import {TRADABLE,PRICE_MAX,moveOffer} from './market.js?v=107';
 
 // Shops may only stand on the market street of the capital, a few metres apart, so roads stay clear.
@@ -52,7 +52,7 @@ export function buyFromShop(shop,buyerBag,id,qty,perks,{who='',now=0}={}){
  if(!row)throw new Error('not-sold');if(!Number.isSafeInteger(qty)||qty<1||qty>row.count)throw new Error('bad-count');
  const cost=row.price*qty,tax=taxOf(cost,perks);
  const [paid]=moveOffer(buyerBag,{coins:0,items:{}},{coins:cost,items:{}},{toCap:Infinity});
- const [,bag]=moveOffer({coins:0,items:{[id]:qty}},paid,{coins:0,items:{[id]:qty}},{fromCap:Infinity,toCap:BAG_SLOTS});
+ const [,bag]=moveOffer({coins:0,items:{[id]:qty}},paid,{coins:0,items:{[id]:qty}},{fromCap:Infinity,toCap:bagCap(buyerBag)});
  const items={...shop.items,[id]:{...row,count:row.count-qty}};if(!items[id].count)delete items[id];
  return {bag,cost,tax,shop:{...shop,items,pouch:addPouch(shop.pouch,cost-tax),log:logged(shop,{t:now,kind:'sold',item:id,count:qty,coins:cost-tax,who})}};
 }

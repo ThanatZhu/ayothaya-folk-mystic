@@ -7,6 +7,10 @@ export const CARD_ATLAS='assets/cards45/cards.png',SOCIAL_ATLAS='assets/social46
 export const GEAR85_ATLAS='assets/gear85/gear.svg';
 export const ATLASES={gear85:GEAR85_ATLAS,gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS,social:SOCIAL_ATLAS,emblems:EMBLEM_ATLAS,emotes:EMOTE_ATLAS,items48:ITEMS48_ATLAS,gear104w:'assets/gear104/weapons.png',gear104a:'assets/gear104/armor.png',gear106a:'assets/gear106/head-garment.png',gear106b:'assets/gear106/shoes.png'}; // item.atlas key → file (default ITEM_ATLAS)
 export const BAG_SLOTS=40,MAX_STACK=999,MAX_COINS=9999999;
+// 0.109.6 bag expansion: each bag carries its own size (40 base, +10 per expansion at Mae Bua's, up to 100)
+export const BAG_MAX=100,BAG_STEP=10;
+export const bagCap=bag=>{const n=bag?.slots;return Number.isSafeInteger(n)?Math.min(BAG_MAX,Math.max(BAG_SLOTS,n)):BAG_SLOTS;};
+export const expandCost=bag=>bagCap(bag)>=BAG_MAX?null:2000*((bagCap(bag)-BAG_SLOTS)/BAG_STEP+1);
 
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
 export const ITEMS={
@@ -275,7 +279,7 @@ for(const b of GEAR_BRACKETS)for(const boss of b.bosses)DROPS[boss].items.push(.
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
 export const SHOPS={
- 'แม่บัว':{mapId:'ayutthaya',title:'แผงยาแม่บัว',stock:['hp-small','hp-large','mp-small','mp-large','green-herb','sticky-rice','return-incense','fly-wing','pet-food','pet-lure']},
+ 'แม่บัว':{mapId:'ayutthaya',title:'แผงยาแม่บัว',expand:true,stock:['hp-small','hp-large','mp-small','mp-large','green-herb','sticky-rice','return-incense','fly-wing','pet-food','pet-lure']},
  // 0.50 festival exchange: paid in event tokens instead of cowries.
  'เจ้าจุก':{mapId:'ayutthaya',title:'ซุ้มงานวัดเจ้าจุก',currency:'event-token',stock:['krathong','green-herb','hp-large','pet-lure','lek-lai']},
  'ป้าละไม':{mapId:'rice-fields',title:'ยุ้งป้าละไม',stock:['hp-small','mp-small','sticky-rice']},
@@ -285,13 +289,15 @@ export const SHOPS={
 };
 
 const int=(v,min,max)=>Number.isSafeInteger(v)?Math.min(Math.max(v,min),max):min;
-export function normalizeBag(bag,cap=BAG_SLOTS){
- const b=bag&&typeof bag==='object'?bag:{},items={};
+export function normalizeBag(bag,cap=bagCap(bag)){
+ const b=bag&&typeof bag==='object'?bag:{},items={},slots=bagCap(b);
  for(const [id,n] of Object.entries(b.items&&typeof b.items==='object'?b.items:{})){
   if(!BAGGABLE(id))continue;const c=int(n,0,MAX_STACK);if(c>0&&Object.keys(items).length<cap)items[id]=c;
  }
- return {coins:int(b.coins,0,MAX_COINS),items};
+ return slots>BAG_SLOTS?{coins:int(b.coins,0,MAX_COINS),items,slots}:{coins:int(b.coins,0,MAX_COINS),items};
 }
+// Buy +BAG_STEP slots (shop service, not an item, so it works even when the bag is full).
+export function expandBag(bag){const b=normalizeBag(bag),cost=expandCost(b);if(cost===null)throw new Error('bag-max');if(b.coins<cost)throw new Error('no-coins');b.coins-=cost;b.slots=bagCap(b)+BAG_STEP;return b;}
 export const count=(bag,id)=>normalizeBag(bag).items[id]??0;
 
 // Adds coins and items; whatever does not fit (full bag / stack cap) is reported as lost.
@@ -300,7 +306,7 @@ export function addLoot(bag,{coins=0,items=[]}={}){
  const gained=int(coins,0,MAX_COINS);b.coins=Math.min(MAX_COINS,b.coins+gained);
  for(const {id,count:n=1} of items){
   if(!BAGGABLE(id)||!(n>0))continue;
-  const room=id in b.items||Object.keys(b.items).length<BAG_SLOTS?MAX_STACK-(b.items[id]??0):0,take=Math.min(room,n);
+  const room=id in b.items||Object.keys(b.items).length<bagCap(b)?MAX_STACK-(b.items[id]??0):0,take=Math.min(room,n);
   if(take>0){b.items[id]=(b.items[id]??0)+take;added.push({id,count:take});}
   if(take<n)lost.push({id,count:n-take});
  }
@@ -361,7 +367,7 @@ export function itemLabel(list){return list.map(({id,count:n})=>(itemDef(id)?.na
 
 // Player-facing reasons (shown as a notice) for the error codes above.
 export const foodBuff=world=>world.food?.left>0?ITEMS[world.food.id]?.buff??null:null;
-export const ITEM_ERRORS={'wing-blocked':'ปีกเหินลมใช้ในดันเจี้ยน บ้านกิลด์ กิลด์วอร์ หรือระหว่างดวลไม่ได้','rebirth-town':'เกิดใหม่ได้เฉพาะในเมือง','rebirth-level':'ต้องถึง Base Lv.99 ก่อน','rebirth-max':'เกิดใหม่ครบ 10 ครั้งแล้ว','no-recipe':'ไม่มีสูตรนี้','no-material':'วัตถุดิบไม่พอ','craft-rate':'ค่อย ๆ ทำทีละรอบ','no-break-guard':'ไม่มียันต์กันแตก','shop-zone':'ตั้งร้านได้เฉพาะถนนตลาดแม่บัวในอยุธยา','shop-limit':'เปิดร้านค้างครบจำนวนแล้ว · เพิ่มทักษะการค้าเพื่อเปิดเพิ่ม','shop-crowded':'ชิดร้านอื่นเกินไป · ขยับออกอีกนิด','shop-far':'เดินไปที่ร้านก่อน','not-wanted':'ร้านนี้ไม่ได้รับซื้อของชิ้นนี้','not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่','not-refinable':'ตีบวกได้เฉพาะอาวุธและเสื้อเกราะที่สวมอยู่','refine-max':'ตีบวกสูงสุด +10 แล้ว','no-ore':'แร่ตีบวกไม่พอ','no-lek-lai':'ไม่มีเหล็กไหล','refine-far':'ต้องตีบวกที่โรงตีครูแสนดาบ','not-card':'ไม่ใช่การ์ด','card-slot':'การ์ดนี้ใส่ช่องนี้ไม่ได้','slot-full':'อุปกรณ์นี้มีการ์ดแล้ว','no-card-slot':'อุปกรณ์นี้ไม่มีช่องการ์ด','storage-far':'คุยกับลุงเรืองที่ท่าน้ำเพื่อเปิดคลัง','coin-cap':'เบี้ยเต็มแล้ว','trade-far':'อยู่ไกลกันเกินไป','trade-busy':'อีกฝ่ายกำลังแลกของอยู่','trade-none':'ไม่ได้แลกของอยู่','trade-locked':'ล็อกข้อเสนอแล้ว แก้ไขไม่ได้','trade-wait':'รออีกฝ่ายล็อกก่อน','stall-city':'ตั้งแผงได้เฉพาะในเมือง','stall-none':'แผงนี้ปิดแล้ว','stall-self':'ซื้อจากแผงตัวเองไม่ได้','recall-here':'อยู่ในเมืองหลวงแล้ว','held':'ขยับตัวไม่ได้','no-ailment':'ไม่มีอาการผิดปกติ','not-tameable':'ล่อได้เฉพาะ หนู หุ่นฟาง ตั๊กแตน ลูกลิง ที่เลือกเป็นเป้าไว้','pet-active':'มีสัตว์เลี้ยงออกมาอยู่แล้ว (คืนเป็นไข่ก่อน)','no-pet':'ยังไม่มีสัตว์เลี้ยง','no-tokens':'เหรียญงานวัดไม่พอ','bounty-town':'รับรางวัลค่าหัวได้ในเมือง','bounty-none':'ไม่มีค่าหัวนี้','bounty-claimed':'รับรางวัลไปแล้ว','bounty-unfinished':'ยังล่าไม่ครบ','hire-far':'จ้างทหารได้ที่โรงตีครูแสนดาบ','hire-active':'มีทหารรับจ้างอยู่แล้ว'};
+export const ITEM_ERRORS={'bag-max':'กระเป๋าขยายเต็มที่แล้ว (100 ช่อง)','wing-blocked':'ปีกเหินลมใช้ในดันเจี้ยน บ้านกิลด์ กิลด์วอร์ หรือระหว่างดวลไม่ได้','rebirth-town':'เกิดใหม่ได้เฉพาะในเมือง','rebirth-level':'ต้องถึง Base Lv.99 ก่อน','rebirth-max':'เกิดใหม่ครบ 10 ครั้งแล้ว','no-recipe':'ไม่มีสูตรนี้','no-material':'วัตถุดิบไม่พอ','craft-rate':'ค่อย ๆ ทำทีละรอบ','no-break-guard':'ไม่มียันต์กันแตก','shop-zone':'ตั้งร้านได้เฉพาะถนนตลาดแม่บัวในอยุธยา','shop-limit':'เปิดร้านค้างครบจำนวนแล้ว · เพิ่มทักษะการค้าเพื่อเปิดเพิ่ม','shop-crowded':'ชิดร้านอื่นเกินไป · ขยับออกอีกนิด','shop-far':'เดินไปที่ร้านก่อน','not-wanted':'ร้านนี้ไม่ได้รับซื้อของชิ้นนี้','not-usable':'ใช้ไอเทมนี้ไม่ได้','no-item':'ไม่มีไอเทมนี้ในกระเป๋า','already-full':'HP / MP เต็มอยู่แล้ว','defeated':'หมดแรงอยู่ ใช้ยาไม่ได้','item-rate':'รอสักครู่ก่อนใช้อีกครั้ง','not-sold':'ร้านนี้ไม่ได้ขายของชิ้นนี้','no-coins':'เบี้ยไม่พอ','bag-full':'กระเป๋าเต็ม','bad-count':'จำนวนไม่ถูกต้อง','not-sellable':'ขายของชิ้นนี้ไม่ได้','shop-too-far':'เดินเข้าใกล้ร้านก่อน','not-gear':'สวมใส่ไม่ได้','wrong-class':'อาชีพนี้ใช้ไม่ได้','low-level':'เลเวลยังไม่ถึง','slot-empty':'ช่องนี้ว่างอยู่','bad-stat':'ค่าสถานะไม่ถูกต้อง','stat-max':'ค่าสถานะสูงสุดแล้ว','no-stat-points':'แต้มสถานะไม่พอ','gear-rate':'รอสักครู่','not-refinable':'ตีบวกได้เฉพาะอาวุธและเสื้อเกราะที่สวมอยู่','refine-max':'ตีบวกสูงสุด +10 แล้ว','no-ore':'แร่ตีบวกไม่พอ','no-lek-lai':'ไม่มีเหล็กไหล','refine-far':'ต้องตีบวกที่โรงตีครูแสนดาบ','not-card':'ไม่ใช่การ์ด','card-slot':'การ์ดนี้ใส่ช่องนี้ไม่ได้','slot-full':'อุปกรณ์นี้มีการ์ดแล้ว','no-card-slot':'อุปกรณ์นี้ไม่มีช่องการ์ด','storage-far':'คุยกับลุงเรืองที่ท่าน้ำเพื่อเปิดคลัง','coin-cap':'เบี้ยเต็มแล้ว','trade-far':'อยู่ไกลกันเกินไป','trade-busy':'อีกฝ่ายกำลังแลกของอยู่','trade-none':'ไม่ได้แลกของอยู่','trade-locked':'ล็อกข้อเสนอแล้ว แก้ไขไม่ได้','trade-wait':'รออีกฝ่ายล็อกก่อน','stall-city':'ตั้งแผงได้เฉพาะในเมือง','stall-none':'แผงนี้ปิดแล้ว','stall-self':'ซื้อจากแผงตัวเองไม่ได้','recall-here':'อยู่ในเมืองหลวงแล้ว','held':'ขยับตัวไม่ได้','no-ailment':'ไม่มีอาการผิดปกติ','not-tameable':'ล่อได้เฉพาะ หนู หุ่นฟาง ตั๊กแตน ลูกลิง ที่เลือกเป็นเป้าไว้','pet-active':'มีสัตว์เลี้ยงออกมาอยู่แล้ว (คืนเป็นไข่ก่อน)','no-pet':'ยังไม่มีสัตว์เลี้ยง','no-tokens':'เหรียญงานวัดไม่พอ','bounty-town':'รับรางวัลค่าหัวได้ในเมือง','bounty-none':'ไม่มีค่าหัวนี้','bounty-claimed':'รับรางวัลไปแล้ว','bounty-unfinished':'ยังล่าไม่ครบ','hire-far':'จ้างทหารได้ที่โรงตีครูแสนดาบ','hire-active':'มีทหารรับจ้างอยู่แล้ว'};
 // 0.85 admin balance overrides (balance.js); item description texts are not rewritten.
 for(const [id,item] of Object.entries(ITEMS))patch('items',id,item);
 patchDrops(DROPS);

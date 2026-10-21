@@ -1,6 +1,6 @@
 // Pets (0.50), shared by the offline game and the realm server. Lure a weakened monster → egg → hatch → it follows you.
 // Hunger falls 1 per minute; feeding when hungry builds intimacy, overfeeding or starving loses it; loyal pets give a stat bonus.
-import {normalizeBag,BAG_SLOTS} from './items.js?v=107';
+import {normalizeBag,BAG_SLOTS,bagCap} from './items.js?v=107';
 export const PETS={
  rat:{name:'หนูยุ้งข้าว',egg:'egg-rat',chance:.35,bonus:{luk:2},text:'LUK +2'},
  straw:{name:'หุ่นฟางหลง',egg:'egg-straw',chance:.3,bonus:{str:1,dex:1},text:'STR +1 · DEX +1'},
@@ -13,7 +13,7 @@ export const mood=pet=>MOODS.find(([n])=>pet.intimacy>=n)[1];
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 export function normalizePet(p){return p&&PETS[p.id]?{id:p.id,intimacy:clamp(Math.round(+p.intimacy||0),0,INTIMACY_MAX),hunger:clamp(+p.hunger||0,0,100)}:null;}
 const take=(bag,id)=>{const b=normalizeBag(bag);if(!b.items[id])throw new Error('no-item');b.items[id]--;if(!b.items[id])delete b.items[id];return b;};
-const give=(b,id)=>{if(!(id in b.items)&&Object.keys(b.items).length>=BAG_SLOTS)throw new Error('bag-full');b.items[id]=(b.items[id]??0)+1;return b;};
+const give=(b,id)=>{if(!(id in b.items)&&Object.keys(b.items).length>=bagCap(b))throw new Error('bag-full');b.items[id]=(b.items[id]??0)+1;return b;};
 // Weaker monsters are easier: chance × (1.6 − hp share). The lure is spent either way.
 export function tame(bag,monsterId,mob,rand=Math.random){
  const pet=PETS[monsterId];if(!pet)throw new Error('not-tameable');if(!mob||mob.hp<=0)throw new Error('not-tameable');

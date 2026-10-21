@@ -120,7 +120,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   for(const e of s.events??[]){if(e.actor===client.id){game.world.events.push(e);continue;}
    const v=views.get(e.actor);if(!v||v.loading)continue;
    if(e.type==='damage'&&Number.isInteger(e.id))game.popup?.(e); // 0.99.3 everyone's numbers float over the monster they hit
-   if(e.type==='playerHit')game.popup?.({...e,color:'#ff987e'},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2+v.sprite.position.y,z:v.state.player.z})});
+   if(e.type==='playerHit')game.popup?.({...e,hurt:true},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2+v.sprite.position.y,z:v.state.player.z})});
    if(e.type==='cast'){
     const id=v.state.character.classId,skill=skillTrack(id,e.skillIndex),current=skillTrack(id,v.action?.index);
     if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock};

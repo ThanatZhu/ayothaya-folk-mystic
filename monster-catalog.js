@@ -12,7 +12,7 @@ export const FRONTIER_MONSTERS=[
  // 0.49: party-dungeon boss (ใต้ถุนโรงสีต้องสาป, never respawns inside the instance) and the timed MVP of โรงสีใต้เงาจันทร์.
  // Own art since 0.54: assets/frontier38/boss-monsters (re-gridded from the ChatGPT bosses49 hand-off).
  {id:'lantern-lord',name:'เจ้าโคมวิญญาณ',hp:3200,speed:.9,damage:26,baseXp:1200,jobXp:700,level:26,sheet:'boss-monsters',row:0,height:3.2,boss:true,respawn:70,reach:2.4,windup:.8},
- {id:'straw-king',name:'ราชาหุ่นฟางเพลิง',hp:7000,speed:.8,damage:34,baseXp:2600,jobXp:1500,level:30,sheet:'boss-monsters',row:1,height:4.4,boss:true,mvp:true,respawn:3600,reach:3,windup:.9},
+ {id:'straw-king',name:'ราชาหุ่นฟางเพลิง',hp:7000,speed:.8,damage:34,baseXp:2600,jobXp:1500,level:30,sheet:'boss-monsters',row:1,height:4.4,boss:true,mvp:true,respawn:3600,reach:3,windup:.9,pctHit:{tank:.2,min:.2,max:.3}},
  // 0.60 บึงบัวต้องมนตร์ (Lv. 25–35): stronger variants drawn with existing rows, larger.
  {id:'marsh-rat',name:'หนูบึงยักษ์',hp:260,speed:1.8,damage:16,baseXp:70,jobXp:40,level:26,sheet:'field-monsters',row:1,height:1.45},
  {id:'bog-hopper',name:'ตั๊กแตนหนองน้ำ',hp:320,speed:1.4,damage:18,baseXp:85,jobXp:48,level:28,sheet:'field-monsters',row:2,height:1.6},

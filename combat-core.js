@@ -85,11 +85,17 @@ export function screenDirection(horizontal,vertical,azimuth){
 }
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 // 0.43: a monster hit after guard, AGI/LUK dodge and DEF (world.derived from character-stats.js). 0 = dodged.
+// 0.112.2 the frontline (sword-and-shield) line soaks percent-of-HP boss hits with its DEF; Master jobs keep the class id
+export const TANK_CLASSES=new Set(['swordsman']);
 export function monsterHit(world,raw,rand=Math.random,monsterId=null){
  // 0.103 dodge from FLEE against this monster's HIT; magic monsters (lanterns) go through MDEF instead of DEF
  const p=world.player,d=world.derived,t=monsterId?MONSTER_TYPES.find(x=>x.id===monsterId):null;
  const dodge=d?(t&&d.fleeStat!=null?dodgeChance(d.fleeStat,monsterHitStat(t),d.total?.luk??1):d.flee):0;
  if(d&&rand()<dodge*(world.status?.blind?.5:1))return 0;
+ // 0.112.2 percent bosses (Straw King): a tank takes pctHit.tank of its max HP minus its DEF; anyone else a random
+ // min..max share of max HP that DEF and element resist do not touch. A guard shield still cuts it like any hit.
+ if(t?.pctHit&&d){const h=t.pctHit,cut=p.shield>0?.35:1,tank=TANK_CLASSES.has(world.profession?.id);
+  return Math.max(1,Math.round((tank?p.maxHp*h.tank-(d.def??0):p.maxHp*(h.min+rand()*(h.max-h.min)))*cut));}
  const base=p.shield>0?Math.ceil(raw*.35):raw,resist=d&&monsterId?1-Math.min(.8,d.resist?.[affinityOf(monsterId).element]??0):1;
  const guard=d?(magicMonster(t)?(d.mdef??0):(d.def??0)):0;
  return d?Math.max(1,Math.round(base*resist*100/(100+guard*4))):base;

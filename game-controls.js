@@ -36,7 +36,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function pillar(x,z,rarity){const m=new THREE.Mesh(new THREE.CylinderGeometry(.18,.42,6,12,1,true),new THREE.MeshBasicMaterial({color:RARITY_COLOR[rarity],transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));m.position.set(x,3,z);scene.add(m);pillars.push({m,age:0});}const footDust=createFootDust(scene);
  let strikes=[],shakeAmount=0,lastStep=0;
  let heroView='side',heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
- const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let hitTintUntil=0,attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,runToggled=false,capabilitySignature='';
+ const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let hitTintUntil=0,strikeAt=0,swingScale=1,heldHits=[],attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,runToggled=false,capabilitySignature='';
  const supportsAction=action=>(action!=='run'||GAMEPLAY_RUN_ENABLED)&&supportsCharacterAction(action,hero.sprite.userData.supportsAction?.bind(hero.sprite.userData));
  function refreshAnimationCapabilities(){const actions=CHARACTER_ACTIONS.filter(supportsAction),signature=actions.join(',');if(signature!==capabilitySignature){capabilitySignature=signature;if(!supportsAction('run'))runToggled=false;dispatchEvent(new CustomEvent('character-animation-capabilities',{detail:{actions}}));}return actions;}
  function setRunning(value){runToggled=value===true&&supportsAction('run');return runToggled;}
@@ -125,15 +125,19 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    const track=Number.isInteger(e.skillIndex)?skillTrack(world.profession.id,e.skillIndex):null;
    // Basic auto-attacks must not replace a skill's active pose mid-animation.
    if(track||world.time>=castUntil||activeSkill===null){
-    activeSkill=track?e.skillIndex:null;castUntil=world.time+(track?.duration??attackDuration(world.profession.id));
+    // 1.10 owner: the swing keeps pace with the attack speed (AGI/DEX make attacks faster than the base swing)
+    const interval=world.profession.delay*((world.derived??world.derivedView)?.delay??1);swingScale=track?1:Math.max(1,attackDuration(world.profession.id)/Math.max(.2,interval*.95));
+    activeSkill=track?e.skillIndex:null;castUntil=world.time+(track?.duration??attackDuration(world.profession.id)/swingScale);
     actionStart=world.time;world.clearEmote();actionMode=!track?'attack':e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    }
-   const beats=track?track.strikes.map(b=>world.time+b*track.duration):[world.time+.12];strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
+   const beats=track?track.strikes.map(b=>world.time+b*track.duration):[world.time+.12];
+   // 1.10 owner: numbers, the hit flash and the death wait for the moment the swing / spell connects
+   strikeAt=world.time+(track?track.strikes[0]*track.duration:.42*attackDuration(world.profession.id)/swingScale);strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    const presentation=track??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
    const from=e.from??world.player,to=e.to??from;
    skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});
-  }else if(e.type==='miss'){popup({...e,type:'damage',amount:'MISS',color:'#d8d8d8'});
-  }else if(e.type==='damage'){popup(e);const v=mobViews[e.id];if(v)v.flashAt=world.time;if(e.color==='#ffd27a')kick=Math.max(kick,1);}
+  }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
+  }else if(e.type==='damage'){const v=mobViews[e.id];if(strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff7a6a');hitTintUntil=world.time+.45;}
   else if(e.type==='notice')toast(e.text);
@@ -240,6 +244,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const steering=paused?{x:0,z:0,attack:false,run:false}:{...direction,attack:input.attack||keys.has('Space'),run:supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'))};
   if(marker.visible){markerAge+=dt;if(walker.active){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}if(network){network.setInput(steering);world.time+=dt;predictMove(world,serverSelf,dt,steering);}else if(!paused)world.update(dt,steering);
   world.events.splice(0).forEach(e=>{effect(e);for(const fn of listeners)fn(e);});
+  if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
   const chosen=actionChoice({time:t,dead:p.hp<=0,hit:t<hitUntil,cast:t<castUntil?actionMode:false,moving:p.moving,running:p.running,emote:world.emote,guard:p.shield>0});
@@ -247,7 +252,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const distanceMoved=Math.hypot(p.x-lastX,p.z-lastZ);lastX=p.x;lastZ=p.z;
   if(distanceMoved<1)gait+=gaitStep(distanceMoved,dt,world.profession.id,mode); // No steps while blocked; teleports do not advance the gait.
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
-  const locomotion=mode==='walk'||mode==='run',poseTime=locomotion||mode==='idle'?t:mode==='hit'?t-hitStart:world.emote?.name===mode?t-world.emote.time:t-actionStart;
+  const locomotion=mode==='walk'||mode==='run',poseTime=locomotion||mode==='idle'?t:mode==='hit'?t-hitStart:world.emote?.name===mode?t-world.emote.time:mode==='attack'?(t-actionStart)*swingScale:t-actionStart;
   const pose=skillActive?skillPose(world.profession.id,activeSkill,t-actionStart,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
   if(!visualPose||reduced)visualPose={...pose};
   else for(const key of Object.keys(pose))visualPose[key]=typeof pose[key]!=='number'||['frame','artFrame','stand','time','phase'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
@@ -275,9 +280,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if((world.rebirth??0)!==shownRank){shownRank=world.rebirth??0;const t=playerLabel.querySelector('.rank-title');t.hidden=!shownRank;t.textContent=shownRank?'✦ '+rebirthRank(shownRank)+' ✦':'';}
   mobViews.forEach((v,i)=>{
    const m=world.mobs[i],type=MONSTER_TYPES[m.type];
-   if(m.hp<=0&&v.deathStart===null)v.deathStart=t;if(m.hp>0)v.deathStart=null;
-   const deadAge=v.deathStart===null?0:t-v.deathStart,visible=m.hp>0||deadAge<1.25;
-   v.sprite.visible=v.shadow.visible=visible;v.label.hidden=m.hp<=0;v.warning.visible=m.hp>0&&m.windup>0;
+   const held=v.holdUntil>t; // 1.10 still standing until the blow lands
+   if(m.hp<=0&&v.deathStart===null&&!held)v.deathStart=t;if(m.hp>0)v.deathStart=null;
+   const deadAge=v.deathStart===null?0:t-v.deathStart,visible=m.hp>0||held||deadAge<1.25;
+   v.sprite.visible=v.shadow.visible=visible;v.label.hidden=m.hp<=0&&!held;v.warning.visible=m.hp>0&&m.windup>0;
    {const charge=Math.min(1,Math.max(0,1-(m.windup??0)/(MONSTER_BEHAVIOUR[type.id]?.windup??type.windup??.45)));const aoe=!!MONSTER_BEHAVIOUR[type.id]?.aoe;v.warning.position.set(m.x,.09,m.z);v.warning.material.opacity=aoe?.3+.35*charge:.12+.25*charge;
     v.charge.visible=aoe&&v.warning.visible;v.charge.position.set(m.x,.092,m.z);v.charge.scale.setScalar(Math.max(.05,charge));v.charge.material.opacity=.1+.14*charge;} // 0.99.3 area bursts fill up until they land
    if(!visible)return;

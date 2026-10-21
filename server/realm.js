@@ -35,7 +35,7 @@ const copy=v=>structuredClone(v);
 // 0.99.11 bandwidth: each player gets only the monsters within MOB_VIEW m, and of those only the fields that changed since
 // that player last got them (the client merges monsters with Object.assign). Server-only timers stay home; positions are
 // rounded to 1 cm, other numbers to 0.1, and the respawn countdown to whole seconds.
-const PLAYER_STATIC=['equipment','partyId','pet','stall','guild','rebirth'],MOB_VIEW=50,MOB_SKIP=new Set(['home','attackCD','leapCD','step','strike','flee','justEnraged']);
+const PLAYER_STATIC=['equipment','partyId','pet','stall','guild','rebirth'],MOB_VIEW=50,MOB_SKIP=new Set(['home','attackCD','leapCD','step','strike','flee','justEnraged','pressure','slamCD']);
 const mobValue=(k,v)=>typeof v!=='number'?v:k==='x'||k==='z'?Math.round(v*100)/100:k==='dead'?Math.ceil(v):Math.round(v*10)/10;
 // 0.93 duels: a challenge lasts 20 s, a bout 90 s; players hit each other for 35% of their monster damage (then the
 // target's dodge, shield and DEF apply as for a monster blow). Walking 20 m apart ends the bout as a draw.
@@ -469,6 +469,7 @@ export class RealmServer{
     if(result==='respawn'){room.contributors.delete(m.id);if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);else if(type.awakened)this.announce(room.serverId,`⚡ ${type.name} (Lv.${type.level}) ตื่นขึ้นที่ ${room.map.name}!`);}
     if(m.justEnraged){m.justEnraged=false;for(const id of room.peers)this.peers.get(id).world.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
     if(result==='burst')for(const id of room.peers){const a=this.peers.get(id);if(!a.suspended&&a.world.player.hp>0&&distance(a.world.player,m)<=MONSTER_BEHAVIOUR[type.id].aoe)a.world.takeMonsterHit(type);}
+    if(result==='slam')for(const id of room.peers){const a=this.peers.get(id);if(!a.suspended&&a.world.player.hp>0)a.world.takeSlam(type,m,MONSTER_BEHAVIOUR[type.id].slam);}
     if(result==='hit'&&target){
      target.world.takeMonsterHit(type);
     }

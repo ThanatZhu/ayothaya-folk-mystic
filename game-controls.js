@@ -1,5 +1,5 @@
 import {itemDef} from './items.js?v=107';
-import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
+import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=101';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=life1';
@@ -8,7 +8,7 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=109.4';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=110.8';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=101';
 import {createRouteWalker} from './route-walk.js?v=01';
 
@@ -144,6 +144,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
   }else if(e.type==='damage'){const v=mobViews[e.id];if(strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
   else if(e.type==='heal'){popup(e,true);}
+  else if(e.type==='knock'){kick=Math.max(kick,1.4);if(network)world.knock={vx:e.vx,vz:e.vz,t:e.t};} // 0.111 boss slam: shake and slide back (online: mirror the server's slide)
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff7a6a');hitTintUntil=world.time+.45;}
   else if(e.type==='notice')toast(e.text);
   else if(e.type==='combo')popup({x:e.x,z:e.z,amount:'คอมโบ!',color:'#fff4dc'},true);
@@ -289,8 +290,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(m.hp<=0&&v.deathStart===null&&!held)v.deathStart=t;if(m.hp>0)v.deathStart=null;
    const deadAge=v.deathStart===null?0:t-v.deathStart,visible=m.hp>0||held||deadAge<1.25;
    v.sprite.visible=v.shadow.visible=visible;v.label.hidden=m.hp<=0&&!held;v.warning.visible=m.hp>0&&m.windup>0;
-   {const charge=Math.min(1,Math.max(0,1-(m.windup??0)/(MONSTER_BEHAVIOUR[type.id]?.windup??type.windup??.45)));const aoe=!!MONSTER_BEHAVIOUR[type.id]?.aoe;v.warning.position.set(m.x,.09,m.z);v.warning.material.opacity=aoe?.3+.35*charge:.12+.25*charge;
-    v.charge.visible=aoe&&v.warning.visible;v.charge.position.set(m.x,.092,m.z);v.charge.scale.setScalar(Math.max(.05,charge));v.charge.material.opacity=.1+.14*charge;} // 0.99.3 area bursts fill up until they land
+   {const b=MONSTER_BEHAVIOUR[type.id],slam=m.slamming&&b?.slam,charge=Math.min(1,Math.max(0,1-(m.windup??0)/(slam?slam.windup:b?.windup??type.windup??.45))),aoe=!!b?.aoe||!!slam,grow=slam?slam.radius/(b.aoe??type.reach??1.35):1;v.warning.position.set(m.x,.09,m.z);v.warning.scale.setScalar(grow);v.warning.material.opacity=slam?.45+.45*charge:aoe?.3+.35*charge:.12+.25*charge;
+    v.charge.visible=aoe&&v.warning.visible;v.charge.position.set(m.x,.092,m.z);v.charge.scale.setScalar(Math.max(.05,charge)*grow);v.charge.material.opacity=.1+.14*charge;} // 0.99.3 area bursts fill up until they land
    if(!visible)return;
    const f=monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
    const recoil=reduced?0:Math.sin(Math.PI*Math.min(1,m.hit/.34))*.18;

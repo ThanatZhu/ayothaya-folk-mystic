@@ -1,7 +1,7 @@
 import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js';
 import {activeEmote,canonicalAction,EMOTE_ACTIONS,movementSpeed} from './character-action-state.js?v=life1';
-import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
+import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
 import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=105.3';
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
@@ -164,8 +164,16 @@ export class CombatWorld{
  weakness(){return (this.status.blind?.7:1)*(this.status.curse?.75:1);}
  inflict(name){if(!name||!AILMENTS[name])return;const fresh=!this.status[name];this.status[name]=AILMENTS[name].time;if(fresh)this.notice(AILMENTS[name].name+'! · '+AILMENTS[name].text);}
  // One monster blow, shared by the offline world and the realm server: damage, ailment roll, or going down (+ death penalty).
- takeMonsterHit(type){
-  const p=this.player,damage=monsterHit(this,type.damage,Math.random,type.id);if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
+ // 0.111 boss ground slam: knock the player back (always; it is the ground that throws you) and hit hard unless dodged.
+ // ponytail: damage floor is a share of max HP before DEF, so very high DEF still shrinks it; tune pct per boss.
+ takeSlam(type,m,s){
+  const p=this.player,dx=p.x-m.x,dz=p.z-m.z,d=Math.hypot(dx,dz)||1;if(p.hp<=0||d>s.radius)return false;
+  this.knock={vx:dx/d*s.push/.35,vz:dz/d*s.push/.35,t:.35};this.path=[];this.emit('knock',{...this.knock,x:p.x,z:p.z});
+  const hit=this.takeMonsterHit(type,Math.max(type.damage*s.power,p.maxHp*s.pct));if(p.hp<=0)this.knock=null;return hit;
+ }
+ knockStep(dt){const k=this.knock;if(!k)return false;moveBody(this.player,k.vx*Math.min(dt,k.t),k.vz*Math.min(dt,k.t),this.nav);if((k.t-=dt)<=0)this.knock=null;return true;}
+ takeMonsterHit(type,raw=type.damage){
+  const p=this.player,damage=monsterHit(this,raw,Math.random,type.id);if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
   p.hp=Math.max(0,p.hp-damage);this.calm=0;this.emit('playerHit',{x:p.x,z:p.z,amount:damage});delete this.status.sleep;
   if(p.hp>0){this.inflict(rollAilment(type.id));return true;}
   p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;p.running=false;this.status={};
@@ -247,10 +255,10 @@ export class CombatWorld{
   // 0.100.11 HP comes back on its own: towns 4 % of max HP a second, the field 1 % a second after 6 s out of combat
   this.calm=this.status.poison?0:(this.calm??0)+dt;
   if(p.hp>0&&p.hp<p.maxHp&&(this.safe||this.calm>6))p.hp=Math.min(p.maxHp,p.hp+Math.max(8,p.maxHp*(this.safe?.04:.01))*dt);
-  const ox=p.x,oz=p.z,manual=!stop&&Math.hypot(input.x,input.z)>.08;
+  const ox=p.x,oz=p.z,knocked=this.knockStep(dt),manual=!stop&&!knocked&&Math.hypot(input.x,input.z)>.08;
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);
-  if(this.auto&&!stop&&!manual&&this.manualGrace===0){
+  if(this.auto&&!stop&&!knocked&&!manual&&this.manualGrace===0){
    let m=this.target;if(!m||!this.prey(m)||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_SEEK+2){m=this.nearest(AUTO_RANGE);
     // 0.91 nothing left near where AUTO was switched on (e.g. turned on at the respawn yard): take the closest monster
     // within 30 m of the player and move the hunting spot there.
@@ -278,6 +286,7 @@ export class CombatWorld{
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
    if(m.justEnraged){m.justEnraged=false;this.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
    if(outcome==='burst'&&Math.hypot(p.x-m.x,p.z-m.z)<=MONSTER_BEHAVIOUR[type.id].aoe&&this.takeMonsterHit(type)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
+   if(outcome==='slam'&&this.takeSlam(type,m,MONSTER_BEHAVIOUR[type.id].slam)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
    if(outcome==='hit'){
     if(this.takeMonsterHit(type)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
    }
@@ -290,7 +299,7 @@ export class CombatWorld{
 // ease onto the server position whenever we are not steering (stopping, auto-pathing).
 export function predictMove(world,server,dt,dir){
  const p=world.player;if(!server||p.hp<=0)return;
- const manual=!held(world.status)&&Math.hypot(dir.x,dir.z)>.08,ox=p.x,oz=p.z,speed=world.walkSpeed(dir.run===true);
+ const ox=p.x,oz=p.z,knocked=world.knockStep(dt),manual=!knocked&&!held(world.status)&&Math.hypot(dir.x,dir.z)>.08,speed=world.walkSpeed(dir.run===true);
  if(Math.hypot(dir.x,dir.z)>.08||dir.attack)world.clearEmote();
  if(manual){const n=Math.max(1,Math.hypot(dir.x,dir.z));moveBody(p,dir.x/n*speed*dt,dir.z/n*speed*dt,world.nav);p.face={x:dir.x,z:dir.z};}
  const ex=server.x-p.x,ez=server.z-p.z,error=Math.hypot(ex,ez);

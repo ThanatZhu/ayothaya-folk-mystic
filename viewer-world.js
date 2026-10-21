@@ -1,6 +1,6 @@
 import {drawCharacterFrame,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {peoplePlacement} from './npc-size.js?v=size1';
-import {groundHeight} from './combat-core.js?v=109.4';
+import {groundHeight} from './combat-core.js?v=110.8';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=38';
@@ -24,7 +24,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=110.5';
+import {createGame} from './game-controls.js?v=110.8';
 import {atlasPath,className} from './classes.js?v=101';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=107';

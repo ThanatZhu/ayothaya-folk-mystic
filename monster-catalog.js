@@ -28,33 +28,42 @@ export const FRONTIER_MONSTERS=[
 // Presentation timing is independent of frame rate and authoritative world position.
 export function monsterFrame(m,time){
  if(m.hp<=0)return 7;
- if(m.hit>0)return m.hit>.14?5:6;
+ if(m.hit>0&&!m.armor)return m.hit>.14?5:6;
  if(m.windup>0)return 3;
  if(m.strike>0)return 4;
  if(m.moving)return 1+(Math.floor((m.step??time*7)*1.4)%2);
  return 0;
 }
 export function markMonsterHit(m,source){
+ m.aggro=true;m.pressure=(m.pressure??0)+1;
+ // 0.111 bosses wear super armor: a short flash, no hurt pose, no recoil and no lost turn, so a party can't stun-lock them.
+ if(m.armor){m.hit=.12;m.recoil=null;return;}
  const dx=m.x-source.x,dz=m.z-source.z,d=Math.hypot(dx,dz)||1;
- m.hit=.34;m.recoil={x:dx/d,z:dz/d};m.aggro=true;
+ m.hit=.34;m.recoil={x:dx/d,z:dz/d};
 }
 // 0.58 behaviours (shared by the offline world and the realm server), set per monster in MONSTER_BEHAVIOUR:
 //  aoe: the wind-up ends in a burst around the monster ('burst' outcome, every player inside is hit; step out to dodge)
 //  skirmish: after landing a hit it runs away for a moment · leap: jumps in when the target is 3–6 away
 //  enrage: below 40% HP it moves faster and winds up sooner
+//  slam (0.111 bosses): after `hits` hits taken it answers with a ground slam: a wider red ring, then everyone inside
+//   is hit for max(damage×power, maxHp×pct) and knocked `push` m away from it ('slam' outcome). `cd` s between slams.
+const slam=(radius,push,power,pct,hits,cd)=>({radius,push,power,pct,hits,cd,windup:1.15});
 export const MONSTER_BEHAVIOUR={'bog-hopper':{leap:true},'bog-lantern':{aoe:2.4,windup:.9},'marsh-ape':{skirmish:1.2,enrage:true},lantern:{aoe:2.2,windup:.9},monkey:{skirmish:1.4},'monkey-chief':{skirmish:1.2,enrage:true},hopper:{leap:true},
- 'rat-chief':{enrage:true},'mill-keeper':{aoe:2.8,enrage:true},'lantern-lord':{aoe:3.2,windup:1,enrage:true},'straw-king':{aoe:3.4,windup:1.1,enrage:true},
- 'rat-chief-awakened':{enrage:true},'monkey-chief-awakened':{skirmish:1.2,enrage:true},'mill-keeper-awakened':{aoe:3.2,windup:1,enrage:true},'marsh-ape-awakened':{skirmish:1.2,enrage:true}};
+ 'rat-chief':{enrage:true},'mill-keeper':{aoe:2.8,enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'lantern-lord':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.4,1.6,.1,8,6.5)},'straw-king':{aoe:3.4,windup:1.1,enrage:true,slam:slam(5,4,1.8,.12,7,6)},
+ 'rat-chief-awakened':{enrage:true,slam:slam(4,3.2,1.4,.08,9,7)},'monkey-chief-awakened':{skirmish:1.2,enrage:true,slam:slam(4.2,3.4,1.5,.09,8,6.5)},'mill-keeper-awakened':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.6,1.6,.1,8,6.5)},'marsh-ape-awakened':{skirmish:1.2,enrage:true,slam:slam(4.6,3.8,1.6,.1,8,6)}};
 export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear}){
  m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);m.strike=Math.max(0,(m.strike??0)-dt);m.moving=false;
  m.flee=Math.max(0,(m.flee??0)-dt);m.leapCD=Math.max(0,(m.leapCD??0)-dt);
+ m.slamCD=Math.max(0,(m.slamCD??0)-dt);m.pressure=Math.max(0,(m.pressure??0)-dt*.4);if(type.boss)m.armor=true;
  const b=MONSTER_BEHAVIOUR[type.id]??{},rage=b.enrage&&m.hp>0&&m.hp<m.maxHp*.4;
  if(rage&&!m.enraged){m.enraged=true;m.justEnraged=true;}if(m.hp>=m.maxHp*.4)m.enraged=false;
- if(m.hp<=0){m.dead-=dt;if(m.dead<=0){Object.assign(m,{...m.home,hp:m.maxHp,aggro:false,root:0,hit:0,windup:0,strike:0,attackCD:1});return 'respawn';}return;}
+ if(m.hp<=0){m.dead-=dt;if(m.dead<=0){Object.assign(m,{...m.home,hp:m.maxHp,aggro:false,root:0,hit:0,windup:0,strike:0,attackCD:1,slamming:false,pressure:0});return 'respawn';}return;}
  if(!target||Math.hypot(m.x-m.home.x,m.z-m.home.z)>9)m.aggro=false;
  if(m.hit>.26&&!(m.windup>0))return;
  const goal=m.aggro&&target?target:m.home,dx=goal.x-m.x,dz=goal.z-m.z,d=Math.hypot(dx,dz),reach=type.reach??1.35;
- if(m.windup>0){m.windup=Math.max(0,m.windup-dt*(rage?1.4:1));if(m.windup===0){m.strike=.24;m.attackCD=rage?1:1.4;if(b.aoe)return 'burst';if(target&&Math.hypot(m.x-target.x,m.z-target.z)<=reach&&lineClear(m,target,nav)){if(b.skirmish)m.flee=b.skirmish;return 'hit';}}return;}
+ // Hit often enough, a boss drops whatever it was winding up and answers with a slam (enraged: sooner, every 2/3 of the cooldown).
+ if(b.slam&&m.aggro&&target&&m.slamCD===0&&!m.slamming&&m.pressure>=b.slam.hits*(rage?.6:1)){m.slamming=true;m.windup=b.slam.windup;m.pressure=0;m.slamCD=b.slam.cd*(rage?.67:1);return;}
+ if(m.windup>0){m.windup=Math.max(0,m.windup-dt*(rage?1.4:1));if(m.windup===0){m.strike=.24;m.attackCD=rage?1:1.4;if(m.slamming){m.slamming=false;return 'slam';}if(b.aoe)return 'burst';if(target&&Math.hypot(m.x-target.x,m.z-target.z)<=reach&&lineClear(m,target,nav)){if(b.skirmish)m.flee=b.skirmish;return 'hit';}}return;}
  const speed=type.speed*(rage?1.35:1);
  if(m.flee>0&&target&&m.root===0){const away=Math.hypot(m.x-target.x,m.z-target.z)||1;moveBody(m,(m.x-target.x)/away*speed*1.2*dt,(m.z-target.z)/away*speed*1.2*dt,nav);m.step+=dt*9;m.moving=true;return;}
  if(b.leap&&m.aggro&&target&&m.root===0&&m.leapCD===0&&d>3&&d<6&&lineClear(m,target,nav)){moveBody(m,dx/d*(d-reach*.8),dz/d*(d-reach*.8),nav);m.leapCD=4;m.attackCD=Math.min(m.attackCD,.3);return 'leap';}

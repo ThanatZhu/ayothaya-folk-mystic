@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import {ITEM_ERRORS,itemDef} from './items.js?v=107';
 import {PETS,FOOD,LOYAL,INTIMACY_MAX,mood,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from './pets.js?v=107';
-import {MONSTER_TYPES,groundHeight} from './combat-core.js?v=109.4';
+import {MONSTER_TYPES,groundHeight} from './combat-core.js?v=110.8';
 import {loadMonsterFrames} from './monster-art.js?v=38';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';

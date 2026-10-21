@@ -269,3 +269,8 @@ body.field-hud.hud63 #menu-rank i::after{display:block;content:"";position:absol
  body.field-hud.hud63 #hud-right #quest-tracker{padding-top:0!important;padding-bottom:0!important;min-height:0!important;row-gap:0!important;margin-top:-8px!important}
  body.field-hud.hud63 #quest-go{min-height:30px!important;padding:0 10px!important}
 }
+/* 1.12.4 owner (phone): a closed HUD window is never drawn. bag-ui.css gave the phone bag display:flex without [open],
+   so the closed bag stayed on screen over every other window and swallowed their close buttons. */
+dialog[data-hud-panel]:not([open]){display:none!important}
+/* and windows are smaller on short landscape phones: everything inside scales together */
+@media (orientation:landscape) and (max-height:520px){dialog[data-hud-panel][open]{zoom:.8}}

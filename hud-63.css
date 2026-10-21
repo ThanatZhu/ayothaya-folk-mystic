@@ -40,16 +40,20 @@ body.field-hud.hud63 #mini-meta{position:absolute;left:24%;right:24%;bottom:3.8%
 
 /* ---------- main menu (top centre): equal buttons, secondary entries in a drawer ---------- */
 body.field-hud.hud63 #game-menu{left:50%;right:auto;top:var(--edge-t);transform:translateX(-50%);gap:var(--g);padding:0;background:none}
-body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:56px;min-width:56px;height:58px;min-height:58px;padding:4px 2px;border-radius:10px;
- background:linear-gradient(#2a4a3f,#16302a);border:1px solid #c9a35a;box-shadow:0 2px 6px #0007;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
-body.field-hud.hud63 #game-menu>button span,body.field-hud.hud63 #menu-drawer>button span{display:block;font-size:11px;font-weight:600;color:var(--ink);line-height:1}
-body.field-hud.hud63 #game-menu i{width:32px;height:32px;border-radius:8px;background:none;border:0}
+body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:60px;min-width:60px;height:72px;min-height:72px;padding:2px;border-radius:10px;
+ background:none;border:1px solid transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px}
+/* labels sit on one line: fixed-height box under a fixed-size icon, so every button's text lines up */
+body.field-hud.hud63 #game-menu>button span,body.field-hud.hud63 #menu-drawer>button span{display:block;height:12px;font-size:11px;font-weight:600;color:var(--ink);line-height:12px;white-space:nowrap;text-shadow:0 1px 2px #000c,0 0 4px #000a}
+/* 0.107.1 icon-only: no square tile, a larger icon lifted off the map by a soft shadow */
+body.field-hud.hud63 #game-menu i{flex:none;width:52px;height:52px;border-radius:8px;background:none;border:0;filter:drop-shadow(0 3px 3px #000a);transition:transform .12s}
+body.field-hud.hud63 #game-menu>button:hover,body.field-hud.hud63 #menu-drawer>button:hover{background:none;border-color:transparent}
+body.field-hud.hud63 #game-menu>button:hover i,body.field-hud.hud63 #menu-drawer>button:hover i{transform:translateY(-2px) scale(1.06)}
 body.field-hud.hud63 #menu-more i{display:grid;place-items:center;font-size:22px;font-style:normal;color:var(--gold);font-weight:700}
 body.field-hud.hud63 #menu-more i::after{display:none}
 body.field-hud.hud63 #menu-drawer{display:none;position:absolute;top:calc(100% + var(--g));right:0;padding:var(--g);gap:var(--g);border-radius:12px;background:var(--surface);
  border:1px solid #c9a35a;box-shadow:0 8px 24px #0009;flex-direction:row}
 body.field-hud.hud63 #game-menu.more-open #menu-drawer{display:flex}
-body.field-hud.hud63 #game-menu.more-open #menu-more{background:linear-gradient(#3b6656,#1f4339)}
+body.field-hud.hud63 #game-menu.more-open #menu-more i{filter:drop-shadow(0 0 5px #f5d58a)}
 #menu-toggle{display:none}
 
 /* ---------- right column under the minimap: quest tracker (foldable) + event chips ---------- */
@@ -213,10 +217,10 @@ body.field-hud.hud63 #quest-tracker span{font-size:9.5px!important;line-height:1
 @media (pointer:coarse),(max-width:900px),(max-height:600px){
  body.field-hud.hud63 #menu-toggle{display:none!important}
  body.field-hud.hud63 #game-menu{display:flex!important;flex-wrap:nowrap;left:auto;right:calc(var(--edge-r) + 120px + var(--g));top:var(--edge-t);transform:none;width:auto;padding:0;gap:4px;background:none;border:0;box-shadow:none}
- body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:46px;min-width:44px;height:50px;min-height:44px;padding:3px 1px;gap:2px}
- body.field-hud.hud63 #game-menu i{width:26px;height:26px}
+ body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:48px;min-width:44px;height:56px;min-height:44px;padding:1px;gap:2px}
+ body.field-hud.hud63 #game-menu i{width:38px;height:38px}
  body.field-hud.hud63 #game-menu>button span,body.field-hud.hud63 #menu-drawer>button span{font-size:9px}
- body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 50px + var(--g))}
+ body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 56px + var(--g))}
 }
 /* narrow portrait phones: the menu runs across the full width under the profile and minimap (two rows),
    then the target box (left) and quest + event chips (right) sit below it */

@@ -9,12 +9,12 @@ import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=110.8';
-import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=101';
+import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=101';
 import {createRouteWalker} from './route-walk.js?v=01';
 
 import {className} from './classes.js?v=101';
 import {rebirthRank} from './character-stats.js?v=107';
-import {normalizeAuto} from './auto-play.js';
+import {normalizeAuto,pickAutoSkill} from './auto-play.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
@@ -126,19 +126,41 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   f.el.style.translate=`calc(${(projection.x*.5+.5)*innerWidth+f.side*Math.min(1,f.age*3)*14}px - 50%) calc(${(-projection.y*.5+.5)*innerHeight-f.off-f.age*26}px - 100%)`;
   f.el.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';
  }
- function effect(e){
-  if(e.type==='experience'){
-   toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');
+ // 1.11 owner (AUTO feels late online): the client mirrors the server's AUTO choice and starts the swing or cast at
+ // once; the server's own cast event then only confirms it. Damage, numbers and deaths still come from the server and
+ // wait for the blow. A cast the client did not foresee plays as before (shifted by the network lag).
+ let predictions=[],predCD=[],predAutoCast=0,nextBasicAt=0,cooldownsAt=0,netLag=.1;const wall=()=>performance.now()/1000; // a steady clock: world.time resyncs to the server
+ function attackInterval(){return world.profession.delay*(((network&&world.derivedView)||world.derived)?.delay??1);}
+ function predictAuto(dt){
+  for(let i=0;i<predCD.length;i++)predCD[i]=Math.max(0,predCD[i]-dt);predAutoCast=Math.max(0,predAutoCast-dt);
+  predictions=predictions.filter(q=>wall()-q.at<.7);
+  const p=world.player;let m=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null;
+  // the target just died: the server takes the nearest live monster in the same tick, so take it here too
+  if(!m||m.hp<=0)m=world.mobs.filter(x=>x.hp>0&&(world.hunt==null||x.type===world.hunt)).sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0]??null;
+  if(m&&Math.hypot(m.x-p.x,m.z-p.z)>8)m=null;
+  if(!m||p.hp<=0)return;
+  const cast=(index,kind,color)=>{p.face={x:m.x-p.x,z:m.z-p.z};playCast({type:'cast',skillIndex:index,predicted:true,kind,color,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z}});};
+  if(predAutoCast===0){
+   const view={player:p,target:m,skills:world.skills,skillLevels:world.skillLevels,profession:world.profession,cooldowns:world.cooldowns.map((c,i)=>Math.max(c-(wall()-cooldownsAt)-netLag,predCD[i]??0)) /* snapshot cooldowns are a network delay old */};
+   const i=pickAutoSkill(view,world.autoConfig,scaledSkill);
+   if(i>=0){const sk=scaledSkill(world.skills[i],world.skillLevels?.[i]??1);predCD[i]=sk?.cd??1;predAutoCast=.5;cast(i,sk?.type,sk?.color);return;}
   }
-  if(e.type==='cast'){
+  if(Math.hypot(m.x-p.x,m.z-p.z)<=world.profession.range+1.5&&wall()>=nextBasicAt){nextBasicAt=wall()+attackInterval();cast(null,world.profession.kind,world.profession.color);}
+ }
+ function playCast(e){
    const track=Number.isInteger(e.skillIndex)?skillTrack(world.profession.id,e.skillIndex):null;
+   // a server cast this client already started: keep the running animation, only time the numbers to its blow
+   if(!e.predicted){const idx=Number.isInteger(e.skillIndex)?e.skillIndex:null,q=predictions.findIndex(q=>q.index===idx);
+    if(q>=0){strikeAt=Math.max(strikeAt,predictions[q].strikeAt);predictions.splice(q,1);if(e.color)castLight.color.set(e.color);return;}
+    if(Number.isFinite(e.lag))netLag=netLag*.8+Math.min(.4,e.lag)*.2;
+    if(idx===null){const lag=Math.min(.4,Math.max(.12,e.lag??0));nextBasicAt=wall()-lag+attackInterval()-.03;}}
    // Basic auto-attacks must not replace a skill's active pose mid-animation.
    // 1.10.4 owner: skills play fast enough that the first blow lands within ~0.25 s and the cast ends within ~0.7 s
    // (shaman skills were 1-2 s long and the hit landed 0.6-1.3 s in, long after the server had dealt it)
    const k=track?Math.max(1,track.strikes[0]*track.duration/.25,track.duration/.7):1,fast=track?{...track,duration:track.duration/k}:null,lag=Math.min(.4,Math.max(0,e.lag??0));
    if(track||world.time>=castUntil||activeSkill===null){
     // 1.10 owner: the swing keeps pace with the attack speed (AGI/DEX make attacks faster than the base swing)
-    const interval=world.profession.delay*((world.derived??world.derivedView)?.delay??1);swingScale=track?1:Math.max(1,attackDuration(world.profession.id)/Math.max(.2,interval*.95),.42*attackDuration(world.profession.id)/.2); // and the blow lands within 0.2 s
+    const interval=world.profession.delay*(((network&&world.derivedView)||world.derived)?.delay??1);swingScale=track?1:Math.max(1,attackDuration(world.profession.id)/Math.max(.2,interval*.95),.42*attackDuration(world.profession.id)/.2); // and the blow lands within 0.2 s
     // 1.10.2 online: the swing began e.lag seconds ago on the server; start it that far in so the blow lands on time
     const swingStart=world.time-lag;skillScale=k;
     activeSkill=track?e.skillIndex:null;castUntil=swingStart+(fast?.duration??attackDuration(world.profession.id)/swingScale);
@@ -146,10 +168,16 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    }
    const beats=fast?fast.strikes.map(b=>world.time-lag+b*fast.duration):[world.time+.12];
    // 1.10 owner: numbers, the hit flash and the death wait for the moment the swing / spell connects
-   strikeAt=world.time-lag+(fast?fast.strikes[0]*fast.duration:.42*attackDuration(world.profession.id)/swingScale);strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
+   strikeAt=world.time-lag+(fast?fast.strikes[0]*fast.duration:.42*attackDuration(world.profession.id)/swingScale);if(e.predicted)predictions.push({index:Number.isInteger(e.skillIndex)?e.skillIndex:null,at:wall(),strikeAt});strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    const presentation=fast??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
    const from=e.from??world.player,to=e.to??from;
    skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});
+ }
+ function effect(e){
+  if(e.type==='experience'){
+   toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');
+  }
+  if(e.type==='cast'){playCast(e);
   }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
   }else if(e.type==='damage'){const v=mobViews[e.id];if(strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
   else if(e.type==='heal'){popup(e,true);}
@@ -258,6 +286,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   refreshAnimationCapabilities();
   const steering=paused?{x:0,z:0,attack:false,run:false}:{...direction,attack:input.attack||keys.has('Space'),run:supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'))};
   if(marker.visible){markerAge+=dt;if(walker.active){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}if(network){network.setInput(steering);world.time+=dt;predictMove(world,serverSelf,dt,steering);}else if(!paused)world.update(dt,steering);
+  if(network&&world.auto&&!paused)predictAuto(dt);
   world.events.splice(0).forEach(e=>{effect(e);for(const fn of listeners)fn(e);});
   if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
@@ -349,7 +378,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   world.skill=i=>{world.clearEmote();return client.command('skill',{index:i});};world.basicAttack=()=>{world.clearEmote();return client.command('attack');};world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=(on,hunt)=>client.command('auto',{on,hunt});world.questTalk=npc=>client.command('questTalk',{npc});world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard)=>client.command('refine',{slot,npc,lekLai,guard});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});world.discard=(item,count)=>client.command('discard',{item,count});
  }
  function applyNetworkSnapshot(snapshot){const s=snapshot.self;{const o=snapshot.weather;world.weatherOverride=o?{id:o.id,mapId:o.mapId??null,endsAt:Date.now()+o.left}:null;} // 0.109.7 admin weather
- world.weekly=s.weekly??null;world.rebirth=s.rebirth??0;if(s.story)world.story=s.story;world.myStall=s.stall??null;world.myGuild=s.guild??null;world.status=s.status??{};world.mvp=s.mvp??null;world.pet=s.pet??null;world.bounty=s.bounty??null;world.mercLeft=s.merc??0;world.album=s.album??[];if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
+ world.weekly=s.weekly??null;world.rebirth=s.rebirth??0;if(s.story)world.story=s.story;world.myStall=s.stall??null;world.myGuild=s.guild??null;world.status=s.status??{};world.mvp=s.mvp??null;world.pet=s.pet??null;world.bounty=s.bounty??null;world.mercLeft=s.merc??0;world.album=s.album??[];if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];cooldownsAt=performance.now()/1000;world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
   serverSelf.running=s.player.running===true;world.emote=activeEmote(s.emote,snapshot.time);
   for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);else if('type' in mob)addNetworkMob(mob);}
  }

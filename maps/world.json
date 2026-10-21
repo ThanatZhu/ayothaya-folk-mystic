@@ -1,5 +1,5 @@
 {
-  "version": 66,
+  "version": 67,
   "capital": "ayutthaya",
   "retiredMaps": [
     "ayutthaya-wilds",
@@ -22556,14 +22556,14 @@
             "aaaaaaa.aaaaaaaaaaafffaaffffffffadfffaaaaaefffffeeaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaaa.a....aaffffeafffdaaaaaffffaadfffffdaaadeefaaaaaa...aaadaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaefaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaaaaa....aafaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaafaaaaaa...aaa.eaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaefaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaa....aafaaaaaaaaaaaaaafaa...aaaaaaaa...aafaaaaaa...aaaaaaaaaaaaaaaaaaaaaa.a...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaa....aafaaaaaaaaaaaaaafaa...aaaaaaaa...aafaaaaaa...aaaaaaaaaaaaaaaaaaaaaa.a...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaa.aaaaaaaa",
             "aaaaaaaad....aafaaaaaaaaaaaaaafad...aaaaaaad...aafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaafaaaaaaaaaaaaaafaa...aaaaaaaa...aafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaafaaaaaaaaaaaaaadfa...aaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaafaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaa.a......afaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaafaaa...aaaaaaaaffaaaaaaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaa....aafaaa...daaaaaaafaaaaaaaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaa....aafaaa...daaaaaaafaaaaaaaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaa.aaaaaaaa",
             "aaaaaaaaaa..aaafaaa...aaaaaaaafaaaaaaaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaafaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
             "aaaaaaa...aajaafaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaafaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaafffffffffffeaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa",
@@ -22630,77 +22630,77 @@
       ],
       "mobs": [
         [
-          6,
+          6.5,
           43,
           4
         ],
         [
-          -6,
+          -5.5,
           36,
           5
         ],
         [
-          11,
+          11.5,
           28,
           6
         ],
         [
-          -18,
+          -17.5,
           15,
           4
         ],
         [
-          -33,
+          -32.5,
           17,
           5
         ],
         [
-          -48,
+          -47.5,
           12,
           6
         ],
         [
-          20,
+          20.5,
           8,
           5
         ],
         [
-          48,
+          48.5,
           14,
           4
         ],
         [
-          54,
+          54.5,
           1,
           6
         ],
         [
-          -16,
+          -15.5,
           -18,
           4
         ],
         [
-          -39,
+          -38.5,
           -34,
           5
         ],
         [
-          11,
+          11.5,
           -40,
           6
         ],
         [
-          52,
+          52.5,
           -32,
           4
         ],
         [
-          -42,
+          -41.5,
           -60,
           10
         ],
         [
-          -18,
+          -17.5,
           15,
           20
         ]
@@ -22770,14 +22770,14 @@
             35
           ],
           "b": [
-            -15,
+            -8,
             35
           ],
           "width": 7
         },
         {
           "a": [
-            -15,
+            -8,
             35
           ],
           "b": [
@@ -22803,14 +22803,14 @@
             4
           ],
           "b": [
-            -15,
+            -8,
             4
           ],
           "width": 7
         },
         {
           "a": [
-            -15,
+            -8,
             4
           ],
           "b": [
@@ -22836,14 +22836,14 @@
             -30
           ],
           "b": [
-            -15,
+            -8,
             -30
           ],
           "width": 7
         },
         {
           "a": [
-            -15,
+            -8,
             -30
           ],
           "b": [
@@ -23006,20 +23006,20 @@
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefffeefeeefeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaa.aaalaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaffffffffeffffffffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.ffffff.fff.ffffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeefeeefeeefeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeeeeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.eeeeeeeeeeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.eeeeee.eee.eeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeeeeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaa..aaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefffefffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaa.aaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefffffffeaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaa..a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaefffefffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaa..a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaeeeeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a.aaaaaaaaaaaaaaaagaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a.aaaaaaaaaaaaaaaagaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaafaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaeaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaa.aaaaaadfgaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.aaaaae.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -23043,49 +23043,49 @@
             "aaaaaa.a...aaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaammmaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaae.aaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefffef.fefffefffeaaa",
-            "aaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefffefffffff.fffeaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefffefffefffefffeaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeefeeefeeaaaeefeeaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaf.ffeff.faaaeffffaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefff..ffeaaaef..eaaa",
+            "aaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeeee.eee.eeeeaaa",
+            "aaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeee.eeeeeeeeee.eeaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeeeeeeeeeeeeeaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeaaaeeeeeaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.eeeee.eaaaeeeeeaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeee..eeeaaaee..eaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeaaaeeeeeaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaa.aaaaaaaa..aaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaa.a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa....aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaa.aaaaaaaa..aaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaa.a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa....aaaaa.a",
             "aaaaaaaaaa.aaaaaaa.aaa.aaaaaaaaaaaaaaaaaaaaali.kkaaaaa.a..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa.a.aaaaaaa",
             "aaaaaaaaaaaaaaaaahkaaaagaaaaafffffffffaaaaaaaaaaaaaaa.....aaaaaaaafffffffffaaaaaaaaaaaaaaaaa.aaaaaahkaaaaaaaafffffffffaaaaaaaaaaaa..aaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaafeaaaaaiiiiiiiiiaaaaaaaaaaaaaaaaa..aaaaaaaaaiiiiiiiiiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaiiiiiiiiiaaaaaaaaaaaaa..aaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaeaaaaaa.iiiiiii.aaaaaaaaaaaaaaaaa.aaaaaaaaaa.iiiiiii.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.iiiiiii.aaaaaaaaaaaaaaaaaaaaaaa",
-            "aa...........................iiiiiiiii............................iiiiiiiiia.................................iiiiiiii.....................aaa",
-            "aa............................iiiiiii..............................iiiiiii.a..................................iiiiiii.....................aaa",
-            "aa...........................iiiiiiii.............................iiiiiiiiiaa...........j....................iiiiiiiii..............j.....aaa",
-            "aa............................iiiiiii..............................iiiiiii.aa...........j.....................iiiiiii...............m.....aaa",
-            "aa...........................iiiiiiii.............................iiiiiiiiiaa...........j.ggg................iiiiiiiiia.............j.....aaa",
-            "aa..........................a.iiiiiii..............................iiiiiii.aaa............ggg.................iiiiiii.a..........g........aaa",
-            "aa..........................aiiiiiiii.............................iiiiiiiiiaaa.............g.................iiiiiiiiia.........ggg.......aaa",
-            "aaa........................aa.iiiiiii..............................iiiiiii.aaaa..........aggg.................iiiiiii.aa........ggg.......aaa",
-            "aaaaaaaaaaaaa.aaaaaaaaaaaaaaaiiiiiiiiiaaaaaaaaaaaaaaaaaaaaaaaaaaaaiiiiiiiiiaaaaaaaaaaaaa.agggaaaaaaaaaaaaaaaaiiiiiiiiiaaaaaaaaaagggaaa.aaaaaa",
-            "aaaaaaaaaaaa...aaaaaaaaaaaaaafffffffffaaaaaaaaa.aaaaaaaaahkaaaaaaafffffffffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafffffffffaaaaaaaaaaafaaaaaaaaaaa",
+            "aa...........................iiiiiiii.............................iiiiiiiii..................................iiiiiiiii....................aaa",
+            "aa............................iiiiiii..............................iiiiiii....................................iiiiiii.....................aaa",
+            "aa...........................iiiiiiii.............................iiiiiiiii.............j....................iiiiiiiii..............j.....a.a",
+            "aa............................iiiiiii..............................iiiiiii..............j.....................iiiiiii...............m.....aaa",
+            "aa...........................iiiiiiii.............................iiiiiiiii.............j.ggg................iiiiiiii...............j.....aaa",
+            "aa............................iiiiiii..............................iiiiiii................ggg.................iiiiiii............g........aaa",
+            "aa...........................iiiiiiii.............................iiiiiiiii................g.................iiiiiiii...........ggg.......aaa",
+            "aaa...........................iiiiiii............................a.iiiiiii.a..............ggg.................iiiiiii...........ggg.......aaa",
+            "aaaaaaaaaaaaa.aaaaaaaaaaaaaaaiiiiiiiiiaaaaaaaaaaaaaaaaaaaaaaaaaaaaiiiiiiiiiaaaaaaaaaaaaaaagggaaaaaaaaaaaaaaaaiiiiiiiiiaaaaaaaaaagggaaaaaaaaaa",
+            "aaaaaaaaaaaa...aaaaaaaaaaaaaafffffffffaaaaaaaaa.aaaaaaaaahkaaaaaaafffffffffaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaafffffffffaaaaaaaaaaaaaaaaa.aaaaa",
             "aaaaaaaaaaaaa..a.aaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa.a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaa.aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafeaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaa.eaaaaaaaaa.aaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaa",
-            "aaeeeeaaaaaaaadaaaaaaaaaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaa",
-            "aaeffeaaaa....a.....aaaaaaaaaaaaaaaaagaa.aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaefffaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaeffe...a.a..aaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaiaaaaaaaa.aaaaaa",
-            "aaeefe...a.a..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaaaaadaaaaaaaaaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaa....a.....aaaaaaaaaaaaaaaaagaa.aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeee...a.a..aaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa",
+            "aaeeee...a.a..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaa",
             "aaaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaa...aaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaa...aaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaa",
+            "aaaaaa...aaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaa",
             "aaaaaaa..a.aaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaajja.aaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaa.aaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -23094,51 +23094,51 @@
             "aaaaaa...aaaaaammmaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaa.aa..aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaa.aakaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaeeeeaaaa.aakiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaa",
-            "aaeffeaaaa...ddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aafffeaaa.aa.aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadeaaaaaaaaaaaa...........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aafffeaaa...aaaaa....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaa.........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaefeeaaaaa.aaaaa.a..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaefffaaaa.aaafaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaa.......aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaffffaaaaaaad.faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaa.a.......aaaaaaag.gaaaaaaaaaaaaaajaaaaaaaa",
-            "aaeffeaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.......aaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaa.......aaaaadaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaefffaaaaadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaefffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa........aaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaefffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaa.aakiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaa",
+            "aaeeeeaaaa...ddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaa.aa.aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadeaaaaaaaaaaaa...........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaa...aaaaa....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaa.........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaa.aaaaa.a..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa........aaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaeeeeaaaa.aaafaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaa.......aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaaaad.faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a.......aaaaaaag.gaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.......aaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaa.......aaaaadaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.......maaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa",
+            "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa........aaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaiiiaaaa.a.aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaamaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaa..iaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaefffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaffffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaeffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaaaaaaeefeaeeeaefeeaeeeaeeeeaefeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaad.faaaaaaaaaaaaaaaaaa.aaaaaaaaefffafffaefffaff.aefffafffaeffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaefeeaeeeaaaaaeaaaaaaaaaaaaaaaaaaa.aaaaaaaaffffafffaffffafffaefffafffaef.faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaef.eafffaeffeafffaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaeffeafffaef.eafffaefffaeffaefffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaef.fafffafffeafffaaaaaaaaaaaa..aaaaaaaaaaaa.aaaaaaaeefeaeeeaeefeaefeae..eaeeeaeefeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaefffafffaeffeaf.faaaaaaaaaaaaaaaaaaaaaaaaaedaaaaaaaefffafffaefffafffafffeafffaef.eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaeefeaeeeaeefeaefeaeefeaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.ffafffaefffafffaffffa.ffafffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaefffafffaefffafffaeffeaaaaaaakaaaaaaaaaaaaaa.aaaaaaeffeafffaefffafffaeffeafffafffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaffffafffaefffafffaffffaaaaaaaaaaaaaaaaaaaaaaa.aaaaaeeeeaefeaefeeaeeeaeeeeaeeeaefeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaae.feaf.faeffeafffaeffeaaaaaaikaaaaaaaaaaaaaaa.aaaaaeffeafffaefffafffaeffeafffaef.eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaeefeaeeeaeefeaefeaeefeaaaaaaii.aaaaaaaaaaaaaaaaaaaaefffafffaffffafffaefffaf.faefffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaef.fafffaefffaf.faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefffae.faeffeaf.faefffaf.faeffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaef.fafffaff.fafffaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaeeeeae.eaee.eaeeeaeefeaefeaeefeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaeffeafffaeffeaf.faaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaae.feafffaeffeafffaefffaeffaeffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaeefeaee.aeeeeaeeeaeefeaaamaaaaaaaaaaaaaaaaaaaaaaaaaf.ffafffaef.fafffaefffafffaefffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaae.feafffaefffafffaeffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaefffaf..aefffa.ffaefffaf.faefffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaffffafffae.ffafffaefffaaadaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaefeaeefeaeeeaeefeaefeaeefeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaeffea..faefffafi.aeffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeffeafffaefffafffaefffafffaeffeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaee.eaefeaeeeeaefeaeefeaeeeaaaaaaaaaaaaaaaaaaaaaaaaaefffafffaefffafffaefffafffaefffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaefffafffaefffafffaefffafffaaaaaaaaaaaaaaaaaaaaaaaaae.ffafffaeffeafffae.feafffaefgfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaefffaf.faffffafffaefffafffaaaaaaaaaaaaaaaaaaaaaaaaaeefeaefeaeeeeaefeaeeeeaefeaeefeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaef.eafffae.feaeffaef.eafffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaefeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaad.faaaaaaaaaaaaaaaaaa.aaaaaaaaeeeeaeeeaeeeeaee.aeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaaaaaeaaaaaaaaaaaaaaaaaaa.aaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaee.eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaee.eaeeeaeeeeaeeeaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaeeeeaeeeaee.eaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaee.eaeeeaeeeeaeeeaaaaaaaaaaaa..aaaaaaaaaaaa.aaaaaaaeeeeaeeeaeeeeaeeeae..eaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeae.eaaaaaaaaaaaaaaaaaaaaaaaaaedaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaee.eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.eeaeeeaeeeeaeeeaeeeea.eeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaaaaaaakaaaaaaaaaaaaaa.aaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaa.aaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaae.eeae.eaeeeeaeeeaeeeeaaaaaaikaaaaaaaaaaaaaaa.aaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaee.eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaaaaaaii.aaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeae.eaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaee.eaeeeaeeeeae.eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeae.eaeeeeae.eaeeeeae.eaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaee.eaeeeaee.eaeeeaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaeeeeae.eaee.eaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeae.eaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaae.eeaeeeaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaee.aeeeeaeeeaeeeeaaamaaaaaaaaaaaaaaaaaaaaaaaaae.eeaeeeaee.eaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaae.eeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeae..aeeeea.eeaeeeeae.eaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeae.eeaeeeaeeeeaaadaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeea..eaeeeeaei.aeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaee.eaeeeaeeeeaeeeaeeeeaeeeaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaaaaaaaaaaaaaaaaaaaaaaaaae.eeaeeeaeeeeaeeeae.eeaeeeaeegeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeae.eaeeeeaeeeaeeeeaeeeaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaee.eaeeeae.eeaeeeaee.eaeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaeeeeaeeeaeeeeaeeeaeeeeaeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
           ]
@@ -23156,57 +23156,57 @@
       ],
       "mobs": [
         [
-          8,
+          8.5,
           40,
           7
         ],
         [
-          -7,
+          -6.5,
           29,
           8
         ],
         [
-          16,
+          16.5,
           21,
           9
         ],
         [
-          -37,
+          -36.5,
           14,
           7
         ],
         [
-          39,
+          39.5,
           14,
           8
         ],
         [
-          53,
+          53.5,
           -4,
           9
         ],
         [
-          -43,
+          -42.5,
           -16,
           7
         ],
         [
-          13,
+          13.5,
           -27,
           8
         ],
         [
-          28,
+          28.5,
           -38,
           9
         ],
         [
-          -44,
+          -43.5,
           -49,
           11
         ],
         [
-          -37,
+          -36.5,
           14,
           21
         ]
@@ -23265,6 +23265,28 @@
             5
           ],
           "b": [
+            0,
+            -1
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            -1
+          ],
+          "b": [
+            0,
+            -21
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            -21
+          ],
+          "b": [
             -3,
             -23
           ],
@@ -23320,6 +23342,28 @@
             4
           ],
           "b": [
+            -37,
+            -1
+          ],
+          "width": 7
+        },
+        {
+          "a": [
+            -37,
+            -1
+          ],
+          "b": [
+            -37,
+            -21
+          ],
+          "width": 7
+        },
+        {
+          "a": [
+            -37,
+            -21
+          ],
+          "b": [
             -31,
             -26
           ],
@@ -23353,15 +23397,37 @@
             16
           ],
           "b": [
-            47,
+            45,
+            6
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            45,
+            6
+          ],
+          "b": [
+            43,
             -1
           ],
           "width": 8
         },
         {
           "a": [
-            47,
+            43,
             -1
+          ],
+          "b": [
+            43,
+            -21
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            43,
+            -21
           ],
           "b": [
             37,
@@ -23643,47 +23709,47 @@
       ],
       "mobs": [
         [
-          9,
+          9.5,
           38,
           4
         ],
         [
-          -8,
+          -7.5,
           28,
           9
         ],
         [
-          13,
+          13.5,
           15,
           8
         ],
         [
-          -26,
+          -25.5,
           14,
           4
         ],
         [
-          -13,
+          -12.5,
           -9,
           9
         ],
         [
-          13,
+          13.5,
           -19,
           4
         ],
         [
-          1,
+          1.5,
           -40,
           12
         ],
         [
-          56,
+          56.5,
           -15,
           14
         ],
         [
-          -26,
+          -25.5,
           14,
           22
         ]
@@ -23923,42 +23989,42 @@
             ".......aa..........................................................................................................................aa........",
             ".......aa..........................................................................................................................aa........",
             ".......aa..........................................................................................................................aa........",
-            ".......aa............................................................kkk...........................................................aa........",
-            ".......aa.......................................................kkkkkkkkkkkkk......................................................aa........",
+            ".......aa..........................................................................................................................aa........",
+            ".......aa........................................................kkkkkkkkkkk.......................................................aa........",
             ".......aa.....................................................kkkkkkkkkkkkkkkkk....................................................aa........",
-            ".......aa...................................................kkkkkklkkk.kkkkkkkkkk..................................................aa........",
-            ".......aa..................................................kkkkkklllkkkkkkkkkkkkkk.................................................aa........",
-            ".......aa.................................................kkkkkkkklkkkkkkkkkklkklkk................................................aa........",
-            ".......aa................................................kkkkkkkkkkkkkkkkkkkkkklkkkk...............................................aa........",
-            ".......aa...............................................kkkkkkkkkkkk.....kkkkllkkkkkk..............................................aa........",
-            ".......aa..............................................kkkkkkkkkkkkk.....kkkkkklllkkkk.............................................aa........",
-            ".......aa..............................................kkkkkkkkkkkkk.....kkkkkkklkkkkk.............................................aa........",
-            ".......aa.............................................kkkkkkkkkkllkkkkkkkkkkkkkklkkkkkk............................................aa........",
+            ".......aa....................................................kkkkkkkkk.kkkkkkkkk...................................................aa........",
+            ".......aa..................................................kkkkkkkkkkkkkkkkkkkkkkk.................................................aa........",
+            ".......aa.................................................kkkkkkkkkkkkkkkkkkkkkkkkk................................................aa........",
+            ".......aa................................................kkkkkkkkkkkkkkkkkkkkkkkkkkk...............................................aa........",
+            ".......aa...............................................kkkkkkkkkkkk.....kkkkkkkkkkkk..............................................aa........",
+            ".......aa...............................................kkkkkkkkkkkk.....kkkkkkkkkkkk..............................................aa........",
+            ".......aa..............................................kkkkkkkkkkkkk.....kkkkkkkkkkkkk.............................................aa........",
             ".......aa.............................................kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk............................................aa........",
-            ".......aa............................................kkkkkkkkklkkkkkkkkkkkkkkkkkkkkkkkkk...........................................aa........",
-            ".......aa............................................kkkklkllkkkkkkkkkkkkkkkkkkkkkkkkkkk...........................................aa........",
-            ".......aa...................j.jjjjjjjjj.jjjjjjjjj.j..kkklkkkkllkllkkkkkkkkkkkkkkkkkkkkkk..j.jjjjjjjjj.jjjjjjjjj.j..................aa........",
-            ".......aa..................jjjjjjjjjjjjjjjjjj.jjjjjj.kklkkkkkkkkkkklkkkkkkkkkkkkkllkkkkk.jjjjjjjjjkkkjjjjjjjkkjjjj.................aa........",
-            ".......aa..................jjj...jjk..jjjj.....j..jj.kklkkkklkkkkkkkkkkkkkkkkkkkklllkkkk.jjjjj..jj...jjjjjjj..jjjj.................aa........",
-            ".......aa..................jjjk..jjkkkjjjj....jkk.jjkkkkkkkklkkkkkkkkkklkkkkkkkkkklkkkkkkjj.....jjj..jjjjjjj..jjjj.................aa........",
-            ".......aa..................jj..jjjjjjjjjjjjj.jjjj..jkkk.kkkklkkkkkkkkklkkkkkkkkkkkkkk.kkkjj.....jjjjjkkkkkjj.jjjjj.................aa........",
-            ".......aa..................jj...jjjjjjkkjjjjjjjjj.jjkkkkkklkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkjj....jkkjjjkkkkkjjjjjjjj.................aa........",
-            ".......aa..................jjjjjjjjjjkkkjjjjjjjkjjjj.kkkkkkkkkkkkkkkkllkklllkkkkkkkkkkkk.jjjjjjjkkkjjjkkkjjj..j.j..................aa........",
-            ".......aa..................j....j....kkkjjjjjjkkkjj....kkkkkkkkkkkklkkkkklllkkkkkkkkkk....jjjjjjkkjjjjjjjjjj....jj.................aa........",
-            ".......aa..................j.........jkjjkkjjkkkjjjllllkkkkkkkkkkkkklkkkklllkkkkkkkkkklllljjjjjjjjjkkjjjjjjj....jj.................aa........",
-            ".......aa.............................jjkkkkjjjjjjjllllkkkkkkkkkkkkkklkklkkkkkkkkkklkklllljjjjjjjjkkkkjjjjjjjjljjj.................aa........",
-            ".......aa..................j.........jjjjkkjjjjjjjjllllkkkkkkkkkkkkkkkkllkkkkkkkkklllklllljjjjjjjjjjjjjjjjjjjj..jj.................aa........",
-            ".......aa..................j....j....jjjjjjjkjjkkjjllllkkkkkkkkkkkkkkkkkllkkkkkkkkklkklllljjjjjjjkkjjjjjjkjjjj..jj.................aa........",
-            ".......aa..................jjk.kkjjjjjjjjjkkkkkkkkkllllkkkkkkkkkkkkkkkkkklkkkkkkkkkkkklllljjjjjjjkkkjjjkkkkkjjjlj..................aa........",
-            ".......aa..................jkkkkkjjjjjjjjjjkkkjkkkjllllkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkklllljjjjjjjkkkjjjjkkkjjjj..j.................aa........",
-            ".......aa..................jjkkkkjjjjjkkkjjjjjjjjjjllllkkkkklllkkkkkkkkklkklllkkkkkkkklllljjjkkkjjjjjjjjjjjjj.j.jj.................aa........",
-            ".......aa..................jjj..jjjjjkkkkkjjjjjjjjj.....kkkkllllkkkkkkkkkkklllkkkkkkk.....jjjkkkjjjjjjjjjjjj..j.jj.................aa........",
-            ".......aa...................jj..jkkkjkkkkkjjjjjjljlj.....kkklllkkkkkkkkkkkklllkkkkkk.....jjjjjjjjjjjjjjjjjj...jjj..................aa........",
-            ".......aa...................jj..jkkkkjjkjjjjjjjjj.jl......kkkkkkkklllkklkkkkkkkkkkk......j..jjjjjkkkkjjjjjj.jjjjj..................aa........",
-            ".......aa...................jjjjjjjjjjjjjjjjjjkl..lj.......kkkkkkkllllkkkkkkkkkkkk.......j..jjj...kkjjjjjjjjjjjjj..................aa........",
-            ".......aa...................jlj.j.jjjjkkjjjjj...jjjj........kkkkkllllk.kkkkkkkkkk........j..j....jjjjjjkkkjjjjjjj..................aa........",
-            ".......aa...................jjjjj..jjjkkkjjjjj..jjjj..........kkkkkkkkkkkkkkkkk..........jjjj...jjjjjjjkkkjjjjjjj..................aa........",
-            ".......aa...................jjjjjjjjjjjkjjjjjj.jjjjj............kkkkkkkkkkkkk............jjjjjjjjjjjjjjjjjjjjjjjj..................aa........",
+            ".......aa.............................................kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk............................................aa........",
+            ".......aa.............................................kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk............................................aa........",
+            ".......aa............................................kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...........................................aa........",
+            ".......aa............................................kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...........................................aa........",
+            ".......aa..................jjjjjjjjjjjjjjjjjj.jjjjj..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.jjjjjjjjjjjjjjjjjjjjjjjj..................aa........",
+            ".......aa..................jjj...jjj..jjjj.....j..j..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.jjjjj..jj...jjjjjjj..jjj..................aa........",
+            ".......aa..................jjjj..jjjjjjjjj....jjj.j..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.jj.....jjj..jjjjjjj..jjj..................aa........",
+            ".......aa..................jj..jjjjjjjjjjjjj.jjjj...kkk.kkkkkkkkkkkkkkkkkkkkkkkkkkkkk.kk.jj.....jjjjjjjjjjjj.jjjj..................aa........",
+            ".......aa..................jj...jjjjjjjjjjjjjjjjj.j..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.jj....jjjjjjjjjjjjjjjjjj..................aa........",
+            ".......aa..................jjjjjjjjjjjjjjjjjjjjjjjj..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.jjjjjjjjjjjjjjjjjjj..j.j..................aa........",
+            ".......aa..................j....j....jjjjjjjjjjjjjj....kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk....jjjjjjjjjjjjjjjjjj....j..................aa........",
+            ".......aa..................j.........jjjjjjjjjjjjjjllllkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkklllljjjjjjjjjjjjjjjjjj....j..................aa........",
+            ".......aa.............................jjjjjjjjjjjjjllllkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkklllljjjjjjjjjjjjjjjjjjjjljj..................aa........",
+            ".......aa..................j.........jjjjjjjjjjjjjjllllkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkklllljjjjjjjjjjjjjjjjjjjj..j..................aa........",
+            ".......aa..................j....j....jjjjjjjjjjjjjjllllkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkklllljjjjjjjjjjjjjjjjjjjj..j..................aa........",
+            ".......aa..................jjj.jjjjjjjjjjjjjjjjjjjjllllkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkklllljjjjjjjjjjjjjjjjjjjjjlj..................aa........",
+            ".......aa..................jjjjjjjjjjjjjjjjjjjjjjjjllllkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkklllljjjjjjjjjjjjjjjjjjjjj....................aa........",
+            ".......aa..................jjjjjjjjjjjjjjjjjjjjjjjjllllkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkklllljjjjjjjjjjjjjjjjjjj.j.j..................aa........",
+            ".......aa..................jjj..jjjjjjjjjjjjjjjjjjj.....kkkkkkkkkkkkkkkkkkkkkkkkkkkkk.....jjjjjjjjjjjjjjjjjj..j.j..................aa........",
+            ".......aa...................jj..jjjjjjjjjjjjjjjjljl......kkkkkkkkkkkkkkkkkkkkkkkkkkk.....jjjjjjjjjjjjjjjjjj...jjj..................aa........",
+            ".......aa...................jj..jjjjjjjjjjjjjjjjj.j.......kkkkkkkkkkkkkkkkkkkkkkkkk......j..jjjjjjjjjjjjjjj.jjjjj..................aa........",
+            ".......aa...................jjjjjjjjjjjjjjjjjjjl..l........kkkkkkkkkkkkkkkkkkkkkkk.......j..jjj...jjjjjjjjjjjjjjj..................aa........",
+            ".......aa...................jlj.j.jjjjjjjjjjj...jjj..........kkkkkkkkk.kkkkkkkkk.........j..j....jjjjjjjjjjjjjjjj..................aa........",
+            ".......aa...................jjjjj..jjjjjjjjjjj..jjj...........kkkkkkkkkkkkkkkkk..........jjjj...jjjjjjjjjjjjjjjjj..................aa........",
+            ".......aa...................jjjjjjjjjjjjjjjjjj.jjjj..............kkkkkkkkkkk.............jjjjjjjjjjjjjjjjjjjjjjjj..................aa........",
             ".......aa...................jjj.jjjjjjjjjjjjjjj.jjj...............llllllll................jjj.jjjjjjjjjjjjjjj.jjj..................aa........",
             ".......aa..........................llllllll........................lllllll.......................llllllll..........................aa........",
             ".......aa...........................lllllll.......................llllllll........................lllllll..........................aa........",
@@ -23988,28 +24054,28 @@
             ".......aa..........................llllllll.......................llllllll.......................llllllll..........................aa........",
             ".......aa...........................lllllll........................lllllll........................lllllll..........................aa........",
             ".......aa..........................llllllll.......................llllllll.......................llllllll..........................aa........",
-            ".......aa...................jjj.jjjjjjjjjjjjjjj.jjj........jjj.jjjjjjjjjjjjjjj.jjj........jjj.jjjjjjjjjjjjjjj.jjj..................aa........",
-            ".......aa..................jjjjjjjjjjjjjjjjjjjjkk.jj......jjjjjjjjjjjjjjjjjjjjjjjjj......jjjjjjjjjjjjjjjjjjj..jjjj.................aa........",
-            ".......aa..................jjj...jjjjjkkjjkkjjjj..jj......jjjj.jjjjjkkjjjjjjl..ljjj......jlj.j..jjjjjjjjjjjj..jjjj.................aa........",
-            ".......aa..................jjkk..jjjkkkkkjkkk.jj..jj......jjj.....jjkkkjjjjjj....jj......jl..ljjjjjjjjjjjjjj...jjj.................aa........",
-            ".......aa...................jjk..jjjjkkkkjkk...jjjjj......jjj...jjjjkkkjjjjjjjl...j......jjj.ljjjjjkkkjjkkkkj...j..................aa........",
-            ".......aa..................jj...jjjjjkkkjjjjj.kjkjjj......jjjjjjjjjjjjjjjkkkjjljj.j......jjjjjjjjjjkkkkjkkkkkj..jj.................aa........",
-            ".......aa..................jj...jjjjjjjjjjjjjkkkkkjj......jjjjjjjjjjjjjjjkkkkjjjjjj......jjjjjjjjjjjjjjjjjjjjjj..j.................aa........",
-            ".......aa..................jj...jjjjjjjjjjjjjkkkkkjl.......ljjjjjjjjjjjjjjjjjjkkkl.......ljjjjjjjjjjjjjjjjjjjjjjjj.................aa........",
-            ".......aa..................jjjj.jjjjjjjjjjjjjjjkkjjllllllllljjjjjjjjjjjjjjjjjkkkkllllllllljjjjjkkkkjjkkjjjjjjjjjjj.................aa........",
-            ".......aa..................j....j....jjjjjjjjjjjjjjllllllllljjjkkkjjjjjjkkkjjjjjjllllllllljjjjjkkkkkkkkj....j....j.................aa........",
-            ".......aa..................j.........jjjjjjjjjjjjjjllllllllljjkkkkkjjjjjkkkkjjjjjllllllllljkkjjjjjjjjkkj.........j.................aa........",
-            ".......aa.............................jjjjjjjkkkjjjllllllllljjjkkkjjjjjjkkkkjjjjjlllllllllkkkjjjjjjjjjj............................aa........",
-            ".......aa..................j.........jjjjjjjkkkkjjjllllllllljjjjjjjjjjjjjjjjjjjjjlllllllllkkkjjjjjjkkjjj.........j.................aa........",
-            ".......aa..................j....j....jkkkkkjjkkjjjjllllllllljjjjjjjjjjjjjjjjjjjjjllllllllljjkkjjjjkkkkjj....j....j.................aa........",
-            ".......aa..................jkk.kkjjjjjjjkkjjjjjjkkjllllllllljjjjjjjkkkkjjjjjjjjjjllllllllljjkkjjjjkkkkjjjjjjjj..kj.................aa........",
-            ".......aa..................jkkkkkkjjjjjjjjjjkkjjkkjl.l.l.l.ljjjjjjkkkkkjjjkkkjjjjl.l.l.l.ljjkkjjjjjjjjjjjkkkkkkkkk.................aa........",
-            ".......aa............ml....jjkkkjjjkkkjjjjjkkkkjjjjj......jjkjjkkkjjkkjjjjkkkkjjjjj......jjjjjjjjjjjjjjjjkkkkj..kk.................aa........",
-            ".......aa............ml.aehjjjjjjjjkkkjjjjkkkkkj..jj......jk..jkkkjjjjjjjjkkkkjjjjj......jjjjjjjjjjjjjjjjjjjjj..jj.................aa........",
-            ".......aa...............aehjjjj..jjjkljjjjjjkkjj..jj......jj..jjkjjjjjjjjjjjjjjjjjj......jjjj..mjjj.jjjjjjjjjj..j..................aa........",
-            ".......aa................ehjjjj..mjjj..j...jjj..jjjj......jjj.jjjjjjjjjjjjjjjjjjjjjhe....jjjk...jkk..jj.....jj...j.................aa........",
-            ".......aa..................jjjj..jjjj..j...jjj...jjj......jjjj...jjjjjjjjjjj...jjjjhe....jjjkk.jjjk..j....jjjj...j.................aa........",
-            ".......aa..................jjjjjj.jjljjljjjjjjjjjjjj......jjjj...jjjjjjjjjjj...jjjjhe....jjjjjjjjjjjjjjjj.jjjjjjjj.................aa........",
+            ".......aa..........................jjjjjjjjj......................jjjjjjjjj......................jjjjjjjjj.........................aa........",
+            ".......aa..................jjjjjjjjjjjjjjjjjjjjjj.j.......jjjjjjjjjjjjjjjjjjjjjjjj.......jjjjjjjjjjjjjjjjjjj..jjj..................aa........",
+            ".......aa..................jjj...jjjjjjjjjjjjjjj..j.......jjjj.jjjjjjjjjjjjjl..ljj.......jlj.j..jjjjjjjjjjjj..jjj..................aa........",
+            ".......aa..................jjjj..jjjjjjjjjjjj.jj..j.......jjj.....jjjjjjjjjjj....j.......jl..ljjjjjjjjjjjjjj...jj..................aa........",
+            ".......aa...................jjj..jjjjjjjjjjj...jjjj.......jjj...jjjjjjjjjjjjjjl..........jjj.ljjjjjjjjjjjjjjj...j..................aa........",
+            ".......aa..................jj...jjjjjjjjjjjjj.jjjjj.......jjjjjjjjjjjjjjjjjjjjljj........jjjjjjjjjjjjjjjjjjjjj..j..................aa........",
+            ".......aa..................jj...jjjjjjjjjjjjjjjjjjj.......jjjjjjjjjjjjjjjjjjjjjjjj.......jjjjjjjjjjjjjjjjjjjjjj....................aa........",
+            ".......aa..................jj...jjjjjjjjjjjjjjjjjjjl.......ljjjjjjjjjjjjjjjjjjjjjl.......ljjjjjjjjjjjjjjjjjjjjjjj..................aa........",
+            ".......aa..................jjjj.jjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjjjjj..................aa........",
+            ".......aa..................j....j....jjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjj....j......................aa........",
+            ".......aa..................j.........jjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjj...........................aa........",
+            ".......aa.............................jjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjj............................aa........",
+            ".......aa..................j.........jjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjj...........................aa........",
+            ".......aa..................j....j....jjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjj....j......................aa........",
+            ".......aa..................jjj.jjjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjjjllllllllljjjjjjjjjjjjjjjjjjjj..j..................aa........",
+            ".......aa..................jjjjjjjjjjjjjjjjjjjjjjjjl.l.l.l.ljjjjjjjjjjjjjjjjjjjjjl.l.l.l.ljjjjjjjjjjjjjjjjjjjjjjj..................aa........",
+            ".......aa............ml....jjjjjjjjjjjjjjjjjjjjjjjj.......jjjjjjjjjjjjjjjjjjjjjjjj.......jjjjjjjjjjjjjjjjjjjjj..j..................aa........",
+            ".......aa............ml.aehjjjjjjjjjjjjjjjjjjjjj..j.......jj..jjjjjjjjjjjjjjjjjjjj.......jjjjjjjjjjjjjjjjjjjjj..j..................aa........",
+            ".......aa...............aehjjjj..jjjjljjjjjjjjjj..j.......jj..jjjjjjjjjjjjjjjjjjjjj......jjjj..mjjj.jjjjjjjjjj..j..................aa........",
+            ".......aa................ehjjjj..mjjj..j...jjj..jjj.......jjj.jjjjjjjjjjjjjjjjjjjjjhe....jjjj...jjj..jj.....jj.....................aa........",
+            ".......aa..................jjjj..jjjj..j...jjj...jj.......jjjj...jjjjjjjjjjj...jjjjhe....jjjjj.jjjj..j....jjjj.....................aa........",
+            ".......aa..................jjjjjj.jjljjljjjjjjjjjjj.......jjjj...jjjjjjjjjjj...jjjjhe....jjjjjjjjjjjjjjjj.jjjjjjj..................aa........",
             ".......aa...................j.jjjjjjjjl.jjjjjjjjj.j........jjjjjjjllllllllljjjjjjj........j.jjjjjjjjj.jjjjjjjjj.j..................aa........",
             ".......aa..........................................................lllllll.........................................................aa........",
             ".......aa.........................................................llllllll.........................................................aa........",
@@ -24448,8 +24514,8 @@
           19
         ],
         [
-          -25.5,
-          -19,
+          -25,
+          -18.5,
           23
         ]
       ],
@@ -24461,7 +24527,7 @@
         },
         {
           "to": "bamboo-grove",
-          "x": -5.5,
+          "x": -5,
           "z": 49
         }
       ],

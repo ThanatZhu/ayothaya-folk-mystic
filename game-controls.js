@@ -99,10 +99,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function popup(e,positive=false,anchor=anchorOf(e)){
   const crit=!positive&&e.color==='#ffd27a',el=document.createElement('span');const mob=Number.isInteger(e.id)?world.mobs[e.id]:null,big=!positive&&!crit&&mob&&typeof e.amount==='number'&&e.amount>=mob.maxHp*.2;
   el.className='damage-number'+(crit?' crit':'')+(big?' big':'')+(positive?' heal':'');
-  // 1.09 owner: numbers only (no minus sign) and four fixed colours instead of one per skill/element:
+  // 1.09 owner: numbers only (no minus or plus sign) and four fixed colours instead of one per skill/element:
   // white = your hit, gold = critical, red = damage you take, green = healing. Words (MISS, คอมโบ!) keep their own.
   const word=typeof e.amount==='string';
-  el.textContent=word?e.amount:(positive?'+':'')+e.amount;
+  el.textContent=String(e.amount); // owner: plain numbers, no + or −
   el.style.color=word?(e.color??'#fff4dc'):positive?'#8ff08c':crit?'#ffd27a':e.hurt?'#ff5a4a':'#fff4dc';
   const same=floats.filter(f=>f.key===anchor.key);for(const f of same)f.slot+=crit?1.3:1;
   if(same.length>=FLOAT_STACK){const old=same[0];old.el.remove();floats.splice(floats.indexOf(old),1);}
@@ -136,7 +136,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff9b83');}
   else if(e.type==='notice')toast(e.text);
-  else if(e.type==='combo')popup({x:e.x,z:e.z,amount:'คอมโบ!',color:'#7ee8ff'},true);
+  else if(e.type==='combo')popup({x:e.x,z:e.z,amount:'คอมโบ!',color:'#fff4dc'},true);
   else if(e.type==='drop'){const best=Math.max(...e.items.map(i=>itemDef(i.id)?.rarity??0));if(best>=2&&Number.isFinite(e.x))pillar(e.x,e.z,best);}
   else if(e.type==='defeat')toast('ปราบ '+MONSTER_TYPES[world.mobs[e.id].type].name+' แล้ว');
  }

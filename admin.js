@@ -215,27 +215,43 @@ function weatherTab(){
  $('view').querySelectorAll('[data-wx]').forEach(b=>b.onclick=()=>setWeather(b.dataset.wx));
 }
 // 0.109.8 world boss tab: pick a realm, a field map and a boss, then summon it (one at a time per map; it does not respawn).
-let bossMsg='',bossMaps=null,bx={serverId:'server-1',mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp))};
+let bossMsg='',bossMaps=null,bx={serverId:'server-1',mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 async function summonBoss(){
  if(!bx.mapId){bossMsg='เลือกแผนที่ก่อน';bossTab();return;}
  bossMsg='กำลังเสก…';bossTab();
- try{const r=await adminFetch('/admin/boss',{serverId:bx.serverId,mapId:bx.mapId,typeId:+bx.typeId});bossMsg=`👑 เสก ${r.name} ที่ ${r.map} แล้ว (จุด X ${r.x} · Y ${r.z}) · ประกาศทั้งเซิร์ฟแล้ว`;}
- catch(e){bossMsg={'boss-alive':'แผนที่นี้มีบอสโลกที่เสกไว้ยังไม่ตาย · ปราบก่อนแล้วค่อยเสกใหม่','bad-map':'แผนที่นี้เสกบอสไม่ได้ (เมือง ดันเจี้ยน บ้านกิลด์)','bad-boss':'มอนตัวนี้ไม่ใช่บอส'}[e.message]??ADMIN_ERRORS[e.message]??'เสกไม่สำเร็จ · '+e.message;}
+ try{const r=await adminFetch('/admin/boss',{serverId:bx.serverId,mapId:bx.mapId,typeId:+bx.typeId,count:bx.count,x:bx.spot?.x??null,y:bx.spot?.y??null});bossMsg=`👑 เสก ${r.name}${r.count>1?' ×'+r.count:''} ที่ ${r.map} แล้ว (จุด X ${r.x} · Y ${r.y}) · ประกาศทั้งเซิร์ฟแล้ว`;}
+ catch(e){bossMsg={'boss-many':'แผนที่นี้มีบอสที่เสกไว้เยอะเกินไปแล้ว (สูงสุด 60 ตัว)','bad-spot':'จุดที่เลือกเดินไม่ได้ · ลองจิ้มบนพื้นสีเขียว','bad-map':'แผนที่นี้เสกบอสไม่ได้ (เมือง ดันเจี้ยน บ้านกิลด์)','bad-boss':'มอนตัวนี้ไม่ใช่บอส'}[e.message]??ADMIN_ERRORS[e.message]??'เสกไม่สำเร็จ · '+e.message;}
  bossTab();
 }
 function bossTab(){
  warmFirebase();const user=LOCAL||fbConn?.auth.currentUser;
- if(!bossMaps){bossMaps=[];fetch('maps/world.json').then(r=>r.json()).then(w=>{bossMaps=w.maps.filter(m=>!m.instance&&!m.safe&&!m.guildHall).map(m=>({id:m.id,name:m.name}));if(!bx.mapId&&bossMaps[0])bx.mapId=bossMaps[0].id;if(tab==='boss')bossTab();}).catch(()=>{});}
+ if(!bossMaps){bossMaps=[];fetch('maps/world.json').then(r=>r.json()).then(w=>{bossMaps=w.maps.filter(m=>!m.instance&&!m.safe&&!m.guildHall).map(m=>({id:m.id,name:m.name,nav:m.nav,bounds:m.bounds}));if(!bx.mapId&&bossMaps[0])bx.mapId=bossMaps[0].id;if(tab==='boss')bossTab();}).catch(()=>{});}
  const bosses=MONSTER_TYPES.map((t,i)=>[i,t]).filter(([,t])=>t.boss);
  $('view').innerHTML=!user?`<div class="wx"><p>ต้องล็อกอิน Google ด้วยบัญชีแอดมินก่อน</p><button type="button" id="bx-login" class="wx-auto">ล็อกอิน</button></div>`:
   `<div class="wx"><div class="wx-pick"><label>เซิร์ฟ <select id="bx-server"><option value="server-1"${bx.serverId==='server-1'?' selected':''}>เซิร์ฟ 1</option><option value="server-2"${bx.serverId==='server-2'?' selected':''}>เซิร์ฟ 2</option></select></label>
   <label>แผนที่ <select id="bx-map">${(bossMaps??[]).map(m=>`<option value="${esc(m.id)}"${m.id===bx.mapId?' selected':''}>${esc(m.name)}</option>`).join('')}</select></label>
-  <label>บอส <select id="bx-type">${bosses.map(([i,t])=>`<option value="${i}"${String(i)===bx.typeId?' selected':''}>${esc(t.name)}${t.mvp?' (MVP)':''} · Lv.${t.level??'?'} · HP ${t.hp.toLocaleString('th-TH')}</option>`).join('')}</select></label></div>
+  <label>บอส <select id="bx-type">${bosses.map(([i,t])=>`<option value="${i}"${String(i)===bx.typeId?' selected':''}>${esc(t.name)}${t.mvp?' (MVP)':''} · Lv.${t.level??'?'} · HP ${t.hp.toLocaleString('th-TH')}</option>`).join('')}</select></label>
+  <label>จำนวน <input id="bx-count" type="number" min="1" max="20" value="${bx.count}"></label></div>
+  <div class="bx-map"><canvas id="bx-canvas" width="360" height="360" aria-label="จิ้มบนแผนที่เพื่อเลือกจุดเสก"></canvas><div><p>จุดเสก: <b>${bx.spot?`X ${bx.spot.x} · Y ${bx.spot.y}`:'สุ่มทั้งแผนที่'}</b></p><label>X <input id="bx-x" type="number" value="${bx.spot?.x??''}"></label><label>Y <input id="bx-y" type="number" value="${bx.spot?.y??''}"></label><button type="button" class="wx-auto" id="bx-random">🎲 สุ่มจุด</button><small>จิ้มบนพื้นสีเขียว · X / Y ตรงกับมุมแผนที่ในเกม</small></div></div>
   <button type="button" class="wx-auto bx-go" id="bx-go">👑 เสกบอสโลก</button><p class="wx-msg" role="status">${esc(bossMsg)}</p>
-  <small>เสกได้เฉพาะแผนที่สนาม (ไม่ใช่เมือง ดันเจี้ยน บ้านกิลด์) · บอสเกิดจุดสุ่มในแผนที่และไม่เกิดซ้ำ · ไม่กระทบเวลาเกิดของ MVP ปกติ · คนตีแรงสุดได้ ถ่านเพลิงราชาหุ่นฟาง</small></div>`;
+  <small>เสกได้เฉพาะแผนที่สนาม (ไม่ใช่เมือง ดันเจี้ยน บ้านกิลด์) · เสกได้หลายตัว (ครั้งละไม่เกิน 20) · ไม่เกิดซ้ำเมื่อตาย · ไม่กระทบเวลาเกิดของ MVP ปกติ · คนตีแรงสุดได้ ถ่านเพลิงราชาหุ่นฟาง</small></div>`;
  $('bx-login')&&($('bx-login').onclick=async()=>{if(await signIn())bossTab();});
- $('bx-server')&&($('bx-server').onchange=e=>{bx.serverId=e.target.value;});$('bx-map')&&($('bx-map').onchange=e=>{bx.mapId=e.target.value;});$('bx-type')&&($('bx-type').onchange=e=>{bx.typeId=e.target.value;});
+ $('bx-server')&&($('bx-server').onchange=e=>{bx.serverId=e.target.value;});$('bx-map')&&($('bx-map').onchange=e=>{bx.mapId=e.target.value;bx.spot=null;bossTab();});$('bx-type')&&($('bx-type').onchange=e=>{bx.typeId=e.target.value;});
  $('bx-go')&&($('bx-go').onclick=summonBoss);
+ $('bx-count')&&($('bx-count').onchange=e=>{bx.count=Math.min(20,Math.max(1,Math.round(+e.target.value)||1));e.target.value=bx.count;});
+ const setXY=()=>{const x=$('bx-x').value,y=$('bx-y').value;bx.spot=x!==''&&y!==''?{x:Math.round(+x),y:Math.round(+y)}:null;bossTab();};
+ $('bx-x')&&($('bx-x').onchange=setXY);$('bx-y')&&($('bx-y').onchange=setXY);$('bx-random')&&($('bx-random').onclick=()=>{bx.spot=null;bossTab();});
+ drawBossMap();
+}
+// The picked map from its walk grid (green = ground players can stand on); a click sets the spot in in-game X / Y.
+function drawBossMap(){
+ const c=$('bx-canvas'),m=bossMaps?.find(v=>v.id===bx.mapId);if(!c||!m)return;const g=c.getContext('2d'),b=m.bounds??{x:-50,z:-50,w:100,d:100},k=c.width/Math.max(b.w,b.d);
+ const px=x=>(x-b.x)*k,pz=z=>(z-b.z)*k;g.fillStyle='#0b1915';g.fillRect(0,0,c.width,c.height);g.fillStyle='#4f8a5d';
+ const grid=m.nav?.grid;if(grid)grid.rows.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]!=='.')g.fillRect(px(grid.x0+i*grid.cell)-k*grid.cell/2,pz(grid.z0+j*grid.cell)-k*grid.cell/2,Math.ceil(k*grid.cell),Math.ceil(k*grid.cell));});
+ else for(const zn of m.nav?.zones??[])g.fillRect(px(zn.x),pz(zn.z),zn.w*k,zn.d*k);
+ g.fillStyle='#1d2b26';for(const o of m.nav?.obstacles??[])g.fillRect(px(o.x),pz(o.z),o.w*k,o.d*k);
+ if(bx.spot){const x=px(bx.spot.x),y=pz(-bx.spot.y);g.fillStyle='#ff5a3c';g.strokeStyle='#fff3d6';g.lineWidth=2;g.beginPath();g.arc(x,y,7,0,7);g.fill();g.stroke();}
+ c.onclick=e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)*c.width/r.width/k+b.x,z=(e.clientY-r.top)*c.height/r.height/k+b.z;bx.spot={x:Math.round(x),y:Math.round(-z)};bossTab();};
 }
 function playersTab(){
  warmFirebase();

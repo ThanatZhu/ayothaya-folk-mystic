@@ -431,7 +431,8 @@ export class RealmServer{
   if(!mob||mob.hp<=0||p.room.map.safe)return;
   const amount=Math.min(mob.hp,damage);mob.hp-=amount;markMonsterHit(mob,p.world.player);rallyPack(p.room.mobs,mob);
   let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
-  if(MONSTER_TYPES[mob.type].mvp||mob.summoned){const d=(p.room.mvpDamage??=new Map());d.set(p.id,(d.get(p.id)??0)+amount);}
+  if(mob.summoned){const all=(p.room.bossDamage??=new Map()),d=all.get(mob.id)??new Map();all.set(mob.id,d);d.set(p.id,(d.get(p.id)??0)+amount);} // each summoned boss keeps its own damage table
+  else if(MONSTER_TYPES[mob.type].mvp){const d=(p.room.mvpDamage??=new Map());d.set(p.id,(d.get(p.id)??0)+amount);}
   p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color,magic:!!p.world.derived?.magic});
   if(mob.hp>0)return;mob.dead=p.room.map.instance?1e9:mobRespawn(mob);mob.aggro=false;
   if(mob.summoned)this.summonDown(p.room,mob);else if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob);
@@ -598,21 +599,29 @@ export class RealmServer{
   return type&&map?{name:type.name,map:map.name,in:Math.max(0,Math.ceil((s.nextAt-this.now())/1000))}:null;}
  // 0.109.8 back-office world boss: a one-off boss on any outdoor field map; it does not respawn and does not touch the
  // timed MVP's clock. Top damage gets the MVP prize, the whole realm hears about it.
- summonBoss({serverId='server-1',mapId,typeId=null}={}){
+ summonBoss({serverId='server-1',mapId,typeId=null,count=1,x=null,z=null}={}){
   const map=this.catalog.maps.find(m=>m.id===mapId);if(!map||map.instance||map.guildHall||map.safe)throw new Error('bad-map');
   const t=typeId===null||typeId===undefined||typeId===''?MONSTER_TYPES.findIndex(x=>x.mvp):Number(typeId),type=MONSTER_TYPES[t];
   if(!type?.boss)throw new Error('bad-boss');
   const roomId=serverId+':'+map.id;let room=this.rooms.get(roomId);
   if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,serverId,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);this.wakeMvp(room);}
-  if(room.mobs.some(m=>m.summoned&&m.hp>0))throw new Error('boss-alive');
-  const {x,z}=randomSpot(map.nav)??map.spawn,hp=type.hp;
-  room.mobs.push({id:room.mobs.length,type:t,pack:null,leader:false,x,z,home:{x,z},hp,maxHp:hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0,summoned:true});
-  this.announce(serverId,`👑 บอสโลก ${type.name} ปรากฏตัวที่ ${map.name}!`);
-  return {name:type.name,map:map.name,x:Math.round(x),z:Math.round(z)};
+  // 0.109.9 any number (up to 20 per call, 60 alive per map), at a chosen spot or random; a chosen spot snaps to the nearest
+  // walkable ground, and a group spreads in a ring around it
+  const n=Math.min(20,Math.max(1,Math.round(Number(count)||1)));
+  if(room.mobs.filter(m=>m.summoned&&m.hp>0).length+n>60)throw new Error('boss-many');
+  const near=(cx,cz)=>{for(let r=0;r<=8;r+=.5)for(let a=0;a<16;a++){const x=cx+Math.cos(a/8*Math.PI)*r,z=cz+Math.sin(a/8*Math.PI)*r;if(walkable(x,z,.28,map.nav))return {x,z};if(!r)break;}return null;};
+  let at=null;if(Number.isFinite(x)&&Number.isFinite(z)){at=near(x,z);if(!at)throw new Error('bad-spot');}
+  const placed=[];
+  for(let i=0;i<n;i++){
+   const spot=at?(i?near(at.x+Math.cos(i*2.4)*2.2,at.z+Math.sin(i*2.4)*2.2)??at:at):randomSpot(map.nav)??map.spawn,hp=type.hp;
+   room.mobs.push({id:room.mobs.length,type:t,pack:null,leader:false,x:spot.x,z:spot.z,home:{x:spot.x,z:spot.z},hp,maxHp:hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0,summoned:true});placed.push(spot);
+  }
+  this.announce(serverId,`👑 บอสโลก ${type.name}${n>1?' ×'+n:''} ปรากฏตัวที่ ${map.name}!`);
+  return {name:type.name,map:map.name,count:n,x:Math.round(placed[0].x),y:Math.round(-placed[0].z)};
  }
  summonDown(room,mob){
   const type=MONSTER_TYPES[mob.type];mob.dead=1e9;
-  const damage=[...(room.mvpDamage??[])].filter(([id])=>this.peers.get(id)?.room===room).sort((a,b)=>b[1]-a[1]);room.mvpDamage=new Map();
+  const damage=[...(room.bossDamage?.get(mob.id)??[])].filter(([id])=>this.peers.get(id)?.room===room).sort((a,b)=>b[1]-a[1]);room.bossDamage?.delete(mob.id);
   const winner=damage[0]&&this.peers.get(damage[0][0]);
   if(winner){this.grantLoot(winner,{coins:0,items:[{id:'king-ember',count:1}]});winner.saveNow=true;winner.world.emit('mvp',{name:type.name});}
   this.herald(room.serverId,winner?`👑 ${winner.character.name} ปราบบอสโลก ${type.name} ได้!`:`บอสโลก ${type.name} ถูกปราบแล้ว`);

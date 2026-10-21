@@ -87,7 +87,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(url.pathname==='/admin/boss'&&req.method==='POST'){
     let data='';for await(const chunk of req){data+=chunk;if(data.length>1024){reply(413,{error:'too-large'});return;}}
     try{const b=JSON.parse(data),serverId=['server-1','server-2'].includes(b?.serverId)?b.serverId:'server-1';
-     const r=realm.summonBoss({serverId,mapId:String(b?.mapId??''),typeId:b?.typeId??null});console.log('admin-boss',who,serverId,b?.mapId,r.name);reply(200,{serverId,...r});}catch(e){reply(400,{error:e.message});}
+     const num=v=>v===null||v===undefined||v===''?null:Number(v); // the page sends in-game X / Y (Y = -z)
+     const r=realm.summonBoss({serverId,mapId:String(b?.mapId??''),typeId:b?.typeId??null,count:b?.count??1,x:num(b?.x),z:num(b?.y)===null?null:-num(b?.y)});console.log('admin-boss',who,serverId,b?.mapId,r.name);reply(200,{serverId,...r});}catch(e){reply(400,{error:e.message});}
     return;
    }
    reply(404,{error:'not-found'});return;

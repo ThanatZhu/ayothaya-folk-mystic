@@ -192,7 +192,7 @@ export class CombatWorld{
  toggleAuto(){this.hunt=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0||mob.pvp)return;this.calm=0;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
-  this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color});
+  this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a'}); // 1.09 kind for the number colour
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  // 0.68 a point in front of the player (toward `toward` when given): where an attack or skill lands with no target.

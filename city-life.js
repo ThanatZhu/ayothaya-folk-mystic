@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {CITIZEN_STYLES} from './city-life-data.js?v=98';
 import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1';
-import {groundHeight} from './combat-core.js?v=101';
+import {groundHeight} from './combat-core.js?v=109.4';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {citizenBodyHeight} from './npc-size.js?v=size1';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction,resetNPCLife,npcLifeFlip,npcLifePreservesGesture} from './npc-life-animation.js?v=106.0';

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {MONSTER_TYPES} from './combat-core.js?v=101';
+import {MONSTER_TYPES} from './combat-core.js?v=109.4';
 export async function loadMonsterFrames(map){
  const result={},sheets=[...new Set(map.mobs.map(m=>MONSTER_TYPES[m[2]].sheet).filter(Boolean))];
  await Promise.all(sheets.map(async sheet=>{

@@ -5,7 +5,7 @@ import {ITEMS,DROPS} from './items.js?v=107';
 import {CLASSES,NOVICE,classSkills,className} from './classes.js?v=101';
 import {multiplayerURL} from './multiplayer-config.js';
 import {iconStyle} from './bag-ui.js?v=107';
-import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=101';
+import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=109.4';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
 import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=101';
 import {deriveStats} from './character-stats.js';

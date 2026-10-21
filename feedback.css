@@ -67,3 +67,7 @@
 @keyframes rank-note{0%{opacity:0;translate:-10px 0}8%{opacity:1;translate:0}88%{opacity:1}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.rank-up .ring,.rank-up .petal{display:none}.rank-banner,.rank-note{animation:rank-fade 2.6s step-end forwards}.rank-banner strong b,.rank-banner strong svg{animation:none}}
 @keyframes rank-fade{to{opacity:0}}
+
+/* 1.09.4 magic crits glow purple, physical crits glow orange */
+.damage-number.crit.magic{text-shadow:0 0 10px #8a3dff,0 0 3px #000,1px 2px 0 #24083a!important}
+.damage-number.crit:not(.magic){text-shadow:0 0 10px #ff5a00,0 0 3px #000,1px 2px 0 #3a1406!important}

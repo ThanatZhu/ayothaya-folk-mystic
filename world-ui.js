@@ -5,7 +5,7 @@ import {drawMap} from './city-map.js?v=107';
 import {createMentorUI} from './mentor-ui.js?v=107';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
-import {groundHeight} from './combat-core.js?v=101';
+import {groundHeight} from './combat-core.js?v=109.4';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=101.5';
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){

@@ -339,13 +339,13 @@ export class RealmServer{
  }
  warHit(p,mob,damage,color){
   const s=this.wars.get(p.serverId);if(!s?.active||!p.world.rivals.includes(mob))return;
-  if(mob===s.stone){const amount=Math.min(mob.hp,damage);mob.hp-=amount;p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color});
+  if(mob===s.stone){const amount=Math.min(mob.hp,damage);mob.hp-=amount;p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color,magic:!!p.world.derived?.magic});
    if(mob.hp>0)return;const g=this.guildOf(p);s.holder=g.id;mob.hp=mob.maxHp;
    for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id)a.world.targetId=null;}
    this.announce(p.serverId,`🏯 กิลด์ ${g.name} ยึด${WAR.name}ได้! · ${p.character.name} ทำลาย${WAR.stone.name}`);return;}
   const a=this.peers.get(mob.id.slice(4)),v=a?.world.player;if(!v||v.hp<=0)return;
   const amount=monsterHit(a.world,Math.max(1,Math.round(damage*WAR.scale)));if(!amount){a.world.emit('dodge',{x:v.x,z:v.z});return;}
-  v.hp=Math.max(0,v.hp-amount);mob.hp=v.hp;p.world.emit('damage',{id:mob.id,x:v.x,z:v.z,amount,color});a.world.emit('playerHit',{x:v.x,z:v.z,amount});
+  v.hp=Math.max(0,v.hp-amount);mob.hp=v.hp;p.world.emit('damage',{id:mob.id,x:v.x,z:v.z,amount,color,magic:!!p.world.derived?.magic});a.world.emit('playerHit',{x:v.x,z:v.z,amount});
   if(v.hp>0)return; // knocked out: back to the map's start in 3 s, no EXP loss
   v.down=3;Object.assign(a.world,{auto:false,targetId:null,path:[],status:{}});
   a.world.notice('ถูก '+p.character.name+' ล้มในกิลด์วอร์ · กลับจุดเกิดใน 3 วินาที');p.world.notice('⚔️ ล้ม '+a.character.name+' ได้!');
@@ -415,7 +415,7 @@ export class RealmServer{
  duelHit(p,mob,damage,color){
   const y=this.peers.get(p.duel?.foe);if(!y||mob.id!=='duel:'+y.id)return;const v=y.world.player;
   const amount=monsterHit(y.world,Math.max(1,Math.round(damage*DUEL.scale)));if(!amount){y.world.emit('dodge',{x:v.x,z:v.z});return;}
-  v.hp=Math.max(1,v.hp-amount);mob.hp=v.hp;p.world.emit('damage',{id:mob.id,x:v.x,z:v.z,amount,color});y.world.emit('playerHit',{x:v.x,z:v.z,amount});
+  v.hp=Math.max(1,v.hp-amount);mob.hp=v.hp;p.world.emit('damage',{id:mob.id,x:v.x,z:v.z,amount,color,magic:!!p.world.derived?.magic});y.world.emit('playerHit',{x:v.x,z:v.z,amount});
   if(v.hp===1)this.endDuel(p,y,'น็อก '+y.character.name);
  }
  hurt(p,mob,damage,color='#fff0a6'){
@@ -424,7 +424,7 @@ export class RealmServer{
   const amount=Math.min(mob.hp,damage);mob.hp-=amount;markMonsterHit(mob,p.world.player);rallyPack(p.room.mobs,mob);
   let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
   if(MONSTER_TYPES[mob.type].mvp){const d=(p.room.mvpDamage??=new Map());d.set(p.id,(d.get(p.id)??0)+amount);}
-  p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color});
+  p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color,magic:!!p.world.derived?.magic});
   if(mob.hp>0)return;mob.dead=p.room.map.instance?1e9:mobRespawn(mob);mob.aggro=false;
   if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob);
   if(p.room.map.instance&&MONSTER_TYPES[mob.type].boss)this.dungeonClear(p.room);

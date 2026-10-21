@@ -3,7 +3,11 @@
 import {activeEvent,surgeOn} from './events.js?v=64';
 import {levelGifts} from './experience.js?v=105.3';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=107';
+<<<<<<< Updated upstream
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=101';
+=======
+import {MONSTER_TYPES,LEADER} from './combat-core.js?v=109.4';
+>>>>>>> Stashed changes
 import {openHudPanel} from './hud-panels.js?v=34';
 import {pickPotion} from './auto-play.js';
 

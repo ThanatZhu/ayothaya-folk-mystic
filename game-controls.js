@@ -8,7 +8,7 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=103.1';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=109.4';
 import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=101';
 import {createRouteWalker} from './route-walk.js?v=01';
 
@@ -36,7 +36,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function pillar(x,z,rarity){const m=new THREE.Mesh(new THREE.CylinderGeometry(.18,.42,6,12,1,true),new THREE.MeshBasicMaterial({color:RARITY_COLOR[rarity],transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));m.position.set(x,3,z);scene.add(m);pillars.push({m,age:0});}const footDust=createFootDust(scene);
  let strikes=[],shakeAmount=0,lastStep=0;
  let heroView='side',heroFlip=false,gait=0,visualPose=null,lastX=world.player.x,lastZ=world.player.z;
- const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,runToggled=false,capabilitySignature='';
+ const joy={x:0,y:0,id:null},input={x:0,z:0,attack:false};let hitTintUntil=0,attackPointer=null,castUntil=0,noticeUntil=0,lastHUD=0,actionMode='attack',actionStart=0,hitStart=0,hitUntil=0,runToggled=false,capabilitySignature='';
  const supportsAction=action=>(action!=='run'||GAMEPLAY_RUN_ENABLED)&&supportsCharacterAction(action,hero.sprite.userData.supportsAction?.bind(hero.sprite.userData));
  function refreshAnimationCapabilities(){const actions=CHARACTER_ACTIONS.filter(supportsAction),signature=actions.join(',');if(signature!==capabilitySignature){capabilitySignature=signature;if(!supportsAction('run'))runToggled=false;dispatchEvent(new CustomEvent('character-animation-capabilities',{detail:{actions}}));}return actions;}
  function setRunning(value){runToggled=value===true&&supportsAction('run');return runToggled;}
@@ -97,13 +97,14 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   return {key:'at'+Math.round(e.x)+':'+Math.round(e.z),pos:()=>({x:e.x,y:1.9+groundHeight(world.nav,e.x,e.z),z:e.z})};
  }
  function popup(e,positive=false,anchor=anchorOf(e)){
-  const crit=!positive&&e.color==='#ffd27a',el=document.createElement('span');const mob=Number.isInteger(e.id)?world.mobs[e.id]:null,big=!positive&&!crit&&mob&&typeof e.amount==='number'&&e.amount>=mob.maxHp*.2;
-  el.className='damage-number'+(crit?' crit':'')+(big?' big':'')+(positive?' heal':'');
+  const crit=!positive&&(e.crit||e.color==='#ffd27a'),magic=!positive&&!!e.magic,el=document.createElement('span');const mob=Number.isInteger(e.id)?world.mobs[e.id]:null,big=!positive&&!crit&&mob&&typeof e.amount==='number'&&e.amount>=mob.maxHp*.2;
+  el.className='damage-number'+(crit?' crit':'')+(magic?' magic':'')+(big?' big':'')+(positive?' heal':'');
   // 1.09 owner: numbers only (no minus or plus sign) and four fixed colours instead of one per skill/element:
   // white = your hit, gold = critical, red = damage you take, green = healing. Words (MISS, คอมโบ!) keep their own.
   const word=typeof e.amount==='string';
   el.textContent=String(e.amount); // owner: plain numbers, no + or −
-  el.style.color=word?(e.color??'#fff4dc'):positive?'#8ff08c':crit?'#ffd27a':e.hurt?'#ff5a4a':'#fff4dc';
+  // 1.09.4 owner: physical white, physical crit orange; magic blue, magic crit purple; taken red; heal green
+  el.style.setProperty('color',word?(e.color??'#fff4dc'):positive?'#8ff08c':e.hurt?'#ff5a4a':magic?(crit?'#c27bff':'#6cc8ff'):crit?'#ff9a2e':'#fff4dc','important');
   const same=floats.filter(f=>f.key===anchor.key);for(const f of same)f.slot+=crit?1.3:1;
   if(same.length>=FLOAT_STACK){const old=same[0];old.el.remove();floats.splice(floats.indexOf(old),1);}
   const f={el,key:anchor.key,pos:anchor.pos,age:0,slot:0,off:0,side:same.length%2?1:-1}; // popcorn: alternate left / right as they rise
@@ -134,7 +135,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(e.type==='miss'){popup({...e,type:'damage',amount:'MISS',color:'#d8d8d8'});
   }else if(e.type==='damage'){popup(e);const v=mobViews[e.id];if(v)v.flashAt=world.time;if(e.color==='#ffd27a')kick=Math.max(kick,1);}
   else if(e.type==='heal'){popup(e,true);}
-  else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff9b83');}
+  else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff7a6a');hitTintUntil=world.time+.45;}
   else if(e.type==='notice')toast(e.text);
   else if(e.type==='combo')popup({x:e.x,z:e.z,amount:'คอมโบ!',color:'#fff4dc'},true);
   else if(e.type==='drop'){const best=Math.max(...e.items.map(i=>itemDef(i.id)?.rarity??0));if(best>=2&&Number.isFinite(e.x))pillar(e.x,e.z,best);}
@@ -261,7 +262,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const facing=p.face.x*Math.cos(azimuth)-p.face.z*Math.sin(azimuth);
   if(Math.abs(facing)/faceLength>.3)heroFlip=facing<0; // hysteresis: keep the last side until clearly turning
   hero.sprite.userData.pose?.(visualPose,heroFlip);
-  hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*8));hero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
+  if(world.time>=hitTintUntil)hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*4)); // 1.09.4 a faint red that lingers a moment when hithero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   footDust.update(dt);
   if(locomotion&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,floor+(!world.nav.grid&&p.z>4.25?.44:.09),p.z-p.face.z/faceLength*.25);}}
   let flash=0,shake=0;for(const s of strikes){const d=t-s.at;if(d>=0&&d<.45){flash=Math.max(flash,s.power*Math.exp(-d*9));if(d<.25)shake=Math.max(shake,s.power*Math.exp(-d*16));}}strikes=strikes.filter(s=>t-s.at<.5);

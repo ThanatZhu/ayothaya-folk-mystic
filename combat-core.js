@@ -6,7 +6,7 @@ import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v
 import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=105.3';
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=73';
-import {getClass,classSkills} from './classes.js?v=101';
+import {getClass,classSkills} from './classes.js?v=112.1';
 import {scaledSkill} from './skill-progress.js?v=101';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 // Engine-independent movement, collision, targeting and combat rules.
@@ -31,6 +31,10 @@ export const MONSTER_TYPES=[
 MONSTER_TYPES.push(...FRONTIER_MONSTERS);
 MONSTER_TYPES.forEach((m,i)=>patch('monsters',monsterKey(m,i),m)); // 0.85 admin balance overrides
 // 0.52 pacing: AUTO looks for monsters within 14 of where it was switched on (was 8); towns are walked 30% faster.
+// 1.12 owner: reach is measured to the monster's edge, not its centre, so a big boss is hit from its body's edge.
+// Body radius from the drawn height: a normal monster ~0.4 m, the straw king 1.1 m.
+export const bodyRadius=m=>m?.pvp?.35:Math.min(1.1,Math.max(.25,(MONSTER_TYPES[m?.type]?.height??1.5)*.25));
+export const reachTo=(p,m)=>distance(p,m)-bodyRadius(m);
 export const AUTO_RANGE=14,AUTO_SEEK=30,TOWN_PACE=1.3;
 export const OBSTACLES=[
  {x:-7.2,z:-11.5,w:6.4,d:7.3}, // north house, veranda and staircase
@@ -195,6 +199,7 @@ export class CombatWorld{
  nearest(range=AUTO_RANGE){return this.foes().filter(m=>m.hp>0&&this.prey(m)&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
  // 0.91 explicit on/off (the button and quests send the state they want, so two quick taps can no longer cross).
  // 0.99.7 hunt = a monster type index: AUTO started by a quest only goes after that kind (cleared by any other switch).
+ bodyRadius(m){return bodyRadius(m);}
  prey(m){return this.hunt==null||m.type===this.hunt;}
  setAuto(on,hunt=null){const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;return ok;}
  toggleAuto(){this.hunt=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
@@ -209,7 +214,7 @@ export class CombatWorld{
   this.clearEmote();const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   // 0.68 no target in reach: swing at the air (auto-chase still uses AUTO / walking to the target).
-  if(!m||distance(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(quiet||this.safe)return false;p.attackCD=this.profession.delay*(this.derived?.delay??1);this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:this.airPoint(Math.min(this.profession.range,2.4),m),color:this.profession.color,kind:this.profession.kind,air:true});return true;}
+  if(!m||reachTo(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(quiet||this.safe)return false;p.attackCD=this.profession.delay*(this.derived?.delay??1);this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:this.airPoint(Math.min(this.profession.range,2.4),m),color:this.profession.color,kind:this.profession.kind,air:true});return true;}
   p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;
    // 0.102.1 a magic class's basic hit is magic damage: class element, no size penalty, violet number
    // 0.103 a physical swing can miss (HIT vs the monster's FLEE); a crit goes straight through DEF
@@ -227,7 +232,7 @@ export class CombatWorld{
   let m=this.target;
   let air=null;
   if(s.range&&this.safe){this.notice('เขตปลอดภัย · ออกนอกเมืองเพื่อใช้สกิลโจมตี');return false;}
-  if(s.range){const hit=m&&distance(p,m)<=s.range&&lineClear(p,m,this.nav)?m:this.nearest(s.range);
+  if(s.range){const hit=m&&reachTo(p,m)<=s.range&&lineClear(p,m,this.nav)?m:this.nearest(s.range);
    // 0.68 no target in range: the skill is cast at the air in front of you (area skills still hit what is there).
    if(hit&&lineClear(p,hit,this.nav)){m=hit;this.select(m.id);p.face={x:m.x-p.x,z:m.z-p.z};}else{air=this.airPoint(Math.min(s.range,4),m);m=null;}}
   const from={x:p.x,z:p.z};
@@ -271,7 +276,7 @@ export class CombatWorld{
     // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
     this.autoCast=Math.max(0,this.autoCast-dt);
     if(this.autoCast===0&&lineClear(p,m,this.nav)){const i=pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0){this.autoCast=.5;this.skill(i);}}
-    if(distance(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
+    if(reachTo(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      // 0.99.11 open ground (nothing between us): walk straight at it and skip the grid search, which is the costly part
      if(this.pathTimer<=0){this.path=lineClear(p,m,this.nav)?[{x:m.x,z:m.z}]:findPath(p,m,this.nav);this.pathTimer=.65;}

@@ -1,4 +1,4 @@
-import {isClass} from './classes.js?v=101';
+import {isClass} from './classes.js?v=112.1';
 import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=101';
 export const skillAtlas=id=>{if(!isClass(id))throw new Error('invalid-class');return new URL('./assets/skills/'+id+'-21.png',import.meta.url).href;};
 export async function applySkillArt(buttons,classId,order=null){ // order[i] = skill shown on button i (0.90 hotbar)

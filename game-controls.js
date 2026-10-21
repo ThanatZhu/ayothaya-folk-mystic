@@ -8,11 +8,11 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight} from './combat-core.js?v=110.8';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=112.1';
 import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=101';
 import {createRouteWalker} from './route-walk.js?v=01';
 
-import {className} from './classes.js?v=101';
+import {className} from './classes.js?v=112.1';
 import {rebirthRank} from './character-stats.js?v=107';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js';
 
@@ -141,11 +141,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(!m||p.hp<=0)return;
   const cast=(index,kind,color)=>{p.face={x:m.x-p.x,z:m.z-p.z};playCast({type:'cast',skillIndex:index,predicted:true,kind,color,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z}});};
   if(predAutoCast===0){
-   const view={player:p,target:m,skills:world.skills,skillLevels:world.skillLevels,profession:world.profession,cooldowns:world.cooldowns.map((c,i)=>Math.max(c-(wall()-cooldownsAt)-netLag,predCD[i]??0)) /* snapshot cooldowns are a network delay old */};
+   const view={bodyRadius,player:p,target:m,skills:world.skills,skillLevels:world.skillLevels,profession:world.profession,cooldowns:world.cooldowns.map((c,i)=>Math.max(c-(wall()-cooldownsAt)-netLag,predCD[i]??0)) /* snapshot cooldowns are a network delay old */};
    const i=pickAutoSkill(view,world.autoConfig,scaledSkill);
    if(i>=0){const sk=scaledSkill(world.skills[i],world.skillLevels?.[i]??1);predCD[i]=sk?.cd??1;predAutoCast=.5;cast(i,sk?.type,sk?.color);return;}
   }
-  if(Math.hypot(m.x-p.x,m.z-p.z)<=world.profession.range+1.5&&wall()>=nextBasicAt){nextBasicAt=wall()+attackInterval();cast(null,world.profession.kind,world.profession.color);}
+  if(Math.hypot(m.x-p.x,m.z-p.z)-bodyRadius(m)<=world.profession.range+1.5&&wall()>=nextBasicAt){nextBasicAt=wall()+attackInterval();cast(null,world.profession.kind,world.profession.color);}
  }
  function playCast(e){
    const track=Number.isInteger(e.skillIndex)?skillTrack(world.profession.id,e.skillIndex):null;

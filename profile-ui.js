@@ -3,7 +3,7 @@
 // lobby, logout), so every module that adds to it keeps working; only its trigger changes.
 import {STATS,STAT_LABEL,combatPower} from './character-stats.js?v=107';
 import {baseProgress,jobProgress} from './experience.js?v=105.3';
-import {className} from './classes.js?v=101';
+import {className} from './classes.js?v=112.1';
 import {jobFor} from './advancement.js?v=73';
 import {openHudPanel} from './hud-panels.js?v=34';
 

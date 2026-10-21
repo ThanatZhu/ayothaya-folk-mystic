@@ -2,7 +2,7 @@ import {createMotionPreview} from './motion-preview.js?v=41.2';
 import {APPEARANCE_OPTIONS,validateAppearance} from './appearance-state.js';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {JOBS,progression,JOB_LEVEL,advanceReady} from './advancement.js?v=73';
-import {atlasPath} from './classes.js?v=101';
+import {atlasPath} from './classes.js?v=112.1';
 import {characterMotion,MOTION_MODES} from './character-motion.js?v=37';
 const labels={garment:'แบบเครื่องแต่งกาย',outfit:'สีเครื่องแต่งกาย',hair:'ทรงผม',hairColor:'สีผม',eyes:'สีตา',beard:'หนวดและเครา',tattoo:'รอยยันต์'};
 const names={shouldercloth:'ผ้าพาดไหล่',cloak:'ผ้าคลุมเดินทาง',original:'แบบประจำอาชีพ',indigo:'คราม',crimson:'แดงชาด',ivory:'งาช้าง',topknot:'มวยสูง',braid:'เปียข้าง',black:'ดำ',brown:'น้ำตาล',silver:'เงิน',green:'เขียว',blue:'ฟ้า',none:'แบบเดิม / ไม่เพิ่ม',mustache:'หนวด',goatee:'หนวดและเครา',forehead:'ยันต์หน้าผาก',arms:'ยันต์ช่วงไหล่'};

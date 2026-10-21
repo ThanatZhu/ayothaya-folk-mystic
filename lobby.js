@@ -3,7 +3,7 @@ import {createMotionPreview} from './motion-preview.js?v=41.2';
 import {characterMotion} from './character-motion.js?v=37';
 import {createWardrobe} from './wardrobe.js?v=73.2';
 import {progression,jobFor,CLASS_LEVEL,advanceReady} from './advancement.js?v=73';
-import {CLASSES,getClass,className,atlasPath} from './classes.js?v=101';
+import {CLASSES,getClass,className,atlasPath} from './classes.js?v=112.1';
 import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {connectFirebase,deadline} from './firebase-client.js';

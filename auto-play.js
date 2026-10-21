@@ -22,7 +22,7 @@ export function pickAutoSkill(world,cfg,scaled){
   if(s.type==='mana'||s.type==='focus'){if(p.mp<p.maxMp*.4)return i;continue;}
   if(SELF.has(s.type)||s.type==='dash')continue;
   if(!m||m.hp<=0)continue;
-  const reach=s.range??s.radius??world.profession.range;if(Math.hypot(m.x-p.x,m.z-p.z)<=reach)return i;
+  const reach=s.range??s.radius??world.profession.range;if(Math.hypot(m.x-p.x,m.z-p.z)-(world.bodyRadius?.(m)??0)<=reach)return i; /* 1.12 reach to the body edge */
  }
  return -1;
 }

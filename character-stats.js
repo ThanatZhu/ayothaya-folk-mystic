@@ -1,7 +1,7 @@
 // Ragnarok-style status (STR AGI VIT INT DEX LUK) and stat-bearing gear (weapon / armor / accessory).
 // Pure rules shared by the client (offline guests + UI) and the realm server. Gear lives in the bag until
 // equipped; it is separate from the cosmetic look in equipment.js, so costumes stay free choices.
-import {BAG_SLOTS,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=95';
+import {BAG_SLOTS,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=107';
 import {dodgeChance,monsterHit} from './combat-formulas.js';
 
 export const STATS=['str','agi','vit','int','dex','luk'];

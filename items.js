@@ -5,7 +5,7 @@ import {patch,patchDrops} from './balance.js';
 export const ITEM_ATLAS='assets/items42/items.png',GEAR_ATLAS='assets/gear43/gear.png',REFINE_ATLAS='assets/refine44/refine.png';
 export const CARD_ATLAS='assets/cards45/cards.png',SOCIAL_ATLAS='assets/social46/social.png',EMBLEM_ATLAS='assets/emblems47/emblems.png',EMOTE_ATLAS='assets/emotes48/emotes.png',ITEMS48_ATLAS='assets/items48/items.png';
 export const GEAR85_ATLAS='assets/gear85/gear.svg';
-export const ATLASES={gear85:GEAR85_ATLAS,gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS,social:SOCIAL_ATLAS,emblems:EMBLEM_ATLAS,emotes:EMOTE_ATLAS,items48:ITEMS48_ATLAS}; // item.atlas key → file (default ITEM_ATLAS)
+export const ATLASES={gear85:GEAR85_ATLAS,gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS,social:SOCIAL_ATLAS,emblems:EMBLEM_ATLAS,emotes:EMOTE_ATLAS,items48:ITEMS48_ATLAS,gear104w:'assets/gear104/weapons.png',gear104a:'assets/gear104/armor.png',gear106a:'assets/gear106/head-garment.png',gear106b:'assets/gear106/shoes.png'}; // item.atlas key → file (default ITEM_ATLAS)
 export const BAG_SLOTS=40,MAX_STACK=999,MAX_COINS=9999999;
 
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
@@ -142,6 +142,71 @@ export const ITEMS={
  'card-mill-keeper':{atlas:'cards',icon:8,name:'การ์ดเจ้าหุ่นฟางพันเชือก',kind:'card',slot:'armor',effect:{resist:{ghost:.3},hpPct:.1},sell:2000,text:'ใส่ในเสื้อเกราะ · รับดาเมจจากผีลด 30% · HP +10%'},
  'refine-hammer':{atlas:'refine',icon:3,name:'ค้อนตีบวก',kind:'ui'},'refine-success':{atlas:'refine',icon:4,name:'ตีบวกสำเร็จ',kind:'ui'},'refine-broken':{atlas:'refine',icon:5,name:'อุปกรณ์แตก',kind:'ui'},
 };
+// 0.107 gear phase 1 (Lv.45–99): 3 themed brackets × 8 classes × weapon/armor × 3 tiers = 144 items from one formula,
+// stat = f(bracket level) × tier mul. f follows the Lv.15/25/35 gear: weapon ATK ≈ 2×Lv (× class power), armor DEF ≈ .55×Lv.
+// Art: assets/gear104/weapons.png + armor.png, row = class pair, col = (2nd of the pair ? 3 : 0) + bracket. `ph` is the stand-in
+// gear43 cell bag-ui shows while those files are missing. Phase 3: a 'legend' row in GEAR_TIERS (×1.8) and set bonuses per `bracket`.
+export const GEAR_TIERS=[
+ {key:'',name:'สามัญ',mul:1,rarity:1,slots:0,src:'ร้านช่างตีบวกขั้นสูง เมืองลับแล'},
+ {key:'fine',name:'ชั้นดี',mul:1.25,rarity:2,tint:'gold',slots:0,src:'ดรอปจากร่างทรง หรือคราฟต์'},
+ {key:'elite',name:'ชั้นเอก',mul:1.5,rarity:3,tint:'violet',src:'ของบอสร่างทรง'},
+];
+// Icon-sheet order. [class, weapon id word, weapon stat, weapon power (Lv.35 boss weapons vs the sword), stand-in weapon cell,
+//  armor DEF mul, armor bonus stat, stand-in armor cell, class name]
+export const GEAR_CLASSES=[
+ ['novice','knuckle','atk',.85,8,1,'vit',16,'ผู้ฝึกตน'],['swordsman','sword','atk',1,9,1.2,'vit',18,'นักดาบ'],
+ ['lancer','spear','atk',1.07,10,1.2,'str',18,'นักทวน'],['hunter','bow','atk',.93,11,1,'dex',17,'นายพราน'],
+ ['boxer','gloves','atk',.93,12,1.1,'str',18,'นักมวย'],['rogue','daggers','atk',.87,13,1,'agi',17,'จอมโจร'],
+ ['shaman','staff','matk',1,14,.8,'int',16,'หมอผี'],['acolyte','beads','matk',.9,15,.8,'int',16,'พระ / แม่ชี'],
+];
+// bosses: who drops the fine/elite pieces (no regular Lv.45+ monsters yet, so the awakened bosses closest in level).
+export const GEAR_BRACKETS=[
+ {key:'krut',level:45,name:'ครุฑ',bosses:['rat-chief-awakened'],
+  weapon:['สนับมือเล็บครุฑ','ดาบปีกครุฑ','ทวนจะงอยครุฑ','ธนูขนครุฑ','นวมกรงเล็บครุฑ','มีดคู่เขี้ยวครุฑ','ไม้เท้าพญาครุฑ','ประคำครุฑพ่าห์'],
+  armor:['เสื้อขนนกครุฑ','เกราะเกล็ดปีกครุฑ','เกราะอกครุฑ','เสื้อพรานขนครุฑ','ประเจียดครุฑ','ชุดพรางเงาครุฑ','เสื้อยันต์ครุฑ','ผ้าคลุมพรตครุฑ'],
+  head:['หมวกเกราะหัวครุฑ','ผ้าโพกขนครุฑ','มงกุฎยอดครุฑ'],garment:['ผ้าคลุมปีกครุฑ','ผ้าคลุมขนนกครุฑ','ผ้าคลุมยันต์ครุฑ'],shoes:['รองเท้าเกราะกรงเล็บครุฑ','รองเท้าขนครุฑ','รองเท้ายันต์ครุฑ']},
+ {key:'kotcha',level:60,name:'คชสีห์',bosses:['monkey-chief-awakened'],
+  weapon:['สนับมืองาคชสีห์','ดาบคชสีห์','ทวนราชสีห์','ธนูศรราชสีห์','นวมงาคชสีห์','มีดคู่เขี้ยวราชสีห์','ไม้เท้าคชสีห์','ประคำงาคชสีห์'],
+  armor:['เสื้อหนังคชสีห์','เกราะทัพคชสีห์','เกราะทัพราชสีห์','เสื้อพรานราชสีห์','ประเจียดคชสีห์','ชุดพรางราชสีห์','เสื้อยันต์คชสีห์','ผ้าคลุมพรตคชสีห์'],
+  head:['หมวกเกราะคชสีห์','ผ้าโพกแผงคอราชสีห์','ลอมพอกคชสีห์'],garment:['ผ้าคลุมทัพคชสีห์','ผ้าคลุมหนังราชสีห์','ผ้าคลุมยันต์คชสีห์'],shoes:['รองเท้าเกราะคชสีห์','รองเท้าหนังราชสีห์','รองเท้าผ้ายันต์คชสีห์']},
+ {key:'himma',level:80,name:'หิมพานต์',bosses:['mill-keeper-awakened','marsh-ape-awakened'],
+  weapon:['สนับมือหิมพานต์','ดาบเทพหิมพานต์','ทวนกิเลนหิมพานต์','ธนูกินรีหิมพานต์','นวมหัสดีหิมพานต์','มีดคู่เงาหิมพานต์','ไม้เท้าวิทยาธร','ประคำแก้วหิมพานต์'],
+  armor:['เสื้อทิพย์หิมพานต์','เกราะเกล็ดกิเลน','เกราะเทพหิมพานต์','เสื้อพรานกินรี','ประเจียดหัสดี','ชุดพรางเงาหิมพานต์','เสื้อยันต์วิทยาธร','ผ้าคลุมพรตหิมพานต์'],
+  head:['หมวกเกราะกิเลน','ผ้าโพกกินรี','ชฎาวิทยาธร'],garment:['ผ้าคลุมเกล็ดกิเลน','ผ้าคลุมปีกกินรี','ผ้าคลุมทิพย์หิมพานต์'],shoes:['รองเท้าเกราะกิเลน','รองเท้ากินรี','รองเท้าเมฆวิทยาธร']},
+];
+export const gearId=(bracket,ci,slot,tier='')=>bracket+'-'+(slot==='weapon'?GEAR_CLASSES[ci][1]:'armor-'+GEAR_CLASSES[ci][0])+(tier?'-'+tier:'');
+GEAR_BRACKETS.forEach((b,bi)=>GEAR_CLASSES.forEach(([cls,,stat,power,phW,defMul,bonusStat,phA,clsName],ci)=>{
+ const L=b.level,icon=Math.floor(ci/2)*6+ci%2*3+bi,buy=Math.round(L*L*5/100)*100;
+ for(const slot of ['weapon','armor'])for(const t of GEAR_TIERS){
+  const it={atlas:slot==='weapon'?'gear104w':'gear104a',icon,ph:{atlas:'gear',icon:slot==='weapon'?phW:phA},name:b[slot][ci]+(t.key?' '+t.name:''),
+   kind:'gear',slot,classes:[cls],level:L,bracket:b.key,tier:t.key||'common',rarity:t.rarity};
+  if(t.tint)it.tint=t.tint;if(t.slots===0)it.slots=0;
+  let line;
+  if(slot==='weapon'){it[stat]=Math.round(2*L*power*t.mul);line=stat.toUpperCase()+' +'+it[stat];}
+  else{it.def=Math.round(.55*L*defMul*t.mul);it.bonus={[bonusStat]:Math.round(L/15*t.mul)};line='DEF +'+it.def+' · '+bonusStat.toUpperCase()+' +'+it.bonus[bonusStat];}
+  const price=slot==='weapon'?buy:Math.round(buy*.8/100)*100;
+  if(!t.key)it.buy=price;it.sell=Math.round(price/4*t.mul**2);
+  it.text=line+' · '+clsName+' · Lv.'+L+' · '+t.name+' · '+t.src+(t.slots===0?'':' · ช่องการ์ด 1');
+  ITEMS[gearId(b.key,ci,slot,t.key)]=it;
+ }
+}));
+// 0.107 head / garment / shoes per archetype, shared by its classes (no card slot, no refine), same tiers and brackets.
+// Art: assets/gear106/head-garment.png (cols 0–2 head, 3–5 garment) and shoes.png (cols 0–2); row = archetype, col = bracket.
+export const GEAR_ARCHETYPES=[['power',['swordsman','lancer','boxer']],['agile',['hunter','rogue']],['magic',['shaman','acolyte']]];
+// [slot, id word, atlas, first column, DEF per level, bonus stat per archetype, stand-in gear85 cell]
+export const GEAR_PIECES=[['head','hat','gear106a',0,.12,['str','dex','int'],1],['garment','cloak','gear106a',3,.1,['vit','agi','int'],3],['shoes','shoes','gear106b',0,.1,['vit','agi','dex'],6]];
+export const pieceId=(bracket,slot,arch,tier='')=>bracket+'-'+GEAR_PIECES.find(p=>p[0]===slot)[1]+'-'+arch+(tier?'-'+tier:'');
+GEAR_BRACKETS.forEach((b,bi)=>GEAR_ARCHETYPES.forEach(([arch,classes],ai)=>{
+ const L=b.level,price=Math.round(L*L*2/100)*100,who=classes.map(c=>GEAR_CLASSES.find(g=>g[0]===c)[8]).join(' / ');
+ for(const [slot,,atlas,col,defPer,stats,ph] of GEAR_PIECES)for(const t of GEAR_TIERS){
+  const stat=stats[ai],it={atlas,icon:ai*6+col+bi,ph:{atlas:'gear85',icon:ph},name:b[slot][ai]+(t.key?' '+t.name:''),kind:'gear',slot,classes,level:L,
+   bracket:b.key,tier:t.key||'common',rarity:t.rarity,slots:0,def:Math.round(defPer*L*t.mul),bonus:{[stat]:Math.round(L/15*t.mul)}};
+  if(t.tint)it.tint=t.tint;if(!t.key)it.buy=price;it.sell=Math.round(price/4*t.mul**2);
+  it.text='DEF +'+it.def+' · '+stat.toUpperCase()+' +'+it.bonus[stat]+' · '+who+' · Lv.'+L+' · '+t.name+' · '+t.src;
+  ITEMS[pieceId(b.key,slot,arch,t.key)]=it;
+ }
+}));
+export const bracketGear=(b,tier)=>Object.keys(ITEMS).filter(id=>ITEMS[id].bracket===b&&ITEMS[id].tier===tier);
 // 0.47 guild emblems: 24 cells of assets/emblems47 (docs/emblems47-art.md), picked when founding a guild.
 // Ids are letters (emblem-a … emblem-x) because item ids are [a-z-]; the guild stores the number 1–24.
 export const emblemId=n=>'emblem-'+String.fromCharCode(96+n);
@@ -204,6 +269,8 @@ export const DROPS={
  'marsh-ape':{coins:[300,450],items:[['lotus-seed',1,3],['hp-large',.8,2],['lek-lai',.25],['vest-chain',.08],['card-marsh-ape',0.04]]},
  'mill-keeper':{coins:[400,600],items:[['hat-ricecrown',.2],['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3],['card-mill-keeper',0.15],['sword-ajna',.03],['spear-panchang',.03],['bow-sinchai',.03],['gloves-leklai',.03],['daggers-stingray',.03],['staff-octa',.03],['beads-mani',.03]]},
 };
+// 0.107 bracket gear: each fine piece 2%, each elite piece 1% from that bracket's awakened bosses.
+for(const b of GEAR_BRACKETS)for(const boss of b.bosses)DROPS[boss].items.push(...bracketGear(b.key,'fine').map(id=>[id,.02]),...bracketGear(b.key,'elite').map(id=>[id,.01]));
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
 export const SHOPS={
@@ -212,6 +279,8 @@ export const SHOPS={
  'เจ้าจุก':{mapId:'ayutthaya',title:'ซุ้มงานวัดเจ้าจุก',currency:'event-token',stock:['krathong','green-herb','hp-large','pet-lure','lek-lai']},
  'ป้าละไม':{mapId:'rice-fields',title:'ยุ้งป้าละไม',stock:['hp-small','mp-small','sticky-rice']},
  'ครูแสนดาบ':{mapId:'ayutthaya',title:'โรงตีอาวุธครูแสนดาบ',refine:true,stock:['iron-ore','laterite','wrap-novice','sword-iron','spear-bamboo','bow-bamboo','gloves-hemp','daggers-twin','staff-wan','beads-wood','knuckle-brass','sword-silver','spear-steel','bow-horn','gloves-leather','daggers-ivory','staff-candle','beads-sandal','hat-headband','hat-ngob','cloak-cotton','cloak-yant','shoes-woven','shoes-buffalo','shoes-ranger','vest-cotton','vest-buffalo','takrut-silver','ring-ruby','anklet-silver','cloth-yant','sword-ajna','spear-panchang','bow-sinchai','gloves-leklai','daggers-stingray','staff-octa','beads-mani','vest-chain']},
+ // 0.107 Lv.45–99 common class gear, second safe town (the shop list shows only the player's class)
+ 'ช่างตีบวกขั้นสูง':{mapId:'lablae',title:'ร้านช่างตีบวกขั้นสูง',stock:GEAR_BRACKETS.flatMap(b=>bracketGear(b.key,'common'))},
 };
 
 const int=(v,min,max)=>Number.isSafeInteger(v)?Math.min(Math.max(v,min),max):min;

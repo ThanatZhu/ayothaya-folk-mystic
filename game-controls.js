@@ -1,4 +1,4 @@
-import {itemDef} from './items.js?v=95';
+import {itemDef} from './items.js?v=107';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=38';
 import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=101';
@@ -13,7 +13,7 @@ import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_
 import {createRouteWalker} from './route-walk.js?v=01';
 
 import {className} from './classes.js?v=101';
-import {rebirthRank} from './character-stats.js?v=106.4';
+import {rebirthRank} from './character-stats.js?v=107';
 import {normalizeAuto} from './auto-play.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){

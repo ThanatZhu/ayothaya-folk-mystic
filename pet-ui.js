@@ -1,11 +1,11 @@
 // Pets (0.50): pet window, bag actions (lure / hatch / feed), the pet that trots after its owner.
 // Online the realm server owns the pet; offline it lives in localStorage beside the bag. Remote pets: multiplayer-ui.js.
 import * as THREE from 'three';
-import {ITEM_ERRORS,itemDef} from './items.js?v=95';
-import {PETS,FOOD,LOYAL,INTIMACY_MAX,mood,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from './pets.js?v=01';
+import {ITEM_ERRORS,itemDef} from './items.js?v=107';
+import {PETS,FOOD,LOYAL,INTIMACY_MAX,mood,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from './pets.js?v=107';
 import {MONSTER_TYPES,groundHeight} from './combat-core.js?v=101';
 import {loadMonsterFrames} from './monster-art.js?v=38';
-import {iconStyle} from './bag-ui.js?v=106.4';
+import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

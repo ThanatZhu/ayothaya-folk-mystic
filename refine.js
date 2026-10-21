@@ -1,7 +1,7 @@
 // Refining +1..+10 at ครูแสนดาบ (0.44). The refine level travels with the item as an id suffix ("sword-iron+5"),
 // so a refined piece keeps its level in the bag. +1..+4 are safe; from +5 a failure breaks the item (Ragnarok).
-import {normalizeBag,itemDef,composeId} from './items.js?v=95';
-import {normalizeGear} from './character-stats.js?v=106.4';
+import {normalizeBag,itemDef,composeId} from './items.js?v=107';
+import {normalizeGear} from './character-stats.js?v=107';
 
 export const REFINE_MAX=10;
 export const REFINE_RATE=[1,1,1,1,.9,.7,.5,.3,.2,.1]; // chance to reach +1 … +10

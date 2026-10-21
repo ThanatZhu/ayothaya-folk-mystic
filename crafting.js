@@ -1,8 +1,8 @@
 // 0.94 crafting: monster drops + a few cowries become potions, food and refine stones. Shared by the realm server
 // and the offline bag, so the recipes and checks are the same everywhere. Crafting works anywhere (from the bag).
-import {normalizeBag,addLoot} from './items.js?v=95';
+import {normalizeBag,addLoot,ITEMS,GEAR_BRACKETS,bracketGear} from './items.js?v=107';
 
-export const CRAFT_GROUPS=[['potion','ยา'],['food','อาหาร'],['refine','หินตีบวก']];
+export const CRAFT_GROUPS=[['potion','ยา'],['food','อาหาร'],['refine','หินตีบวก'],['gear','อุปกรณ์']];
 // out: item made, count: how many per craft, needs: materials used, coins: cowries spent.
 export const RECIPES=[
  {out:'hp-small',count:2,group:'potion',needs:{'straw-bundle':3},coins:5},
@@ -21,6 +21,8 @@ export const RECIPES=[
  {out:'lek-lai',count:1,group:'refine',needs:{'spirit-thread':5,'palm-leaf':1},coins:500},
  {out:'break-guard',count:1,group:'refine',needs:{'palm-leaf':2,'spirit-thread':3,'lek-lai':1},coins:2000},
 ];
+// 0.107 fine (ชั้นดี) Lv.45–99 gear: the common piece + Lek Lai + ore/laterite + half its shop price.
+GEAR_BRACKETS.forEach((b,bi)=>{for(const id of bracketGear(b.key,'common')){const it=ITEMS[id];RECIPES.push({out:id+'-fine',count:1,group:'gear',needs:{[id]:1,'lek-lai':2+bi*2,[it.slot==='weapon'?'iron-ore':'laterite']:5},coins:it.buy/2});}});
 export const recipeFor=out=>RECIPES.find(r=>r.out===out)??null;
 // How many times the bag can afford a recipe.
 export function craftable(bag,r){const b=normalizeBag(bag);let n=r.coins?Math.floor(b.coins/r.coins):99;for(const [id,k] of Object.entries(r.needs))n=Math.min(n,Math.floor((b.items[id]??0)/k));return Math.max(0,Math.min(99,n));}

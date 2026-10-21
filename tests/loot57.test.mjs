@@ -23,7 +23,7 @@ test('affixes: parse, add stats, raise rarity, survive refine, and roll on ~35% 
 
 test('tier 3 (Lv.25, forge) and tier 4 (Lv.35, boss only) weapons exist for all 7 classes', () => {
  for(const c of ['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte']){
-  const w=Object.entries(ITEMS).filter(([,it])=>it.slot==='weapon'&&it.classes?.includes(c)&&it.level>=25);
+  const w=Object.entries(ITEMS).filter(([,it])=>it.slot==='weapon'&&it.classes?.includes(c)&&it.level>=25&&!it.bracket); // 0.107 Lv.45+ bracket gear: tests/gear106
   assert.deepEqual(w.map(([,it])=>it.level).sort(),[25,35]);
   const t3=w.find(([,it])=>it.level===25)[0];assert.ok(SHOPS['ครูแสนดาบ'].stock.includes(t3));
   assert.equal(canWear(t3,{classId:c,level:24}),'low-level');assert.equal(canWear(t3,{classId:c,level:25}),null);

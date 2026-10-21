@@ -1,16 +1,16 @@
 // 0.48 everyday UI: ailment icons on the HUD, RO-style emote bubbles (picker + own bubble), daily login popup.
 // Remote players' bubbles are drawn by multiplayer-ui.js; the server rewards the daily login online, this file offline.
-import {emoteId,itemDef} from './items.js?v=95';
+import {emoteId,itemDef} from './items.js?v=107';
 import {AILMENTS} from './ailments.js?v=01';
 import {claimDaily,DAILY} from './daily.js?v=01';
 import {activeEvent,expRate,surge,WEEKEND_EXP} from './events.js?v=64';
 import {WAR,warWindow} from './guild-war.js?v=98';
 import {ARENA,arenaEnds} from './arena.js?v=98';
-import {SHOPS} from './items.js?v=95';
-import {iconStyle} from './bag-ui.js?v=106.4';
+import {SHOPS} from './items.js?v=107';
+import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {baseProgress} from './experience.js?v=105.3';
-import {rebirthRank,REBIRTH_POINTS,REBIRTH_MAX,REBIRTH_STAT,rebirthStatBonus} from './character-stats.js?v=106.4';
+import {rebirthRank,REBIRTH_POINTS,REBIRTH_MAX,REBIRTH_STAT,rebirthStatBonus} from './character-stats.js?v=107';
 import * as THREE from 'three';
 
 const $=id=>document.getElementById(id);

@@ -2376,3 +2376,31 @@ Object.assign(globalThis.I18N_EN,{
  'ลับแลมีทั้งย่านช่าง สวนดอกไม้ และวัด ลองเดินชมให้ทั่วเถิด':'Lablae has an artisan quarter, a flower garden and a temple. Explore them all.',
  'กำลังเอางานสานไปส่งที่ตลาด ถ้าชอบงานฝีมือก็ลองไปชมย่านช่างนะ':'I am taking woven goods to the market. Visit the artisan quarter if you enjoy crafts.'
 });
+// 0.107 Lv.45–99 class gear (Garuda · War Beast · Himmapan brackets)
+Object.assign(globalThis.I18N_EN,{
+ 'สามัญ':'Common','ชั้นดี':'Fine','ชั้นเอก':'Elite',
+ 'ร้านช่างตีบวกขั้นสูง':'Master Smith Shop','ร้านช่างตีบวกขั้นสูง เมืองลับแล':'Master Smith Shop, Lablae',
+ 'ดรอปจากร่างทรง หรือคราฟต์':'Drops from awakened bosses, or craft it','ของบอสร่างทรง':'Awakened boss item','· ช่องการ์ด 1':'· 1 card slot','ช่องการ์ด 1':'1 card slot',
+ 'ครุฑ':'Garuda','คชสีห์':'War Beast','หิมพานต์':'Himmapan',
+ 'สนับมือเล็บครุฑ':'Garuda Talon Knuckles','ดาบปีกครุฑ':'Garuda Wing Sword','ทวนจะงอยครุฑ':'Garuda Beak Spear','ธนูขนครุฑ':'Garuda Feather Bow',
+ 'นวมกรงเล็บครุฑ':'Garuda Claw Gloves','มีดคู่เขี้ยวครุฑ':'Garuda Fang Daggers','ไม้เท้าพญาครุฑ':'Garuda King Staff','ประคำครุฑพ่าห์':'Garuda Emblem Beads',
+ 'เสื้อขนนกครุฑ':'Garuda Feather Shirt','เกราะเกล็ดปีกครุฑ':'Garuda Wing-Scale Armor','เกราะอกครุฑ':'Garuda Breastplate','เสื้อพรานขนครุฑ':'Garuda Feather Hunter Coat',
+ 'ประเจียดครุฑ':'Garuda Prajiad','ชุดพรางเงาครุฑ':'Garuda Shadow Garb','เสื้อยันต์ครุฑ':'Garuda Yantra Shirt','ผ้าคลุมพรตครุฑ':'Garuda Ascetic Robe',
+ 'สนับมืองาคชสีห์':'War Beast Tusk Knuckles','ดาบคชสีห์':'War Beast Sword','ทวนราชสีห์':'Lion King Spear','ธนูศรราชสีห์':'Lion King Bow',
+ 'นวมงาคชสีห์':'War Beast Tusk Gloves','มีดคู่เขี้ยวราชสีห์':'Lion Fang Daggers','ไม้เท้าคชสีห์':'War Beast Staff','ประคำงาคชสีห์':'War Beast Ivory Beads',
+ 'เสื้อหนังคชสีห์':'War Beast Hide Shirt','เกราะทัพคชสีห์':'War Beast Army Armor','เกราะทัพราชสีห์':'Lion Army Armor','เสื้อพรานราชสีห์':'Lion Hunter Coat',
+ 'ประเจียดคชสีห์':'War Beast Prajiad','ชุดพรางราชสีห์':'Lion Shadow Garb','เสื้อยันต์คชสีห์':'War Beast Yantra Shirt','ผ้าคลุมพรตคชสีห์':'War Beast Ascetic Robe',
+ 'สนับมือหิมพานต์':'Himmapan Knuckles','ดาบเทพหิมพานต์':'Himmapan Divine Sword','ทวนกิเลนหิมพานต์':'Himmapan Qilin Spear','ธนูกินรีหิมพานต์':'Himmapan Kinnari Bow',
+ 'นวมหัสดีหิมพานต์':'Himmapan Hatsadi Gloves','มีดคู่เงาหิมพานต์':'Himmapan Shadow Daggers','ไม้เท้าวิทยาธร':'Vidyadhara Staff','ประคำแก้วหิมพานต์':'Himmapan Crystal Beads',
+ 'เสื้อทิพย์หิมพานต์':'Himmapan Celestial Shirt','เกราะเกล็ดกิเลน':'Qilin Scale Armor','เกราะเทพหิมพานต์':'Himmapan Divine Armor','เสื้อพรานกินรี':'Kinnari Hunter Coat',
+ 'ประเจียดหัสดี':'Hatsadi Prajiad',
+ 'หมวกเกราะหัวครุฑ':'Garuda Head Helm','ผ้าโพกขนครุฑ':'Garuda Feather Turban','มงกุฎยอดครุฑ':'Garuda Crest Crown',
+ 'ผ้าคลุมปีกครุฑ':'Garuda Wing Cape','ผ้าคลุมขนนกครุฑ':'Garuda Feather Cloak','ผ้าคลุมยันต์ครุฑ':'Garuda Yantra Mantle',
+ 'รองเท้าเกราะกรงเล็บครุฑ':'Garuda Talon Greaves','รองเท้าขนครุฑ':'Garuda Feather Boots','รองเท้ายันต์ครุฑ':'Garuda Yantra Slippers',
+ 'หมวกเกราะคชสีห์':'War Beast Helm','ผ้าโพกแผงคอราชสีห์':'Lion Mane Turban','ลอมพอกคชสีห์':'War Beast Lomphok Hat',
+ 'ผ้าคลุมทัพคชสีห์':'War Beast Army Cape','ผ้าคลุมหนังราชสีห์':'Lion Hide Cloak','ผ้าคลุมยันต์คชสีห์':'War Beast Yantra Mantle',
+ 'รองเท้าเกราะคชสีห์':'War Beast Greaves','รองเท้าหนังราชสีห์':'Lion Hide Boots','รองเท้าผ้ายันต์คชสีห์':'War Beast Yantra Slippers',
+ 'หมวกเกราะกิเลน':'Qilin Helm','ผ้าโพกกินรี':'Kinnari Turban','ชฎาวิทยาธร':'Vidyadhara Chada Crown',
+ 'ผ้าคลุมเกล็ดกิเลน':'Qilin Scale Cape','ผ้าคลุมปีกกินรี':'Kinnari Wing Cloak','ผ้าคลุมทิพย์หิมพานต์':'Himmapan Celestial Mantle',
+ 'รองเท้าเกราะกิเลน':'Qilin Greaves','รองเท้ากินรี':'Kinnari Boots','รองเท้าเมฆวิทยาธร':'Vidyadhara Cloud Slippers','ชุดพรางเงาหิมพานต์':'Himmapan Shadow Garb','เสื้อยันต์วิทยาธร':'Vidyadhara Yantra Shirt','ผ้าคลุมพรตหิมพานต์':'Himmapan Ascetic Robe'
+});

@@ -2,8 +2,8 @@
 // stores, server-wide search (RO @whosell), sales tax, reference prices and the trade skill (merchant perks).
 // Pure rules shared by the realm server and the UI. A shop holds its goods (sell) or its coins (buy) in escrow,
 // so a purchase never touches an offline player's save: proceeds wait in the shop's pouch until collected.
-import {BAG_SLOTS,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=95';
-import {TRADABLE,PRICE_MAX,moveOffer} from './market.js?v=70';
+import {BAG_SLOTS,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
+import {TRADABLE,PRICE_MAX,moveOffer} from './market.js?v=107';
 
 // Shops may only stand on the market street of the capital, a few metres apart, so roads stay clear.
 export const MARKET_ZONE={mapId:'ayutthaya',x:8,z:-16,w:30,d:20,name:'ถนนตลาดแม่บัว'};

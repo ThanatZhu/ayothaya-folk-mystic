@@ -1,7 +1,7 @@
 // 0.94 craft window, opened from the bag header. Online the server crafts; offline the local bag does.
-import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=95';
-import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=94';
-import {iconStyle} from './bag-ui.js?v=106.4';
+import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=107';
+import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=107';
+import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -30,7 +30,7 @@ export function createCraftUI({game,bagUI}){
   const bag=normalizeBag(bagUI.bag()),sig=JSON.stringify([bag,group]);if(!force&&sig===shown)return;shown=sig;
   $('craft-coins').innerHTML=`<i class="item-icon small" style="${iconStyle('cowrie')}"></i>${bag.coins.toLocaleString('th-TH')}`;
   dialog.querySelectorAll('[data-group]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.group===group)));
-  $('craft-list').innerHTML=RECIPES.filter(r=>r.group===group).map(r=>{
+  $('craft-list').innerHTML=RECIPES.filter(r=>r.group===group&&(itemDef(r.out).classes?.includes(world.profession.id)??true)).map(r=>{
    const it=itemDef(r.out),n=craftable(bag,r);
    const needs=Object.entries(r.needs).map(([id,k])=>{const have=bag.items[id]??0;return `<span class="${have>=k?'ok':'short'}"><i class="item-icon small" style="${iconStyle(id)}"></i>${itemDef(id).name} ${have}/${k}</span>`;}).join('');
    return `<li><i class="item-icon" style="${iconStyle(r.out)}"></i><div><strong>${it.name}${r.count>1?' ×'+r.count:''}</strong><small>${it.text??''}</small><p class="craft-needs">${needs}<span class="${bag.coins>=r.coins?'ok':'short'}">${r.coins} เบี้ย</span></p></div>`+

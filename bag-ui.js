@@ -2,7 +2,7 @@
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
 import {activeEvent,surgeOn} from './events.js?v=64';
 import {levelGifts} from './experience.js?v=105.3';
-import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=95';
+import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=107';
 import {MONSTER_TYPES,LEADER} from './combat-core.js?v=101';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {pickPotion} from './auto-play.js';
@@ -15,9 +15,14 @@ const GEAR_PLACES=[['head','หมวก'],['weapon','อาวุธ'],['access
 
 // 0.57 tier 3/4 gear reuses the tier-2 icon recoloured until painted art lands.
 const TINTS={gold:'sepia(.55) saturate(2.4) hue-rotate(-10deg) brightness(1.12) drop-shadow(0 0 3px #ffd25a)',violet:'hue-rotate(215deg) saturate(1.7) brightness(1.05) drop-shadow(0 0 4px #c27bff)'};
+// 0.107 sheets that may not be painted yet: until one loads, its items (`ph`) show their stand-in cell, tagged --ph so
+// icons already on screen swap to the painted cell once it arrives.
+const loaded={};if(typeof Image==='function')for(const k of new Set(Object.values(ITEMS).filter(it=>it.ph).map(it=>it.atlas))){const im=new Image();im.onload=()=>{loaded[k]=true;
+ for(const el of document.querySelectorAll('[style*="--ph:"]'))el.style.cssText=iconStyle(el.style.getPropertyValue('--ph').trim().slice(1,-1));};im.src=ATLASES[k];}
 export function iconStyle(id){
- const item=itemDef(id);if(!item)return '';
- return `background-image:url(${ATLASES[item.atlas]??ITEM_ATLAS});background-size:600% 400%;background-position:${item.icon%6*20}% ${Math.floor(item.icon/6)/3*100}%`+(TINTS[item.tint]?';filter:'+TINTS[item.tint]:'');
+ const def=itemDef(id);if(!def)return '';
+ const ph=def.ph&&!loaded[def.atlas],item=ph?{...def,...def.ph}:def;
+ return `background-image:url(${ATLASES[item.atlas]??ITEM_ATLAS});background-size:600% 400%;background-position:${item.icon%6*20}% ${Math.floor(item.icon/6)/3*100}%`+(TINTS[item.tint]?';filter:'+TINTS[item.tint]:'')+(ph?`;--ph:'${id}'`:'');
 }
 const icon=(id,cls='item-icon')=>`<i class="${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 

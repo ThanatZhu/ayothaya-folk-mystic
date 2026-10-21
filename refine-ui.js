@@ -1,9 +1,9 @@
 // Refine window at ครูแสนดาบ (0.44) + the target's element/size badge. Online the server rolls; offline here.
-import {SHOPS,ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=95';
-import {REFINE_RATE,REFINE_ORE,REFINE_MAX,LEK_LAI_BONUS,refineCost,refineGear} from './refine.js?v=106.4';
+import {SHOPS,ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=107';
+import {REFINE_RATE,REFINE_ORE,REFINE_MAX,LEK_LAI_BONUS,refineCost,refineGear} from './refine.js?v=107';
 import {affinityOf,ELEMENT_NAME,SIZE_NAME} from './affinity.js?v=02';
 import {MONSTER_TYPES} from './combat-core.js?v=101';
-import {iconStyle} from './bag-ui.js?v=106.4';
+import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

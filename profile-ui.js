@@ -1,7 +1,7 @@
 // 0.83 owner layout: the portrait opens a character card (preview + status) and the game settings move to their
 // own gear button. The settings panel is the old account panel (sync status, controls, sound, FPS / graphics,
 // lobby, logout), so every module that adds to it keeps working; only its trigger changes.
-import {STATS,STAT_LABEL,combatPower} from './character-stats.js?v=94';
+import {STATS,STAT_LABEL,combatPower} from './character-stats.js?v=106.4';
 import {baseProgress,jobProgress} from './experience.js?v=105.3';
 import {className} from './classes.js?v=101';
 import {jobFor} from './advancement.js?v=73';
@@ -44,7 +44,8 @@ export function createProfileUI({game,account,statusUI,equipmentUI}){
   $('profile-power').innerHTML=`ค่าพลัง <span>${combatPower(d,base.level).toLocaleString('th-TH')}</span>`;
   const bar=(label,p)=>`<div class="profile-level"><b>${label} Lv.${p.level}${p.maxed?' · ตัน':''}</b><i style="--p:${Math.round(p.percent)}%"></i><small>${p.maxed?'สูงสุด':p.current+' / '+p.required}</small></div>`;
   $('profile-levels').innerHTML=bar('Base',base)+bar('Job',job);
-  $('profile-base').innerHTML=STATS.map(k=>`<li><b>${STAT_LABEL[k]}</b><span>${total[k]??v.stats[k]}</span></li>`).join('');
+  const tip=d.rebirthBonus?'รวมโบนัสจุติถาวร +'+d.rebirthBonus:''; // 0.104
+  $('profile-base').innerHTML=STATS.map(k=>`<li title="${tip}"><b>${STAT_LABEL[k]}</b><span>${total[k]??v.stats[k]}</span></li>`).join('');
   const pct=n=>Math.round(n*100)+'%';
   $('profile-derived').innerHTML=[['HP',`${Math.round(world.player.hp)} / ${d.maxHp}`],['MP',`${Math.round(world.player.mp)} / ${d.maxMp}`],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['ความเร็วโจมตี',Math.round(100/d.delay)+'%'],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)]].map(([k,n])=>`<div><dt>${esc(k)}</dt><dd>${esc(n)}</dd></div>`).join('');
   $('profile-raise').textContent=v.points>0?`อัปแต้มสถานะ · เหลือ ${v.points} แต้ม`:'หน้าสถานะ · อัปแต้ม';$('profile-raise').classList.toggle('glow',v.points>0);

@@ -8,7 +8,7 @@ import {awardExperience,baseProgress,levelGifts,migrateXp,XP_CURVE} from '../exp
 import {refineGear} from '../refine.js';
 import {STORAGE_SLOTS,STORAGE_NPC,normalizeStorage,normalizeOffer,moveOffer,hasOffer,swapOffers,normalizeStall,buyFromStall} from '../market.js';
 import {MARKET_ZONE,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,searchMarket,publicShop} from '../market-board.js';
-import {REBIRTH_MAX,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
+import {REBIRTH_MAX,rebirthStatBonus,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot} from '../realm-state.js';
 import {normalizeSkills,upgradeSkill,availablePoints,SLOTS} from '../skill-progress.js';
@@ -183,7 +183,7 @@ export class RealmServer{
    if(baseProgress(w).level<99)return this.itemFail(p,'rebirth-level');
    if((p.rebirth??0)>=REBIRTH_MAX)return this.itemFail(p,'rebirth-max');
    p.rebirth=(p.rebirth??0)+1;w.baseXp=0;p.stats=normalizeStats(null);p.statSig=null;this.refreshStats(p);w.player.hp=w.player.maxHp;w.player.mp=w.player.maxMp;
-   p.saveNow=true;w.notice('เกิดใหม่ครั้งที่ '+p.rebirth+' · กลับสู่ Lv.1 พร้อมแต้มสเตตัสโบนัส +'+p.rebirth*40);
+   p.saveNow=true;w.notice('เกิดใหม่ครั้งที่ '+p.rebirth+' · กลับสู่ Lv.1 พร้อมแต้มสเตตัสโบนัส +'+p.rebirth*40+' · ทุกค่าสถานะถาวร +'+rebirthStatBonus(p.rebirth));
    this.announce(p.serverId,'🌟 '+p.character.name+' เกิดใหม่เป็นครั้งที่ '+p.rebirth+'!');return true;
   }
   if(m.type==='weeklyClaim'){

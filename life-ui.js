@@ -7,10 +7,10 @@ import {activeEvent,expRate,surge,WEEKEND_EXP} from './events.js?v=64';
 import {WAR,warWindow} from './guild-war.js?v=98';
 import {ARENA,arenaEnds} from './arena.js?v=98';
 import {SHOPS} from './items.js?v=95';
-import {iconStyle} from './bag-ui.js?v=99';
+import {iconStyle} from './bag-ui.js?v=106.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {baseProgress} from './experience.js?v=105.3';
-import {rebirthRank,REBIRTH_POINTS,REBIRTH_MAX} from './character-stats.js?v=94';
+import {rebirthRank,REBIRTH_POINTS,REBIRTH_MAX,REBIRTH_STAT,rebirthStatBonus} from './character-stats.js?v=106.4';
 import * as THREE from 'three';
 
 const $=id=>document.getElementById(id);
@@ -128,7 +128,7 @@ export function createLifeUI({game,account,camera}){
  const rebirthBtn=document.createElement('button');rebirthBtn.type='button';rebirthBtn.id='rebirth-btn';rebirthBtn.hidden=true;($('game-shell')??document.body).append(rebirthBtn);
  rebirthBtn.onclick=()=>{const n=(world.rebirth??0)+1;
   if(document.body.dataset.safe!=='true'){world.notice('จุติได้เฉพาะในเมือง');return;}
-  if(confirm(`จุติครั้งที่ ${n} · ยศ "${rebirthRank(n)}"\n\nBase Lv. กลับเป็น 1 · แต้มสถานะคืนทั้งหมดให้แจกใหม่ (+${n*REBIRTH_POINTS} โบนัส)\nอาชีพ สกิล Job กระเป๋า และอุปกรณ์ยังอยู่ครบ`))world.market?.('rebirth');};
+  if(confirm(`จุติครั้งที่ ${n} · ยศ "${rebirthRank(n)}"\n\nBase Lv. กลับเป็น 1 · แต้มสถานะคืนทั้งหมดให้แจกใหม่ (+${n*REBIRTH_POINTS} โบนัส)\n+${REBIRTH_STAT} ทุกค่าสถานะถาวร (รวม +${rebirthStatBonus(n)} · เกิน 99 ได้)\nอาชีพ สกิล Job กระเป๋า และอุปกรณ์ยังอยู่ครบ`))world.market?.('rebirth');};
  let rebirthShown='';
  function drawRebirth(){const n=world.rebirth??0,on=game.online&&baseProgress(world).level>=99&&n<REBIRTH_MAX,key=on+':'+n;if(key===rebirthShown)return;rebirthShown=key;
   rebirthBtn.hidden=!on;if(on)rebirthBtn.innerHTML=`<i aria-hidden="true">🌟</i><span><b>จุติ</b><small>ครั้งที่ ${n+1} · ${rebirthRank(n+1)}</small></span>`;}

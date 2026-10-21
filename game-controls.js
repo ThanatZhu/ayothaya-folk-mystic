@@ -13,7 +13,7 @@ import {upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_
 import {createRouteWalker} from './route-walk.js?v=01';
 
 import {className} from './classes.js?v=101';
-import {rebirthRank} from './character-stats.js?v=94';
+import {rebirthRank} from './character-stats.js?v=106.4';
 import {normalizeAuto} from './auto-play.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){

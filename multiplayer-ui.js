@@ -1,5 +1,5 @@
 import {openHudPanel} from './hud-panels.js?v=34';
-import {iconStyle} from './bag-ui.js?v=99';
+import {iconStyle} from './bag-ui.js?v=106.4';
 import {emblemId,emoteId} from './items.js?v=95';
 import {createPetView} from './pet-ui.js?v=98';
 import * as THREE from 'three';
@@ -8,7 +8,7 @@ import {groundHeight} from './combat-core.js?v=103.1';
 import {MultiplayerClient} from './multiplayer-client.js?v=life1';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=101';
-import {rebirthRank} from './character-stats.js?v=94';
+import {rebirthRank} from './character-stats.js?v=106.4';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
 import {createPaintedAvatar} from './painted-avatar.js?v=106.0';

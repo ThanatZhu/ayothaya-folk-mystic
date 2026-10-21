@@ -52,8 +52,8 @@
 #status-window h2{margin:0;font-size:16px;color:#f4cf7a;flex:1}
 #status-points{font-size:12px;color:#95efe2}
 #status-stats{list-style:none;margin:0;padding:8px 10px;display:grid;gap:4px}
-#status-stats li{display:grid;grid-template-columns:42px 52px 1fr auto;align-items:center;gap:6px;padding:4px 6px;border:1px solid #af884f33;border-radius:6px;background:#0e292677}
-#status-stats b{color:#f4cf7a;font-size:13px}#status-stats span{font-size:14px;font-weight:700}#status-stats em{font-style:normal;color:#95efe2;font-size:11px}
+#status-stats li{display:grid;grid-template-columns:42px minmax(52px,max-content) 1fr auto;align-items:center;gap:6px;padding:4px 6px;border:1px solid #af884f33;border-radius:6px;background:#0e292677}
+#status-stats b{color:#f4cf7a;font-size:13px}#status-stats span{font-size:14px;font-weight:700;white-space:nowrap}#status-stats em{font-style:normal;color:#95efe2;font-size:11px}#status-stats em.rebirth-bonus{color:#8fe388}
 #status-stats small{font-size:10px;color:#c9b98f}
 #status-stats button{min-width:40px;padding:3px 6px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:800 12px Mali,Tahoma,sans-serif;cursor:pointer}
 #status-stats button i{font-style:normal;font-size:9px;margin-left:3px;opacity:.75}
@@ -69,7 +69,7 @@
 #menu-status .status-glyph{font-size:20px;color:#f4cf7a;font-style:normal}
 @media (orientation:landscape) and (max-height:520px){
  #status-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(372px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}
- #status-stats li{grid-template-columns:38px 46px 1fr auto}
+ #status-stats li{grid-template-columns:38px minmax(46px,max-content) 1fr auto}
 }
 /* Refine window + target element badge (refine-ui.js) */
 #refine-window[data-hud-panel]{position:fixed;inset:auto;top:85px;right:200px;left:auto;bottom:auto;margin:0;width:372px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 160px);padding:0;border:1px solid #c6a16488;border-radius:8px;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;box-shadow:0 6px 24px #0006;z-index:40;overflow:auto;font-family:Mali,Tahoma,sans-serif}
@@ -177,7 +177,7 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
   grid-template-columns:minmax(380px,430px) 1fr;grid-template-rows:auto auto 1fr;grid-template-areas:"head head" "stats gear" "derived gear";column-gap:4px}
  #status-window>header{grid-area:head;padding:10px 14px}#status-window h2{font-size:19px}#status-points{font-size:14px}
  #status-stats{grid-area:stats;padding:12px 14px 8px;gap:6px}
- #status-stats li{grid-template-columns:52px 64px 1fr auto;padding:7px 10px}
+ #status-stats li{grid-template-columns:52px minmax(64px,max-content) 1fr auto;padding:7px 10px}
  #status-stats b{font-size:15px}#status-stats span{font-size:17px}#status-stats small{font-size:12px}
  #status-stats button{min-width:48px;padding:5px 9px;font-size:13px}
  #status-derived{grid-area:derived;align-self:start;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 14px 14px}

@@ -21,6 +21,8 @@ export const raiseCost=x=>Math.floor((x-1)/10)+2;
 // Points earned by Base Level L: 3 + floor(level/5) for every level gained after 1.
 // 0.102 rebirth: each one (up to REBIRTH_MAX) adds REBIRTH_POINTS on top of what the levels earn
 export const REBIRTH_POINTS=40,REBIRTH_MAX=10;
+// 0.104 each rebirth also adds REBIRTH_STAT to every final stat, past STAT_MAX; the allocated values stay capped at 99
+export const REBIRTH_STAT=2,rebirthStatBonus=n=>Math.min(REBIRTH_MAX,Math.max(0,n|0))*REBIRTH_STAT;
 // 0.103.2 the title shown above a reborn character's name (index = times reborn)
 export const REBIRTH_RANKS=['','ผู้จุติ','ยอดฝีมือ','ขุนพล','จอมยุทธ์','ปรมาจารย์','ผู้วิเศษ','เทพยุทธ์','มหาเทพ','ราชันย์','ตำนานอโยธยา'];
 export const rebirthRank=n=>REBIRTH_RANKS[Math.min(REBIRTH_MAX,Math.max(0,n|0))]??'';
@@ -76,13 +78,13 @@ export function combatPower(d,level=1){
  if(!d)return 0;const dmg=Math.max(d.atk??0,d.matk??0)*(1+(d.crit??0)*.5)/Math.max(.5,d.delay??1);
  return Math.round(dmg*6+(d.maxHp??0)*.6+(d.maxMp??0)*.2+(d.def??0)*12+(d.flee??0)*1500+level*25);
 }
-export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=null}){
+export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=null,reborn=0}){
  const s=normalizeStats(stats),g=normalizeGear(gear),worn=GEAR_SLOTS.map(k=>g[k]&&itemDef(g[k])).filter(Boolean);
  // Refine: weapons +max(2, 8% of base) ATK/MATK per level, armor +1 DEF per level.
  const up=(it,k)=>(it[k]??0)?(it[k]+it.refine*Math.max(2,Math.round(it[k]*.08))):0;
  const cards=worn.map(it=>it.card&&ITEMS[it.card]?.effect).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
  const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0)+(food?.[k]??0),S={}; // pet: loyal pet bonus (0.50); food: meal buff (0.94)
- for(const k of STATS)S[k]=s[k]+add(k);
+ const rebirthBonus=rebirthStatBonus(reborn);for(const k of STATS)S[k]=s[k]+rebirthBonus+add(k);
  const atkStat=RANGED.has(classId)?S.dex:S.str;
  const weaponAtk=worn.reduce((n,it)=>n+up(it,'atk'),0),weaponMatk=worn.reduce((n,it)=>n+up(it,'matk'),0);
  // 0.103 status ATK: the main stat (STR, or DEX for ranged) plus small help from the other one and from LUK
@@ -90,7 +92,7 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
  const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+Math.floor(sideStat/5)+Math.floor(S.luk/3)+weaponAtk)*(1+sum(e=>e.atkPct))),matk=Math.round((S.int-1)*1.5)+Math.floor(S.int/7)**2+weaponMatk;
  const magic=MAGIC.has(classId);
  return {
-  total:S,magic,atk,matk,
+  total:S,rebirthBonus,magic,atk,matk,
   maxHp:Math.round((140+(level-1)*12)*(1+(S.vit-1)*.02)*(1+sum(e=>e.hpPct))),
   maxMp:Math.round((100+(level-1)*5)*(1+(S.int-1)*.02)),
   def:worn.reduce((n,it)=>n+(it.def?it.def+it.refine:0),0)+Math.floor((S.vit-1)/2)+sum(e=>e.def),

@@ -1,9 +1,9 @@
 // Status window (สถานะ · C): STR AGI VIT INT DEX LUK with status points, combat numbers, and the three
 // stat-gear slots. Online the server validates and owns everything; offline guests keep it in this browser.
-import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=94';
+import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=106.4';
 import {ITEMS,ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=95';
 import {baseProgress} from './experience.js?v=105.3';
-import {iconStyle} from './bag-ui.js?v=99';
+import {iconStyle} from './bag-ui.js?v=106.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);
@@ -67,8 +67,10 @@ export function createStatusUI({game,account,bagUI}){
   if(!dialog.open)return;
   $('status-points').textContent='แต้มสถานะ '+v.points;
   const total=v.derived.total??v.stats;
-  $('status-stats').innerHTML=STATS.map(k=>{const cost=raiseCost(v.stats[k]),bonus=(total[k]??v.stats[k])-v.stats[k];
-   return `<li><b>${STAT_LABEL[k]}</b><span>${v.stats[k]}${bonus?` <em>+${bonus}</em>`:''}</span><small>${STAT_HINT[k]}</small><button type="button" data-stat="${k}" ${v.points<cost?'disabled':''} aria-label="เพิ่ม ${STAT_LABEL[k]}">+<i>${cost}</i></button></li>`;}).join('');
+  // 0.104 permanent rebirth bonus, shown green apart from gear/pet/food
+  const reborn=v.derived.rebirthBonus??0,rebirthTag=reborn?` <em class="rebirth-bonus" title="โบนัสจุติถาวร">+${reborn}</em>`:'';
+  $('status-stats').innerHTML=STATS.map(k=>{const cost=raiseCost(v.stats[k]),bonus=(total[k]??v.stats[k])-v.stats[k]-reborn;
+   return `<li><b>${STAT_LABEL[k]}</b><span>${v.stats[k]+rebirthTag}${bonus?` <em>+${bonus}</em>`:''}</span><small>${STAT_HINT[k]}</small><button type="button" data-stat="${k}" ${v.points<cost?'disabled':''} aria-label="เพิ่ม ${STAT_LABEL[k]}">+<i>${cost}</i></button></li>`;}).join('');
   $('status-stats').querySelectorAll('[data-stat]').forEach(b=>b.onclick=()=>raise(b.dataset.stat));
   const d=v.derived,pct=n=>Math.round(n*100)+'%';
   $('status-derived').innerHTML=[['HP สูงสุด',d.maxHp],['MP สูงสุด',d.maxMp],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)],['ความเร็วโจมตี',Math.round(100/d.delay)+'%']].map(([k,n])=>`<div><dt>${k}</dt><dd>${n}</dd></div>`).join('');

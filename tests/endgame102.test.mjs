@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 import {levelStart} from '../experience.js';
-import {statPoints,earnedStatPoints,canWear} from '../character-stats.js';
+import {statPoints,earnedStatPoints,canWear,STATS,deriveStats,combatPower,raiseStat,normalizeStats} from '../character-stats.js';
 import {WEEKLY,normalizeWeekly,weeklyDefeat,weeklyClaim,weekOf} from '../bounty.js';
 import {MONSTER_TYPES} from '../combat-core.js';
 import {ITEMS} from '../items.js';
@@ -29,4 +29,20 @@ test('rebirth at Lv.99 in town: back to Lv.1, stats refunded with +40, gear limi
  p.stats={str:30};assert.equal(realm.receive(p.id,{type:'rebirth',seq:1}),true);
  assert.equal(p.rebirth,1);assert.equal(p.world.baseXp,0);assert.equal(p.stats.str,1);assert.equal(realm.record(p,{state}).rebirth,1);
  assert.equal(realm.receive(p.id,{type:'rebirth',seq:2}),false,'needs Lv.99 again');
+});
+test('0.104 rebirth adds +2 to every final stat past 99, allocated stats stay capped, old saves load',()=>{
+ const max=Object.fromEntries(STATS.map(k=>[k,99]));
+ for(const k of STATS)assert.equal(deriveStats({stats:{},reborn:1}).total[k],3);
+ const top=deriveStats({classId:'swordsman',level:99,stats:max,reborn:10}),plain=deriveStats({classId:'swordsman',level:99,stats:max});
+ for(const k of STATS){assert.equal(top.total[k],119);assert.equal(plain.total[k],99);}
+ assert.equal(top.rebirthBonus,20);assert.equal(deriveStats({stats:max,reborn:99}).total.str,119,'capped at REBIRTH_MAX');
+ for(const k of ['maxHp','maxMp','atk','matk','def','hit'])assert.ok(top[k]>plain[k],k);
+ assert.ok(combatPower(top,99)>combatPower(plain,99));
+ assert.throws(()=>raiseStat(max,'str',99,10),/stat-max/);assert.equal(normalizeStats({str:150}).str,99);
+ const town={id:'t',name:'เมือง',safe:true,nav:{zones:[{x:-20,z:-20,w:40,d:40}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[]};
+ const realm=new RealmServer({catalog:{capital:'t',maps:[town]},now:()=>1e4}),state=initialSave();state.mapId='t';
+ const join=(uid,record)=>realm.join({uid,serverId:'server-1',slotId:'slot-1',record:{character:{name:'ผู้'+uid,gender:'male',classId:'swordsman'},state,bag:{coins:0,items:{}},...record},send:()=>{}});
+ const old=join('a',{stats:{str:5}}),reborn=join('b',{stats:{str:5},rebirth:3});
+ assert.equal(old.derived.total.str,5);assert.equal(old.derived.rebirthBonus,0);
+ assert.equal(reborn.derived.total.str,11);assert.equal(reborn.stats.str,5,'allocated value untouched');
 });

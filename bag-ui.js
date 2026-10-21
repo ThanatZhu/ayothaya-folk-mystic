@@ -22,7 +22,7 @@ export function iconStyle(id){
 const icon=(id,cls='item-icon')=>`<i class="${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 
 export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
- if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=106.3';css.dataset.bagUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=106.4';css.dataset.bagUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-bag:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeBag(JSON.parse(localStorage.getItem(key)));}catch{return normalizeBag(null);}};
  let local=read();

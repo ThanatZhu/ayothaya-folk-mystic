@@ -11,27 +11,27 @@
 }
 
 /* Window frame: painted wood + gold with lotus corners, jade body */
-:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#emote-window,#mentor-panel,#job-ready,#welcome-card,#settings-panel,#equipment-panel,#online-panel,#controls-editor,#npc-dialog,#world-atlas-dialog){
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#inspect-window,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#emote-window,#mentor-panel,#job-ready,#welcome-card,#settings-panel,#equipment-panel,#online-panel,#controls-editor,#npc-dialog,#world-atlas-dialog){
  border:3px solid transparent!important;border-image:var(--uk-frame)!important;border-radius:4px!important;
  background:var(--uk-surface)!important;background-clip:border-box!important;background-origin:border-box!important;
  color:var(--uk-ink)!important;box-shadow:0 12px 34px #000a!important;
  scrollbar-color:#c9a35a #0b1c19!important;backdrop-filter:none!important}
 
 /* Title bar: the window name sits on a painted gold plate */
-:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#mentor-panel,#settings-panel,#equipment-panel,#online-panel,#world-atlas-dialog)>:is(header,.settings-heading){
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#inspect-window,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#mentor-panel,#settings-panel,#equipment-panel,#online-panel,#world-atlas-dialog)>:is(header,.settings-heading){
  background:linear-gradient(#c9a35a26,#0000)!important;border-bottom:1px solid #c9a35a66!important;box-shadow:none!important}
-:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#settings-panel,#online-panel)>:is(header,.settings-heading) h2{
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#inspect-window,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#settings-panel,#online-panel)>:is(header,.settings-heading) h2{
  flex:0 1 auto!important;margin-right:auto!important;padding:3px 18px!important;
  border:4px solid transparent!important;border-image:var(--uk-plate)!important;
  color:var(--uk-gold)!important;text-shadow:0 1px 2px #000}
 
 /* Close ×: the HUD's gold ring with a jade centre */
-:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#online-panel)>header>.mp-icon:last-child,
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#inspect-window,#social-window,#quests-window,#pet-window,#profile-card,#online-panel)>header>.mp-icon:last-child,
 :root :is(#equipment-close,#mentor-close,#close-settings,#events-close,#atlas-close){
  width:44px;min-width:44px;height:44px;min-height:44px;flex:none;padding:0!important;border:0!important;border-radius:50%!important;
  background:url(assets/ui63/frames/ring.png) center/40px no-repeat,radial-gradient(circle,#1d4a41 0 13px,#0000 14px)!important;
  color:var(--uk-gold)!important;font:700 20px/1 var(--font-game)!important;box-shadow:none!important;filter:drop-shadow(0 2px 3px #0008);cursor:pointer}
-:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#online-panel)>header>.mp-icon:last-child:hover,
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#inspect-window,#social-window,#quests-window,#pet-window,#profile-card,#online-panel)>header>.mp-icon:last-child:hover,
 :root :is(#equipment-close,#mentor-close,#close-settings,#events-close,#atlas-close):hover{filter:drop-shadow(0 0 6px #ffd77a) brightness(1.1)}
 
 /* Tabs: jade with a gold edge, the selected one gold */
@@ -51,7 +51,7 @@
 :root :is(.bag-detail strong,#status-window h3,#refine-window h3){color:var(--uk-gold)!important}
 
 /* Primary buttons: the HUD's painted gold plate with diamond ends */
-:root :is(.bag-actions button,.shop-list .deal,#npc-shop,#status-stats button,#refine-list button,#npc-refine,.craft-go button,#bag-craft,#job-ready-go,#controls-editor button.primary,.daily-actions button,#world-warp button,.market-list button,.market-actions button,.market-bar button,#npc-storage,.pet-actions button,#profile-raise.glow,#profile-card .profile-actions button.glow,#social-window button:not(.emblem):not([role=tab]):not(.mp-icon),#quests-window .social-list button,#welcome-go,#npc-dialog button:not(#close-npc),:is(#market-board,#online-panel,#leaderboard) .mp-primary){
+:root :is(.bag-actions button,.shop-list .deal,#npc-shop,#status-stats button,#refine-list button,#npc-refine,.craft-go button,#bag-craft,#job-ready-go,#controls-editor button.primary,.daily-actions button,#world-warp button,.market-list button,.market-actions button,.market-bar button,#npc-storage,.pet-actions button,#profile-raise.glow,#profile-card .profile-actions button.glow,#social-window button:not(.emblem):not([role=tab]):not(.mp-icon),#quests-window .social-list button,#welcome-go,#npc-dialog button:not(#close-npc),:is(#market-board,#online-panel,#leaderboard,#inspect-window) .mp-primary){
  border:3px solid transparent!important;border-image:var(--uk-plate)!important;border-radius:0!important;padding-inline:16px;
  background:none!important;color:var(--uk-gold)!important;box-shadow:none!important;text-shadow:0 1px 2px #000}
 /* Secondary buttons: plain jade with a thin gold rim */
@@ -68,4 +68,4 @@
 :root :is(#welcome-card,#job-ready,#mentor-panel) :is(h1,h2,h3,strong){color:var(--uk-gold)!important}
 
 /* Text fields and pickers inside the windows */
-:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#mentor-panel,#settings-panel,#equipment-panel,#online-panel) :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),select){background:#0b1c19!important;border:1px solid #c9a35a88!important;color:var(--uk-ink)!important}
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#inspect-window,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#mentor-panel,#settings-panel,#equipment-panel,#online-panel) :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),select){background:#0b1c19!important;border:1px solid #c9a35a88!important;color:var(--uk-ink)!important}

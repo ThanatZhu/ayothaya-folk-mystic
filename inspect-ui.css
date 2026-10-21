@@ -1,0 +1,14 @@
+/* 0.108.1 another player's worn gear (tap a player -> ดูอุปกรณ์) */
+#inspect-window[open]{position:fixed;inset:0;margin:auto;width:min(380px,calc(100vw - 24px));height:fit-content;max-height:calc(100dvh - 40px);overflow:auto;z-index:45;padding:0;border:1px solid #c6a16488;border-radius:10px;background:linear-gradient(135deg,#24382bf6,#152925f2);color:#fff0ce;font-family:var(--font-game,Mali,Tahoma,sans-serif);box-shadow:0 10px 30px #000a}
+#inspect-window>header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#b5924520;border-bottom:1px solid #af884f44}
+#inspect-window header>div{flex:1;min-width:0}
+#inspect-window h2{margin:0;font-size:16px;font-weight:700;color:#f4cf7a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#inspect-window header small{font-size:11px;color:#c9b98f}
+.inspect-meta{margin:8px 10px 0;font-size:12px;color:#d9cba4}.inspect-meta b{color:#f4cf7a;font-variant-numeric:tabular-nums}
+.inspect-gear{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0;padding:8px 10px 12px;list-style:none}
+.inspect-gear li{display:flex;align-items:center;gap:8px;min-width:0;padding:6px;border:1px solid #af884f66;border-radius:8px;background:#0e2926aa}
+.inspect-gear li.empty{border-style:dashed;opacity:.65}
+.inspect-gear .item-icon{flex:none;width:40px;height:40px}
+.inspect-gear li>div{min-width:0}.inspect-gear small{display:block;font-size:10px;color:#ac9360}
+.inspect-gear strong{display:block;font-size:12px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+@media (orientation:landscape) and (max-height:520px){#inspect-window[open]{width:min(520px,calc(100vw - 24px))}.inspect-gear{grid-template-columns:repeat(3,1fr)}}

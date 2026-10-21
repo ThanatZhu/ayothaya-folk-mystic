@@ -1,4 +1,5 @@
 import {openHudPanel} from './hud-panels.js?v=34';
+import {createInspectUI} from './inspect-ui.js?v=108.1';
 import {iconStyle} from './bag-ui.js?v=107';
 import {emblemId,emoteId} from './items.js?v=107';
 import {createPetView} from './pet-ui.js?v=107';
@@ -16,7 +17,7 @@ import {characterMotion,attackDuration,gaitStep,walkView} from './character-moti
 import {activeEmote,actionChoice,supportsCharacterAction} from './character-action-state.js?v=106.0';
 import {skillPose,skillTrack} from './skill-choreography.js?v=life1';
 import {createSkillEffects} from './skill-effects.js?v=74';
-const messages={'server-busy':'เซิร์ฟเวอร์กำลังบันทึกหรือสลับเครื่อง · ลองอีกครั้งในไม่กี่วินาที','stale-command':'คำสั่งซ้ำ/ล่าช้า · ลองกดใหม่อีกครั้ง','rate-limit':'กดเร็วเกินไป · รอสักครู่แล้วลองใหม่','duel-invalid':'ท้าดวลได้เฉพาะนอกเมือง กับผู้เล่นในแผนที่เดียวกัน','duel-busy':'มีคนกำลังประลองอยู่แล้ว','duel-far':'อยู่ห่างกันเกิน 20 ม. · เดินเข้าไปใกล้ก่อนท้าดวล','replaced':'บัญชีนี้เข้าเล่นจากอีกหน้าต่าง/อีกเครื่องแล้ว · หน้านี้ออฟไลน์','already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','world-rate':'แชตโลกส่งได้ทุก 8 วินาที','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
+const messages={'server-busy':'เซิร์ฟเวอร์กำลังบันทึกหรือสลับเครื่อง · ลองอีกครั้งในไม่กี่วินาที','stale-command':'คำสั่งซ้ำ/ล่าช้า · ลองกดใหม่อีกครั้ง','rate-limit':'กดเร็วเกินไป · รอสักครู่แล้วลองใหม่','duel-invalid':'ท้าดวลได้เฉพาะนอกเมือง กับผู้เล่นในแผนที่เดียวกัน','duel-busy':'มีคนกำลังประลองอยู่แล้ว','duel-far':'อยู่ห่างกันเกิน 20 ม. · เดินเข้าไปใกล้ก่อนท้าดวล','replaced':'บัญชีนี้เข้าเล่นจากอีกหน้าต่าง/อีกเครื่องแล้ว · หน้านี้ออฟไลน์','already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','inspect-gone':'ผู้เล่นคนนี้ไม่อยู่ในแผนที่นี้แล้ว','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','world-rate':'แชตโลกส่งได้ทุก 8 วินาที','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
 const chatErrors=new Set(['chat-rate','world-rate','no-party','invalid-chat']);
 const statusText={connecting:'กำลังเข้าห้อง… (ถ้าเซิร์ฟเวอร์ฟรีหลับอยู่ อาจรอราว 1 นาที)',reconnecting:'เน็ตหลุด · หยุดตัวละครและกำลังเชื่อมต่อใหม่',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
 const editable=e=>e.target instanceof Element&&!!e.target.closest('input,textarea,select,button,a,[contenteditable=true]');
@@ -178,9 +179,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const closeMenu=()=>{playerMenu.hidden=true;};
  addEventListener('pointerdown',e=>{if(!playerMenu.hidden&&!playerMenu.contains(e.target))closeMenu();},true);
  addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+ const inspect=createInspectUI({game});
  function openPlayerMenu(s,x,y){
   const name=s.character?.name??'ผู้เล่น',info=roster.find(p=>p.id===s.id),title=el('b','',name);title.dataset.i18nSkip='';playerMenu.replaceChildren(title);
   const add=(text,fn)=>{const b=el('button','',text);b.type='button';b.onclick=()=>{closeMenu();fn();};playerMenu.append(b);};
+  add('ดูอุปกรณ์',()=>inspect.open(s.id));
   if(!(info?.partyId??s.partyId)&&(!party||party.leader===client.id))add('ชวนเข้าปาร์ตี้',()=>client.command('invite',{target:s.id}));
   // guild invites go by name; the server checks that we lead a guild with room and that they have none
   if(game.world.myGuild&&!s.guild)add('ชวนเข้ากิลด์',()=>game.world.market?.('guildInvite',{name}));

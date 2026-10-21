@@ -48,7 +48,7 @@ export function refineAnnouncement(who,r,before,after){
  if(r.result==='broken'&&r.level+1>=REFINE_ANNOUNCE)return `💥 ${who} ตีบวก ${before} → +${r.level+1} ล้มเหลว อุปกรณ์แตก!`;
  return null;
 }
-const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
+const allowed=new Set(['craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -147,6 +147,11 @@ export class RealmServer{
    p.duelAsk={to:t.id,until:now+DUEL.ask};t.send({type:'duelAsk',from:p.id,name:p.character.name,expires:now+DUEL.ask});w.notice('ส่งคำท้าดวลถึง '+t.character.name+' แล้ว');return true;
   }
   if(m.type==='duelQuit'){if(p.duel)this.endDuel(this.peers.get(p.duel.foe),p,'ยอมแพ้');return true;}
+  // 0.108.1 tap a player -> see what they wear: only someone on the same map, at most a few times a second
+  if(m.type==='inspect'){const o=this.peers.get(m.target);if(!o||o.room!==p.room||o.suspended)return this.error(p,'inspect-gone');
+   if(now-(p.inspectAt??-Infinity)<300)return true;p.inspectAt=now;const level=this.who(o).level;
+   w.emit('inspect',{id:o.id,name:o.character.name,classId:o.character.classId,jobId:o.character.jobId??null,gender:o.character.gender,level,
+    reborn:o.rebirth??0,guild:this.guildTag(o),gear:normalizeGear(o.gear),power:combatPower(o.derived,level)});return true;}
   if(m.type.startsWith('trade'))return this.tradeCommand(p,m);
   if(m.type.startsWith('stall'))return this.stallCommand(p,m);
   if(m.type.startsWith('shop')||m.type==='marketSearch')return this.marketCommand(p,m);

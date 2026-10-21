@@ -117,7 +117,9 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   clock=s.time;game.applyNetworkSnapshot(s);self={...s.self.player,connected:true};players=new Map(s.players.map(p=>[p.id,p.player&&{...p.player,connected:p.connected}]));
   const ids=new Set(s.players.map(p=>p.id));for(const [id,v] of views)if(!ids.has(id)){if(!v.loading)remove(v);views.delete(id);}
   for(const p of s.players){const v=views.get(p.id);if(v){v.state={...v.state,...p};if(v.retryAt&&performance.now()>v.retryAt)addRemote(v.state);}else if(p.character)addRemote(p);}
-  for(const e of s.events??[]){if(e.actor===client.id){game.world.events.push(e);continue;}
+  for(const e of s.events??[]){if(e.actor===client.id){
+    // 1.10.2 how long ago this happened: snapshot delay on the server plus half the ping (capped)
+    const ping=Number(button?.dataset.ping)||80;game.world.events.push({...e,lag:Math.min(.4,Math.max(0,(Number.isFinite(e.at)&&Number.isFinite(s.time)?s.time-e.at:.05)+ping/2000))});continue;}
    const v=views.get(e.actor);if(!v||v.loading)continue;
    if(e.type==='damage'&&Number.isInteger(e.id))game.popup?.(e); // 0.99.3 everyone's numbers float over the monster they hit
    if(e.type==='playerHit')game.popup?.({...e,hurt:true},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2+v.sprite.position.y,z:v.state.player.z})});

@@ -127,12 +127,14 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(track||world.time>=castUntil||activeSkill===null){
     // 1.10 owner: the swing keeps pace with the attack speed (AGI/DEX make attacks faster than the base swing)
     const interval=world.profession.delay*((world.derived??world.derivedView)?.delay??1);swingScale=track?1:Math.max(1,attackDuration(world.profession.id)/Math.max(.2,interval*.95));
-    activeSkill=track?e.skillIndex:null;castUntil=world.time+(track?.duration??attackDuration(world.profession.id)/swingScale);
-    actionStart=world.time;world.clearEmote();actionMode=!track?'attack':e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
+    // 1.10.2 online: the swing began e.lag seconds ago on the server; start it that far in so the blow lands on time
+    const swingStart=world.time-Math.min(.4,Math.max(0,e.lag??0));
+    activeSkill=track?e.skillIndex:null;castUntil=swingStart+(track?.duration??attackDuration(world.profession.id)/swingScale);
+    actionStart=swingStart;world.clearEmote();actionMode=!track?'attack':e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    }
    const beats=track?track.strikes.map(b=>world.time+b*track.duration):[world.time+.12];
    // 1.10 owner: numbers, the hit flash and the death wait for the moment the swing / spell connects
-   strikeAt=world.time+(track?track.strikes[0]*track.duration:.42*attackDuration(world.profession.id)/swingScale);strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
+   strikeAt=world.time-Math.min(.4,Math.max(0,e.lag??0))+(track?track.strikes[0]*track.duration:.42*attackDuration(world.profession.id)/swingScale);strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    const presentation=track??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
    const from=e.from??world.player,to=e.to??from;
    skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});

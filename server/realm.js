@@ -431,10 +431,10 @@ export class RealmServer{
   if(!mob||mob.hp<=0||p.room.map.safe)return;
   const amount=Math.min(mob.hp,damage);mob.hp-=amount;markMonsterHit(mob,p.world.player);rallyPack(p.room.mobs,mob);
   let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
-  if(MONSTER_TYPES[mob.type].mvp){const d=(p.room.mvpDamage??=new Map());d.set(p.id,(d.get(p.id)??0)+amount);}
+  if(MONSTER_TYPES[mob.type].mvp||mob.summoned){const d=(p.room.mvpDamage??=new Map());d.set(p.id,(d.get(p.id)??0)+amount);}
   p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color,magic:!!p.world.derived?.magic});
   if(mob.hp>0)return;mob.dead=p.room.map.instance?1e9:mobRespawn(mob);mob.aggro=false;
-  if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob);
+  if(mob.summoned)this.summonDown(p.room,mob);else if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob);
   if(p.room.map.instance&&MONSTER_TYPES[mob.type].boss)this.dungeonClear(p.room);
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
@@ -463,7 +463,7 @@ export class RealmServer{
    for(const m of room.mobs){
     let target=null,near=Infinity;for(const p of alive){const d=distance(p.world.player,m);if(d<near){near=d;target=p;}}
     const type=MONSTER_TYPES[m.type];
-    if(type.mvp&&m.hp<=0)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
+    if(type.mvp&&m.hp<=0&&!m.summoned)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
     const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
     if(result==='respawn'){room.contributors.delete(m.id);if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);else if(type.awakened)this.announce(room.serverId,`⚡ ${type.name} (Lv.${type.level}) ตื่นขึ้นที่ ${room.map.name}!`);}
     if(m.justEnraged){m.justEnraged=false;for(const id of room.peers)this.peers.get(id).world.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
@@ -596,6 +596,27 @@ export class RealmServer{
   if(left<=0){this.weatherOverrides.delete(serverId);return null;}return {id:o.id,mapId:o.mapId,left};}
  mvpInfo(serverId){const s=this.mvpState(serverId),type=MONSTER_TYPES.find(t=>t.mvp),map=this.catalog.maps.find(m=>m.mobs?.some(([,,t])=>MONSTER_TYPES[t]?.mvp));
   return type&&map?{name:type.name,map:map.name,in:Math.max(0,Math.ceil((s.nextAt-this.now())/1000))}:null;}
+ // 0.109.8 back-office world boss: a one-off boss on any outdoor field map; it does not respawn and does not touch the
+ // timed MVP's clock. Top damage gets the MVP prize, the whole realm hears about it.
+ summonBoss({serverId='server-1',mapId,typeId=null}={}){
+  const map=this.catalog.maps.find(m=>m.id===mapId);if(!map||map.instance||map.guildHall||map.safe)throw new Error('bad-map');
+  const t=typeId===null||typeId===undefined||typeId===''?MONSTER_TYPES.findIndex(x=>x.mvp):Number(typeId),type=MONSTER_TYPES[t];
+  if(!type?.boss)throw new Error('bad-boss');
+  const roomId=serverId+':'+map.id;let room=this.rooms.get(roomId);
+  if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,serverId,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);this.wakeMvp(room);}
+  if(room.mobs.some(m=>m.summoned&&m.hp>0))throw new Error('boss-alive');
+  const {x,z}=randomSpot(map.nav)??map.spawn,hp=type.hp;
+  room.mobs.push({id:room.mobs.length,type:t,pack:null,leader:false,x,z,home:{x,z},hp,maxHp:hp,attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0,summoned:true});
+  this.announce(serverId,`👑 บอสโลก ${type.name} ปรากฏตัวที่ ${map.name}!`);
+  return {name:type.name,map:map.name,x:Math.round(x),z:Math.round(z)};
+ }
+ summonDown(room,mob){
+  const type=MONSTER_TYPES[mob.type];mob.dead=1e9;
+  const damage=[...(room.mvpDamage??[])].filter(([id])=>this.peers.get(id)?.room===room).sort((a,b)=>b[1]-a[1]);room.mvpDamage=new Map();
+  const winner=damage[0]&&this.peers.get(damage[0][0]);
+  if(winner){this.grantLoot(winner,{coins:0,items:[{id:'king-ember',count:1}]});winner.saveNow=true;winner.world.emit('mvp',{name:type.name});}
+  this.herald(room.serverId,winner?`👑 ${winner.character.name} ปราบบอสโลก ${type.name} ได้!`:`บอสโลก ${type.name} ถูกปราบแล้ว`);
+ }
  mvpDown(room,mob){
   const s=this.mvpState(room.serverId),type=MONSTER_TYPES[mob.type];s.nextAt=this.now()+MVP_INTERVAL;mob.dead=MVP_INTERVAL/1000;
   const damage=[...(room.mvpDamage??[])].filter(([id])=>this.peers.get(id)?.room===room).sort((a,b)=>b[1]-a[1]);room.mvpDamage=new Map();

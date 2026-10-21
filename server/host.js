@@ -83,6 +83,13 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      console.log('admin-weather',who,serverId,b?.weather,b?.minutes??'',b?.mapId??'all');reply(200,{serverId,weather:state});}catch(e){reply(400,{error:e.message});}
     return;
    }
+   // 0.109.8 world boss from the back office: POST {serverId, mapId, typeId?}
+   if(url.pathname==='/admin/boss'&&req.method==='POST'){
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>1024){reply(413,{error:'too-large'});return;}}
+    try{const b=JSON.parse(data),serverId=['server-1','server-2'].includes(b?.serverId)?b.serverId:'server-1';
+     const r=realm.summonBoss({serverId,mapId:String(b?.mapId??''),typeId:b?.typeId??null});console.log('admin-boss',who,serverId,b?.mapId,r.name);reply(200,{serverId,...r});}catch(e){reply(400,{error:e.message});}
+    return;
+   }
    reply(404,{error:'not-found'});return;
   }
   if(mode==='local'&&url.pathname==='/dev/session'&&req.method==='POST'){

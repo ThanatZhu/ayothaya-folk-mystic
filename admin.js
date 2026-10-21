@@ -53,7 +53,7 @@ function set(r,f,v){
  showCount();
 }
 // 0.101.2 side menu: what each page is for, in one line
-const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว']};
+const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP']};
 function tabs(){
  $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();});
@@ -73,7 +73,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather'].includes(tab);
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss'].includes(tab);
  $('page-title').textContent=icon+' '+name;$('page-help').textContent=help+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -85,6 +85,7 @@ function render(withFilters=true){
  if(tab==='formula'){formulaTab();return;}
  if(tab==='drops'){dropsTab();return;}
  if(tab==='weather'){weatherTab();return;}
+ if(tab==='boss'){bossTab();return;}
  const rows=rowsFor(),cols=columns(rows);
  $('view').innerHTML=`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th>${cols.map(c=>`<th>${LABEL[c]??c}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-i="${i}"><td class="l"><span class="name">${r.group==='items'?`<i class="ico sm" data-item="${esc(r.key)}" style="${iconStyle(r.key)}"></i>`:r.group==='classes'?`<i class="face sm" style="background-image:url(assets/character-life100/player/${esc(r.key)}-male.png)"></i>`:''}<span><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></span></span></td>${cols.map(f=>{const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined;return `<td>${b==null&&!edited?'<span class="na">—</span>':`<input type="number" step="any" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`}</td>`;}).join('')}<td><button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button></td></tr>`).join('')}</tbody></table></div>`;
  $('view').querySelectorAll('tr[data-i]').forEach(tr=>{const r=rows[+tr.dataset.i];
@@ -212,6 +213,29 @@ function weatherTab(){
  $('wx-login')&&($('wx-login').onclick=async()=>{if(await signIn())loadWeather();});
  $('wx-server')&&($('wx-server').onchange=e=>{wx.serverId=e.target.value;});$('wx-map')&&($('wx-map').onchange=e=>{wx.mapId=e.target.value;});$('wx-min')&&($('wx-min').onchange=e=>{wx.minutes=+e.target.value;});
  $('view').querySelectorAll('[data-wx]').forEach(b=>b.onclick=()=>setWeather(b.dataset.wx));
+}
+// 0.109.8 world boss tab: pick a realm, a field map and a boss, then summon it (one at a time per map; it does not respawn).
+let bossMsg='',bossMaps=null,bx={serverId:'server-1',mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp))};
+async function summonBoss(){
+ if(!bx.mapId){bossMsg='เลือกแผนที่ก่อน';bossTab();return;}
+ bossMsg='กำลังเสก…';bossTab();
+ try{const r=await adminFetch('/admin/boss',{serverId:bx.serverId,mapId:bx.mapId,typeId:+bx.typeId});bossMsg=`👑 เสก ${r.name} ที่ ${r.map} แล้ว (จุด X ${r.x} · Y ${r.z}) · ประกาศทั้งเซิร์ฟแล้ว`;}
+ catch(e){bossMsg={'boss-alive':'แผนที่นี้มีบอสโลกที่เสกไว้ยังไม่ตาย · ปราบก่อนแล้วค่อยเสกใหม่','bad-map':'แผนที่นี้เสกบอสไม่ได้ (เมือง ดันเจี้ยน บ้านกิลด์)','bad-boss':'มอนตัวนี้ไม่ใช่บอส'}[e.message]??ADMIN_ERRORS[e.message]??'เสกไม่สำเร็จ · '+e.message;}
+ bossTab();
+}
+function bossTab(){
+ warmFirebase();const user=LOCAL||fbConn?.auth.currentUser;
+ if(!bossMaps){bossMaps=[];fetch('maps/world.json').then(r=>r.json()).then(w=>{bossMaps=w.maps.filter(m=>!m.instance&&!m.safe&&!m.guildHall).map(m=>({id:m.id,name:m.name}));if(!bx.mapId&&bossMaps[0])bx.mapId=bossMaps[0].id;if(tab==='boss')bossTab();}).catch(()=>{});}
+ const bosses=MONSTER_TYPES.map((t,i)=>[i,t]).filter(([,t])=>t.boss);
+ $('view').innerHTML=!user?`<div class="wx"><p>ต้องล็อกอิน Google ด้วยบัญชีแอดมินก่อน</p><button type="button" id="bx-login" class="wx-auto">ล็อกอิน</button></div>`:
+  `<div class="wx"><div class="wx-pick"><label>เซิร์ฟ <select id="bx-server"><option value="server-1"${bx.serverId==='server-1'?' selected':''}>เซิร์ฟ 1</option><option value="server-2"${bx.serverId==='server-2'?' selected':''}>เซิร์ฟ 2</option></select></label>
+  <label>แผนที่ <select id="bx-map">${(bossMaps??[]).map(m=>`<option value="${esc(m.id)}"${m.id===bx.mapId?' selected':''}>${esc(m.name)}</option>`).join('')}</select></label>
+  <label>บอส <select id="bx-type">${bosses.map(([i,t])=>`<option value="${i}"${String(i)===bx.typeId?' selected':''}>${esc(t.name)}${t.mvp?' (MVP)':''} · Lv.${t.level??'?'} · HP ${t.hp.toLocaleString('th-TH')}</option>`).join('')}</select></label></div>
+  <button type="button" class="wx-auto bx-go" id="bx-go">👑 เสกบอสโลก</button><p class="wx-msg" role="status">${esc(bossMsg)}</p>
+  <small>เสกได้เฉพาะแผนที่สนาม (ไม่ใช่เมือง ดันเจี้ยน บ้านกิลด์) · บอสเกิดจุดสุ่มในแผนที่และไม่เกิดซ้ำ · ไม่กระทบเวลาเกิดของ MVP ปกติ · คนตีแรงสุดได้ ถ่านเพลิงราชาหุ่นฟาง</small></div>`;
+ $('bx-login')&&($('bx-login').onclick=async()=>{if(await signIn())bossTab();});
+ $('bx-server')&&($('bx-server').onchange=e=>{bx.serverId=e.target.value;});$('bx-map')&&($('bx-map').onchange=e=>{bx.mapId=e.target.value;});$('bx-type')&&($('bx-type').onchange=e=>{bx.typeId=e.target.value;});
+ $('bx-go')&&($('bx-go').onclick=summonBoss);
 }
 function playersTab(){
  warmFirebase();

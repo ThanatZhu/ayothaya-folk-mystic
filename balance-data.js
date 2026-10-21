@@ -12,6 +12,22 @@ export default {
    "jobXp": 8000,
    "level": 40,
    "reach": 4
+  },
+  "rat-chief-awakened": {
+   "hp": 200000,
+   "damage": 500
+  },
+  "monkey-chief-awakened": {
+   "hp": 300000,
+   "damage": 800
+  },
+  "mill-keeper-awakened": {
+   "hp": 450000,
+   "damage": 1000
+  },
+  "marsh-ape-awakened": {
+   "hp": 600000,
+   "damage": 800
   }
  },
  "drops": {

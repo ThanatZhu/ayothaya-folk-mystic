@@ -29,7 +29,7 @@ export function iconStyle(id){
 const icon=(id,cls='item-icon')=>`<i class="${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 
 export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
- if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=109.6';css.dataset.bagUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=110.4';css.dataset.bagUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-bag:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeBag(JSON.parse(localStorage.getItem(key)));}catch{return normalizeBag(null);}};
  let local=read();
@@ -139,7 +139,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
 
  // Shop: the NPC dialog gets a button; the shop window closes if the player walks away.
  const shopDialog=document.createElement('dialog');shopDialog.id='shop-window';shopDialog.setAttribute('aria-labelledby','shop-title');
- shopDialog.innerHTML='<header><h2 id="shop-title"></h2><b class="coins" id="shop-coins"></b><button class="mp-icon" id="shop-close" aria-label="ปิดร้าน">×</button></header><div class="shop-tabs" role="tablist"><button type="button" role="tab" data-tab="buy" aria-selected="true">ซื้อ</button><button type="button" role="tab" data-tab="sell" aria-selected="false">ขาย</button></div><ol class="shop-list" id="shop-list"></ol><div class="shop-expand" id="shop-expand" hidden></div>';
+ shopDialog.innerHTML='<header><h2 id="shop-title"></h2><b class="coins" id="shop-coins"></b><button class="mp-icon" id="shop-close" aria-label="ปิดร้าน">×</button></header><div class="shop-tabs" role="tablist"><button type="button" role="tab" data-tab="buy" aria-selected="true">ซื้อ</button><button type="button" role="tab" data-tab="sell" aria-selected="false">ขาย</button></div><div class="shop-expand" id="shop-expand" hidden></div><ol class="shop-list" id="shop-list"></ol>';
  ($('game-shell')??document.body).append(shopDialog);
  let shopNpc=null,tab='buy';
  shopDialog.querySelector('#shop-close').onclick=()=>shopDialog.close();
@@ -184,8 +184,8 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    const shop=SHOPS[shopNpc.name];$('shop-title').textContent=shop.title;$('shop-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');
    shopDialog.querySelectorAll('[data-tab]').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===tab)));
    // 0.109.6 bag expansion at shops that offer it: +BAG_STEP slots for a price that rises each time, up to BAG_MAX
-   {const box=$('shop-expand'),cost=expandCost(b),cap=bagCap(b);box.hidden=!shop.expand||tab!=='buy';
-    if(!box.hidden){box.innerHTML=cost===null?`<small>กระเป๋าขยายเต็มที่แล้ว · ${BAG_MAX} ช่อง</small>`:`<div><strong>ขยายกระเป๋า +${BAG_STEP} ช่อง</strong><small>${cap} → ${cap+BAG_STEP} ช่อง · สูงสุด ${BAG_MAX}</small></div><button type="button" class="deal"${b.coins<cost?' disabled':''}>${cost.toLocaleString('th-TH')} เบี้ย</button>`;
+   {const box=$('shop-expand'),cost=expandCost(b),cap=bagCap(b);box.hidden=!shop.expand||tab!=='buy';if(box.hidden)box.innerHTML=''; // never keep another shop's button
+    if(!box.hidden){box.innerHTML=cost===null?`<small>กระเป๋าขยายเต็มที่แล้ว · ${BAG_MAX} ช่อง</small>`:`<div><strong>ขยายกระเป๋า +${BAG_STEP} ช่อง</strong><small>${cap} → ${cap+BAG_STEP} ช่อง · สูงสุด ${BAG_MAX}</small></div><button type="button" class="deal"${b.coins<cost?' disabled':''}>${cost.toLocaleString('th-TH')} เบี้ย</button>${b.coins<cost?`<small class="short">เบี้ยไม่พอ · ขาดอีก ${(cost-b.coins).toLocaleString('th-TH')} เบี้ย</small>`:''}`;
      const btn=box.querySelector('button');if(btn)btn.onclick=()=>{if(game.online){world.market?.('bagExpand',{npc:shopNpc.name});return;}try{local=expandBag(local);save();world.notice('ขยายกระเป๋าแล้ว · '+local.slots+' ช่อง');render(true);}catch(e){fail(e.message);}};}}
    const myClass=account?.character?.classId??world.profession.id;
    const rows=tab==='buy'?shop.stock.filter(id=>!itemDef(id).classes||itemDef(id).classes.includes(myClass)).map(id=>({id,price:shop.currency?itemDef(id).tokens:itemDef(id).buy,have:b.items[id]??0})):Object.keys(b.items).filter(id=>itemDef(id).sell).map(id=>({id,price:itemDef(id).sell,have:b.items[id]}));

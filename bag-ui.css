@@ -207,6 +207,8 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
 /* 0.109.4 four quick slots: an empty one reads as an open socket waiting for an item, not a broken button */
 #quick-slots button.empty:disabled{opacity:.8;border-style:dashed;border-color:#c6a164aa;background:#15292599}
 /* 0.109.6 bag expansion row under Mae Bua's stock */
-.shop-expand{display:flex;align-items:center;gap:10px;margin:0 10px 10px;padding:8px 10px;border:1px dashed #c6a16499;border-radius:8px;background:#0e292688}
+.shop-expand[hidden]{display:none!important} /* 0.110.4 display:flex used to override [hidden]: the row showed in every shop */
+.shop-expand{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 10px 0;padding:8px 10px;border:1px dashed #c6a16499;border-radius:8px;background:#0e292688}
 .shop-expand>div{flex:1;min-width:0}.shop-expand strong{display:block;font-size:13px;color:#f4cf7a}.shop-expand small{font-size:11px;color:#c9b98f}
+.shop-expand .short{flex-basis:100%;color:#ffb38a}
 .shop-expand .deal{min-height:36px;padding:4px 12px;font-variant-numeric:tabular-nums}

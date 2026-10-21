@@ -238,7 +238,8 @@ export class CombatWorld{
   else if(s.type==='dash'){const n=Math.hypot(p.face.x,p.face.z)||1;moveBody(p,p.face.x/n*2.8,p.face.z/n*2.8,this.nav);this.manualGrace=.7;this.path=[];}
   else if(s.type==='nova'){this.foes().filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
   else if(s.type==='area'){const c=m??air;this.foes().filter(v=>v.hp>0&&distance(v,c)<=s.radius&&lineClear(c,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
-  else if(m){this.hurt(m,this.power(s.damage,m),s.color);if(s.type==='root')m.root=3.5;if(s.type==='push'){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
+  // 0.111.3 bosses take the damage but are never rooted or pushed back
+  else if(m){this.hurt(m,this.power(s.damage,m),s.color);const firm=MONSTER_TYPES[m.type]?.boss;if(s.type==='root'&&!firm)m.root=3.5;if(s.type==='push'&&!firm){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
   this.emit('cast',{skillIndex:index,from,to:s.type==='dash'?{x:p.x,z:p.z}:m?{x:m.x,z:m.z}:air??{x:p.x,z:p.z},air:!!air,color:s.color,kind:s.type,radius:s.radius??1});return true;
  }
  update(dt,input={x:0,z:0,attack:false},{monsters=true}={}){

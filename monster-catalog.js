@@ -51,6 +51,7 @@ const slam=(radius,push,power,pct,hits,cd)=>({radius,push,power,pct,hits,cd,wind
 export const MONSTER_BEHAVIOUR={'bog-hopper':{leap:true},'bog-lantern':{aoe:2.4,windup:.9},'marsh-ape':{skirmish:1.2,enrage:true},lantern:{aoe:2.2,windup:.9},monkey:{skirmish:1.4},'monkey-chief':{skirmish:1.2,enrage:true},hopper:{leap:true},
  'rat-chief':{enrage:true},'mill-keeper':{aoe:2.8,enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'lantern-lord':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.4,1.6,.1,8,6.5)},'straw-king':{aoe:3.4,windup:1.1,enrage:true,slam:slam(5,4,1.8,.12,7,6)},
  'rat-chief-awakened':{enrage:true,slam:slam(4,3.2,1.4,.08,9,7)},'monkey-chief-awakened':{skirmish:1.2,enrage:true,slam:slam(4.2,3.4,1.5,.09,8,6.5)},'mill-keeper-awakened':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.6,1.6,.1,8,6.5)},'marsh-ape-awakened':{skirmish:1.2,enrage:true,slam:slam(4.6,3.8,1.6,.1,8,6)}};
+export const BOSS_SIGHT=10,BOSS_GIVE_UP=25;
 export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear}){
  m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);m.strike=Math.max(0,(m.strike??0)-dt);m.moving=false;
  m.flee=Math.max(0,(m.flee??0)-dt);m.leapCD=Math.max(0,(m.leapCD??0)-dt);
@@ -58,7 +59,10 @@ export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear}){
  const b=MONSTER_BEHAVIOUR[type.id]??{},rage=b.enrage&&m.hp>0&&m.hp<m.maxHp*.4;
  if(rage&&!m.enraged){m.enraged=true;m.justEnraged=true;}if(m.hp>=m.maxHp*.4)m.enraged=false;
  if(m.hp<=0){m.dead-=dt;if(m.dead<=0){Object.assign(m,{...m.home,hp:m.maxHp,aggro:false,root:0,hit:0,windup:0,strike:0,attackCD:1,slamming:false,pressure:0});return 'respawn';}return;}
- if(!target||Math.hypot(m.x-m.home.x,m.z-m.home.z)>9)m.aggro=false;
+ // 0.111.3 a boss is a boss: it picks a fight with anyone within BOSS_SIGHT, chases without the 9 m leash and only gives
+ // up (walking home) once its target is past BOSS_GIVE_UP; other monsters keep the old wait-until-hit + leash rule.
+ if(type.boss){if(!target)m.aggro=false;else{const td=Math.hypot(m.x-target.x,m.z-target.z);if(td<=BOSS_SIGHT)m.aggro=true;else if(td>BOSS_GIVE_UP)m.aggro=false;}}
+ else if(!target||Math.hypot(m.x-m.home.x,m.z-m.home.z)>9)m.aggro=false;
  if(m.hit>.26&&!(m.windup>0))return;
  const goal=m.aggro&&target?target:m.home,dx=goal.x-m.x,dz=goal.z-m.z,d=Math.hypot(dx,dz),reach=type.reach??1.35;
  // Hit often enough, a boss drops whatever it was winding up and answers with a slam (enraged: sooner, every 2/3 of the cooldown).

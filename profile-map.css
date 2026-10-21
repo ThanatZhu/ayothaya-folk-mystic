@@ -17,3 +17,4 @@
 #city-map-viewport{width:min(78.35dvh,763px,calc(96vw - 28px));height:min(76dvh,740px);overflow:auto;touch-action:pan-x pan-y;overscroll-behavior:contain;border-radius:5px}
 #city-map{width:calc(100% * var(--map-zoom,1));height:calc(100% * var(--map-zoom,1));max-width:none;object-fit:fill}
 @media(max-width:900px),(pointer:coarse),(max-height:600px){#city-map-viewport{height:calc(94dvh - 66px);width:min(calc((94dvh - 66px) * 1.031),calc(96vw - 28px))}#city-map{height:calc(100% * var(--map-zoom,1))}#world-map h1{font-size:14px}}
+#city-map{cursor:crosshair}

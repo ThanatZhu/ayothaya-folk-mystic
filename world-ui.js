@@ -1,5 +1,5 @@
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
-import {createWorldAtlas} from './world-atlas-ui.js?v=105.2';
+import {createWorldAtlas} from './world-atlas-ui.js?v=112.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
 import {createMentorUI} from './mentor-ui.js?v=107';
@@ -34,7 +34,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   location.assign('?server='+account.serverId+'&map='+encodeURIComponent(id));
  }
  // 0.59 realistic map: render the real scene straight down once (sprites hidden, no fog) and draw labels over it.
- let photo=null;
+ let photo=null,photoQueued=false; // 0.112.4 taken a moment after load, so the minimap shows the real map at once
  function mapPhoto(){
   if(photo!==null||!renderer)return photo||null;
   try{
@@ -101,6 +101,13 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  const drawCityMap=()=>drawMap($('city-map'),map,world.player,{detailed:true,photo:mapPhoto(),...markers()});
  let mapZoom=1;const viewport=$('city-map-viewport');
  function zoomMap(step){const old=mapZoom;mapZoom=Math.max(1,Math.min(3,mapZoom+step));const x=(viewport.scrollLeft+viewport.clientWidth/2)*mapZoom/old-viewport.clientWidth/2,y=(viewport.scrollTop+viewport.clientHeight/2)*mapZoom/old-viewport.clientHeight/2;viewport.style.setProperty('--map-zoom',mapZoom);viewport.scrollTo(x,y);$('map-minus').disabled=mapZoom===1;$('map-plus').disabled=mapZoom===3;}
+ // 0.112.4 click (or tap) a spot on the big map to walk there; the same transform drawMap uses (detailed: 48 px margin)
+ $('city-map').addEventListener('click',e=>{
+  const c=e.currentTarget,r=c.getBoundingClientRect(),b=map.bounds,pad=48,cx=(e.clientX-r.left)*c.width/r.width,cy=(e.clientY-r.top)*c.height/r.height;
+  const x=b.x+(cx-pad)*b.w/(c.width-pad*2),z=b.z+(cy-pad)*b.d/(c.height-pad*2);
+  if(x<b.x||x>b.x+b.w||z<b.z||z>b.z+b.d||world.player.hp<=0)return;
+  game.clearInput();game.walkTo({x,z},{radius:.5,kind:'map',onFail:()=>world.notice('เดินไปจุดนั้นไม่ได้ · ลองแตะบนทางเดินหรือพื้นโล่ง')});
+ });
  $('map-plus').onclick=()=>zoomMap(.5);$('map-minus').onclick=()=>zoomMap(-.5);
  function minimap(){drawMap(mini,map,world.player,{photo:photo||null,...markers()});}
  function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
@@ -115,6 +122,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   $('interact').hidden=!canInteract;
   if(canInteract)$('interact').textContent=nearest?'เดินทางไป '+lookup(nearest.to).name:'คุยกับ '+nearNPC.name;
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
+  if(photo===null&&!photoQueued){photoQueued=true;setTimeout(()=>{mapPhoto();lastMini=0;},2500);}
   const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}
   if(dialog.open&&now-lastBig>250){lastBig=now;drawCityMap();} // 0.64.1 the open map follows you live
  }

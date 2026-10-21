@@ -36,3 +36,18 @@
  .atlas-here{font-size:10px;padding:1px 5px}
 }
 @media(prefers-reduced-motion:reduce){#world-atlas-dialog .atlas-place{transition:none}}
+/* 0.112.4 Thailand map: portrait image, visible pins with names, greyed historic cities not open yet */
+.atlas-surface{aspect-ratio:1240/2052}
+#world-atlas-dialog .atlas-place{width:18px;min-width:18px;height:18px;border:2px solid #fff0bb;background:#c9862f;box-shadow:0 0 0 2px #2a1b0c88,0 2px 6px #0008}
+#world-atlas-dialog .atlas-place::after{content:'';position:absolute;inset:-13px;border-radius:50%} /* 44px touch target */
+#world-atlas-dialog .atlas-place:hover,#world-atlas-dialog .atlas-place[aria-pressed="true"]{background:#ffd56a;border-color:#fff8dc}
+#world-atlas-dialog .atlas-place.is-current{background:#4fd6a8;border-color:#d9fff1}
+.atlas-name{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:3px;padding:1px 7px;border-radius:999px;background:#1b2e26e6;color:#fff3d6;font:700 11px var(--font-game,Mali),sans-serif;white-space:nowrap;pointer-events:none;box-shadow:0 1px 3px #0007}
+.atlas-place[aria-pressed="true"] .atlas-name{background:#5a3f12f0;color:#ffe9a8}
+.atlas-later{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;pointer-events:auto;cursor:default;opacity:.8}
+.atlas-later i{width:10px;height:10px;border:2px solid #d9d0b8;border-radius:50%;background:#7c7461}
+.atlas-later span{margin-top:2px;padding:0 6px;border-radius:999px;background:#2a2a24c0;color:#ded6c0;font:500 10px var(--font-game,Mali),sans-serif;white-space:nowrap}
+.atlas-here{bottom:calc(100% + 4px)}
+.atlas-name.side-t{top:auto;bottom:100%;margin:0 0 3px}
+.atlas-name.side-l{left:auto;right:100%;top:50%;transform:translateY(-50%);margin:0 4px 0 0}
+.atlas-name.side-r{left:100%;top:50%;transform:translateY(-50%);margin:0 0 0 4px}

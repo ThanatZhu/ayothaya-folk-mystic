@@ -1,0 +1,71 @@
+/* Pop-up windows, NPC talk and their buttons in the same painted gold-lotus art as the HUD (assets/ui63/frames).
+   Linked at the end of <body> in game.html (after the sheets the UI modules inject into <head>); skin properties are
+   !important so they win over the per-window and phone rules, which keep owning size and position.
+   The in-game HUD (player frame, bars, target, toasts, quest tracker) and the skill tree keep their own look. */
+:root{
+ --uk-ink:#fff3d6;--uk-muted:#cfe0d4;--uk-gold:#e9c46a;--uk-jade:#14322d;
+ --uk-surface:url(assets/ui-kit/pattern.svg) 0 0/28px,linear-gradient(160deg,#1d4a41f2,#0f2421f4 55%,#0b1c19f6);
+ --uk-frame:url(assets/ui63/frames/tooltip.png) 44/26px/10px stretch;
+ --uk-plate:url(assets/ui63/frames/button.png) 30 fill/13px/0 stretch;
+ --uk-well:url(assets/ui63/frames/square.png) 34 fill/11px/0 stretch;
+}
+
+/* Window frame: painted wood + gold with lotus corners, jade body */
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#emote-window,#mentor-panel,#job-ready,#welcome-card,#settings-panel,#equipment-panel,#online-panel,#controls-editor,#npc-dialog,#world-atlas-dialog){
+ border:3px solid transparent!important;border-image:var(--uk-frame)!important;border-radius:10px!important;
+ background:var(--uk-surface)!important;background-clip:padding-box!important;
+ color:var(--uk-ink)!important;box-shadow:0 12px 34px #000a!important;
+ scrollbar-color:#c9a35a #0b1c19!important;backdrop-filter:none!important}
+
+/* Title bar: the window name sits on a painted gold plate */
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#mentor-panel,#settings-panel,#equipment-panel,#online-panel,#world-atlas-dialog)>:is(header,.settings-heading){
+ background:linear-gradient(#c9a35a26,#0000)!important;border-bottom:1px solid #c9a35a66!important;box-shadow:none!important}
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#settings-panel,#online-panel)>:is(header,.settings-heading) h2{
+ flex:0 1 auto!important;margin-right:auto!important;padding:3px 18px!important;
+ border:4px solid transparent!important;border-image:var(--uk-plate)!important;
+ color:var(--uk-gold)!important;text-shadow:0 1px 2px #000}
+
+/* Close ×: the HUD's gold ring with a jade centre */
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#online-panel)>header>.mp-icon:last-child,
+:root :is(#equipment-close,#mentor-close,#close-settings,#events-close,#atlas-close){
+ width:44px;min-width:44px;height:44px;min-height:44px;flex:none;padding:0!important;border:0!important;border-radius:50%!important;
+ background:url(assets/ui63/frames/ring.png) center/40px no-repeat,radial-gradient(circle,#1d4a41 0 13px,#0000 14px)!important;
+ color:var(--uk-gold)!important;font:700 20px/1 var(--font-game)!important;box-shadow:none!important;filter:drop-shadow(0 2px 3px #0008);cursor:pointer}
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#online-panel)>header>.mp-icon:last-child:hover,
+:root :is(#equipment-close,#mentor-close,#close-settings,#events-close,#atlas-close):hover{filter:drop-shadow(0 0 6px #ffd77a) brightness(1.1)}
+
+/* Tabs: jade with a gold edge, the selected one gold */
+:root :is(.bag-tabs,.board-tabs,.craft-tabs,.equipment-tabs,.guild-tabs,.shop-tabs,.social-tabs) button{
+ border:1px solid #c9a35a66!important;border-radius:8px 8px 3px 3px!important;
+ background:linear-gradient(#1d4a41,#0f2421)!important;color:var(--uk-muted)!important;box-shadow:inset 0 1px #ffffff14!important}
+:root :is(.bag-tabs,.board-tabs,.craft-tabs,.equipment-tabs,.guild-tabs,.shop-tabs,.social-tabs) button[aria-selected=true]{
+ border-color:#f6dc92!important;background:linear-gradient(#f8e3a0,#d9ae57 60%,#b5863a)!important;color:#2a1d08!important;box-shadow:inset 0 1px #fff9,0 0 8px #e9c46a55!important}
+
+/* Item slots: the HUD's lotus-corner square */
+:root :is(.bag-grid .slot,.gear-slot){border:3px solid transparent!important;border-image:var(--uk-well)!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+:root .bag-grid .slot.empty{filter:brightness(.62) saturate(.7)}
+:root .bag-grid .slot.on{filter:drop-shadow(0 0 5px #ffd77a) brightness(1.12)}
+
+/* Panels inside windows (detail boxes, list rows) */
+:root :is(.bag-detail,.shop-list li,#refine-list li,#status-stats li,#status-gear li,#status-derived div,#craft-list li,.bag-discard>div,.market-list li,.social-list li,.guild-card,.daily-track li,#world-warp li,.ev-card,#profile-base li,#profile-derived div,.emote-grid button,.emote-poses button,.emblem-grid .emblem){border-color:#c9a35a44!important;background:#0b1c19b3!important}
+:root :is(.bag-detail strong,#status-window h3,#refine-window h3){color:var(--uk-gold)!important}
+
+/* Primary buttons: the HUD's painted gold plate with diamond ends */
+:root :is(.bag-actions button,.shop-list .deal,#npc-shop,#status-stats button,#refine-list button,#npc-refine,.craft-go button,#bag-craft,#job-ready-go,#controls-editor button.primary,.daily-actions button,#world-warp button,.market-list button,.market-actions button,.market-bar button,#npc-storage,.pet-actions button,#profile-raise.glow,#profile-card .profile-actions button.glow,#social-window button:not(.emblem):not([role=tab]):not(.mp-icon),#quests-window .social-list button,#welcome-go,#npc-dialog button:not(#close-npc),:is(#market-board,#online-panel,#leaderboard) .mp-primary){
+ border:3px solid transparent!important;border-image:var(--uk-plate)!important;border-radius:0!important;padding-inline:16px;
+ background:none!important;color:var(--uk-gold)!important;box-shadow:none!important;text-shadow:0 1px 2px #000}
+/* Secondary buttons: plain jade with a thin gold rim */
+:root :is(.bag-actions button+button,#status-gear button,#bag-look,.profile-actions button:not(.glow),#job-ready .mentor-actions button:not(#job-ready-go),#controls-editor button:not(.primary),#mentor-panel button:not(#mentor-close),#close-npc){
+ border:1px solid #c9a35a!important;border-radius:10px!important;padding-inline:16px;
+ background:linear-gradient(#1d4a41,#14322d)!important;color:var(--uk-ink)!important;box-shadow:inset 0 1px #ffffff1a,0 2px 4px #0006!important;text-shadow:none}
+:root :is(.bag-actions,.shop-list,#status-stats,#status-gear,#refine-list,.craft-go,.daily-actions,#world-warp,.market-list,.market-actions,.market-bar,.pet-actions,.profile-actions,#controls-editor,#mentor-panel,#job-ready,#welcome-card,#npc-dialog,#social-window,#quests-window) button:is(:hover,:focus-visible):not(:disabled){filter:brightness(1.18)}
+:root :is(.bag-actions,.shop-list,#status-stats,#status-gear,#refine-list,.craft-go,.daily-actions,#world-warp,.market-list,.market-actions,.market-bar,.pet-actions,.profile-actions,#controls-editor,#mentor-panel,#job-ready,#welcome-card,#npc-dialog,#social-window,#quests-window) button:disabled{filter:grayscale(1) brightness(.7);opacity:.7}
+
+/* NPC talk and story cards: gold names, cream text */
+#npc-dialog #npc-name{color:var(--uk-gold)!important}
+#npc-dialog #npc-text{color:var(--uk-ink)!important}
+#npc-dialog{padding-inline:22px!important}
+:root :is(#welcome-card,#job-ready,#mentor-panel) :is(h1,h2,h3,strong){color:var(--uk-gold)!important}
+
+/* Text fields and pickers inside the windows */
+:root :is(#bag-window,#shop-window,#status-window,#refine-window,#craft-window,#market-window,#market-board,#leaderboard,#social-window,#quests-window,#pet-window,#profile-card,#daily-window,#events-window,#mentor-panel,#settings-panel,#equipment-panel,#online-panel) :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),select){background:#0b1c19!important;border:1px solid #c9a35a88!important;color:var(--uk-ink)!important}

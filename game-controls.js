@@ -99,7 +99,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function popup(e,positive=false,anchor=anchorOf(e)){
   const crit=!positive&&e.color==='#ffd27a',el=document.createElement('span');const mob=Number.isInteger(e.id)?world.mobs[e.id]:null,big=!positive&&!crit&&mob&&typeof e.amount==='number'&&e.amount>=mob.maxHp*.2;
   el.className='damage-number'+(crit?' crit':'')+(big?' big':'')+(positive?' heal':'');
-  el.textContent=typeof e.amount==='string'?e.amount:(positive?'+':'−')+e.amount;el.style.color=e.color??(positive?'#abedaa':'#fff0ab');
+  // 1.09 owner: numbers only (no minus sign) and four fixed colours instead of one per skill/element:
+  // white = your hit, gold = critical, red = damage you take, green = healing. Words (MISS, คอมโบ!) keep their own.
+  const word=typeof e.amount==='string';
+  el.textContent=word?e.amount:(positive?'+':'')+e.amount;
+  el.style.color=word?(e.color??'#fff4dc'):positive?'#8ff08c':crit?'#ffd27a':e.hurt?'#ff5a4a':'#fff4dc';
   const same=floats.filter(f=>f.key===anchor.key);for(const f of same)f.slot+=crit?1.3:1;
   if(same.length>=FLOAT_STACK){const old=same[0];old.el.remove();floats.splice(floats.indexOf(old),1);}
   const f={el,key:anchor.key,pos:anchor.pos,age:0,slot:0,off:0,side:same.length%2?1:-1}; // popcorn: alternate left / right as they rise
@@ -130,7 +134,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(e.type==='miss'){popup({...e,type:'damage',amount:'MISS',color:'#d8d8d8'});
   }else if(e.type==='damage'){popup(e);const v=mobViews[e.id];if(v)v.flashAt=world.time;if(e.color==='#ffd27a')kick=Math.max(kick,1);}
   else if(e.type==='heal'){popup(e,true);}
-  else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,color:'#ff987e'});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff9b83');}
+  else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff9b83');}
   else if(e.type==='notice')toast(e.text);
   else if(e.type==='combo')popup({x:e.x,z:e.z,amount:'คอมโบ!',color:'#7ee8ff'},true);
   else if(e.type==='drop'){const best=Math.max(...e.items.map(i=>itemDef(i.id)?.rarity??0));if(best>=2&&Number.isFinite(e.x))pillar(e.x,e.z,best);}

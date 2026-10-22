@@ -2646,5 +2646,13 @@ Object.assign(globalThis.I18N_EN,{
  'โดย':'by',
  '{0} แลกเปลี่ยนไอเทมสำเร็จกับ {1} (แนล {2})':'{0} completed a trade with {1} (Channel {2})',
  '{0} ซื้อ {1} x{2} จากร้าน {3} ({4} เบี้ย)':'{0} bought {1} x{2} from {3}\'s shop ({4} cowries)',
- '{0} ก่อตั้งกิลด์ "{1}"':'{0} founded guild "{1}"'
+ '{0} ก่อตั้งกิลด์ "{1}"':'{0} founded guild "{1}"',
+ 'ผู้จ่าย / เงินใคร':'Paid By / Owner',
+ 'ผู้จ่าย / เงินใคร (เช่น ธนัท, นายทุน)':'Paid By / Owner (e.g., Thanat, Investor)',
+ 'เช่น ธนัท, นายทุน, กองกลาง':'e.g., Thanat, Investor, Shared Pool',
+ 'ระบุชื่อผู้จ่าย...':'Paid by / Owner...',
+ 'ยังไม่ระบุชื่อ':'Unassigned',
+ 'จ่าย -{0}':'Paid -{0}',
+ 'รับ +{0}':'Received +{0}',
+ '👤 {0}: {1}':'👤 {0}: {1}'
 });

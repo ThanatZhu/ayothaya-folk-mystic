@@ -14,7 +14,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% 0%,#1f3e34 0%,#0f1f1b 65%);color:var(--ink);font-family:Mali,Tahoma,system-ui,sans-serif;line-height:1.55}
 button,input,select{font:inherit;color:inherit}
-.dash-shell{max-width:1360px;margin:0 auto;padding:24px 20px 60px;display:grid;gap:20px}
+.dash-shell{max-width:1840px;width:96%;margin:0 auto;padding:24px 20px 60px;display:grid;gap:20px}
 .dash-header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:16px;padding:22px 26px;background:var(--bg-card);border:1px solid var(--rim);border-radius:18px;box-shadow:0 14px 40px #0006}
 .eyebrow{font-size:10px;letter-spacing:2.2px;color:var(--gold);margin:0 0 4px;font-weight:700;display:block}
 .dash-header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,30px);color:var(--gold-bright)}
@@ -106,12 +106,12 @@ button,input,select{font:inherit;color:inherit}
 /* Inline cost form */
 .inline-form{padding:14px 16px;border-radius:12px;background:#11231d;border:1px solid #75907744}
 .inline-form h3{margin:0 0 10px;font-size:14px;color:var(--gold)}
-.form-row{display:grid;grid-template-columns:1.4fr 1.1fr 1.5fr .9fr .7fr .7fr 1fr auto;gap:8px}
+.form-row{display:grid;grid-template-columns:1.2fr .95fr 1fr 1.3fr .85fr .65fr .65fr .95fr auto;gap:8px}
 @media(max-width:1100px){.form-row{grid-template-columns:1fr 1fr}}
 .form-row input,.form-row select,.tx-form input,.tx-form select{padding:8px 10px;border-radius:8px;border:1px solid #75907766;background:#0b1814;color:var(--ink);font-size:12px;width:100%}
 
 /* Ledger Section */
-.ledger-grid{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
+.ledger-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:start}
 @media(max-width:960px){.ledger-grid{grid-template-columns:1fr}}
 .tx-form{padding:16px;border-radius:14px;background:#11231d;border:1px solid #75907744;display:grid;gap:10px}
 .tx-form h3{margin:0 0 4px;font-size:15px;color:var(--gold)}
@@ -125,8 +125,15 @@ button,input,select{font:inherit;color:inherit}
 /* Price cells: keep the currency sign and the input on one line, aligned */
 .money-cell{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .money-unit{color:var(--muted);font-size:12px;min-width:10px;text-align:center}
-.dash-table td:nth-child(4),.dash-table td:nth-child(5),.dash-table td:nth-child(6){white-space:nowrap}
+.dash-table td:nth-child(5),.dash-table td:nth-child(6),.dash-table td:nth-child(7){white-space:nowrap}
 .dash-table input.inline-num{width:90px}
 .dash-table select.sel-status{min-width:150px}
 .rate-box{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;background:#13261f;border:1px solid var(--rim);font-size:12px;color:var(--gold-bright);white-space:nowrap}
 .rate-box input{width:64px;padding:4px 6px;border-radius:6px;border:1px solid #75907766;background:#0b1814;color:var(--ink);text-align:right;font-weight:700}
+.dash-table input.inline-text{width:100%;padding:6px 9px;border-radius:7px;border:1px solid #75907755;background:#11231d;color:var(--ink);font-size:12.5px}
+.dash-table input.inline-text:focus,.dash-table input.inline-num:focus{outline:none;border-color:var(--gold);background:#173027}
+.dash-table input.inp-name,.dash-table input.inp-tx-title{min-width:190px;font-weight:700;color:#fff6df}
+.dash-table input.inp-payer,.dash-table input.inp-tx-payer{min-width:130px;font-weight:700;color:var(--gold-bright);border-color:#b8975888}
+.dash-table input.inp-role,.dash-table input.inp-tx-note{min-width:240px;color:var(--muted)}
+.payer-summary{display:flex;flex-wrap:wrap;gap:8px;padding-top:4px}
+.payer-chip{padding:5px 11px;border-radius:10px;background:#162d24;border:1px solid var(--rim);font-size:12px;font-weight:700;color:var(--gold-bright)}

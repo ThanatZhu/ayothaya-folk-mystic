@@ -279,6 +279,8 @@ function updateCostKpi(){
  $('kpi-cost-sub').textContent=`คิดเป็น ~$${monthlyTotalUsd.toFixed(2)}/เดือน (เรท 1$ = ${usdRate}฿) · ประหยัดงบด้วย Vercel + Firebase ฟรี`;
 }
 
+const trText=s=>globalThis.I18N?.t?globalThis.I18N.t(String(s||'')):String(s||'');
+
 function renderCosts(){
  const tbody=$('cost-tbody');
  tbody.replaceChildren();
@@ -292,9 +294,10 @@ function renderCosts(){
   }
   const tr=document.createElement('tr');
   tr.innerHTML=`
-   <td><strong class="cost-name-cell"></strong></td>
+   <td><input type="text" class="inline-text inp-name" aria-label="รายการต้นทุน / บริการ"></td>
+   <td><input type="text" class="inline-text inp-payer" placeholder="ระบุชื่อผู้จ่าย..."></td>
    <td class="cost-cat-cell"></td>
-   <td class="cost-role-cell" style="color:var(--muted);font-size:12px"></td>
+   <td><input type="text" class="inline-text inp-role" aria-label="หน้าที่ในเกม"></td>
    <td>${CYCLE_LABELS[item.cycle]||item.cycle}</td>
    <td><span class="money-cell"><span class="money-unit">$</span><input type="number" step="0.01" min="0" class="inline-num inp-usd" value="${Number(item.usd||0)}"></span></td>
    <td><span class="money-cell"><input type="number" step="1" min="0" class="inline-num inp-thb" value="${Number(item.thb||0)}"><span class="money-unit">฿</span></span></td>
@@ -308,9 +311,10 @@ function renderCosts(){
    </td>
    <td><button type="button" class="btn-del">ลบ</button></td>
   `;
-  tr.querySelector('.cost-name-cell').textContent=item.name;
+  const nameInp=tr.querySelector('.inp-name');nameInp.value=trText(item.name);nameInp.onchange=e=>{item.name=e.target.value.trim()||item.name;saveCosts(costs);};
+  const payerInp=tr.querySelector('.inp-payer');payerInp.value=item.payer||'';payerInp.onchange=e=>{item.payer=e.target.value.trim();saveCosts(costs);};
   tr.querySelector('.cost-cat-cell').textContent=item.category;
-  tr.querySelector('.cost-role-cell').textContent=item.role;
+  const roleInp=tr.querySelector('.inp-role');roleInp.value=trText(item.role);roleInp.onchange=e=>{item.role=e.target.value.trim();saveCosts(costs);};
 
   tr.querySelector('.inp-usd').oninput=e=>{item.usd=Math.max(0,Number(e.target.value||0));item.thb=toThb(item.usd);tr.querySelector('.inp-thb').value=item.thb;saveCosts(costs);updateCostKpi();};
   tr.querySelector('.inp-usd').onchange=e=>{item.usd=Math.max(0,Number(e.target.value||0));item.thb=toThb(item.usd);saveCosts(costs);renderCosts();};
@@ -349,6 +353,7 @@ $('cost-form').onsubmit=e=>{
  costs.push({
   id:'c-'+Date.now(),
   name:$('cost-name').value.trim(),
+  payer:$('cost-payer')?.value.trim()||'',
   category:$('cost-category').value,
   role:$('cost-role').value.trim(),
   cycle:$('cost-cycle').value,
@@ -359,6 +364,7 @@ $('cost-form').onsubmit=e=>{
  saveCosts(costs);
  renderCosts();
  $('cost-name').value='';
+ if($('cost-payer'))$('cost-payer').value='';
  $('cost-role').value='';
  $('cost-usd').value='0';
  $('cost-thb').value='';
@@ -383,6 +389,43 @@ function saveLedger(list){
 }
 let ledger=loadLedger();
 
+function updateLedgerSummary(){
+ let totalIncome=0,totalExpense=0;
+ const byPayer=new Map();
+ for(const tx of ledger){
+  const amt=Number(tx.amount||0);
+  if(tx.type==='income')totalIncome+=amt;
+  else totalExpense+=amt;
+  const who=(tx.payer||'').trim()||'ยังไม่ระบุชื่อ';
+  const cur=byPayer.get(who)||{income:0,expense:0};
+  if(tx.type==='income')cur.income+=amt;
+  else cur.expense+=amt;
+  byPayer.set(who,cur);
+ }
+ const net=totalIncome-totalExpense;
+ $('kpi-total-income').textContent='+'+formatMoney(totalIncome);
+ $('kpi-total-expense').textContent='-'+formatMoney(totalExpense);
+ $('kpi-net-balance').textContent=(net>=0?'+':'')+formatMoney(net);
+ $('kpi-net-balance').className='kpi-value '+(net>=0?'txt-jade':'txt-danger');
+ $('ratio-income-label').textContent=`รายรับรวม: +${formatMoney(totalIncome)}`;
+ $('ratio-expense-label').textContent=`รายจ่ายรวม: -${formatMoney(totalExpense)}`;
+ const sum=totalIncome+totalExpense;
+ $('ratio-income-bar').style.width=(sum>0?(totalIncome/sum)*100:50)+'%';
+ const ps=$('payer-summary');
+ if(ps){
+  ps.replaceChildren();
+  for(const [who,v] of byPayer.entries()){
+   const chip=document.createElement('span');
+   chip.className='payer-chip';
+   const parts=[];
+   if(v.expense>0)parts.push(`จ่าย -${formatMoney(v.expense)}`);
+   if(v.income>0)parts.push(`รับ +${formatMoney(v.income)}`);
+   chip.textContent=`👤 ${who}: ${parts.join(' · ')||'0 ฿'}`;
+   ps.append(chip);
+  }
+ }
+}
+
 function renderLedger(){
  const tbody=$('tx-tbody');
  tbody.replaceChildren();
@@ -405,10 +448,11 @@ function renderLedger(){
  const sum=totalIncome+totalExpense;
  $('ratio-income-bar').style.width=(sum>0?(totalIncome/sum)*100:50)+'%';
 
+ updateLedgerSummary();
  const visible=ledger.filter(tx=>currentTxFilter==='all'||tx.type===currentTxFilter);
  if(!visible.length){
   const tr=document.createElement('tr');
-  tr.innerHTML='<td colspan="7" style="text-align:center;color:var(--muted);padding:18px">ยังไม่มีรายการในหมวดนี้</td>';
+  tr.innerHTML='<td colspan="8" style="text-align:center;color:var(--muted);padding:18px">ยังไม่มีรายการในหมวดนี้</td>';
   tbody.append(tr);
   return;
  }
@@ -420,14 +464,21 @@ function renderLedger(){
    <td>${tx.date||'-'}</td>
    <td><span class="status-pill ${isInc?'free':'active'}">${isInc?'รายรับ (+)':'รายจ่าย (-)'}</span></td>
    <td class="tx-cat-cell"></td>
-   <td><strong class="tx-title-cell"></strong></td>
-   <td class="tx-note-cell" style="color:var(--muted);font-size:12px"></td>
-   <td class="${isInc?'txt-jade':'txt-danger'}" style="font-weight:700">${isInc?'+':'-'}${formatMoney(tx.amount)}</td>
+   <td><input type="text" class="inline-text inp-tx-payer" placeholder="ระบุชื่อผู้จ่าย..."></td>
+   <td><input type="text" class="inline-text inp-tx-title" aria-label="ชื่อรายการ"></td>
+   <td><input type="text" class="inline-text inp-tx-note" aria-label="หมายเหตุ"></td>
+   <td><span class="money-cell"><span class="money-unit ${isInc?'txt-jade':'txt-danger'}">${isInc?'+':'-'}</span><input type="number" step="1" min="0" class="inline-num inp-tx-amount" value="${Number(tx.amount||0)}"><span class="money-unit">฿</span></span></td>
+
+
+
    <td><button type="button" class="btn-del">ลบ</button></td>
   `;
   tr.querySelector('.tx-cat-cell').textContent=tx.category||'';
-  tr.querySelector('.tx-title-cell').textContent=tx.title||'';
-  tr.querySelector('.tx-note-cell').textContent=tx.note||'-';
+  const pInp=tr.querySelector('.inp-tx-payer');pInp.value=tx.payer||'';pInp.oninput=e=>{tx.payer=e.target.value;saveLedger(ledger);updateLedgerSummary();};
+  const tInp=tr.querySelector('.inp-tx-title');tInp.value=trText(tx.title||'');tInp.onchange=e=>{tx.title=e.target.value.trim();saveLedger(ledger);};
+  const nInp=tr.querySelector('.inp-tx-note');nInp.value=trText(tx.note||'');nInp.onchange=e=>{tx.note=e.target.value.trim();saveLedger(ledger);};
+  const aInp=tr.querySelector('.inp-tx-amount');aInp.oninput=e=>{tx.amount=Math.max(0,Number(e.target.value||0));saveLedger(ledger);updateLedgerSummary();};
+
   tr.querySelector('.btn-del').onclick=()=>{
    ledger=ledger.filter(x=>x.id!==tx.id);
    saveLedger(ledger);
@@ -445,12 +496,14 @@ $('tx-form').onsubmit=e=>{
   date:$('tx-date').value||new Date().toISOString().slice(0,10),
   category:$('tx-category').value,
   title:$('tx-title').value.trim(),
+  payer:$('tx-payer')?.value.trim()||'',
   amount:Math.max(0,Number($('tx-amount').value||0)),
   note:$('tx-note').value.trim()
  });
  saveLedger(ledger);
  renderLedger();
  $('tx-title').value='';
+ if($('tx-payer'))$('tx-payer').value='';
  $('tx-amount').value='';
  $('tx-note').value='';
 };
@@ -466,6 +519,7 @@ $('btn-record-monthly-cost').onclick=()=>{
    date:today,
    category:'ค่าเซิร์ฟเวอร์ (DigitalOcean/Render)',
    title:c.name,
+   payer:c.payer||'',
    amount:Number(c.thb),
    note:c.role
   });

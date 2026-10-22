@@ -50,7 +50,7 @@ export function refineAnnouncement(who,r,before,after){
  if(r.result==='broken'&&r.level+1>=REFINE_ANNOUNCE)return `💥 ${who} ตีบวก ${before} → +${r.level+1} ล้มเหลว อุปกรณ์แตก!`;
  return null;
 }
-const allowed=new Set(['switchChannel','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
+const allowed=new Set(['switchChannel','storyCheck','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','tame','hatch','petFeed','petReturn','bountyClaim','weeklyClaim','rebirth','hire']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -120,6 +120,7 @@ export class RealmServer{
   if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
   const w=p.world,now=this.now();
   if(m.type==='ping'){p.send({type:'pong',stamp:typeof m.stamp==='number'?m.stamp:0});return true;}
+  if(m.type==='storyCheck'){this.storyCheck(p);return true;}
   if(m.type==='switchChannel'){
    if(p.room.map.instance||p.room.map.guildHall||p.duel)return false;
    const nextCh=normalizeChannel(m.channel);if(nextCh===(p.channel??1)&&p.room.channel===nextCh)return true;
@@ -140,7 +141,7 @@ export class RealmServer{
    let r;try{r=refineGear(p.bag,p.gear,m.slot,{lekLai:m.lekLai===true,guard:m.guard===true});}catch(e){return this.itemFail(p,e.message);}
    const before=itemDef(p.gear[m.slot])?.name;p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);
    const shout=refineAnnouncement(p.character.name,r,before,itemDef(r.gear[m.slot])?.name);if(shout)this.worldSay(p.serverId,{actor:null,name:'ประกาศ',text:shout});
-   w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});return true;
+   w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});this.storyCheck(p);return true;
   }
   if(m.type==='storageOpen'||m.type==='store'||m.type==='retrieve'){
    const npc=p.room.map.npcs?.find(n=>n.name===STORAGE_NPC);
@@ -185,7 +186,7 @@ export class RealmServer{
     else if(m.type==='petFeed'){const r=feedPet(p.bag,p.pet);this.setBag(p,r.bag);p.pet=r.pet;}
     else{const r=returnPet(p.bag,p.pet);this.setBag(p,r.bag);p.pet=null;p.saveNow=true;}
    }catch(e){return this.itemFail(p,e.message);}
-   this.refreshStats(p);return true;
+   this.refreshStats(p);this.storyCheck(p);return true;
   }
   if(m.type==='hire'){
    const npc=p.room.map.npcs?.find(n=>n.name==='ครูแสนดาบ');if(!npc||distance(npc,w.player)>3.6)return this.itemFail(p,'hire-far');
@@ -218,7 +219,7 @@ export class RealmServer{
   if(m.type==='insertCard'){
    if(now-p.gearAt<300)return this.itemFail(p,'gear-rate');p.gearAt=now;
    let r;try{r=insertCard(p.bag,p.gear,m.slot,m.card);}catch(e){return this.itemFail(p,e.message);}
-   p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);w.emit('carded',{slot:m.slot,card:m.card});return true;
+   p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);w.emit('carded',{slot:m.slot,card:m.card});this.storyCheck(p);return true;
   }
   if(m.type==='statUp'||m.type==='equip'||m.type==='unequip'){
    if(now-p.gearAt<200)return this.itemFail(p,'gear-rate');p.gearAt=now;
@@ -227,7 +228,7 @@ export class RealmServer{
     if(m.type==='statUp')p.stats=raiseStat(p.stats,m.stat,who.level,who.reborn);
     else{const r=m.type==='equip'?equipGear(p.bag,p.gear,m.item,who):unequipGear(p.bag,p.gear,m.slot);p.gear=r.gear;this.setBag(p,r.bag);if(m.type==='equip')w.notice('สวมใส่ '+itemDef(m.item).name);}
    }catch(e){return this.itemFail(p,e.message);}
-   this.refreshStats(p);return true;
+   this.refreshStats(p);this.storyCheck(p);return true;
   }
   if(m.type==='useItem'){
    if(now-p.itemAt<800)return this.itemFail(p,'item-rate');
@@ -273,7 +274,7 @@ export class RealmServer{
   }
   if(m.type==='upgradeSkill'){
    try{p.skills=upgradeSkill(p.skills,p.character.classId,m.index,this.progress(p));}catch(e){return this.error(p,e.message);}
-   w.skillLevels=[...p.skills[p.character.classId]];return true;
+   w.skillLevels=[...p.skills[p.character.classId]];this.storyCheck(p);return true;
   }
   if(m.type==='input'){
    if(!Number.isFinite(m.x)||!Number.isFinite(m.z)||Math.abs(m.x)>1||Math.abs(m.z)>1||typeof m.attack!=='boolean'||(m.run!==undefined&&typeof m.run!=='boolean'))return this.error(p,'invalid-input');

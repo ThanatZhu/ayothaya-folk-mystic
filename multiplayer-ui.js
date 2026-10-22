@@ -35,9 +35,6 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  chPop.querySelector('#channel-pop-close').onclick=()=>{chPop.hidden=true;};
  const bindMiniMeta=()=>{const mm=document.getElementById('mini-meta');if(mm&&!mm.dataset.chBound){mm.dataset.chBound='1';mm.style.cursor='pointer';mm.title='คลิกเพื่อเลือกแนล (Channel 1–5)';mm.onclick=e=>{e.stopPropagation();chButton.click();};}};
  setTimeout(bindMiniMeta,500);setInterval(bindMiniMeta,2000);
- const chPop=el('div','mp-channel-popover');chPop.id='channel-popover';chPop.hidden=true;chPop.innerHTML='<div class="mp-pop-head"><strong>เลือกแนล (ย้ายแนลได้ทันที)</strong><button type="button" id="channel-pop-close" aria-label="ปิด">×</button></div><div id="channel-pop-list" class="mp-pop-list"></div>';shell.append(chPop);
- chButton.onclick=e=>{e.stopPropagation();game.clearInput();chPop.hidden=!chPop.hidden;if(!chPop.hidden)drawChannels();};
- chPop.querySelector('#channel-pop-close').onclick=()=>{chPop.hidden=true;};
  addEventListener('pointerdown',e=>{if(!chPop.hidden&&!chPop.contains(e.target)&&!chButton.contains(e.target))chPop.hidden=true;},true);
  const chip=text=>{button.querySelector('#online-label').textContent=text;};
  // Nonmodal roster window for joining, inviting and party management.

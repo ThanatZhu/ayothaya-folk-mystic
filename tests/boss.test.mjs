@@ -46,7 +46,7 @@ test('the MVP waits for the server-wide timer, crowns the top damage dealer and 
  tick(MVP_FIRST);for(let i=0;i<30;i++)realm.step(.05);
  assert.equal(mvp.hp,mvp.maxHp,'spawned');assert.ok(sent.get(b.id).some(m=>m.type==='chat'&&m.text.includes('ปรากฏตัว')));
  Object.assign(a.world.player,{x:mvp.x+1,z:mvp.z});Object.assign(b.world.player,{x:mvp.x+2,z:mvp.z});
- realm.hurt(b,mvp,100);realm.hurt(a,mvp,99999);
+ realm.hurt(b,mvp,100);realm.hurt(a,mvp,mvp.hp+1000);
  assert.equal(a.bag.items['king-ember'],1,'top damage wins MVP');assert.equal(b.bag.items['king-ember'],undefined);
  assert.ok(sent.get(b.id).some(m=>m.channel==='system'&&m.text.includes('เอ ได้ MVP')));
  assert.equal(realm.snapshot(a).self.mvp.in,MVP_INTERVAL/1000);

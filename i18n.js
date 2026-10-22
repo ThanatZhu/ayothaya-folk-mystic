@@ -6,7 +6,8 @@
 (()=>{
  const KEY='ayothaya.lang',THAI=/[฀-๿]/,ATTRS=['title','placeholder','aria-label','alt'];
  let stored=null;
- try{const q=new URLSearchParams(location.search).get('lang');if(q==='en'||q==='th')localStorage.setItem(KEY,q);stored=localStorage.getItem(KEY);}catch{}
+ try{const q=typeof location!=='undefined'&&new URLSearchParams(location.search).get('lang');if(q==='en'||q==='th')localStorage.setItem(KEY,q);}catch{}
+ try{stored=localStorage.getItem(KEY);}catch{}
  const lang=stored==='en'||stored==='th'?stored:(/^en\b/i.test(navigator.language||'')?'en':'th');
  const exact=new Map(),templates=[],cache=new Map();
  let phrases=null;

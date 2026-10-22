@@ -1,7 +1,8 @@
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createMotionPreview} from './motion-preview.js?v=41.2';
 import {characterMotion} from './character-motion.js?v=37';
-import {createWardrobe} from './wardrobe.js?v=73.2';
+import {validateAppearance} from './appearance-state.js';
+import {customizeAtlas} from './character-appearance.js?v=41';
 import {progression,jobFor,CLASS_LEVEL,advanceReady} from './advancement.js?v=73';
 import {CLASSES,getClass,className,atlasPath} from './classes.js?v=112.1';
 import {previewPose} from './sprite-motion.js';
@@ -17,12 +18,15 @@ let connection=null,catalog=null,owner=null,store=null,selected=null,record=null
 let roster=[];
 const say=text=>$('lobby-status').textContent=text;
 const lobbyMotion=createMotionPreview($('hero-preview'));
-const wardrobe=createWardrobe({getClass:()=>selectedClass,getGender:()=>previewGender,getRecord:()=>record,onTexture:(url,atlas,gender)=>{lobbyMotion.setSource(atlas,gender,selectedClass,record?.equipment);},onNotice:say,onApply:async(appearance,jobId)=>{
- if(busy)throw new Error('busy');if(record){if(selectedClass!==record.character.classId)throw new Error('class-first');lock(true);try{record=await store.customize(selected,record,appearance,jobId);roster=await store.list();displayCharacter();}finally{lock(false);}}
-}});
-$('open-wardrobe').onclick=()=>{if(!busy)wardrobe.open();};
+// 0.113 the dressing room is off for now: new characters take the default look, saved looks still show in the preview
+const atlases=new Map();let atlasToken=0;
+async function drawAtlas(){
+ const token=++atlasToken,id=selectedClass,src=atlasPath(id);
+ if(!atlases.has(src))atlases.set(src,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;}));
+ try{const img=await atlases.get(src);if(token===atlasToken)lobbyMotion.setSource(customizeAtlas(img,validateAppearance(record?.character.appearance),id),previewGender,id,record?.equipment);}catch{atlases.delete(src);}
+}
 function show(next){screen=next;document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
-function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#open-wardrobe,.character-slot').forEach(b=>b.disabled=value);}
+function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,.character-slot').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
  const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
@@ -86,14 +90,14 @@ function preview(gender=previewGender){
  $('profession-options').hidden=!canChoose;
  $('change-class').hidden=!canChoose||selectedClass===record.character.classId;$('enter-world').hidden=!!record&&selectedClass!==record.character.classId;
  document.querySelectorAll('[name=profession]').forEach(el=>el.checked=el.value===selectedClass);
- wardrobe.render();previewTime=0;
+ drawAtlas();previewTime=0;
 }
 for(const c of CLASSES){const label=document.createElement('label');label.className='class-option';const radio=document.createElement('input');radio.type='radio';radio.name='profession';radio.value=c.id;radio.checked=c.id===selectedClass;radio.addEventListener('change',()=>{selectedClass=c.id;preview();});const text=document.createElement('span');text.textContent=c.name;const icon=document.createElement('b');icon.textContent=c.icon;label.append(radio,icon,text);$('class-options').append(label);}
 document.querySelectorAll('[data-pose]').forEach(b=>b.onclick=()=>{poseMode=b.dataset.pose;previewTime=0;document.querySelectorAll('[data-pose]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));});
 let previewLast=0;const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 let lastRigDraw=0;
 function animatePreview(ms){const dt=Math.min(.05,(ms-previewLast)/1000);previewLast=ms;
- if(!document.hidden&&screen==='character'&&!document.getElementById('wardrobe')?.open){
+ if(!document.hidden&&screen==='character'){
  const stopped=document.body.classList.contains('motion-off')||reduced.matches;if(!stopped)previewTime+=dt;
  const state=previewPose(previewTime,poseMode,stopped);
  if(ms-lastRigDraw>=1000/30){lastRigDraw=ms;const mode=poseMode==='attack'?'attack':state.casting?'attack':state.moving?'walk':'idle';lobbyMotion.draw(characterMotion({time:mode==='attack'?previewTime%.95:previewTime,mode,classId:selectedClass,reduced:stopped}));}
@@ -116,17 +120,19 @@ function displayCharacter(){
  $('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
  $('character-form').hidden=!!record||roster.length>=5;
  $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · Job 10 ตันแล้วเปลี่ยนอาชีพ · Job 40 ตันรับ Master · Base สูงสุด 99':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(advanceReady(record.state.traveler,'novice').ok?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ฝึก Job ผู้ฝึกตนให้ตัน (Job 10) เพื่อเปลี่ยนอาชีพ'):'อาชีพ '+className(record.character.classId,record.character.gender)+'ฝึก Job ให้ตัน (Job 40) เพื่อรับ Master';
- if(record){wardrobe.reset(record.character.appearance,record.character.jobId??'');selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
- else{wardrobe.reset();$('character-form').reset();selectedClass='novice';preview('male');}
+ if(record){selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
+ else{$('character-form').reset();selectedClass='novice';preview('male');}
+ $('stage-name').textContent=record?.character.name??'';
  show('character');
 }
+$('hero-name').addEventListener('input',()=>{if(!record)$('stage-name').textContent=$('hero-name').value.trim();});
 document.querySelectorAll('[data-server]').forEach(button=>button.onclick=async()=>{
  if(busy)return;lock(true);selected=button.dataset.server;say('กำลังโหลดตัวละคร…');
  try{roster=await store.list();record=roster.find(r=>r.serverId===selected)??null;displayCharacter();}catch(e){record=null;report(e);}finally{lock(false);}
 });
 $('character-form').onsubmit=async event=>{
  event.preventDefault();if(busy)return;lock(true);say('กำลังสร้างตัวละคร…');
- try{record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:'novice',appearance:wardrobe.appearance,jobId:''});roster=await store.list();displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}
+ try{record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:'novice',appearance:validateAppearance(),jobId:''});roster=await store.list();displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}
 };
 $('change-class').onclick=async()=>{
  if(!record||busy||selectedClass===record.character.classId)return;lock(true);say('กำลังบันทึกอาชีพ…');

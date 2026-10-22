@@ -38,14 +38,14 @@ export function createMmoHud({game,account}){
  if(skillsBox)new MutationObserver(()=>{const now=[...skillsBox.querySelectorAll('.master-slot')].map(b=>b.hidden?0:1).join('');if(now!==shown){shown=now;layoutWheel();}}).observe(skillsBox,{subtree:true,attributes:true,attributeFilter:['hidden']});
  // Status line inside the online chip.
  const meta=document.createElement('span');meta.id='online-meta';$('online-button')?.append(meta);
- const realm='เซิร์ฟ '+String(account.serverId||'').slice(-1);
+ const getRealm=()=>'แนล '+(sessionStorage.getItem('ayothaya-channel-v1')||'1');
  let frames=0,fps=0,last=performance.now();
  const count=t=>{frames++;if(t-last>=1000){fps=Math.round(frames*1000/(t-last));frames=0;last=t;}requestAnimationFrame(count);};requestAnimationFrame(count);
  // Coordinates and realm under the minimap.
  const coords=document.createElement('small');coords.id='mini-meta';document.querySelector('.mini-panel')?.append(coords);
  const dot=id=>{const b=$(id);if(!b)return null;let d=b.querySelector('.menu-dot');if(!d){d=document.createElement('b');d.className='menu-dot';d.hidden=true;b.append(d);}return d;};
  function tick(){
-  const ping=Number($('online-button')?.dataset.ping),time=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+  const realm=getRealm(),ping=Number($('online-button')?.dataset.ping),time=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
   meta.textContent=[Number.isFinite(ping)&&ping>0?ping+' ms':null,'FPS '+fps,time,realm].filter(Boolean).join(' · ');
   const p=game.world.player;coords.textContent=`X ${Math.round(p.x)} · Y ${Math.round(-p.z)} · ${realm}`;
   const skills=dot('menu-skills'),players=dot('menu-players'),chat=dot('menu-chat');

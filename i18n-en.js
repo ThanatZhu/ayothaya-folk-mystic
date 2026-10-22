@@ -2654,5 +2654,13 @@ Object.assign(globalThis.I18N_EN,{
  'ยังไม่ระบุชื่อ':'Unassigned',
  'จ่าย -{0}':'Paid -{0}',
  'รับ +{0}':'Received +{0}',
- '👤 {0}: {1}':'👤 {0}: {1}'
+ '👤 {0}: {1}':'👤 {0}: {1}',
+ 'แนล':'Ch.',
+ 'เปลี่ยนแนล ▾':'Switch Channel ▾',
+ 'ย้ายเข้าสู่':'Switched to',
+ 'ย้ายเข้าสู่ {0} แล้ว':'Switched to {0}',
+ 'เซิร์ฟเวอร์หลักแห่งอโยธยา · ย้ายแนล 1–5 ในเกมได้ตลอดเวลา':'Main Ayothaya Server · Switch between Channels 1–5 anytime in-game',
+ 'เซิร์ฟเวอร์ 1 · อยุธยา':'Server 1 · Ayutthaya',
+ 'เซิร์ฟเวอร์หลักริมเจ้าพระยา':'Main Chao Phraya Server',
+ '5 ตัวละครต่อบัญชี · เลือกแนลได้ทันทีตอนอยู่ในเกม':'5 characters per account · Switch channels anytime while in-game'
 });

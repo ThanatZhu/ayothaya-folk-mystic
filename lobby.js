@@ -110,13 +110,13 @@ function drawRoster(){
  $('slot-count').textContent=roster.length+' / 5';$('character-slots').replaceChildren();
  for(const id of CHARACTER_SLOTS){
   const row=roster.find(r=>r.slotId===id),button=document.createElement('button');button.type='button';button.className='character-slot';button.setAttribute('aria-pressed',String(row?.slotId===record?.slotId&&!!row));
-  if(row){const image=document.createElement('span');image.className='slot-portrait';image.style.backgroundImage='url('+atlasPath(row.character.classId)+')';image.style.backgroundPosition='0 '+(row.character.gender==='female'?'100%':'0%');const name=document.createElement('strong');name.textContent=row.character.name;const detail=document.createElement('small');detail.textContent='Lv. '+progression(row.state.traveler).level+' · แนล '+selectedChannel;button.append(image,name,detail);button.setAttribute('aria-label','เลือก '+row.character.name+' '+detail.textContent);}
+  if(row){const image=document.createElement('span');image.className='slot-portrait';image.style.backgroundImage='url('+atlasPath(row.character.classId)+')';image.style.backgroundPosition='0 '+(row.character.gender==='female'?'100%':'0%');const name=document.createElement('strong');name.textContent=row.character.name;const detail=document.createElement('small');detail.textContent='Lv. '+progression(row.state.traveler).level+' · '+className(row.character.classId,row.character.gender);button.append(image,name,detail);button.setAttribute('aria-label','เลือก '+row.character.name+' '+detail.textContent);}
   else{button.textContent='+ สร้างตัวละคร';button.setAttribute('aria-label','สร้างตัวละครช่อง '+id.slice(-1));}
   button.onclick=()=>{if(busy)return;record=row??null;selected=row?row.serverId:'server-1';displayCharacter();};$('character-slots').append(button);
  }
 }
 function displayCharacter(){
- const ch=CHANNELS.find(c=>c.id===selectedChannel)??CHANNELS[0];$('realm-caption').textContent=ch.name+' · '+ch.subtitle;
+ const srv=SERVERS[0];$('realm-caption').textContent=srv.name+' · '+srv.subtitle;
  $('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
  $('character-form').hidden=!!record||roster.length>=5;
  $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · Job 10 ตันแล้วเปลี่ยนอาชีพ · Job 40 ตันรับ Master · Base สูงสุด 99':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(advanceReady(record.state.traveler,'novice').ok?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ฝึก Job ผู้ฝึกตนให้ตัน (Job 10) เพื่อเปลี่ยนอาชีพ'):'อาชีพ '+className(record.character.classId,record.character.gender)+'ฝึก Job ให้ตัน (Job 40) เพื่อรับ Master';

@@ -29,6 +29,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0,currentChannel=normalizeChannel(new URLSearchParams(location.search).get('channel')||(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1)),channelCounts=[];const seenMessages=new Set(),bubbles=new Map();
  // HUD chip: connection state dot + label. Opens the room/party roster.
  const button=el('button');button.id='online-button';button.dataset.state='offline';button.innerHTML='<i class="mp-dot" aria-hidden="true"></i><span id="online-label">ผู้เล่นออนไลน์</span>';shell.append(button);
+ const chButton=el('button','mp-hud-channel');chButton.id='channel-button';chButton.type='button';chButton.innerHTML='🌐 <b id="channel-btn-label">แนล 1</b> <span>เปลี่ยนแนล ▾</span>';(document.querySelector('.mini-panel')||shell).append(chButton);
+ const chPop=el('div','mp-channel-popover');chPop.id='channel-popover';chPop.hidden=true;chPop.innerHTML='<div class="mp-pop-head"><strong>เลือกแนล (ย้ายแนลได้ทันที)</strong><button type="button" id="channel-pop-close" aria-label="ปิด">×</button></div><div id="channel-pop-list" class="mp-pop-list"></div>';shell.append(chPop);
+ chButton.onclick=e=>{e.stopPropagation();game.clearInput();chPop.hidden=!chPop.hidden;if(!chPop.hidden)drawChannels();};
+ chPop.querySelector('#channel-pop-close').onclick=()=>{chPop.hidden=true;};
+ addEventListener('pointerdown',e=>{if(!chPop.hidden&&!chPop.contains(e.target)&&!chButton.contains(e.target))chPop.hidden=true;},true);
  const chip=text=>{button.querySelector('#online-label').textContent=text;};
  // Nonmodal roster window for joining, inviting and party management.
  const dialog=el('dialog');dialog.id='online-panel';dialog.dataset.state='offline';dialog.setAttribute('aria-labelledby','online-title');
@@ -67,14 +72,35 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  // Speech bubbles over the speaker; positioned every frame in update().
  function bubble(m){let b=bubbles.get(m.actor);if(!b){b={node:el('span','chat-bubble')};labels.append(b.node);bubbles.set(m.actor,b);}b.node.textContent=m.text.length>70?m.text.slice(0,69)+'…':m.text;b.node.classList.toggle('party',m.channel==='party');b.until=performance.now()+5500;}
  function place(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;return Math.abs(projection.x)<=1.1&&Math.abs(projection.y)<=1.1&&projection.z<1;}
+ function pickChannel(id){
+  const next=normalizeChannel(id);chPop.hidden=true;if(next===currentChannel)return;
+  const ch=CHANNELS.find(c=>c.id===next)||CHANNELS[0];
+  currentChannel=next;try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}
+  drawChannels();
+  if(client?.status==='online')client.command('switchChannel',{channel:next});
+  else game.world?.notice?.('ย้ายเข้าสู่ '+ch.name+' แล้ว');
+ }
  function drawChannels(){
+  const cur=CHANNELS.find(c=>c.id===currentChannel)||CHANNELS[0];
+  const lbl=$('channel-btn-label')||document.getElementById('channel-btn-label');if(lbl)lbl.textContent=cur.name;
+  const popList=$('channel-pop-list');
+  if(popList){
+   popList.replaceChildren();
+   for(const ch of CHANNELS){
+    const info=channelCounts.find(c=>c.channel===ch.id),count=info?info.players:(ch.id===currentChannel?roster.length:0);
+    const row=el('button',ch.id===currentChannel?'mp-pop-item active':'mp-pop-item');row.type='button';
+    row.innerHTML=`<div><b>${ch.name}</b><small>${ch.subtitle}</small></div><span>${count} คน</span>`;
+    row.onclick=()=>pickChannel(ch.id);
+    popList.append(row);
+   }
+  }
   const box=$('online-channels');if(!box)return;box.replaceChildren();
   for(const ch of CHANNELS){
    const info=channelCounts.find(c=>c.channel===ch.id),count=info?info.players:(ch.id===currentChannel?roster.length:0);
    const b=el('button',ch.id===currentChannel?'mp-channel active':'mp-channel');
    b.setAttribute('aria-pressed',String(ch.id===currentChannel));
    b.innerHTML=`<b>${ch.name}</b><small>${count} คน</small>`;
-   b.onclick=()=>{if(ch.id!==currentChannel&&client?.status==='online')client.command('switchChannel',{channel:ch.id});};
+   b.onclick=()=>pickChannel(ch.id);
    box.append(b);
   }
  }

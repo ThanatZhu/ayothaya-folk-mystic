@@ -16,7 +16,7 @@ function guide(step,{world,weapon,walking}){
  if(step.type==='defeat')return world.auto?[]:world.targetId!==null&&world.targetId!==undefined?[{sel:'#attack',text:'กดโจมตี (Space) หรือเปิด AUTO'}]:[{sel:'#quest-go',text:'กด ▶ เดินไปหามอนสเตอร์'}];
  if(step.type==='level')return world.auto?[]:[{sel:'#auto-attack',text:'เปิด AUTO ให้ตัวละครล่าเก็บเลเวล'}];
  switch(step.action){
-  case 'equip':return [{sel:'#bag-detail [data-act="wear"]',text:'กด สวมใส่'},...bagItem(`[data-id="${weapon}"]`,'แตะอาวุธที่ได้รับ','gear','อุปกรณ์'),...menu('menu-bag','เปิดกระเป๋า')];
+  case 'equip':return [{sel:'#bag-detail [data-act="wear"]',text:'กด สวมใส่'},...bagItem(`[data-id^="${weapon}"]`,'แตะอาวุธที่ได้รับ','gear','อุปกรณ์'),...menu('menu-bag','เปิดกระเป๋า')];
   case 'skill':return [{sel:'#skill-window .skill-node>button:not(:disabled)',text:'กด + เพื่ออัปสกิล (ใช้ 1 แต้ม)'},{sel:'#skill-window[open] .skill-hint',text:'ยังไม่มีแต้มสกิล · ล่ามอนให้ Job เลเวลขึ้น (1 เลเวล = 1 แต้ม) แล้วกลับมาที่นี่'},...menu('menu-skills','เปิดหน้าสกิล')];
   case 'auto':return [{sel:'#auto-attack',text:'กด AUTO ให้ตัวละครล่าเอง'}];
   case 'refine':return [{sel:'#refine-list button[data-slot]:not(:disabled)',text:'กด ตีบวก (+1 ถึง +4 ไม่แตก)'},{sel:'#npc-refine',text:'เลือก ตีบวกอาวุธ / เกราะ'},{sel:'#quest-go',text:'กด ▶ เดินไปหาครูแสนดาบ'}];
@@ -45,6 +45,7 @@ export function createCoach({game,account,objective,paused=()=>false}){
  const popover=typeof el.showPopover==='function';
  const show=on=>{if(popover){if(on&&!el.matches(':popover-open'))el.showPopover();if(!on&&el.matches(':popover-open'))el.hidePopover();}el.hidden=!on;};
  tip.querySelector('button').onclick=()=>api.setOff(true);
+ tip.onclick=e=>{if(e.target.closest('button'))return;const obj=objective();if(!obj)return;const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'wrap-novice';const steps=guide(obj.step,{world,weapon,walking:game.walking}).map(g=>({...g,node:document.querySelector(g.sel)}));const pick=steps.find(g=>shown(g.node));if(pick?.node)pick.node.click();};
  let lastTop=null,lastText='';
  const api={
   get off(){return off;},

@@ -288,7 +288,7 @@ export class RealmServer{
    if(m.type==='select'){if(!integer(m.target,0,9999))return this.error(p,'invalid-target');w.select(m.target);return true;}
    if(m.type==='skill'){if(!integer(m.index,0,SLOTS-1))return this.error(p,'invalid-skill');return w.skill(m.index);}
    if(m.type==='attack')return w.basicAttack();
-   if(m.type==='auto'){if(typeof m.on==='boolean')w.setAuto(m.on,m.hunt);else w.toggleAuto();return true;}
+   if(m.type==='auto'){if(typeof m.on==='boolean')w.setAuto(m.on,m.hunt);else w.toggleAuto();this.storyCheck(p);return true;}
    const name=canonicalAction(m.name);if(!EMOTE_ACTIONS.includes(name))return this.error(p,'invalid-emote');
    if(!w.setEmote(name))return this.error(p,'invalid-emote');
    // Clear the last held input too: a sit command cannot keep steering until its next packet.

@@ -2921,5 +2921,19 @@ Object.assign(globalThis.I18N_EN,{
  'ยกเลิกการล็อกอิน':'Sign-in cancelled',
  'สลับแนล ▾':'Switch Channel ▾',
  'คลิกเพื่อเลือกแนล (Channel 1–5)':'Click to switch channel (Channel 1–5)',
- '(ขั้น {0}/{1})':'(Step {0}/{1})'
+ '(ขั้น {0}/{1})':'(Step {0}/{1})',
+ '▶ ล่ามอน':'▶ Hunt',
+ '▶ ฟาร์มเวล':'▶ Farm EXP',
+ '▶ สวมใส่':'▶ Equip',
+ '▶ อัปสกิล':'▶ Upgrade Skill',
+ '▶ เปิด AUTO':'▶ Toggle AUTO',
+ '▶ คราฟต์':'▶ Craft',
+ '▶ ใส่การ์ด':'▶ Insert Card',
+ '▶ สัตว์เลี้ยง':'▶ Pet',
+ '▶ ตีบวก':'▶ Refine',
+ '▶ ร้านค้า':'▶ Shop',
+ '▶ กิลด์':'▶ Guild',
+ '▶ ท้าดวล':'▶ Duel',
+ 'เดินไปลานครูไม่ได้':"Can't walk to the Masters' Court",
+ 'เปิด AUTO ฟาร์มเลเวล':'Turned on AUTO to farm EXP'
 });

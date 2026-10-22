@@ -66,6 +66,31 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(s.type==='do'&&!s.mapId)return s.hint;
   return s.hint+where;
  }
+ function goButtonLabel(obj){
+  if(game.walking&&walking)return '■ หยุด';
+  const s=obj?.step;
+  if(!s)return '▶ เดินไป';
+  if(s.type==='talk'||s.type==='enter')return '▶ เดินไป';
+  if(s.type==='defeat')return '▶ ล่ามอน';
+  if(s.type==='level')return '▶ ฟาร์มเวล';
+  if(s.type==='do'){
+   switch(s.action){
+    case 'equip':return '▶ สวมใส่';
+    case 'skill':return '▶ อัปสกิล';
+    case 'auto':return '▶ เปิด AUTO';
+    case 'craft':return '▶ คราฟต์';
+    case 'card':return '▶ ใส่การ์ด';
+    case 'pet':return '▶ สัตว์เลี้ยง';
+    case 'refine':return '▶ ตีบวก';
+    case 'shop':return '▶ ร้านค้า';
+    case 'job':return '▶ ไปลานครู';
+    case 'guild':return '▶ กิลด์';
+    case 'duel':return '▶ ท้าดวล';
+    default:return '▶ เดินไป';
+   }
+  }
+  return '▶ เดินไป';
+ }
  let markedNpc=null,shown='';
  function render(){
   const obj=currentObjective(state()),sig=JSON.stringify([state(),game.walking&&walking]);
@@ -76,7 +101,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   $('quest-hint').textContent=obj?hintText(obj):'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';
   $('quest-how').textContent=obj?.step.how??'';$('quest-how').hidden=!obj?.step.how;
   $('quest-go').hidden=!obj;
-  $('quest-go').textContent=game.walking&&walking?'■ หยุด':'▶ เดินไป';
+  $('quest-go').textContent=goButtonLabel(obj);
   // A gold "!" over the NPC the story wants next.
   const want=(obj?.step.type==='talk'||obj?.step.type==='do')&&obj.step.npc&&obj.step.mapId===map.id?obj.step.npc:null;
   if(markedNpc!==want){worldUI.npcLabel(markedNpc)?.classList.remove('quest-npc');worldUI.npcLabel(want)?.classList.add('quest-npc');markedNpc=want;}
@@ -87,14 +112,142 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  function go(){
   const obj=currentObjective(state());if(!obj){world.notice('จบเนื้อเรื่องบทที่ 1 แล้ว');return;}
   const s=obj.step;
-  // do / level steps without a place: the tracker already says how; repeat it as a toast
-  if((s.type==='do'||s.type==='level')&&!s.mapId){world.notice(s.how??s.hint);return;}
+  if(s.type==='do'){
+   switch(s.action){
+    case 'equip':{
+     const bagWin=document.getElementById('bag-window');
+     const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'wrap-novice';
+     if(bagWin?.open){
+      const wearBtn=document.querySelector('#bag-detail [data-act="wear"]');
+      if(wearBtn){wearBtn.click();world.storyCheck?.();return;}
+      const it=document.querySelector(`#bag-grid [data-id^="${weapon}"]`)??document.querySelector('#bag-grid [data-id]');
+      if(it){it.click();setTimeout(()=>{document.querySelector('#bag-detail [data-act="wear"]')?.click();world.storyCheck?.();},100);return;}
+      world.storyCheck?.();
+     }else{
+      document.getElementById('menu-bag')?.click();
+      setTimeout(()=>{
+       const it=document.querySelector(`#bag-grid [data-id^="${weapon}"]`)??document.querySelector('#bag-grid [data-id]');
+       if(it){it.click();setTimeout(()=>{document.querySelector('#bag-detail [data-act="wear"]')?.click();world.storyCheck?.();},120);}
+      },150);
+     }
+     return;
+    }
+    case 'skill':{
+     const skillWin=document.getElementById('skill-window');
+     if(skillWin?.open){
+      const btn=document.querySelector('#skill-window .skill-node>button:not(:disabled)');
+      if(btn){btn.click();world.storyCheck?.();return;}
+      world.notice(s.how??s.hint);
+     }else{
+      document.getElementById('menu-skills')?.click()||window.dispatchEvent(new CustomEvent('open-skill-window'));
+      setTimeout(()=>{
+       const btn=document.querySelector('#skill-window .skill-node>button:not(:disabled)');
+       if(btn){btn.click();world.storyCheck?.();}
+      },200);
+     }
+     return;
+    }
+    case 'auto':{
+     world.setAuto?.(!world.auto);
+     world.storyCheck?.();
+     return;
+    }
+    case 'craft':{
+     const craftWin=document.getElementById('craft-window');
+     if(craftWin?.open){
+      const btn=document.querySelector('#craft-list button[data-out]:not(:disabled)');
+      if(btn){btn.click();return;}
+      world.notice(s.how??s.hint);
+     }else{
+      const craftBtn=document.getElementById('bag-craft');
+      if(craftBtn)craftBtn.click();
+      else{document.getElementById('menu-bag')?.click();setTimeout(()=>document.getElementById('bag-craft')?.click(),150);}
+     }
+     return;
+    }
+    case 'card':{
+     const statWin=document.getElementById('status-window');
+     if(statWin?.open){
+      const slot=document.querySelector('#status-window [data-slotcard="weapon"]');
+      if(slot){slot.click();return;}
+      world.notice(s.how??s.hint);
+     }else{
+      document.getElementById('menu-status')?.click();
+      setTimeout(()=>{document.querySelector('#status-window [data-slotcard="weapon"]')?.click();},150);
+     }
+     return;
+    }
+    case 'pet':{
+     const bagWin=document.getElementById('bag-window');
+     if(bagWin?.open){
+      const hatch=document.querySelector('#bag-detail [data-act="hatch"]');if(hatch){hatch.click();return;}
+      const tame=document.querySelector('#bag-detail [data-act="tame"]');if(tame){tame.click();return;}
+      const egg=document.querySelector('#bag-grid [data-id^="egg-"]');if(egg){egg.click();setTimeout(()=>document.querySelector('#bag-detail [data-act="hatch"]')?.click(),100);return;}
+      const lure=document.querySelector('#bag-grid [data-id="pet-lure"]');if(lure){lure.click();return;}
+     }else{
+      document.getElementById('menu-bag')?.click();
+      world.notice(s.how??s.hint);
+     }
+     return;
+    }
+    case 'job':{
+     const targetMap='ayutthaya';
+     if(map.id===targetMap){
+      walking=true;
+      const done=()=>{walking=false;render();};
+      game.walkTo({x:40,z:-46},{radius:3,kind:'quest',onArrive:()=>{done();document.getElementById('job-ready')?.showModal?.();},onFail:()=>{done();world.notice('เดินไปลานครูไม่ได้');}});
+      render();return;
+     }
+     s.mapId=targetMap;
+     break;
+    }
+    case 'refine':{
+     const slotBtn=document.querySelector('#refine-list button[data-slot]:not(:disabled)');
+     if(slotBtn){slotBtn.click();world.storyCheck?.();return;}
+     const refineBtn=document.getElementById('npc-refine');
+     if(refineBtn){refineBtn.click();return;}
+     break;
+    }
+    case 'shop':{
+     const shopBtn=document.getElementById('npc-shop');
+     if(shopBtn){shopBtn.click();return;}
+     break;
+    }
+    case 'guild':{
+     document.getElementById('menu-social')?.click();
+     setTimeout(()=>{document.querySelector('#social-window [data-tab="guild"]')?.click();},150);
+     return;
+    }
+    case 'duel':{
+     document.getElementById('menu-players')?.click()||document.getElementById('online-button')?.click();
+     world.notice(s.how??s.hint);
+     return;
+    }
+   }
+  }
+  if(s.type==='level'){
+   const farmMap=s.level<=10?'rice-fields':'old-orchard';
+   if(map.id===farmMap){
+    world.setAuto?.(true);
+    world.notice('เปิด AUTO ฟาร์มเลเวล');
+    const near=()=>world.mobs.filter(m=>m.hp>0).sort((a,b)=>Math.hypot(a.x-world.player.x,a.z-world.player.z)-Math.hypot(b.x-world.player.x,b.z-world.player.z))[0];
+    const m=near();
+    if(m){
+     walking=true;
+     const done=()=>{walking=false;render();};
+     game.walkTo({x:m.x,z:m.z},{radius:2.4,kind:'quest',onArrive:()=>{done();world.select(m.id);setTimeout(()=>world.setAuto?.(true),150);},onFail:()=>{done();}});
+     render();
+    }
+    return;
+   }
+   s.mapId=farmMap;
+  }
   walking=true;
   const done=()=>{walking=false;render();};
   if(s.mapId!==map.id){
    const hop=nextHop(catalog.maps,map.id,s.mapId),portal=map.portals.find(p=>p.to===hop);
    if(!portal){done();world.notice('ยังหาทางไปไม่เจอ');return;}
-   if(map.safe){try{sessionStorage.setItem(RESUME,'1');}catch{}done();worldUI.travelTo(hop);return;} // town: ride straight out of the gate
+   if(map.safe){try{sessionStorage.setItem(RESUME,'1');}catch{}done();worldUI.travelTo(hop);return;}
    game.walkTo({x:portal.x,z:portal.z},{radius:1.2,kind:'quest',onArrive:()=>{try{sessionStorage.setItem(RESUME,'1');}catch{}done();worldUI.travelTo(hop);},onFail:()=>{done();world.notice('เดินไปจุดเดินทางไม่ได้');}});
   }else if(s.type==='talk'||s.type==='do'){
    if(!worldUI.talkTo(s.npc))world.notice('ไม่พบ '+s.npc+' ในแผนที่นี้');

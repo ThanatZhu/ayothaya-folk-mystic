@@ -71,3 +71,38 @@ body[data-screen=character] #existing-name{margin:0;font-weight:700;color:#fff0c
  body[data-screen=character] #gender-options legend{margin-bottom:3px}
  body[data-screen=character] #create-character,body[data-screen=character] #enter-world{min-height:42px;font-size:13px}
 }
+
+/* 0.113.1 owner: phones felt oversized. Compact pass for short landscape screens (inputs stay 16px so iOS does not zoom). */
+@media (orientation:landscape) and (max-height:500px){
+ [data-lang-toggle]{top:6px!important;right:8px!important;font-size:10px!important;padding:2px 8px!important}
+ .lobby-header .top-actions{margin-right:62px}
+ .lobby-header .top-actions button,#identity{font-size:9px!important;padding:3px 7px!important;min-height:0!important}
+ .wordmark{font-size:12px!important}.wordmark .brand-emblem{width:22px!important;height:22px!important}
+ body:not([data-screen=character]) .lobby-card{max-width:300px!important;padding:10px 14px!important;justify-self:end}
+ .lobby-card .steps{margin-bottom:6px!important;font-size:9px}.lobby-card .steps b{width:18px;height:18px;font-size:8px}
+ .screen .eyebrow{font-size:7px!important;margin:0 0 2px!important}
+ .screen h2{font-size:16px!important;line-height:1.3!important;margin:0 0 4px!important}
+ .screen .muted{font-size:10px!important;line-height:1.45!important;margin:0 0 8px!important}
+ .screen .small{font-size:9px!important;line-height:1.4!important;margin:6px 0 0!important}
+ #login-screen button,#servers-screen .text-button{min-height:34px!important;padding:5px 10px!important;font-size:11px!important}
+ .divider{margin:5px 0!important;font-size:9px}
+ .server{min-height:0!important;padding:6px 10px!important;margin-bottom:6px}.server-number{font-size:16px!important}.server strong{font-size:12px}.server small{font-size:9px}
+ .story .brand-hero{max-width:150px}.story-copy{font-size:11px!important}
+ body[data-screen=character] .character-heading h2{font-size:14px!important}
+ body[data-screen=character] .character-heading .slot{font-size:10px;padding:1px 8px}
+ body[data-screen=character] #progression-hint{font-size:9px!important;padding:2px 10px!important;margin:3px 0 5px!important}
+ body[data-screen=character] .character-body{grid-template-columns:minmax(112px,19%) minmax(0,1fr) minmax(0,36%)!important;gap:6px!important}
+ body[data-screen=character] button.character-slot{min-height:30px!important;padding:2px 6px!important;font-size:10px!important;grid-template-columns:24px minmax(0,1fr);column-gap:5px;border-radius:9px}
+ body[data-screen=character] .slot-portrait{width:24px!important;height:24px!important}
+ body[data-screen=character] .character-slot strong{font-size:10px}body[data-screen=character] .character-slot small{font-size:8px!important}
+ body[data-screen=character] .hero-art{width:min(140px,100%)!important}
+ .stage-name{font-size:11px}
+ body[data-screen=character] .pose-controls button{font-size:9px;padding:1px 7px;min-height:22px}
+ body[data-screen=character] .character-details{padding:6px 8px!important;gap:4px;border-radius:12px}
+ body[data-screen=character] #character-form label[for=hero-name],body[data-screen=character] #gender-options legend{font-size:10px}
+ body[data-screen=character] #hero-name{min-height:32px!important;height:32px;padding:2px 8px}
+ body[data-screen=character] #gender-options label{min-height:28px;font-size:11px;border-radius:8px}
+ body[data-screen=character] #create-character,body[data-screen=character] #enter-world{min-height:34px!important;font-size:12px!important;border-radius:10px}
+ body[data-screen=character] #existing-name{font-size:13px!important}body[data-screen=character] #existing-detail{font-size:9px!important}
+ body[data-screen=character] #back-servers{font-size:9px!important;min-height:22px!important}
+}

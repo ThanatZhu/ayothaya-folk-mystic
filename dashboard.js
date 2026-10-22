@@ -1,8 +1,12 @@
 import {multiplayerURL} from './multiplayer-config.js?v=28';
 import {CHANNELS} from './realm-state.js?v=21';
+import {connectFirebase, deadline} from './firebase-client.js';
+
+export const ALLOWED_ADMINS = ['chokkungfn@gmail.com'];
+export const DO_SERVER_URL = 'https://hammerhead-app-nhswh.ondigitalocean.app';
 
 const $=id=>document.getElementById(id);
-const URL_KEY='ayothaya-dashboard-url-v1';
+const URL_KEY='ayothaya-dashboard-url-v3';
 const COSTS_KEY='ayothaya-dashboard-costs-v1';
 const RATE_KEY='ayothaya-dashboard-usd-rate-v1';
 // USD -> THB: typing a dollar price fills the baht price with this rate (editable on the page, saved on this device)
@@ -47,10 +51,10 @@ const DEFAULT_LEDGER=[
 
 function defaultHttpUrl(){
  const saved=localStorage.getItem(URL_KEY);
- if(saved&&!saved.includes('onrender.com'))return saved;
+ if(saved&&!saved.includes('onrender.com')&&!saved.includes('vercel.app'))return saved.replace(/\/+$/,'');
  const ws=multiplayerURL();
- if(ws)return ws.replace(/^wss:/,'https:').replace(/^ws:/,'http:').replace(/\/realtime\/?$/,'');
- return 'http://127.0.0.1:8787';
+ if(ws&&!ws.includes('onrender.com')&&!ws.includes('vercel.app'))return ws.replace(/^wss:/,'https:').replace(/^ws:/,'http:').replace(/\/realtime\/?$/,'');
+ return DO_SERVER_URL;
 }
 
 let serverUrl=defaultHttpUrl();
@@ -193,7 +197,13 @@ async function pollServer(){
 
 $('srv-url-form').onsubmit=e=>{
  e.preventDefault();
- serverUrl=$('srv-url-input').value.trim();
+ let val=$('srv-url-input').value.trim().replace(/\/+$/,'');
+ if(val.includes('vercel.app')){
+  alert('https://ayothaya-folk-mystic.vercel.app คือหน้าเว็บ ไม่ใช่เซิร์ฟเวอร์เกมครับ ระบบจะเปลี่ยนเป็นเซิร์ฟเวอร์ DigitalOcean ให้อัตโนมัติ');
+  val=DO_SERVER_URL;
+  $('srv-url-input').value=DO_SERVER_URL;
+ }
+ serverUrl=val||DO_SERVER_URL;
  localStorage.setItem(URL_KEY,serverUrl);
  pollServer();
 };
@@ -557,8 +567,88 @@ $('input-import-tx').onchange=async e=>{
  e.target.value='';
 };
 
-renderCosts();
-renderLedger();
-renderServerPanel({totalPlayers:0,rooms:[],uptimeSeconds:0,bandwidth:{bytesSent:0},logs:[]});
-pollServer();
-setInterval(pollServer,5000);
+let fbConn=null;
+let pollTimer=null;
+
+function startDashboard(user){
+ const gate=$('auth-gate'),shell=$('dash-shell'),badge=$('admin-user-badge');
+ if(gate)gate.hidden=true;
+ if(shell)shell.hidden=false;
+ if(badge)badge.textContent='👤 '+user.email;
+ renderCosts();
+ renderLedger();
+ renderServerPanel({totalPlayers:0,rooms:[],uptimeSeconds:0,bandwidth:{bytesSent:0},logs:[]});
+ pollServer();
+ if(!pollTimer)pollTimer=setInterval(pollServer,5000);
+}
+
+function lockDashboard(msgHtml){
+ const gate=$('auth-gate'),shell=$('dash-shell'),msg=$('gate-msg');
+ if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+ if(shell)shell.hidden=true;
+ if(gate)gate.hidden=false;
+ if(msg){
+  if(msgHtml)msg.innerHTML=msgHtml;
+  else msg.textContent='กรุณาล็อกอินด้วยบัญชี Gmail ของแอดมินเพื่อปลดล็อก';
+ }
+}
+
+async function initAuthGate(){
+ const gate=$('auth-gate');
+ if(!gate){
+  renderCosts();renderLedger();
+  renderServerPanel({totalPlayers:0,rooms:[],uptimeSeconds:0,bandwidth:{bytesSent:0},logs:[]});
+  pollServer();setInterval(pollServer,5000);
+  return;
+ }
+ const msg=$('gate-msg'),btnLogin=$('btn-login-google'),btnLogout=$('btn-logout');
+ if(msg)msg.textContent='กำลังเตรียมระบบความปลอดภัย…';
+ try{
+  fbConn=await deadline(connectFirebase(),15000);
+  fbConn.auth.onAuthStateChanged(user=>{
+   const email=(user?.email||'').toLowerCase().trim();
+   if(user&&email&&ALLOWED_ADMINS.includes(email)){
+    startDashboard(user);
+   }else if(user){
+    lockDashboard(`<span class="txt-danger">⛔ บัญชี <b>${user.email}</b> ไม่มีสิทธิ์เข้าถึงหน้านี้<br>(อนุญาตเฉพาะแอดมิน: ${ALLOWED_ADMINS.join(', ')})</span>`);
+    fbConn.sdk.signOut(fbConn.auth).catch(()=>{});
+   }else{
+    lockDashboard();
+   }
+  });
+ }catch(e){
+  if(msg)msg.textContent='ไม่สามารถเชื่อมต่อระบบความปลอดภัย Firebase ได้ กรุณารีเฟรชหน้าเว็บ';
+ }
+ if(btnLogin){
+  btnLogin.onclick=async()=>{
+   if(!fbConn){if(msg)msg.textContent='กำลังเชื่อมต่อระบบ กรุณากดอีกครั้ง';return;}
+   if(msg)msg.textContent='กำลังเปิดหน้าต่างล็อกอิน Google…';
+   const provider=new fbConn.sdk.GoogleAuthProvider();
+   provider.setCustomParameters({prompt:'select_account'});
+   try{
+    const res=await fbConn.sdk.signInWithPopup(fbConn.auth,provider);
+    const email=(res.user?.email||'').toLowerCase().trim();
+    if(res.user&&email&&ALLOWED_ADMINS.includes(email)){
+     startDashboard(res.user);
+    }else{
+     lockDashboard(`<span class="txt-danger">⛔ บัญชี <b>${res.user?.email||''}</b> ไม่มีสิทธิ์เข้าถึงหน้านี้</span>`);
+     fbConn.sdk.signOut(fbConn.auth).catch(()=>{});
+    }
+   }catch(err){
+    if(err.code!=='auth/popup-closed-by-user'){
+     if(msg)msg.textContent='ล็อกอินไม่สำเร็จ: '+(err.message||err.code);
+    }else{
+     if(msg)msg.textContent='ยกเลิกการล็อกอิน';
+    }
+   }
+  };
+ }
+ if(btnLogout){
+  btnLogout.onclick=async()=>{
+   if(fbConn)await fbConn.sdk.signOut(fbConn.auth);
+   location.reload();
+  };
+ }
+}
+
+initAuthGate();

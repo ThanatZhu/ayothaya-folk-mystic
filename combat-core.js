@@ -310,10 +310,11 @@ export class CombatWorld{
 // so walking is immediate and smooth. Server snapshots (10 Hz) only correct drift: snap on big jumps (dash, respawn),
 // ease onto the server position whenever we are not steering (stopping, auto-pathing).
 export function predictMove(world,server,dt,dir){
- const p=world.player;if(!server||p.hp<=0)return;
+ const p=world.player;if(p.hp<=0)return;
  const ox=p.x,oz=p.z,knocked=world.knockStep(dt),manual=!knocked&&!held(world.status)&&Math.hypot(dir.x,dir.z)>.08,speed=world.walkSpeed(dir.run===true);
  if(Math.hypot(dir.x,dir.z)>.08||dir.attack)world.clearEmote();
  if(manual){const n=Math.max(1,Math.hypot(dir.x,dir.z));moveBody(p,dir.x/n*speed*dt,dir.z/n*speed*dt,world.nav);p.face={x:dir.x,z:dir.z};}
+ if(!server){p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;p.running=p.moving&&dir.run===true;return;}
  const ex=server.x-p.x,ez=server.z-p.z,error=Math.hypot(ex,ez);
  if(error>2.5){p.x=server.x;p.z=server.z;}
  else if(!manual&&error>.002){const f=1-Math.exp(-dt*10);p.x+=ex*f;p.z+=ez*f;if(server.moving)p.face=server.face;}

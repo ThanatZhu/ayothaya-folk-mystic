@@ -2897,5 +2897,21 @@ Object.assign(globalThis.I18N_EN,{
  '(สายเวท · ใช้ MATK)':'(Magic · Uses MATK)',
  '(สายกายภาพ · ใช้ ATK)':'(Physical · Uses ATK)',
  'อาชีพนี้ไม่มีสกิลโจมตี':'This class has no offensive skills',
- 'ได้รับของจากทีมงานอโยธยา':'Received a gift from the Ayothaya team'
+ 'ได้รับของจากทีมงานอโยธยา':'Received a gift from the Ayothaya team',
+ '🔒 ศูนย์บัญชาการลับอโยธยา':'🔒 Ayothaya Secret Command Center',
+ 'พื้นที่เฉพาะแอดมิน กรุณาเข้าสู่ระบบด้วยบัญชี Google (Gmail) เพื่อดูเซิร์ฟเวอร์ ล็อกในเกม และบัญชีต้นทุน':'Restricted Admin Area · Please sign in with an authorized Google account (Gmail) to access server logs and finances',
+ 'กำลังเตรียมระบบความปลอดภัย…':'Initializing security gate…',
+ 'เข้าสู่ระบบด้วย Google (Gmail)':'Sign in with Google (Gmail)',
+ 'https://ayothaya-folk-mystic.vercel.app คือหน้าเว็บ ไม่ใช่เซิร์ฟเวอร์เกมครับ ระบบจะเปลี่ยนเป็นเซิร์ฟเวอร์ DigitalOcean ให้อัตโนมัติ':'https://ayothaya-folk-mystic.vercel.app is the web frontend, not the game server. Auto-switching to DigitalOcean server.',
+ 'กรุณาล็อกอินด้วยบัญชี Gmail ของแอดมินเพื่อปลดล็อก':'Please sign in with an authorized admin Gmail to unlock',
+ '⛔ บัญชี':'⛔ Account',
+ 'ไม่มีสิทธิ์เข้าถึงหน้านี้':'is not authorized to access this dashboard',
+ '(อนุญาตเฉพาะแอดมิน: {1})':'(Authorized admins only: {1})',
+ 'ไม่สามารถเชื่อมต่อระบบความปลอดภัย Firebase ได้ กรุณารีเฟรชหน้าเว็บ':'Could not connect to Firebase Auth. Please reload the page.',
+ 'กำลังเชื่อมต่อระบบ กรุณากดอีกครั้ง':'Connecting to auth system… Please click again.',
+ 'กำลังเปิดหน้าต่างล็อกอิน Google…':'Opening Google Sign-in popup…',
+ 'ล็อกอินไม่สำเร็จ:':'Sign-in failed:',
+ 'ยกเลิกการล็อกอิน':'Sign-in cancelled',
+ 'สลับแนล ▾':'Switch Channel ▾',
+ 'คลิกเพื่อเลือกแนล (Channel 1–5)':'Click to switch channel (Channel 1–5)'
 });

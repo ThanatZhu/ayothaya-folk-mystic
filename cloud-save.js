@@ -29,7 +29,14 @@ export async function prepareCloud(catalog){
   store=createRealmStore({connection,owner:entry.owner,catalog});record=await store.load(serverId,entry.slotId);
   if(!record)return toLobby();
   lastJSON=JSON.stringify(record.state);$('account-name').textContent=record.character.name+' · เซิร์ฟ '+serverId.slice(-1);
-  say(store.cloud?'บันทึกอัตโนมัติ · บัญชี Google':'บันทึกอัตโนมัติ · เฉพาะเบราว์เซอร์นี้');
+  const anon=()=>!!connection?.auth.currentUser?.isAnonymous;
+  const status=()=>say(!store.cloud?'บันทึกอัตโนมัติ · เฉพาะเบราว์เซอร์นี้':anon()?'บันทึกออนไลน์ · ยังไม่ผูก Google (ผูกเพื่อเก็บตัวละครถาวร)':'บันทึกอัตโนมัติ · บัญชี Google');status();
+  // 0.112.7 a quick-play (anonymous) account links Google here too; the uid stays, so nothing moves
+  $('link-account').hidden=!anon();
+  $('link-account').onclick=async()=>{if(!anon())return;const p=new connection.sdk.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
+   try{await connection.sdk.linkWithPopup(connection.auth.currentUser,p);$('link-account').hidden=true;$('logout-account').hidden=false;status();}
+   catch(e){say(e.code==='auth/credential-already-in-use'||e.code==='auth/email-already-in-use'?'บัญชี Google นี้มีข้อมูลเกมของตัวเองอยู่แล้ว · เลือกบัญชีอื่น':'ผูกบัญชีไม่สำเร็จ · ลองอีกครั้ง');}};
+  if(anon())$('logout-account').hidden=true; // signing out of an unlinked account would lose it
  }catch(e){blocked=true;report(e);$('retry-sync').hidden=true;$('reload-save').hidden=false;open();}
  if(connection)connection.sdk.onAuthStateChanged(connection.auth,u=>{if(u?.uid!==entry.owner){blocked=true;location.replace('./play.html');}});
  function save(override){

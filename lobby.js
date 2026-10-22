@@ -22,7 +22,7 @@ const wardrobe=createWardrobe({getClass:()=>selectedClass,getGender:()=>previewG
 }});
 $('open-wardrobe').onclick=()=>{if(!busy)wardrobe.open();};
 function show(next){screen=next;document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
-function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#switch-account,#continue-account,#change-class,#open-wardrobe,.character-slot').forEach(b=>b.disabled=value);}
+function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#open-wardrobe,.character-slot').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
  const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
@@ -30,16 +30,34 @@ function report(error){
 }
 const catalogReady=fetch('./maps/world.json?v=108.3').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
 catalogReady.catch(()=>say('โหลดข้อมูลโลกไม่ได้ กรุณาโหลดหน้าใหม่'));
+// 0.112.7 quick play: a Firebase anonymous account plays online like a Google one (same saves, same server). Linking
+// Google later keeps the same uid, so every character stays. Signing out of an unlinked account loses it for good.
+const anon=()=>!!connection?.auth.currentUser?.isAnonymous;
+function showIdentity(){
+ const u=connection?.auth.currentUser;
+ $('identity').textContent=owner==='guest'?'โหมดออฟไลน์ · เซฟบนเครื่องนี้':anon()?'ผู้เล่นใหม่ · ยังไม่ผูก Google':u?.displayName||'นักเดินทาง';
+ $('identity-link').hidden=!(owner&&owner!=='guest'&&anon());
+}
+async function linkGoogle(){
+ if(!connection||busy||!anon())return;const provider=new connection.sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});lock(true);
+ try{const r=await connection.sdk.linkWithPopup(connection.auth.currentUser,provider);say('ผูกบัญชี Google แล้ว · '+(r.user.displayName||r.user.email||'')+' · ตัวละครทั้งหมดอยู่ครบ');showIdentity();setButtons();}
+ catch(e){if(e.code==='auth/credential-already-in-use'||e.code==='auth/email-already-in-use')say('บัญชี Google นี้มีข้อมูลเกมของตัวเองอยู่แล้ว · เลือกบัญชี Google อื่นที่ยังไม่เคยเล่น');else report(e);}
+ finally{lock(false);}
+}
+function setButtons(){
+ const u=connection?.auth.currentUser;$('continue-account').hidden=!u;$('switch-account').hidden=!u;$('login-google').hidden=!!u;
+ $('login-quick').hidden=!!u;$('link-google').hidden=!(u&&u.isAnonymous);
+}
 async function selectIdentity(id){
  lock(true);say('กำลังเตรียมรายชื่อเซิร์ฟเวอร์…');
- try{await catalogReady;owner=id;store=createRealmStore({connection,owner,catalog});$('identity').textContent=owner==='guest'?'โหมดทดลอง · เซฟบนเครื่องนี้':connection.auth.currentUser.displayName||'นักเดินทาง';show('servers');}
+ try{await catalogReady;owner=id;store=createRealmStore({connection,owner,catalog});showIdentity();show('servers');}
  catch(e){report(e);}finally{lock(false);}
 }
 async function setup(){
  try{
   connection=await deadline(connectFirebase());$('login-google').disabled=false;$('retry-connection').hidden=true;
-  const user=connection.auth.currentUser;$('continue-account').hidden=!user;$('switch-account').hidden=!user;$('login-google').hidden=!!user;
-  if(screen==='login')say(user?'ยินดีต้อนรับกลับ '+(user.displayName||'นักเดินทาง'):'');
+  const user=connection.auth.currentUser;$('login-quick').disabled=false;setButtons();
+  if(screen==='login')say(user?(user.isAnonymous?'ยินดีต้อนรับกลับ · บัญชีนี้ยังไม่ผูก Google':'ยินดีต้อนรับกลับ '+(user.displayName||'นักเดินทาง')):'');
   connection.sdk.onAuthStateChanged(connection.auth,u=>{if(owner&&owner!=='guest'&&u?.uid!==owner)location.replace('./play.html');});
  }catch(e){if(screen==='login'){report(e);$('retry-connection').hidden=false;}}
 }
@@ -50,7 +68,14 @@ $('login-google').onclick=async()=>{
 };
 $('continue-account').onclick=()=>selectIdentity(connection.auth.currentUser.uid);
 $('login-guest').onclick=()=>selectIdentity('guest');
-$('switch-account').onclick=async()=>{if(busy)return;lock(true);try{await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.replace('./play.html');}catch(e){report(e);lock(false);}};
+$('login-quick').onclick=async()=>{
+ if(!connection||busy)return;lock(true);
+ try{const r=await connection.sdk.signInAnonymously(connection.auth);setButtons();await selectIdentity(r.user.uid);}
+ catch(e){if(e.code==='auth/operation-not-allowed'||e.code==='auth/admin-restricted-operation')say('ยังเปิดโหมดเล่นทันทีไม่ได้ · ใช้ Google หรือเล่นออฟไลน์ไปก่อน');else report(e);}
+ finally{lock(false);}
+};
+$('link-google').onclick=linkGoogle;$('identity-link').onclick=linkGoogle;
+$('switch-account').onclick=async()=>{if(busy)return;if(anon()&&!confirm('บัญชีนี้ยังไม่ได้ผูก Google · ถ้าออกตอนนี้ ตัวละครทั้งหมดในบัญชีนี้จะหายถาวร · กด ยกเลิก แล้วผูก Google ก่อน หรือกด ตกลง เพื่อออกเลย'))return;lock(true);try{await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.replace('./play.html');}catch(e){report(e);lock(false);}};
 $('back-login').onclick=()=>{if(!busy){owner=null;show('login');setup();}};
 $('back-servers').onclick=()=>{if(!busy)show('servers');};
 function preview(gender=previewGender){

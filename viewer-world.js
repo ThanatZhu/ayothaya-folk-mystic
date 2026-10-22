@@ -50,7 +50,7 @@ import {resolveMap} from './world-state.js?v=101.5';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=106.1-lablae';
 import {createRoofCutaway} from './roof-cutaway.js?v=106.1-lablae';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
-import {prepareCloud} from './cloud-save.js?v=101.5';
+import {prepareCloud} from './cloud-save.js?v=112.7';
 import {captureSave,applySave} from './save-state.js?v=101.5';
 const $=id=>document.getElementById(id),loading=getLoadingScreen(),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.

@@ -12,6 +12,8 @@ import {WEATHERS} from './weather.js?v=97';
 import {deriveStats} from './character-stats.js';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 
+export const ALLOWED_ADMINS = ['chokkungfn@gmail.com'];
+
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const LABEL={damage:'พลัง',heal:'ฟื้นฟู',cost:'MP',cd:'คูลดาวน์',range:'ระยะ',radius:'รัศมี',duration:'นาน',delay:'หน่วง (วิ)',atk:'ATK',matk:'MATK',def:'DEF',level:'เลเวล',buy:'ราคาซื้อ',sell:'ราคาขาย',tokens:'เหรียญงาน',hp:'HP',mp:'MP',speed:'ความเร็ว',baseXp:'Base EXP',jobXp:'Job EXP',respawn:'เกิดใหม่ (วิ)',reach:'ระยะตี'};
@@ -162,7 +164,83 @@ function placeTip(x,y){const w=tip.offsetWidth,h=tip.offsetHeight;tip.style.left
 document.addEventListener('pointerover',e=>{const el=e.target.closest?.('[data-item]');if(!el){tip.hidden=true;tipFor=null;return;}if(el.dataset.item!==tipFor){tipFor=el.dataset.item;tip.innerHTML=tipHTML(tipFor);}tip.hidden=false;placeTip(e.clientX,e.clientY);});
 document.addEventListener('pointermove',e=>{if(!tip.hidden)placeTip(e.clientX,e.clientY);});
 document.addEventListener('scroll',()=>{tip.hidden=true;tipFor=null;},true);
-tabs();render();warmFirebase();
+async function initAdminAuthGate(){
+ const gate=$('auth-gate'),app=$('app-shell');
+ if(!gate||!app){
+  tabs();render();warmFirebase();
+  return;
+ }
+ const msg=$('gate-msg'),btnLogin=$('btn-login-google'),btnLogout=$('btn-logout'),badge=$('admin-user-badge');
+ if(msg)msg.textContent='กำลังเตรียมระบบความปลอดภัย…';
+
+ try{
+  const m=await import('./firebase-client.js');
+  fbConn=await m.deadline(m.connectFirebase(),15000);
+  fbWarm=Promise.resolve(fbConn);
+
+  fbConn.auth.onAuthStateChanged(user=>{
+   const email=(user?.email||'').toLowerCase().trim();
+   if(user&&email&&ALLOWED_ADMINS.includes(email)){
+    gate.hidden=true;
+    app.hidden=false;
+    if(badge)badge.textContent='👤 '+user.email;
+    tabs();
+    render();
+   }else if(user){
+    gate.hidden=false;
+    app.hidden=true;
+    if(msg)msg.innerHTML=`<span style="color:var(--bad)">⛔ บัญชี <b>${user.email}</b> ไม่มีสิทธิ์เข้าถึงหน้านี้<br>(อนุญาตเฉพาะแอดมิน: ${ALLOWED_ADMINS.join(', ')})</span>`;
+    fbConn.sdk.signOut(fbConn.auth).catch(()=>{});
+   }else{
+    gate.hidden=false;
+    app.hidden=true;
+    if(msg)msg.textContent='กรุณาเข้าสู่ระบบด้วย Google (Gmail)';
+   }
+  });
+ }catch(e){
+  if(msg)msg.textContent='ไม่สามารถเชื่อมต่อระบบความปลอดภัย Firebase ได้ กรุณารีเฟรชหน้าเว็บ';
+ }
+
+ if(btnLogin){
+  btnLogin.onclick=async()=>{
+   if(!fbConn){if(msg)msg.textContent='กำลังเชื่อมต่อระบบ กรุณากดอีกครั้ง';return;}
+   if(msg)msg.textContent='กำลังเปิดหน้าต่างล็อกอิน Google…';
+   const provider=new fbConn.sdk.GoogleAuthProvider();
+   provider.setCustomParameters({prompt:'select_account'});
+   try{
+    const res=await fbConn.sdk.signInWithPopup(fbConn.auth,provider);
+    const email=(res.user?.email||'').toLowerCase().trim();
+    if(res.user&&email&&ALLOWED_ADMINS.includes(email)){
+     gate.hidden=true;
+     app.hidden=false;
+     if(badge)badge.textContent='👤 '+res.user.email;
+     tabs();
+     render();
+    }else{
+     gate.hidden=false;
+     app.hidden=true;
+     if(msg)msg.innerHTML=`<span style="color:var(--bad)">⛔ บัญชี <b>${res.user?.email||''}</b> ไม่มีสิทธิ์เข้าถึงหน้านี้</span>`;
+     fbConn.sdk.signOut(fbConn.auth).catch(()=>{});
+    }
+   }catch(err){
+    if(err.code!=='auth/popup-closed-by-user'){
+     if(msg)msg.textContent='ล็อกอินไม่สำเร็จ: '+(err.message||err.code);
+    }else{
+     if(msg)msg.textContent='ยกเลิกการล็อกอิน';
+    }
+   }
+  };
+ }
+
+ if(btnLogout){
+  btnLogout.onclick=async()=>{
+   if(fbConn)await fbConn.sdk.signOut(fbConn.auth);
+   location.reload();
+  };
+ }
+}
+
+initAdminAuthGate();
 
 // 0.99.16 players tab: who is online right now (from the realm server) and gifts of items or cowries.
 // Production asks for a Google sign-in; the server only answers emails listed in ADMIN_EMAILS on Render.

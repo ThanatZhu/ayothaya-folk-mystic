@@ -280,8 +280,8 @@ function renderCosts(){
    <td class="cost-cat-cell"></td>
    <td class="cost-role-cell" style="color:var(--muted);font-size:12px"></td>
    <td>${CYCLE_LABELS[item.cycle]||item.cycle}</td>
-   <td>$<input type="number" step="0.01" min="0" class="inline-num inp-usd" value="${Number(item.usd||0)}"></td>
-   <td><input type="number" step="1" min="0" class="inline-num inp-thb" value="${Number(item.thb||0)}"> ฿</td>
+   <td><span class="money-cell"><span class="money-unit">$</span><input type="number" step="0.01" min="0" class="inline-num inp-usd" value="${Number(item.usd||0)}"></span></td>
+   <td><span class="money-cell"><input type="number" step="1" min="0" class="inline-num inp-thb" value="${Number(item.thb||0)}"><span class="money-unit">฿</span></span></td>
    <td>
     <select class="sel-status" style="padding:4px 8px;border-radius:8px;background:#13261f;border:1px solid #75907766;font-size:11px">
      <option value="active" ${item.status==='active'?'selected':''}>${STATUS_LABELS.active}</option>

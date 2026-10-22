@@ -121,3 +121,10 @@ button,input,select{font:inherit;color:inherit}
 .ratio-labels{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
 .ratio-track{height:10px;border-radius:6px;background:#b94e3a;overflow:hidden}
 .ratio-track i{display:block;height:100%;background:linear-gradient(90deg,#48c98a,#88e8b6);transition:width .25s}
+
+/* Price cells: keep the currency sign and the input on one line, aligned */
+.money-cell{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.money-unit{color:var(--muted);font-size:12px;min-width:10px;text-align:center}
+.dash-table td:nth-child(4),.dash-table td:nth-child(5),.dash-table td:nth-child(6){white-space:nowrap}
+.dash-table input.inline-num{width:90px}
+.dash-table select.sel-status{min-width:150px}

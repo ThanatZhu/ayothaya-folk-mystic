@@ -1,7 +1,7 @@
 // 0.98 landing page: live server status, weekly event clocks (the same rules the realm uses) and the class cards.
 import {warWindow} from './guild-war.js?v=98';
 import {arenaEnds} from './arena.js?v=98';
-import {MULTIPLAYER_URL} from './multiplayer-config.js';
+import {MULTIPLAYER_URL} from './multiplayer-config.js?v=28';
 
 const DISCORD_INVITE='https://discord.gg/Be9WwsX6'; // the Discord buttons and links show only when this is set
 const $=id=>document.getElementById(id);

@@ -2662,5 +2662,6 @@ Object.assign(globalThis.I18N_EN,{
  'เซิร์ฟเวอร์หลักแห่งอโยธยา · ย้ายแนล 1–5 ในเกมได้ตลอดเวลา':'Main Ayothaya Server · Switch between Channels 1–5 anytime in-game',
  'เซิร์ฟเวอร์ 1 · อยุธยา':'Server 1 · Ayutthaya',
  'เซิร์ฟเวอร์หลักริมเจ้าพระยา':'Main Chao Phraya Server',
- '5 ตัวละครต่อบัญชี · เลือกแนลได้ทันทีตอนอยู่ในเกม':'5 characters per account · Switch channels anytime while in-game'
+ '5 ตัวละครต่อบัญชี · เลือกแนลได้ทันทีตอนอยู่ในเกม':'5 characters per account · Switch channels anytime while in-game',
+ '⚙️ หลังบ้านอโยธยา (Admin) ↗':'⚙️ Ayothaya Back Office (Admin) ↗'
 });

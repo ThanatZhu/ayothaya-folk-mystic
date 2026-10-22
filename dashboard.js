@@ -1,4 +1,4 @@
-import {multiplayerURL} from './multiplayer-config.js?v=27';
+import {multiplayerURL} from './multiplayer-config.js?v=28';
 import {CHANNELS} from './realm-state.js?v=21';
 
 const $=id=>document.getElementById(id);
@@ -47,7 +47,7 @@ const DEFAULT_LEDGER=[
 
 function defaultHttpUrl(){
  const saved=localStorage.getItem(URL_KEY);
- if(saved)return saved;
+ if(saved&&!saved.includes('onrender.com'))return saved;
  const ws=multiplayerURL();
  if(ws)return ws.replace(/^wss:/,'https:').replace(/^ws:/,'http:').replace(/\/realtime\/?$/,'');
  return 'http://127.0.0.1:8787';

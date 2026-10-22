@@ -4,7 +4,7 @@ import {trainingAction} from './city-life-data.js?v=98';
 import {CLASS_LEVEL,progression,validateJob,advanceReady} from './advancement.js?v=73';
 import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=62';
 import {validateSave,nextRevision} from './save-state.js?v=101.5';
-import {multiplayerURL} from './multiplayer-config.js?v=27';
+import {multiplayerURL} from './multiplayer-config.js?v=28';
 
 export function validateCharacterChange(before,after,state){
  if(before.name!==after.name||before.gender!==after.gender)throw new Error('character-identity');

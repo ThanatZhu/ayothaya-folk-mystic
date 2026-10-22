@@ -10,7 +10,7 @@ import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=114';
-import {wakeServer} from './multiplayer-config.js?v=27';
+import {wakeServer} from './multiplayer-config.js?v=28';
 wakeServer();
 const $=id=>document.getElementById(id);
 createLandscapeGuard();

@@ -3,7 +3,7 @@
 // balance-data.js for the next deploy. Player data is not touched here.
 import {ITEMS,DROPS} from './items.js?v=107';
 import {CLASSES,NOVICE,classSkills,className} from './classes.js?v=112.1';
-import {multiplayerURL} from './multiplayer-config.js';
+import {multiplayerURL} from './multiplayer-config.js?v=28';
 import {iconStyle} from './bag-ui.js?v=107';
 import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=112.1';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';

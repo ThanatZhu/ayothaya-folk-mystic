@@ -25,7 +25,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
  let savedList={at:0,rows:[]};
- const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set();let closing=false;
+ const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set(),metrics={bytesSent:0,messagesSent:0,startedAt:Date.now()};let closing=false;
  const toDiscord=discordPoster();if(toDiscord)realm.onAnnounce=toDiscord; // 0.96 war + tournament news (DISCORD_WEBHOOK_URL)
  // 0.47 guilds: loaded once, written on each change (rare: create/join/leave/emblem), outside the per-player saves.
  // 0.70 market: shops stay open while their owners are offline, so they live outside the player saves.
@@ -38,7 +38,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env)});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(catalog.capital),bandwidth:metrics});return;}
+  if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(catalog.capital),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.99.16 back-office (admin.html): online players and gifts. Production needs a Google ID token whose verified
   // email is in ADMIN_EMAILS; the local server trusts its own origin. Every gift is logged.
   if(url.pathname.startsWith('/admin/')){
@@ -129,7 +130,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   }
   reply(404,{error:'not-found'});
  });
- const wss=new WebSocketServer({noServer:true,maxPayload:4096,perMessageDeflate:false});
+ const wss=new WebSocketServer({noServer:true,maxPayload:4096,perMessageDeflate:true});
  server.on('upgrade',(req,socket,head)=>{
   if(closing||req.url!=='/realtime'||!allowedOrigin(req.headers.origin)||wss.clients.size>=capacity*4+20){socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');socket.destroy();return;}
   if(!authoritative()){socket.write('HTTP/1.1 503 Service Unavailable\r\nRetry-After: 5\r\n\r\n');socket.destroy();return;}
@@ -139,7 +140,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;const record=s.travelRecord??realm.record(s.peer,s.lease.record);let timer;await Promise.race([store.checkpoint(s.lease,record,{release}),new Promise((_,no)=>{timer=setTimeout(()=>no(new Error('save-timeout')),15000);})]).finally(()=>clearTimeout(timer));s.autoSavedAt=Date.now();s.savedJson=JSON.stringify(record);if(release)s.released=true;});return s.queue;};
  wss.on('connection',ws=>{
   let session=null,authenticating=false;ws.alive=true;
-  const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}ws.send(JSON.stringify(data));}};
+  const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}const raw=JSON.stringify(data);metrics.bytesSent+=Buffer.byteLength(raw);metrics.messagesSent++;ws.send(raw);}};
   const timer=setTimeout(()=>{if(!session)ws.close(4001,'authentication-required');},8000);
   ws.on('pong',()=>{ws.alive=true;});
   ws.on('message',async raw=>{
@@ -192,7 +193,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(old){const closed=new Promise(r=>{old.onClosed=r;});try{old.ws.send(JSON.stringify({type:'error',code:'replaced'}));}catch{}old.ws.close(4009,'replaced');await Promise.race([closed,new Promise(r=>setTimeout(r,8000))]);}
     lease=await store.acquire(identity,randomUUID());if(ws.readyState!==WebSocket.OPEN)throw new Error('connection-closed');
     // Send welcome after the full authenticated session exists.
-    const queued=[],peer=realm.join({...identity,record:lease.record,send:data=>queued.push(data)});
+    const queued=[],peer=realm.join({...identity,...(message.channel!==undefined?{channel:message.channel}:{}),record:lease.record,send:data=>queued.push(data)});
     session={peer,lease,ws,queue:Promise.resolve(),autoSavedAt:Date.now(),savedJson:null,expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);queued.forEach(send);
    }catch(e){if(lease)await store.checkpoint(lease,lease.record,{release:true}).catch(()=>{});send({type:'error',code:['already-online','room-full','character-not-found','character-server'].includes(e.message)?e.message:'authentication-failed'});ws.close(4003,'join-rejected');}
    finally{if(claimed)joinPending.delete(identity.uid);}
@@ -211,7 +212,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   const age=Date.now()-(s.autoSavedAt??0);if(age<SAVE_MIN_GAP)return false;return age>=SAVE_MAX_GAP||JSON.stringify(realm.record(s.peer,s.lease.record))!==s.savedJson;};
  const autosave=setInterval(()=>{for(const s of sessions.values())if(!s.closing&&dueForSave(s))checkpoint(s).catch(()=>{s.closing=true;s.peer.send({type:'error',code:'save-failed'});s.ws.close(4010,'save-failed');});},10000);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
- return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
+ return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
 }
 export async function start(){
  const mode=process.env.AUTH_MODE??'firebase',port=Number(process.env.PORT??8787),host=mode==='local'?'127.0.0.1':(process.env.HOST??'0.0.0.0');
@@ -219,9 +220,9 @@ export async function start(){
  if(!origins.length)throw new Error('Set ALLOWED_ORIGINS to the exact game origins');
  let store,authenticate;
  if(mode==='local')store=await new LocalStore(path.join(root,'.local-multiplayer')).init();
- else{const {initializeApp,applicationDefault}=await import('firebase-admin/app'),{getAuth}=await import('firebase-admin/auth'),{getFirestore}=await import('firebase-admin/firestore');
+ else{const {initializeApp,applicationDefault,cert}=await import('firebase-admin/app'),{getAuth}=await import('firebase-admin/auth'),{getFirestore}=await import('firebase-admin/firestore');
   const projectId=process.env.FIREBASE_PROJECT_ID;if(!projectId)throw new Error('FIREBASE_PROJECT_ID is required');
-  const app=initializeApp({credential:applicationDefault(),projectId});store=new FirebaseStore(getFirestore(app));authenticate=token=>getAuth(app).verifyIdToken(token,true);
+  const rawKey=process.env.FIREBASE_SERVICE_ACCOUNT??(process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim().startsWith('{')?process.env.GOOGLE_APPLICATION_CREDENTIALS:null);const credential=rawKey?cert(JSON.parse(rawKey)):applicationDefault();const app=initializeApp({credential,projectId});store=new FirebaseStore(getFirestore(app));authenticate=token=>getAuth(app).verifyIdToken(token,true);
  }
  const service=await createHost({mode,store,authenticate,origins,capacity:Number(process.env.ROOM_CAPACITY??50),serveStatic:mode==='local'});
  await new Promise(resolve=>service.server.listen(port,host,resolve));console.log(`Multiplayer ${mode} listening on ${host}:${port}`);

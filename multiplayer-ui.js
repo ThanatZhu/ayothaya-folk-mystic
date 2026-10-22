@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=112.1';
 import {MultiplayerClient} from './multiplayer-client.js?v=life1';
+import {CHANNELS,CHANNEL_KEY,normalizeChannel} from './realm-state.js?v=62';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=27';
 import {atlasPath,className} from './classes.js?v=112.1';
 import {rebirthRank} from './character-stats.js?v=107';
@@ -25,13 +26,13 @@ function el(tag,className,text){const node=document.createElement(tag);if(classN
 export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const url=multiplayerURL(),local=['127.0.0.1','localhost'].includes(location.hostname),views=new Map(),fx=createSkillEffects(scene),projection=new THREE.Vector3(),reduced=matchMedia('(prefers-reduced-motion:reduce)');
  const shell=document.getElementById('game-shell'),labels=document.getElementById('world-labels'),compact=matchMedia('(pointer:coarse),(max-width:900px)');
- let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0;const seenMessages=new Set(),bubbles=new Map();
+ let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0,currentChannel=normalizeChannel(new URLSearchParams(location.search).get('channel')||(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1)),channelCounts=[];const seenMessages=new Set(),bubbles=new Map();
  // HUD chip: connection state dot + label. Opens the room/party roster.
  const button=el('button');button.id='online-button';button.dataset.state='offline';button.innerHTML='<i class="mp-dot" aria-hidden="true"></i><span id="online-label">ผู้เล่นออนไลน์</span>';shell.append(button);
  const chip=text=>{button.querySelector('#online-label').textContent=text;};
  // Nonmodal roster window for joining, inviting and party management.
  const dialog=el('dialog');dialog.id='online-panel';dialog.dataset.state='offline';dialog.setAttribute('aria-labelledby','online-title');
- dialog.innerHTML='<header><div><small>AYOTHAYA ONLINE</small><h2 id="online-title">เพื่อนร่วมอโยธยา</h2></div><button id="online-close" class="mp-icon" aria-label="ปิดหน้าผู้เล่นออนไลน์">×</button></header><p id="online-status" class="mp-status" role="status"><i class="mp-dot" aria-hidden="true"></i><span></span></p><div class="online-actions"><button id="online-reload" class="mp-primary" hidden>เชื่อมต่อใหม่</button><button id="online-party-leave" hidden>ออกจากปาร์ตี้</button></div><section class="mp-roster"><h3>ผู้เล่นในห้อง <small id="online-count"></small></h3><ul id="online-players"></ul></section><p class="online-note">ปาร์ตี้สูงสุด 5 คน · อยู่เซิร์ฟเวอร์และแมพเดียวกันจึงพบกัน · เมืองเป็นเขตปลอดภัย · กด Enter เพื่อแชตระหว่างเล่น</p>';
+ dialog.innerHTML='<header><div><small>AYOTHAYA · MAIN SERVER</small><h2 id="online-title">เพื่อนร่วมอโยธยา</h2></div><button id="online-close" class="mp-icon" aria-label="ปิดหน้าผู้เล่นออนไลน์">×</button></header><p id="online-status" class="mp-status" role="status"><i class="mp-dot" aria-hidden="true"></i><span></span></p><div class="online-actions"><button id="online-reload" class="mp-primary" hidden>เชื่อมต่อใหม่</button><button id="online-party-leave" hidden>ออกจากปาร์ตี้</button></div><section class="mp-channels"><h3>เลือกแนล (ย้ายแนลได้ทันที)</h3><div id="online-channels" class="mp-channel-bar"></div></section><section class="mp-roster"><h3>ผู้เล่นในห้อง <small id="online-count"></small></h3><ul id="online-players"></ul></section><p class="online-note">ปาร์ตี้สูงสุด 5 คน · อยู่เซิร์ฟเวอร์และแมพเดียวกันจึงพบกัน · เมืองเป็นเขตปลอดภัย · กด Enter เพื่อแชตระหว่างเล่น</p>';
  shell.append(dialog);const $=id=>shell.querySelector('#'+id),status=text=>{$('online-status').lastChild.textContent=text;};
  // Chat dock: always visible while online and never pauses the game.
  const dock=el('section');dock.id='online-dock';dock.hidden=true;dock.dataset.channel='room';dock.setAttribute('aria-label','แชตออนไลน์');
@@ -66,7 +67,20 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  // Speech bubbles over the speaker; positioned every frame in update().
  function bubble(m){let b=bubbles.get(m.actor);if(!b){b={node:el('span','chat-bubble')};labels.append(b.node);bubbles.set(m.actor,b);}b.node.textContent=m.text.length>70?m.text.slice(0,69)+'…':m.text;b.node.classList.toggle('party',m.channel==='party');b.until=performance.now()+5500;}
  function place(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;return Math.abs(projection.x)<=1.1&&Math.abs(projection.y)<=1.1&&projection.z<1;}
+ function drawChannels(){
+  const box=$('online-channels');if(!box)return;box.replaceChildren();
+  for(const ch of CHANNELS){
+   const info=channelCounts.find(c=>c.channel===ch.id),count=info?info.players:(ch.id===currentChannel?roster.length:0);
+   const b=el('button',ch.id===currentChannel?'mp-channel active':'mp-channel');
+   b.setAttribute('aria-pressed',String(ch.id===currentChannel));
+   b.innerHTML=`<b>${ch.name}</b><small>${count} คน</small>`;
+   b.onclick=()=>{if(ch.id!==currentChannel&&client?.status==='online')client.command('switchChannel',{channel:ch.id});};
+   box.append(b);
+  }
+ }
+ drawChannels();
  function drawRoster(){
+  drawChannels();
   $('online-players').replaceChildren();$('online-count').textContent=roster.length+' คน';
   for(const p of roster){
    const li=el('li',p.id===client?.id?'me':''),who=el('div','mp-who'),name=el('b','',p.name);who.append(name,el('small','',className(p.classId)+(p.id===client?.id?' · คุณ':'')+(p.partyId&&p.partyId===party?.id?' · ปาร์ตี้เรา':p.partyId?' · มีปาร์ตี้':'')+(p.here===false?' · '+p.map:'')));
@@ -99,10 +113,10 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   }
  }
  async function identity(){
-  if(account.cloud)return {token:await account.token(),serverId:account.serverId,slotId:account.slotId};
+  if(account.cloud)return {token:await account.token(),serverId:account.serverId,slotId:account.slotId,channel:currentChannel};
   const key='ayothaya-local-network:'+account.slotId;let data;try{data=JSON.parse(sessionStorage.getItem(key));}catch{}
   if(!data){const endpoint=new URL(url.replace(/^ws/,'http'));endpoint.pathname='/dev/session';const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:account.character.name,gender:account.character.gender})});if(!response.ok)throw new Error('local-server-unavailable');data=await response.json();sessionStorage.setItem(key,JSON.stringify(data));}
-  return {token:data.token,serverId:data.serverId,slotId:data.slotId};
+  return {token:data.token,serverId:data.serverId,slotId:data.slotId,channel:currentChannel};
  }
  function remove(view){view.emoteBubble?.remove();view.pet?.dispose();scene.remove(view.sprite);view.sprite.userData.dispose();for(const t of view.frames)t.dispose();view.label.remove();}
  async function addRemote(state){
@@ -146,15 +160,16 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   if(active)return;wakeServer();
   try{await account.beginOnline();active=true;client=new MultiplayerClient({url,identity});game.setNetwork(client);account.setOnline(client);
    client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;const waking=detail==='reconnecting'&&!client.everOnline;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':waking?'กำลังปลุกเซิร์ฟเวอร์…':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':detail==='connecting'?'กำลังเข้าห้อง…':detail==='error'?'เชื่อมต่อไม่ได้':'ผู้เล่นออนไลน์');status(waking?'เซิร์ฟเวอร์ฟรีหลับอยู่ · กำลังปลุก อาจใช้ถึง 1–2 นาที':statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();if(detail==='error'&&!dialog.open){game.clearInput();openHudPanel(dialog);}});
-   client.addEventListener('welcome',({detail})=>{for(const m of detail.history)log(m);
+   client.addEventListener('channelSwitched',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}}for(const [id,v] of views){if(!v.loading)remove(v);views.delete(id);}if(detail.snapshot)acceptSnapshot(detail.snapshot);drawChannels();});
+   client.addEventListener('welcome',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}drawChannels();}for(const m of detail.history)log(m);
     // 1.01 the server decides the map (someone no longer in a guild wakes up in the capital, not the hall): follow it.
-    const mapId=String(detail.room??'').split(':')[1];if(mapId&&document.body.dataset.map&&mapId!==document.body.dataset.map){const go=()=>location.assign('?server='+account.serverId+'&map='+encodeURIComponent(mapId));
+    const parts=String(detail.room??'').split(':'),mapId=parts[1]?.startsWith('ch')?parts[2]:parts[1];if(mapId&&document.body.dataset.map&&mapId!==document.body.dataset.map){const go=()=>location.assign('?server='+account.serverId+'&channel='+currentChannel+'&map='+encodeURIComponent(mapId));
      // the page opens the saved map first, so save the server's choice before reloading (else it would loop)
      Promise.resolve(account.data&&account.save?.({...account.data,mapId,position:null})).catch(()=>{}).finally(go);}});
    client.addEventListener('snapshot',({detail})=>acceptSnapshot(detail));
    client.addEventListener('events',({detail})=>game.world.events.push(...detail.events));
    client.addEventListener('chat',({detail})=>log(detail,true));
-   client.addEventListener('social',({detail})=>{roster=detail.players;party=detail.party;drawRoster();chip('ออนไลน์ · '+roster.length+' คน');});
+   client.addEventListener('social',({detail})=>{roster=detail.players;party=detail.party;if(detail.channel)currentChannel=normalizeChannel(detail.channel);if(detail.channels)channelCounts=detail.channels;drawRoster();chip('ออนไลน์ · '+roster.length+' คน');});
    client.addEventListener('error',({detail})=>{const text=messages[detail.code]??(client.status==='error'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ · กดเชื่อมต่อใหม่อีกครั้ง':'ไม่สามารถทำรายการนี้ได้ · '+detail.code);status(text);if(chatErrors.has(detail.code)||!dialog.open)dockNote(text);if(!chatErrors.has(detail.code))game.world.notice(text);});
    client.addEventListener('invite',({detail})=>showInvite(detail));
    client.addEventListener('duelAsk',({detail})=>showInvite(detail,true));

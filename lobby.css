@@ -4,3 +4,4 @@
 @media(prefers-reduced-motion:reduce){.ember,.hero-art{animation:none}.ember{opacity:.3}}
 
 @media(orientation:landscape) and (max-height:430px){.lobby-header{padding:6px 3vw}.lobby-card{padding:12px 20px}.steps{margin-bottom:12px}.hero-art{max-width:170px}.character-stage{min-height:145px}.class-info p{margin:6px 0}.lobby-footer{padding-top:0;padding-bottom:5px}.character-body{gap:14px}}
+.channel-grid{grid-template-columns:1fr 1fr;gap:10px}.channel-grid .server{padding:14px 14px;gap:12px}.channel-grid .channel-featured{grid-column:1/-1;background:linear-gradient(120deg,#305846a8,#24423599);border-color:#d2b47580}.channel-grid .server-number{font-size:24px}.channel-grid .server strong{font-size:15px}

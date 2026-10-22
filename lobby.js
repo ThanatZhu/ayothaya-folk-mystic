@@ -8,14 +8,14 @@ import {CLASSES,getClass,className,atlasPath} from './classes.js?v=112.1';
 import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {connectFirebase,deadline} from './firebase-client.js';
-import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
+import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=114';
 import {wakeServer} from './multiplayer-config.js?v=27';
 wakeServer();
 const $=id=>document.getElementById(id);
 createLandscapeGuard();
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',poseMode='cycle',previewTime=0;
-let roster=[];
+let roster=[],selectedChannel=normalizeChannel(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1);
 const say=text=>$('lobby-status').textContent=text;
 const lobbyMotion=createMotionPreview($('hero-preview'));
 // 0.113 the dressing room is off for now: new characters take the default look, saved looks still show in the preview
@@ -110,13 +110,13 @@ function drawRoster(){
  $('slot-count').textContent=roster.length+' / 5';$('character-slots').replaceChildren();
  for(const id of CHARACTER_SLOTS){
   const row=roster.find(r=>r.slotId===id),button=document.createElement('button');button.type='button';button.className='character-slot';button.setAttribute('aria-pressed',String(row?.slotId===record?.slotId&&!!row));
-  if(row){const image=document.createElement('span');image.className='slot-portrait';image.style.backgroundImage='url('+atlasPath(row.character.classId)+')';image.style.backgroundPosition='0 '+(row.character.gender==='female'?'100%':'0%');const name=document.createElement('strong');name.textContent=row.character.name;const detail=document.createElement('small');detail.textContent='Lv. '+progression(row.state.traveler).level+' · เซิร์ฟ '+row.serverId.slice(-1);button.append(image,name,detail);button.setAttribute('aria-label','เลือก '+row.character.name+' '+detail.textContent);}
+  if(row){const image=document.createElement('span');image.className='slot-portrait';image.style.backgroundImage='url('+atlasPath(row.character.classId)+')';image.style.backgroundPosition='0 '+(row.character.gender==='female'?'100%':'0%');const name=document.createElement('strong');name.textContent=row.character.name;const detail=document.createElement('small');detail.textContent='Lv. '+progression(row.state.traveler).level+' · แนล '+selectedChannel;button.append(image,name,detail);button.setAttribute('aria-label','เลือก '+row.character.name+' '+detail.textContent);}
   else{button.textContent='+ สร้างตัวละคร';button.setAttribute('aria-label','สร้างตัวละครช่อง '+id.slice(-1));}
-  button.onclick=()=>{if(busy)return;record=row??null;if(row)selected=row.serverId;displayCharacter();};$('character-slots').append(button);
+  button.onclick=()=>{if(busy)return;record=row??null;selected=row?row.serverId:'server-1';displayCharacter();};$('character-slots').append(button);
  }
 }
 function displayCharacter(){
- const realm=SERVERS.find(s=>s.id===selected);$('realm-caption').textContent=realm.name+' · '+realm.subtitle;
+ const ch=CHANNELS.find(c=>c.id===selectedChannel)??CHANNELS[0];$('realm-caption').textContent=ch.name+' · '+ch.subtitle;
  $('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
  $('character-form').hidden=!!record||roster.length>=5;
  $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · Job 10 ตันแล้วเปลี่ยนอาชีพ · Job 40 ตันรับ Master · Base สูงสุด 99':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(advanceReady(record.state.traveler,'novice').ok?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ฝึก Job ผู้ฝึกตนให้ตัน (Job 10) เพื่อเปลี่ยนอาชีพ'):'อาชีพ '+className(record.character.classId,record.character.gender)+'ฝึก Job ให้ตัน (Job 40) เพื่อรับ Master';
@@ -127,8 +127,8 @@ function displayCharacter(){
 }
 $('hero-name').addEventListener('input',()=>{if(!record)$('stage-name').textContent=$('hero-name').value.trim();});
 document.querySelectorAll('[data-server]').forEach(button=>button.onclick=async()=>{
- if(busy)return;lock(true);selected=button.dataset.server;say('กำลังโหลดตัวละคร…');
- try{roster=await store.list();record=roster.find(r=>r.serverId===selected)??null;displayCharacter();}catch(e){record=null;report(e);}finally{lock(false);}
+ if(busy)return;lock(true);selected=button.dataset.server||'server-1';selectedChannel=normalizeChannel(button.dataset.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(selectedChannel));}catch{}say('กำลังโหลดตัวละคร…');
+ try{roster=await store.list();record=roster[0]??null;if(record)selected=record.serverId;displayCharacter();}catch(e){record=null;report(e);}finally{lock(false);}
 });
 $('character-form').onsubmit=async event=>{
  event.preventDefault();if(busy)return;lock(true);say('กำลังสร้างตัวละคร…');
@@ -146,7 +146,7 @@ $('delete-dialog').addEventListener('close',async()=>{
 });
 $('enter-world').onclick=()=>{
  if(!record||busy)return;
- try{sessionStorage.setItem(ENTRY_KEY,JSON.stringify({owner,serverId:selected,slotId:record.slotId}));getLoadingScreen().show(record.state.mapId,{travel:true,message:'กำลังเข้าสู่โลกอโยธยา…'});requestAnimationFrame(()=>location.assign('./game.html?server='+selected+'&map='+record.state.mapId));}catch{say('กรุณาเปิดอนุญาตพื้นที่เก็บข้อมูลของเบราว์เซอร์เพื่อเข้าเกม');}
+ try{const srv=record.serverId||selected||'server-1';sessionStorage.setItem(CHANNEL_KEY,String(selectedChannel));sessionStorage.setItem(ENTRY_KEY,JSON.stringify({owner,serverId:srv,slotId:record.slotId,channel:selectedChannel}));getLoadingScreen().show(record.state.mapId,{travel:true,message:'กำลังเข้าสู่โลกอโยธยา…'});requestAnimationFrame(()=>location.assign('./game.html?server='+srv+'&channel='+selectedChannel+'&map='+record.state.mapId));}catch{say('กรุณาเปิดอนุญาตพื้นที่เก็บข้อมูลของเบราว์เซอร์เพื่อเข้าเกม');}
 };
 $('ambient-toggle').onclick=()=>{const off=document.body.classList.toggle('motion-off');$('ambient-toggle').textContent=off?'เปิดโมชั่น':'หยุดโมชั่น';$('ambient-toggle').setAttribute('aria-pressed',String(off));};
 for(let i=0;i<25;i++){const p=document.createElement('i');p.className='ember';p.style.left=((i*37)%100)+'%';p.style.top=(25+(i*23)%75)+'%';p.style.animationDelay=(-i*.71)+'s';p.style.animationDuration=(7+i%8)+'s';$('embers').append(p);}

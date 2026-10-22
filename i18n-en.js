@@ -2459,5 +2459,12 @@ Object.assign(globalThis.I18N_EN,{
  'รองเท้าเกราะคชสีห์':'War Beast Greaves','รองเท้าหนังราชสีห์':'Lion Hide Boots','รองเท้าผ้ายันต์คชสีห์':'War Beast Yantra Slippers',
  'หมวกเกราะกิเลน':'Qilin Helm','ผ้าโพกกินรี':'Kinnari Turban','ชฎาวิทยาธร':'Vidyadhara Chada Crown',
  'ผ้าคลุมเกล็ดกิเลน':'Qilin Scale Cape','ผ้าคลุมปีกกินรี':'Kinnari Wing Cloak','ผ้าคลุมทิพย์หิมพานต์':'Himmapan Celestial Mantle',
- 'รองเท้าเกราะกิเลน':'Qilin Greaves','รองเท้ากินรี':'Kinnari Boots','รองเท้าเมฆวิทยาธร':'Vidyadhara Cloud Slippers','ชุดพรางเงาหิมพานต์':'Himmapan Shadow Garb','เสื้อยันต์วิทยาธร':'Vidyadhara Yantra Shirt','ผ้าคลุมพรตหิมพานต์':'Himmapan Ascetic Robe'
+ 'รองเท้าเกราะกิเลน':'Qilin Greaves','รองเท้ากินรี':'Kinnari Boots','รองเท้าเมฆวิทยาธร':'Vidyadhara Cloud Slippers','ชุดพรางเงาหิมพานต์':'Himmapan Shadow Garb','เสื้อยันต์วิทยาธร':'Vidyadhara Yantra Shirt','ผ้าคลุมพรตหิมพานต์':'Himmapan Ascetic Robe',
+ '· แนล':'· Ch.','เลือกแนล (ย้ายแนลได้ทันที)':'Choose Channel (Switch Anytime)','{1} คน':'{1} online','เซิร์ฟเวอร์หลัก · เลือกแนล':'Main Server · Choose Channel',
+ 'รวมเป็น 1 เซิร์ฟเวอร์เดียว · แบ่ง 5 แนลลดความแออัดและประหยัดแบนด์วิดท์':'Unified single server · 5 channels to reduce crowding and save bandwidth',
+ 'แนล 1 · ริมเจ้าพระยา':'Channel 1 · Chao Phraya Riverside','เซิร์ฟเวอร์หลัก · แนลรวมนักเดินทาง':'Main Server · Travelers Hub',
+ 'แนล 1':'Channel 1','แนล 2':'Channel 2','แนล 3':'Channel 3','แนล 4':'Channel 4','แนล 5':'Channel 5',
+ 'อยุธยา · ตลาดน้ำ':'Ayutthaya · Floating Market','อยุธยา · ลานไทรทอง':'Ayutthaya · Golden Banyan Court','อยุธยา · ท่าเรือสำเภา':'Ayutthaya · Junk Harbor',
+ '5 ตัวละครต่อบัญชี · ใช้ตัวละครเดียวกันย้ายแนล 1–5 ในเกมได้ตลอดเวลา':'5 characters per account · Switch freely between Channels 1–5 anytime in-game',
+ 'ย้ายแนล':'Switched channel'
 });

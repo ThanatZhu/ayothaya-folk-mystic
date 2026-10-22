@@ -11,7 +11,8 @@ export class MultiplayerClient extends EventTarget{
    socket.addEventListener('open',()=>{if(generation!==this.generation){socket.close();return;}socket.send(JSON.stringify({type:'join',...identity}));});
    socket.addEventListener('message',e=>{if(generation!==this.generation)return;let m;try{m=JSON.parse(e.data);}catch{return;}
     if(m.type==='welcome'){this.equipment=m.snapshot.self.equipment;this.training=m.snapshot.self.training??null;this.seq=0;this.id=m.id;this.retries=0;this.everOnline=true;this.state('online');this.emit('welcome',m);this.emit('snapshot',m.snapshot);}
-    else if(m.type==='snapshot'){this.equipment=m.self.equipment;this.training=m.self.training??null;this.emit('snapshot',m);}
+    else if(m.type==='snapshot'){if(m.self?.equipment)this.equipment=m.self.equipment;if('training' in (m.self??{}))this.training=m.self.training??null;this.emit('snapshot',m);}
+    else if(m.type==='channelSwitched'){if(m.snapshot?.self?.equipment)this.equipment=m.snapshot.self.equipment;if('training' in (m.snapshot?.self??{}))this.training=m.snapshot.self.training??null;this.emit('channelSwitched',m);}
     else if(m.type==='equipped'){this.equipment=m.equipment;this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
     else if(m.type==='equipment-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
     else if(m.type==='trained'){this.training=m.training;if(m.advanced)this.stopped=true;this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}

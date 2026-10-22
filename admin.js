@@ -171,7 +171,27 @@ async function initAdminAuthGate(){
   return;
  }
  const msg=$('gate-msg'),btnLogin=$('btn-login-google'),btnLogout=$('btn-logout'),badge=$('admin-user-badge');
- if(msg)msg.textContent='กำลังเตรียมระบบความปลอดภัย…';
+
+ function lock(msgHtml){
+  app.hidden=true;
+  app.style.display='none';
+  gate.hidden=false;
+  gate.style.display='flex';
+  document.body.style.overflow='hidden';
+  if(msg&&msgHtml)msg.innerHTML=msgHtml;
+ }
+ function unlock(user){
+  gate.hidden=true;
+  gate.style.display='none';
+  app.hidden=false;
+  app.style.display='grid';
+  document.body.style.overflow='';
+  if(badge)badge.textContent='👤 '+user.email;
+  tabs();
+  render();
+ }
+
+ lock('กำลังเตรียมระบบความปลอดภัย…');
 
  try{
   const m=await import('./firebase-client.js');
@@ -181,29 +201,21 @@ async function initAdminAuthGate(){
   fbConn.auth.onAuthStateChanged(user=>{
    const email=(user?.email||'').toLowerCase().trim();
    if(user&&email&&ALLOWED_ADMINS.includes(email)){
-    gate.hidden=true;
-    app.hidden=false;
-    if(badge)badge.textContent='👤 '+user.email;
-    tabs();
-    render();
+    unlock(user);
    }else if(user){
-    gate.hidden=false;
-    app.hidden=true;
-    if(msg)msg.innerHTML=`<span style="color:var(--bad)">⛔ บัญชี <b>${user.email}</b> ไม่มีสิทธิ์เข้าถึงหน้านี้<br>(อนุญาตเฉพาะแอดมิน: ${ALLOWED_ADMINS.join(', ')})</span>`;
+    lock(`<span style="color:var(--bad)">⛔ บัญชี <b>${user.email}</b> ไม่มีสิทธิ์เข้าถึงหน้านี้<br>(อนุญาตเฉพาะแอดมิน: ${ALLOWED_ADMINS.join(', ')})</span>`);
     fbConn.sdk.signOut(fbConn.auth).catch(()=>{});
    }else{
-    gate.hidden=false;
-    app.hidden=true;
-    if(msg)msg.textContent='กรุณาเข้าสู่ระบบด้วย Google (Gmail)';
+    lock('กรุณาเข้าสู่ระบบด้วย Google (Gmail)');
    }
   });
  }catch(e){
-  if(msg)msg.textContent='ไม่สามารถเชื่อมต่อระบบความปลอดภัย Firebase ได้ กรุณารีเฟรชหน้าเว็บ';
+  lock('ไม่สามารถเชื่อมต่อระบบความปลอดภัย Firebase ได้ กรุณารีเฟรชหน้าเว็บ');
  }
 
  if(btnLogin){
   btnLogin.onclick=async()=>{
-   if(!fbConn){if(msg)msg.textContent='กำลังเชื่อมต่อระบบ กรุณากดอีกครั้ง';return;}
+   if(!fbConn){lock('กำลังเชื่อมต่อระบบ กรุณากดอีกครั้ง');return;}
    if(msg)msg.textContent='กำลังเปิดหน้าต่างล็อกอิน Google…';
    const provider=new fbConn.sdk.GoogleAuthProvider();
    provider.setCustomParameters({prompt:'select_account'});
@@ -211,15 +223,9 @@ async function initAdminAuthGate(){
     const res=await fbConn.sdk.signInWithPopup(fbConn.auth,provider);
     const email=(res.user?.email||'').toLowerCase().trim();
     if(res.user&&email&&ALLOWED_ADMINS.includes(email)){
-     gate.hidden=true;
-     app.hidden=false;
-     if(badge)badge.textContent='👤 '+res.user.email;
-     tabs();
-     render();
+     unlock(res.user);
     }else{
-     gate.hidden=false;
-     app.hidden=true;
-     if(msg)msg.innerHTML=`<span style="color:var(--bad)">⛔ บัญชี <b>${res.user?.email||''}</b> ไม่มีสิทธิ์เข้าถึงหน้านี้</span>`;
+     lock(`<span style="color:var(--bad)">⛔ บัญชี <b>${res.user?.email||''}</b> ไม่มีสิทธิ์เข้าถึงหน้านี้</span>`);
      fbConn.sdk.signOut(fbConn.auth).catch(()=>{});
     }
    }catch(err){

@@ -1,6 +1,6 @@
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
-import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems} from './story-quests.js?v=98';
+import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=98';
 import {createCoach} from './coach.js?v=104.1';
 import {MONSTER_TYPES} from './combat-core.js?v=112.1';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
@@ -71,7 +71,8 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   const obj=currentObjective(state()),sig=JSON.stringify([state(),game.walking&&walking]);
   if(sig===shown)return;shown=sig;
   $('quest-chapter').textContent=obj?.quest?.chapter??STORY_TITLE;
-  $('quest-title').textContent=obj?obj.quest.title+` (${obj.stepNumber}/${obj.steps})`:'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';
+  const stepLabel=obj&&obj.steps>1?` (ขั้น ${obj.stepNumber}/${obj.steps})`:'';
+  $('quest-title').textContent=obj?obj.quest.title+stepLabel:'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';
   $('quest-hint').textContent=obj?hintText(obj):'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';
   $('quest-how').textContent=obj?.step.how??'';$('quest-how').hidden=!obj?.step.how;
   $('quest-go').hidden=!obj;

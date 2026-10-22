@@ -88,6 +88,7 @@ td.top{background:#1f3b31;color:var(--jade);font-weight:700}td.bottom{background
 
 /* 0.101.2 layout: side menu + page header; save bar only on editable pages; item stat tooltip */
 body{padding:0}
+[hidden],.app[hidden],#app-shell[hidden]{display:none!important}
 .app{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100dvh}
 .side{position:sticky;top:0;height:100dvh;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:18px 12px;border-right:1px solid var(--rule);background:#0c1a14}
 .brand small{display:block;font-size:10px;letter-spacing:.18em;color:var(--muted)}.brand b{font:700 21px Mali,Tahoma,sans-serif;color:var(--gold)}
@@ -166,7 +167,8 @@ table.drops tr.mon td{background:#ffffff08;border-top:2px solid var(--rule)}tabl
 #bx-count{width:80px}
 
 /* Auth Gate (Security Guard for Admin) */
-.auth-gate{min-height:85vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.auth-gate{position:fixed;inset:0;z-index:99999;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:radial-gradient(circle at 50% 30%,#1e3d33 0%,#08110e 85%);overflow-y:auto}
+.auth-gate[hidden]{display:none!important}
 .gate-card{max-width:440px;width:100%;padding:36px 28px;background:var(--panel);border:1px solid var(--rule);border-radius:20px;box-shadow:0 24px 60px #000a;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
 .gate-card .eyebrow{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700}
 .gate-card h2{margin:0;font:700 22px Mali,Tahoma,sans-serif;color:var(--gold)}

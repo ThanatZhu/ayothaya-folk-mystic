@@ -58,8 +58,8 @@ function defaultHttpUrl(){
 }
 
 let serverUrl=defaultHttpUrl();
-$('srv-url-input').value=serverUrl;
-$('tx-date').value=new Date().toISOString().slice(0,10);
+if($('srv-url-input'))$('srv-url-input').value=serverUrl;
+if($('tx-date'))$('tx-date').value=new Date().toISOString().slice(0,10);
 
 let currentLogFilter='all';
 let currentTxFilter='all';
@@ -572,8 +572,9 @@ let pollTimer=null;
 
 function startDashboard(user){
  const gate=$('auth-gate'),shell=$('dash-shell'),badge=$('admin-user-badge');
- if(gate)gate.hidden=true;
- if(shell)shell.hidden=false;
+ if(gate){gate.hidden=true;gate.style.display='none';}
+ if(shell){shell.hidden=false;shell.style.display='grid';}
+ document.body.style.overflow='';
  if(badge)badge.textContent='👤 '+user.email;
  renderCosts();
  renderLedger();
@@ -585,8 +586,9 @@ function startDashboard(user){
 function lockDashboard(msgHtml){
  const gate=$('auth-gate'),shell=$('dash-shell'),msg=$('gate-msg');
  if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
- if(shell)shell.hidden=true;
- if(gate)gate.hidden=false;
+ if(shell){shell.hidden=true;shell.style.display='none';}
+ if(gate){gate.hidden=false;gate.style.display='flex';}
+ document.body.style.overflow='hidden';
  if(msg){
   if(msgHtml)msg.innerHTML=msgHtml;
   else msg.textContent='กรุณาล็อกอินด้วยบัญชี Gmail ของแอดมินเพื่อปลดล็อก';
@@ -602,6 +604,7 @@ async function initAuthGate(){
   return;
  }
  const msg=$('gate-msg'),btnLogin=$('btn-login-google'),btnLogout=$('btn-logout');
+ lockDashboard();
  if(msg)msg.textContent='กำลังเตรียมระบบความปลอดภัย…';
  try{
   fbConn=await deadline(connectFirebase(),15000);

@@ -2920,5 +2920,6 @@ Object.assign(globalThis.I18N_EN,{
  'ล็อกอินไม่สำเร็จ:':'Sign-in failed:',
  'ยกเลิกการล็อกอิน':'Sign-in cancelled',
  'สลับแนล ▾':'Switch Channel ▾',
- 'คลิกเพื่อเลือกแนล (Channel 1–5)':'Click to switch channel (Channel 1–5)'
+ 'คลิกเพื่อเลือกแนล (Channel 1–5)':'Click to switch channel (Channel 1–5)',
+ '(ขั้น {0}/{1})':'(Step {0}/{1})'
 });

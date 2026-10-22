@@ -29,7 +29,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0,currentChannel=normalizeChannel(new URLSearchParams(location.search).get('channel')||(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1)),channelCounts=[];const seenMessages=new Set(),bubbles=new Map();
  // HUD chip: connection state dot + label. Opens the room/party roster.
  const button=el('button');button.id='online-button';button.dataset.state='offline';button.innerHTML='<i class="mp-dot" aria-hidden="true"></i><span id="online-label">ผู้เล่นออนไลน์</span>';shell.append(button);
- const chButton=el('button','mp-hud-channel');chButton.id='channel-button';chButton.type='button';chButton.innerHTML='🌐 <b id="channel-btn-label">แนล 1</b> <span>สลับแนล ▾</span>';shell.append(chButton);
+ const chButton=el('button','mp-hud-channel');chButton.id='channel-button';chButton.type='button';chButton.innerHTML='<span class="ch-ico">🌐</span> <b id="channel-btn-label" class="ch-name">แนล 1</b><b id="channel-btn-mob" class="ch-name-mobile">CH 1</b> <span class="ch-detail">สลับแนล ▾</span>';shell.append(chButton);
  const chPop=el('div','mp-channel-popover');chPop.id='channel-popover';chPop.hidden=true;chPop.innerHTML='<div class="mp-pop-head"><strong>เลือกแนล (ย้ายแนลได้ทันที)</strong><button type="button" id="channel-pop-close" aria-label="ปิด">×</button></div><div id="channel-pop-list" class="mp-pop-list"></div>';shell.append(chPop);
  chButton.onclick=e=>{e.stopPropagation();game.clearInput();chPop.hidden=!chPop.hidden;if(!chPop.hidden)drawChannels();};
  chPop.querySelector('#channel-pop-close').onclick=()=>{chPop.hidden=true;};
@@ -85,6 +85,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  function drawChannels(){
   const cur=CHANNELS.find(c=>c.id===currentChannel)||CHANNELS[0];
   const lbl=$('channel-btn-label')||document.getElementById('channel-btn-label');if(lbl)lbl.textContent=cur.name;
+  const mob=$('channel-btn-mob')||document.getElementById('channel-btn-mob');if(mob)mob.textContent='CH '+cur.id;
   const popList=$('channel-pop-list');
   if(popList){
    popList.replaceChildren();

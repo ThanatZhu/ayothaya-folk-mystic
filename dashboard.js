@@ -87,7 +87,7 @@ function renderServerPanel(data){
  const uptime=data?.uptimeSeconds??0;
  const bw=data?.bandwidth??{bytesSent:0,messagesSent:0};
 
- $('kpi-players').textContent=totalPlayers+' คน';
+ $('kpi-players').textContent=`${totalPlayers} คน`;
  $('kpi-rooms').textContent=`ห้องที่เปิดอยู่: ${rooms.length} ห้อง · อัปไทม์: ${formatUptime(uptime)}`;
 
  const bytes=bw.bytesSent||0;
@@ -140,7 +140,7 @@ function renderLogs(){
   if(currentLogFilter==='market')return ['market','trade'].includes(item.category);
   return item.category===currentLogFilter;
  });
- $('log-count-badge').textContent=filtered.length+' รายการ';
+ $('log-count-badge').textContent=`${filtered.length} รายการ`;
  if(!filtered.length){
   const empty=document.createElement('p');
   empty.style.color='var(--muted)';
@@ -400,8 +400,8 @@ function renderLedger(){
  $('kpi-net-balance').textContent=(net>=0?'+':'')+formatMoney(net);
  $('kpi-net-balance').className='kpi-value '+(net>=0?'txt-jade':'txt-danger');
 
- $('ratio-income-label').textContent='รายรับรวม: +'+formatMoney(totalIncome);
- $('ratio-expense-label').textContent='รายจ่ายรวม: -'+formatMoney(totalExpense);
+ $('ratio-income-label').textContent=`รายรับรวม: +${formatMoney(totalIncome)}`;
+ $('ratio-expense-label').textContent=`รายจ่ายรวม: -${formatMoney(totalExpense)}`;
  const sum=totalIncome+totalExpense;
  $('ratio-income-bar').style.width=(sum>0?(totalIncome/sum)*100:50)+'%';
 

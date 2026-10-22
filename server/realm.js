@@ -11,7 +11,7 @@ import {MARKET_ZONE,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,co
 import {REBIRTH_MAX,rebirthStatBonus,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot,CHANNELS,normalizeChannel} from '../realm-state.js';
-import {logJoin,logLeave,logChannel,logChat,logMvp,logTrade,logMarket,logGuild} from './dashboard-log.js';
+import {logJoin,logLeave,logChannel,logChat,logMvp,logTrade,logMarket,logGuild,logLevelUp} from './dashboard-log.js';
 import {normalizeSkills,upgradeSkill,availablePoints,SLOTS} from '../skill-progress.js';
 import {normalizeStory,storyEvent,rewardItems} from '../story-quests.js';
 import {FRIEND_MAX,GUILD_COST,SOCIAL_ERRORS,cleanName,validGuildName,validEmblem,normalizeFriends,GUILD_HALL,DEPUTY_MAX,DONATE_MIN,DONATE_MAX,GUILD_LEVELS,guildLevel,GUILD_UPGRADES,GUILD_RITE,GUILD_GOAL,guildSeats,cleanNotice} from '../social.js';
@@ -60,7 +60,7 @@ function autoPotionFor(realm,p){
 export class RealmServer{
  autoPotion(p){autoPotionFor(this,p);}
  constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false}={}){this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];}
- channelCounts(mapId){return CHANNELS.map(c=>{let n=0;for(const p of this.peers.values())if(!p.suspended&&(p.channel??1)===c.id&&(!mapId||p.room?.map?.id===mapId))n++;return {channel:c.id,name:c.name,subtitle:c.subtitle,players:n};});}
+ channelCounts(mapId){return CHANNELS.map(c=>{let n=0;for(const p of this.peers.values())if((!p.suspended||(p.resumeUntil&&p.resumeUntil>this.now()))&&(p.channel??1)===c.id&&(!mapId||p.room?.map?.id===mapId))n++;return {channel:c.id,name:c.name,subtitle:c.subtitle,players:n};});}
  join({uid,serverId,slotId,channel,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
   let existing=[...this.peers.values()].find(p=>p.uid===uid);
@@ -103,7 +103,7 @@ export class RealmServer{
  }
  leave(id,{travel=false}={}){
   const p=this.peers.get(id);if(!p)return;
-  this.endTrade(p,'อีกฝ่ายออกไปแล้ว');p.stall=null;logLeave(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id);
+  this.endTrade(p,'อีกฝ่ายออกไปแล้ว');p.stall=null;if(!travel)logLeave(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id);
   const party=travel&&this.parties.get(p.partyId);
   if(party){party.members.delete(id);(party.pending??=new Map()).set(p.uid,this.now()+60000);if(party.leader===id){party.leaderPending??=p.uid;if(party.members.size)party.leader=party.members.values().next().value;}p.partyId=null;}
   else this.leaveParty(p);this.peers.delete(id);p.room.peers.delete(id);
@@ -338,7 +338,7 @@ export class RealmServer{
  }
  // 0.99.14 the roster covers the whole channel (every map of the server), so a party can be formed across maps;
  // here = on the viewer's map (duels, trades and shared EXP still need the same map)
- social(room){const all=[...this.peers.values()].filter(a=>a.serverId===room.serverId&&a.room&&(room.channel?a.channel===room.channel:!a.room.channel));const channels=this.channelCounts(room.map.id);for(const p of all){const party=this.parties.get(p.partyId);p.send({type:'social',channel:p.channel??1,channels,players:all.map(a=>({id:a.id,name:a.character.name,classId:a.character.classId,partyId:a.partyId,map:a.room.map.name,here:a.room===p.room})),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
+ social(room){const all=[...this.peers.values()].filter(a=>a.serverId===room.serverId&&a.room&&(room.channel?a.channel===room.channel:!a.room.channel));const channels=this.channelCounts();for(const p of all){const party=this.parties.get(p.partyId);p.send({type:'social',channel:p.channel??1,channels,players:all.map(a=>({id:a.id,name:a.character.name,classId:a.character.classId,partyId:a.partyId,map:a.room.map.name,here:a.room===p.room})),party:party?{id:party.id,leader:party.leader,members:[...party.members]}:null});}}
  // ---- 0.95 weekly guild war (guild-war.js). One war state per channel; the stone is shared by everyone there.
  warState(serverId){let s=this.wars.get(serverId);if(!s){s={active:false,holder:null,stone:{id:'war:stone',pvp:true,name:WAR.stone.name,x:WAR.stone.x,z:WAR.stone.z,hp:WAR.stone.hp,maxHp:WAR.stone.hp}};this.wars.set(serverId,s);}return s;}
  castleOwner(serverId){return [...this.guilds.values()].find(g=>g.serverId===serverId&&g.castle)??null;}
@@ -491,7 +491,7 @@ export class RealmServer{
      target.world.takeMonsterHit(type);
     }
    }
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock}; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album','crafted'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock}; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album','crafted'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){this.broadcasting=true;const events=copy(room.events);for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p,{delta:true}),events});}this.broadcasting=false;room.events=[];}
   }
  }
@@ -654,7 +654,7 @@ export class RealmServer{
   logMvp(this.logs,this.now(),type.name,room.channel??1,room.map.id,winner?.character?.name);
   this.herald(room.serverId,winner?`👑 ${winner.character.name} ได้ MVP ${type.name}! · กลับมาอีกใน 60 นาที`:`${type.name} ถูกปราบแล้ว · กลับมาอีกใน 60 นาที`);
  }
- worldSay(serverId,{actor,name,text}){const message={type:'chat',id:randomUUID(),actor,name,text,channel:'world',time:this.now()};for(const o of this.peers.values())if(o.serverId===serverId&&!o.suspended)o.send(message);}
+ worldSay(serverId,{actor,name,text}){logChat(this.logs,this.now(),'โลก','all',name,text);const message={type:'chat',id:randomUUID(),actor,name,text,channel:'world',time:this.now()};for(const o of this.peers.values())if(o.serverId===serverId&&!o.suspended)o.send(message);}
  announce(serverId,text){const message={type:'chat',id:randomUUID(),actor:null,name:'ประกาศ',text,channel:'system',time:this.now()};for(const o of this.peers.values())if(o.serverId===serverId&&!o.suspended)o.send(message);}
  dungeonClear(room){
   const today=thaiDay(this.now());

@@ -16,22 +16,27 @@ const LEDGER_KEY='ayothaya-dashboard-ledger-v1';
 
 const MAP_NAMES={
  'ayothaya':'พระนครศรีอยุธยา (เมืองหลวง)',
- 'rice-fields':'ทุ่งนาชานเมือง',
+ 'rice-fields':'ทุ่งขวัญข้าว (ชานเมือง)',
  'FloatingMarket':'ตลาดน้ำอโยธยา',
  'JungleRuins':'ป่ารกและเทวสถานร้าง',
  'lavo':'เมืองละโว้',
- 'sukhothai':'เมืองสุโขทai',
- 'ancient-temple':'วัดโบราณริมน้ำ'
+ 'sukhothai':'เมืองสุโขทัย',
+ 'ancient-temple':'วัดโบราณริมน้ำ',
+ 'old-orchard':'สวนหมากคลองเก่า',
+ 'moonlit-mill':'โรงสีใต้เงาจันทร์',
+ 'lotus-marsh':'บึงบัวต้องมนตร์',
+ 'mill-cellar':'ดันเจี้ยนใต้ถุนโรงสี',
+ 'guild-hall':'ป้อมและห้องโถงกิลด์'
 };
 
 const CAT_LABELS={
  join:'เข้าเกม',
  leave:'ออกเกม',
- channel:'ย้ายแนล',
+ channel:'ย้ายแนล/แมพ',
  chat:'แชต',
  mvp:'บอส MVP',
  trade:'แลกเปลี่ยน',
- market:'ตั้งร้าน',
+ market:'ตั้งร้าน/ตีบวก',
  guild:'กิลด์'
 };
 
@@ -60,10 +65,19 @@ function defaultHttpUrl(){
 let serverUrl=defaultHttpUrl();
 if($('srv-url-input'))$('srv-url-input').value=serverUrl;
 if($('tx-date'))$('tx-date').value=new Date().toISOString().slice(0,10);
+setTimeout(renderLogs, 0);
+
+const LOG_STORAGE_KEY='ayothaya-dashboard-logs-cache-v1';
+function loadCachedLogs(){
+ try{const r=localStorage.getItem(LOG_STORAGE_KEY);return r?JSON.parse(r):[];}catch{return [];}
+}
+function saveCachedLogs(logs){
+ try{localStorage.setItem(LOG_STORAGE_KEY,JSON.stringify(logs.slice(0,300)));}catch{}
+}
 
 let currentLogFilter='all';
 let currentTxFilter='all';
-let liveLogs=[];
+let liveLogs=loadCachedLogs();
 let liveChannels=CHANNELS.map(c=>({channel:c.id,name:c.name,subtitle:c.subtitle,players:0}));
 let liveRooms=[];
 
@@ -131,7 +145,13 @@ function renderServerPanel(data){
   }
  }
 
- if(Array.isArray(data?.logs))liveLogs=data.logs;
+ if(Array.isArray(data?.logs)){
+  const map=new Map();
+  for(const l of liveLogs)if(l&&l.id)map.set(l.id,l);
+  for(const l of data.logs)if(l&&l.id)map.set(l.id,l);
+  liveLogs=[...map.values()].sort((a,b)=>(b.time||0)-(a.time||0)).slice(0,250);
+  saveCachedLogs(liveLogs);
+ }
  renderLogs();
 }
 

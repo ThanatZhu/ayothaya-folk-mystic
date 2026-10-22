@@ -13,12 +13,14 @@ export class LocalStore{
  async init(){await mkdir(this.directory,{recursive:true});try{this.rows=new Map(JSON.parse(await readFile(path.join(this.directory,'profiles.json'),'utf8')));}catch(e){if(e.code!=='ENOENT')throw e;}return this;}
  async createLocal({name,gender='male'}){const uid='dev-'+randomUUID(),token=randomUUID()+randomUUID(),record={serverId:'server-1',slotId:'slot-1',revision:1,character:character({name,gender,classId:'novice'}),state:initialSave(),localTokenHash:createHash('sha256').update(token).digest('hex')};this.rows.set(uid,record);await this.flush();return {uid,token,record:copy(record)};}
  verifyLocal(token){const hash=createHash('sha256').update(token).digest('hex');return [...this.rows].find(([,v])=>v.localTokenHash===hash)?.[0];}
- async acquire(identity,leaseId){
+ async acquire(identity,leaseId,{takeover=false}={}){
   const row=this.rows.get(identity.uid);if(!row||identity.slotId!=='slot-1')throw new Error('character-not-found');
-  const lock=this.leases.get(identity.uid);if(lock&&lock.expires>Date.now())throw new Error('already-online');
+  const lock=this.leases.get(identity.uid);if(!takeover&&lock&&lock.expires>Date.now())throw new Error('already-online');
   if(row.serverId!==identity.serverId)throw new Error('character-server');
   this.leases.set(identity.uid,{id:leaseId,expires:Date.now()+ttl});return {identity,leaseId,record:copy(row)};
  }
+ async loadDashboardLogs(){try{return JSON.parse(await readFile(path.join(this.directory,'dashboard-logs.json'),'utf8'));}catch{return [];}}
+ async saveDashboardLogs(logs){try{const recent=Array.isArray(logs)?logs.slice(-200):[];await writeFile(path.join(this.directory,'dashboard-logs.json'),JSON.stringify(recent),{mode:0o600});}catch{}}
  async checkpoint(session,record,{release=false}={}){
   const lock=this.leases.get(session.identity.uid);if(!lock||lock.id!==session.leaseId||lock.expires<Date.now())throw new Error('session-lost');
   this.rows.set(session.identity.uid,copy({...record,revision:(this.rows.get(session.identity.uid)?.revision??0)+1,savedAt:Date.now()}));
@@ -104,11 +106,13 @@ export class FirebaseStore{
   });
  }
  refs(identity){const root=this.db.collection('multiplayerProfiles').doc(identity.uid);return {profile:root.collection('characters').doc(identity.slotId),lease:this.db.collection('multiplayerLeases').doc(identity.uid),legacy:this.db.collection('players').doc(identity.uid).collection('characters').doc(identity.slotId)};}
- async acquire(identity,leaseId){
+ async loadDashboardLogs(){try{const snap=await this.db.collection('multiplayerRuntime').doc('dashboardLogs').get();if(snap.exists&&Array.isArray(snap.data().logs))return snap.data().logs;}catch(e){console.error('loadDashboardLogs',e.message);}return [];}
+ async saveDashboardLogs(logs){try{const recent=Array.isArray(logs)?logs.slice(-200):[];await this.db.collection('multiplayerRuntime').doc('dashboardLogs').set({logs:recent,updatedAt:Date.now()});}catch(e){console.error('saveDashboardLogs',e.message);}}
+ async acquire(identity,leaseId,{takeover=false}={}){
   const refs=this.refs(identity);return this.db.runTransaction(async tx=>{
    await this.checkAuthority(tx);
    const [online,legacy,lease]=await Promise.all([tx.get(refs.profile),tx.get(refs.legacy),tx.get(refs.lease)]);
-   if(lease.exists&&lease.data().expires>Date.now())throw new Error('already-online');
+   if(!takeover&&lease.exists&&lease.data().expires>Date.now())throw new Error('already-online');
    if(!legacy.exists)throw new Error('character-not-found');
    const record=online.exists?online.data().record:legacy.data();
    if(record.serverId!==identity.serverId||legacy.data().serverId!==identity.serverId)throw new Error('character-server');

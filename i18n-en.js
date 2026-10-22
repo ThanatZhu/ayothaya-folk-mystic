@@ -2937,3 +2937,18 @@ Object.assign(globalThis.I18N_EN,{
  'เดินไปลานครูไม่ได้':"Can't walk to the Masters' Court",
  'เปิด AUTO ฟาร์มเลเวล':'Turned on AUTO to farm EXP'
 });
+
+Object.assign(globalThis.I18N_EN, {
+ 'ทุ่งขวัญข้าว (ชานเมือง)': 'Spirit Rice Fields (Suburbs)',
+ 'เมืองสุโขทัย': 'Sukhothai City',
+ 'ดันเจี้ยนใต้ถุนโรงสี': 'Mill Cellar Dungeon',
+ 'ป้อมและห้องโถงกิลด์': 'Fortress & Guild Hall',
+ 'ย้ายแนล/แมพ': 'Change Channel / Map',
+ 'ตั้งร้าน/ตีบวก': 'Stall / Refine',
+ '{0} เดินทางสู่ {1} ({2} · แนล {3})': '{0} traveled to {1} ({2} · CH {3})',
+ '🎉 {0} เลเวล{1}อัปเป็น Lv. {2} ({3} · แนล {4})': '🎉 {0} leveled up {1} to Lv. {2} ({3} · CH {4})',
+ 'อาชีพ (Job)': 'Job',
+ '{0} ตีบวก {1} เป็น +{2} {3}': '{0} refined {1} to +{2} {3}',
+ 'สำเร็จ! ✨': 'Success! ✨',
+ 'แตก 💥': 'Broke 💥'
+});

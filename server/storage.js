@@ -27,6 +27,11 @@ export class LocalStore{
  }
  // 0.103 back office: every saved character, and a gift written into one that is not in a game right now.
  async listProfiles(){return [...this.rows].map(([uid,r])=>({uid,slotId:'slot-1',record:copy(r),savedAt:r.savedAt??null}));}
+ async deleteCharacter(identity){
+  const row=this.rows.get(identity.uid);if(!row||identity.slotId!=='slot-1')throw new Error('character-not-found');
+  const lock=this.leases.get(identity.uid);if(lock&&lock.expires>Date.now())throw new Error('player-online');
+  this.rows.delete(identity.uid);await this.flush();
+ }
  async giveOffline(identity,apply){
   const row=this.rows.get(identity.uid);if(!row||identity.slotId!=='slot-1')throw new Error('character-not-found');
   const lock=this.leases.get(identity.uid);if(lock&&lock.expires>Date.now())throw new Error('player-online');
@@ -83,6 +88,19 @@ export class FirebaseStore{
    if(lease.exists&&lease.data().expires>Date.now())throw new Error('player-online');
    if(!profile.exists)throw new Error('character-not-found');
    const record=apply(copy(profile.data().record));tx.set(refs.profile,{record,updatedAt:profile.data().updatedAt??Date.now()});return copy(record);
+  });
+ }
+ // 0.114 players delete their own characters from the lobby. Same lease rule as giveOffline. The private profile goes
+ // with the mirror (a new character in the slot would otherwise load the old progress), and so does the old
+ // players/{uid}/saves/server-N document, or the lobby would migrate slot 1/2 straight back from it.
+ async deleteCharacter(identity){
+  const refs=this.refs(identity),old=/^slot-[12]$/.test(identity.slotId)?this.db.collection('players').doc(identity.uid).collection('saves').doc(identity.slotId==='slot-1'?'server-1':'server-2'):null;
+  return this.db.runTransaction(async tx=>{
+   await this.checkAuthority(tx);
+   const [legacy,lease]=await Promise.all([tx.get(refs.legacy),tx.get(refs.lease)]);
+   if(lease.exists&&lease.data().expires>Date.now())throw new Error('player-online');
+   if(!legacy.exists)throw new Error('character-not-found');
+   tx.delete(refs.profile);tx.delete(refs.legacy);if(old)tx.delete(old);
   });
  }
  refs(identity){const root=this.db.collection('multiplayerProfiles').doc(identity.uid);return {profile:root.collection('characters').doc(identity.slotId),lease:this.db.collection('multiplayerLeases').doc(identity.uid),legacy:this.db.collection('players').doc(identity.uid).collection('characters').doc(identity.slotId)};}

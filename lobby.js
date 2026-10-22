@@ -9,7 +9,7 @@ import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=66';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
-import {createRealmStore} from './realm-store.js?v=101.5';
+import {createRealmStore} from './realm-store.js?v=114';
 import {wakeServer} from './multiplayer-config.js?v=27';
 wakeServer();
 const $=id=>document.getElementById(id);
@@ -26,10 +26,10 @@ async function drawAtlas(){
  try{const img=await atlases.get(src);if(token===atlasToken)lobbyMotion.setSource(customizeAtlas(img,validateAppearance(record?.character.appearance),id),previewGender,id,record?.equipment);}catch{atlases.delete(src);}
 }
 function show(next){screen=next;document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
-function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,.character-slot').forEach(b=>b.disabled=value);}
+function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#delete-character,.character-slot').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
- const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
+ const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่','player-online':'ตัวละครในบัญชีนี้ยังอยู่ในเกม ออกจากเกมแล้วรอสักครู่ค่อยลบ','character-not-found':'ไม่พบตัวละครนี้แล้ว ลองโหลดหน้าใหม่','bad-token':'การล็อกอินหมดอายุ กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
  say(code==='character-exists'?'มีตัวละครในเซิร์ฟเวอร์นี้แล้ว กดเปลี่ยนเซิร์ฟเวอร์แล้วเลือกอีกครั้ง':code==='auth/popup-blocked'?'กรุณาอนุญาตป๊อปอัป แล้วกด Google อีกครั้ง':code==='auth/popup-closed-by-user'?'ยังไม่ได้ล็อกอิน ลองใหม่ได้ครับ':code==='permission-denied'?'ยังเข้าถึงเซฟไม่ได้ กรุณาลองอีกครั้ง':String(code).startsWith('ชื่อ')||String(code).startsWith('กรุณา')?code:'เชื่อมต่อไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง');
 }
 const catalogReady=fetch('./maps/world.json?v=108.3').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
@@ -138,6 +138,12 @@ $('change-class').onclick=async()=>{
  if(!record||busy||selectedClass===record.character.classId)return;lock(true);say('กำลังบันทึกอาชีพ…');
  try{record=await store.changeClass(selected,record,selectedClass);roster=await store.list();displayCharacter();say('เปลี่ยนอาชีพแล้ว · ความคืบหน้าเดิมยังอยู่');}catch(e){report(e);}finally{lock(false);}
 };
+$('delete-character').onclick=()=>{if(!record||busy)return;$('delete-name').textContent=record.character.name;$('delete-confirm').value='';$('delete-go').disabled=true;$('delete-dialog').showModal();$('delete-confirm').focus();};
+$('delete-confirm').oninput=()=>{$('delete-go').disabled=$('delete-confirm').value.trim()!==record?.character.name;};
+$('delete-dialog').addEventListener('close',async()=>{
+ if($('delete-dialog').returnValue!=='ok'||!record||busy)return;lock(true);say('กำลังลบตัวละคร…');
+ try{const name=record.character.name;await store.remove(record);record=null;roster=await store.list();displayCharacter();say('ลบ '+name+' แล้ว');}catch(e){report(e);}finally{lock(false);}
+});
 $('enter-world').onclick=()=>{
  if(!record||busy)return;
  try{sessionStorage.setItem(ENTRY_KEY,JSON.stringify({owner,serverId:selected,slotId:record.slotId}));getLoadingScreen().show(record.state.mapId,{travel:true,message:'กำลังเข้าสู่โลกอโยธยา…'});requestAnimationFrame(()=>location.assign('./game.html?server='+selected+'&map='+record.state.mapId));}catch{say('กรุณาเปิดอนุญาตพื้นที่เก็บข้อมูลของเบราว์เซอร์เพื่อเข้าเกม');}

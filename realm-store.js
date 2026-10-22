@@ -4,6 +4,7 @@ import {trainingAction} from './city-life-data.js?v=98';
 import {CLASS_LEVEL,progression,validateJob,advanceReady} from './advancement.js?v=73';
 import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=62';
 import {validateSave,nextRevision} from './save-state.js?v=101.5';
+import {multiplayerURL} from './multiplayer-config.js?v=27';
 
 export function validateCharacterChange(before,after,state){
  if(before.name!==after.name||before.gender!==after.gender)throw new Error('character-identity');
@@ -93,5 +94,14 @@ export function createRealmStore({connection=null,owner='guest',catalog,storage}
   const result=trainingAction(record,mentor,action,jobId);
   const updated=await save(server,{...record,...result},record.state);return {...result,record:updated};
  }
- return {list,load,create,save,changeClass,customize,train,cloud,owner};
+ // 0.114 delete a character for good. Online the realm server does it (it also drops the private profile and the
+ // old pre-slot save); browser saves drop the slot key and the old per-server key it would be migrated back from.
+ async function remove(record){
+  slotCheck(record.slotId);
+  if(!cloud){storage.removeItem(localKey(record.slotId));const i=CHARACTER_SLOTS.indexOf(record.slotId);if(i<2)storage.removeItem(guestKey('server-'+(i+1)));return;}
+  guard();const url=new URL(multiplayerURL().replace(/^ws/,'http'));url.pathname='/character/delete';
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await connection.auth.currentUser.getIdToken()},body:JSON.stringify({slotId:record.slotId})});
+  if(!r.ok)throw new Error((await r.json().catch(()=>({}))).error??'delete-failed');
+ }
+ return {list,load,create,save,changeClass,customize,train,remove,cloud,owner};
 }

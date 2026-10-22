@@ -93,6 +93,20 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    }
    reply(404,{error:'not-found'});return;
   }
+  // 0.114 a signed-in player deletes one of their own characters (lobby). The token names the account; the store
+  // refuses while that account is in a game.
+  if(url.pathname==='/character/delete'&&req.method==='POST'){
+   if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
+   let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>1024){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
+   const token=String(req.headers.authorization??'').replace(/^Bearer /,'');let uid;
+   try{uid=mode==='local'?store.verifyLocal(token):(await authenticate(token)).uid;}catch{}
+   if(!uid){reply(401,{error:'bad-token'});return;}
+   try{const slotId=JSON.parse(data)?.slotId;if(!/^slot-[1-5]$/.test(slotId??''))throw new Error('invalid-slot');
+    if([...realm.peers.values()].some(p=>p.uid===uid))throw new Error('player-online');
+    await store.deleteCharacter({uid,slotId});savedList.at=0;console.log('character-delete',uid,slotId);reply(200,{ok:true});}
+   catch(e){reply(e.message==='player-online'?409:400,{error:e.message});}
+   return;
+  }
   if(mode==='local'&&url.pathname==='/dev/session'&&req.method==='POST'){
    if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>1024){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}

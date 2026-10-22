@@ -124,3 +124,17 @@ body[data-screen=character] #existing-name{margin:0;font-weight:700;color:#fff0c
 /* 0.113.3 signed-in login screen: the continue and link-Google buttons sat flush; the "or" divider hung over nothing */
 #login-screen>button:not([hidden])+button:not([hidden]){margin-top:10px}
 #login-screen .divider:has(+#login-quick[hidden]){display:none}
+
+/* 0.114 delete a character: quiet link under the enter button, a confirm dialog that needs the name typed */
+.delete-link{align-self:center;color:#e08a7a!important;font-size:11px!important;margin-top:2px}
+.delete-link:hover:not(:disabled){color:#ff9e8c!important;text-decoration:underline}
+#delete-dialog{max-width:min(380px,92vw);padding:18px 20px;border-radius:14px;border:1px solid #c6a16488;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#f6edd6;font-family:var(--font-game)}
+#delete-dialog::backdrop{background:#050f0cb3}
+#delete-dialog h3{margin:0 0 8px;font-weight:700;color:#ffb3a3}
+#delete-dialog p{margin:0 0 12px;font-size:13px;line-height:1.55}
+#delete-dialog b{color:#fff0ce}
+#delete-dialog label{display:block;font-size:12px;margin-bottom:6px;color:#d9ccb0}
+#delete-dialog input{width:100%;min-height:40px;font-size:16px;border-radius:10px;padding:4px 10px;border:1px solid #c6a16466;background:#0e1d19;color:#fff0ce}
+.delete-actions{display:flex;gap:8px;margin-top:14px}.delete-actions button{flex:1;min-height:40px;border-radius:10px;font-weight:700}
+#delete-go{background:#a8392b;color:#fff0ce;border:1px solid #e07a66}#delete-go:disabled{opacity:.4;cursor:not-allowed}
+@media (orientation:landscape) and (max-height:500px){#delete-dialog{padding:10px 14px}#delete-dialog p{font-size:11px;margin-bottom:6px}#delete-dialog input{min-height:32px}.delete-actions{margin-top:8px}.delete-actions button{min-height:32px}.delete-link{font-size:9px!important;min-height:20px!important;padding:0!important}}

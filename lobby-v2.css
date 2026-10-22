@@ -106,3 +106,17 @@ body[data-screen=character] #existing-name{margin:0;font-weight:700;color:#fff0c
  body[data-screen=character] #existing-name{font-size:13px!important}body[data-screen=character] #existing-detail{font-size:9px!important}
  body[data-screen=character] #back-servers{font-size:9px!important;min-height:22px!important}
 }
+
+/* 0.113.2 owner: on phones the character card should be as big as its content, not stretched to fill the screen */
+@media (orientation:landscape) and (max-height:500px){
+ .mobile-viewport body[data-screen=character] .lobby-layout,body[data-screen=character] .lobby-layout{height:auto!important;max-height:var(--lobby-height,calc(100dvh - 46px))!important;display:flex!important;justify-content:center;align-items:flex-start}
+ body[data-screen=character] .lobby-card{height:auto!important;max-height:100%;width:auto!important;max-width:560px!important;overflow-y:auto!important}
+ body[data-screen=character] .character-body{flex:0 0 auto!important;grid-template-columns:118px 170px 200px!important;align-items:start}
+ body[data-screen=character] #character-slots{overflow:visible}
+ body[data-screen=character] button.character-slot{flex:0 0 auto!important;min-height:30px!important}
+ body[data-screen=character] .character-stage{padding:4px}
+ body[data-screen=character] .hero-art{width:110px!important}
+ body[data-screen=character] .character-details{align-self:start}
+ body[data-screen=character] #create-character,body[data-screen=character] #enter-world{margin-top:4px}
+ body[data-screen=character] #existing-character:not([hidden]){flex:0 0 auto}
+}

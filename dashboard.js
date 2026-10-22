@@ -4,6 +4,10 @@ import {CHANNELS} from './realm-state.js?v=21';
 const $=id=>document.getElementById(id);
 const URL_KEY='ayothaya-dashboard-url-v1';
 const COSTS_KEY='ayothaya-dashboard-costs-v1';
+const RATE_KEY='ayothaya-dashboard-usd-rate-v1';
+// USD -> THB: typing a dollar price fills the baht price with this rate (editable on the page, saved on this device)
+let usdRate=Number(localStorage.getItem(RATE_KEY))||34;
+const toThb=usd=>Math.round(Math.max(0,Number(usd)||0)*usdRate);
 const LEDGER_KEY='ayothaya-dashboard-ledger-v1';
 
 const MAP_NAMES={
@@ -263,6 +267,18 @@ const STATUS_LABELS={
  paused:'ยกเลิก / สำรอง'
 };
 
+function updateCostKpi(){
+ let monthlyTotalThb=0,monthlyTotalUsd=0;
+ for(const item of costs){
+  if(item.status==='active'){
+   if(item.cycle==='monthly'){monthlyTotalThb+=Number(item.thb||0);monthlyTotalUsd+=Number(item.usd||0);}
+   else if(item.cycle==='yearly'){monthlyTotalThb+=Number(item.thb||0)/12;monthlyTotalUsd+=Number(item.usd||0)/12;}
+  }
+ }
+ $('kpi-monthly-cost').textContent=`${formatMoney(Math.round(monthlyTotalThb))} / เดือน`;
+ $('kpi-cost-sub').textContent=`คิดเป็น ~$${monthlyTotalUsd.toFixed(2)}/เดือน (เรท 1$ = ${usdRate}฿) · ประหยัดงบด้วย Vercel + Firebase ฟรี`;
+}
+
 function renderCosts(){
  const tbody=$('cost-tbody');
  tbody.replaceChildren();
@@ -296,7 +312,8 @@ function renderCosts(){
   tr.querySelector('.cost-cat-cell').textContent=item.category;
   tr.querySelector('.cost-role-cell').textContent=item.role;
 
-  tr.querySelector('.inp-usd').onchange=e=>{item.usd=Math.max(0,Number(e.target.value||0));saveCosts(costs);renderCosts();};
+  tr.querySelector('.inp-usd').oninput=e=>{item.usd=Math.max(0,Number(e.target.value||0));item.thb=toThb(item.usd);tr.querySelector('.inp-thb').value=item.thb;saveCosts(costs);updateCostKpi();};
+  tr.querySelector('.inp-usd').onchange=e=>{item.usd=Math.max(0,Number(e.target.value||0));item.thb=toThb(item.usd);saveCosts(costs);renderCosts();};
   tr.querySelector('.inp-thb').onchange=e=>{item.thb=Math.max(0,Number(e.target.value||0));saveCosts(costs);renderCosts();};
   tr.querySelector('.sel-status').onchange=e=>{item.status=e.target.value;saveCosts(costs);renderCosts();};
   tr.querySelector('.btn-del').onclick=()=>{costs=costs.filter(c=>c.id!==item.id);saveCosts(costs);renderCosts();};
@@ -304,8 +321,28 @@ function renderCosts(){
  }
 
  $('kpi-monthly-cost').textContent=`${formatMoney(Math.round(monthlyTotalThb))} / เดือน`;
- $('kpi-cost-sub').textContent=`คิดเป็น ~$${monthlyTotalUsd.toFixed(2)}/เดือน · ประหยัดงบด้วย Vercel + Firebase ฟรี`;
+ updateCostKpi();
 }
+
+const rateEl=$('usd-rate');
+if(rateEl){
+ rateEl.value=usdRate;
+ rateEl.onchange=e=>{
+  const v=Number(e.target.value);
+  if(v>0){
+   usdRate=v;
+   localStorage.setItem(RATE_KEY,String(usdRate));
+   for(const c of costs){if(Number(c.usd)>0)c.thb=toThb(c.usd);}
+   saveCosts(costs);
+   renderCosts();
+   if(Number($('cost-usd').value)>0)$('cost-thb').value=toThb($('cost-usd').value);
+  }
+ };
+}
+
+$('cost-usd').oninput=e=>{
+ $('cost-thb').value=toThb(e.target.value);
+};
 
 $('cost-form').onsubmit=e=>{
  e.preventDefault();
@@ -316,7 +353,7 @@ $('cost-form').onsubmit=e=>{
   role:$('cost-role').value.trim(),
   cycle:$('cost-cycle').value,
   usd:Math.max(0,Number($('cost-usd').value||0)),
-  thb:Math.max(0,Number($('cost-thb').value||0)),
+  thb:Math.max(0,Number($('cost-thb').value||toThb($('cost-usd').value)||0)),
   status:$('cost-status').value
  });
  saveCosts(costs);

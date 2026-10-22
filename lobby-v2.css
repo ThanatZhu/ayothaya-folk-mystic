@@ -120,3 +120,7 @@ body[data-screen=character] #existing-name{margin:0;font-weight:700;color:#fff0c
  body[data-screen=character] #create-character,body[data-screen=character] #enter-world{margin-top:4px}
  body[data-screen=character] #existing-character:not([hidden]){flex:0 0 auto}
 }
+
+/* 0.113.3 signed-in login screen: the continue and link-Google buttons sat flush; the "or" divider hung over nothing */
+#login-screen>button:not([hidden])+button:not([hidden]){margin-top:10px}
+#login-screen .divider:has(+#login-quick[hidden]){display:none}

@@ -20,8 +20,9 @@ export function createLandscapeGuard({onChange=()=>{},allowPortrait=false}={}){
   const bottom=parseFloat(getComputedStyle(root).getPropertyValue('--safe-bottom'))||0;
   const available=Math.max(1,height-top-bottom-6);
   root.style.setProperty('--lobby-height',`${available}px`);
-  const scale=Math.min(1,available/Math.max(1,layout.offsetHeight,layout.scrollHeight));
-  root.style.setProperty('--lobby-scale',String(scale));
+  // Reflow / scroll inside the usable viewport. Scaling a whole lobby shrinks
+  // touch targets and makes canvas feet drift relative to CSS decoration.
+  root.style.setProperty('--lobby-scale','1');
   root.style.setProperty('--lobby-top',`${top}px`);
  }
  function scheduleFit(){if(!fitFrame)fitFrame=requestAnimationFrame(fitViewport);}

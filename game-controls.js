@@ -340,6 +340,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    // 0.74 hit flash: overbright tint (>1) burns the sprite near-white for ~0.12 s, then fades back.
    const burn=reduced?0:Math.max(0,1-(t-v.flashAt)/.14);v.sprite.material.color.set(m.root>0?'#9ddacc':'#fff1da');if(burn>0)v.sprite.material.color.multiplyScalar(1+2.6*burn);
    if(burn>0)v.sprite.scale.set(v.height*1.1*(1+.08*burn),v.height*(1-.06*burn),1);v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
+   v.label.toggleAttribute('data-full-health',m.hp>=m.maxHp);
    if(m.aggro){const side=(p.x-m.x)*Math.cos(controls.getAzimuthalAngle())-(p.z-m.z)*Math.sin(controls.getAzimuthalAngle());v.sprite.material.map.repeat.x=side<0?-1:1;v.sprite.material.map.offset.x=side<0?1:0;}
    project(v.label,m.x,mobFloor+v.height+.24,m.z);
   });

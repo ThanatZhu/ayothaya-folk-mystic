@@ -3,7 +3,7 @@ export function openHudPanel(panel){
  dispatchEvent(new CustomEvent('hud-panel-opening',{detail:panel.id}));
  for(const other of document.querySelectorAll('dialog[data-hud-panel][open]'))if(other!==panel)other.close();
  panel.dataset.hudPanel='true';
- if(!panel.open)panel.show();
+ if(!panel.open){if(document.body.classList.contains('mobile-play'))panel.showModal();else panel.show();}
 }
 addEventListener('keydown',e=>{
  if(e.code!=='Escape'||e.defaultPrevented)return;

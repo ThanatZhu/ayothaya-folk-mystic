@@ -1,0 +1,19 @@
+import {readFile} from 'node:fs/promises';
+export async function mobileLobbyFixture(){
+ let html=(await readFile(new URL('../play.html',import.meta.url),'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'');
+ return html.replace('</body>',`<script type="module">
+ import {createLandscapeGuard} from './mobile-layout.js';import {createMotionPreview} from './motion-preview.js';import {characterMotion} from './character-motion.js';import {atlasPath,CLASSES} from './classes.js';
+ document.body.dataset.screen='character';document.querySelectorAll('.screen').forEach(e=>e.hidden=e.id!=='character-screen');
+ document.querySelector('#journey-loading')?.remove();document.querySelector('#profession-options').hidden=true;document.querySelector('#character-form').hidden=true;document.querySelector('#existing-character').hidden=false;
+ document.querySelector('#character-title').textContent='เลือกตัวละคร';document.querySelector('#realm-caption').textContent='พรีวิว · ไม่มีการแก้บัญชีหรือเซฟ';document.querySelector('#progression-hint').textContent='ลองเลือกอาชีพและสลับท่า เท้าต้องตรงกับฐานทุกขนาดจอ';document.querySelector('#slot-count').textContent='8 อาชีพ';document.querySelector('#lobby-status').textContent='';
+ const host=document.querySelector('#hero-preview'),preview=createMotionPreview(host);let id='acolyte',gender='male',mode='idle',ready=0;
+ async function choose(next){id=next;const token=++ready,img=new Image();img.src=atlasPath(id);await img.decode();if(token!==ready)return;preview.setSource(img,gender,id);document.querySelector('#stage-name').textContent=CLASSES.find(c=>c.id===id).name;document.querySelector('#existing-name').textContent=document.querySelector('#stage-name').textContent+' · Lv. 38';document.querySelector('#existing-detail').textContent='ชาย · อโยธยา';document.querySelectorAll('.character-slot').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.role===id)));}
+ document.querySelector('#class-badge').textContent='ภาพตัวละครเดิม · ฐานร่วมกับเท้า';document.querySelector('#character-slots').replaceChildren();
+ for(const c of CLASSES){const b=document.createElement('button');b.type='button';b.className='character-slot';b.dataset.role=c.id;b.innerHTML='<span class="slot-portrait" style="background-image:url('+atlasPath(c.id)+')"></span><strong>'+c.name+'</strong><small>Lv. 38</small>';b.onclick=()=>choose(c.id);document.querySelector('#character-slots').append(b);}
+ document.querySelectorAll('[data-pose]').forEach(b=>b.onclick=()=>{mode=b.dataset.pose==='cycle'?'idle':b.dataset.pose;document.querySelectorAll('[data-pose]').forEach(e=>e.setAttribute('aria-pressed',String(e===b)));});
+ document.querySelector('#enter-world').onclick=()=>location.href='/mobile-fixture.html';document.querySelector('#delete-character').hidden=true;document.querySelector('#back-servers').onclick=()=>location.href='/mobile-play-lab.html';
+ createLandscapeGuard({allowPortrait:true});await choose(id);document.body.dataset.review='ready';
+ const frame=t=>{preview.draw(characterMotion({time:mode==='attack'?(t/1000)%.95:t/1000,mode,classId:id}));requestAnimationFrame(frame);};requestAnimationFrame(frame);
+ window.__mobileLobby={choose,setMode(value){mode=value;}};
+ </script></body>`);
+}

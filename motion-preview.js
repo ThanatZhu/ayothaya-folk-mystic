@@ -1,4 +1,4 @@
-import {drawCharacterFrame} from './character-size.js?v=41.2';
+import {drawCharacterFrame,FRAME_FOOT,FRAME_SIZE,LOGICAL_SIZE} from './character-size.js?v=41.2';
 import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {FRAME_COUNT} from './animation-frames.js?v=37';
 export function createMotionPreview(host){
@@ -11,8 +11,14 @@ export function createMotionPreview(host){
  }
  function draw(p){
   ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;
+  // The pedestal and soles share one coordinate system at every CSS size.
+  const floor=274,size=270,pad=(FRAME_SIZE-LOGICAL_SIZE)/2,y=floor-(FRAME_FOOT-pad)*size/LOGICAL_SIZE;
+  const glow=ctx.createRadialGradient(160,floor+3,0,160,floor+3,105);glow.addColorStop(0,'#d5b87555');glow.addColorStop(1,'#9abb7600');
+  ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(160,floor+3,106,19,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#d1b26966';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='#08181077';ctx.beginPath();ctx.ellipse(160,floor+1,42,6,0,0,Math.PI*2);ctx.fill();
   const source=frames?.[Math.max(0,Math.min(FRAME_COUNT-1,Math.round(p.artFrame??0)))]??frames?.[0]??cell;
-  if(frames)drawCharacterFrame(ctx,source,20,8-(p.y??0)*130,280);else ctx.drawImage(source,20,8-(p.y??0)*130,280,280);
+  if(frames)drawCharacterFrame(ctx,source,25,y-(p.y??0)*130,size);else ctx.drawImage(source,25,floor-size-(p.y??0)*130,size,size);
  }
  return {setSource,draw};
 }

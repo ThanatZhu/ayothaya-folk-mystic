@@ -2979,3 +2979,12 @@ Object.assign(globalThis.I18N_EN, {
  'เลือกช่องปลายทางเพื่อสลับสกิล':'Choose a destination slot to swap skills',
  'ยกเลิกการย้ายแล้ว':'Move canceled'
 });
+Object.assign(globalThis.I18N_EN,{
+ "ปิดเมนูและกลับเข้าเกม":"Close menu and return to game",
+ "ดูภารกิจ":"View quest",
+ "รายละเอียดภารกิจ:":"Quest details:",
+ "สกิลชุด {0} จาก {1}":"Skill set {0} of {1}",
+ "สกิลทั้งหมด":"All skills",
+ "ชุด {0}/{1} ⇄":"Set {0}/{1} ⇄",
+ "สลับชุดสกิล ชุด {0} จาก {1}":"Switch skill set, set {0} of {1}"
+});

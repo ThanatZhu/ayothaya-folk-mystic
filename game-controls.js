@@ -1,4 +1,5 @@
 import {itemDef} from './items.js?v=107';
+import {targetHudState,paintTargetHud} from './target-hud.js';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=101';
@@ -62,7 +63,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const makeMobView=m=>{
   const h=(MONSTER_TYPES[m.type].height??1.45)*(m.leader?1.35:1),frames=monsterArt[m.type]?.map(t=>t.clone()),tex=frames?.[0]??monsterTextures[m.type%4].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
   s.userData.monsterId=m.id;
-  const label=document.createElement('button');label.className='mob-label'+(m.leader?' leader':'');label.type='button';label.setAttribute('aria-label','เลือกเป้า '+MONSTER_TYPES[m.type].name+' '+(m.id+1));
+  const label=document.createElement('button');label.className='mob-label'+(m.leader?' leader':'')+(MONSTER_TYPES[m.type].boss?' boss':'');label.type='button';label.setAttribute('aria-label','เลือกเป้า '+MONSTER_TYPES[m.type].name+' '+(m.id+1));
   const text=document.createElement('span');text.textContent=(m.leader?'★ หัวหน้า':'')+MONSTER_TYPES[m.type].name;label.append(text);
   const bar=document.createElement('i'),fill=document.createElement('b');bar.append(fill);label.append(bar);$('world-labels').append(label);
   label.addEventListener('click',()=>world.select(m.id));
@@ -340,7 +341,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    const burn=reduced?0:Math.max(0,1-(t-v.flashAt)/.14);v.sprite.material.color.set(m.root>0?'#9ddacc':'#fff1da');if(burn>0)v.sprite.material.color.multiplyScalar(1+2.6*burn);
    if(burn>0)v.sprite.scale.set(v.height*1.1*(1+.08*burn),v.height*(1-.06*burn),1);v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
    if(m.aggro){const side=(p.x-m.x)*Math.cos(controls.getAzimuthalAngle())-(p.z-m.z)*Math.sin(controls.getAzimuthalAngle());v.sprite.material.map.repeat.x=side<0?-1:1;v.sprite.material.map.offset.x=side<0?1:0;}
-   project(v.label,m.x,v.height+.08,m.z);
+   project(v.label,m.x,mobFloor+v.height+.24,m.z);
   });
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}
   skillEffects.update(dt,camera);
@@ -358,9 +359,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
     track.setAttribute('aria-valuenow',String(Math.round(stats.percent)));track.setAttribute('aria-valuetext',label+' Level '+stats.level+', '+(stats.maxed?'สูงสุด':stats.current+' จาก '+stats.required+' EXP'));
    }
    $('auto-attack').classList.toggle('active',world.auto);$('auto-attack').setAttribute('aria-pressed',String(world.auto));$('auto-state').textContent=world.auto?'เปิด':'ปิด';
-   $('target-name').textContent=target?.pvp?'⚔ '+target.name+(target.id.startsWith('duel:')?' · '+world.duelLeft+' วิ':target.guild?' · '+target.guild:''):target?MONSTER_TYPES[target.type].name:world.safe?'เขตปลอดภัย':'ยังไม่เลือกเป้าหมาย';$('target-hp').textContent=target?`${target.hp} / ${target.maxHp}`:world.safe?'พักฟื้น · พูดคุย · เดินทาง':'คลิก / แตะมอนสเตอร์';{const wv=world.war,line=$('war-line'),mm=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); // 0.95 guild war status under the target
+   {const wv=world.war,line=$('war-line'),mm=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); // 0.95 guild war status under the target
     line.hidden=!wv?.active;if(wv?.active)line.textContent='⚔ กิลด์วอร์ '+mm(wv.left)+(wv.stone?' · ศิลา '+wv.stone.hp.toLocaleString('th-TH')+'/'+wv.stone.maxHp.toLocaleString('th-TH'):'')+' · ผู้ยึด: '+(wv.holder??'ยังไม่มี');}
-   $('target-fill').style.width=target?`${target.hp/target.maxHp*100}%`:'0%';
+   paintTargetHud(document,targetHudState({target:world.target,mobs:world.mobs,player:p,types:MONSTER_TYPES}));
    if(!network)world.skillPoints=availablePoints(localSkills,progress());
    if(network){const j=JSON.stringify(world.autoConfig);if(j!==autoSent&&network.command('autoConfig',world.autoConfig))autoSent=j;}
    skillButtons.forEach((b,i)=>{const cd=world.cooldowns[hotbar[i]],lv=world.skillLevels[hotbar[i]]??1;const s=world.skills[hotbar[i]];b.hidden=isMaster(i)&&!lv;b.querySelector('.skill-level').textContent=lv?'Lv'+lv:'—';b.classList.toggle('locked',!lv);b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<s.cost);b.style.setProperty('--cooldown',`${cd/s.cd*100}%`);});

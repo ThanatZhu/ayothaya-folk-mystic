@@ -24,8 +24,8 @@ export function createLifeUI({game,account,camera}){
  // Ailment row under the player frame.
  const row=document.createElement('div');row.id='ailment-row';row.setAttribute('aria-live','polite');document.body.append(row);let rowSig='';
  function drawAilments(){
-  const st=world.status??{},sig=Object.entries(st).map(([k,t])=>k+Math.ceil(t)).join();if(sig===rowSig)return;rowSig=sig;
-  row.innerHTML=Object.entries(st).filter(([k])=>AILMENTS[k]).map(([k,t])=>`<span title="${AILMENTS[k].name} · ${AILMENTS[k].text}">${icon(AILMENTS[k].icon)}<b>${Math.ceil(t)}</b></span>`).join('');
+  const st=world.status??{},shield=Math.ceil(world.player.shield??0),sig=Object.entries(st).map(([k,t])=>k+Math.ceil(t)).join()+'shield'+shield;if(sig===rowSig)return;rowSig=sig;
+  row.innerHTML=(shield>0?`<span class="buff" title="เกราะอาคม · ลดความเสียหาย · ${shield} วินาที" aria-label="เกราะอาคม ${shield} วินาที">◇<b>${shield}</b></span>`:'')+Object.entries(st).filter(([k,t])=>AILMENTS[k]&&t>0).map(([k,t])=>`<span title="${AILMENTS[k].name} · ${AILMENTS[k].text}">${icon(AILMENTS[k].icon)}<b>${Math.ceil(t)}</b></span>`).join('');
  }
 
  // Emote picker beside the quick slots; own bubble floats over the hero.

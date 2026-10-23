@@ -12,14 +12,19 @@ export function createHud63(){
  const $=id=>document.getElementById(id),body=document.body;
  const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=112.4';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
+ const minimalStyle=document.createElement('link');minimalStyle.rel='stylesheet';minimalStyle.href='./minimal-combat-hud.css?v=3';document.head.append(minimalStyle);
+ const mobileStyle=document.createElement('link');mobileStyle.rel='stylesheet';mobileStyle.href='./mobile-hud-stability.css?v=4';document.head.append(mobileStyle);
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
- deco(document.querySelector('.player-panel'),'f-profile');
+ const profile=document.querySelector('.player-panel');deco(profile,'f-profile');
+ if(profile)new ResizeObserver(()=>document.documentElement.style.setProperty('--profile-height',profile.getBoundingClientRect().height+'px')).observe(profile);
+ if($('ailment-row'))new ResizeObserver(()=>document.documentElement.style.setProperty('--status-height',$('ailment-row').getBoundingClientRect().height+'px')).observe($('ailment-row'));
  deco(document.querySelector('.mini-panel'),'f-minimap');
  // The minimap plaque shows the area name only; the channel is already in the coordinates line.
  const title=document.querySelector('.field-map-title');if(title)title.textContent=title.textContent.split(' · ')[0];
  // Right column under the minimap: quest tracker, then the timed-event chips, so nothing floats over the field.
  const right=document.createElement('div');right.id='hud-right';body.append(right);
  const quest=$('quest-tracker'),chips=$('hud-chips');if(quest)right.append(quest);if(chips)right.append(chips);
+ if($('war-line'))right.append($('war-line')); // war status stays available without a selected enemy
  if(quest){
   const fold=document.createElement('button');fold.type='button';fold.id='quest-fold';fold.setAttribute('aria-label','ย่อหรือขยายรายการภารกิจ');
   const compact=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)').matches,key='ayothaya-quest-fold68:'+(compact?'phone':'desktop'),saved=store(key);
@@ -68,5 +73,12 @@ export function createHud63(){
   // iOS leaves the page scrolled/zoomed after the keyboard closes: restore the original view.
   setTimeout(()=>{window.scrollTo(0,0);document.scrollingElement&&(document.scrollingElement.scrollTop=0);dispatchEvent(new Event('resize'));},80);});
  vv?.addEventListener('resize',place);vv?.addEventListener('scroll',place);
+ // Keep secondary information reachable in the mobile menu instead of competing
+ // with the quest, joystick and skill wheel. Move the live nodes, preserving handlers.
+ const mobile=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)'),channel=$('channel-button');
+ const channelRow=document.createElement('div');channelRow.id='hud-channel-row';if(channel)channelRow.append(channel);
+ const arrange=()=>{if(!nav)return;if(mobile.matches){if(chips)nav.append(chips);if(channel)nav.prepend(channelRow);}
+  else{if(chips)right.append(chips);if(channel)right.prepend(channelRow);}};
+ mobile.addEventListener('change',arrange);arrange();
  return {};
 }

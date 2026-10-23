@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>ตำราสกิลและ Master · อโยธยา</title><link rel="icon" href="data:,"><link rel="stylesheet" href="typography.css"><link rel="stylesheet" href="role-skill-lab.css"></head>
+<body><header><a href="./skill-lab.html">← กระบวนท่าเดิม</a><span>อโยธยา · ตำราสกิลฉบับทดลอง</span><b>7 อาชีพ / 14 Master</b></header>
+<main><section class="arena-panel"><div class="intro"><small>ROLE SKILLS · MASTER PATHS</small><h1 id="role-title">กำลังเปิดลานฝึก</h1><p id="role-description"></p></div>
+<div class="stage-wrap"><div id="stage" aria-label="ลานทดลองสกิลสามมิติ"></div><div id="labels"></div><div id="cast-progress" hidden><span></span><i></i></div><div class="stage-caption">ลานทดลอง · ไม่ใช้บัญชีหรือข้อมูลเซฟจริง</div></div>
+<div class="trial-controls"><button id="stage-cast" type="button">ทดลองท่าที่เลือก</button><button id="stage-next" type="button">สกิลถัดไป →</button><span id="stage-skill-name"></span></div>
+<div class="scenario-row" role="group" aria-label="สถานการณ์"><button data-scenario="idle">หุ่นฝึก</button><button data-scenario="swarm">มอนรุมเพื่อน</button><button data-scenario="boss">บอสร่ายท่า</button><button data-scenario="poison">เพื่อนติดพิษ</button><button data-scenario="down">เพื่อนล้ม</button><button data-scenario="setup">เตรียมคอมโบ / ไก่</button></div>
+<div class="options"><label><input id="battle" type="checkbox"> ให้มอนโจมตีกลับ</label><label><input id="shake" type="checkbox" checked> กล้องสั่นตอนกระแทก</label><label><input id="reduced" type="checkbox"> ลดการเคลื่อนไหว</label><label>เอฟเฟกต์ <select id="quality"><option value="high">เต็ม</option><option value="low">เบา</option></select></label><label>ความเร็ว <select id="speed"><option value="1">ปกติ</option><option value="0.5">ครึ่งหนึ่ง</option></select></label></div>
+<div id="target-buttons" role="group" aria-label="เลือกเป้าหมาย"></div><p id="status" role="status">กำลังโหลดภาพตัวละคร…</p><ol id="combat-log" aria-label="เหตุการณ์การต่อสู้"></ol>
+</section>
+<aside><div class="selectors"><label>อาชีพ<select id="profession"></select></label><label>ขั้นอาชีพ<select id="branch"></select></label><label>ตัวละคร<select id="gender"><option value="male">ชาย / พระ</option><option value="female">หญิง / แม่ชี</option></select></label></div><p id="branch-description"></p><div class="resource"><span id="hp"></span><span id="mp"></span><span id="combo"></span></div>
+<h2>สกิลหลัก <small>6 ท่า</small></h2><div id="base-skills" class="skill-grid"></div>
+<h2 id="master-heading" hidden>สกิล Master <small>3 ท่าเฉพาะแขนง</small></h2><div id="master-skills" class="skill-grid master"></div>
+<article id="skill-info"><div class="skill-heading"><i id="detail-art"></i><div><small id="skill-tier"></small><h3 id="skill-title"></h3></div></div><p id="skill-tip"></p><p id="skill-values"></p><button id="cast-selected" type="button">ใช้สกิล</button><p id="skill-condition"></p></article>
+<div id="passives"></div><p class="note">เลือกสกิล → เลือกเป้าบนตัวละครหรือปุ่มชื่อ → กดใช้สกิล<br>ปุ่มเลข 1–9 ใช้สกิลตามลำดับ · รีเซ็ตสถานการณ์เพื่อคืน MP และคูลดาวน์</p>
+<details><summary>แนวทาง Master ทั้ง 14 แขนง</summary><div id="master-index"></div></details>
+<p class="note">ตัวเลขและสมดุลยังเป็นร่าง ระบบจริงยังใช้สกิลชุดเดิม ภาพท่าตัวละครใช้ชุดที่มีอยู่ พร้อมเอฟเฟกต์ใหม่ในลานฝึกนี้ ก่อนเชื่อมเข้าเซิร์ฟเวอร์จะต้องทำเป้าหมายเพื่อน สถานะล้ม และการย้ายแต้มสกิลเดิมให้ครบ</p></aside></main>
+<link rel="stylesheet" href="role-skill-labels.css"><script type="module" src="role-skill-lab.js"></script></body></html>

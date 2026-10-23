@@ -13,8 +13,9 @@ try{
   const inside=async selector=>{const r=await page.locator(selector).boundingBox();assert.ok(r&&r.width>0&&r.height>0,selector+' visible');assert.ok(r.x>=-1&&r.y>=-1&&r.x+r.width<=width+1&&r.y+r.height<=height+1,selector+' within viewport '+JSON.stringify(r));return r;};
   const profile=await inside('.player-panel'),map=await inside('.mini-panel'),toggle=await inside('#menu-toggle');
   assert.ok(profile.height<=120,'compact profile including status icons');
-  assert.ok(profile.x+profile.width<=toggle.x||profile.y+profile.height<=toggle.y,'profile/menu overlap');
-  assert.ok(toggle.x+toggle.width<=map.x||toggle.y+toggle.height<=map.y,'menu/map overlap');
+  const separate=(a,b)=>a.x+a.width<=b.x||b.x+b.width<=a.x||a.y+a.height<=b.y||b.y+b.height<=a.y;
+  assert.ok(separate(profile,toggle),'profile/menu overlap');
+  assert.ok(separate(toggle,map),'menu/map overlap');
   await inside('#mobile-quest-summary');await inside('#online-dock');
   assert.equal(await page.locator('.target-panel').isVisible(),false);
   assert.equal(await page.locator('.f-profile').count(),1);
@@ -34,7 +35,7 @@ try{
   assert.equal(await page.locator('#game-menu').isVisible(),false);await inside('#bag-window');assert.equal(await page.locator('#bag-window').evaluate(e=>getComputedStyle(e).zoom),'1');
   await page.locator('#bag-window button').click();await page.locator('#dock-toggle').click();await inside('#online-dock');await page.locator('#online-text').focus();
   assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('chat-typing')),true);await inside('#online-dock');
-  await page.locator('#online-text').blur();await page.waitForTimeout(100);assert.equal(await page.locator('#joystick').isVisible(),true);
+  await page.locator('#online-text').blur();await page.waitForTimeout(100);assert.equal(await page.locator('#joystick').isVisible(),false);
   await page.locator('#dock-toggle').click();await page.screenshot({path:fileURLToPath(new URL(`${width}x${height}.png`,output))});
   assert.deepEqual(errors,[]);results.push({width,height,passed:true});await page.close();
  }

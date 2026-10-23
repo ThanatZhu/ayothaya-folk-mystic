@@ -8,7 +8,8 @@ const fixture=async()=>{
  let html=(await readFile(path.join(root,'game.html'),'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'');
  const online=await readFile(path.join(root,'multiplayer-ui.js'),'utf8');
  const dock=online.match(/dock\.innerHTML='([^\n]*)';/)[1];
- const extra=`<button id="online-button"><span id="online-label">ออนไลน์ · 1 คน</span></button><button id="channel-button">CH 1</button>
+ const channelBody=online.match(/chPop\.innerHTML='([^\n]*)';/)[1],channelButton=online.match(/chButton\.innerHTML='([^\n]*)';/)[1];
+ const extra=`<button id="online-button"><span id="online-label">ออนไลน์ · 1 คน</span></button><button id="channel-button">${channelButton}</button><div id="channel-popover" class="mp-channel-popover" hidden>${channelBody}</div>
  <section id="online-dock" class="collapsed">${dock}</section>
  <section id="quest-tracker"><strong id="quest-title">เพื่อนร่วมทาง</strong><span id="quest-hint">คุยกับลุงเรืองเพื่อเริ่มการผจญภัย</span><button id="quest-go">เดินไป</button></section>
  <div id="hud-chips"><button>☀ กลางวัน</button><button>กิจกรรม</button></div>
@@ -41,6 +42,8 @@ const fixture=async()=>{
  document.querySelector('#review-mob').onclick=()=>window.__hudReviewSelect('normal');
  document.querySelector('#menu-bag').onclick=()=>document.querySelector('#bag-window').show();
  const dock=document.querySelector('#online-dock');document.querySelector('#dock-toggle').onclick=()=>dock.classList.toggle('collapsed');
+ const channel=document.querySelector('#channel-popover');document.querySelector('#channel-button').onclick=()=>channel.hidden=!channel.hidden;document.querySelector('#channel-pop-close').onclick=()=>channel.hidden=true;
+ for(let i=1;i<=5;i++){const b=document.createElement('button');b.type='button';b.className='mp-channel';b.textContent='CH '+i;b.onclick=()=>{document.querySelector('#channel-btn-mob').textContent='CH '+i;document.querySelector('#channel-btn-label').textContent='แนล '+i;channel.hidden=true;};document.querySelector('#channel-pop-list').append(b);}
  document.querySelector('#online-chat').onsubmit=e=>e.preventDefault();
  document.querySelector('#online-messages').innerHTML='<p>ลุงเรือง: ยินดีต้อนรับสู่อโยธยา</p>';
  await Promise.all([...document.querySelectorAll('link[rel=stylesheet]')].map(link=>link.sheet?Promise.resolve():new Promise(resolve=>{link.addEventListener('load',resolve,{once:true});link.addEventListener('error',resolve,{once:true});})));

@@ -12,14 +12,23 @@ Neither fixture signs in, changes a save, spends an item, or contacts the realm.
   original order. The existing AUTO settings still reorder the saved hotbar.
 - Preserve the player's gold frame. Keep the top corners compact, buffs under
   vitals, and move the online/player chip into the menu without replacing it.
-- Show the current quest hint in a one-line button; expand for details, the
+- Show a 44px quest icon instead of a text strip; expand for details, the
   navigation action, and the existing navigation-arrow toggle.
 - Menus have a backdrop, utility dialogs are modal on touch screens, and visible
   panels clear movement input and hide combat controls. Desktop panels retain
   their existing behavior. Keyboard, camera and world taps cannot pass through
   the backdrop.
 - Minimap, joystick, potions, AUTO settings and attack have reserved areas.
-  Respect browser safe areas; chat remains a small entry button until expanded.
+  Respect browser safe areas; chat is a long central strip with the last message.
+  A generated jade-and-gold PNG button expands chat and rotates to collapse it.
+  The source prompt is `assets/ui-mobile/chat-drawer-prompt.txt`; the original
+  generated alpha is preserved in `assets/ui-mobile/chat-drawer-v1.png`.
+- Buffs wrap to additional rows without scrolling or clipping. Dense groups use
+  smaller badges, with an automated 36-status stress case on every tested size.
+- Place CH beside the profile name, open its chooser below the profile, and
+  expand the mobile menu toward the profile with wrapping on narrow screens.
+- The skill set switch is an opposing circular-arrow icon in the sixth grid
+  position. It retains a spoken set label but has no visible text.
 - Draw the lobby pedestal and shadow inside the character canvas using the
   normalized sole coordinate. Remove the separate CSS pedestal and floating CSS
   animation. Reflow/scroll mobile lobby content instead of scaling the whole UI.

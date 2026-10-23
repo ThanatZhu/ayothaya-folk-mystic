@@ -6,8 +6,8 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const THAI=/[\u0E00-\u0E7F]/;
-// Dev labs, galleries, admin and the Discord bot are not player-facing.
-const SKIP=/^(.*lab|.*gallery|character-size-review|loading-preview|i18n-en)\b|discord/;
+// Dev labs, art review galleries and the Discord bot are not player-facing.
+const SKIP=/^(.*lab|.*gallery|skill-(?:polish|library)-art|character-size-review|loading-preview|i18n-en)\b|discord/;
 
 export function sourceFiles(){
  const files=readdirSync(root).filter(f=>/\.(js|html)$/.test(f)&&!SKIP.test(f));

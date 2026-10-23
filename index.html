@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="th"><head><script src="i18n-en.js?v=110"></script><script src="i18n.js?v=100"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f2420">
+<html lang="th"><head><script src="i18n-en.js?v=editorial117"></script><script src="i18n.js?v=100"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f2420">
 <title>อโยธยา · Ayothaya Folk Mystic — MMORPG แฟนตาซีไทยบนเว็บ</title>
 <meta name="description" content="ผจญภัยในอยุธยาแฟนตาซีบนเว็บ เล่นฟรี ไม่ต้องติดตั้ง · 7 อาชีพ ตีบวก การ์ด สัตว์เลี้ยง กิลด์วอร์ยึดป้อมทุกเสาร์ และทัวร์นาเมนต์ประลองรายสัปดาห์">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Ayothaya Folk Mystic"><meta property="og:title" content="อโยธยา · Ayothaya Folk Mystic">
@@ -7,68 +7,82 @@
 <meta property="og:image" content="https://ayothaya-folk-mystic.vercel.app/assets/landing98/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:url" content="https://ayothaya-folk-mystic.vercel.app/"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="assets/brand69/ayothaya-emblem.png"><link rel="apple-touch-icon" href="assets/brand69/ayothaya-emblem.png"><link rel="manifest" href="manifest.webmanifest">
-<link rel="preload" href="assets/landing98/promo-poster.webp" as="image" type="image/webp" fetchpriority="high">
-<link rel="stylesheet" href="typography.css?v=10"><link rel="stylesheet" href="landing.css?v=105.1"></head>
-<body>
-<header class="nav"><a class="mark" href="./"><img src="assets/brand69/ayothaya-emblem.png" width="40" height="40" alt=""><span>AYOTHAYA <b>FOLK MYSTIC</b></span></a>
- <nav aria-label="หัวข้อ"><a href="#features">ระบบเด่น</a><a href="#classes">อาชีพ</a><a href="#world">แผนที่</a><a href="#events">กิจกรรม</a><a href="#news">อัปเดต</a><a data-discord href="#" target="_blank" rel="noopener" hidden>Discord</a><button type="button" class="lang-toggle" data-lang-toggle>TH / EN</button></nav>
- <a class="btn small gold" href="play.html">เข้าเกม</a></header>
+<link rel="preload" href="assets/landing98/hero.webp" as="image" type="image/webp" fetchpriority="high">
+<link rel="stylesheet" href="typography.css?v=10"><link rel="stylesheet" href="landing.css?v=editorial117"></head>
+<body id="top">
+<a class="skip-link" href="#main">ข้ามไปเนื้อหา</a>
+<header class="nav">
+ <a class="mark" href="./" aria-label="อโยธยา หน้าแรก"><img src="assets/brand69/ayothaya-emblem.png" width="40" height="40" alt=""><span>AYOTHAYA <b>FOLK MYSTIC</b></span></a>
+ <nav id="site-nav" aria-label="หัวข้อ"><a href="#features">ระบบเด่น</a><a href="#classes">อาชีพ</a><a href="#world">แผนที่</a><a href="#events">กิจกรรม</a><a href="#news">อัปเดต</a><a data-discord href="#" target="_blank" rel="noopener" hidden>Discord <span aria-hidden="true">↗</span></a></nav>
+ <div class="nav-actions"><button type="button" class="lang-toggle" data-lang-toggle>TH / EN</button><a class="btn small gold" href="play.html">เข้าเกม <span aria-hidden="true">↗</span></a><button class="nav-toggle" id="nav-toggle" type="button" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button></div>
+</header>
 
-<main>
-<section class="hero">
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+ <img class="hero-art" src="assets/landing98/hero.webp" width="1600" height="900" alt="" fetchpriority="high">
+ <div class="hero-rail" aria-hidden="true"><span>AYOTHAYA / A LIVING FOLK TALE</span><i></i></div>
  <div class="hero-copy">
-  <span class="chip">MMORPG แฟนตาซีไทยบนเว็บ · เล่นฟรี · ไม่ต้องติดตั้ง</span>
-  <h1><img src="assets/brand69/ayothaya-logo.png" width="1536" height="1024" alt="อโยธยา · Ayothaya Folk Mystic"></h1>
-  <p class="lead">ผจญภัยในอยุธยาแห่งความเชื่อ ตีบวกอาวุธ ล่าบอส ตั้งกิลด์ยึดป้อมโรงสี แล้วประลองชิงอันดับทุกสัปดาห์ — เปิดเบราว์เซอร์แล้วเล่นได้ทันที ทั้งคอมและมือถือ</p>
-  <div class="actions"><a class="btn gold" href="play.html">เล่นเลย</a><a class="btn" id="discord" data-discord href="#" target="_blank" rel="noopener" hidden>เข้าร่วม Discord</a><a class="btn" href="#features">ดูระบบในเกม</a></div>
-  <p class="status" id="status"><i></i><span>กำลังเช็กเซิร์ฟเวอร์…</span></p>
+  <p class="eyebrow"><span class="tiny-diamond" aria-hidden="true"></span> โลกแห่งความเชื่อ กำลังรอคุณอยู่</p>
+  <h1 id="hero-title"><span>ทุกตำนาน</span><em>เริ่มจากคุณ</em></h1>
+  <p class="lead">ออกผจญภัยในอยุธยาแห่งมนตรา พบเพื่อนร่วมทาง<br class="desktop-break"> ล่าบอสในตำนาน และเขียนเรื่องราวในแบบของคุณ</p>
+  <div class="actions hero-actions"><a class="btn gold" href="play.html">เริ่มการผจญภัย <span aria-hidden="true">↗</span></a><button class="film-link" type="button" id="open-film"><span class="play-disc" aria-hidden="true">▶</span><span>ชมเกมเพลย์<small>ภาพจากเกมจริง</small></span></button></div>
+  <p class="status" id="status" role="status"><i aria-hidden="true"></i><span>กำลังเช็กเซิร์ฟเวอร์…</span></p>
  </div>
- <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="assets/landing98/promo-poster.webp" aria-hidden="true"><source src="assets/landing98/promo.mp4?v=105.1" type="video/mp4"></video><button type="button" class="hero-sound" id="hero-sound" aria-pressed="false"><i aria-hidden="true">🔇</i><span>เปิดเสียง</span></button>
+ <div class="hero-caption"><span class="caption-index">01 / AYOTHAYA</span><p>ริมสายน้ำแห่งตำนาน</p><small>โลกแฟนตาซีจากกลิ่นอายพื้นบ้านไทย</small></div>
+ <div class="hero-bottom"><p>เล่นฟรีบนเบราว์เซอร์ <span>คอมพิวเตอร์และมือถือ · ไม่ต้องติดตั้ง</span></p><a href="#features">เปิดบันทึกการเดินทาง <span aria-hidden="true">↓</span></a></div>
 </section>
 
-<section id="features" class="block"><h2>ระบบเด่น</h2><p class="sub">ทุกอย่างหาได้จากการเล่น ของดรอปจากมอนกลายเป็นยา อาหาร และหินตีบวก หมุนเวียนในตลาดของผู้เล่น</p>
+<div class="world-intro"><p>โลกเก่าแก่ <em>การผจญภัยครั้งใหม่</em></p><div><span><b>07</b> อาชีพหลัก</span><span><b>14</b> สาย Master</span><span><b>01</b> โลกที่เราเขียนร่วมกัน</span></div></div>
+
+<section id="features" class="block" aria-labelledby="features-title">
+ <div class="section-heading"><div><p class="eyebrow">01 — THE ADVENTURE</p><h2 id="features-title">มากกว่าการเก็บเลเวล<br><em>คือเรื่องราวระหว่างทาง</em></h2></div><p class="sub">ของดรอปทุกชิ้นมีเรื่องราวต่อ ตีบวกอาวุธคู่ใจ เลี้ยงเพื่อนตัวเล็ก หรือรวมกิลด์ไปสร้างชื่อด้วยกัน</p></div>
  <ul class="features">
-  <li><b>⚔️</b><h3>7 อาชีพ · สาย Master</h3><p>เริ่มจากผู้ฝึกตน เลือกอาชีพที่ลานครู ผ่านบททดสอบ แล้วไต่สู่ Master</p></li>
-  <li><b>🔨</b><h3>ตีบวก +10</h3><p>+1 ถึง +4 ไม่มีวันแตก ตั้งแต่ +5 ลุ้นสุดตัว มีเหล็กไหลและยันต์กันแตกช่วย</p></li>
-  <li><b>🃏</b><h3>การ์ดมอนสเตอร์</h3><p>ทุกมอนมีการ์ดของตัวเอง ใส่ในอุปกรณ์เพิ่มพลังแบบถาวร</p></li>
-  <li><b>⚒️</b><h3>คราฟต์</h3><p>ยา อาหารเพิ่มสเตตัส 10 นาที และหินตีบวก จากของดรอป</p></li>
-  <li><b>🐾</b><h3>สัตว์เลี้ยง</h3><p>ล่อจับมอนตัวเล็ก ฟักไข่ เลี้ยงจนสนิทแล้วได้สเตตัสติดตัว</p></li>
-  <li><b>🏯</b><h3>กิลด์วอร์ยึดป้อม</h3><p>ทุกเสาร์ 20:00 ทำลายศิลาราชสีห์ ครองป้อมโรงสีทั้งสัปดาห์</p></li>
-  <li><b>🏆</b><h3>ทัวร์นาเมนต์ประลอง</h3><p>ท้าดวลสะสมแต้ม อันดับ 1–3 ประจำสัปดาห์รับรางวัล</p></li>
-  <li><b>🌦️</b><h3>โลกมีชีวิต</h3><p>ฝน หมอก พายุ เปลี่ยนทุก 15 นาที ฝูงคลั่ง EXP ×2 และบอส MVP</p></li>
- </ul></section>
+  <li><span class="entry-number">01</span><h3>7 อาชีพ · สาย Master</h3><p>เริ่มจากผู้ฝึกตน เลือกเส้นทางที่ลานครู แล้วฝึกวิชาจนพบสไตล์การต่อสู้ของตัวเอง</p></li>
+  <li><span class="entry-number">02</span><h3>อาวุธที่เติบโตไปกับคุณ</h3><p>ตีบวกสูงสุด +10 ใส่การ์ดมอนสเตอร์ และคราฟต์ของจากวัตถุดิบที่ออกไปหามาเอง</p></li>
+  <li><span class="entry-number">03</span><h3>เพื่อนร่วมทางตัวเล็ก</h3><p>ล่อจับ ฟักไข่ และเลี้ยงสัตว์เลี้ยงจนสนิท พร้อมพลังติดตัวที่ช่วยในการผจญภัย</p></li>
+  <li><span class="entry-number">04</span><h3>เรื่องใหญ่ที่ต้องไปด้วยกัน</h3><p>รวมกิลด์ยึดป้อม ล่าบอส MVP หรือประลองฝีมือเพื่อชิงอันดับประจำสัปดาห์</p></li>
+ </ul>
+</section>
 
-<section id="classes" class="block"><h2>อาชีพ</h2><p class="sub">ทุกอาชีพเลือกได้ทั้งชายและหญิง แตะการ์ดเพื่อสลับ</p>
- <ul class="classes" id="class-list"></ul></section>
+<section id="classes" class="block class-section" aria-labelledby="classes-title">
+ <div class="section-heading"><div><p class="eyebrow">02 — CHOOSE YOUR PATH</p><h2 id="classes-title">คุณจะเป็นใคร<br><em>ในตำนานบทนี้</em></h2></div><p class="sub">เจ็ดอาชีพ หลากหลายวิธีต่อสู้<br>แตะตัวละครเพื่อสลับชายและหญิง</p></div>
+ <ul class="classes" id="class-list"></ul>
+ <div class="section-end"><span>เริ่มต้นจากผู้ฝึกตน แล้วเลือกเส้นทางของคุณ</span><a class="text-link" href="play.html">สร้างตัวละคร <span aria-hidden="true">↗</span></a></div>
+</section>
 
-<section id="world" class="block"><h2>ออกเดินทาง</h2><p class="sub">จากเมืองหลวงอยุธยา ออกประตูเหนือสู่ทุ่งนา สวนหมาก โรงสี และบึงบัวต้องมนตร์</p>
+<section id="world" class="block" aria-labelledby="world-title">
+ <div class="section-heading"><div><p class="eyebrow">03 — FIELD NOTES</p><h2 id="world-title">พ้นประตูเมือง<br><em>ยังมีโลกให้ค้นพบ</em></h2></div><p class="sub">จากทุ่งนาริมคลองถึงโรงสีใต้เงาจันทร์ ทุกพื้นที่มีผู้คน เรื่องเล่า และอันตรายรออยู่</p></div>
  <ul class="maps">
-  <li><img src="assets/landing98/rice-fields.webp" width="720" height="405" alt="ทุ่งขวัญข้าว" loading="lazy"><h3>ทุ่งขวัญข้าว</h3><p>Lv. 1–12 · หุ่นฟางหลง หนูยุ้งข้าว ตั๊กแตนเกราะ และพญาหนูยุ้งข้าว</p></li>
-  <li><img src="assets/landing98/old-orchard.webp" width="720" height="405" alt="สวนหมากคลองเก่า" loading="lazy"><h3>สวนหมากคลองเก่า</h3><p>Lv. 10–22 · ลูกลิงฉกของ เถาวัลย์พันขา โคมหลงทาง และวานรเจ้าเล่ห์</p></li>
-  <li><img src="assets/landing98/moonlit-mill.webp" width="720" height="405" alt="โรงสีใต้เงาจันทร์" loading="lazy"><h3>โรงสีใต้เงาจันทร์</h3><p>Lv. 15–25 · เจ้าหุ่นฟางพันเชือก ดันเจี้ยนใต้ถุน และสนามกิลด์วอร์ · ต่อไปบึงบัว Lv. 25–35</p></li>
- </ul></section>
+  <li><a href="world-atlas.html"><div class="map-image"><img src="assets/landing98/rice-fields.webp" width="720" height="405" alt="ทุ่งขวัญข้าว" loading="lazy"><span class="map-level">LV. 1—12</span><span class="image-arrow" aria-hidden="true">↗</span></div><div class="map-copy"><span class="entry-number">I. THE RICE FIELDS</span><h3>ทุ่งขวัญข้าว</h3><p>แสงเช้า ลำคลอง และก้าวแรกของนักผจญภัย ระวังหุ่นฟางที่ไม่ยอมอยู่นิ่ง</p></div></a></li>
+  <li><a href="world-atlas.html"><div class="map-image"><img src="assets/landing98/old-orchard.webp" width="720" height="405" alt="สวนหมากคลองเก่า" loading="lazy"><span class="map-level">LV. 10—22</span><span class="image-arrow" aria-hidden="true">↗</span></div><div class="map-copy"><span class="entry-number">II. THE OLD ORCHARD</span><h3>สวนหมากคลองเก่า</h3><p>ใต้ร่มหมากมีทั้งวานรเจ้าเล่ห์ และโคมหลงทางที่รอใครสักคน</p></div></a></li>
+  <li><a href="world-atlas.html"><div class="map-image"><img src="assets/landing98/moonlit-mill.webp" width="720" height="405" alt="โรงสีใต้เงาจันทร์" loading="lazy"><span class="map-level">LV. 15—25</span><span class="image-arrow" aria-hidden="true">↗</span></div><div class="map-copy"><span class="entry-number">III. THE MOONLIT MILL</span><h3>โรงสีใต้เงาจันทร์</h3><p>เรื่องลี้ลับใต้ถุนโรงสี และสนามรบของกิลด์ที่ต่างอยากจารึกชื่อ</p></div></a></li>
+ </ul>
+ <div class="section-end"><span>ภาพบรรยากาศของแต่ละดินแดน · ยังมีอีกหลายพื้นที่ให้สำรวจ</span><a class="text-link" href="world-atlas.html">เปิดแผนที่โลก <span aria-hidden="true">↗</span></a></div>
+</section>
 
-<section id="events" class="block"><h2>กิจกรรมประจำสัปดาห์</h2>
+<section id="events" class="block event-section" aria-labelledby="events-title">
+ <div class="section-heading"><div><p class="eyebrow">04 — A WORLD IN MOTION</p><h2 id="events-title">นัดพบ<br><em>ในโลกอโยธยา</em></h2></div><p class="sub">บางเรื่องสนุกขึ้น เมื่อมีเพื่อนอยู่ข้าง ๆ<br>ชวนปาร์ตี้มา แล้วออกไปสร้างเรื่องเล่าด้วยกัน</p></div>
  <ul class="events">
-  <li><b>🏯 กิลด์วอร์ยึดป้อมโรงสี</b><span>ทุกวันเสาร์ 20:00–20:30 น.</span><em id="war-clock"></em></li>
-  <li><b>🏆 ปิดรอบทัวร์นาเมนต์ประลอง</b><span>ทุกคืนวันอาทิตย์ 24:00 น.</span><em id="arena-clock"></em></li>
-  <li><b>🔥 ฝูงคลั่ง EXP ×2 ดรอป ×2</b><span>ทุก 20 นาที นาน 5 นาที วนทุกแผนที่นอกเมือง</span><em>ตลอดวัน</em></li>
-  <li><b>👑 บอส MVP</b><span>ราชาหุ่นฟางเพลิงที่โรงสี เกิดใหม่เป็นรอบ ประกาศทั้งเซิร์ฟ</span><em>ดูเวลาในเกม</em></li>
- </ul></section>
+  <li><span class="event-tag">GUILD WAR</span><div><h3>ศึกยึดป้อมโรงสี</h3><p>ทุกวันเสาร์ 20:00–20:30 น.</p></div><em id="war-clock"></em><span aria-hidden="true">↗</span></li>
+  <li><span class="event-tag">TOURNAMENT</span><div><h3>เวทีประลองประจำสัปดาห์</h3><p>ปิดรอบทุกคืนวันอาทิตย์ 24:00 น.</p></div><em id="arena-clock"></em><span aria-hidden="true">↗</span></li>
+  <li><span class="event-tag">WORLD EVENT</span><div><h3>ฝูงคลั่ง · EXP ×2 ดรอป ×2</h3><p>ทุก 20 นาที นาน 5 นาที ในแผนที่นอกเมือง</p></div><em>ตลอดวัน</em><span aria-hidden="true">↗</span></li>
+  <li><span class="event-tag">MVP HUNT</span><div><h3>รวมพลล่าบอส MVP</h3><p>บอสเกิดเป็นรอบ พร้อมประกาศให้ทั้งเซิร์ฟเวอร์รู้</p></div><em>ดูเวลาในเกม</em><span aria-hidden="true">↗</span></li>
+ </ul>
+</section>
 
-<section id="news" class="block"><h2>อัปเดตล่าสุด</h2>
+<section id="news" class="news-section" aria-labelledby="news-title"><div class="news-inner">
+ <div class="news-heading"><p class="eyebrow">05 — THE CHRONICLE</p><h2 id="news-title">บันทึก<br><em>โลกอโยธยา</em></h2><p>เรื่องราวยังคงเดินต่อ<br>พร้อมสิ่งใหม่ในทุกบท</p><a class="text-link" data-discord href="#" target="_blank" rel="noopener" hidden>ติดตามข่าวใน Discord <span aria-hidden="true">↗</span></a></div>
  <ul class="news">
-  <li><b>0.99</b><p>สร้างตัวละครใหม่มีหน้าต่างต้อนรับ และลูกศรสีทองชี้ปุ่มที่ต้องกดในทุกเควสสอนเล่น</p></li>
-  <li><b>0.98</b><p>เควสเนื้อเรื่องใหม่ที่สอนเล่นไปในตัว 23 เควส · บททดสอบเปลี่ยนอาชีพแบบ 3 ด่าน · หน้าต่างเด้งเมื่อ Job ตัน</p></li>
-  <li><b>0.97</b><p>สภาพอากาศ ฝน หมอก พายุฟ้าแลบ · แก้ปุ่ม AUTO และการสวมใส่</p></li>
-  <li><b>0.96</b><p>ทัวร์นาเมนต์ประลองรายสัปดาห์ · ประกาศกิจกรรมเข้า Discord</p></li>
-  <li><b>0.95</b><p>กิลด์วอร์ยึดป้อมโรงสีทุกคืนวันเสาร์</p></li>
-  <li><b>0.93–0.94</b><p>ท้าดวล PvP · คราฟต์ยา อาหาร หินตีบวก และยันต์กันแตก</p></li>
- </ul></section>
+  <li><b>0.116<small>LATEST CHAPTER</small></b><div><h3>ทุกอาชีพ มีบทบาทในปาร์ตี้</h3><p>สกิลอาชีพและ Master รวม 112 สกิล พร้อมเอฟเฟกต์ใหม่ ไอคอนบัฟ และการตั้งค่า Auto ที่แยกจากหน้าเรียนสกิล</p></div></li>
+  <li><b>0.114</b><div><h3>ออกเดินทางให้คล่องขึ้น</h3><p>ปรับ HUD และแถบเป้าหมายให้กระชับขึ้น เพื่อเปิดพื้นที่ให้เห็นการผจญภัย</p></div></li>
+  <li><b>0.112</b><div><h3>โลกที่กว้างกว่าเดิม</h3><p>เปิดพื้นที่ใหม่ให้สำรวจ พร้อมแผนที่โลกสำหรับเลือกจุดหมายและออกเดินทาง</p></div></li>
+ </ul>
+</div></section>
 
-<section class="cta"><h2>พร้อมออกเดินทางหรือยัง</h2><p>เล่นฟรีบนเบราว์เซอร์ บันทึกด้วยบัญชี Google หรือทดลองเล่นได้ทันที</p><div class="actions center"><a class="btn gold" href="play.html">เล่นเลย</a><a class="btn" data-discord href="#" target="_blank" rel="noopener" hidden>เข้าร่วม Discord</a></div></section>
+<section class="cta" aria-labelledby="cta-title"><span class="eyebrow">YOUR STORY STARTS HERE</span><h2 id="cta-title">ตำนานบทต่อไป<br><em>อาจเป็นเรื่องของคุณ</em></h2><p>เล่นฟรีบนเบราว์เซอร์ บันทึกด้วยบัญชี Google หรือทดลองเล่นได้ทันที</p><div class="actions center"><a class="btn gold" href="play.html">เริ่มการผจญภัย <span aria-hidden="true">↗</span></a><a class="text-link" data-discord href="#" target="_blank" rel="noopener" hidden>พบเพื่อนใน Discord <span aria-hidden="true">↗</span></a></div></section>
 </main>
 
-<footer><span>© Ayothaya Folk Mystic · EARLY WORLD PREVIEW · 0.114</span><a href="play.html">เข้าเกม</a><a data-discord href="#" target="_blank" rel="noopener" hidden>Discord</a><a href="#top" onclick="scrollTo({top:0,behavior:'smooth'});return false">กลับด้านบน</a></footer>
-<script type="module" src="landing.js?v=105.1"></script>
+<footer><a class="mark" href="#top"><img src="assets/brand69/ayothaya-emblem.png" width="36" height="36" alt=""><span>AYOTHAYA <b>FOLK MYSTIC</b></span></a><span>© Ayothaya Folk Mystic · EARLY WORLD PREVIEW</span><a href="#top">กลับด้านบน ↑</a></footer>
+<dialog id="promo-dialog" aria-labelledby="promo-title"><header><div><small>AYOTHAYA / GAMEPLAY FILM</small><h2 id="promo-title">สัมผัสการผจญภัยในเกมจริง</h2></div><button id="close-film" type="button" aria-label="ปิดวิดีโอ">×</button></header><video class="hero-video" controls playsinline preload="none" poster="assets/landing98/hero.webp"><source src="assets/landing98/promo.mp4?v=105.1" type="video/mp4"></video></dialog>
+<script type="module" src="landing.js?v=editorial117"></script>
 </body></html>

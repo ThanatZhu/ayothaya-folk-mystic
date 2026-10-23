@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import './mobile-review-server.mjs';
+const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true});
+const out=new URL('../outputs/skill-polish/',import.meta.url);await mkdir(out,{recursive:true});const errors=[],failed=[],results=[];
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:1000}});page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});page.on('response',r=>{if(r.status()>=400)failed.push(r.url());});
+ await page.goto(`http://127.0.0.1:${process.env.MOBILE_REVIEW_PORT||8896}/skill-polish-lab.html`);await page.locator('body[data-ready=true]').waitFor({timeout:90000});
+ for(const [id,t] of [['sword',1.09],['rooster',.97],['lotus',2.12]]){await page.evaluate(async({id,t})=>{await window.__skillPolish.choose(id);window.__skillPolish.seek(t);},{id,t});await page.waitForTimeout(100);assert.ok(await page.evaluate(()=>window.__skillPolish.metrics.textures>0));await page.screenshot({path:fileURLToPath(new URL(id+'-painted.png',out)),fullPage:true});await page.locator('#original').click();await page.screenshot({path:fileURLToPath(new URL(id+'-old.png',out)),fullPage:true});await page.locator('#painted').click();results.push({id,paintedAndOld:true});}
+ await page.evaluate(()=>window.__skillPolish.seek(3.2));assert.equal(await page.evaluate(()=>window.__skillPolish.state.sample.targetMode),'standUp');
+ await page.locator('#gender').selectOption('female');await page.locator('body[data-ready=true]').waitFor();await page.evaluate(()=>window.__skillPolish.seek(2.1));assert.equal(await page.evaluate(()=>window.__skillPolish.state.sample.hp),525);
+ const cycle=async()=>{for(const id of ['sword','rooster','lotus']){await page.evaluate(async id=>{await window.__skillPolish.choose(id);for(let t=0;t<3;t+=.15)window.__skillPolish.seek(t);},id);}};await cycle();const warm=await page.evaluate(()=>window.__skillPolish.metrics);await cycle();const end=await page.evaluate(()=>window.__skillPolish.metrics);assert.ok(end.textures<=warm.textures+3,'unbounded texture growth '+JSON.stringify({warm,end}));
+ for(const [width,height] of [[1440,900],[844,390],[390,844],[320,568]]){await page.setViewportSize({width,height});await page.waitForTimeout(150);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));for(const selector of ['#stage','#scrub','#play','.skill-tabs']){const box=await page.locator(selector).boundingBox();assert.ok(box&&box.x>=-1&&box.x+box.width<=width+1,selector);}await page.screenshot({path:fileURLToPath(new URL(`${width}x${height}.png`,out)),fullPage:true});results.push({width,height,layout:true});}
+ await page.emulateMedia({reducedMotion:'reduce'});await page.waitForTimeout(100);assert.equal(await page.locator('#reduced').isChecked(),true);assert.equal(await page.evaluate(()=>window.__skillPolish.state.playing),false);await page.locator('#restart').click();await page.waitForTimeout(300);assert.equal(await page.evaluate(()=>window.__skillPolish.state.sample.shake),0);
+ assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);await writeFile(new URL('checks.json',out),JSON.stringify({results,errors,failed,metrics:{warm,end}},null,2));console.log(JSON.stringify({checks:results.length,errors,failed,metrics:{warm,end}}));
+}finally{await browser.close();}process.exit(0);

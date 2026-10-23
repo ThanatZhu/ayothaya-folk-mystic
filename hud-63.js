@@ -58,7 +58,7 @@ export function createHud63(){
  // Desktop skill bar: one row of equal slots instead of the touch wheel (the wheel stays on touch screens).
  const bar=matchMedia('not all'); // 0.71: the straight desktop hotbar is retired; every screen uses the phone skill wheel
  // Desktop: potions sit at the start of the hotbar row and AUTO becomes a small toggle at the bottom right.
- const cc=document.querySelector('.combat-controls'),ac=document.querySelector('.attack-controls'),auto=$('auto-attack'),quick=$('quick-slots');
+ const cc=document.querySelector('.combat-controls'),ac=document.querySelector('.attack-controls'),auto=$('auto-control')??$('auto-attack'),quick=$('quick-slots');
  const applyBar=()=>{body.classList.toggle('hud63-bar',bar.matches);
   if(bar.matches){if(quick&&cc&&quick.parentElement!==cc)cc.prepend(quick);if(auto&&auto.parentElement!==body)body.append(auto);}
   else{if(quick&&quick.parentElement!==body)body.append(quick);if(auto&&ac&&auto.parentElement!==ac)ac.prepend(auto);}};bar.addEventListener('change',applyBar);applyBar();

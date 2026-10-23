@@ -18,15 +18,23 @@ const fixture=async()=>{
  <div class="review-monster"><div class="review-monster-art"></div><button class="mob-label" id="review-mob" aria-label="เลือกเป้าหมูป่า"><span>หมูป่า</span><i><b style="width:65%"></b></i></button></div>
  <script type="module">
  import {paintTargetHud,targetHudState} from './target-hud.js';
- import {createHud63} from './hud-63.js';import {createMmoHud} from './mmo-hud.js';import {createGameMenu} from './game-menu.js';
+ import {createHud63} from './hud-63.js';import {createSkillWindow} from './skill-window.js';import {createAutoSettings} from './auto-settings.js';import {CombatWorld} from './combat-core.js';import {applySkillArt} from './skill-art.js';import {HOTBAR_KEYS} from './skill-progress.js';import {activeStatusIcons,statusBadgeHTML,loadStatusStyles} from './status-icons.js';import {createMmoHud} from './mmo-hud.js';import {createGameMenu} from './game-menu.js';
  document.querySelector('#journey-loading')?.remove();document.querySelector('#orientation-gate')?.remove();
  document.querySelector('#game-shell').append(document.querySelector('#online-button'),document.querySelector('#channel-button'),document.querySelector('#online-dock'));
- const game={clearInput(){},world:{player:{x:0,z:0},skillPoints:1}},account={serverId:'server-1'};
+ const classId=new URL(location.href).searchParams.get('class')||'swordsman',world=new CombatWorld({classId});world.skillLevels=world.skills.map((_,i)=>i===14?0:5);world.skillPoints=12;world.player.shield=8;world.status={poison:5};world.food={id:'miang-kham',left:540};let bar=world.skills.map((_,i)=>i);
+ const reviewKey='ayothaya-auto-ui-review:'+classId;try{const saved=JSON.parse(localStorage.getItem(reviewKey));if(saved){bar=saved.bar;world.autoConfig=saved.config;}}catch{}
+ const save=()=>{try{localStorage.setItem(reviewKey,JSON.stringify({bar,config:world.autoConfig}));}catch{}};
+ const paintReview=()=>{const buttons=[...document.querySelectorAll('#skills .skill')];buttons.forEach((b,i)=>{b.querySelector('kbd').textContent=HOTBAR_KEYS[i];b.querySelector('strong').textContent=world.skills[bar[i]].icon;b.title=world.skills[bar[i]].name;});applySkillArt(buttons,classId,bar);};
+ const game={clearInput(){},world,get hotbar(){return [...bar];},setHotbar(next){bar=[...next];paintReview();save();},setAutoConfig(cfg){world.autoConfig=cfg;save();},upgradeSkill(i){world.skillLevels[i]++;return true;}},account={serverId:'server-1'};
+ window.__autoReview=game;
+ const skillWindow=createSkillWindow({game,classId});
  createGameMenu({game,account});
  for(const [id,label] of [['menu-bag','กระเป๋า'],['menu-quests','เควส'],['menu-status','สถานะ'],['menu-social','สังคม'],['menu-pet','สัตว์เลี้ยง']]){const b=document.createElement('button');b.id=id;b.innerHTML='<i>✦</i><span>'+label+'</span>';document.querySelector('#game-menu').append(b);}
  for(let i=0;i<15;i++){const b=document.createElement('button');b.className='skill'+(i>=10?' master-slot':'');b.innerHTML='<strong>✦</strong><kbd>'+(i+1)+'</kbd>';document.querySelector('#skills').append(b);}
- document.querySelector('#skills').classList.add('skills');
- createMmoHud({game,account});createHud63();
+ document.querySelector('#skills').classList.add('skills');paintReview();
+ createMmoHud({game,account});createAutoSettings({game,classId});createHud63();
+ const auto=document.getElementById('auto-attack');auto.disabled=false;auto.onclick=()=>{world.auto=!world.auto;auto.setAttribute('aria-pressed',String(world.auto));auto.classList.toggle('active',world.auto);document.getElementById('auto-state').textContent=world.auto?'เปิด':'ปิด';};
+ loadStatusStyles();document.getElementById('ailment-row').innerHTML=activeStatusIcons(world).map(statusBadgeHTML).join('');
  const types=[{name:'หมูป่า'},{name:'ราชาฟาง',boss:true}],normal={type:0,hp:65,maxHp:100,x:4,z:4},boss={type:1,hp:750,maxHp:1000,x:6,z:6,aggro:true};
  window.__hudReviewSelect=kind=>{const state=targetHudState({types,player:{x:0,z:0},target:kind==='normal'?normal:null,mobs:kind==='boss'?[boss]:[]});paintTargetHud(document,state);document.querySelector('#review-mob').classList.toggle('selected',kind==='normal');};
  window.__hudReviewSelect(new URL(location.href).searchParams.get('target')||'none');
@@ -46,7 +54,7 @@ http.createServer(async(req,res)=>{try{
  if(url.pathname==='/mobile-review.html'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(reviewPage());return;}
  if(url.pathname==='/mobile-fixture.html'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(await fixture());return;}
  const file=path.resolve(root,'.'+decodeURIComponent(url.pathname));
- if(!file.startsWith(root)||path.basename(file).startsWith('.')||!['.js','.css','.html','.png','.svg','.ttf','.json','.glb'].includes(path.extname(file))){res.writeHead(404).end();return;}
- const mime={'.js':'text/javascript','.css':'text/css','.html':'text/html','.png':'image/png','.svg':'image/svg+xml','.ttf':'font/ttf','.json':'application/json'};
+ if(!file.startsWith(root)||path.basename(file).startsWith('.')||!['.js','.css','.html','.png','.svg','.ttf','.json','.glb','.txt'].includes(path.extname(file))){res.writeHead(404).end();return;}
+ const mime={'.js':'text/javascript','.css':'text/css','.html':'text/html','.png':'image/png','.svg':'image/svg+xml','.ttf':'font/ttf','.json':'application/json','.txt':'text/plain; charset=utf-8'};
  res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');res.end(await readFile(file));
  }catch{res.writeHead(404).end();}}).listen(Number(process.env.MOBILE_REVIEW_PORT||8896),'127.0.0.1',()=>console.log('Mobile HUD review: http://127.0.0.1:8896/mobile-review.html'));

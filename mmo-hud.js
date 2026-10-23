@@ -19,8 +19,9 @@ function layoutWheel(){
  box.style.setProperty('--wheel-slot',slot+'px');box.style.setProperty('--wheel-attack',attack+'px');
  box.style.width=Math.round(cx+outer+slot/2+4)+'px';box.style.height=Math.round(cy+outer+slot/2+4)+'px';
  // AUTO sits at the far left of the wheel's bottom row, clear of both arcs.
- const auto=$('auto-attack'),autoSize=compact?44:54;
- if(auto){auto.style.right=Math.round(cx+outer+slot/2+8)+'px';auto.style.bottom='4px';box.style.width=Math.round(cx+outer+slot/2+8+autoSize+4)+'px';}
+ const auto=$('auto-control')??$('auto-attack'),autoSize=short?z(60):compact?64:76;
+ box.style.setProperty('--auto-size',autoSize+'px');
+ if(auto){const gap=26;auto.style.right=Math.round(cx+outer+slot/2+gap)+'px';auto.style.bottom='4px';box.style.width=Math.round(cx+outer+slot/2+gap+autoSize+4)+'px';}
  document.documentElement.style.setProperty('--wheel-width',box.style.width);
  let m=0;
  [...document.querySelectorAll('#skills .skill')].forEach((b,i)=>{

@@ -1,7 +1,7 @@
 // 0.48 everyday UI: ailment icons on the HUD, RO-style emote bubbles (picker + own bubble), daily login popup.
 // Remote players' bubbles are drawn by multiplayer-ui.js; the server rewards the daily login online, this file offline.
 import {emoteId,itemDef} from './items.js?v=107';
-import {AILMENTS} from './ailments.js?v=01';
+import {activeStatusIcons,statusBadgeHTML,loadStatusStyles} from './status-icons.js?v=1';
 import {claimDaily,DAILY} from './daily.js?v=01';
 import {activeEvent,expRate,surge,WEEKEND_EXP} from './events.js?v=64';
 import {WAR,warWindow} from './guild-war.js?v=98';
@@ -19,13 +19,13 @@ const POSES=[['idle','ลุก / ยืน'],['sit','นั่งพัก'],['
 
 export function createLifeUI({game,account,camera}){
  if(!document.querySelector('link[data-life-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='life-ui.css?v=105.0';css.dataset.lifeUi='';document.head.append(css);}
- const world=game.world;world.status??={};
+ const world=game.world;world.status??={};loadStatusStyles();
 
  // Ailment row under the player frame.
  const row=document.createElement('div');row.id='ailment-row';row.setAttribute('aria-live','polite');document.body.append(row);let rowSig='';
  function drawAilments(){
-  const st=world.status??{},shield=Math.ceil(world.player.shield??0),sig=Object.entries(st).map(([k,t])=>k+Math.ceil(t)).join()+'shield'+shield;if(sig===rowSig)return;rowSig=sig;
-  row.innerHTML=(shield>0?`<span class="buff" title="เกราะอาคม · ลดความเสียหาย · ${shield} วินาที" aria-label="เกราะอาคม ${shield} วินาที">◇<b>${shield}</b></span>`:'')+Object.entries(st).filter(([k,t])=>AILMENTS[k]&&t>0).map(([k,t])=>`<span title="${AILMENTS[k].name} · ${AILMENTS[k].text}">${icon(AILMENTS[k].icon)}<b>${Math.ceil(t)}</b></span>`).join('');
+  const effects=activeStatusIcons(world),sig=JSON.stringify(effects.map(e=>[e.id,e.seconds]));if(sig===rowSig)return;rowSig=sig;
+  row.innerHTML=effects.map(statusBadgeHTML).join('');
  }
 
  // Emote picker beside the quick slots; own bubble floats over the hero.

@@ -2955,3 +2955,27 @@ Object.assign(globalThis.I18N_EN, {
  'เกราะอาคม · ลดความเสียหาย · {0} วินาที': 'Magic Armor · Damage reduction · {0} seconds',
  'เกราะอาคม {1} วินาที': 'Magic Armor {1} seconds'
 });
+
+// AUTO settings moved out of the skill learning window.
+Object.assign(globalThis.I18N_EN, {
+ 'ตั้งค่าออโต้และตำแหน่งสกิล':'AUTO settings and skill positions',
+ 'ออโต้และปุ่มลัด':'AUTO and hotbar',
+ 'สกิลอัตโนมัติ':'Automatic skills',
+ 'จัดตำแหน่งสกิล':'Skill positions',
+ 'น้ำยา':'Potions',
+ 'เลือกสกิลที่ให้ใช้เอง':'Choose skills for AUTO',
+ 'ใช้ตามลำดับปุ่มลัดเมื่อสกิลพร้อม ใช้ MP พอ และเข้าเงื่อนไขของสกิล':'Uses hotbar order when skills are ready, affordable and useful.',
+ 'จัดตำแหน่งปุ่มลัด':'Arrange the hotbar',
+ 'แตะช่องต้นทาง แล้วแตะช่องปลายทางเพื่อสลับ หรือใช้เมาส์ลากสลับช่องได้':'Tap a source slot, then a destination to swap, or drag with the mouse.',
+ 'ยกเลิกการย้าย':'Cancel move',
+ 'ใช้น้ำยาอัตโนมัติ':'Automatic potions',
+ 'เลือกเกณฑ์ HP / MP ที่ให้ใช้น้ำยา 0% คือปิด ใช้ได้เมื่อเปิด AUTO':'Choose HP / MP thresholds. 0% is off. Potions are used while AUTO is on.',
+ 'HP ต่ำกว่า':'HP below',
+ 'MP ต่ำกว่า':'MP below',
+ 'บันทึกการตั้งค่าให้อัตโนมัติ':'Settings are saved automatically',
+ 'เสร็จแล้ว':'Done',
+ 'ปิดตั้งค่าออโต้':'Close AUTO settings',
+ 'หน้าตั้งค่าออโต้':'AUTO settings tabs',
+ 'เลือกช่องปลายทางเพื่อสลับสกิล':'Choose a destination slot to swap skills',
+ 'ยกเลิกการย้ายแล้ว':'Move canceled'
+});

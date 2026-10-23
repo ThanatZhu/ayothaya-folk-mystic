@@ -1,5 +1,5 @@
 // 0.90 AUTO helpers shared by the browser and the realm server (owner: AUTO also casts skills and drinks potions,
-// set from the skill window). Pure functions: the caller owns the world, the bag and the timing.
+// set from the AUTO gear panel). Pure functions: the caller owns the world, the bag and the timing.
 import {ITEMS} from './items.js?v=107';
 import {SLOTS} from './skill-progress.js?v=101';
 export const AUTO_DEFAULT={skills:[0],hp:40,mp:0};

@@ -23,21 +23,6 @@ html body #skill-window[data-hud-panel],html body #skill-window{position:fixed!i
  .skill-tree{gap:18px 6px;padding:10px 10px 4px}.skill-node{grid-template-columns:30px 1fr;padding:4px 5px;column-gap:5px}.skill-node .skill-icon{width:30px;height:30px}
  .skill-node>span{font-size:10px}#skill-window .skill-hint{display:none}
 }
-/* 0.90 hotbar + AUTO setup under the tree */
-.skill-setup{margin:8px 14px 0;display:grid;gap:6px}
-.skill-setup h3{margin:4px 0 0;font:700 13px Mali,Tahoma,sans-serif;color:#f4cf7a}.skill-setup h3 small{display:block;font-weight:400;font-size:10px;color:#d9c8a2}
-#skill-hotbar{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
-#skill-hotbar li{position:relative;display:grid;justify-items:center;gap:2px;padding:6px 2px 4px;border:1px solid #6b5a3d;border-radius:10px;background:#11231cee;cursor:grab;min-width:0}
-#skill-hotbar li .skill-icon{width:34px;height:34px}#skill-hotbar li span{font-size:9px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff0ce}
-#skill-hotbar kbd{position:absolute;left:3px;top:2px;font:700 9px Mali,Tahoma,sans-serif;color:#2a2210;background:#f4cf7a;border-radius:4px;padding:0 3px}
-#skill-hotbar li.over,#skill-hotbar li.waiting:hover{border-color:#95efe2;box-shadow:0 0 0 2px #95efe255}#skill-hotbar li.waiting{border-style:dashed;border-color:#95efe2;cursor:pointer}
-#skill-hotbar li:focus-visible{outline:2px solid #95efe2;outline-offset:2px}
-#skill-auto{display:flex;flex-wrap:wrap;gap:6px}
-#skill-auto label{display:flex;align-items:center;gap:5px;padding:4px 9px;border:1px solid #6b5a3d;border-radius:999px;background:#11231cb3;font-size:11px;cursor:pointer}
-#skill-auto label.off{opacity:.45}#skill-auto input{accent-color:#f4cf7a}
-.auto-pots{display:grid;grid-template-columns:1fr 1fr;gap:10px}.auto-pots label{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:11px}
-.auto-pots input{accent-color:#f4cf7a}.auto-pots output{min-width:34px;text-align:right;color:#ffd98f;font-weight:700}
-@media (max-width:640px),(orientation:landscape) and (max-height:520px){#skill-hotbar{grid-template-columns:repeat(5,minmax(0,1fr))}.auto-pots{grid-template-columns:1fr}.skill-setup h3 small{display:none}}
 /* 0.101 Master tab: same tree grid, its own five skills */
 .skill-tabs{display:flex;gap:6px;margin:8px 14px 0}
 .skill-tabs button{padding:5px 14px;border:1px solid #6b5a3d;border-radius:999px;background:#11231cb3;color:#fff0ce;font:700 12px Mali,Tahoma,sans-serif;cursor:pointer}

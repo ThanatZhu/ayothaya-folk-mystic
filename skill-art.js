@@ -1,7 +1,9 @@
+import {paintIcon,skillById} from './assets/skills-next/catalog.js';
 import {isClass} from './classes.js?v=112.1';
-import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=101';
+import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=role116';
 export const skillAtlas=id=>{if(!isClass(id))throw new Error('invalid-class');return new URL('./assets/skills/'+id+'-21.png',import.meta.url).href;};
-export async function applySkillArt(buttons,classId,order=null){ // order[i] = skill shown on button i (0.90 hotbar)
+export async function applySkillArt(buttons,classId,order=null,definitions=null){ // order[i] = skill shown on button i (0.90 hotbar)
+ if(definitions?.some(s=>s.roleSkillId)){buttons.forEach((button,i)=>{const slot=order?.[i]??i,definition=definitions[slot],art=button.querySelector('strong');if(!art)return;art.textContent='';if(definition?.roleSkillId){paintIcon(art,skillById(definition.roleSkillId));art.classList.toggle('master-art',slot>=10);}else art.style.backgroundImage='none';});return;}
  const image=new Image(),url=skillAtlas(classId);image.src=url;
  try{await image.decode();}catch{return;}
  // Hunter's source atlas has a slightly higher row divider; sample its actual bounds.

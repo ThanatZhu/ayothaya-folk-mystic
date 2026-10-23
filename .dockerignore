@@ -6,6 +6,13 @@ dist
 .env.*
 .vercel
 assets
+!assets/
+assets/**
+!assets/skills-next/
+!assets/skills-next/catalog.js
+!assets/skill-polish/
+!assets/skill-polish/library-profiles.js
+!assets/skill-polish/timing.js
 work
 outputs
 tests

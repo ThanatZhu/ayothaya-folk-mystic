@@ -1,4 +1,4 @@
-import {SLOTS} from './skill-progress.js?v=101';
+import {SLOTS} from './skill-progress.js?v=role116';
 import {normalizeAuto} from './auto-play.js';
 
 export function swapSkillSlots(order,from,to){

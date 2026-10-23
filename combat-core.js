@@ -1,3 +1,4 @@
+import {createRoleCombat,stepRoleMonsters} from './role-combat.js';
 import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js';
 import {activeEmote,canonicalAction,EMOTE_ACTIONS,movementSpeed} from './character-action-state.js?v=life1';
@@ -7,7 +8,7 @@ import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=105.3
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=73';
 import {getClass,classSkills} from './classes.js?v=112.1';
-import {scaledSkill} from './skill-progress.js?v=101';
+import {scaledSkill} from './skill-progress.js?v=role116';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[
@@ -146,7 +147,7 @@ export class CombatWorld{
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,running:false,face:{x:1,z:0}};this.emote=null;
   this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack,leader],id)=>({id,type,pack,leader:!!leader,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),maxHp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
-  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.autoIdle=0;this.foe=null;this.rivals=[];this.food=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.master?0:1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;
+  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.autoIdle=0;this.foe=null;this.rivals=[];this.food=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.master?0:1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;this.roleCombat=config.roleSkills===true?createRoleCombat(this,{moveBody,lineClear,types:MONSTER_TYPES}):null;if(this.roleCombat){this.skills=this.roleCombat.skills;this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.reserved||s.master?0:1);}
  }
  // 0.61 hired mercenary: attacks your target (or, on AUTO, the nearest monster) within 6, every 1.4 s, 10 + 2·level damage.
  hire(seconds){this.merc={left:seconds,cd:0};}
@@ -170,7 +171,7 @@ export class CombatWorld{
  }
  // 0.48 ailments: blind and curse weaken every hit; stun/sleep stop acting; silence stops skills.
  // One movement rule for authority and prediction; sprint is an explicit modifier and never changes default pace.
- walkSpeed(run=false){return movementSpeed(this.profession.speed*(this.status?.curse?.6:1)*(this.safe?TOWN_PACE:1),run);}
+ walkSpeed(run=false){return movementSpeed(this.profession.speed*(this.status?.curse?.6:1)*(this.status?.slow?.5:1)*(this.safe?TOWN_PACE:1),run);}
  weakness(){return (this.status.blind?.7:1)*(this.status.curse?.75:1);}
  inflict(name){if(!name||!AILMENTS[name])return;const fresh=!this.status[name];this.status[name]=AILMENTS[name].time;if(fresh)this.notice(AILMENTS[name].name+'! · '+AILMENTS[name].text);}
  // One monster blow, shared by the offline world and the realm server: damage, ailment roll, or going down (+ death penalty).
@@ -179,16 +180,17 @@ export class CombatWorld{
  takeSlam(type,m,s){
   const p=this.player,dx=p.x-m.x,dz=p.z-m.z,d=Math.hypot(dx,dz)||1;if(p.hp<=0||d>s.radius)return false;
   this.knock={vx:dx/d*s.push/.35,vz:dz/d*s.push/.35,t:.35};this.path=[];this.emit('knock',{...this.knock,x:p.x,z:p.z});
-  const hit=this.takeMonsterHit(type,Math.max(type.damage*s.power,p.maxHp*s.pct));if(p.hp<=0)this.knock=null;return hit;
+  const hit=this.takeMonsterHit(type,Math.max(type.damage*s.power,p.maxHp*s.pct),m);if(p.hp<=0)this.knock=null;return hit;
  }
  knockStep(dt){const k=this.knock;if(!k)return false;moveBody(this.player,k.vx*Math.min(dt,k.t),k.vz*Math.min(dt,k.t),this.nav);if((k.t-=dt)<=0)this.knock=null;return true;}
- takeMonsterHit(type,raw=type.damage){
-  const p=this.player,damage=monsterHit(this,raw,Math.random,type.id);if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
+ takeMonsterHit(type,raw=type.damage,source=null){
+  const p=this.player,baseDamage=monsterHit(this,raw,Math.random,type.id),damage=this.roleCombat?this.roleCombat.incoming(baseDamage,source):baseDamage;if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
   p.hp=Math.max(0,p.hp-damage);this.calm=0;this.emit('playerHit',{x:p.x,z:p.z,amount:damage});delete this.status.sleep;
   if(p.hp>0){this.inflict(rollAilment(type.id));return true;}
-  p.down=3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;p.running=false;this.status={};
-  const lost=deathPenalty(this);this.notice('หมดแรง · กลับลานใน 3 วินาที'+(lost?' · Base EXP -'+lost:''));return true;
+  this.fall();return true;
  }
+ fall(){const p=this.player;  p.down=this.roleCombat?20:3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;p.running=false;this.status={};
+  const lost=deathPenalty(this);this.notice((this.roleCombat?'หมดแรง · รอเพื่อนชุบหรือกลับลานใน 20 วินาที':'หมดแรง · กลับลานใน 3 วินาที')+(lost?' · Base EXP -'+lost:''));}
  // 0.58 combo: a skill on a rooted monster hits 30% harder.
  // 0.103 skill damage also passes the monster's DEF (MDEF for magic classes); duels and war targets are handled elsewhere
  guardOf(mob,magic){if(!mob||mob.pvp)return 1;const t=MONSTER_TYPES[mob.type];return defFactor(magic?monsterMdef(t):monsterDef(t));}
@@ -199,7 +201,7 @@ export class CombatWorld{
   const id=MONSTER_TYPES[mob.type]?.id,a=affinityOf(id),card=1+(d?.vsSize?.[a.size]??0)+(d?.vsElement?.[a.element]??0);
   return affinityMultiplier({element,physical:basic||!magic,classId:cls},id)*card*this.weakness();}
  // 0.43 status/gear: max HP/MP and the multipliers above. null keeps the pre-0.43 numbers.
- applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=d.maxHp;p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
+ applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=Math.round(d.maxHp*(1+(this.roleCombat?.mods().maxHp??0)));p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
  notice(text){this.emit('notice',{text});}
  select(id){const mob=this.foes().find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
  nearest(range=AUTO_RANGE){return this.foes().filter(m=>m.hp>0&&this.prey(m)&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
@@ -217,6 +219,7 @@ export class CombatWorld{
  // 0.68 a point in front of the player (toward `toward` when given): where an attack or skill lands with no target.
  airPoint(range,toward=null){const p=this.player;if(toward){const dx=toward.x-p.x,dz=toward.z-p.z;if(Math.hypot(dx,dz)>.01)p.face={x:dx,z:dz};}const n=Math.hypot(p.face.x,p.face.z)||1;return {x:p.x+p.face.x/n*range,z:p.z+p.face.z/n*range};}
  basicAttack(quiet=false){
+  if(this.roleCombat?.state.pending)return false;
   this.clearEmote();const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
   // 0.68 no target in reach: swing at the air (auto-chase still uses AUTO / walking to the target).
@@ -229,6 +232,7 @@ export class CombatWorld{
    this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),crit?'#ffd27a':magic?'#c9a8ff':undefined);}return true;
  }
  skill(index){
+  if(this.roleCombat&&!this.roleCombat.legacy)return this.roleCombat.cast(index);
   if(Number.isInteger(index)&&this.skills[index])this.clearEmote();
   const level=this.skillLevels[index]??1;if(this.skills[index]&&level<1){this.notice('ยังไม่ได้เรียนสกิลนี้');return false;}
   const s=scaledSkill(this.skills[index],level),p=this.player;if(!s||p.hp<=0||held(this.status))return false;
@@ -260,9 +264,9 @@ export class CombatWorld{
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;
   for(const k in this.status){this.status[k]-=dt;if(this.status[k]<=0)delete this.status[k];}
   if(this.food&&(this.food.left-=dt)<=0){this.food=null;this.notice('ฤทธิ์อาหารหมดแล้ว');}
-  if(this.status.poison&&p.hp>1&&(this.poisonTick+=dt)>=1){this.poisonTick=0;const n=Math.min(p.hp-1,Math.max(1,Math.round(p.maxHp*.03)));p.hp-=n;this.emit('playerHit',{x:p.x,z:p.z,amount:n});}
+  if(this.status.poison&&!this.roleDebuffs?.poison&&p.hp>1&&(this.poisonTick+=dt)>=1){this.poisonTick=0;const n=Math.min(p.hp-1,Math.max(1,Math.round(p.maxHp*.03)));p.hp-=n;this.emit('playerHit',{x:p.x,z:p.z,amount:n});}
   const stop=held(this.status),wantsRun=input.run===true&&Math.hypot(input.x,input.z)>.08,speed=this.walkSpeed(wantsRun);
-  this.mercStep(dt);
+  this.mercStep(dt);this.roleCombat?.step(dt,input);if(monsters&&this.roleCombat)stepRoleMonsters(this.mobs,dt,()=>this);
   if(p.hp<=0){p.moving=false;p.running=false;p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
   // 0.100.11 HP comes back on its own: towns 4 % of max HP a second, the field 1 % a second after 6 s out of combat
   this.calm=this.status.poison?0:(this.calm??0)+dt;
@@ -281,7 +285,7 @@ export class CombatWorld{
    if(m){
     // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
     this.autoCast=Math.max(0,this.autoCast-dt);
-    if(this.autoCast===0&&lineClear(p,m,this.nav)){const i=pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0){this.autoCast=.5;this.skill(i);}}
+    if(this.autoCast===0&&lineClear(p,m,this.nav)){const i=this.roleCombat&&!this.roleCombat.legacy?this.roleCombat.autoIndex(this.autoConfig):pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0){this.autoCast=.5;this.skill(i);}}
     if(reachTo(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      // 0.99.11 open ground (nothing between us): walk straight at it and skip the grid search, which is the costly part
@@ -294,13 +298,13 @@ export class CombatWorld{
   p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;p.running=p.moving&&manual&&wantsRun;
   if(!monsters)return; // Shared-room servers advance each monster exactly once per tick.
   for(const m of this.mobs){
-   const type=MONSTER_TYPES[m.type],outcome=advanceMonster(m,p,type,dt,this.nav,{moveBody,lineClear});
+   const baseType=MONSTER_TYPES[m.type],type=m.roleStatus?.slow?{...baseType,speed:baseType.speed*(baseType.boss?.8:.5)}:baseType,decoy=m.roleStatus?.decoy,aim=decoy?{...p,x:p.x+1.2,hp:1}:p,outcome=advanceMonster(m,aim,type,dt,this.nav,{moveBody,lineClear});
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
    if(m.justEnraged){m.justEnraged=false;this.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
-   if(outcome==='burst'&&Math.hypot(p.x-m.x,p.z-m.z)<=MONSTER_BEHAVIOUR[type.id].aoe&&this.takeMonsterHit(type)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
+   if(outcome==='burst'&&Math.hypot(p.x-m.x,p.z-m.z)<=MONSTER_BEHAVIOUR[type.id].aoe&&this.takeMonsterHit(type,type.damage,m)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
    if(outcome==='slam'&&this.takeSlam(type,m,MONSTER_BEHAVIOUR[type.id].slam)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
-   if(outcome==='hit'){
-    if(this.takeMonsterHit(type)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
+   if(outcome==='hit'&&!m.roleStatus?.decoy){
+    if(this.takeMonsterHit(type,type.damage,m)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}
    }
   }
  }

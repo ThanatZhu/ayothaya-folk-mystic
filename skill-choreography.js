@@ -3,7 +3,7 @@ import {skillFrame} from './animation-frames.js?v=37';
 import {characterMotion} from './character-motion.js?v=life1';
 import {JOINT_CHANNELS} from './character-rig.js?v=37';
 import {gestureJoints} from './joint-gestures.js?v=37';
-import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=101';
+import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=role116';
 const gestures={
  ready:{lean:-.032,crouch:.027,armL:.016,armR:-.025},
  jab:{lean:.055,armR:.065,armL:-.014,legR:.025,x:.16},

@@ -2979,3 +2979,32 @@ Object.assign(globalThis.I18N_EN, {
  'เลือกช่องปลายทางเพื่อสลับสกิล':'Choose a destination slot to swap skills',
  'ยกเลิกการย้ายแล้ว':'Move canceled'
 });
+
+Object.assign(globalThis.I18N_EN, {
+ 'เล็งจุดวางสกิลบนพื้น':'Aim a ground skill',
+ 'หมดแรง · รอเพื่อนชุบหรือกลับลานใน 20 วินาที':'Defeated · wait for revival or return in 20 seconds',
+ 'เลือกจุดวางแล้ว · กดสกิลเพื่อร่าย':'Ground point selected · press a skill to cast',
+ 'เลือกเป้าหมายก่อน':'Select a target first',
+ 'เลือกเพื่อนในปาร์ตี้เดียวกัน':'Select a member of your party',
+ 'เป้าหมายไม่ตรงกับสกิล':'This skill needs a different target',
+ 'เป้าหมายหมดแรงแล้ว':'The target has been defeated',
+ 'เป้าหมายไกลหรือมีสิ่งกีดขวาง':'Target is too far away or obstructed',
+ 'เรียกไก่ชนก่อน':'Summon your rooster first',
+ 'เป้าหมายต้องติดพิษก่อน':'The target must be poisoned first',
+ 'เป้าหมายต้องติดคำสาปก่อน':'The target must be cursed first',
+ 'การร่ายถูกยกเลิก':'Casting canceled',
+ 'รอคืนขวัญ':'Awaiting revival',
+ 'หมดแรง · รอเพื่อนคืนขวัญ':'Defeated · waiting for a party revival',
+ 'กลับจุดเกิด':'Return to spawn',
+ 'แตะพื้นเพื่อเลือกจุดวางสกิล':'Tap the ground to aim your skill',
+ 'กลับจุดเกิดอัตโนมัติใน':'Automatic return in',
+ 'เลือกสาย Master เพื่อปลดล็อก':'Choose a Master branch to unlock',
+ 'ช่องสำรอง':'Reserved slot',
+ 'พาสซีฟ · ทำงานแล้ว':'Passive · active',
+ 'พาสซีฟ · ยังไม่เรียน':'Passive · not learned',
+ 'เลือกสาย Master ก่อน':'Choose a Master branch first'
+});
+
+Object.assign(globalThis.I18N_EN,{ 'พาสซีฟทำงานอัตโนมัติ':'Passive works automatically', 'เลือกสาย Master ที่อาจารย์ประจำอาชีพ เพื่อปลดล็อกสกิลขั้นสูงและพาสซีฟ':'Choose a Master path at your class teacher to unlock advanced skills and passives', 'เริ่มจากสกิลแถวบน · เรียนฟรีเมื่อเงื่อนไขครบ · ขั้น 2–10 ใช้ขั้นละ 1 แต้ม · ตั้งค่าใช้สกิลอัตโนมัติที่ฟันเฟืองปุ่ม Auto':'Start at the top · Learn for free when requirements are met · Levels 2–10 cost 1 point each · Configure Auto skills with its gear button', 'เกมมีสกิลเวอร์ชันใหม่ กรุณารีเฟรชหน้าเกม':'New skills are available. Please refresh the game.'});
+
+Object.assign(globalThis.I18N_EN,{'อัปเดตสกิลประจำอาชีพแล้ว · คืนแต้มสกิลเดิมให้จัดใหม่ที่เมนูสกิล':'Class skills updated. Your spent skill points have been refunded. Allocate them in Skills.'});

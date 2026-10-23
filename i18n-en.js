@@ -2950,5 +2950,6 @@ Object.assign(globalThis.I18N_EN, {
  'อาชีพ (Job)': 'Job',
  '{0} ตีบวก {1} เป็น +{2} {3}': '{0} refined {1} to +{2} {3}',
  'สำเร็จ! ✨': 'Success! ✨',
- 'แตก 💥': 'Broke 💥'
+ 'แตก 💥': 'Broke 💥',
+ 'แตะแท็บ ขาย ก่อน': 'Open the Sell tab first'
 });

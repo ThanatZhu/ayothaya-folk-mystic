@@ -256,7 +256,7 @@ export class RealmServer{
    const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null,shop=npc&&SHOPS[npc.name];
    if(!shop?.expand||shop.mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'shop-too-far');
    try{this.setBag(p,expandBag(p.bag));}catch(e){return this.itemFail(p,e.message);}
-   w.notice('ขยายกระเป๋าแล้ว · '+p.bag.slots+' ช่อง');return true;
+   w.notice('ขยายกระเป๋าแล้ว · '+p.bag.slots+' ช่อง');this.storyProgress(p,{type:'do',action:'shop'});return true;
   }
   if(m.type==='buy'||m.type==='sell'){
    // Trading only next to that shop's NPC in its own map; the shared rules check coins, stock and bag room.

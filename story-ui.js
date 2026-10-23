@@ -209,6 +209,8 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
      break;
     }
     case 'shop':{
+     const dealBtn=document.querySelector('#shop-list button.deal:not(:disabled)');
+     if(dealBtn){dealBtn.click();world.storyCheck?.();return;}
      const shopBtn=document.getElementById('npc-shop');
      if(shopBtn){shopBtn.click();return;}
      break;

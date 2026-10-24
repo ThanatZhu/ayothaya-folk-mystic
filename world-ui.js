@@ -1,3 +1,4 @@
+import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=112.4';
 import {openHudPanel} from './hud-panels.js?v=34';
@@ -10,6 +11,7 @@ import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-s
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
+ const npcStyle=document.createElement('link');npcStyle.rel='stylesheet';npcStyle.href='./npc-interaction.css?v=137';document.head.append(npcStyle);
  const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0,lastBig=0;
  const mentors=createMentorUI({game,account,inTown:()=>map.id==='ayutthaya',recall:()=>api.recall()});
@@ -85,11 +87,20 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  });
  function talk(n){
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
-  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
+  if(world.player.hp<=0||traveling)return;
+  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
   endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;const reply=api.onTalk?.(n);if(reply?.handled)return;$('npc-text').textContent=reply??n.text;$('npc-dialog').hidden=false;$('close-npc').focus();api.afterTalk?.(n);
  }
+ const npcSprites=[];scene.traverse(o=>{if(o.isSprite&&o.userData.npc)npcSprites.push(o);});
+ const npcRay=new THREE.Raycaster(),npcPointer=new THREE.Vector2();
+ const talkBlocked=()=>traveling||world.player.hp<=0||!!conversation||atlas.open||mentors.paused||!!document.querySelector('dialog[open],#account-panel:not([hidden])')||document.body.matches('.mobile-menu-open,.mobile-chat-open,.controls-editing');
+ const pickNPC=(x,y)=>{if(talkBlocked())return null;npcPointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);npcRay.setFromCamera(npcPointer,camera);
+  for(const hit of npcRay.intersectObjects(npcSprites.filter(s=>s.visible)))if(opaqueNPCHit(hit))return hit.object.userData.npc;return null;
+ };
+ const activateNPC=npc=>{if(!npc||talkBlocked())return false;talk(npc);return true;};
+ game.npcInteraction={pick:pickNPC,activate:activateNPC,talkNearest(){return activateNPC(nearestTalkNPC(npcViews.map(v=>v.n),world.player));},tap(x,y){return activateNPC(pickNPC(x,y));}};
  $('close-npc').onclick=endTalk;
- $('interact').onclick=()=>{if(nearest)travel(nearest.to);else if(nearNPC)talk(nearNPC);};
+ $('interact').onclick=()=>{if(nearNPC)talk(nearNPC);else if(nearest)travel(nearest.to);};
  addEventListener('keydown',e=>{
   if($('settings-panel')?.open||e.repeat||e.ctrlKey||e.altKey||e.metaKey||e.target.closest?.('input,textarea,select'))return;
   if(e.code==='KeyM'){e.preventDefault();atlas.open?atlas.close():dialog.open?dialog.close():openMap();}
@@ -120,7 +131,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   let npcDistance=2.3;for(const v of npcViews){const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(document.body.classList.contains('mobile-play')?6:v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
   mentors.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!atlas.open&&!mentors.paused;
   $('interact').hidden=!canInteract;
-  if(canInteract)$('interact').textContent=nearest?'เดินทางไป '+lookup(nearest.to).name:'คุยกับ '+nearNPC.name;
+  if(canInteract){const button=$('interact'),mobile=document.body.classList.contains('mobile-play');button.dataset.kind=nearNPC?'npc':'portal';const text=nearNPC?(mobile?'แตะ NPC เพื่อพูดคุย':'กด Space เพื่อพูดคุย · หรือคลิก NPC'):'เดินทางไป '+lookup(nearest.to).name;if(button.textContent!==text)button.textContent=text;button.title=nearNPC?'คุยกับ '+nearNPC.name:text;}
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
   if(photo===null&&!photoQueued){photoQueued=true;setTimeout(()=>{mapPhoto();lastMini=0;},2500);}
   const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}

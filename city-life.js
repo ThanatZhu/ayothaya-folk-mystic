@@ -31,7 +31,7 @@ export async function createCityLife({scene,map,shadow,paving}){
    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearFilter;texture.generateMipmaps=false;
    return {texture,w:c.width,h:c.height,anchor:meta.anchors[n.row*meta.columns+i]+pad,pad};});
   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:frames[0].texture,alphaTest:.5,transparent:false,depthWrite:true,color:'#fff5e7'}));scene.add(sprite);
-  if(n.citizen)sprite.userData.citizenId=n.id;
+  sprite.userData.npc=n;if(n.citizen)sprite.userData.citizenId=n.id;
   const walk=n.citizen?createCitizenMotion(n,Date.now()/1000+n.offset):null;if(walk){n.x=walk.pose.x;n.z=walk.pose.z;}
   n.visualHeight=WORLD_BODY_HEIGHT;
   const life=await loadNPCLife(`${n.sheet}-${n.row}`);

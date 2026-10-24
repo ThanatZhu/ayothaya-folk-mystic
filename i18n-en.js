@@ -3607,3 +3607,7 @@ Object.assign(globalThis.I18N_EN,{
 });
 
 Object.assign(globalThis.I18N_EN,{"เลือกอุปกรณ์ที่จะตีบวก":"Choose equipment to refine","เลือก ตีบวกอุปกรณ์":"Choose Refine Equipment","ตีบวกอุปกรณ์เป็น +1":"Refine Equipment to +1","คุยครูแสนดาบ → ตีบวกอุปกรณ์ → เลือกชิ้นที่สวมอยู่ → กด ตีบวก (ใช้แร่ 1 + เบี้ย)":"Talk to Kru Saen Dap, choose Refine Equipment, select worn equipment and press Refine (1 ore + Bia)"});
+
+Object.assign(globalThis.I18N_EN,{"กด Space เพื่อพูดคุย · หรือคลิก NPC":"Press Space to talk, or click the NPC","แตะ NPC เพื่อพูดคุย":"Tap an NPC to talk"});
+
+Object.assign(globalThis.I18N_EN,{"· Space คุยกับ NPC / โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E ใช้ยา":"- Space Talk to NPC / Attack - F Auto - 1-9 / 0 Skills - Q / E Potions","WASD เดิน · คลิกมอนเลือกเป้า · Space คุยกับ NPC / โจมตี · F ออโต้":"WASD Move - Click a monster to target - Space Talk to NPC / Attack - F Auto","WASD เดิน · Space คุยกับ NPC / โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E ใช้ยา":"WASD Move - Space Talk to NPC / Attack - F Auto - 1-9 / 0 Skills - Q / E Potions"});

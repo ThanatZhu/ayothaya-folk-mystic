@@ -6,14 +6,14 @@ import {itemDef} from './items.js?v=107';
 import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {awardExperience} from './experience.js?v=105.3';
 import {dailyBounties,normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd,ALBUM_CARDS,ALBUM_MILESTONES,WEEKLY,normalizeWeekly} from './bounty.js?v=107';
-import {iconStyle} from './bag-ui.js?v=107';
+import {iconStyle} from './bag-ui.js?v=gacha147';
 import {openHudPanel} from './hud-panels.js?v=34';
 const $=id=>document.getElementById(id);
 const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 const TIER=['ง่าย','กลาง','ยาก','หัวหน้า'];
 
 export function createQuestsUI({game,account,map,bagUI}){
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./quests-journal.css?v=139',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./quests-journal.css?v=gacha147',import.meta.url).href;document.head.append(css);
  const desktop=matchMedia('(min-width:901px) and (pointer:fine)');
  let selectedQuest=null,lastQuest=-1;
  const world=game.world,slot=(account?.serverId??'local')+':'+(account?.slotId??'guest');

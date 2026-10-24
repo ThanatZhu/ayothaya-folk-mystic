@@ -1,0 +1,14 @@
+# Himmapan summoning and card paintings — 147
+
+- 29 chapter-two monsters now have individual generated portrait card illustrations. The original 20 legacy card variants retain their existing painted atlas. Cards use the same item IDs, effects, drop rates and album progress.
+- Four additional generated assets: moonlit forest, Thai pi musician, lotus spirit egg and gold bullion. Production WebP exports total about 4 MB including the cards; original high-resolution PNGs stay in local outputs and in the image generator archive.
+- All artwork was created with built-in image_gen. Exact prompts: `assets/summon147/prompts.json`. Export script: `scripts/prepare-summon147.mjs`, using local `outputs/imagegen147/sources.json` and proportional canvas exports; alpha is checked for each cutout.
+- Pet window has an invitation scene and a separate companion tab. The companion tab shows **owned pets only**, selects an owned pet automatically, and offers a route back to summoning when empty.
+- The ritual uses layered mist, fireflies, musician breathing, gathering light and egg reveal motion. S = golden light, A = violet, B = blue; labels also identify rarity. Reduced motion skips the intro and disables CSS motion. Closing the window pauses decorative loops.
+- Ten-pull results appear as ten individually clickable eggs or can be opened together. A single pull has one large egg. The server saves the result before the scene begins; revealing and closing/reopening never submits another draw. Failed commands retain the original request UUID for retry.
+- The existing 100/1,000 costs, 3/17/80 percent rates, 80-pull S guarantee, duplicate copies, star upgrade requirements, cooldowns and authoritative wallet remain unchanged. There are no payment changes.
+- Bag header displays the ordinary coin and server-owned gold-bar balances; balance changes participate in the render signature.
+- Summoning and companion panels use bounded viewport grids, dynamic viewport height and safe-area insets. There is no vertical catalog scroll. Responsive QA includes 1920×1080, 1440×900, 1280×720, 1024×600, 844×390, 667×375, 640×360, 390×844 and 360×640.
+- `summon-lab.html` is a separate nonpersistent visual sandbox with fake credits. It uses the same UI but never sends a live wallet request.
+
+Validation: `node --test tests/summon147.test.mjs tests/pet-gacha.test.mjs tests/pet-live.test.mjs tests/cards.test.mjs`; `node --test tests/syntax.test.mjs tests/movement146.test.mjs`; build and `scripts/check-summon147.mjs <playwright/index.mjs>`. Browser QA uses an isolated real server and temporary profiles, checks a rapid double click makes only one saved draw, close/reopen, guaranteed S, individual and all-egg reveal, equip/upgrade, both bag balances, all 29 images, owned-only and empty states, overflow and console errors. Screenshots and results are local under `outputs/summon147/`.

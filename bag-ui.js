@@ -7,6 +7,7 @@ import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,ex
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=role116';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {pickPotion} from './auto-play.js';
+import {normalizePetAccount} from './pet-account.js';
 
 const $=id=>document.getElementById(id);
 const QUICK_KEY='ayothaya-quick-slots';
@@ -24,14 +25,14 @@ const loaded={};if(typeof Image==='function')for(const k of new Set(Object.value
  for(const el of document.querySelectorAll('[style*="--ph:"]'))el.style.cssText=iconStyle(el.style.getPropertyValue('--ph').trim().slice(1,-1));};im.src=ATLASES[k];}
 export function iconStyle(id){
  const def=itemDef(id);if(!def)return '';
- if(def.monsterCard){const layout=ATLAS_LAYOUTS[def.atlas];return 'background-image:url('+ATLASES[def.atlas]+');background-size:'+(layout.columns*100)+'% '+(layout.rows*100)+'%;background-position:0 0;background-color:#20382f;box-shadow:inset 0 0 0 2px #d9bc72;border-radius:4px';}
+ if(def.monsterCard)return 'background-image:url(assets/cards147/'+id.slice(5)+'.webp);background-size:contain;background-position:center;background-color:transparent;border-radius:3px';
  const ph=def.ph&&!loaded[def.atlas],item=ph?{...def,...def.ph}:def;
  return `background-image:url(${ATLASES[item.atlas]??ITEM_ATLAS});background-size:600% 400%;background-position:${item.icon%6*20}% ${Math.floor(item.icon/6)/3*100}%`+(TINTS[item.tint]?';filter:'+TINTS[item.tint]:'')+(ph?`;--ph:'${id}'`:'');
 }
 const icon=(id,cls='item-icon')=>`<i class="${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 
 export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
- if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=drag146';css.dataset.bagUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=gacha147';css.dataset.bagUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-bag:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeBag(JSON.parse(localStorage.getItem(key)));}catch{return normalizeBag(null);}};
  let local=read();
@@ -165,14 +166,14 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  worldUI.coins=()=>bag().coins;worldUI.payWarp=cost=>{if(local.coins<cost)return false;local={...local,coins:local.coins-cost};save();return true;};
  let shown='';
  function render(force=false){
-  const b=bag(),gear=api.gearView?.()??{},sig=JSON.stringify([b,gear,selected,worn,category,quick,tab,shopNpc?.name,dialog.open,shopDialog.open]);
+  const b=bag(),gear=api.gearView?.()??{},sig=JSON.stringify([b,world.petCollection?.balance,gear,selected,worn,category,quick,tab,shopNpc?.name,dialog.open,shopDialog.open]);
   if(!force&&sig===shown)return;shown=sig;
   // Quick slots
   QUICK_IDX.forEach(i=>{const id=quick[i],el=$('quick-'+i),n=id?b.items[id]??0:0,key=QUICK_KEYS[i];
    el.innerHTML=id?icon(id)+'<b>'+n+'</b><kbd>'+key+'</kbd>':'<kbd>'+key+'</kbd>';
    el.disabled=!id||!n;el.classList.toggle('empty',!id);el.title=id?itemDef(id).name+' ('+key+')':'ตั้งปุ่มลัดในกระเป๋า';el.setAttribute('aria-label',el.title);});
   if(dialog.open){
-   $('bag-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');
+   $('bag-coins').innerHTML='<span title="เบี้ย">'+icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH')+'</span><span class="bag-gold" title="ทองแท่ง"><img src="assets/summon147/gold-bars.webp" alt="ทองแท่ง">'+normalizePetAccount(world.petCollection).balance.toLocaleString('th-TH')+'</span>';
    const all=Object.keys(b.items),kinds=TABS.find(t=>t[0]===category)[2],ids=kinds?all.filter(id=>kinds.includes(itemDef(id)?.kind)):all;if(selected&&!b.items[selected])selected=null;
    tabs.querySelectorAll('[data-cat]').forEach(t=>{const k=TABS.find(x=>x[0]===t.dataset.cat)[2],n=k?all.filter(id=>k.includes(itemDef(id)?.kind)).length:all.length;t.setAttribute('aria-selected',String(t.dataset.cat===category));t.dataset.count=n;});
    $('bag-space').textContent=`ช่องที่ใช้ ${all.length} / ${bagCap(b)}`;

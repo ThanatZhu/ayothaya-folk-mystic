@@ -212,3 +212,5 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
 .shop-expand>div{flex:1;min-width:0}.shop-expand strong{display:block;font-size:13px;color:#f4cf7a}.shop-expand small{font-size:11px;color:#c9b98f}
 .shop-expand .short{flex-basis:100%;color:#ffb38a}
 .shop-expand .deal{min-height:36px;padding:4px 12px;font-variant-numeric:tabular-nums}
+/* Both wallets are visible in the bag; the premium balance is the server snapshot. */
+#bag-coins{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}#bag-coins>span{display:inline-flex;align-items:center;gap:4px}#bag-coins .bag-gold img{width:28px;height:24px;object-fit:contain}#bag-coins .bag-gold{color:#ffe1a0}

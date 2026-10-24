@@ -1,7 +1,7 @@
 import {createAutoTargetUI} from './auto-target-ui.js?v=139';
 import {createBossBrowserUI} from './boss-browser-ui.js?v=138';
 import './role-i18n.js?v=116';
-import {createActionbar} from './actionbar-ui.js?v=talk137';
+import {createActionbar} from './actionbar-ui.js?v=painted141';
 import {drawCharacterFrame,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {peoplePlacement} from './npc-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=pets128';

@@ -5,7 +5,7 @@ import {WebSocket} from 'ws';
 import {LocalStore} from '../server/storage.js';
 import {createHost} from '../server/host.js';
 import {levelStart,XP_CURVE} from '../experience.js';
-const out=new URL('../outputs/actionbar/',import.meta.url);await mkdir(out,{recursive:true});
+const out=new URL('../outputs/action141/',import.meta.url);await mkdir(out,{recursive:true});
 const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8'));
 const store=await new LocalStore(fileURLToPath(new URL('store/',out))).init(),base='http://127.0.0.1:8920';
 const host=await createHost({mode:'local',store,catalog,origins:[base],serveStatic:true});await new Promise(r=>host.server.listen(8920,'127.0.0.1',r));
@@ -35,7 +35,7 @@ try{
  if(await page.locator('#run-toggle').isEnabled()){
   const before=await page.evaluate(()=>window.__ayothaya.game.runningRequested);await page.locator('#run-toggle').click();
   assert.equal(await page.evaluate(()=>window.__ayothaya.game.runningRequested),!before);assert.equal(await page.locator('#run-toggle .movement-label').textContent(),before?'วิ่ง':'เดิน');
-  assert.equal(await page.locator('#run-toggle svg:visible').count(),1);await page.locator('#run-toggle').click();
+  assert.equal(await page.locator('#run-toggle svg:visible').count(),0);assert.ok(await page.locator('#run-toggle .action-helper-art').isVisible());await page.locator('#run-toggle').click();
  }
  while(!(await page.locator('#actionbar-remove').isDisabled()))await page.locator('#actionbar-remove').click();
  const bottom=await page.locator('.actionbar-row[data-row="0"]').boundingBox(),entries=await page.evaluate(()=>window.__ayothaya.game.actionBar.state.slots.slice(0,8));
@@ -54,12 +54,17 @@ try{
  await page.keyboard.press('k');await page.locator('#skill-window').waitFor({state:'visible'});
  await drag(page.locator('#skill-window .skill-node[data-slot="0"] strong'),page.locator('.action-slot[data-index="1"]'));assert.deepEqual(await page.evaluate(()=>window.__ayothaya.game.actionBar.state.slots[1]),{kind:'skill',index:0});await page.locator('#skill-close').click();
  await drag(page.locator('.action-slot[data-index="0"]'),page.locator('.action-slot[data-index="2"]'));assert.deepEqual(await page.evaluate(()=>window.__ayothaya.game.actionBar.state.slots[2]),{kind:'item',id:'hp-small'});
- peer.world.cooldowns[0]=4;await page.waitForTimeout(200);assert.match(await page.locator('.action-slot[data-index="1"] em').textContent(),/^[1-4]$/);peer.world.cooldowns[0]=0;
+ peer.world.cooldowns[0]=4;await page.waitForFunction(()=>/^[1-4]$/.test(document.querySelector('.action-slot[data-index="1"] em')?.textContent),null,{timeout:3500});assert.match(await page.locator('.action-slot[data-index="1"] em').textContent(),/^[1-4]$/);peer.world.cooldowns[0]=0;
  const saved=await page.evaluate(()=>window.__ayothaya.game.actionBar.state);await page.reload();await page.waitForFunction(()=>window.__ayothaya?.game.actionBar&&document.getElementById('online-button')?.dataset.state==='online');await page.waitForTimeout(750);assert.deepEqual(await page.evaluate(()=>window.__ayothaya.game.actionBar.state),saved);
  for(const [w,h] of [[1920,1080],[1440,900],[1280,720],[1024,768],[1280,600]]){
   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(200);
   const r=await page.locator('#desktop-actionbar').boundingBox();assert.ok(r&&r.x>=0&&r.x+r.width<=w&&r.y+r.height<=h);
   const grid=await page.locator('.actionbar-rows').boundingBox(),tools=await page.locator('.actionbar-tools').boundingBox();assert.ok(Math.abs(grid.x+grid.width/2-w/2)<1,'the grid itself is centered');assert.ok(tools.x>=grid.x+grid.width&&tools.x+tools.width<=w,'side controls stay outside the grid and inside the screen');
+  const resize=await page.locator('.actionbar-resize').boundingBox();assert.ok(resize.x>=0&&resize.x+resize.width<grid.x,'row controls stay on the left of the grid');assert.ok(resize.y>=0&&resize.y+resize.height<=h);
+  for(const id of ['actionbar-add','actionbar-remove','emote-open','run-toggle']){
+   const image=page.locator('#'+id+' img');assert.match(await image.getAttribute('src'),/assets\/ui-action141\/.+\.webp/);await image.evaluate(i=>i.decode());assert.ok(await image.isVisible());
+   const clickable=await page.locator('#'+id).evaluate(b=>{const r=b.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return b===hit||b.contains(hit);});assert.ok(clickable,id+' remains unobstructed');
+  }
   const events=await page.evaluate(()=>{const map=document.querySelector('.mini-panel').getBoundingClientRect();return [...document.querySelectorAll('#hud-chips>button')].filter(b=>!b.hidden).map(b=>{const s=getComputedStyle(b),r=b.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,mapBottom:map.bottom,bg:s.backgroundImage,color:s.backgroundColor,shadow:s.boxShadow,iconShadow:getComputedStyle(b,'::before').filter,image:getComputedStyle(b,'::before').backgroundImage};});});
   assert.ok(events.length>0);for(const e of events){assert.equal(e.bg,'none');assert.equal(e.color,'rgba(0, 0, 0, 0)');assert.equal(e.shadow,'none');assert.match(e.iconShadow,/drop-shadow/);assert.match(e.image,/status-ai-v1\/.*\.webp/,'real generated art is bound to each event');assert.ok(e.y>=e.mapBottom,'desktop events begin below the map');assert.ok(e.bottom<=h,'desktop event column fits');}
   for(let i=1;i<events.length;i++){assert.equal(events[i].x,events[0].x);assert.ok(events[i].y>=events[i-1].bottom,'desktop events form a vertical column');}
@@ -74,6 +79,7 @@ try{
    while((await page.locator('.actionbar-row').count())>count)await page.locator('#actionbar-remove').click();
    await page.waitForTimeout(70);
    const picker=await page.locator('#emote-window').boundingBox(),grid=await page.locator('.actionbar-rows').boundingBox();
+   const resize=await page.locator('.actionbar-resize').boundingBox();assert.ok(resize.x>=0&&resize.x+resize.width<grid.x&&resize.y>=0&&resize.y+resize.height<=height,'painted row controls fit at every row count');
    assert.ok(picker.x>=0&&picker.y>=0&&picker.x+picker.width<=width,'emote picker fits');
    assert.ok(Math.abs(grid.y-picker.y-picker.height-10)<2,'emotes sit ten pixels above the current top row');
    if(previous&&previous.count!==count)assert.ok(count>previous.count?picker.y+picker.height<previous.bottom:picker.y+picker.height>previous.bottom,'open picker follows added and removed rows');
@@ -89,6 +95,7 @@ try{
  for(const [w,h] of [[844,390],[667,375]]){
   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(350);await page.evaluate(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();if(document.getElementById('dock-toggle')?.getAttribute('aria-expanded')==='true')document.getElementById('dock-toggle').click();});
   assert.ok(!(await page.locator('#desktop-actionbar').isVisible()));assert.ok(await page.locator('.combat-controls').isVisible());
+  assert.equal(await page.locator('.action-helper-art:visible').count(),0,'mobile controls retain their established layout');
   const geometry=await page.evaluate(()=>[...document.querySelectorAll('#skills .skill')].filter(b=>!b.hidden&&!b.hasAttribute('data-mobile-away')).map(b=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,radius:getComputedStyle(b).borderRadius};}));
   assert.ok(geometry.length>0&&geometry.length<=4);assert.ok(geometry.every(r=>r.radius==='50%'&&r.w>=44&&r.x>=0&&r.x+r.w<=w&&r.y>=0&&r.y+r.h<=h),JSON.stringify(geometry));
   assert.equal(await page.locator('#quick-slots > button[id^="quick-"]:visible').count(),4);
@@ -97,6 +104,6 @@ try{
   for(let i=0;i<geometry.length;i++)for(let j=i+1;j<geometry.length;j++){const a=geometry[i],b=geometry[j];assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'mobile skill targets do not overlap');}
   await page.locator('#skill-bank').click();await page.screenshot({path:fileURLToPath(new URL('mobile-'+w+'.png',out))});console.log('mobile',w,h,'circular skills, fits');
  }
- assert.deepEqual(errors,[]);await writeFile(new URL('checks.json',out),JSON.stringify({errors,desktopSizes:5,mobileSizes:2,bagDrop:true,skillDrop:true,serverItemUse:true,cooldown:true,persistence:true},null,2));
+ assert.deepEqual(errors,[]);await writeFile(new URL('checks.json',out),JSON.stringify({errors,desktopSizes:5,mobileSizes:2,paintedButtons:4,rowControlsOnLeft:true,bagDrop:true,skillDrop:true,serverItemUse:true,cooldown:true,persistence:true},null,2));
  await context.close();console.log('PASS actionbar: drag, reorder, use, row anchoring, persistence, desktop and mobile');
 }finally{await browser.close();await host.close();}

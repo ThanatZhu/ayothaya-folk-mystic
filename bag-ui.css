@@ -147,7 +147,7 @@ html body #craft-window[data-hud-panel]{position:fixed!important;inset:0!importa
 
 /* 0.99.17 drag a potion onto Q / E: the item follows the pointer, the slots light up */
 .bag-grid .slot.potion{touch-action:none}
-.bag-drag{position:fixed;z-index:60;pointer-events:none;translate:-50% -50%;scale:1.15;filter:drop-shadow(0 6px 10px #000a)}
+.bag-drag{position:fixed;z-index:10000;width:64px;height:64px;line-height:0;pointer-events:none;translate:-50% -50%;scale:1.15;filter:drop-shadow(0 6px 10px #000a)}
 #quick-slots.drop-ready button{box-shadow:0 0 0 3px #f4cf7a66,0 0 14px #f4cf7a88}
 #quick-slots button.drop-over{scale:1.18;box-shadow:0 0 0 4px #f4cf7a,0 0 22px #f4cf7a}
 /* 0.100.10 drag any item to the trash zone (or out of the window) to discard; a small prompt asks how many */

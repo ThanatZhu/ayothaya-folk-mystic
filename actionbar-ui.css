@@ -48,6 +48,18 @@ body.actionbar-desktop.field-hud.hud63 #online-dock{max-width:380px!important}
 body.actionbar-dragging{user-select:none}
 @media(max-width:1280px){#desktop-actionbar{--action-size:46px;gap:6px}}
 @media(max-width:1050px){#desktop-actionbar{--action-size:42px}}
+/* Painted controls: row management on the left, emotes/movement on the right. */
+.action-helper-art{display:none}
+#desktop-actionbar>.actionbar-resize{position:absolute;right:calc(100% + 10px);bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;height:max(104px,var(--actionbar-rows-height,124px));width:48px}
+#desktop-actionbar .actionbar-resize button{display:block;width:48px;min-width:48px;height:48px;min-height:48px;flex-shrink:0;padding:0;border:0!important;background:none!important;box-shadow:none!important;border-radius:7px;filter:drop-shadow(0 2px 3px #0007)}
+#desktop-actionbar .actionbar-button-art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+#desktop-actionbar .actionbar-resize button:disabled{opacity:.45;filter:grayscale(.7) drop-shadow(0 1px 2px #0006)}
+#desktop-actionbar #actionbar-life button{width:70px!important;height:80px!important;min-height:80px!important;gap:0;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;text-shadow:0 1px 3px #000,1px 0 #143027,-1px 0 #143027;filter:drop-shadow(0 2px 3px #0007)}
+#desktop-actionbar #actionbar-life .action-helper-art{display:block;width:64px;height:64px;object-fit:contain;pointer-events:none}
+#desktop-actionbar #actionbar-life :is(.item-icon,.movement-glyph){display:none!important}
+#desktop-actionbar #actionbar-life .action-helper-label,#desktop-actionbar #actionbar-life .movement-label{display:block;font-size:12px;line-height:16px}
+#desktop-actionbar #run-toggle[aria-pressed=true] .action-helper-art{filter:brightness(1.15) drop-shadow(0 0 4px #f6d67a)}
+#desktop-actionbar #actionbar-life button:disabled{opacity:.45;filter:grayscale(.7)}
 /* Four skills per page sit around attack; the central circular arrows change page. */
 body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel{position:fixed!important;right:var(--edge-r)!important;bottom:var(--touch-bottom)!important;width:228px!important;height:202px!important;display:block!important;translate:none!important;scale:1!important}
 body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important}

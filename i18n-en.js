@@ -3572,3 +3572,38 @@ Object.assign(globalThis.I18N_EN,{
  "ไม่พบผู้เล่นที่ค้นหา": "No players match your search",
  "เพิ่มสมาชิกปาร์ตี้": "Add party member"
 });
+
+Object.assign(globalThis.I18N_EN,{
+ "ใช้ตีบวกหมวก เสื้อเกราะ ผ้าคลุม รองเท้า และเครื่องประดับ": "Used to refine headgear, armor, cloaks, shoes and accessories",
+ "เลือกอุปกรณ์ที่สวมอยู่เพื่อตีบวก": "Select worn equipment to refine",
+ "โรงตีอาวุธ": "The forge",
+ "อุปกรณ์ของเรา": "Your equipment",
+ "เลือกอุปกรณ์ที่สวมอยู่ · ตีบวกได้ครบ 6 ช่อง": "Choose worn equipment - all 6 slots can be refined",
+ "ใช้ยันต์กันแตก": "Use Safeguard Talisman",
+ "+1 ถึง +4 สำเร็จ 100% · ตั้งแต่ +5 ล้มเหลวแล้วอุปกรณ์จะแตกหายไป · ยันต์กันแตกถูกใช้เฉพาะเมื่อล้มเหลวตั้งแต่ +5": "+1 to +4: 100% success. From +5, failure destroys the equipment. A Safeguard Talisman is consumed only on failure from +5.",
+ "ช่างตีบวกและผลลัพธ์": "Blacksmith and refinement result",
+ "ช่างถือค้อนตีอุปกรณ์": "Blacksmith hammering equipment",
+ "กำลังตีบวก": "Refining",
+ "กำลังตีบวก…": "Refining...",
+ "รอช่างตีค้อนเสร็จจึงแสดงผล": "The result appears after the final hammer strike",
+ "เลือกอุปกรณ์ทางด้านขวา": "Choose equipment on the right",
+ "อาวุธใช้เศษเหล็กน้ำพี้ · เครื่องสวมใส่อื่นใช้ก้อนศิลาแลง": "Weapons use Namphi Iron Scrap; other equipment uses Laterite",
+ "ตีบวกไม่ได้": "Cannot refine",
+ "การเชื่อมต่อขาดหาย กรุณาเชื่อมต่อใหม่": "Connection lost. Please reconnect.",
+ "ยังไม่ได้รับผลจากเซิร์ฟเวอร์": "Waiting for the server result",
+ "ตรวจอุปกรณ์หรือเชื่อมต่อใหม่ก่อนตีอีกครั้ง ระบบจะไม่ส่งคำสั่งซ้ำอัตโนมัติ": "Check your equipment or reconnect before trying again. The command will not be retried automatically.",
+ "ตีบวกสำเร็จ!": "Refinement successful!",
+ "อุปกรณ์แตก!": "Equipment destroyed!",
+ "· แตกและหายไปแล้ว": "- Destroyed and removed",
+ "ยันต์กันแตกทำงาน": "Safeguard Talisman activated",
+ "· ระดับเดิม อุปกรณ์ไม่แตก": "- Level unchanged; equipment preserved",
+ "ยังไม่ได้สวมอุปกรณ์": "No equipment worn",
+ "เพิ่มพลังโจมตี": "Increases attack power",
+ "สวมจากกระเป๋าก่อน": "Equip from your bag first",
+ "รอยืนยันผลจากเซิร์ฟเวอร์": "Awaiting server confirmation",
+ "เลือกอุปกรณ์ก่อน": "Choose equipment first",
+ "โอกาสสำเร็จ {2}% · {3} เบี้ย · {4} 1 (มี {5})": "Success chance {2}% - {3} Bia - {4} x1 (have {5})",
+ "ตีบวก +": "Refine +"
+});
+
+Object.assign(globalThis.I18N_EN,{"เลือกอุปกรณ์ที่จะตีบวก":"Choose equipment to refine","เลือก ตีบวกอุปกรณ์":"Choose Refine Equipment","ตีบวกอุปกรณ์เป็น +1":"Refine Equipment to +1","คุยครูแสนดาบ → ตีบวกอุปกรณ์ → เลือกชิ้นที่สวมอยู่ → กด ตีบวก (ใช้แร่ 1 + เบี้ย)":"Talk to Kru Saen Dap, choose Refine Equipment, select worn equipment and press Refine (1 ore + Bia)"});

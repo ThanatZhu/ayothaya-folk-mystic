@@ -84,7 +84,7 @@ export function combatPower(d,level=1){
 }
 export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=null,reborn=0}){
  const s=normalizeStats(stats),g=normalizeGear(gear),worn=GEAR_SLOTS.map(k=>g[k]&&itemDef(g[k])).filter(Boolean);
- // Refine: weapons +max(2, 8% of base) ATK/MATK per level, armor +1 DEF per level.
+ // Refine: weapons +max(2, 8% of base) ATK/MATK per level, all non-weapon equipment +1 DEF per level, including accessories without base DEF.
  const up=(it,k)=>(it[k]??0)?(it[k]+it.refine*Math.max(2,Math.round(it[k]*.08))):0;
  const cards=worn.map(it=>it.card&&ITEMS[it.card]?.effect).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
  const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0)+(food?.[k]??0),S={}; // pet: loyal pet bonus (0.50); food: meal buff (0.94)
@@ -99,7 +99,7 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
   total:S,rebirthBonus,magic,atk,matk,
   maxHp:Math.round((140+(level-1)*12)*(1+(S.vit-1)*.02)*(1+sum(e=>e.hpPct))),
   maxMp:Math.round((100+(level-1)*5)*(1+(S.int-1)*.02)),
-  def:worn.reduce((n,it)=>n+(it.def?it.def+it.refine:0),0)+Math.floor((S.vit-1)/2)+sum(e=>e.def),
+  def:worn.reduce((n,it)=>n+((it.def??0)+(it.slot!=='weapon'?it.refine:0)),0)+Math.floor((S.vit-1)/2)+sum(e=>e.def),
   weaponElement:worn.find(it=>it.slot==='weapon')?.element??'neutral',
   // 0.102.1 magic classes hit with their full MATK on basic attacks too (owner)
   basicBonus:magic?matk:atk,

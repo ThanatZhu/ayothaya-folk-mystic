@@ -148,13 +148,15 @@ export class RealmServer{
    p.send({type:'channelSwitched',room:nextId,channel:nextCh,history:copy(nextRoom.history),snapshot:this.snapshot(p)});this.social(nextRoom);return true;
   }
   if(m.type==='refine'){
+   const attempt=typeof m.attempt==='string'&&m.attempt.length<=80?m.attempt:null;
+   const reject=code=>{w.emit('refineRejected',{attempt,slot:m.slot,code});return this.itemFail(p,code);};
    const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null;
-   if(!npc||!SHOPS[npc.name]?.refine||SHOPS[npc.name].mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'refine-far');
-   if(now-p.gearAt<600)return this.itemFail(p,'gear-rate');p.gearAt=now;
-   let r;try{r=refineGear(p.bag,p.gear,m.slot,{lekLai:m.lekLai===true,guard:m.guard===true});}catch(e){return this.itemFail(p,e.message);}
-   const before=itemDef(p.gear[m.slot])?.name;p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);
+   if(!npc||!SHOPS[npc.name]?.refine||SHOPS[npc.name].mapId!==p.room.map.id||distance(npc,w.player)>3.6)return reject('refine-far');
+   if(now-p.gearAt<600)return reject('gear-rate');p.gearAt=now;
+   let r;try{r=refineGear(p.bag,p.gear,m.slot,{lekLai:m.lekLai===true,guard:m.guard===true});}catch(e){return reject(e.message);}
+   const item=p.gear[m.slot],before=itemDef(item)?.name;p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);
    const shout=refineAnnouncement(p.character.name,r,before,itemDef(r.gear[m.slot])?.name);if(shout)this.worldSay(p.serverId,{actor:null,name:'ประกาศ',text:shout});
-   w.emit('refined',{slot:m.slot,result:r.result,level:r.level,chance:r.chance});this.storyCheck(p);return true;
+   w.emit('refined',{attempt,item,upgradedItem:r.gear[m.slot],slot:m.slot,result:r.result,level:r.level,chance:r.chance});this.storyCheck(p);return true;
   }
   if(m.type==='storageOpen'||m.type==='store'||m.type==='retrieve'){
    const npc=p.room.map.npcs?.find(n=>n.name===STORAGE_NPC);
@@ -504,7 +506,7 @@ export class RealmServer{
      target.world.takeMonsterHit(type,type.damage,m);
     }
    }
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock}; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album','crafted'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock}; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','refineRejected','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album','crafted'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){this.broadcasting=true;const events=copy(room.events);for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p,{delta:true}),events});}this.broadcasting=false;room.events=[];}
   }
  }

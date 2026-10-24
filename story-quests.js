@@ -44,7 +44,7 @@ export const STORY=[
  {id:'t8',title:'เหล็กน้ำพี้',reward:{baseXp:60,jobXp:30,coins:300,items:[{id:'card-rat',count:1},{id:'laterite',count:1}]},steps:[
   {type:'level',level:6,hint:'ล่ามอนจนถึง Lv.6',how:'เปิด AUTO ในทุ่งขวัญข้าว · ภารกิจล่ารางวัลในเมืองก็ให้ EXP'},
   {type:'talk',npc:'ครูแสนดาบ',mapId:'ayutthaya',hint:'กลับไปหาครูแสนดาบ',say:'เหล็กน้ำพี้ดีนี่ มาตีบวกอาวุธกัน +1 ถึง +4 ไม่มีวันแตก ตั้งแต่ +5 ถ้าพลาดของจะแตก เว้นแต่มียันต์กันแตก'},
-  {type:'do',action:'refine',npc:'ครูแสนดาบ',mapId:'ayutthaya',hint:'ตีบวกอาวุธเป็น +1',how:'คุยครูแสนดาบ → ตีบวกอาวุธ / เกราะ → กด ตีบวก (ใช้เศษเหล็ก 1 + เบี้ย)'},
+  {type:'do',action:'refine',npc:'ครูแสนดาบ',mapId:'ayutthaya',hint:'ตีบวกอุปกรณ์เป็น +1',how:'คุยครูแสนดาบ → ตีบวกอุปกรณ์ → เลือกชิ้นที่สวมอยู่ → กด ตีบวก (ใช้แร่ 1 + เบี้ย)'},
  ]},
  {id:'t9',title:'การ์ดใบแรก',reward:{baseXp:40,jobXp:25,coins:200,items:[{id:'hp-small',count:5}]},steps:[
   {type:'do',action:'card',hint:'ใส่การ์ดหนูยุ้งข้าวในอาวุธ',how:'กด สถานะ → ช่องอาวุธ → เลือกการ์ด แล้วกด ใส่การ์ด (ใส่แล้วถอดไม่ได้ · การ์ดดรอปจากมอนแต่ละชนิด)'},

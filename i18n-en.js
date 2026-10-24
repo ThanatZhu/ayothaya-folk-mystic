@@ -3429,6 +3429,7 @@ Object.assign(globalThis.I18N_EN,{
  "สัตว์เลี้ยงเดิมและการให้อาหาร": "Legacy Pets and Feeding",
  "ตารางปุ่มลัดสกิลและไอเท็ม": "Skill and Item Shortcut Grid",
  "ช่องปุ่มลัด": "Shortcut Slots",
+ "ช่องสกิลว่าง": "Empty Skill Slot",
  "เพิ่มแถวปุ่มลัด 8 ช่อง": "Add a row of 8 shortcuts",
  "ซ่อนแถวบนสุด 8 ช่อง": "Hide the top row of 8 shortcuts",
  "แถวหลัก ลบไม่ได้": "Permanent bottom row",

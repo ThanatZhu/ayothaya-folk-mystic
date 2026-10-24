@@ -20,8 +20,8 @@ the upper rows; compact key labels use S and A. Bindings are saved on this
 device per realm, character slot, class and Master branch. They do not modify
 character saves or inventory. Legacy mobile wheel order remains separate.
 
-Mobile uses five circular skills per page around the attack button, with
-circular arrows to switch pages. Existing quick items remain reachable on
+Mobile uses four circular skill positions per page around the attack button, with
+circular arrows to switch pages. Four quick item slots remain reachable on
 mobile. The desktop grid and side controls restore their original mobile
 parents when changing layouts. The AUTO positions tab explicitly describes
 the mobile wheel when viewed from desktop.

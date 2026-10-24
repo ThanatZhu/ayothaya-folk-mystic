@@ -92,7 +92,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  const heroCtx=dialog.querySelector('#bag-hero').getContext('2d');
 
  // Quick slots: per-viewer convenience, so localStorage is fine.
- let quick=['hp-small','mp-small',null,null];try{const q=JSON.parse(localStorage.getItem(QUICK_KEY));if(Array.isArray(q)&&q.length>=2&&q.length<=4)quick=QUICK_IDX.map(i=>quickable(q[i])?q[i]:null);}catch{}
+ let quick=['hp-small','mp-small','fly-wing','return-incense'];try{const q=JSON.parse(localStorage.getItem(QUICK_KEY));if(Array.isArray(q)&&q.length>=2&&q.length<=4)quick=QUICK_IDX.map(i=>quickable(q[i])?q[i]:i>=q.length?quick[i]:null);}catch{}
  const bar=document.createElement('div');bar.id='quick-slots';bar.innerHTML=QUICK_IDX.map(i=>`<button type="button" id="quick-${i}"></button>`).join('');document.body.append(bar);
  QUICK_IDX.forEach(i=>$('quick-'+i).onclick=()=>quickUse(quick[i]));
  // 0.99.17 drag a potion from the bag onto the Q / E slot at the bottom (mouse or finger)

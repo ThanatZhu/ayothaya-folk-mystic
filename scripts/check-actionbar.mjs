@@ -13,7 +13,7 @@ const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await
 try{
  const seeded=await store.createLocal({name:'ActionbarQA',gender:'male'}),record=store.rows.get(seeded.uid);
  record.character.classId='shaman';record.character.jobId='spirit-master';record.xpCurve=XP_CURVE;record.state.mapId='ayutthaya';record.state.traveler.baseXp=levelStart(59);record.skills={_tree84:Array(15).fill(0),_roles116:Array(15).fill(0),shaman:Array(15).fill(10)};
- record.bag={coins:2000,items:{'hp-small':8,'mp-small':8,'fly-wing':2}};record.daily={day:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),streak:1};
+ record.bag={coins:2000,items:{'hp-small':8,'mp-small':8,'fly-wing':2,'return-incense':2}};record.daily={day:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),streak:1};
  const context=await browser.newContext({viewport:{width:1440,height:900}});
  await context.route('http://127.0.0.1:8787/**',r=>r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'}));
  await context.routeWebSocket('ws://127.0.0.1:8787/realtime',route=>{
@@ -61,7 +61,10 @@ try{
   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(350);await page.evaluate(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();if(document.getElementById('dock-toggle')?.getAttribute('aria-expanded')==='true')document.getElementById('dock-toggle').click();});
   assert.ok(!(await page.locator('#desktop-actionbar').isVisible()));assert.ok(await page.locator('.combat-controls').isVisible());
   const geometry=await page.evaluate(()=>[...document.querySelectorAll('#skills .skill')].filter(b=>!b.hidden&&!b.hasAttribute('data-mobile-away')).map(b=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,radius:getComputedStyle(b).borderRadius};}));
-  assert.ok(geometry.length>0&&geometry.length<=5);assert.ok(geometry.every(r=>r.radius==='50%'&&r.w>=44&&r.x>=0&&r.x+r.w<=w&&r.y>=0&&r.y+r.h<=h),JSON.stringify(geometry));
+  assert.ok(geometry.length>0&&geometry.length<=4);assert.ok(geometry.every(r=>r.radius==='50%'&&r.w>=44&&r.x>=0&&r.x+r.w<=w&&r.y>=0&&r.y+r.h<=h),JSON.stringify(geometry));
+  assert.equal(await page.locator('#quick-slots > button[id^="quick-"]:visible').count(),4);
+  for(let i=0;i<4;i++)assert.ok(await page.locator('#quick-'+i).isEnabled(),'all four owned quick items are usable');
+  const blanks=await page.locator('#skills .mobile-skill-empty:visible').count();assert.equal(geometry.length+blanks,4,'each wheel page keeps four skill positions');
   for(let i=0;i<geometry.length;i++)for(let j=i+1;j<geometry.length;j++){const a=geometry[i],b=geometry[j];assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'mobile skill targets do not overlap');}
   await page.locator('#skill-bank').click();await page.screenshot({path:fileURLToPath(new URL('mobile-'+w+'.png',out))});console.log('mobile',w,h,'circular skills, fits');
  }

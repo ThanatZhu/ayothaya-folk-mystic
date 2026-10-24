@@ -7,7 +7,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const ERRORS={'bag-full':'กระเป๋าเต็ม กรุณาจัดกระเป๋าก่อนรับของ','coin-cap':'เบี้ยเต็ม กรุณาใช้หรือฝากเบี้ยก่อน','server-busy':'กำลังบันทึกหรือแลกเปลี่ยนอยู่ ลองอีกครั้ง','not-connected':'เชื่อมต่อเกมก่อนเปิดจดหมาย','mail-not-found':'ไม่พบจดหมายฉบับนี้','disconnected':'การเชื่อมต่อขาด กดใหม่ได้โดยไม่รับของซ้ำ','mailbox-full':'กล่องจดหมายเต็ม'};
 export function createMailboxUI({game}){
  if(document.getElementById('menu-mail'))return {update(){}};
- const css=document.createElement('link');css.rel='stylesheet';css.href='mailbox-ui.css?v=publish134';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='mailbox-ui.css?v=menu135';document.head.append(css);
  const menu=document.createElement('button');menu.type='button';menu.id='menu-mail';menu.setAttribute('aria-label','จดหมาย');menu.innerHTML='<i class="mail-symbol" aria-hidden="true"></i><span>จดหมาย</span><b class="mail-badge" hidden></b>';document.getElementById('game-menu')?.append(menu);
  const dialog=document.createElement('dialog');dialog.id='mail-window';dialog.setAttribute('aria-labelledby','mail-title');dialog.innerHTML='<header><h2 id="mail-title">จดหมาย</h2><button type="button" id="mail-refresh">รีเฟรช</button><button type="button" id="mail-close" aria-label="ปิด">×</button></header><p id="mail-status" role="status"></p><div class="mail-layout"><nav id="mail-list" aria-label="รายการจดหมาย"></nav><article id="mail-detail"></article></div>';(document.getElementById('game-shell')??document.body).append(dialog);
  let rows=[],selected=null,busy=false,last=-1,status='';const $=id=>dialog.querySelector('#'+id);

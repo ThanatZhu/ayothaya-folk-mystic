@@ -2,13 +2,13 @@ import {className} from './classes.js?v=112.1';
 const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;};
 const format=n=>Math.max(0,Math.round(Number(n)||0)).toLocaleString();
 export function createBossResultsUI({game}){
- const css=el('link');css.rel='stylesheet';css.href='boss-results-ui.css?v=129';document.head.append(css);
+ const css=el('link');css.rel='stylesheet';css.href='boss-results-ui.css?v=menu135';document.head.append(css);
  const dialog=el('dialog');dialog.id='boss-results';dialog.setAttribute('aria-labelledby','boss-results-title');
  const header=el('header'),heading=el('div'),kicker=el('small','','BOSS REPORT'),title=el('h2');title.id='boss-results-title';heading.append(kicker,title);
  const close=el('button','boss-close','×');close.type='button';close.setAttribute('aria-label','ปิด');header.append(heading,close);
  const meta=el('p','boss-result-meta'),leader=el('section','boss-result-leader'),table=el('section','boss-result-table'),history=el('select'),foot=el('footer'),note=el('p','','นับดาเมจที่ลด HP จริง รวมพิษและสัตว์เลี้ยง · DPS ใช้เวลาตั้งแต่โจมตีครั้งแรกจนบอสล้ม');history.setAttribute('aria-label','ผลการต่อสู้ล่าสุด');foot.append(history,note);dialog.append(header,meta,leader,table,foot);
  (document.getElementById('game-shell')??document.body).append(dialog);
- const button=el('button');button.id='menu-boss-result';button.type='button';button.hidden=true;button.setAttribute('aria-label','สรุปดาเมจบอส');button.append(el('i','','♛'),el('span','','MVP'));document.getElementById('game-menu')?.append(button);
+ const button=el('button');button.id='menu-boss-result';button.type='button';button.hidden=true;button.setAttribute('aria-label','สรุปดาเมจบอส');const icon=el('i');icon.setAttribute('aria-hidden','true');button.append(icon,el('span','','MVP'));document.getElementById('game-menu')?.append(button);
  let results=[],selected=null;
  function draw(){
   const result=results.find(r=>r.encounterId===selected)??results[0];if(!result)return;

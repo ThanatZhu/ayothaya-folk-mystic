@@ -5,7 +5,7 @@ import {applySkillArt} from './skill-art.js?v=icons117';
 
 export function createActionbar({game,bagUI,account={}}){
  const world=game.world,body=document.body,$=id=>document.getElementById(id),phone=matchMedia('(any-pointer:coarse),(max-width:900px)');
- const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=painted141';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=combat142';document.head.append(css);
  const key='ayothaya-actionbar-v1:'+[(account.serverId??'local'),(account.slotId??'guest'),world.profession.id,world.jobId??'',world.roleCombat?'role':'legacy'].join(':');
  const fallback=defaultActionbar(world.skills,game.hotbar,bagUI.quickItems);
  let saved;try{saved=JSON.parse(localStorage.getItem(key));}catch{}
@@ -17,6 +17,9 @@ export function createActionbar({game,bagUI,account={}}){
  }
  for(const [id,art] of [['emote-open','emote'],['run-toggle','run']]){
   const button=$(id);if(!button)continue;const image=document.createElement('img');image.className='action-helper-art';image.src='assets/ui-action141/'+art+'.webp';image.alt='';image.width=image.height=64;button.prepend(image);
+ }
+ for(const [id,art,size] of [['auto-attack','auto',84],['auto-settings-open','settings',36],['attack','attack',84]]){
+  const button=$(id);if(!button)continue;const image=document.createElement('img');image.className='combat-control-art';image.src='assets/ui-combat142/'+art+'.webp';image.alt='';image.width=image.height=size;button.prepend(image);
  }
  $('game-shell').append(root);const rows=root.querySelector('.actionbar-rows'),status=root.querySelector('[role=status]');
  const auto=$('auto-control')??$('auto-attack'),attack=$('attack'),moves=[auto,attack,$('emote-open'),$('run-toggle')].filter(Boolean).map(node=>{const home=document.createComment('shortcut home');node.before(home);return {node,home};});

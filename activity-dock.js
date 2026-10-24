@@ -1,7 +1,7 @@
 const hit=(a,b,gap=6)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
 // Prefer a free left column. Tiny landscapes use a modal only while expanded.
 export function planActivityDock({width,height,left=0,top=0,obstacles=[],touch=false,expanded=true}){
- const edge=10,right=left+width,bottom=top+height,navH=touch?44:156;
+ const edge=10,right=left+width,bottom=top+height,navH=touch?44:210;
  const find=(w,minH,maxH)=>{
   const xs=[left+edge,left+126,...obstacles.map(r=>r.right+8)].filter(x=>x+w<=right-edge&&x<left+width*.58);
   const ys=[top+edge,...obstacles.map(r=>r.bottom+8)].sort((a,b)=>a-b);
@@ -10,14 +10,14 @@ export function planActivityDock({width,height,left=0,top=0,obstacles=[],touch=f
    return {left:x,top:y,width:w,maxHeight:Math.min(maxH,limit-y),horizontal:touch,overlay:false};
   }return null;
  };
- if(expanded){for(const w of touch?[280,232]:[350,310]){const p=find(Math.min(w,width-20),touch?142:180,touch?242:330);if(p)return p;}}
- const rail=find(touch?156:50,touch?44:navH,touch?44:navH)??find(104,44,44);
+ if(expanded){for(const w of touch?[280,232]:[350,310]){const p=find(Math.min(w,width-20),touch?142:navH,touch?242:330);if(p)return p;}}
+ const rail=find(touch?156:84,touch?44:navH,touch?44:navH)??find(104,44,44);
  return {...(rail??{left:left+edge,top:top+edge,width:104,maxHeight:44}),horizontal:touch||!rail||rail.width===104,small:!rail||rail.width===104,overlay:expanded};
 }
 
 export function createActivityDock({game,partyUI}){
  const $=id=>document.getElementById(id),body=document.body,quest=$('quest-tracker'),party=$('party-frame'),trial=$('training-journal');if(!quest||!party)return;
- const css=document.createElement('link');css.rel='stylesheet';css.href='./activity-dock.css?v=overlay143';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./activity-dock.css?v=activity145';document.head.append(css);
  const root=document.createElement('section');root.id='activity-dock';root.setAttribute('aria-label','เควสและปาร์ตี้');root.innerHTML='<nav role="tablist" aria-label="เควสและปาร์ตี้"><button type="button" role="tab" id="activity-quest-tab" aria-controls="activity-quest-pane" data-activity="quest"><i class="activity-quest-icon" aria-hidden="true"></i><span>เควส</span></button><button type="button" role="tab" id="activity-party-tab" aria-controls="activity-party-pane" data-activity="party"><i class="activity-party-icon" aria-hidden="true"></i><span>ปาร์ตี้</span><b id="activity-party-count" hidden></b></button><button type="button" id="activity-fold" aria-label="ย่อเควสและปาร์ตี้" aria-expanded="true">‹</button></nav><div id="activity-content"><section id="activity-quest-pane" role="tabpanel" aria-labelledby="activity-quest-tab"><div class="activity-heading"><small>การเดินทางของคุณ</small><button type="button" id="activity-journal">สมุดเควส</button></div></section><section id="activity-party-pane" role="tabpanel" aria-labelledby="activity-party-tab" hidden><div id="activity-party-empty"><small>เพื่อนร่วมทาง</small><h3>ออกผจญภัยด้วยกัน</h3><p>ชวนเพื่อนในแนล เริ่มปาร์ตี้เมื่อเพื่อนตอบรับ · สูงสุด 5 คน</p><button type="button" id="activity-create-party"><i class="activity-party-icon" aria-hidden="true"></i><span>สร้างปาร์ตี้</span><b aria-hidden="true">+</b></button><button type="button" id="activity-find-party">หาเพื่อนร่วมทาง</button><small id="activity-party-note"></small></div></section></div>';
  const home=document.createComment('quest and party dock');($('game-shell')??body).append(home,root);$('activity-quest-pane').append(quest);if(trial)$('activity-quest-pane').append(trial);$('activity-party-pane').append(party);quest.classList.remove('folded');party.removeAttribute('data-layout-hidden');party.dataset.compact='false';
  body.classList.add('activity-dock-ready');

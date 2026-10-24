@@ -3679,6 +3679,7 @@ Object.assign(globalThis.I18N_EN,{
 });
 
 Object.assign(globalThis.I18N_EN,{'เลือกเป้าหมายถัดไป':'Select next target'});
+Object.assign(globalThis.I18N_EN,{'ข้ามแอนิเมชัน':'Skip animation','ความคืบหน้าการันตี S':'S guarantee progress','ขวัญแห่งพงไพรกำลังมาพบคุณ…':'A forest companion is coming to meet you…','ไข่ขวัญ {6}':'Companion egg {6}','เปิดไข่ขวัญใบที่ {3}':'Open companion egg {3}','สะสม':'Collected','· การันตี S อีก':'· S guarantee in'});
 Object.assign(globalThis.I18N_EN,{'ลากจัดปุ่มบนหน้าจอ':'Drag HUD buttons','สลับ':'Swap','จัดตำแหน่งปุ่มบนหน้าจอ':'Arrange HUD buttons','ลากปุ่มไปวางตำแหน่งที่ต้องการ':'Drag buttons to your preferred positions','คืนค่าเดิม':'Reset','คัดลอกตำแหน่ง':'Copy layout','จัดแยกแนวตั้งและแนวนอน · ใช้นิ้วหรือเมาส์ลากได้':'Separate portrait and landscape layouts. Drag with touch or mouse.','ข้อมูลตำแหน่งปุ่ม':'Button layout data','ลาก':'Drag','บันทึกไม่ได้ ลองคัดลอกตำแหน่งเก็บไว้ก่อน':'Unable to save. Copy your layout to keep it.','คืนค่าตำแหน่งแนวนี้แล้ว กดบันทึกเพื่อใช้':'This orientation has been reset. Save to apply.','คัดลอกแล้ว นำไปวางในแชตเพื่อส่งตำแหน่งได้':'Copied. Paste in chat to share your layout.','เลือกข้อความแล้ว คัดลอกแล้วส่งในแชตได้':'Text selected. Copy it to share in chat.'});
 
 Object.assign(globalThis.I18N_EN,{"พูดคุย":"Talk"});

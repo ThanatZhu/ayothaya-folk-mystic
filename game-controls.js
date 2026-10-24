@@ -1,3 +1,4 @@
+import {characterHead} from './character-label.js?v=149';
 import {createRoleWorldDecor} from './role-world-decor.js';
 import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progress.js';
@@ -359,7 +360,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   // Camera follows the player while preserving user-controlled azimuth and zoom.
   const follow=new THREE.Vector3(p.x,floor+1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
   controls.update();camera.updateMatrixWorld();
-  project(playerLabel,p.x,2.0+hero.sprite.position.y,p.z);
+  const head=characterHead(hero.sprite,camera);project(playerLabel,head.x,head.y,head.z);
   if((world.rebirth??0)!==shownRank){shownRank=world.rebirth??0;const t=playerLabel.querySelector('.rank-title');t.hidden=!shownRank;t.textContent=shownRank?'✦ '+rebirthRank(shownRank)+' ✦':'';}
   mobViews.forEach((v,i)=>{
    const m=world.mobs[i],type=MONSTER_TYPES[m.type];

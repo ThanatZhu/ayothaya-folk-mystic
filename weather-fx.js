@@ -1,5 +1,6 @@
 // 0.97 weather on screen: rain streaks around the camera, darker light, thicker haze and storm lightning, easing over
 // a few seconds when the weather turns. One LineSegments draw for all the rain; the drop count follows graphics quality.
+import {announce} from './announcement-ui.js?v=149';
 import * as THREE from 'three';
 import {weatherAt,WEATHERS} from './weather.js?v=97';
 // ?weather=storm (or drizzle / mist / clear) previews one weather on this page only.
@@ -27,7 +28,7 @@ export function createWeather({scene,controls,sun,map,game,quality='mid',reduced
   update(dt){
    // re-pick when the slot ends or an admin override starts / changes / is cleared
    const o=game.world.weatherOverride,key=o?o.id+':'+(o.mapId??'')+':'+Math.round(o.endsAt/5e3):'';
-   place();if(Date.now()>=now.endsAt||key!==overrideKey){overrideKey=key;const before=now.id;now=pick(Date.now(),map,o);if(now.id!==before)game.world.notice(`${now.icon} สภาพอากาศเปลี่ยน · ${now.name}`);}
+   place();if(Date.now()>=now.endsAt||key!==overrideKey){overrideKey=key;const before=now.id;now=pick(Date.now(),map,o);if(now.id!==before){const text=`${now.icon} สภาพอากาศเปลี่ยน · ${now.name}`;dispatchEvent(new CustomEvent('game-notice',{detail:text}));announce(text,{kind:'weather'});}}
    paintChip();
    const k=Math.min(1,dt/3); // ~3 s ease toward the target weather
    level.rain+=(now.rain-level.rain)*k;level.dim+=(now.dim-level.dim)*k;level.fog+=(now.fog-level.fog)*k;

@@ -1,3 +1,6 @@
+import {announce} from './announcement-ui.js?v=149';
+import {realmAnnouncement} from './announcement-state.js?v=149';
+import {characterHead} from './character-label.js?v=149';
 import {createPartyLayout} from './party-layout.js?v=overlay143';
 import {createDesktopChat} from './desktop-chat-ui.js?v=channel144';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
@@ -9,7 +12,7 @@ import {iconStyle} from './bag-ui.js?v=107';
 import {emblemId,emoteId} from './items.js?v=107';
 import {createPetView} from './pet-ui.js?v=pets128';
 import * as THREE from 'three';
-import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
+import {CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=pets128';
 import {MultiplayerClient} from './multiplayer-client.js?v=movement146';
 import {CHANNELS,CHANNEL_KEY,normalizeChannel} from './realm-state.js?v=62';
@@ -226,7 +229,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
      Promise.resolve(account.data&&account.save?.({...account.data,mapId,position:null})).catch(()=>{}).finally(go);}});
    client.addEventListener('snapshot',({detail})=>acceptSnapshot(detail));
    client.addEventListener('events',({detail})=>game.world.events.push(...detail.events));
-   client.addEventListener('chat',({detail})=>log(detail,true));
+   client.addEventListener('chat',({detail})=>{log(detail,true);if(realmAnnouncement(detail))announce(detail.text,{id:detail.id});});
    client.addEventListener('social',({detail})=>{roster=detail.players;party=detail.party;if(detail.channel)currentChannel=normalizeChannel(detail.channel);if(detail.channels)channelCounts=detail.channels;drawRoster();chip('ออนไลน์ · '+roster.length+' คน');});
    client.addEventListener('error',({detail})=>{const text=messages[detail.code]??(client.status==='error'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ · กดเชื่อมต่อใหม่อีกครั้ง':'ไม่สามารถทำรายการนี้ได้ · '+detail.code);status(text);if(chatErrors.has(detail.code)||!dialog.open)dockNote(text);if(!chatErrors.has(detail.code))game.world.notice(text);});
    client.addEventListener('invite',({detail})=>showInvite(detail));
@@ -299,8 +302,8 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if((state.rebirth??0)!==v.rankShown){v.rankShown=state.rebirth??0;const t=v.label.querySelector('.rank-title');if(t){t.hidden=!v.rankShown;t.textContent=v.rankShown?'✦ '+rebirthRank(v.rankShown)+' ✦':'';}}
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
    const tag=state.guild?state.guild.emblem+':'+(state.guild.castle?'👑 ':'')+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append((state.guild.castle?'👑 ':'')+state.guild.name);v.label.append(g);}}
-   const up=camera.matrixWorld.elements,labelHeight=WORLD_BODY_HEIGHT+.14;
-   v.label.hidden=p.hp<=0||!place(v.label,v.sprite.position.x+up[4]*labelHeight,v.sprite.position.y+up[5]*labelHeight,v.sprite.position.z+up[6]*labelHeight);
+   const head=characterHead(v.sprite,camera);
+   v.label.hidden=p.hp<=0||!place(v.label,head.x,head.y,head.z);
    if((state.pet??null)!==(v.pet?.id??null)){v.pet?.dispose();v.pet=state.pet?createPetView(scene,state.pet):null;}v.pet?.follow(v.sprite.position,Math.min(.05,dt));
    if(v.emoteBubble)v.emoteBubble.hidden=performance.now()>v.emoteUntil||!v.sprite.visible||!place(v.emoteBubble,v.sprite.position.x,v.sprite.position.y+2.9,v.sprite.position.z);
   }

@@ -1,4 +1,5 @@
 import {createPartyLayout} from './party-layout.js?v=138';
+import {createDesktopChat} from './desktop-chat-ui.js?v=140';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
 import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';
@@ -73,12 +74,14 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  setChannel('room');
  let noteTimer;const dockNote=text=>{$('dock-note').textContent=text;clearTimeout(noteTimer);noteTimer=setTimeout(()=>{$('dock-note').textContent='';},3500);};
  $('online-text').addEventListener('focus',()=>{game.clearInput();setCollapsed(false);});
- $('online-text').addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();e.stopPropagation();e.target.blur();}});
- addEventListener('keydown',e=>{if(e.code!=='Enter'||e.repeat||!active||dock.hidden||editable(e)||document.querySelector('dialog[open]'))return;e.preventDefault();setCollapsed(false);$('online-text').focus();});
+ $('online-text').addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();e.stopPropagation();if(desktopChat.desktop())desktopChat.close();else e.target.blur();}});
+ addEventListener('keydown',e=>{if(e.code!=='Enter'||e.repeat||e.isComposing||e.ctrlKey||e.metaKey||e.altKey||!active||dock.hidden||editable(e)||document.querySelector('dialog[open]'))return;e.preventDefault();if(desktopChat.desktop())desktopChat.open();else{setCollapsed(false);$('online-text').focus();}});
+ const desktopChat=createDesktopChat({shell,dock,game,setCollapsed});
  function log(m,live=false){
   if(seenMessages.has(m.id))return;seenMessages.add(m.id);if(seenMessages.size>160)seenMessages.delete(seenMessages.values().next().value);
   const mine=m.actor===client?.id,p=el('p',['party','system','guild','whisper','world'].includes(m.channel)?m.channel:''),name=el('b','',m.channel==='whisper'&&mine?'ถึง '+m.to:m.name),time=el('time','',new Date(m.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
-  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.channel==='guild')p.append(el('span','mp-tag','กิลด์'));if(m.channel==='whisper')p.append(el('span','mp-tag','กระซิบ'));if(m.channel==='world')p.append(el('span','mp-tag','โลก'));if(mine)p.classList.add('mine');name.dataset.initial=String(m.name??'').slice(0,1);const said=el('span','',' '+m.text);if(m.channel!=='system'){name.dataset.i18nSkip='';said.dataset.i18nSkip='';}p.append(name,said,time);
+  const mark=el('span','chat-author-mark',Array.from(m.name??'?')[0]);mark.setAttribute('aria-hidden','true');mark.dataset.i18nSkip='';p.append(mark);
+  if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.channel==='guild')p.append(el('span','mp-tag','กิลด์'));if(m.channel==='whisper')p.append(el('span','mp-tag','กระซิบ'));if(m.channel==='world')p.append(el('span','mp-tag','โลก'));if(mine)p.classList.add('mine');name.dataset.initial=Array.from(m.name??'?')[0];const said=el('span','chat-message-text',' '+m.text);if(m.channel!=='system'){name.dataset.i18nSkip='';said.dataset.i18nSkip='';}p.append(name,said,time);
   const box=$('online-messages'),atEnd=box.scrollHeight-box.scrollTop-box.clientHeight<40;box.append(p);while(box.children.length>80)box.firstChild.remove();if(atEnd)box.scrollTop=box.scrollHeight;
   $('dock-preview').toggleAttribute('data-i18n-skip',m.channel!=='system');$('dock-preview').textContent=m.name+': '+m.text;
   if(live){if(dock.classList.contains('collapsed')){unread++;$('dock-unread').textContent=unread>9?'9+':String(unread);$('dock-unread').hidden=false;}if(m.channel==='room'||m.channel==='party')bubble(m);}
@@ -242,7 +245,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   const w=/^\/(?:w|ก)\s+(\S+)\s+([\s\S]+)$/.exec(text),channel=dock.dataset.channel;
   if(channel==='whisper'&&!w&&!$('online-whisper-to').value.trim()){dockNote('กรอกชื่อผู้รับก่อนส่งกระซิบ');$('online-whisper-to').focus();return;}
   if(!client?.command('chat',w?{channel:'whisper',to:w[1],text:w[2]}:channel==='whisper'?{channel:'whisper',to:$('online-whisper-to').value.trim(),text}:{channel:['party','guild','world'].includes(channel)?channel:'room',text})){dockNote('ต้องเชื่อมต่อออนไลน์ก่อนส่งข้อความ');return;}
-  input.value=w?'/w '+w[1]+' ':'';if(!compact.matches)input.blur();
+  input.value=w?'/w '+w[1]+' ':'';if(desktopChat.desktop())input.focus({preventScroll:true});else if(!compact.matches)input.blur();
  };
  // System lines (EXP, level ups, notices) appear only in this player's chat, never sent to others.
  addEventListener('game-notice',({detail})=>{if(!active||typeof detail!=='string')return;log({id:'sys-'+performance.now()+Math.random(),channel:'system',name:'ระบบ',text:detail,time:Date.now()});});

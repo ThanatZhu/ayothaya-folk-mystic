@@ -3666,3 +3666,13 @@ Object.assign(globalThis.I18N_EN,{
 });
 
 Object.assign(globalThis.I18N_EN,{"เลือกเป้าหมายออโต้":"Choose AUTO Target","หยุด AUTO":"Stop AUTO","ตั้งค่าสกิลออโต้":"AUTO Skill Settings","ปิดเลือกเป้าหมาย":"Close Target Picker","ชนิดเป้าหมาย":"Target Type","AUTO เปิด":"AUTO On","AUTO ปิด":"AUTO Off","เลือกชนิดมอนสเตอร์ในแผนที่นี้ แล้วเริ่มออโต้":"Choose a monster type on this map to start AUTO.","ทุกมอนสเตอร์":"All Monsters","ล่าเฉพาะมอนสเตอร์ ไม่เปลี่ยนไปโจมตีผู้เล่น":"Hunt monsters without switching to players.","พบ":"Present","แผนที่นี้ยังไม่มีมอนสเตอร์ให้ล่า":"There are no monsters to hunt on this map.","เลือกคู่ดวลหรือศัตรูในสงครามตามกติกาของพื้นที่":"Choose your duel opponent or an eligible war enemy.","ล็อคผู้เล่นนี้เป็นเป้าหมาย":"Lock onto this player","ยังไม่มีผู้เล่นที่สามารถต่อสู้ได้ในขณะนี้":"No eligible player targets right now.","เป้าหมายนี้ไม่อยู่หรือไม่สามารถต่อสู้ได้":"This target is unavailable or cannot be fought.","เปิดเมนูด้านขวา":"Open Right Menu","ปิดเมนูด้านขวา":"Close Right Menu","เลือกเป้าหมายออโต้ใหม่อีกครั้ง":"Choose an AUTO target again.","ชื่อผู้รับข้อความกระซิบ":"Whisper Recipient Name","ชื่อผู้รับ":"Recipient Name","พิมพ์ข้อความกระซิบ…":"Type a whisper...","กรอกชื่อผู้รับก่อนส่งกระซิบ":"Enter a recipient before whispering."});
+Object.assign(globalThis.I18N_EN,{
+ "รายการภารกิจ":"Quest list",
+ "ภารกิจปัจจุบัน":"Current quest",
+ "จบเนื้อเรื่อง":"Story complete",
+ "สำเร็จแล้ว":"Completed",
+ "ขั้น {0}/{1}":"Step {0}/{1}",
+ "สนทนา":"Chat",
+ "ปิดแชต":"Close chat",
+ "เปิดแชต · Enter":"Open chat · Enter"
+});

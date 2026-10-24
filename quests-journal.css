@@ -1,0 +1,48 @@
+/* A readable journal on desktop; a collapsible chapter list on touch screens. */
+#quests-window .quest-journal-layout{min-width:0;min-height:0}
+#quests-window .quest-journal-nav{margin:10px;border:1px solid #c7a66166;border-radius:6px;background:#10271fe6;min-width:0;min-height:0}
+#quests-window .quest-journal-toggle{display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;color:#f5d58c;cursor:pointer;font:700 14px Mali,Tahoma,sans-serif;border:0;background:none;text-align:start}
+#quests-window .quest-journal-toggle::before{content:'▸'}
+#quests-window .quest-journal-toggle[aria-expanded=true]::before{content:'▾'}
+#quests-window .quest-journal-list{display:flex;flex-direction:column;gap:6px;padding:10px;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c5a55b #142b25}
+#quests-window .quest-journal-list[hidden]{display:none}
+#quests-window .quest-journal-list button{display:flex;flex-direction:column;gap:5px;flex-shrink:0;text-align:start;padding:12px;border:1px solid #baa26544;border-radius:5px;background:#1a352bd9;color:#eee5c8;font:700 14px Mali,Tahoma,sans-serif;cursor:pointer;white-space:normal;overflow-wrap:anywhere}
+#quests-window .quest-journal-list button small{font-size:11px;font-weight:500;color:#a9c5ad}
+#quests-window .quest-journal-list button:hover{background:#355143;border-color:#d5b96e}
+#quests-window .quest-journal-list button[aria-pressed=true]{background:linear-gradient(110deg,#554c2d,#293e2b);border-color:#f1cd75;box-shadow:inset 3px 0 #f1cd75}
+#quests-window .quest-journal-list button[aria-pressed=true] small{color:#f1cd75}
+#quests-window .quest-journal-list button:focus-visible{outline:2px solid #fff0bc;outline-offset:1px}
+#quests-window .quest-journal-detail{box-sizing:border-box;margin:10px;padding:16px;border:0;background:#10271fc9;min-width:0;line-height:1.8;overflow-wrap:anywhere}
+#quests-window .quest-journal-detail h3{margin:3px 0 12px;color:#fff0ce;font-size:22px;line-height:1.5}
+#quests-window .quest-journal-state{color:#e8c675;font-size:12px}
+#quests-window .story-recap-art{display:block;box-sizing:border-box;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border:1px solid #c5a55b55;border-radius:5px;margin:0 0 16px}
+#quests-window .quest-journal-detail p{margin:10px 0;font-size:15px}
+#quests-window .quest-journal-goal{margin:0 0 16px;padding:10px 16px;background:#d9bd6620;border-left:3px solid #d9bd66;border-radius:0 5px 5px 0}
+#quests-window .quest-journal-goal small{color:#e8c675}
+#quests-window .quest-journal-goal p{margin:3px 0;color:#d5e5c3;font-weight:700}
+@media(min-width:901px) and (pointer:fine){
+ html body.field-hud.hud63 #quests-window[data-hud-panel][open]{width:min(1080px,calc(100vw - 48px))!important;height:min(740px,calc(var(--window-height) - 24px))!important;display:flex;flex-direction:column;padding:0;overflow:hidden!important}
+ #quests-window>header{flex-shrink:0;padding:12px 18px}
+ #quests-window h2{font-size:20px}
+ #quests-window>.social-tabs{flex-shrink:0;padding:12px 18px;gap:10px;border-bottom:1px solid #c5a55b44}
+ #quests-window>.social-tabs button{min-height:42px;font-size:14px}
+ #quests-window #quests-body{flex:1;min-height:0;overflow:auto;padding:16px;scrollbar-width:thin;scrollbar-color:#c5a55b #142b25}
+ #quests-window[data-quest-tab=story] #quests-body{overflow:hidden}
+ #quests-window .quest-journal-layout{display:grid;grid-template-columns:minmax(230px,29%) minmax(0,1fr);gap:18px;height:100%}
+ #quests-window .quest-journal-nav{margin:0;display:flex;flex-direction:column;overflow:hidden}
+ #quests-window .quest-journal-toggle{display:none}
+ #quests-window .quest-journal-list{flex:1}
+ #quests-window .quest-journal-detail{margin:0;padding:16px 22px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c5a55b #142b25;border-radius:6px}
+ #quests-window .story-recap-art{height:clamp(120px,25dvh,235px);object-fit:cover}
+ #quests-window .social-note{font-size:14px;margin:0 0 16px;padding:0;line-height:1.8}
+ #quests-window .social-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0}
+ #quests-window .social-list li{padding:16px;gap:12px;align-items:flex-start;flex-wrap:wrap}
+ #quests-window .social-list strong{white-space:normal;font-size:15px;line-height:1.7}
+ #quests-window .social-list small{font-size:12px;line-height:1.8;margin-top:6px}
+ #quests-window .social-list button{min-height:36px}
+ #quests-window .album-grid{grid-template-columns:repeat(10,minmax(0,1fr));gap:12px;padding:0}
+}
+@media(max-width:900px),(pointer:coarse){
+ #quests-window .quest-journal-list{max-height:180px}
+ #quests-window .quest-journal-detail h3{font-size:18px}
+}

@@ -10,4 +10,5 @@ export function openSummonEgg(batch,index){
 }
 export const allSummonEggsOpen=batch=>batch.opened.every(Boolean);
 export function openAllSummonEggs(batch){batch.opened.fill(true);}
-export const summonTier=batch=>batch.results.reduce((tier,r,i)=>batch.opened[i]&&'BAS'.indexOf(r.tier)>'BAS'.indexOf(tier)?r.tier:tier,'B');
+// Ambient light announces the highest rarity in the saved batch, even before opening.
+export const summonTier=batch=>batch.results.reduce((tier,r)=>'BAS'.indexOf(r.tier)>'BAS'.indexOf(tier)?r.tier:tier,'B');

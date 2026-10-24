@@ -7,9 +7,13 @@ import {stat,readFile} from 'node:fs/promises';
 test('reveals only expose the already saved server result, including duplicates and pity',()=>{
  const granted=petAccountAction(null,{type:'petGrant',gems:1000,pet:null,requestId:'grant-gacha147'}).state;granted.pity=79;
  const action={type:'petDraw',count:10,requestId:'draw-gacha147'},saved=petAccountAction(granted,action,()=>.5),snapshot=JSON.stringify(saved.state),batch=summonBatch(saved.result.results);
- assert.equal(saved.state.balance,0);assert.equal(batch.results[0].tier,'S');assert.equal(summonTier(batch),'B');assert.equal(openSummonEgg(batch,0),true);assert.equal(summonTier(batch),'S');assert.equal(openSummonEgg(batch,0),false);assert.equal(openSummonEgg(batch,-1),false);assert.equal(openSummonEgg(batch,10),false);assert.equal(allSummonEggsOpen(batch),false);openAllSummonEggs(batch);assert.equal(allSummonEggsOpen(batch),true);assert.equal(JSON.stringify(saved.state),snapshot);assert.equal(petAccountAction(saved.state,action,()=>{throw Error('must never reroll');}).replayed,true);
+ assert.equal(saved.state.balance,0);assert.equal(batch.results[0].tier,'S');assert.equal(summonTier(batch),'S');assert.equal(openSummonEgg(batch,0),true);assert.equal(summonTier(batch),'S');assert.equal(openSummonEgg(batch,0),false);assert.equal(openSummonEgg(batch,-1),false);assert.equal(openSummonEgg(batch,10),false);assert.equal(allSummonEggsOpen(batch),false);openAllSummonEggs(batch);assert.equal(allSummonEggsOpen(batch),true);assert.equal(JSON.stringify(saved.state),snapshot);assert.equal(petAccountAction(saved.state,action,()=>{throw Error('must never reroll');}).replayed,true);
 });
 test('each missing chapter card now has its own generated portrait',async()=>{
  const manifest=JSON.parse(await readFile('assets/summon147/prompts.json','utf8'));assert.equal(manifest.cards.length,CHAPTER2_MONSTERS.length);
  for(const m of CHAPTER2_MONSTERS){assert.ok(manifest.cards.some(x=>x.id===m.id));assert.ok((await stat('assets/cards147/'+m.id+'.webp')).size>4000,m.id);}
+});
+
+test('batch lighting uses all saved eggs, independent of opening order',()=>{
+ for(const [ids,tier] of [[['rice-rabbit'],'B'],[['blossom-fox'],'A'],[['rice-rabbit','garuda-dawn','blossom-fox','rice-rabbit','rice-rabbit','rice-rabbit','rice-rabbit','rice-rabbit','rice-rabbit','rice-rabbit'],'S']]){const batch=summonBatch(ids.map(id=>({id})));assert.equal(summonTier(batch),tier);for(let i=ids.length-1;i>=0;i--){openSummonEgg(batch,i);assert.equal(summonTier(batch),tier);}}
 });

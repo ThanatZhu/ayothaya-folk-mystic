@@ -1,4 +1,4 @@
-import {createPremiumPetPanel} from './pet-collection-ui.js?v=gacha147';
+import {createPremiumPetPanel} from './pet-collection-ui.js?v=ritual148';
 import {petAccountAction,normalizePetAccount} from './pet-account.js';
 import {PREMIUM_PETS} from './premium-pets.js';
 const dialog=document.getElementById('pet-window'),game={world:{petCollection:normalizePetAccount(null)}};let sequence=0;

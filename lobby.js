@@ -6,7 +6,7 @@ import {customizeAtlas} from './character-appearance.js?v=41';
 import {progression,jobFor,CLASS_LEVEL,advanceReady} from './advancement.js?v=73';
 import {CLASSES,getClass,className,atlasPath} from './classes.js?v=112.1';
 import {previewPose} from './sprite-motion.js';
-import {createLandscapeGuard} from './mobile-layout.js?v=mobile2';
+import {createLandscapeGuard} from './mobile-layout.js?v=fit118';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=114';

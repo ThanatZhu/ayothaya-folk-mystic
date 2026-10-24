@@ -7,7 +7,7 @@ import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {jobProgress} from './experience.js?v=105.3';
-import {applySkillArt} from './skill-art.js?v=role116';
+import {applySkillArt} from './skill-art.js?v=icons117';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=life1';
 import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=106.0';
 import {skillTrack,skillPose} from './skill-choreography.js?v=life1';

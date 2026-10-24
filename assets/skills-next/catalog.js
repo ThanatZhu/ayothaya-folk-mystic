@@ -1,3 +1,5 @@
+import {roleIconRegion} from './icon-regions.js';
+import {paintSkillRegion} from './icon-renderer.js';
 // Draft skill identities. Kept separate from live saved skill indices and server rules.
 const s=(id,name,tip,kind,extra={})=>({id,name,tip,kind,mp:18,cd:8,windup:.36,duration:1.2,power:65,range:7,radius:2.8,seconds:5,pose:0,...extra});
 const p=(id,name,tip,modifier,value)=>({id,name,tip,modifier,value,passive:true});
@@ -151,4 +153,4 @@ export function loadout(classId,branchId=''){
  const branch=branchId?role.branches.find(b=>b.id===branchId):null;if(branchId&&!branch)throw new Error('Branch does not belong to class');
  return {role,branch,active:[...role.base,...(branch?.active??[])],passives:branch?.passives??[]};
 }
-export function paintIcon(el,skill){const {sheet,cols,rows,row,col}=skill.icon;el.classList.add('skill-art');el.style.backgroundImage=`url("./assets/skills-next/${sheet}")`;el.style.backgroundSize=`${cols*100}% ${rows*100}%`;el.style.backgroundPosition=`${col/(cols-1)*100}% ${row/(rows-1)*100}%`;}
+export function paintIcon(el,skill){if(!skill?.icon)return Promise.resolve(false);el.dataset.skillIcon=skill.id;return paintSkillRegion(el,new URL('./'+skill.icon.sheet,import.meta.url).href,roleIconRegion(skill.icon));}

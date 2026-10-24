@@ -1,5 +1,5 @@
 import {STORY,currentObjective,normalizeStory} from './story-quests.js?v=story123';
-import {STORY_RECAP} from './story-dialogue.js?v=story123';
+import {STORY_RECAP,storyArt} from './story-dialogue.js?v=story124';
 // 0.60 "ภารกิจ" window: daily bounty board (claim in a town) and the card album. Online the realm server owns both;
 // offline guests keep them in localStorage and pay out through the same 'reward' / experience events.
 import {itemDef} from './items.js?v=107';
@@ -49,7 +49,7 @@ export function createQuestsUI({game,account,map,bagUI}){
   if(tab==='story'){
    const state=storyState(),obj=currentObjective(state);body.replaceChildren();
    const section=document.createElement('section');section.className='story-recap';
-   const heading=document.createElement('h3');heading.textContent=obj?.quest.title??'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';section.append(heading);
+   const heading=document.createElement('h3');heading.textContent=obj?.quest.title??'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';section.append(heading);if(obj){const art=storyArt(obj.quest.id,obj.stepNumber),image=document.createElement('img');image.src=art.src;image.alt=art.alt;image.className='story-recap-art';image.width=640;image.height=360;image.decoding='async';image.onerror=()=>image.remove();section.append(image);}
    const recap=document.createElement('p');recap.textContent=obj?STORY_RECAP[obj.quest.id]:'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';section.append(recap);
    if(obj){const goal=document.createElement('small');goal.textContent=obj.step.hint;section.append(goal);}
    body.append(section);

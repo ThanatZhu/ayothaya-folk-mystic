@@ -46,10 +46,30 @@ export const STORY_RECAP={
  t22:'ขุนอินทร์ฝากให้เจ้าหาพวกพ้อง เส้นทางต่อไปต้องการคนที่ช่วยรับแรงโจมตี รักษา และคุ้มกันกันได้ เข้าร่วมกิลด์เพื่อเริ่มสายใยใหม่',
  t23:'การประลองคือการเรียนรู้จังหวะของกันและกัน ลองฝึกกับผู้เดินทางอีกคน ก่อนต้องยืนเคียงกันในอันตรายจริง',
 };
+export const STORY_ART={
+ 'dark-pier':{src:'./assets/story124/dark-pier.webp',alt:'ประทีปดับที่ท่าน้ำอโยธยา'},
+ 'straw-thread':{src:'./assets/story124/straw-thread.webp',alt:'สายใยเรืองแสงในหุ่นฟางข้างยุ้งข้าว'},
+ 'orchard-lanterns':{src:'./assets/story124/orchard-lanterns.webp',alt:'โคมหลงทางในสวนหมาก'},
+ 'moonlit-mill':{src:'./assets/story124/moonlit-mill.webp',alt:'โรงสีใต้เงาจันทร์และหุ่นพันเชือก'},
+ 'lotus-thread':{src:'./assets/story124/lotus-thread.webp',alt:'สายใยขวัญและโคมกลางบึงบัว'},
+ 'city-home':{src:'./assets/story124/city-home.webp',alt:'ผู้คนและบ้านเรือนในอโยธยา'},
+};
+export function storyArt(questId,stepNumber=1){
+ const n=Number(questId?.slice(1));
+ const id=n<=3?'dark-pier':n<=9?'straw-thread':n<=14?'orchard-lanterns':n===15?(stepNumber>=5?'city-home':'moonlit-mill'):n===16?'moonlit-mill':n===17?'city-home':n<=20?'lotus-thread':n===21&&stepNumber===1?'lotus-thread':'city-home';
+ return STORY_ART[id];
+}
 export function dialogueFor(objective){
  if(objective?.step?.type!=='talk')return null;
  const d=STORY_DIALOGUE[objective.quest.id+':'+(objective.stepNumber-1)];
  if(!d)return null;
- return {...d,pages:[...d.pages,objective.step.say]};
+ return {...d,art:storyArt(objective.quest.id,objective.stepNumber),pages:[...d.pages,objective.step.say]};
 }
 export const sameObjective=(state,index)=>!!state&&!state.done&&state.quest===index.quest&&state.step===index.step;
+
+// Portraits use the same standing artwork as the NPCs in the world, rather than inventing different faces.
+export function storyPortrait(npc){
+ const known={'ลุงเรือง':3,'ขุนอินทร์':0,'ครูแสนดาบ':0,'พระปัญญา':1,'เจ้าจุก':2,'ป้าละไม':1,'ยายสาย':0,'จ้อย':2,'ยายบัวผัน':1};
+ const texture=npc?.texture??known[npc?.name]??0,index=Number.isInteger(texture)&&texture>=0&&texture<4?texture:0;
+ return {src:'./assets/story124/npc-'+index+'.webp',alt:npc?.name??''};
+}

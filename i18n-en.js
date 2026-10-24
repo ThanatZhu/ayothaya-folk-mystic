@@ -3225,3 +3225,5 @@ Object.assign(globalThis.I18N_EN,{
  "การประลองคือการเรียนรู้จังหวะของกันและกัน ลองฝึกกับผู้เดินทางอีกคน ก่อนต้องยืนเคียงกันในอันตรายจริง": "A friendly duel teaches each other's rhythm. Practice with another traveler before facing real danger together.",
  "กดปุ่ม AUTO มุมขวาล่าง (หรือคีย์ F) ตัวละครจะล่าเอง · กดฟันเฟืองที่ปุ่ม AUTO เพื่อตั้งค่าสกิลและยา": "Press AUTO at the bottom-right (or F) to hunt automatically. Use its gear button to configure skills and potions."
 });
+
+Object.assign(globalThis.I18N_EN,{"ประทีปดับที่ท่าน้ำอโยธยา": "Extinguished lamps at the Ayothaya pier", "สายใยเรืองแสงในหุ่นฟางข้างยุ้งข้าว": "A glowing thread in the straw figure beside the granary", "โคมหลงทางในสวนหมาก": "Lost lanterns in the betel orchard", "โรงสีใต้เงาจันทร์และหุ่นพันเชือก": "The moonlit mill and its rope-bound figure", "สายใยขวัญและโคมกลางบึงบัว": "Khwan threads and lanterns over Lotus Marsh", "ผู้คนและบ้านเรือนในอโยธยา": "People and homes of Ayothaya"});

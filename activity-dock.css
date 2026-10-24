@@ -35,8 +35,9 @@ body.field-hud.hud63 #activity-dock #quest-distance{font-size:11px!important;col
 #activity-dock nav .activity-quest-icon{background-image:url('assets/ui-overlay143/quest.webp');background-size:contain;background-position:center}
 #activity-dock nav .activity-party-icon{background-image:url('assets/ui-overlay143/party.webp');background-size:contain;background-position:center}
 #activity-dock #activity-fold{border:0;background:none;box-shadow:none;font-size:0}
-#activity-dock #activity-fold::before{content:'';display:block;width:44px;height:30px;background:url('assets/ui-overlay143/fold.webp') center/contain no-repeat;filter:drop-shadow(0 2px 2px #0008)}
+#activity-dock #activity-fold::before{content:'';display:block;width:100%;height:100%;background:url('assets/ui-overlay143/fold.webp') center/contain no-repeat;filter:drop-shadow(0 2px 2px #0008)}
 #activity-dock #activity-fold[aria-expanded=false]::before{transform:rotate(180deg)}
+html body.mobile-play #activity-dock #activity-fold{font-size:0!important}
 @media(min-width:901px) and (pointer:fine){
  #activity-dock:not([data-horizontal=true]) nav button[role=tab]{border:0;border-radius:0;background:none;box-shadow:none;justify-content:flex-end;padding:5px 2px;filter:drop-shadow(0 2px 3px #0008)}
  #activity-dock:not([data-horizontal=true]) nav i{position:absolute;inset:0;width:100%;height:100%;filter:none;pointer-events:none}

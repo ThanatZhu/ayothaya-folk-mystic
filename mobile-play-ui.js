@@ -1,11 +1,11 @@
-import {createMobileReferenceUI} from './mobile-reference-ui.js?v=139';
+import {createMobileReferenceUI} from './mobile-reference-ui.js?v=142';
 // A single owner for the touch HUD. Reuse live buttons so cooldowns and saved
 // hotbar order stay with game-controls / auto-settings rather than a second UI.
 export function skillPage(slots,page=0,size=4){
  const pages=Math.max(1,Math.ceil(slots.length/size)),index=((page%pages)+pages)%pages;
  return {index,pages,slots:slots.slice(index*size,(index+1)*size)};
 }
-export function createMobilePlayUI({clearInput=()=>{}}={}){
+export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  const body=document.body,$=id=>document.getElementById(id),query=matchMedia('(any-pointer:coarse),(max-width:900px)');
  const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=menu135';document.head.append(css);
  const skills=$('skills'),bank=$('skill-bank'),nav=$('game-menu'),toggle=$('menu-toggle'),quest=$('quest-tracker');
@@ -53,7 +53,7 @@ export function createMobilePlayUI({clearInput=()=>{}}={}){
   if(bank){if(query.matches&&skills&&bank.parentElement!==skills)skills.append(bank);else if(!query.matches&&attackControls&&bank.parentElement!==attackControls)attackControls.prepend(bank);}
   const buttons=[...skills?.querySelectorAll('.skill')??[]],available=buttons.map((b,i)=>!b.hidden?i:null).filter(i=>i!==null),selection=skillPage(available,page);page=selection.index;
   skillSignature=buttons.map(b=>b.hidden?'0':'1').join('');
-  const arc=innerHeight>innerWidth?[[44,92],[44,36],[100,0],[158,32]]:innerHeight<=360?[[0,88],[14,36],[68,8],[130,4]]:[[0,114],[14,54],[68,16],[130,4]];
+  const unit=Math.max(36,Math.min(76,(innerHeight>innerWidth?innerWidth*.12:innerHeight*.108)));body.style.setProperty('--ref-unit',unit+'px');const arc=[[0,3.6],[0,2.3],[.9,.9],[2.5,.3]].map(([x,y])=>[x*unit,y*unit]);
   buttons.forEach((b,i)=>{const off=query.matches&&!selection.slots.includes(i);if(b.hasAttribute('data-mobile-away')!==off)b.toggleAttribute('data-mobile-away',off);const pos=selection.slots.indexOf(i);if(pos>=0){b.style.setProperty('--arc-x',arc[pos][0]+'px');b.style.setProperty('--arc-y',arc[pos][1]+'px');}});
   skills?.setAttribute('aria-label',query.matches?`สกิลชุด ${page+1} จาก ${selection.pages}`:'สกิลทั้งหมด');
   if(bank){if(query.matches){if(!bank.querySelector('svg'))bank.innerHTML=arrows;}else bank.textContent='สกิล 1–5 ⇄';bank.setAttribute('aria-label',query.matches?`สลับชุดสกิล ชุด ${page+1} จาก ${selection.pages}`:'แสดงสกิล 6 ถึง 0');}
@@ -78,5 +78,5 @@ export function createMobilePlayUI({clearInput=()=>{}}={}){
  addEventListener('resize',refresh);window.visualViewport?.addEventListener('resize',refresh);
  query.addEventListener('change',()=>{page=0;closeQuest();refresh();});
  document.addEventListener('pointerdown',e=>{if(query.matches&&body.classList.contains('mobile-quest-open')&&!e.target.closest?.('#hud-right,#mobile-quest-summary'))closeQuest();},{passive:true});
- refresh();createMobileReferenceUI({clearInput});return {refresh};
+ refresh();createMobileReferenceUI({clearInput,selectTarget});return {refresh};
 }

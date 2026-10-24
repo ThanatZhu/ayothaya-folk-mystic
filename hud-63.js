@@ -5,7 +5,7 @@
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
 import {createActivityDock} from './activity-dock.js?v=overlay143';
-import {createMobilePlayUI} from './mobile-play-ui.js?v=139';
+import {createMobilePlayUI} from './mobile-play-ui.js?v=142';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
@@ -79,7 +79,7 @@ export function createHud63({game,partyUI}={}){
  const channel=$('channel-button');
  const channelRow=document.createElement('div');channelRow.id='hud-channel-row';if(channel)channelRow.append(channel);
  right.prepend(channelRow);
- const mobileUI=createMobilePlayUI({clearInput:()=>game?.clearInput?.()});
+ const mobileUI=createMobilePlayUI({clearInput:()=>game?.clearInput?.(),selectTarget:()=>{const w=game.world,foes=w.foes().filter(m=>m.hp>0).sort((a,b)=>Math.hypot(a.x-w.player.x,a.z-w.player.z)-Math.hypot(b.x-w.player.x,b.z-w.player.z));const next=foes[(foes.findIndex(m=>m.id===w.targetId)+1)%foes.length];if(next)w.select(next.id);}});
  const activityDock=createActivityDock({game,partyUI});
  return {mobileUI,activityDock};
 }

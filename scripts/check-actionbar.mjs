@@ -113,7 +113,7 @@ try{
   assert.equal(await page.locator('.combat-control-art:visible').count(),0,'desktop combat artwork does not alter the mobile wheel');
   const geometry=await page.evaluate(()=>[...document.querySelectorAll('#skills .skill')].filter(b=>!b.hidden&&!b.hasAttribute('data-mobile-away')).map(b=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,radius:getComputedStyle(b).borderRadius};}));
   assert.ok(geometry.length>0&&geometry.length<=4);assert.ok(geometry.every(r=>r.radius==='50%'&&r.w>=44&&r.x>=0&&r.x+r.w<=w&&r.y>=0&&r.y+r.h<=h),JSON.stringify(geometry));
-  assert.equal(await page.locator('#quick-slots > button[id^="quick-"]:visible').count(),4);
+  assert.equal(await page.locator('#quick-slots > button[id^="quick-"]').count(),4);assert.equal(await page.locator('#quick-slots > button[id^="quick-"]:visible').count(),await page.locator('#mobile-target-next').count()?0:4,'preserve the active mobile reference composition');
   for(let i=0;i<4;i++)assert.ok(await page.locator('#quick-'+i).isEnabled(),'all four owned quick items are usable');
   assert.equal(await page.locator('#skills .mobile-skill-empty').count(),0,'unused skill positions never paint floating disks');
   for(let i=0;i<geometry.length;i++)for(let j=i+1;j<geometry.length;j++){const a=geometry[i],b=geometry[j];assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'mobile skill targets do not overlap');}

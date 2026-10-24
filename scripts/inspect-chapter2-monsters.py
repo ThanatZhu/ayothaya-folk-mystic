@@ -119,7 +119,8 @@ def main():
                 meta["clips"]["move"] = {"frames": [0, 1, 2, 6], "durations": [150, 150, 160, 180], "loop": True}
             if id_ == "stone-garuda":
                 frames[4]["flipX"] = True
-            (ART / "animations" / f"{id_}.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+            # Dense generated masks are machine data; compact them for mobile transfer.
+            (ART / "animations" / f"{id_}.json").write_text(json.dumps(meta, ensure_ascii=False, separators=(",", ":"))+"\n", encoding="utf-8")
             report.append({"id": id_, "sourceSize": [width, height], "frames": 8,
                            "transparentFraction": round(float((pixels[:, :, 3] == 0).mean()), 3),
                            "poseHeightRatios": [round(f["rect"][3]/meta["idlePixels"], 3) for f in frames],

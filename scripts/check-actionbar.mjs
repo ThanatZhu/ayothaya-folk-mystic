@@ -109,8 +109,8 @@ try{
  for(const [w,h] of [[844,390],[667,375]]){
   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(350);await page.evaluate(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();if(document.getElementById('dock-toggle')?.getAttribute('aria-expanded')==='true')document.getElementById('dock-toggle').click();});
   assert.ok(!(await page.locator('#desktop-actionbar').isVisible()));assert.ok(!(await page.locator('#actionbar-combat').isVisible()));assert.ok(await page.locator('.combat-controls').isVisible());
-  assert.equal(await page.locator('.action-helper-art:visible').count(),0,'mobile controls retain their established layout');
-  assert.equal(await page.locator('.combat-control-art:visible').count(),0,'desktop combat artwork does not alter the mobile wheel');
+  const paintedMobile=await page.locator('#mobile-hud-arrange').count()>0;assert.equal(await page.locator('.action-helper-art:visible').count(),paintedMobile?2:0,'mobile controls retain the current reference toolbar');
+  assert.equal(await page.locator('.combat-control-art:visible').count(),paintedMobile?1:0,'only the mobile reference AUTO art is visible');assert.equal(await page.locator('#attack .combat-control-art:visible,#auto-settings-open .combat-control-art:visible').count(),0,'desktop battle art stays out of the mobile wheel');
   const geometry=await page.evaluate(()=>[...document.querySelectorAll('#skills .skill')].filter(b=>!b.hidden&&!b.hasAttribute('data-mobile-away')).map(b=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,radius:getComputedStyle(b).borderRadius};}));
   assert.ok(geometry.length>0&&geometry.length<=4);assert.ok(geometry.every(r=>r.radius==='50%'&&r.w>=44&&r.x>=0&&r.x+r.w<=w&&r.y>=0&&r.y+r.h<=h),JSON.stringify(geometry));
   assert.equal(await page.locator('#quick-slots > button[id^="quick-"]').count(),4);assert.equal(await page.locator('#quick-slots > button[id^="quick-"]:visible').count(),await page.locator('#mobile-target-next').count()?0:4,'preserve the active mobile reference composition');

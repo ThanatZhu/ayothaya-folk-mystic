@@ -31,6 +31,12 @@ try{
  await page.waitForTimeout(1200);await page.evaluate(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();if(document.getElementById('dock-toggle')?.getAttribute('aria-expanded')==='true')document.getElementById('dock-toggle').click();});
  assert.ok(await page.locator('#desktop-actionbar').isVisible());assert.ok(!(await page.locator('.combat-controls').isVisible()));assert.ok(!(await page.locator('#quick-slots').isVisible()));
  assert.ok(await page.locator('#attack').isEnabled());assert.equal(await page.locator('#actionbar-life #emote-open').count(),1);
+ await page.locator('#emote-open').click();assert.ok(await page.locator('#emote-window').isVisible());await page.keyboard.press('Escape');
+ if(await page.locator('#run-toggle').isEnabled()){
+  const before=await page.evaluate(()=>window.__ayothaya.game.runningRequested);await page.locator('#run-toggle').click();
+  assert.equal(await page.evaluate(()=>window.__ayothaya.game.runningRequested),!before);assert.equal(await page.locator('#run-toggle .movement-label').textContent(),before?'วิ่ง':'เดิน');
+  assert.equal(await page.locator('#run-toggle svg:visible').count(),1);await page.locator('#run-toggle').click();
+ }
  while(!(await page.locator('#actionbar-remove').isDisabled()))await page.locator('#actionbar-remove').click();
  const bottom=await page.locator('.actionbar-row[data-row="0"]').boundingBox(),entries=await page.evaluate(()=>window.__ayothaya.game.actionBar.state.slots.slice(0,8));
  await page.locator('#actionbar-add').click();const same=await page.locator('.actionbar-row[data-row="0"]').boundingBox();assert.equal(Math.round(bottom.y),Math.round(same.y));assert.equal(await page.locator('.actionbar-row').first().getAttribute('data-row'),'1');
@@ -54,7 +60,30 @@ try{
   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(200);
   const r=await page.locator('#desktop-actionbar').boundingBox();assert.ok(r&&r.x>=0&&r.x+r.width<=w&&r.y+r.height<=h);
   const grid=await page.locator('.actionbar-rows').boundingBox(),tools=await page.locator('.actionbar-tools').boundingBox();assert.ok(Math.abs(grid.x+grid.width/2-w/2)<1,'the grid itself is centered');assert.ok(tools.x>=grid.x+grid.width&&tools.x+tools.width<=w,'side controls stay outside the grid and inside the screen');
+  const events=await page.evaluate(()=>{const map=document.querySelector('.mini-panel').getBoundingClientRect();return [...document.querySelectorAll('#hud-chips>button')].filter(b=>!b.hidden).map(b=>{const s=getComputedStyle(b),r=b.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,mapBottom:map.bottom,bg:s.backgroundImage,color:s.backgroundColor,shadow:s.boxShadow,iconShadow:getComputedStyle(b,'::before').filter,image:getComputedStyle(b,'::before').backgroundImage};});});
+  assert.ok(events.length>0);for(const e of events){assert.equal(e.bg,'none');assert.equal(e.color,'rgba(0, 0, 0, 0)');assert.equal(e.shadow,'none');assert.match(e.iconShadow,/drop-shadow/);assert.match(e.image,/status-ai-v1\/.*\.webp/,'real generated art is bound to each event');assert.ok(e.y>=e.mapBottom,'desktop events begin below the map');assert.ok(e.bottom<=h,'desktop event column fits');}
+  for(let i=1;i<events.length;i++){assert.equal(events[i].x,events[0].x);assert.ok(events[i].y>=events[i-1].bottom,'desktop events form a vertical column');}
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:fileURLToPath(new URL('desktop-'+w+'.png',out))});console.log('desktop',w,h,'8 columns, fits');
+ }
+ for(const [width,height] of [[1440,900],[1024,768],[1280,600]]){
+  await page.setViewportSize({width,height});await page.waitForTimeout(100);
+  while(!(await page.locator('#actionbar-remove').isDisabled()))await page.locator('#actionbar-remove').click();
+  await page.locator('#emote-open').click();let previous=null;
+  for(const count of [1,2,3,4,3,2,1]){
+   while((await page.locator('.actionbar-row').count())<count)await page.locator('#actionbar-add').click();
+   while((await page.locator('.actionbar-row').count())>count)await page.locator('#actionbar-remove').click();
+   await page.waitForTimeout(70);
+   const picker=await page.locator('#emote-window').boundingBox(),grid=await page.locator('.actionbar-rows').boundingBox();
+   assert.ok(picker.x>=0&&picker.y>=0&&picker.x+picker.width<=width,'emote picker fits');
+   assert.ok(Math.abs(grid.y-picker.y-picker.height-10)<2,'emotes sit ten pixels above the current top row');
+   if(previous&&previous.count!==count)assert.ok(count>previous.count?picker.y+picker.height<previous.bottom:picker.y+picker.height>previous.bottom,'open picker follows added and removed rows');
+   previous={count,bottom:picker.y+picker.height};
+   const targets=await page.locator('#emote-window [data-b]').evaluateAll(nodes=>nodes.map(b=>{const r=b.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return b===hit||b.contains(hit);}));
+   assert.equal(targets.length,24);if(!targets.every(Boolean))await page.screenshot({path:fileURLToPath(new URL('emote-click-failure.png',out))});assert.ok(targets.every(Boolean),'every emote remains clickable above the table: '+JSON.stringify({width,height,count,targets}));
+   if(count===4)await page.screenshot({path:fileURLToPath(new URL('emotes-four-rows-'+width+'.png',out))});
+  }
+  await page.locator('#emote-window [data-b="24"]').click();assert.ok(!(await page.locator('#emote-window').isVisible()));
+  console.log('emotes',width,height,'follow rows 1–4 and back; all 24 targets clickable');
  }
  while(!(await page.locator('#actionbar-add').isDisabled()))await page.locator('#actionbar-add').click();await page.screenshot({path:fileURLToPath(new URL('desktop-four-rows.png',out))});
  for(const [w,h] of [[844,390],[667,375]]){
@@ -64,7 +93,7 @@ try{
   assert.ok(geometry.length>0&&geometry.length<=4);assert.ok(geometry.every(r=>r.radius==='50%'&&r.w>=44&&r.x>=0&&r.x+r.w<=w&&r.y>=0&&r.y+r.h<=h),JSON.stringify(geometry));
   assert.equal(await page.locator('#quick-slots > button[id^="quick-"]:visible').count(),4);
   for(let i=0;i<4;i++)assert.ok(await page.locator('#quick-'+i).isEnabled(),'all four owned quick items are usable');
-  const blanks=await page.locator('#skills .mobile-skill-empty:visible').count();assert.equal(geometry.length+blanks,4,'each wheel page keeps four skill positions');
+  assert.equal(await page.locator('#skills .mobile-skill-empty').count(),0,'unused skill positions never paint floating disks');
   for(let i=0;i<geometry.length;i++)for(let j=i+1;j<geometry.length;j++){const a=geometry[i],b=geometry[j];assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'mobile skill targets do not overlap');}
   await page.locator('#skill-bank').click();await page.screenshot({path:fileURLToPath(new URL('mobile-'+w+'.png',out))});console.log('mobile',w,h,'circular skills, fits');
  }

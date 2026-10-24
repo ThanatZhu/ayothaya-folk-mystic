@@ -4,7 +4,7 @@
 // 0.67 follows the approved desktop mockup (outputs/ui-hud63-desktop-mockup.png): four main buttons + เมนู.
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
-import {createMobilePlayUI} from './mobile-play-ui.js?v=actionbar128';
+import {createMobilePlayUI} from './mobile-play-ui.js?v=center132';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
@@ -74,13 +74,10 @@ export function createHud63({game}={}){
   // iOS leaves the page scrolled/zoomed after the keyboard closes: restore the original view.
   setTimeout(()=>{window.scrollTo(0,0);document.scrollingElement&&(document.scrollingElement.scrollTop=0);dispatchEvent(new Event('resize'));},80);});
  vv?.addEventListener('resize',place);vv?.addEventListener('scroll',place);
- // Keep secondary information reachable in the mobile menu instead of competing
- // with the quest, joystick and skill wheel. Move the live nodes, preserving handlers.
- const mobile=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)'),channel=$('channel-button');
+ // The touch HUD owns event and channel placement; keep their desktop home stable.
+ const channel=$('channel-button');
  const channelRow=document.createElement('div');channelRow.id='hud-channel-row';if(channel)channelRow.append(channel);
- const arrange=()=>{if(!nav)return;if(mobile.matches){if(chips)nav.append(chips);if(channel)nav.prepend(channelRow);}
-  else{if(chips)right.append(chips);if(channel)right.prepend(channelRow);}};
- mobile.addEventListener('change',arrange);arrange();
+ right.prepend(channelRow);
  const mobileUI=createMobilePlayUI({clearInput:()=>game?.clearInput?.()});
  return {mobileUI};
 }

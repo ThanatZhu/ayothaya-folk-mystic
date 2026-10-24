@@ -13,6 +13,6 @@ body.mobile-play #party-frame #party-manage{min-height:44px}body.mobile-play #pa
 #game-menu #menu-party[hidden]{display:none!important}
 /* The roster must remain above the desktop hotbar while managing members. */
 body.field-hud.hud63 #online-panel[data-hud-panel]{z-index:120!important;box-sizing:border-box}
-body.field-hud.hud63:not(.mobile-play) #online-panel[data-hud-panel]{inset:50% auto auto 50%!important;transform:translate(-50%,-50%)!important;margin:0!important;width:min(620px,calc(100vw - 32px))!important;max-height:calc(100dvh - 32px)!important}
+body.field-hud.hud63:not(.mobile-play) #online-panel[data-hud-panel]{width:min(620px,calc(100vw - 32px))!important;max-height:calc(100dvh - 32px)!important}
 #online-panel .mp-roster{flex:1 1 auto}#online-panel .party-roster-tools{margin-left:18px;margin-right:18px}#online-panel #online-players{flex-shrink:1;min-height:0}
 body.mobile-play #online-panel #online-players li{flex-wrap:wrap}body.mobile-play #online-panel .mp-who{flex-basis:calc(100% - 56px)}

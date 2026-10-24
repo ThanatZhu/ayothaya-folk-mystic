@@ -1,6 +1,6 @@
 import {createAnnouncementUI} from './announcement-ui.js?v=149';
 import {createAutoTargetUI} from './auto-target-ui.js?v=139';
-import {createBossBrowserUI} from './boss-browser-ui.js?v=138';
+import {createBossBrowserUI} from './boss-browser-ui.js?v=150';
 import './role-i18n.js?v=116';
 import {createActionbar} from './actionbar-ui.js?v=overlay143';
 import {drawCharacterFrame,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
@@ -44,7 +44,7 @@ import {createWeather} from './weather-fx.js?v=announce149';
 import {createMarketUI} from './market-ui.js?v=trade-center122';
 import {createSocialUI} from './social-ui.js?v=107';
 import {createLifeUI} from './life-ui.js?v=boss138';
-import {createPetUI} from './pet-ui.js?v=ritual148';
+import {createPetUI} from './pet-ui.js?v=mail150';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=gacha147';
 import {createLifeNPC} from './life-npc.js?v=106.0';

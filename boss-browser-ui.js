@@ -1,3 +1,4 @@
+import {paintedPanels} from './painted-panels.js?v=150';
 import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {MONSTER_BEHAVIOUR} from './monster-catalog.js';
 import {bossEntries,bossCountdown,bossClock} from './boss-directory.js?v=138';
@@ -7,7 +8,7 @@ import {createBossResultsUI} from './boss-results-ui.js?v=boss138';
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;};
 const format=n=>Math.round(n??0).toLocaleString();
 export function createBossBrowserUI({game,catalog,map,worldUI}){
- const css=el('link');css.rel='stylesheet';css.href='boss-browser-ui.css?v=138';document.head.append(css);
+ const css=el('link');css.rel='stylesheet';css.href='boss-browser-ui.css?v=150';document.head.append(css);paintedPanels();
  const dialog=el('dialog');dialog.id='boss-browser';dialog.setAttribute('aria-labelledby','boss-browser-title');dialog.innerHTML='<header class="boss-browser-header"><div><small>AYOTHAYA · BESTIARY</small><h2 id="boss-browser-title">สารานุกรมบอส</h2></div><button type="button" id="boss-browser-close" aria-label="ปิดหน้า MVP">×</button></header><nav class="boss-browser-tabs" role="tablist" aria-label="หมวดบอส"><button type="button" role="tab" data-boss-tab="mvp">MVP · บอสโลก</button><button type="button" role="tab" data-boss-tab="mini">มินิบอส / ร่างทรง</button><button type="button" role="tab" data-boss-tab="results">อันดับดาเมจ</button></nav><p id="boss-directory-state" role="status"></p><div id="boss-browser-catalog"><nav id="boss-browser-list" aria-label="รายชื่อบอส"></nav><article id="boss-browser-detail"></article></div><section id="boss-browser-results" hidden></section>';
  (document.getElementById('game-shell')??document.body).append(dialog);const $=id=>dialog.querySelector('#'+id);
  const button=el('button');button.id='menu-boss-result';button.type='button';button.setAttribute('aria-label','เปิดหน้า MVP และรายชื่อบอส');const icon=el('i');icon.setAttribute('aria-hidden','true');button.append(icon,el('span','','MVP'));document.getElementById('game-menu')?.append(button);

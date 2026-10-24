@@ -1,0 +1,237 @@
+{
+  "purpose": "Admin portraits extracted from live masked idle frames; no new artwork",
+  "records": [
+    {
+      "id": "bamboo-sprout",
+      "source": "assets/monsters-chapter2/animations/bamboo-sprout.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 11198
+    },
+    {
+      "id": "hungry-pop",
+      "source": "assets/monsters-chapter2/animations/hungry-pop.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12438
+    },
+    {
+      "id": "bamboo-bat",
+      "source": "assets/monsters-chapter2/animations/bamboo-bat.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 7902
+    },
+    {
+      "id": "bamboo-ward",
+      "source": "assets/monsters-chapter2/animations/bamboo-ward.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 14242
+    },
+    {
+      "id": "pop-grove-lord",
+      "source": "assets/monsters-chapter2/animations/pop-grove-lord.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 14958
+    },
+    {
+      "id": "clay-temple-doll",
+      "source": "assets/monsters-chapter2/animations/clay-temple-doll.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 9852
+    },
+    {
+      "id": "haunted-bell",
+      "source": "assets/monsters-chapter2/animations/haunted-bell.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 9978
+    },
+    {
+      "id": "walking-bricks",
+      "source": "assets/monsters-chapter2/animations/walking-bricks.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 11920
+    },
+    {
+      "id": "stone-gate-guardian",
+      "source": "assets/monsters-chapter2/animations/stone-gate-guardian.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 10634
+    },
+    {
+      "id": "abandoned-bell-curse",
+      "source": "assets/monsters-chapter2/animations/abandoned-bell-curse.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12284
+    },
+    {
+      "id": "mist-cap",
+      "source": "assets/monsters-chapter2/animations/mist-cap.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12150
+    },
+    {
+      "id": "crystal-tusk-boar",
+      "source": "assets/monsters-chapter2/animations/crystal-tusk-boar.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12064
+    },
+    {
+      "id": "leaf-flame-bird",
+      "source": "assets/monsters-chapter2/animations/leaf-flame-bird.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12934
+    },
+    {
+      "id": "vine-tiger",
+      "source": "assets/monsters-chapter2/animations/vine-tiger.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12472
+    },
+    {
+      "id": "woodland-elephant",
+      "source": "assets/monsters-chapter2/animations/woodland-elephant.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 11810
+    },
+    {
+      "id": "cave-crystal-toad",
+      "source": "assets/monsters-chapter2/animations/cave-crystal-toad.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 9554
+    },
+    {
+      "id": "jade-scale-hatchling",
+      "source": "assets/monsters-chapter2/animations/jade-scale-hatchling.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 11174
+    },
+    {
+      "id": "glowstone-crab",
+      "source": "assets/monsters-chapter2/animations/glowstone-crab.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 10426
+    },
+    {
+      "id": "stream-serpent",
+      "source": "assets/monsters-chapter2/animations/stream-serpent.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 11454
+    },
+    {
+      "id": "underwater-naga-guardian",
+      "source": "assets/monsters-chapter2/animations/underwater-naga-guardian.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12392
+    },
+    {
+      "id": "stone-mist-hare",
+      "source": "assets/monsters-chapter2/animations/stone-mist-hare.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 9894
+    },
+    {
+      "id": "wind-mountain-bird",
+      "source": "assets/monsters-chapter2/animations/wind-mountain-bird.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 11772
+    },
+    {
+      "id": "crystal-horn-goat",
+      "source": "assets/monsters-chapter2/animations/crystal-horn-goat.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12114
+    },
+    {
+      "id": "stone-garuda",
+      "source": "assets/monsters-chapter2/animations/stone-garuda.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12114
+    },
+    {
+      "id": "cloud-peak-yaksha",
+      "source": "assets/monsters-chapter2/animations/cloud-peak-yaksha.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12528
+    },
+    {
+      "id": "rice-world-guardian",
+      "source": "assets/monsters-chapter2/animations/rice-world-guardian.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 15250
+    },
+    {
+      "id": "orchard-world-guardian",
+      "source": "assets/monsters-chapter2/animations/orchard-world-guardian.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12762
+    },
+    {
+      "id": "mill-world-guardian",
+      "source": "assets/monsters-chapter2/animations/mill-world-guardian.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 13952
+    },
+    {
+      "id": "marsh-world-guardian",
+      "source": "assets/monsters-chapter2/animations/marsh-world-guardian.json",
+      "frame": 0,
+      "width": 160,
+      "height": 160,
+      "bytes": 12528
+    }
+  ]
+}

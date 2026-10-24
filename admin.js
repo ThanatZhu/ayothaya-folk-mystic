@@ -1,4 +1,7 @@
-import {PREMIUM_PETS} from './premium-pets.js';
+import {petGrantHTML,bindPetGrant} from './admin-pet-panel.js?v=127';
+import {paintAdminSkills,paintAdminMonsters} from './admin-art.js?v=127';
+import {liveRoleSkills} from './role-skill-progress.js';
+import {roleById} from './assets/skills-next/catalog.js';
 // 0.85 back-office dashboard: every tunable game number in one place (paths, skills, items, monsters).
 // Edits are kept as overrides (balance.js FIELDS); "บันทึกเข้าเกม" posts them to the local dev server, which writes
 // balance-data.js for the next deploy. Player data is not touched here.
@@ -25,7 +28,7 @@ let draft=JSON.parse(JSON.stringify(BALANCE));
 // what is already in the game: the counter shows only edits made since the last save
 let saved=JSON.parse(JSON.stringify(BALANCE));
 for(const g of [...Object.keys(FIELDS),'drops'])draft[g]??={};
-let tab='players',classId='swordsman',query='',kind='all',tableView='compare';
+let tab='players',classId='swordsman',query='',kind='all',tableView='compare',viewMode='cards',skillSet='live',masterId='',monsterKind='all';
 let mapBossView={serverId:'server-1',channel:1,rows:null,loading:false,message:'',request:0,offset:0};
 // players tab state (declared up here: the first render may already be on that tab)
 const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
@@ -37,7 +40,7 @@ try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});
 let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',mapId:'',minutes:30};
 let bossMsg='',bossMaps=null,bx={serverId:'server-1',channel:1,mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
-let petGrantPending=null;
+let petGrantPending=null,petGrantSending=false,giftPane='pets';const petGrantDrafts=new Map();
 let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',gearClass='all',itemQuery='',pickCount=1;
 const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
 const itemName=id=>ITEMS[id]?.name??id;
@@ -48,9 +51,9 @@ const original=(group,key,field,current)=>{const id=group+'.'+key+'.'+field;retu
 const skillBase=(cid,slot)=>classSkills(cid,SKILLS)[slot];
 function rowsFor(){
  if(tab==='classes')return paths.map(c=>({group:'classes',key:c.id,title:c.name,sub:c.role??'',src:c}));
- if(tab==='skills')return skillBase&&classSkills(classId,SKILLS).map((s,i)=>({group:'skills',key:classId+':'+i,title:s.key+' · '+s.name,sub:s.type,src:s,skill:true}));
+ if(tab==='skills')return skillBase&&classSkills(classId,SKILLS).map((s,i)=>({group:'skills',key:classId+':'+i,title:s.key+' · '+s.name,sub:s.type,src:s,skill:true,artSlot:i}));
  if(tab==='items')return Object.entries(ITEMS).filter(([id,it])=>it.kind!=='ui'&&it.kind!=='reserved'&&(kind==='all'||it.kind===kind)&&(!query||(it.name+id).toLowerCase().includes(query))).map(([id,it])=>({group:'items',key:id,title:it.name,sub:(KIND[it.kind]??it.kind)+' · '+id,src:it}));
- return MONSTER_TYPES.map((m,i)=>({group:'monsters',key:monsterKey(m,i),title:m.name,sub:(m.boss?'บอส · ':m.elite?'อีลิท · ':'')+monsterKey(m,i),src:m})).filter(r=>!query||(r.title+r.key).toLowerCase().includes(query));
+ return MONSTER_TYPES.map((m,i)=>({group:'monsters',key:monsterKey(m,i),title:m.name,sub:(m.boss?'บอส · ':m.elite?'อีลิท · ':'')+monsterKey(m,i),src:m})).filter(r=>(!query||(r.title+r.key).toLowerCase().includes(query))&&(monsterKind==='all'||monsterKind==='boss'&&r.src.boss||monsterKind==='elite'&&r.src.elite&&!r.src.boss||monsterKind==='normal'&&!r.src.elite&&!r.src.boss));
 }
 const round=v=>typeof v==='number'?Math.round(v*1000)/1000:v;
 const value=(r,f)=>{const o=draft[r.group][r.key]?.[f];if(o!==undefined)return o;return round(r.skill?r.src[f]:original(r.group,r.key,f,r.src[f]));};
@@ -67,44 +70,59 @@ const PAGES={formula:['📐','สูตรดาเมจ','ลองค่า�
 function tabs(){
  PAGES.mapbosses=['🏔️','บอสประจำแมพ','9 แมพ · HP ไล่ตามพื้นที่ · เกิดใหม่ 60 นาทีหลังตาย แยกตามเซิร์ฟ/CH'];
  $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
- $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();});
+ $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();$('page-title').scrollIntoView({block:'start'});});
 }
 const remember=()=>{try{localStorage.setItem('ayo-admin-view',JSON.stringify({tab,classId}));}catch{}};
 function filters(){
  const f=$('filters');
- if(tab==='skills')f.innerHTML=`<label>อาชีพ <select id="class-pick">${paths.map(c=>`<option value="${c.id}"${c.id===classId?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><small>ค่านี้คือค่าขั้น 1 ก่อนบวกโบนัส Master · ขั้นสูงขึ้นคำนวณจากค่านี้</small>`;
+ if(tab==='skills'){
+  const role=roleById(classId);if(!role?.branches.some(b=>b.id===masterId))masterId=role?.branches[0]?.id??'';
+  f.innerHTML=`<label>อาชีพ <select id="class-pick">${paths.map(c=>`<option value="${c.id}"${c.id===classId?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><label>ชุดสกิล <select id="skill-set"><option value="live"${skillSet==='live'?' selected':''}>ชุดที่ใช้ในเกม · ดูรายละเอียด</option><option value="legacy"${skillSet==='legacy'?' selected':''}>ชุดเดิม · แก้ค่าสมดุล</option></select></label>`+(skillSet==='live'&&role?`<label>สาย Master <select id="master-pick">${role.branches.map(b=>`<option value="${b.id}"${b.id===masterId?' selected':''}>${esc(b.name)}</option>`).join('')}</select></label>`:'');
+ }
  else if(tab==='table')f.innerHTML=`<label>ดู <select id="table-pick"><option value="compare"${tableView==='compare'?' selected':''}>เทียบทุกอาชีพ</option>${paths.map(c=>`<option value="${c.id}"${c.id===tableView?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><small>ตัวเลขรวมค่าที่แก้ในแท็บสกิล (ยังไม่บันทึกก็เห็นผลทันที) · เขียว/แดง = สูงสุด/ต่ำสุดของแถว</small>`;
  else if(tab==='items')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อหรือรหัสไอเท็ม"></label><label>ประเภท <select id="kind-pick"><option value="all">ทั้งหมด</option>${Object.entries(KIND).map(([k,n])=>`<option value="${k}"${k===kind?' selected':''}>${n}</option>`).join('')}</select></label>`;
  else if(tab==='drops')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อมอนหรือไอเท็ม"></label><small>100% = ดรอปทุกครั้ง · หัวหน้าฝูงและช่วงดรอป ×2 ยังทอยซ้ำตามเดิม</small>`;
- else if(tab==='monsters')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อหรือรหัสมอนสเตอร์"></label>`;
+ else if(tab==='monsters')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อหรือรหัสมอนสเตอร์"></label><label>ประเภท <select id="monster-kind">${[['all','ทั้งหมด'],['normal','ธรรมดา'],['elite','อีลิท'],['boss','บอส']].map(([k,n])=>`<option value="${k}"${monsterKind===k?' selected':''}>${n}</option>`).join('')}</select></label>`;
  else f.innerHTML='';
+ if(['skills','monsters'].includes(tab)&&!(tab==='skills'&&skillSet==='live'))f.insertAdjacentHTML('beforeend',`<div class="admin-view-switch" aria-label="รูปแบบการแสดงผล"><button type="button" data-view-mode="cards" aria-pressed="${viewMode==='cards'}">รูปภาพและรายละเอียด</button><button type="button" data-view-mode="table" aria-pressed="${viewMode==='table'}">ตารางตัวเลข</button></div>`);
+ f.querySelectorAll('[data-view-mode]').forEach(b=>b.onclick=()=>{viewMode=b.dataset.viewMode;render();});
+ $('monster-kind')&&($('monster-kind').onchange=e=>{monsterKind=e.target.value;render(false);});
+ $('skill-set')&&($('skill-set').onchange=e=>{skillSet=e.target.value;render();});$('master-pick')&&($('master-pick').onchange=e=>{masterId=e.target.value;render();});
  $('class-pick')&&($('class-pick').onchange=e=>{classId=e.target.value;remember();render();});
  $('table-pick')&&($('table-pick').onchange=e=>{tableView=e.target.value;render(false);});
  $('kind-pick')&&($('kind-pick').onchange=e=>{kind=e.target.value;render(false);});
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses'].includes(tab);
- $('page-title').textContent=name;$('page-help').textContent=help+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
+ $('page-title').textContent=name;$('page-help').textContent=(tab==='skills'&&skillSet==='live'?'ชุดสกิลที่ใช้ในเกมปัจจุบัน · ดูรูป บทบาท และสาย Master':help)+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
 function showCount(){const n=count();$('changes').textContent=n?`แก้ไว้ ${n} ช่อง · ยังไม่บันทึก`:'ยังไม่มีการแก้';$('changes').classList.toggle('dirty',!!n);$('save').disabled=!n;$('reset-all').disabled=!n;}
+function rowArt(r){
+ if(r.skill)return `<span class="admin-skill-host" data-skill-art="${r.artSlot}"><strong></strong></span>`;
+ if(r.group==='monsters')return `<img class="admin-monster-art" data-monster-art="${MONSTER_TYPES.indexOf(r.src)}" alt="${esc(r.title)}" width="160" height="160">`;
+ if(r.group==='items')return `<i class="ico sm" data-item="${esc(r.key)}" style="${iconStyle(r.key)}"></i>`;
+ return `<i class="face sm" style="background-image:url(assets/character-life100/player/${esc(r.key)}-male.png)"></i>`;
+}
+function fieldInput(r,f){const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined,range=FIELDS[r.group][f];return `<input type="number" step="any" min="${range[0]}" max="${range[1]}" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`;}
+function currentSkills(){
+ const defs=liveRoleSkills(classId,masterId)??classSkills(classId,SKILLS),role=roleById(classId),list=defs.map((s,i)=>({...s,artSlot:i})).filter(s=>!s.reserved);
+ $('view').innerHTML=`<div class="admin-info-strip"><span>${esc(role?.role??className(classId))}</span><small>ค่าพื้นฐานก่อนเพิ่มระดับสกิล · ดูรายละเอียดเท่านั้น</small></div><div class="admin-entity-grid live-skill-grid">${list.map(s=>`<article class="admin-entity-card"><header>${rowArt({skill:true,artSlot:s.artSlot})}<div><span class="admin-tag">${s.passive?'พาสซีฟ':s.artSlot>=10?'Master':'สกิลอาชีพ'}</span><h3>${esc(s.name)}</h3><small>${esc(s.type)}</small></div></header><p class="admin-skill-tip">${esc(s.tip??'')}</p><dl class="admin-read-stats">${[['MP',s.passive?null:s.cost],['คูลดาวน์ (วิ)',s.passive?null:s.cd],['พลัง',s.passive||['taunt','guard','intercept','evade','stealth','clones','summon','greatSummon','spirit','greatSpirit','crow','smoke'].includes(s.type)?null:s.power??s.damage??s.heal]].filter(([,v])=>v!=null).map(([k,v])=>`<div><dt>${k}</dt><dd>${round(v)}</dd></div>`).join('')}</dl></article>`).join('')}</div>`;
+ paintAdminSkills($('view'),classId,defs);
+}
 function render(withFilters=true){
  if(withFilters)filters();pageHead();
- if(tab==='table'){$('view').innerHTML=skillTable();return;}
- if(tab==='players'){playersTab();return;}
- if(tab==='formula'){formulaTab();return;}
- if(tab==='drops'){dropsTab();return;}
- if(tab==='weather'){weatherTab();return;}
- if(tab==='boss'){bossTab();return;}
- if(tab==='mapbosses'){mapBossesTab();return;}
- const rows=rowsFor(),cols=columns(rows);
- $('view').innerHTML=`<div class="scroll"><table><thead><tr><th class="l">ชื่อ</th>${cols.map(c=>`<th>${LABEL[c]??c}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-i="${i}"><td class="l"><span class="name">${r.group==='items'?`<i class="ico sm" data-item="${esc(r.key)}" style="${iconStyle(r.key)}"></i>`:r.group==='classes'?`<i class="face sm" style="background-image:url(assets/character-life100/player/${esc(r.key)}-male.png)"></i>`:''}<span><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></span></span></td>${cols.map(f=>{const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined;return `<td>${b==null&&!edited?'<span class="na">—</span>':`<input type="number" step="any" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`}</td>`;}).join('')}<td><button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button></td></tr>`).join('')}</tbody></table></div>`;
- $('view').querySelectorAll('tr[data-i]').forEach(tr=>{const r=rows[+tr.dataset.i];
-  if(r.src.worldBoss){const respawn=tr.querySelector('input[data-f="respawn"]');if(respawn){respawn.disabled=true;respawn.title='บอสประจำแมพเกิดใหม่ 60 นาทีหลังตาย';}}
-  tr.querySelectorAll('input').forEach(inp=>inp.onchange=()=>{set(r,inp.dataset.f,inp.value);const edited=draft[r.group][r.key]?.[inp.dataset.f]!==undefined;inp.classList.toggle('edited',edited);if(!edited)inp.value=base(r,inp.dataset.f)??'';tr.querySelector('.undo').hidden=!draft[r.group][r.key];});
-  tr.querySelector('.undo').onclick=()=>{delete draft[r.group][r.key];set(r,'',null);render(false);};});
- showCount();
+ if(tab==='skills'&&skillSet==='live'){currentSkills();return;}
+ if(tab==='table'){$('view').innerHTML=skillTable();paintAdminSkills($('view'),tableView==='compare'?classId:tableView);return;}
+ if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
+ const rows=rowsFor(),cols=columns(rows),cards=['skills','monsters'].includes(tab)&&viewMode==='cards';
+ const undo=(r,i)=>`<button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button>`;
+ const note=tab==='skills'?'<p class="admin-legacy-note">ชุดสกิลเดิมก่อนปรับระบบอาชีพ · ไม่ใช่ชุดสกิลปัจจุบันที่แสดงในเกม</p>':'';
+ $('view').innerHTML=note+(cards?`<div class="admin-info-strip"><span>${rows.length} รายการ</span><small>แก้เฉพาะค่าที่ต้องการ แล้วกดบันทึกเข้าเกม · สีทองคือค่าที่ยังไม่บันทึก</small></div><div class="admin-entity-grid">${rows.map((r,i)=>`<article class="admin-entity-card" data-i="${i}"><header>${rowArt(r)}<div><h3>${esc(r.title)}</h3><small>${esc(r.sub)}</small></div></header><div class="admin-edit-fields">${cols.filter(f=>base(r,f)!=null||draft[r.group][r.key]?.[f]!==undefined).map(f=>`<label><span>${LABEL[f]??f}</span>${fieldInput(r,f)}</label>`).join('')}</div><footer>${undo(r,i)}</footer></article>`).join('')}</div>`:
+ `<div class="scroll admin-data-scroll"><table><thead><tr><th class="l">ชื่อ</th>${cols.map(c=>`<th>${LABEL[c]??c}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-i="${i}"><td class="l"><span class="name">${rowArt(r)}<span><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></span></span></td>${cols.map(f=>`<td>${base(r,f)==null&&draft[r.group][r.key]?.[f]===undefined?'<span class="na">—</span>':fieldInput(r,f)}</td>`).join('')}<td>${undo(r,i)}</td></tr>`).join('')}</tbody></table></div>`);
+ $('view').querySelectorAll('[data-i]').forEach(el=>{const r=rows[+el.dataset.i];el.querySelectorAll('input[data-f]').forEach(inp=>inp.onchange=()=>{set(r,inp.dataset.f,inp.value);const edited=draft[r.group][r.key]?.[inp.dataset.f]!==undefined;inp.classList.toggle('edited',edited);if(!edited)inp.value=base(r,inp.dataset.f)??'';el.querySelector('.undo').hidden=!draft[r.group][r.key];});el.querySelector('.undo').onclick=()=>{delete draft[r.group][r.key];showCount();render(false);};});
+ if(tab==='skills')paintAdminSkills($('view'),classId);if(tab==='monsters')paintAdminMonsters($('view'));showCount();
 }
 // 0.89 skill table (owner): the balance view from the game numbers, including unsaved edits from the skill tab.
 const ROLE=['โจมตี','วงกว้าง','ตรึง','ผลัก','ฟื้นตัว','ตั้งรับ','โจมตีหนัก','พุ่ง','รวมสมาธิ','ไม้ตาย'];
@@ -115,7 +133,7 @@ const reqText=(list,slot)=>(REQ[slot]??[]).map(([r,l])=>`${esc(list[r].name)} �
 function skillTable(){
  if(tableView!=='compare'){const list=live(tableView);
   return `<div class="scroll"><table><thead><tr><th class="l">สกิล</th><th>MP</th><th>คูลดาวน์</th><th>ระยะ/รัศมี</th><th>นาน</th><th>ขั้น 1</th><th>ขั้น 4</th><th>ขั้น 7</th><th>ขั้น 10</th><th>พลัง/MP</th><th>พลัง/วิ</th><th class="l">ปลดล็อกเมื่อ</th></tr></thead><tbody>${list.map(s=>{const p=s.damage??s.heal??0,lv=[1,4,7,10].map(l=>scaledSkill(s,l));
-   return `<tr><td class="l"><b>${s.key} · ${esc(s.name)}</b><small>${ROLE[s.slot]} · ${esc(s.type)}</small></td><td>${num(s.cost)}</td><td>${num(s.cd)}</td><td>${num(s.radius??s.range)}</td><td>${num(s.duration)}</td>${lv.map(x=>`<td>${s.heal?'+'+num(x.heal):num(x.damage)}<small>${num(x.cd)} วิ</small></td>`).join('')}<td>${s.cost?num(p/s.cost):'—'}</td><td>${s.cd?num(p/s.cd):'—'}</td><td class="l req">${reqText(list,s.slot)}</td></tr>`;}).join('')}</tbody></table></div>`;}
+   return `<tr><td class="l"><span class="name">${rowArt({skill:true,artSlot:s.slot})}<span><b>${s.key} · ${esc(s.name)}</b><small>${ROLE[s.slot]} · ${esc(s.type)}</small></span></span></td><td>${num(s.cost)}</td><td>${num(s.cd)}</td><td>${num(s.radius??s.range)}</td><td>${num(s.duration)}</td>${lv.map(x=>`<td>${s.heal?'+'+num(x.heal):num(x.damage)}<small>${num(x.cd)} วิ</small></td>`).join('')}<td>${s.cost?num(p/s.cost):'—'}</td><td>${s.cd?num(p/s.cd):'—'}</td><td class="l req">${reqText(list,s.slot)}</td></tr>`;}).join('')}</tbody></table></div>`;}
  const all=paths.map(c=>({c,list:live(c.id)}));
  return `<div class="scroll"><table><thead><tr><th class="l">ช่อง · บทบาท</th>${all.map(a=>`<th>${esc(a.c.name)}</th>`).join('')}</tr></thead><tbody><tr><td class="l"><b>ตีธรรมดา</b><small>ATK อาชีพ · หน่วง</small></td>${all.map(a=>`<td>${num(a.c.damage)}<small>${num(a.c.delay)} วิ</small></td>`).join('')}</tr>${ROLE.map((role,slot)=>{const vals=all.map(a=>a.list[slot].damage??a.list[slot].heal??null),n=vals.filter(v=>v!=null),hi=Math.max(...n),lo=Math.min(...n);
   return `<tr><td class="l"><b>${slot===9?0:slot+1} · ${role}</b><small>${reqText(all[0].list,slot)}</small></td>${all.map((a,i)=>{const s=a.list[slot],v=vals[i],k=n.length>1&&hi!==lo&&v!=null?(v===hi?'top':v===lo?'bottom':''):'';return `<td class="${k}">${s.heal?'+'+num(s.heal):num(s.damage)}<small>MP ${num(s.cost)} · ${num(s.cd)} วิ</small></td>`;}).join('')}</tr>`;}).join('')}</tbody></table></div>`;
@@ -130,6 +148,7 @@ function dropsTab(){
   return `<tr class="mon"><td class="l" colspan="4"><b>${esc(name)}</b><small>${esc(mid)} · เบี้ย ${d.coins[0]}–${d.coins[1]}</small></td><td><button type="button" class="undo" data-undo-drop="${esc(mid)}" ${over?'':'hidden'}>คืนค่า</button></td></tr>`+
   d.items.map(([id,now,n=1])=>{const b=dropBase(mid,id,now),edited=over?.[id]!==undefined,v=edited?over[id]:b;
    return `<tr><td class="l"><span class="name"><i class="ico sm" data-item="${esc(id)}" style="${iconStyle(id)}"></i><span><b>${esc(itemName(id))}</b><small>${esc(id)}</small></span></span></td><td>${pct(b)}%</td><td><input type="number" min="0" max="100" step="any" data-mid="${esc(mid)}" data-id="${esc(id)}" value="${pct(v)}" class="${edited?'edited':''}" aria-label="${esc(name)} ${esc(itemName(id))} %" title="ค่าเดิม ${pct(b)}%"></td><td>×${n}</td><td></td></tr>`;}).join('');}).join('')||'<tr><td class="l" colspan="5">ไม่พบ</td></tr>'}</tbody></table></div>`;
+ $('view').querySelectorAll('tr.mon td:first-child').forEach((cell,i)=>{const index=MONSTER_TYPES.findIndex((m,k)=>monsterKey(m,k)===list[i].mid);if(index>=0){const image=document.createElement('img');image.className='admin-monster-art';image.dataset.monsterArt=index;image.alt=list[i].name;cell.prepend(image);}});paintAdminMonsters($('view'));
  $('view').querySelectorAll('input[data-mid]').forEach(inp=>inp.onchange=()=>{
   const {mid,id}=inp.dataset,entry=DROPS[mid].items.find(e=>e[0]===id),b=dropBase(mid,id,entry[1]),v=inp.value===''?b:Math.min(100,Math.max(0,Number(inp.value)))/100;
   if(!Number.isFinite(v)||pct(v)===pct(b)){if(draft.drops[mid]){delete draft.drops[mid][id];if(!Object.keys(draft.drops[mid]).length)delete draft.drops[mid];}}
@@ -282,7 +301,7 @@ async function loadPlayers(quiet=false,fresh=false){
  catch(e){adminMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}
  if(tab==='players')playersTab();
 }
-function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(document.activeElement?.closest?.('#give'))return;loadPlayers(true);},15000);}
+function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(petGrantSending||document.activeElement?.closest?.('#give,.admin-pet-grant'))return;loadPlayers(true);},15000);}
 // 0.109.7 weather tab: set rain / mist / storm (or clear) on a realm for some minutes, or hand it back to the clock.
 async function loadWeather(){try{weatherState=(await adminFetch('/admin/weather')).servers;weatherMsg='';}catch(e){weatherMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}if(tab==='weather')weatherTab();}
 async function setWeather(weather){
@@ -330,12 +349,13 @@ function mapBossesTab(){
  $('view').innerHTML='<div class="wx"><div class="wx-pick"><label>เซิร์ฟ <select id="mb-server">'+['server-1','server-2'].map((id,i)=>'<option value="'+id+'"'+(mapBossView.serverId===id?' selected':'')+'>เซิร์ฟ '+(i+1)+'</option>').join('')+'</select></label><label>CH <select id="mb-channel">'+[1,2,3,4,5].map(c=>'<option'+(mapBossView.channel===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label><button id="mb-refresh" type="button"'+(mapBossView.loading?' disabled':'')+'>รีเฟรชสถานะ</button></div><p role="status">'+esc(mapBossView.message||'ตารางบอสประจำแมพ · กดรีเฟรชเพื่อดูเวลาเกิด')+'</p><div class="scroll"><table><thead><tr><th>แมพ / เลเวล</th><th>บอส</th><th>HP / พลังโจมตี</th><th>สถานะ / เกิดใหม่</th><th>ของประจำแมพ</th><th>จัดการ</th></tr></thead><tbody>'+rows.map(b=>{
   const t=MONSTER_TYPES.find(t=>t.id===b.id),left=b.nextAt?Math.max(0,Math.ceil((b.nextAt-clock)/1000)):0;
   const status=b.alive===undefined?'ยังไม่โหลดสถานะ':b.alive?'พร้อมต่อสู้':left?Math.floor(left/60)+' นาที '+left%60+' วินาที':'กำลังเกิด';
-  return '<tr><td class="l">'+esc(b.mapName)+'<small>Lv.'+b.minLevel+'–'+b.level+'</small></td><td class="l">'+esc(b.name)+'<small>'+esc(b.id)+'</small></td><td>'+num(t?.hp??b.hp)+'<small>ATK '+num(t?.damage)+' · Lv.'+num(t?.level??b.level)+'</small></td><td>'+status+'<small>60 นาทีหลังตาย · CH '+mapBossView.channel+'</small></td><td class="l"><span class="name"><i class="ico sm" style="'+iconStyle(b.accessory)+'"></i>'+esc(itemName(b.accessory))+'</span><small>'+esc(itemName(b.material))+' ×5 · ตราบอส 8% (ค่าเริ่มต้น)</small></td><td><button type="button" data-mb-edit="'+b.id+'">ค่าบอส</button><button type="button" data-mb-drops="'+b.id+'">ดรอป</button><a href="assets/monsters-chapter2/animations/'+b.id+'-poses-v1.png" target="_blank" rel="noopener">ภาพท่า ↗</a></td></tr>';
+  return '<tr><td class="l">'+esc(b.mapName)+'<small>Lv.'+b.minLevel+'–'+b.level+'</small></td><td class="l">'+esc(b.name)+'<small>'+esc(b.id)+'</small></td><td>'+num(t?.hp??b.hp)+'<small>ATK '+num(t?.damage)+' · Lv.'+num(t?.level??b.level)+'</small></td><td>'+status+'<small>60 นาทีหลังตาย · CH '+mapBossView.channel+'</small></td><td class="l"><span class="name"><i class="ico sm" style="'+iconStyle(b.accessory)+'"></i>'+esc(itemName(b.accessory))+'</span><small>'+esc(itemName(b.material))+' ×5 · ตราบอส 8% (ค่าเริ่มต้น)</small></td><td><button type="button" data-mb-edit="'+b.id+'">ค่าบอส</button><button type="button" data-mb-drops="'+b.id+'">ดรอป</button><a href="assets/monsters-chapter2/animations/'+b.id+'-poses-v1.png" target="_blank" rel="noopener">ภาพท่า</a></td></tr>';
  }).join('')+'</tbody></table></div><p>มอนทั่วไป ตัวพิเศษ และบอสเควสเดิมแยกจากบอสประจำแมพนี้ · เมืองปลอดภัยและดันเจี้ยนส่วนตัวไม่มีบอสประจำแมพเกิดอัตโนมัติ</p></div>';
  $('view').firstElementChild.classList.add('map-boss-admin');
+ $('view').querySelectorAll('tbody tr').forEach((tr,i)=>{const index=MONSTER_TYPES.findIndex(m=>m.id===rows[i].id);if(index>=0){const image=document.createElement('img');image.className='admin-monster-art';image.dataset.monsterArt=index;image.alt=rows[i].name;tr.children[1].prepend(image);}});paintAdminMonsters($('view'));
  const scope=()=>{mapBossView.serverId=$('mb-server').value;mapBossView.channel=+$('mb-channel').value;mapBossView.rows=null;loadMapBosses();};
  $('mb-server').onchange=scope;$('mb-channel').onchange=scope;$('mb-refresh').onclick=loadMapBosses;
- $('view').querySelectorAll('[data-mb-edit],[data-mb-drops]').forEach(b=>b.onclick=()=>{tab=b.dataset.mbEdit?'monsters':'drops';query=b.dataset.mbEdit??b.dataset.mbDrops;remember();tabs();render();});
+ $('view').querySelectorAll('[data-mb-edit],[data-mb-drops]').forEach(b=>b.onclick=()=>{tab=b.dataset.mbEdit?'monsters':'drops';query=b.dataset.mbEdit??b.dataset.mbDrops;monsterKind='all';remember();tabs();render();});
 }
 function bossTab(){
  warmFirebase();const user=LOCAL||fbConn?.auth.currentUser;
@@ -392,10 +412,11 @@ function playersTab(){
  const plist=`<section class="plist"><input id="player-search" type="search" placeholder="🔍 ค้นหาชื่อผู้เล่น" value="${esc(search)}">${chips}${list.slice(0,shownRows).map(row).join('')||`<p class="hint">${players?'ไม่พบผู้เล่น':'กำลังโหลด…'}</p>`}${list.length>shownRows?`<button type="button" id="more-players" class="more">แสดงเพิ่ม (อีก ${list.length-shownRows} คน)</button>`:''}</section>`;
  let gift='<p class="hint big">← เลือกผู้เล่นทางซ้ายเพื่อดูกระเป๋าและส่งของ</p>';
  if(p){
+  const petDraft=petGrantDrafts.get(p.id)??{gems:0,pet:null};petGrantDrafts.set(p.id,petDraft);petDraft.pane=giftPane;
   const bag=Object.entries(p.items).filter(([id,n])=>n>0&&ITEMS[id]).map(([id,n])=>`<span class="cell" title="${esc(itemName(id))} ×${n}">${pic(id,n)}</span>`).join('')||'<span class="hint">ว่าง</span>';
   const quick=QUICK.map(([id,n],i)=>`<button type="button" class="qbtn" data-quick="${i}">${id==='coins'?`<i class="ico" style="${iconStyle('cowrie')}"></i>`:`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>`}<span>+${id==='coins'?n.toLocaleString('th-TH')+' เบี้ย':esc(itemName(id))+' ×'+n}</span></button>`).join('');
   const lines=basket.map((l,i)=>`<li>${pic(l.id)}<span>${esc(itemName(l.id))}</span><b>×${l.count}</b><button type="button" data-drop="${i}" aria-label="เอาออก">×</button></li>`).join('')+(giftCoins?`<li><i class="ico" style="${iconStyle('cowrie')}"></i><span>เบี้ย</span><b>${giftCoins.toLocaleString('th-TH')}</b><button type="button" data-drop="coins" aria-label="เอาออก">×</button></li>`:'');
-  gift=`<form id="give"><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small> ${state(p)}</div></div>`+
+  gift=`<nav class="admin-gift-tabs" aria-label="ประเภทของที่จะมอบ"><button type="button" data-gift-pane="pets" aria-pressed="${giftPane==='pets'}">สัตว์เลี้ยงและแก้วขวัญ</button><button type="button" data-gift-pane="items" aria-pressed="${giftPane==='items'}">กระเป๋าและไอเท็ม</button></nav><form id="give" ${giftPane==='pets'?'hidden':''}><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small> ${state(p)}</div></div>`+
    (p.offline?'<p class="hint offline-note">ผู้เล่นออฟไลน์อยู่ · ของที่ส่งจะเข้ากระเป๋าในเซฟทันที และเห็นตอนเข้าเกมครั้งถัดไป</p>':'')+
    `<h4>กระเป๋า</h4><div class="grid bag">${bag}</div>`+
    `<h4>ส่งด่วน</h4><div class="quick">${quick}</div>`+
@@ -407,7 +428,7 @@ function playersTab(){
    `<div class="sendbar"><h4>รายการที่จะส่ง</h4><ul class="basket">${lines||'<li class="empty">ยังว่าง · แตะรูปไอเท็มหรือปุ่มส่งด่วน</li>'}</ul>`+
    `<label class="coins">+ เบี้ย <input id="give-coins" type="number" min="0" max="10000000" value="${giftCoins}"></label>`+
    `<button type="submit" class="primary send"${!basket.length&&!giftCoins?' disabled':''}>🎁 ส่งให้ ${esc(p.name)}</button></div></form>`+
-   `<section class="admin-pet-grant"><p class="eyebrow">COMPANION COLLECTION</p><h3>สัตว์เลี้ยงและแก้วขวัญ</h3><p>ยอดปัจจุบัน ${(p.petCollection?.balance??0).toLocaleString('th-TH')} แก้วขวัญ · มี ${Object.keys(p.petCollection?.collection??{}).length}/10 ตัว</p><p class="hint">มอบโดยแอดมิน · ยังไม่มีระบบเติมเงินจริง</p><label>แก้วขวัญที่จะมอบ <input id="grant-pet-gems" type="number" min="0" max="1000000" step="1" value="0"></label><label>สัตว์เลี้ยง / ตัวซ้ำ 1 ตัว <select id="grant-pet-id"><option value="">ไม่มอบสัตว์เลี้ยง</option>${PREMIUM_PETS.map(x=>`<option value="${x.id}">${x.tier} · ${x.name}</option>`).join('')}</select></label><button type="button" id="give-pets" class="primary">มอบเข้าคอลเลกชัน</button><p id="give-pets-status" role="status"></p></section>`;
+   petGrantHTML(p,petDraft,petGrantSending);
  }
  $('view').innerHTML=`<div class="players">${head}${user?`<div class="players-body">${plist}<section class="gift">${gift}</section></div>`:'<p class="hint big">ล็อกอินด้วยอีเมลแอดมินเพื่อดูผู้เล่นที่ออนไลน์อยู่ และส่งไอเท็มหรือเบี้ยให้</p>'}</div>`;
  const on=(id,ev,fn)=>{const el=$(id);if(el)el[ev]=fn;};
@@ -419,12 +440,13 @@ function playersTab(){
  $('view').querySelectorAll('[data-presence]').forEach(b=>b.onclick=()=>{presence=b.dataset.presence;shownRows=50;playersTab();});
  refocus('player-search',v=>{search=v;shownRows=50;});
  $('view').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{if(picked!==b.dataset.pick){picked=b.dataset.pick;basket=[];giftCoins=0;}adminMsg='';playersTab();});
- const petGive=$('give-pets');if(petGive)petGive.onclick=async()=>{
-  const payload={peer:p.id,gems:Number($('grant-pet-gems').value),pet:$('grant-pet-id').value||null},signature=JSON.stringify(payload);
-  if(!petGrantPending||petGrantPending.signature!==signature)petGrantPending={signature,id:crypto.randomUUID()};petGive.disabled=true;
-  try{const r=await adminFetch('/admin/pets',{...payload,requestId:petGrantPending.id});p.petCollection=r.petCollection;petGrantPending=null;adminMsg='มอบสัตว์เลี้ยงและแก้วขวัญเรียบร้อยแล้ว';playersTab();}
-  catch(e){$('give-pets-status').textContent='ยังไม่สำเร็จ · '+e.message;petGive.disabled=false;}
- };
+ $('view').querySelectorAll('[data-gift-pane]').forEach(b=>b.onclick=()=>{giftPane=b.dataset.giftPane;playersTab();});
+ if(p)bindPetGrant($('view'),{player:p,draft:petGrantDrafts.get(p.id),busy:petGrantSending,onSend:async()=>{
+  if(petGrantSending)return;const draft=petGrantDrafts.get(p.id),payload={peer:p.id,gems:draft.gems,pet:draft.pet||null},signature=JSON.stringify(payload);
+  if(!petGrantPending||petGrantPending.signature!==signature)petGrantPending={signature,id:crypto.randomUUID()};petGrantSending=true;playersTab();
+  try{const r=await adminFetch('/admin/pets',{...payload,requestId:petGrantPending.id});p.petCollection=r.petCollection;petGrantPending=null;draft.gems=0;draft.pet=null;adminMsg='มอบสัตว์เลี้ยงและแก้วขวัญเรียบร้อยแล้ว';}
+  catch(e){adminMsg='ยังไม่สำเร็จ · '+e.message;}finally{petGrantSending=false;playersTab();}
+ }});
  const form=$('give');if(!form)return;
  const keep=()=>{giftCoins=Math.max(0,Math.min(1e7,Math.floor(Number($('give-coins').value)||0)));pickCount=Math.max(1,Math.min(999,Math.floor(Number($('give-count').value)||1)));};
  const addItem=(id,count)=>{const line=basket.find(l=>l.id===id);if(line)line.count=Math.min(999,line.count+count);else if(basket.length<20)basket.push({id,count});};

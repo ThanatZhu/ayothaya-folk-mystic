@@ -14,3 +14,12 @@
 
 /* 0.99.12 trial journal: one line per part of the trial */
 #training-journal span{white-space:pre-line;line-height:1.6}
+
+/* 1.24 Actual HUD rectangles own journal placement; the list can be folded on short screens. */
+#training-journal{position:fixed;box-sizing:border-box;width:min(245px,calc(100vw - 24px));max-width:none;pointer-events:auto;overflow:hidden;z-index:12;gap:0;padding:8px 12px;}
+#training-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;width:100%;min-height:36px;padding:0;border:0;background:transparent;color:#edc57b;text-align:left;font:inherit;cursor:pointer;}
+#training-toggle b{font-size:20px;}#training-toggle:focus-visible{outline:2px solid #e7c67d;outline-offset:2px;}
+#training-details{display:flex;flex-direction:column;gap:4px;min-height:0;overflow-y:auto;overscroll-behavior:contain;}
+#training-details[hidden],#training-summary[hidden]{display:none;}
+#training-summary{font-size:11px;color:#dfd4b4;}
+@media(max-height:600px){#training-journal{width:190px;padding:5px 9px;}#training-toggle{min-height:36px;}}

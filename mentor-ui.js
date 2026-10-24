@@ -9,9 +9,12 @@ import {getLoadingScreen} from './loading-screen.js?v=39';
 const errors={'trainer-boss':'ยังไม่ได้ล้มบอสของบททดสอบ','trainer-items':'วัตถุดิบหรือเบี้ยยังไม่ครบ','trainer-level':'ระดับยังไม่ถึงเงื่อนไขของครู','trainer-distance':'เดินเข้าใกล้ครูก่อนนะ','trainer-active':'มีบททดสอบที่รับไว้แล้ว ให้กลับหาครูสายเดิมก่อน','trainer-incomplete':'ยังทำบททดสอบไม่ครบ','trainer-class':'ครูท่านนี้สอนอีกสายอาชีพ','trainer-finished':'คุณผ่านการเลื่อนขั้นแล้ว','trainer-quest':'ยังไม่ได้รับบททดสอบนี้','action-rate':'รอสักครู่แล้วลองอีกครั้ง','online-required':'ต้องเชื่อมต่อเซิร์ฟเวอร์ก่อนรับบททดสอบ','not-connected':'กำลังเชื่อมต่อเซิร์ฟเวอร์ กรุณารอสักครู่'};
 export function createMentorUI({game,account,inTown=()=>false,recall=()=>false}){
  const panel=document.createElement('dialog');panel.id='mentor-panel';panel.setAttribute('aria-labelledby','mentor-name');
- panel.innerHTML='<header><div><small>ลานครูแห่งอโยธยา</small><h2 id="mentor-name"></h2></div><button id="mentor-close" aria-label="ปิดบทสนทนา">×</button></header><div class="mentor-content"><div class="mentor-portrait" role="img"></div><section><p id="mentor-role"></p><p id="mentor-story"></p><h3 id="mentor-quest"></h3><p id="mentor-objective"></p><progress id="mentor-progress"></progress><label id="mentor-branch-label">เลือกสาย Master<select id="mentor-branch"></select></label><p id="mentor-result" role="status"></p><div class="mentor-actions"><button id="mentor-accept">รับบททดสอบ</button><button id="mentor-complete">ส่งบททดสอบ</button><button id="mentor-cancel">ยกเลิกบททดสอบ</button></div></section></div>';
+ panel.innerHTML='<header><div><small>ลานครูแห่งอโยธยา</small><h2 id="mentor-name"></h2></div><button id="mentor-close" aria-label="ปิดบทสนทนา">×</button></header><div class="mentor-content"><div class="mentor-portrait" role="img"></div><section><p id="mentor-role"></p><p id="mentor-story"></p><h3 id="mentor-quest"></h3><p id="mentor-objective"></p><progress id="mentor-progress"></progress><label id="mentor-branch-label">เลือกสาย Master<select id="mentor-branch"></select></label><p id="mentor-stat-note">เมื่อเปลี่ยนอาชีพหรือสาย Master จะคืนแต้มสถานะทั้งหมดให้จัดใหม่</p><p id="mentor-result" role="status"></p><div class="mentor-actions"><button id="mentor-accept">รับบททดสอบ</button><button id="mentor-complete">ส่งบททดสอบ</button><button id="mentor-cancel">ยกเลิกบททดสอบ</button></div></section></div>';
  document.getElementById('game-shell').append(panel);const $=id=>panel.querySelector('#'+id);let current=null,busy=false,last='';
- const journal=document.createElement('aside');journal.id='training-journal';journal.hidden=true;journal.innerHTML='<strong>บททดสอบจากครู</strong><span></span><small></small>';document.getElementById('game-shell').append(journal);
+ const journal=document.createElement('aside');journal.id='training-journal';journal.hidden=true;journal.innerHTML='<button type="button" id="training-toggle" aria-controls="training-details" aria-label="ย่อหรือขยายรายการภารกิจ"><strong>บททดสอบจากครู</strong><b aria-hidden="true"></b></button><div id="training-details"><span class="training-lines"></span><small></small></div><span id="training-summary" hidden></span>';document.getElementById('game-shell').append(journal);
+ const compact=matchMedia('(max-height:600px)'),foldButton=journal.querySelector('#training-toggle');let folded=compact.matches,manualFold=false;
+ function fold(){journal.dataset.folded=String(folded);journal.querySelector('#training-details').hidden=folded;journal.querySelector('#training-summary').hidden=!folded;foldButton.setAttribute('aria-expanded',String(!folded));foldButton.querySelector('b').textContent=folded?'+':'−';}
+ fold();foldButton.onclick=e=>{e.stopPropagation();game.clearInput();manualFold=true;folded=!folded;fold();stackJournal();};journal.addEventListener('pointerdown',e=>e.stopPropagation());compact.addEventListener('change',()=>{if(!manualFold){folded=compact.matches;fold();}stackJournal();});
  const close=()=>{if(busy)return;panel.close();};$('mentor-close').onclick=close;panel.addEventListener('cancel',e=>{if(busy)e.preventDefault();});panel.addEventListener('close',()=>{if(current)current.talking=false;current=null;game.clearInput();});
  async function act(action){if(busy||!current)return;busy=true;for(const b of panel.querySelectorAll('button'))b.disabled=true;$('mentor-result').textContent='กำลังบันทึก…';
   try{const result=await account.train(current.mentorId,action,$('mentor-branch').value);if(result.advanced){$('mentor-result').textContent='ผ่านบททดสอบแล้ว กำลังเตรียมอาชีพใหม่…';getLoadingScreen().show('ayutthaya');location.reload();return;}$('mentor-result').textContent=action==='accept'?'รับบททดสอบแล้ว ออกไปฝึกนอกกำแพงเมืองได้เลย':'ยกเลิกบททดสอบแล้ว';}
@@ -19,6 +22,7 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
  }
  $('mentor-accept').onclick=()=>act('accept');$('mentor-complete').onclick=()=>act('complete');$('mentor-cancel').onclick=()=>act('cancel');
  function render(){if(!current)return;const s=trainingStatus(account.character,account.training,game.world,current.mentorId),ready=trialReady(s,game.world.bag,game.online);
+  $('mentor-stat-note').hidden=s.completed||s.wrongClass;
   $('mentor-role').textContent=current.title+' · '+className(current.classId,account.character.gender);
   $('mentor-quest').textContent=s.tier==='class'?'บททดสอบฝากตัวเป็นศิษย์':'บททดสอบสู่ Master';
   $('mentor-objective').textContent=s.completed?'คุณผ่านการเลื่อนขั้นแล้ว ยินดีต้อนรับกลับมาฝึกฝนเสมอ':s.wrongClass?'กลับไปหาครูประจำสายอาชีพของคุณเพื่อเลื่อนขั้น':!s.eligible?'ฝึก Job ให้ตัน ('+s.jobLevel+' / '+s.jobCap+')'+' ก่อนกลับมารับบททดสอบ':s.training&&!s.own?'คุณรับบททดสอบของสาย '+className(s.training.classId,account.character.gender)+' ไว้แล้ว':(s.own?trialLines(s,game.world.bag,game.online).join(' · '):'บททดสอบ: ล่ามอนสเตอร์ '+s.target+' ตัว'+(game.online?' · ล้ม'+s.trial.bossName+' · นำ'+s.trial.items.map(([id,n])=>itemDef(id).name+' '+n).join(' ')+' และ '+s.trial.coins.toLocaleString('th-TH')+' เบี้ย':''))+' · กลับมาหาครูเพื่อ'+(s.tier==='class'?'เปลี่ยนอาชีพ':'เลื่อนขั้น')+(ready?' · พร้อมส่งแล้ว':'');
@@ -47,13 +51,29 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
   ready.querySelector('#job-ready-text').textContent=r.ok?'ไปหาครูประจำสายที่ลานครูแห่งอโยธยา รับบททดสอบ แล้วทำให้ครบทั้ง 3 ด่าน':'ต้อง Base Lv.'+r.min+' ก่อน (ตอนนี้ Lv.'+r.base+') ระหว่างนี้เตรียมของสำหรับบททดสอบไว้ได้เลย';
   ready.querySelector('#job-ready-steps').innerHTML=['ล่ามอนสเตอร์ '+t.kills+' ตัว','ล้ม'+t.bossName,'นำ '+t.items.map(([id,n])=>itemDef(id).name+' '+n).join(' · ')+' และ '+t.coins.toLocaleString('th-TH')+' เบี้ย'].map(x=>'<li>'+x+'</li>').join('');
   ready.querySelector('#job-ready-go').textContent=inTown()?'▶ เดินไปหา Master':'▶ กลับอยุธยา ไปหา Master';if(!ready.open)ready.showModal();}
- // 0.101.3 the trial journal sits under the party frame and the ailment row (whichever reach lower), so they never overlap
+ // Position from actual visible rectangles, including the profile and online chip. Long lists scroll below the header.
  function stackJournal(){
-  if(journal.hidden)return;let below=0;
-  // 1.12.6 also below the event chips and the rebirth button (they covered the trial journal on phones)
-  for(const id of ['party-frame','ailment-row','hud-chips','rebirth-btn']){const el=document.getElementById(id);if(el&&!el.hidden&&(el.childElementCount||id==='rebirth-btn')&&getComputedStyle(el).display!=='none'){const r=el.getBoundingClientRect();if(r.height&&r.left<journal.getBoundingClientRect().right)below=Math.max(below,r.bottom);}}
-  const top=below?Math.round(below+8-(journal.offsetParent?.getBoundingClientRect().top??0))+'px':'';if(journal.style.top!==top)journal.style.top=top;
+  if(journal.hidden)return;
+  const rect=journal.getBoundingClientRect(),viewport=window.visualViewport,profile=document.querySelector('.player-panel')?.getBoundingClientRect();
+  const left=Math.max(8,profile?.left??16),right=left+rect.width,bottom=(viewport?.offsetTop??0)+(viewport?.height??innerHeight)-12;
+  const visible=selector=>[...document.querySelectorAll(selector)].filter(el=>!el.hidden&&getComputedStyle(el).visibility!=='hidden').map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height&&r.bottom>0&&r.top<bottom);
+  const stack=visible('.player-panel,#ailment-row,#online-button,#party-frame,#hud-chips,#rebirth-btn');
+  let top=Math.round(Math.max(viewport?.offsetTop??0,...stack.filter(r=>r.left<right&&r.right>left).map(r=>r.bottom))+10),x=left,room=bottom-top;
+  // A very tall party/buff stack can exhaust the left edge. Use a free adjacent space instead of covering another HUD.
+  if(room<64){
+   const avoid=[...stack,...visible('#menu-toggle,#hud-right,.mini-panel,.target-panel,#joystick,.combat-controls,#online-dock,#quick-slots')],width=viewport?.width??innerWidth;
+   const xs=[left,...avoid.map(r=>r.right+8),width-rect.width-8],ys=[(viewport?.offsetTop??0)+8,...avoid.map(r=>r.bottom+8)];
+   outer:for(const cx of xs)for(const cy of ys){
+    if(cx<8||cx+rect.width>width-8||cy+64>bottom)continue;
+    if(avoid.some(r=>cx<r.right+6&&cx+rect.width>r.left-6&&cy<r.bottom+6&&cy+64>r.top-6))continue;
+    x=cx;top=cy;room=Math.min(bottom,...avoid.filter(r=>r.left<cx+rect.width&&r.right>cx&&r.top>cy).map(r=>r.top-8))-cy;break outer;
+   }
+  }
+  const styles={left:Math.round(x)+'px',top:Math.round(top)+'px',maxHeight:Math.max(58,room)+'px'};
+  for(const [key,value] of Object.entries(styles))if(journal.style[key]!==value)journal.style[key]=value;
+
  }
- function update(){jobReady();stackJournal();const q=account.training,key=JSON.stringify([q,game.world.kills,game.world.bag]);if(key===last)return;last=key;journal.hidden=!q;if(q){const m=mentorById(q.classId==='acolyte'?'monk-master':({swordsman:'sword-master',lancer:'spear-master',hunter:'hunt-master',boxer:'box-master',rogue:'shadow-master',shaman:'spirit-master'})[q.classId]);const s=trainingStatus(account.character,q,game.world,m.id);journal.querySelector('span').textContent=className(q.classId,account.character.gender)+'\n'+trialLines(s,game.world.bag,game.online).join('\n');journal.querySelector('small').textContent=trialReady(s,game.world.bag,game.online)?'กลับลานครูเพื่อส่งบททดสอบ':'ฝึกนอกเมือง · บันทึกอัตโนมัติ';}render();}
+
+ function update(){jobReady();stackJournal();const q=account.training,key=JSON.stringify([q,game.world.kills,game.world.bag]);if(key===last)return;last=key;journal.hidden=!q;if(q){const m=mentorById(q.classId==='acolyte'?'monk-master':({swordsman:'sword-master',lancer:'spear-master',hunter:'hunt-master',boxer:'box-master',rogue:'shadow-master',shaman:'spirit-master'})[q.classId]);const s=trainingStatus(account.character,q,game.world,m.id);journal.querySelector('.training-lines').textContent=className(q.classId,account.character.gender)+'\n'+trialLines(s,game.world.bag,game.online).join('\n');journal.querySelector('#training-summary').textContent='มอนสเตอร์ '+s.progress+'/'+s.target;journal.querySelector('small').textContent=trialReady(s,game.world.bag,game.online)?'กลับลานครูเพื่อส่งบททดสอบ':'ฝึกนอกเมือง · บันทึกอัตโนมัติ';}stackJournal();render();}
  return {open,update,get paused(){return panel.open;}};
 }

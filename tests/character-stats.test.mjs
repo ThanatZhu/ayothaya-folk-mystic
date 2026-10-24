@@ -1,3 +1,4 @@
+import {statsAfterClassChange} from '../character-stats.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizeStats,raiseStat,raiseCost,earnedStatPoints,statPoints,equipGear,unequipGear,dropInvalidGear,deriveStats,STATS} from '../character-stats.js';
@@ -59,3 +60,13 @@ test('server: stat points, equipping and the saved record; max HP grows with VIT
  const self=realm.snapshot(peer).self;assert.equal(self.gear.weapon,'sword-iron');assert.ok(self.statPoints>=0);
  for(const k of STATS)assert.ok(k in self.stats);
 });
+
+ test('class and Master changes refund exactly the allocated points; reload/appearance changes keep them',()=>{
+  const stats=normalizeStats({str:25,agi:11,int:8}),novice={classId:'novice',jobId:''},boxer={classId:'boxer',jobId:''},master={...boxer,jobId:'master-boxer'};
+  for(const [before,after] of [[novice,boxer],[boxer,master],[master,{...boxer,jobId:'iron-boxer'}]]){
+   const reset=statsAfterClassChange(before,after,stats);assert.deepEqual(reset,normalizeStats(null));
+   for(const reborn of [0,3,10]){assert.equal(statPoints(reset,60,reborn),earnedStatPoints(60,reborn));assert.equal(statPoints(statsAfterClassChange(after,after,reset),60,reborn),earnedStatPoints(60,reborn));}
+  }
+  assert.deepEqual(statsAfterClassChange(master,{...master,name:'New name',gender:'female'},stats),stats);
+  assert.equal(stats.str,25,'never mutate the saved allocation');
+ });

@@ -73,7 +73,8 @@ test('private cooldowns survive relog, elapsed down time respawns at the map spa
  const later=roleRealm(()=>20000),c=joinRole(later,'a',saved);assert.ok(c.world.player.hp>0);assert.equal(c.world.player.x,-5);assert.equal(c.world.player.z,-5);
 });
 
-test('PvP reflection resolves once per hit and cannot recurse or award two wins on a reflection knockout',()=>{
+test('PvP reflection resolves once per hit and cannot recurse or award two wins on a reflection knockout',t=>{
+ t.mock.method(Math,'random',()=>.99); // Test reflection/KO rather than the independent dodge roll.
  const realm=roleRealm(),a=joinRole(realm,'a'),b=joinRole(realm,'b');b.world.player.x=a.world.player.x+1;const send=(p,target)=>realm.receive(p.id,{type:'duel',seq:p.seq+1,target});assert.equal(send(a,b.id),true);assert.equal(send(b,a.id),true);
  for(const p of [a,b]){p.world.status.reflect=10;p.world.roleCombat.state.meta.reflect={power:50};}
  let hits=0;const hurt=realm.hurt.bind(realm);realm.hurt=(...args)=>{assert.ok(++hits<5);return hurt(...args);};a.world.roleCombat.damage(a.world.foe,30);assert.ok(hits<=2);assert.ok(a.world.player.hp<a.world.player.maxHp);assert.ok(b.world.player.hp<b.world.player.maxHp);

@@ -5,22 +5,29 @@ import {MULTIPLAYER_URL} from './multiplayer-config.js?v=28';
 
 const DISCORD_INVITE='https://discord.gg/Be9WwsX6'; // the Discord buttons and links show only when this is set
 const $=id=>document.getElementById(id);
-// 0.104.2 reduced motion: the promo stays on its poster frame
-if(matchMedia('(prefers-reduced-motion:reduce)').matches)for(const v of document.querySelectorAll('.hero-video')){v.removeAttribute('autoplay');v.pause();}
-// 0.105.1 sound toggle for the promo (autoplay has to start muted)
-{const v=document.querySelector('.hero-video'),b=$('hero-sound');if(v&&b)b.onclick=()=>{v.muted=!v.muted;if(!v.muted){v.volume=.8;v.play().catch(()=>{});}b.setAttribute('aria-pressed',String(!v.muted));b.querySelector('i').textContent=v.muted?'🔇':'🔊';b.querySelector('span').textContent=v.muted?'เปิดเสียง':'ปิดเสียง';};}
+// Film playback is an explicit action; the hero uses clean artwork without the gameplay HUD.
+const film=$('promo-dialog'),video=film?.querySelector('video');
+$('open-film')?.addEventListener('click',()=>{film.showModal();video.play().catch(()=>{});});
+$('close-film')?.addEventListener('click',()=>film.close());
+film?.addEventListener('close',()=>video.pause());
+film?.addEventListener('click',e=>{if(e.target===film){const r=film.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)film.close();}});
+const nav=$('site-nav'),toggle=$('nav-toggle');
+const closeNav=()=>{nav.classList.remove('open');toggle.setAttribute('aria-expanded','false');};
+toggle.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));nav.classList.toggle('open',open);});
+nav.addEventListener('click',e=>{if(e.target.closest('a'))closeNav();});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeNav();});
+addEventListener('resize',()=>{if(innerWidth>1000)closeNav();});
 if(DISCORD_INVITE)for(const a of document.querySelectorAll('[data-discord]')){a.href=DISCORD_INVITE;a.hidden=false;}
 
-// Server status from the realm's /health (players across both channels). Render's free tier sleeps when idle;
-// this request also wakes it, so the lobby is ready by the time the player gets there.
+// Public server status. Keep connection failures distinct from an actual server restart.
 async function status(){
  const box=$('status'),say=(state,text)=>{box.dataset.state=state;box.querySelector('span').textContent=text;};
  try{
   const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),9000);
   const health=await fetch(MULTIPLAYER_URL.replace(/^wss/,'https').replace(/\/realtime$/,'/health'),{cache:'no-store',signal:ctrl.signal}).then(r=>r.json());clearTimeout(timer);
-  if(!health.ok)throw new Error('down');
+  if(!health.ok||health.authority===false){say('wake','กำลังเตรียมโลกอโยธยา · กรุณารอสักครู่');setTimeout(status,10000);return;}
   say('on',health.players>0?`เซิร์ฟเวอร์เปิดอยู่ · ออนไลน์ ${health.players.toLocaleString('th-TH')} คน`:'เซิร์ฟเวอร์เปิดอยู่ · เข้ามาเป็นคนแรกได้เลย');
- }catch{say('wake','กำลังปลุกเซิร์ฟเวอร์ · กดเล่นได้เลย ใช้เวลาไม่เกิน 1 นาที');setTimeout(status,20000);}
+ }catch{say('wake','ออกเดินทางได้เลย · ตรวจสถานะอีกครั้งที่หน้าเข้าเกม');setTimeout(status,20000);}
 }
 status();
 
@@ -37,11 +44,11 @@ clocks();setInterval(clocks,30000);
 const CLASSES=[
  ['swordsman','นักดาบ','ดาบกับโล่ ยืนแนวหน้า รับดาเมจแทนเพื่อน'],
  ['lancer','นักทวน','ระยะกลาง แทงทะลุ คุมพื้นที่ได้ดี'],
- ['hunter','นายพราน','ยิงไกล คริแรง เก่งเรื่องเก็บมอนทีละตัว'],
+ ['hunter','นายพราน','ศร กับดัก และไก่ชนคู่ใจ คอยช่วยคุมสนาม'],
  ['boxer','นักมวย','หมัดเร็ว คอมโบต่อเนื่อง ประชิดตัวสุดมัน'],
  ['rogue','จอมโจร','มีดคู่ หลบไว ลอบตีจุดอ่อน'],
  ['shaman','หมอผี','อาคมธาตุ ตีเป็นวง คุมฝูงมอน'],
  ['acolyte','พระ / แม่ชี','รักษา บัฟ และกันภัยให้ทั้งปาร์ตี้'],
 ];
-$('class-list').innerHTML=CLASSES.map(([id,name,text])=>`<li><button type="button" data-id="${id}" data-g="m" aria-label="${name} · แตะเพื่อสลับชาย/หญิง"><img src="assets/landing98/class-${id}-m.webp" width="240" height="240" alt="" loading="lazy"></button><h3>${name}</h3><p>${text}</p></li>`).join('');
+$('class-list').innerHTML=CLASSES.map(([id,name,text],i)=>`<li><span class="class-index">0${i+1}</span><button type="button" data-id="${id}" data-g="m" aria-label="${name} · แตะเพื่อสลับชาย/หญิง"><img src="assets/landing98/class-${id}-m.webp" width="240" height="240" alt="" loading="lazy"></button><h3>${name}</h3><p>${text}</p></li>`).join('');
 $('class-list').addEventListener('click',e=>{const b=e.target.closest('button[data-id]');if(!b)return;b.dataset.g=b.dataset.g==='m'?'f':'m';b.querySelector('img').src=`assets/landing98/class-${b.dataset.id}-${b.dataset.g}.webp`;});

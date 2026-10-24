@@ -1,6 +1,6 @@
 // Status window (สถานะ · C): STR AGI VIT INT DEX LUK with status points, combat numbers, and the three
 // stat-gear slots. Online the server validates and owns everything; offline guests keep it in this browser.
-import {STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=107';
+import {statPath,STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=story123';
 import {ITEMS,ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=107';
 import {baseProgress} from './experience.js?v=105.3';
 import {iconStyle} from './bag-ui.js?v=107';
@@ -12,9 +12,9 @@ const SLOT_LABEL={weapon:'อาวุธ',head:'หมวก',armor:'เสื�
 export function createStatusUI({game,account,bagUI}){
  const world=game.world,key='ayothaya-status:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const classId=account?.character?.classId??world.profession.id;
- let local={stats:normalizeStats(null),gear:normalizeGear(null)};
- try{const v=JSON.parse(localStorage.getItem(key));if(v)local={stats:normalizeStats(v.stats),gear:normalizeGear(v.gear)};}catch{}
- const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};
+ const path=statPath(account?.character??{classId});let local={stats:normalizeStats(null),gear:normalizeGear(null),path};
+ try{const v=JSON.parse(localStorage.getItem(key));if(v)local={stats:normalizeStats(v.path&&v.path!==path?null:v.stats),gear:normalizeGear(v.gear),path};}catch{}
+ const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};if(!account?.cloud)save();
  const who=()=>({classId,level:baseProgress(world).level});
  const view=()=>game.online?{stats:normalizeStats(world.stats),gear:normalizeGear(world.gear),points:world.statPoints??0,derived:world.derivedView??deriveStats({...who()})}
   :{...local,points:statPoints(local.stats,who().level),derived:deriveStats({...who(),...local,pet:world.petBonus,food:foodBuff(world)})};

@@ -270,6 +270,7 @@ export class RealmServer{
    w.emit('trade',{kind:m.type,item:m.item,count:qty,coins:p.bag.coins});this.storyProgress(p,{type:'do',action:'shop'});return true;
   }
   if(m.type==='questTalk'){
+   if(m.expected&&(m.expected.quest!==p.story.quest||m.expected.step!==p.story.step))return false;
    // Story talk only counts next to that NPC in this room; the shared rules decide whether it advances anything.
    const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null;
    if(!npc||distance(npc,w.player)>3.6)return this.error(p,'quest-too-far');

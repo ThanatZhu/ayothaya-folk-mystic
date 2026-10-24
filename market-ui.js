@@ -12,7 +12,7 @@ const coins=n=>icon('cowrie','item-icon small')+(n??0).toLocaleString('th-TH');
 const TITLES={storage:'คลังเก็บของ · ลุงเรือง',pick:'แลกของกับผู้เล่น',ask:'คำขอแลกของ',trade:'แลกของ',stall:'ตั้งแผงขายของ',market:'ตลาด · แผงผู้เล่น'};
 
 export function createMarketUI({game,map,account,bagUI}){
- if(!document.querySelector('link[data-market-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='market-ui.css?v=72';css.dataset.marketUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-market-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='market-ui.css?v=trade-center122';css.dataset.marketUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-storage:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  let local;try{local=normalizeStorage(JSON.parse(localStorage.getItem(key)));}catch{local=normalizeStorage(null);}
  let remote=normalizeStorage(null),npc=null,view=null,trade=null,ask=null,players=[],stalls=[],shown='';
@@ -21,7 +21,7 @@ export function createMarketUI({game,map,account,bagUI}){
  const dialog=document.createElement('dialog');dialog.id='market-window';dialog.setAttribute('aria-labelledby','market-title');
  dialog.innerHTML='<header><h2 id="market-title"></h2><b class="coins" id="market-coins"></b><button class="mp-icon" id="market-close" aria-label="ปิดหน้าต่าง">×</button></header><div id="market-body"></div>';
  ($('game-shell')??document.body).append(dialog);
- const show=v=>{view=v;if(!dialog.open){game.clearInput();openHudPanel(dialog);}render(true);};
+ const show=v=>{view=v;dialog.dataset.marketView=v;if(!dialog.open){game.clearInput();openHudPanel(dialog);}render(true);};
  dialog.querySelector('#market-close').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{if(trade)cmd('tradeCancel');if(ask)cmd('tradeAnswer',{from:ask.from,accept:false});ask=null;view=null;});
 

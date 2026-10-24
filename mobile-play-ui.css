@@ -146,5 +146,3 @@ body.field-hud.hud63:not(.mobile-play) #hud-right #hud-chips{position:static!imp
 body.field-hud.hud63:not(.mobile-play) #hud-right #hud-channel-row{grid-column:1;grid-row:1}
 body.field-hud.hud63:not(.mobile-play) #hud-right #quest-tracker{grid-column:1;grid-row:2;min-width:0}
 body.field-hud.hud63:not(.mobile-play) #hud-right #war-line{grid-column:1;grid-row:3}
-
-body.field-hud.hud63 #game-menu #menu-quests>i::after{background:url('assets/ui-mobile/status-ai-v1/letter.webp') center / contain no-repeat!important}

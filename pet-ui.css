@@ -11,3 +11,5 @@
 .pet-actions button{padding:5px 12px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
 .pet-actions button:disabled{opacity:.45}
 @media (orientation:landscape) and (max-height:520px){#pet-window[data-hud-panel]{top:63px;left:170px;right:auto;width:min(360px,calc(100vw - 440px));max-height:calc(100dvh - 75px)}}
+
+.pet-preview-entry{margin:12px;padding:12px;border:1px solid #d0ad6255;border-radius:8px;background:#28412f;display:grid;gap:6px}.pet-preview-entry a{display:block;color:#ffe0a0;font-size:13px;min-height:44px;padding:10px 5px;text-align:center;border:1px solid #c8a859;border-radius:7px;text-decoration:none}.pet-preview-entry small{font-size:10px;color:#c3d3b8;text-align:center}

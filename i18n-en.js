@@ -3227,3 +3227,43 @@ Object.assign(globalThis.I18N_EN,{
 });
 
 Object.assign(globalThis.I18N_EN,{"ประทีปดับที่ท่าน้ำอโยธยา": "Extinguished lamps at the Ayothaya pier", "สายใยเรืองแสงในหุ่นฟางข้างยุ้งข้าว": "A glowing thread in the straw figure beside the granary", "โคมหลงทางในสวนหมาก": "Lost lanterns in the betel orchard", "โรงสีใต้เงาจันทร์และหุ่นพันเชือก": "The moonlit mill and its rope-bound figure", "สายใยขวัญและโคมกลางบึงบัว": "Khwan threads and lanterns over Lotus Marsh", "ผู้คนและบ้านเรือนในอโยธยา": "People and homes of Ayothaya"});
+
+// Pet preview catalog and removal of mandatory capture tutorial.
+Object.assign(globalThis.I18N_EN,{
+ "แก้วขวัญ": "Khwan Gems",
+ "แสงในสวนสงบลงแล้ว ก่อนตามเสียงไปโรงสี แวะตลาดแม่บัวเตรียมยาและเสบียงให้พร้อมก่อนนะลูก": "The orchard lights are calm. Before following the voice to the mill, visit Mae Bua’s market for medicine and supplies.",
+ "อย่ารีบร้อน คนเดินทางต้องมียาและเสบียง แวะตลาดแม่บัวก่อน แล้วค่อยชวนคนที่ไว้ใจไปด้วยกัน โรงสีเงียบมานานเกินกว่าจะเดินเข้าไปโดยไม่เตรียมตัว": "Take your time. A traveler needs medicine and supplies. Visit Mae Bua’s market, then find companions you trust. The mill has been silent too long to enter unprepared.",
+ "ข้าจะแวะตลาดก่อนเดินทาง": "I will visit the market before setting out.",
+ "พรีวิวสัตว์เลี้ยงใหม่ 10 ตัว": "Preview 10 new pets",
+ "กาชาและอัปดาว · ใช้เงินทดสอบเท่านั้น": "Summoning and stars · test currency only",
+ "ครุฑอรุณ": "Dawn Garuda",
+ "ปีกเพลิงคุ้มขวัญ": "Guardian Flame Wings",
+ "โจมตีศัตรูเป็นกลุ่มด้วยเปลวเพลิง": "Strike a group of enemies with sacred fire.",
+ "นาคบัวมณี": "Lotus Jewel Naga",
+ "ธาราบัวพิสุทธิ์": "Purifying Lotus Stream",
+ "ฟื้นฟูพลังชีวิตและล้างพิษให้เจ้าของ": "Restore your owner’s health and cleanse poison.",
+ "กิเลนจันทรา": "Moon Kirin",
+ "พรจันทราคุ้มภัย": "Moonlit Blessing",
+ "สร้างโล่พร้อมเพิ่มพลังโจมตีชั่วคราว": "Grant a shield and a temporary attack blessing.",
+ "สิงห์ทองน้อย": "Golden Singha Cub",
+ "คำรามพิทักษ์": "Guardian Roar",
+ "ลดความเสียหายที่เจ้าของได้รับชั่วคราว": "Temporarily reduce damage taken by your owner.",
+ "ฮูกอาคม": "Yantra Owl",
+ "ตาวิเศษเปิดอาคม": "Mystic True Sight",
+ "เปิดจุดอ่อน ลดเกราะของเป้าหมาย": "Expose a weakness and reduce the target’s armor.",
+ "จิ้งจอกบุปผา": "Blossom Fox",
+ "บุปผาพันธนา": "Binding Blossoms",
+ "โจมตีและตรึงเป้าหมายด้วยเถาบุปผา": "Damage and root a target with flowering vines.",
+ "กระต่ายรวงข้าว": "Rice Rabbit",
+ "ข้าวทิพย์ชุบใจ": "Rice of Renewal",
+ "ฟื้นฟูพลังชีวิตให้เจ้าของ": "Restore your owner’s health.",
+ "เต่าหยก": "Jade Turtle",
+ "กระดองหยกคุ้มกาย": "Jade Shell Guard",
+ "สร้างโล่ดูดซับความเสียหายให้เจ้าของ": "Give your owner a damage-absorbing shield.",
+ "กระเต็นวารี": "Water Kingfisher",
+ "ละอองวารี": "Restoring Water Mist",
+ "ฟื้นฟูพลังเวทให้เจ้าของ": "Restore your owner’s mana.",
+ "ค้างคาวประทีป": "Lantern Bat",
+ "เสียงสะกดประทีป": "Lantern Echo",
+ "โจมตีและทำให้เป้าหมายเคลื่อนไหวช้าลง": "Damage a target and slow its movement."
+});

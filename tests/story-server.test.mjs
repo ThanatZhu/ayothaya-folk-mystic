@@ -20,7 +20,7 @@ function setup(map,story){
 
 test('story talk only counts next to the right NPC, then pays the quest reward and is saved', () => {
  const {realm,peer,send,record}=setup(city);
- assert.deepEqual(realm.snapshot(peer).self.story,{v:2,quest:0,step:0,count:0,done:false});
+ assert.deepEqual(realm.snapshot(peer).self.story,{v:3,quest:0,step:0,count:0,done:false});
  Object.assign(peer.world.player,{x:-8,z:0});
  assert.equal(send('questTalk',{npc:'ลุงเรือง'}),false,'too far from ลุงเรือง');
  assert.equal(send('questTalk',{npc:'ครูแสนดาบ'}),false,'right place, wrong step');
@@ -33,7 +33,7 @@ test('story talk only counts next to the right NPC, then pays the quest reward a
  assert.ok(peer.world.baseXp>xp,'quest reward paid');
  assert.equal(peer.bag.items['wrap-novice'],1,'the starter weapon for this class');
  assert.equal(realm.snapshot(peer).self.story.quest,1);
- assert.deepEqual(realm.record(peer,record).story,{v:2,quest:1,step:0,count:0,done:false});
+ assert.deepEqual(realm.record(peer,record).story,{v:3,quest:1,step:0,count:0,done:false});
  assert.ok(peer.world.events.some(e=>e.type==='story'&&e.completed==='คืนที่ประทีปดับ'));
  // the next quest teaches equipping: wearing the weapon finishes it on the next check and pays the armor
  assert.equal(send('equip',{item:'wrap-novice'}),true);for(let i=0;i<20;i++)realm.step(.05);
@@ -41,11 +41,11 @@ test('story talk only counts next to the right NPC, then pays the quest reward a
 });
 
 test('entering a map completes an "enter" step; kills count toward a defeat step on the server', () => {
- const {realm,peer}=setup(fields,{v:2,quest:3,step:0});
+ const {realm,peer}=setup(fields,{v:3,quest:3,step:0});
  assert.equal(realm.snapshot(peer).self.story.step,1,'arriving in rice-fields completed the enter step');
- const hunt=setup(fields,{v:2,quest:4,step:0});
+ const hunt=setup(fields,{v:3,quest:4,step:0});
  for(const mob of hunt.peer.room.mobs){Object.assign(hunt.peer.world.player,{x:mob.x,z:mob.z+1});hunt.realm.hurt(hunt.peer,mob,9999);}
- assert.deepEqual(hunt.realm.snapshot(hunt.peer).self.story,{v:2,quest:4,step:1,count:0,done:false});
+ assert.deepEqual(hunt.realm.snapshot(hunt.peer).self.story,{v:3,quest:4,step:1,count:0,done:false});
 });
 
 test('a delayed dialogue confirmation cannot advance a different quest or pay a reward twice',()=>{

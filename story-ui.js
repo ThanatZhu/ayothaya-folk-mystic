@@ -1,7 +1,7 @@
-import {createStoryDialogue} from './story-dialogue-ui.js?v=story124';
+import {createStoryDialogue} from './story-dialogue-ui.js?v=pets125';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
-import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=story123';
+import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=pets125';
 import {createCoach} from './coach.js?v=104.1';
 import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
@@ -84,7 +84,6 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
     case 'auto':return '▶ เปิด AUTO';
     case 'craft':return '▶ คราฟต์';
     case 'card':return '▶ ใส่การ์ด';
-    case 'pet':return '▶ สัตว์เลี้ยง';
     case 'refine':return '▶ ตีบวก';
     case 'shop':return '▶ ร้านค้า';
     case 'job':return '▶ ไปลานครู';
@@ -178,19 +177,6 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
      }else{
       document.getElementById('menu-status')?.click();
       setTimeout(()=>{document.querySelector('#status-window [data-slotcard="weapon"]')?.click();},150);
-     }
-     return;
-    }
-    case 'pet':{
-     const bagWin=document.getElementById('bag-window');
-     if(bagWin?.open){
-      const hatch=document.querySelector('#bag-detail [data-act="hatch"]');if(hatch){hatch.click();return;}
-      const tame=document.querySelector('#bag-detail [data-act="tame"]');if(tame){tame.click();return;}
-      const egg=document.querySelector('#bag-grid [data-id^="egg-"]');if(egg){egg.click();setTimeout(()=>document.querySelector('#bag-detail [data-act="hatch"]')?.click(),100);return;}
-      const lure=document.querySelector('#bag-grid [data-id="pet-lure"]');if(lure){lure.click();return;}
-     }else{
-      document.getElementById('menu-bag')?.click();
-      world.notice(s.how??s.hint);
      }
      return;
     }

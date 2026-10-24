@@ -31,7 +31,7 @@ export function createPetView(scene,id){
 }
 
 export function createPetUI({game,account,scene,bagUI}){
- if(!document.querySelector('link[data-pet-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='pet-ui.css?v=01';css.dataset.petUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-pet-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='pet-ui.css?v=pets125';css.dataset.petUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-pet:'+(account?.serverId??'local')+':'+(account?.slotId??'guest'),fail=c=>world.notice(ITEM_ERRORS[c]??c);
  let local=null;try{local=normalizePet(JSON.parse(localStorage.getItem(key)));}catch{}
  const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};
@@ -55,7 +55,7 @@ export function createPetUI({game,account,scene,bagUI}){
  menu.innerHTML='<i>'+icon('pet-bell','item-icon menu-item-icon')+'</i><span>สัตว์เลี้ยง</span>';
  const nav=$('game-menu');if(nav)nav.insertBefore(menu,$('menu-players')??null);
  const dialog=document.createElement('dialog');dialog.id='pet-window';dialog.setAttribute('aria-labelledby','pet-title');
- dialog.innerHTML='<header><h2 id="pet-title">สัตว์เลี้ยง</h2><button class="mp-icon" id="pet-close" aria-label="ปิด">×</button></header><div id="pet-body"></div>';
+ dialog.innerHTML='<header><h2 id="pet-title">สัตว์เลี้ยง</h2><button class="mp-icon" id="pet-close" aria-label="ปิด">×</button></header><div class="pet-preview-entry"><a href="pet-gacha-lab.html?v=125" target="_blank" rel="noopener">พรีวิวสัตว์เลี้ยงใหม่ 10 ตัว</a><small>กาชาและอัปดาว · ใช้เงินทดสอบเท่านั้น</small></div><div id="pet-body"></div>';
  ($('game-shell')??document.body).append(dialog);
  menu.onclick=()=>{if(dialog.open)dialog.close();else{game.clearInput();openHudPanel(dialog);render(true);}};
  dialog.querySelector('#pet-close').onclick=()=>dialog.close();

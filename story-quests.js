@@ -1,10 +1,10 @@
 // Story quests that double as the tutorial (0.98): every quest teaches one system and its reward is what the next
-// quest asks you to use (the starter weapon → equip it, iron ore → refine, a card → insert it, a lure → tame a pet).
+// quest asks you to use (the starter weapon → equip it, iron ore → refine, a card → insert it).
 // Shared by the client (offline guests + UI) and the realm server (authoritative online progress and rewards).
 // Progress state: {v, quest: index of the current quest, step: index inside it, count: kills toward a defeat step, done}.
 
 export const STORY_TITLE='บทที่ 1 · ประทีปที่ดับพร้อมกัน';
-const STORY_VERSION=2; // 0.98 the tutorial chain replaced the old one; older progress starts over at quest 1
+export const STORY_VERSION=3; // v3 removes t13; v2 progress is mapped below instead of restarting the story.
 
 // Step types:
 // talk {npc, mapId, say} · defeat {monster (MONSTER_TYPES id), count, mapId} · enter {mapId}
@@ -57,12 +57,9 @@ export const STORY=[
  {id:'t11',title:'ยาของตัวเอง',reward:{baseXp:50,jobXp:28,coins:150,items:[{id:'khao-tom-mat',count:1}]},steps:[
   {type:'do',action:'craft',hint:'คราฟต์ของ 1 ครั้ง',how:'กระเป๋า → ⚒ คราฟต์ → แท็บ ยา → ยาสมุนไพรแดง → ทำ · อาหารเพิ่มสเตตัสได้ 10 นาที'},
  ]},
- {id:'t12',title:'โคมหลงทาง',reward:{baseXp:66,jobXp:36,coins:300,items:[{id:'pet-lure',count:2},{id:'mp-large',count:3}]},steps:[
+ {id:'t12',title:'โคมหลงทาง',reward:{baseXp:66,jobXp:36,coins:300,items:[{id:'mp-large',count:3}]},steps:[
   {type:'defeat',monster:'lantern',count:3,mapId:'old-orchard',hint:'ปลอบโคมหลงทาง'},
-  {type:'talk',npc:'ยายสาย',mapId:'old-orchard',hint:'กลับไปหายายสาย',say:'สัตว์ในทุ่งเหงาตั้งแต่ประทีปดับ ข้าวเหนียวนี่ล่อมันมาเป็นเพื่อนได้นะ'},
- ]},
- {id:'t13',title:'เพื่อนร่วมทาง',reward:{baseXp:60,jobXp:30,coins:200,items:[{id:'pet-food',count:5}]},steps:[
-  {type:'do',action:'pet',hint:'จับหรือฟักสัตว์เลี้ยง 1 ตัว',how:'เลือกมอนตัวเล็ก (หนู หุ่นฟาง ตั๊กแตน ลิง) → กระเป๋า → ข้าวเหนียวล่อสัตว์ → ล่อ · ได้ไข่แล้วกด ฟักไข่ · สนิทมากได้สเตตัส'},
+  {type:'talk',npc:'ยายสาย',mapId:'old-orchard',hint:'กลับไปหายายสาย',say:'แสงในสวนสงบลงแล้ว ก่อนตามเสียงไปโรงสี แวะตลาดแม่บัวเตรียมยาและเสบียงให้พร้อมก่อนนะลูก'},
  ]},
  {id:'t14',title:'ตลาดแม่บัว',reward:{baseXp:50,jobXp:25,coins:300,items:[]},steps:[
   {type:'do',action:'shop',npc:'แม่บัว',mapId:'ayutthaya',hint:'ซื้อหรือขายของกับพ่อค้า 1 ครั้ง',how:'คุยแม่บัวในอยุธยา (หรือป้าละไมในทุ่ง) · ผู้เล่นตั้งแผงขายของกันได้ที่ถนนตลาดแม่บัว'},
@@ -110,8 +107,9 @@ export const STARTER_WEAPON={novice:'wrap-novice',swordsman:'sword-iron',lancer:
 export const rewardItems=(reward,classId)=>(reward?.items??[]).map(i=>i.id==='@weapon'?{...i,id:STARTER_WEAPON[classId]??'wrap-novice'}:i);
 
 export function normalizeStory(state){
- const s=state&&typeof state==='object'&&state.v===STORY_VERSION?state:{};
- const quest=Number.isInteger(s.quest)?Math.min(Math.max(s.quest,0),STORY.length):0;
+ const s=state&&typeof state==='object'&&[2,STORY_VERSION].includes(state.v)?state:{};
+ const old=Number.isInteger(s.quest)?Math.min(Math.max(s.quest,0),STORY.length+(s.v===2?1:0)):0;
+ const quest=s.v===2&&old>12?old-1:old; // old t13 (index 12) now points straight to t14; no reward is granted.
  const done=quest>=STORY.length;
  const steps=done?0:STORY[quest].steps.length;
  const step=!done&&Number.isInteger(s.step)?Math.min(Math.max(s.step,0),steps-1):0;

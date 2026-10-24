@@ -9,8 +9,9 @@ export function createSkillEffects(scene){
   create(track,options={}){
    if(disposed)throw new Error('Skill effects manager is disposed');
    while(active.length>=16)remove(active[0]);
-   const e=createCombatEffect(art,track,options);e.dispose=()=>remove(e);active.push(e);scene.add(e.group);return e;
+   const e=createCombatEffect(art,track,options);e.castId=options.castId;e.actor=options.actor??'self';e.dispose=()=>remove(e);active.push(e);scene.add(e.group);return e;
   },
+  cancel(castId,actor='self'){for(const e of [...active])if(castId!=null&&e.castId===castId&&e.actor===actor)remove(e);},
   update(dt,camera){const elapsed=Number.isFinite(dt)?Math.max(0,dt):0;for(const e of [...active]){e.age+=elapsed;if(e.age>e.life)remove(e);else e.sample(e.age,camera);}},
   clear(){for(const e of [...active])remove(e);},
   dispose(){if(disposed)return;api.clear();art.dispose();disposed=true;},

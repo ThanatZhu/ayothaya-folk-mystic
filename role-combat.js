@@ -1,3 +1,5 @@
+import {roleTiming} from './combat-timing.js';
+import {applyPoison,poisonFor,takePoison,tickPoison} from './role-poison.js';
 import {petIncoming} from './pet-combat.js';
 import {roleById} from './assets/skills-next/catalog.js';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
@@ -14,17 +16,17 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
  const mods=()=>Object.fromEntries((branch?.passives??[]).filter((_,i)=>(w.skillLevels[13+i]??0)>0).map(s=>[s.modifier,s.value]));
  function trigger(mod,at=p){const skill=branch?.passives.find(s=>s.modifier===mod);if(!skill||(w.skillLevels[13+branch.passives.indexOf(skill)]??0)<1||w.time-(state.passiveAt[skill.id]??-9)<1)return;state.passiveAt[skill.id]=w.time;w.emit('rolePassive',{roleSkillId:skill.id,from:{x:p.x,z:p.z},to:{x:at.x,z:at.z},kind:'passive',color:role.color});}
  const status=(a,key,seconds,power=0)=>{a.world.status[key]=Math.max(a.world.status[key]??0,seconds);if(a.world.roleCombat)a.world.roleCombat.state.meta[key]={power,owner:w.roleOwnerId??'self',facing:{...p.face}};};
- function enemyStatus(m,key,seconds,power=0){const victim=m.pvp?w.roleEnemy?.(m):null;if(victim){victim.status[key]=seconds;m.roleStatus=victim.roleDebuffs??={};} (m.roleStatus??={})[key]={left:seconds,power,owner:w.roleOwnerId??'self',pvpId:m.pvp?m.id:null};if(key==='root')m.root=Math.max(m.root??0,seconds);}
+ function enemyStatus(m,key,seconds,power=0){const victim=m.pvp?w.roleEnemy?.(m):null;if(victim){victim.status[key]=Math.max(victim.status[key]??0,seconds);m.roleStatus=victim.roleDebuffs??={};} const effects=m.roleStatus??={},effect={left:seconds,power,owner:w.roleOwnerId??'self',pvpId:m.pvp?m.id:null};if(key==='poison')applyPoison(effects,effect);else effects[key]=effect;if(key==='root')m.root=Math.max(m.root??0,seconds);}
  function shield(a,amount,seconds=7){if(!a.world.roleCombat)return;const m=mods();a.world.roleCombat.state.shield=Math.max(a.world.roleCombat.state.shield,amount*(1+(m.shieldBonus??0)));status(a,'shield',seconds);trigger('shieldBonus',a.player);}
  function heal(a,amount){if(a.player.hp<=0)return;const n=Math.max(0,Math.min(a.player.maxHp-a.player.hp,amount*(1+(mods().healBonus??0))));if(n){a.player.hp+=n;a.world.emit('heal',{x:a.player.x,z:a.player.z,amount:Math.round(n),color:'#a6efaa'});trigger('healBonus',a.player);}}
  function clean(a){for(const key of harmful)delete a.world.status[key];if(a.world.roleCombat)for(const key of harmful)delete a.world.roleCombat.state.meta[key];}
  function crowd(m,seconds){if(types[m.type]?.boss||m.pvp){m.roleStagger=clamp((m.roleStagger??0)+35,0,100);if(m.roleStagger>=100){m.roleStagger=0;m.charge=0;m.windup=0;m.slamming=false;m.attackCD=Math.max(m.attackCD??0,.6);w.emit('combo',{x:m.x,z:m.z});}return;}enemyStatus(m,'root',seconds);m.charge=0;m.windup=0;}
- function damage(m,n,kind='skill'){
+ function damage(m,n,kind='skill',resolved=0){
   if(!m||m.hp<=0||!visible(p,m))return;if(kind==='reflection'){w.roleSecondary=true;try{w.hurt(m,Math.round(n),role.color);}finally{w.roleSecondary=false;}return;}if(w.status.inspired)n*=1.2;const a=mods(),s=m.roleStatus??{};
   if(s.mark)n*=1.2+(a.markBonus??0);if(s.brand)n*=1.2;if(s.break)n*=1.3*(1+(a.brokenBonus??0));
-  if(a.farBonus&&dist(p,m)>4){n*=1+a.farBonus;trigger('farBonus',m);}if(a.venomFinish&&s.poison&&m.hp/m.maxHp<.35){n*=1+a.venomFinish;trigger('venomFinish',m);}
+  if(a.farBonus&&dist(p,m)>4){n*=1+a.farBonus;trigger('farBonus',m);}
   if(a.markBonus&&s.mark)trigger('markBonus',m);if(a.brokenBonus&&s.break)trigger('brokenBonus',m);
-  w.roleSecondary=kind!=='skill';try{w.hurt(m,w.power(n,m),role.color);}finally{w.roleSecondary=false;}
+  w.roleSecondary=kind!=='skill';try{w.hurt(m,w.power(n,m)+resolved,role.color);}finally{w.roleSecondary=false;}
  }
  function area(at,r=3){return enemies().filter(m=>dist(m,at)<=r&&visible(at,m));}
  function team(at,r=4.5){return allies().filter(a=>a.player.hp>0&&dist(a.player,at)<=r&&visible(at,a.player));}
@@ -32,21 +34,21 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
  function pet(s,kind){state.pets=state.pets.filter(a=>a.kind!==kind);state.pets.push({kind,x:p.x+.7,z:p.z+.4,left:s.seconds,power:s.kind.startsWith('great')?48:28,tick:.4,skillId:s.roleSkillId});status(me(),kind,s.seconds);}
  function field(s,at){state.fields=state.fields.filter(f=>f.skillId!==s.roleSkillId);state.fields.push({x:at.x,z:at.z,left:s.seconds+(['sanctuary'].includes(s.type)?mods().sanctuaryDuration??0:0),tick:0,radius:s.radius*(1+(['zone','wall'].includes(s.type)?mods().zoneRadius??0:0)),power:s.power,kind:s.type,skillId:s.roleSkillId});if(['zone','wall'].includes(s.type))trigger('zoneRadius');if(s.type==='sanctuary')trigger('sanctuaryDuration');}
  function perform(s,target){
-  const m=mods(),kind=s.type,at=target?.player??target??p,n=s.power??0,around=()=>area(p,s.radius),near=()=>area(at,s.radius),a=target?.world?target:me();
+  const firstHit=(w.damageContext?.hitIndex??0)===0,m=mods(),kind=s.type,at=target?.player??target??p,n=s.power??0,around=()=>area(p,s.radius),near=()=>area(at,s.radius),a=target?.world?target:me();
   switch(kind){
    case 'taunt':case 'anchor':for(const enemy of around())enemyStatus(enemy,'taunt',s.seconds+(m.tauntDuration??0));if(kind==='anchor')shield(me(),n);trigger('tauntDuration');break;
    case 'guard':status(me(),'guard',s.seconds,.65);break;
    case 'counter':status(me(),'counter',s.seconds,n);break;
-   case 'riposte':damage(target,n);crowd(target,1);status(me(),'counter',3,90);break;
+   case 'riposte':damage(target,n);if(firstHit){crowd(target,1);status(me(),'counter',3,90);}break;
    case 'intercept':{const dx=at.x-p.x,dz=at.z-p.z,d=Math.hypot(dx,dz)||1;moveBody(p,dx/d*Math.max(0,d-.8),dz/d*Math.max(0,d-.8),w.nav);status(a,'link',s.seconds,40);shield(me(),60);break;}
    case 'link':status(a,'link',s.seconds,n);break;
    case 'lastStand':heal(me(),p.maxHp*n/100);shield(me(),p.maxHp*.25);break;
    case 'cleave':for(const enemy of around())damage(enemy,n);break;
    case 'break':case 'brand':damage(target,n);enemyStatus(target,kind,s.seconds);break;
    case 'execute':damage(target,n*(target.hp/target.maxHp<.35?2:1));break;
-   case 'line':case 'drill':case 'chainLine':case 'phalanx':{const victims=line(at,s.range);for(const enemy of victims){damage(enemy,n*(kind==='chainLine'?1+.15*Math.max(0,victims.length-1):1));if(kind==='drill')enemyStatus(enemy,'break',6);}if(kind==='phalanx')for(const ally of team(p))shield(ally,90);if(victims.length>1&&m.lineRecovery){for(let i=0;i<6;i++)w.cooldowns[i]=Math.max(0,w.cooldowns[i]-m.lineRecovery);trigger('lineRecovery');}break;}
+   case 'line':case 'drill':case 'chainLine':case 'phalanx':{const victims=line(at,s.range);for(const enemy of victims){damage(enemy,n*(kind==='chainLine'?1+.15*Math.max(0,victims.length-1):1));if(kind==='drill')enemyStatus(enemy,'break',6);}if(kind==='phalanx')for(const ally of team(p))shield(ally,90);if(firstHit&&victims.length>1&&m.lineRecovery){for(let i=0;i<6;i++)w.cooldowns[i]=Math.max(0,w.cooldowns[i]-m.lineRecovery);trigger('lineRecovery');}break;}
    case 'interrupt':case 'bind':damage(target,n);crowd(target,s.seconds);break;
-   case 'massBind':case 'uppercut':case 'flock':for(const enemy of near()){damage(enemy,n);crowd(enemy,2);}break;
+   case 'massBind':case 'uppercut':case 'flock':for(const enemy of near()){damage(enemy,n);if(firstHit)crowd(enemy,2);}break;
    case 'push':case 'pull':for(const enemy of near()){damage(enemy,n);if(types[enemy.type]?.boss||enemy.pvp){crowd(enemy,1);continue;}const dx=enemy.x-p.x,dz=enemy.z-p.z,d=Math.hypot(dx,dz)||1,k=kind==='pull'?-1.8:1.8;moveBody(enemy,dx/d*k,dz/d*k,w.nav);}break;
    case 'evade':{const d=Math.hypot(p.face.x,p.face.z)||1;moveBody(p,-p.face.x/d*2,-p.face.z/d*2,w.nav);status(me(),'evade',s.seconds);break;}
    case 'retreatShot':{damage(target,n);const d=dist(p,at)||1;moveBody(p,(p.x-at.x)/d*2,(p.z-at.z)/d*2,w.nav);break;}
@@ -60,14 +62,14 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
    case 'ambush':damage(target,n*(target.roleStatus?.mark?1.25:1));status(me(),'stealth',3);break;
    case 'crow':for(const ally of team(p)){status(ally,'inspired',s.seconds,.2);delete ally.world.status.fear;}break;
    case 'jab':damage(target,n);state.combo=Math.min(3,state.combo+1);break;
-   case 'combo':damage(target,n);state.combo=3;if(m.comboMana){p.mp=Math.min(p.maxMp,p.mp+m.comboMana);trigger('comboMana');}break;
-   case 'comboFinish':case 'comboBurst':for(const enemy of kind==='comboBurst'?near():[target])damage(enemy,n*(1+state.combo*.35)*(1+(m.comboBonus??0)));state.combo=0;if(m.comboMana)p.mp=Math.min(p.maxMp,p.mp+m.comboMana);trigger('comboBonus');trigger('comboMana');break;
+   case 'combo':damage(target,n);state.combo=3;if(firstHit&&m.comboMana){p.mp=Math.min(p.maxMp,p.mp+m.comboMana);trigger('comboMana');}break;
+   case 'comboFinish':case 'comboBurst':for(const enemy of kind==='comboBurst'?near():[target])damage(enemy,n*(1+state.combo*.35)*(1+(m.comboBonus??0)));state.combo=0;if(firstHit&&m.comboMana)p.mp=Math.min(p.maxMp,p.mp+m.comboMana);trigger('comboBonus');trigger('comboMana');break;
    case 'leap':{const d=dist(p,at)||1;moveBody(p,(at.x-p.x)/d*Math.max(0,d-1),(at.z-p.z)/d*Math.max(0,d-1),w.nav);damage(target,n);crowd(target,1);break;}
    case 'stealth':status(me(),'stealth',s.seconds+(m.stealthDuration??0));trigger('stealthDuration');break;
    case 'backstab':{const hidden=!!w.status.stealth,d=dist(p,at)||1;moveBody(p,(at.x-p.x)/d*Math.max(0,d-.9),(at.z-p.z)/d*Math.max(0,d-.9),w.nav);damage(target,n*(hidden?1.6:1));delete w.status.stealth;if(hidden&&m.stealthMana){p.mp=Math.min(p.maxMp,p.mp+m.stealthMana);trigger('stealthMana');}break;}
    case 'slow':damage(target,n);enemyStatus(target,'slow',s.seconds);break;
    case 'poison':case 'venom':damage(target,n*.5);enemyStatus(target,'poison',s.seconds+(m.poisonDuration??0),w.power(n,target));trigger('poisonDuration');break;
-   case 'detonatePoison':damage(target,n+(target.roleStatus?.poison?.left??0)*(target.roleStatus?.poison?.power??0)*.7);delete target.roleStatus.poison;break;
+   case 'detonatePoison':{const poison=poisonFor(target.roleStatus,w.roleOwnerId??'self');damage(target,n,'skill',Math.round((poison?.left??0)*(poison?.power??0)*.7));takePoison(target.roleStatus??{},w.roleOwnerId??'self');if(target.pvp&&!target.roleStatus?.poison){const victim=w.roleEnemy?.(target);if(victim)delete victim.status.poison;}break;}
    case 'smoke':for(const ally of team(at)){status(ally,'smoke',s.seconds);delete ally.world.status.fear;}break;
    case 'clones':status(me(),'stealth',s.seconds+(m.stealthDuration??0));for(const enemy of around())if(!types[enemy.type]?.boss&&!enemy.pvp)enemyStatus(enemy,'decoy',s.seconds);trigger('stealthDuration');break;
    case 'curse':damage(target,n);enemyStatus(target,'curse',s.seconds);break;
@@ -92,7 +94,7 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   if(dist(p,at)>(s.range??7)+.6||!visible(p,at))return 'เป้าหมายไกลหรือมีสิ่งกีดขวาง';
   if(w.safe&&!selfKinds.has(s.type)&&!friends.has(s.type))return 'เขตปลอดภัย';
   if(['peck','flock','crow'].includes(s.type)&&!state.pets.some(a=>a.kind==='rooster'))return 'เรียกไก่ชนก่อน';
-  if(s.type==='detonatePoison'&&!target.roleStatus?.poison)return 'เป้าหมายต้องติดพิษก่อน';
+  if(s.type==='detonatePoison'&&!poisonFor(target.roleStatus,w.roleOwnerId??'self'))return 'เป้าหมายต้องติดพิษก่อน';
   if(s.type==='detonateCurse'&&!target.roleStatus?.curse)return 'เป้าหมายต้องติดคำสาปก่อน';
   return null;
  }
@@ -108,14 +110,14 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   if(st.shield){const absorbed=Math.min(n,state.shield);state.shield-=absorbed;n-=absorbed;if(state.shield<=0)delete st.shield;}
   return Math.max(0,Math.round(n));
  }
- return {state,mods,trigger,incoming,damage,legacy:!specific,skills:liveRoleSkills(w.profession.id,w.jobId)??w.skills,
-  cast(index){const s=scaledSkill(w.skills[index],w.skillLevels[index]??0);if(!s||s.reserved||s.passive||p.hp<=0||state.pending||w.status.stun||w.status.sleep)return false;if(w.status.silence){w.notice('ใบ้ · ใช้สกิลไม่ได้');return false;}if(w.cooldowns[index]>0||p.mp<s.cost)return false;const target=targetFor(s),error=valid(s,target);if(error){w.notice(error);return false;}const at=target.player??target,profile=SKILL_PROFILES[s.roleSkillId];const aim=selfKinds.has(s.type)?w.target??at:at;if(dist(p,aim)>.01)p.face={x:aim.x-p.x,z:aim.z-p.z};p.mp-=s.cost;w.cooldowns[index]=s.cd*(role.id==='hunter'&&['rain','cone','ambush','retreatShot'].includes(s.type)?1-(mods().arrowCooldown??0):1);if(mods().arrowCooldown)trigger('arrowCooldown');state.pending={s,index,target,hit:0,times:['combo','execute'].includes(s.type)?profile.impacts:null,left:profile.impacts[0]??s.windup,origin:{x:p.x,z:p.z}};w.emit('cast',{skillIndex:index,roleSkillId:s.roleSkillId,from:{x:p.x,z:p.z},to:{x:at.x,z:at.z},color:role.color,kind:s.type});return true;},
-  autoIndex(config){if(state.pending)return -1;for(const i of config.skills){const s=scaledSkill(w.skills[i],w.skillLevels[i]??0);if(!s||s.reserved||s.passive||w.cooldowns[i]>0||p.mp<s.cost)continue;const target=targetFor(s);if(valid(s,target))continue;if(['revive','greatRevive'].includes(s.type))return i;if(s.type==='heal'&&target.player.hp>target.player.maxHp*.6)continue;if(['guard','counter','stealth','smoke'].includes(s.type)&&w.status[s.type])continue;if(['summon','greatSummon'].includes(s.type)&&state.pets.some(a=>a.kind==='rooster'))continue;if(['spirit','greatSpirit'].includes(s.type)&&state.pets.some(a=>a.kind==='spirit'))continue;if(['sanctuary','regen','lifeTree','yantra','ward'].includes(s.type)&&(!w.target||state.fields.some(f=>f.kind===s.type)))continue;if(['lastStand'].includes(s.type)&&p.hp>p.maxHp*.35)continue;if(s.type==='cleanse'&&!harmful.some(k=>target.world.status[k]))continue;return i;}return -1;},
+ return {state,mods,trigger,incoming,damage,outgoing(m,n){if(!m)return n;const bonus=mods().venomFinish??0;if(bonus&&poisonFor(m.roleStatus,w.roleOwnerId??'self')&&m.hp/m.maxHp<.35){trigger('venomFinish',m);return n*(1+bonus);}return n;},legacy:!specific,skills:liveRoleSkills(w.profession.id,w.jobId)??w.skills,
+  cast(index){const s=scaledSkill(w.skills[index],w.skillLevels[index]??0);if(!s||s.reserved||s.passive||p.hp<=0||state.pending||w.basicPending||w.status.stun||w.status.sleep)return false;if(w.status.silence){w.notice('ใบ้ · ใช้สกิลไม่ได้');return false;}if(w.cooldowns[index]>0||p.mp<s.cost)return false;const target=targetFor(s),error=valid(s,target);if(error){w.notice(error);return false;}const at=target.player??target,profile=SKILL_PROFILES[s.roleSkillId];const aim=selfKinds.has(s.type)?w.target??at:at;if(dist(p,aim)>.01)p.face={x:aim.x-p.x,z:aim.z-p.z};p.mp-=s.cost;w.cooldowns[index]=s.cd*(role.id==='hunter'&&['rain','cone','ambush','retreatShot'].includes(s.type)?1-(mods().arrowCooldown??0):1);if(mods().arrowCooldown)trigger('arrowCooldown');const timing=roleTiming(s,profile),castId=++w.castSerial||(w.castSerial=1);state.pending={s,index,target,hit:0,combo:state.combo,times:timing.impacts,left:timing.impacts[0],castId,origin:{x:p.x,z:p.z}};w.emit('cast',{skillIndex:index,roleSkillId:s.roleSkillId,castId,timing,from:{x:p.x,z:p.z},to:{x:at.x,z:at.z},color:role.color,kind:s.type});return true;},
+  autoIndex(config){if(state.pending||w.basicPending||w.legacyPending)return -1;for(const i of config.skills){const s=scaledSkill(w.skills[i],w.skillLevels[i]??0);if(!s||s.reserved||s.passive||w.cooldowns[i]>0||p.mp<s.cost)continue;const target=targetFor(s);if(valid(s,target))continue;if(['poison','venom'].includes(s.type)){const old=poisonFor(target.roleStatus,w.roleOwnerId??'self');if(old?.left>1&&old.power>=w.power(s.power,target))continue;}if(['revive','greatRevive'].includes(s.type))return i;if(s.type==='heal'&&target.player.hp>target.player.maxHp*.6)continue;if(['guard','counter','stealth','smoke'].includes(s.type)&&w.status[s.type])continue;if(['summon','greatSummon'].includes(s.type)&&state.pets.some(a=>a.kind==='rooster'))continue;if(['spirit','greatSpirit'].includes(s.type)&&state.pets.some(a=>a.kind==='spirit'))continue;if(['sanctuary','regen','lifeTree','yantra','ward'].includes(s.type)&&(!w.target||state.fields.some(f=>f.kind===s.type)))continue;if(['lastStand'].includes(s.type)&&p.hp>p.maxHp*.35)continue;if(s.type==='cleanse'&&!harmful.some(k=>target.world.status[k]))continue;return i;}return -1;},
   step(dt,input){
    const hpMod=mods().maxHp??0;if(hpMod!==(state.hpMod??0)){const base=w.derived?.maxHp??p.maxHp/(1+(state.hpMod??0));p.maxHp=Math.round(base*(1+hpMod));p.hp=Math.min(p.hp,p.maxHp);state.hpMod=hpMod;trigger('maxHp');}
-   for(const [key,effect] of Object.entries(w.roleDebuffs??{})){if(!w.status[key]){delete w.roleDebuffs[key];continue;}effect.left=w.status[key];if(key==='poison'){effect.tick=(effect.tick??1)-dt;if(effect.tick<=0){effect.tick=1;const owner=w.roleResolveOwner?.(effect.owner);const victim=owner?.foes().find(m=>m.id===effect.pvpId);if(victim)owner.hurt(victim,effect.power,'#a9d86f');}}}
-   for(const k of Object.keys(state.meta))if(!w.status[k])delete state.meta[k];if(p.hp<=0){state.pending=null;state.fields=[];state.pets=[];state.combo=0;state.shield=0;return;}
-   if(state.pending){const c=state.pending;if(w.status.stun||w.status.sleep||w.status.silence||(['revive','greatRevive'].includes(c.s.type)&&(Math.hypot(input.x??0,input.z??0)>.08||dist(p,c.origin)>.15))){state.pending=null;w.notice('การร่ายถูกยกเลิก');}else if((c.left-=dt)<=0){if(!valid(c.s,c.target,true)){perform(c.times?{...c.s,power:c.s.power/c.times.length}:c.s,c.target);w.emit('roleRelease',{roleSkillId:c.s.roleSkillId});c.hit++;if(c.times&&c.hit<c.times.length)c.left=c.times[c.hit]-c.times[c.hit-1];else state.pending=null;}else state.pending=null;}}
+   for(const [key,effect] of Object.entries(w.roleDebuffs??{})){if(!w.status[key]){delete w.roleDebuffs[key];continue;}effect.left=w.status[key];if(key==='poison')tickPoison(w.roleDebuffs,dt,e=>{const owner=w.roleResolveOwner?.(e.owner),victim=owner?.foes().find(m=>m.id===e.pvpId);if(victim)owner.hurt(victim,e.power,'#a9d86f');});if(key==='poison'&&!w.roleDebuffs.poison)delete w.status.poison;}
+   for(const k of Object.keys(state.meta))if(!w.status[k])delete state.meta[k];if(p.hp<=0){if(state.pending)w.emit('castCancel',{castId:state.pending.castId});state.pending=null;state.fields=[];state.pets=[];state.combo=0;state.shield=0;return;}
+   if(state.pending){const c=state.pending;if(w.status.stun||w.status.sleep||w.status.silence||(['revive','greatRevive'].includes(c.s.type)&&(Math.hypot(input.x??0,input.z??0)>.08||dist(p,c.origin)>.15))){w.emit('castCancel',{castId:c.castId});state.pending=null;w.notice('การร่ายถูกยกเลิก');}else if((c.left-=dt)<=1e-8){if(!valid(c.s,c.target,true)){w.damageContext={castId:c.castId,hitIndex:c.hit,roleSkillId:c.s.roleSkillId,source:'skill'};try{if(['comboBurst','comboFinish'].includes(c.s.type))state.combo=c.combo;perform(c.times?{...c.s,power:c.s.power/c.times.length}:c.s,c.target);}finally{w.damageContext=null;}w.emit('roleRelease',{roleSkillId:c.s.roleSkillId,castId:c.castId,hitIndex:c.hit});c.hit++;if(c.times&&c.hit<c.times.length)c.left+=c.times[c.hit]-c.times[c.hit-1];else{state.pending=null;p.attackCD=Math.max(p.attackCD,.16);}}else{w.emit('castCancel',{castId:c.castId});state.pending=null;}}}
    for(const f of state.fields){f.left-=dt;f.tick-=dt;if(f.tick>0)continue;f.tick=1;
     if(['regen','lifeTree'].includes(f.kind))for(const ally of team(f,f.radius)){heal(ally,f.power);status(ally,f.kind,1.2);}else if(['sanctuary','yantra'].includes(f.kind)){for(const ally of team(f,f.radius))status(ally,'sanctuary',1.2);if(f.kind==='yantra')for(const enemy of area(f,f.radius))enemyStatus(enemy,'slow',1.2);}else{for(const enemy of area(f,f.radius)){damage(enemy,f.power*(f.kind==='holyField'&&enemy.roleStatus?.curse?1.35+(mods().holyBonus??0):1));if(['trap','wall'].includes(f.kind))crowd(enemy,1.1);if(['zone','thorns'].includes(f.kind))enemyStatus(enemy,'slow',1.2);}if(f.kind==='mine'&&area(f,f.radius).length)f.left=0;}}
    state.fields=state.fields.filter(f=>f.left>0);
@@ -125,4 +127,4 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
  };
 }
 // One call per shared room, not per player. The original owner retains kill credit for poison.
-export function stepRoleMonsters(mobs,dt,resolve){for(const m of mobs){for(const [key,s] of Object.entries(m.roleStatus??{})){s.left-=dt;if(s.left<=0||m.hp<=0){delete m.roleStatus[key];continue;}if(key==='poison'){s.tick=(s.tick??1)-dt;if(s.tick<=0){s.tick+=1;resolve(s.owner)?.hurt(m,s.power,'#a9d86f');}}}if(m.hp<=0)m.roleStatus={};}}
+export function stepRoleMonsters(mobs,dt,resolve){for(const m of mobs){if(m.hp<=0){m.roleStatus={};continue;}const status=m.roleStatus??{};tickPoison(status,dt,s=>{if(m.hp>0){const owner=resolve(s.owner);if(owner){owner.damageContext={source:'poison'};try{owner.hurt(m,s.power,'#a9d86f');}finally{owner.damageContext=null;}}}});for(const [key,s] of Object.entries(status)){if(key==='poison')continue;s.left-=dt;if(s.left<=0)delete status[key];}if(m.hp<=0)m.roleStatus={};}}

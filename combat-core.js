@@ -4,6 +4,8 @@ import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js';
 import {activeEmote,canonicalAction,EMOTE_ACTIONS,movementSpeed} from './character-action-state.js?v=life1';
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
+import {skillTrack} from './skill-choreography.js';
+import {basicTiming} from './combat-timing.js';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
 import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=105.3';
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
@@ -163,7 +165,7 @@ export class CombatWorld{
  // 0.95 guild war: rivals are enemy-guild players and the guardian stone, kept in step by the server the same way.
  foes(){return this.foe||this.rivals.length?[...this.mobs,...(this.foe?[this.foe]:[]),...this.rivals]:this.mobs;}
  get target(){return this.foes().find(m=>m.id===this.targetId&&m.hp>0)??null;}
- emit(type,extra={}){if(type==='cast'||type==='playerHit')this.clearEmote();this.events.push({type,...extra});}
+ emit(type,extra={}){if(type==='cast'||type==='playerHit')this.clearEmote();this.events.push({type,...(['damage','miss'].includes(type)&&this.roleCombat?{synced:true,...this.damageContext}:{}),...extra});}
  clearEmote(){this.emote=null;}
  setEmote(action){
   const name=canonicalAction(action);if(!EMOTE_ACTIONS.includes(name)||this.player.hp<=0)return false;
@@ -213,26 +215,33 @@ export class CombatWorld{
  setAuto(on,hunt=null){const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;return ok;}
  toggleAuto(){this.hunt=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0||mob.pvp)return;this.calm=0;damage=Math.round(damage*petBlessing(this));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
+  if(!mob||mob.hp<=0||mob.pvp)return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a'}); // 1.09 kind for the number colour
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  // 0.68 a point in front of the player (toward `toward` when given): where an attack or skill lands with no target.
  airPoint(range,toward=null){const p=this.player;if(toward){const dx=toward.x-p.x,dz=toward.z-p.z;if(Math.hypot(dx,dz)>.01)p.face={x:dx,z:dz};}const n=Math.hypot(p.face.x,p.face.z)||1;return {x:p.x+p.face.x/n*range,z:p.z+p.face.z/n*range};}
  basicAttack(quiet=false){
-  if(this.roleCombat?.state.pending)return false;
+  if(this.roleCombat?.state.pending||this.basicPending||this.legacyPending)return false;
   this.clearEmote();const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;
   let m=this.target;if(!m){m=this.nearest(this.profession.range);if(m)this.select(m.id);}
-  // 0.68 no target in reach: swing at the air (auto-chase still uses AUTO / walking to the target).
-  if(!m||reachTo(p,m)>this.profession.range||!lineClear(p,m,this.nav)){if(quiet||this.safe)return false;p.attackCD=this.profession.delay*(this.derived?.delay??1);this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:this.airPoint(Math.min(this.profession.range,2.4),m),color:this.profession.color,kind:this.profession.kind,air:true});return true;}
-  p.attackCD=this.profession.delay*(this.derived?.delay??1);p.face={x:m.x-p.x,z:m.z-p.z};this.emit('cast',{skillIndex:null,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z},color:this.profession.color,kind:this.profession.kind});{const d=this.derived,crit=!!d&&Math.random()<d.crit;
-   // 0.102.1 a magic class's basic hit is magic damage: class element, no size penalty, violet number
-   // 0.103 a physical swing can miss (HIT vs the monster's FLEE); a crit goes straight through DEF
-   const magic=!!d?.magic,t=MONSTER_TYPES[m.type];
-   if(d&&!magic&&!m.pvp&&d.hit!=null&&Math.random()>=hitChance(d.hit,monsterFlee(t))){this.emit('miss',{id:m.id,x:m.x,z:m.z});return true;}
-   this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),crit?'#ffd27a':magic?'#c9a8ff':undefined);}return true;
+  const air=!m||reachTo(p,m)>this.profession.range||!lineClear(p,m,this.nav);if(air&&(quiet||this.safe))return false;
+  const timing=basicTiming(this.profession.id,this.profession.delay*(this.derived?.delay??1)),castId=++this.castSerial|| (this.castSerial=1);
+  p.attackCD=timing.period;const to=air?this.airPoint(Math.min(this.profession.range,2.4),m):{x:m.x,z:m.z};p.face={x:to.x-p.x,z:to.z-p.z};
+  this.emit('cast',{skillIndex:null,castId,timing,from:{x:p.x,z:p.z},to,color:this.profession.color,kind:this.profession.kind,air});
+  if(!air){if(this.roleCombat)this.basicPending={target:m,left:timing.impacts[0],castId};else this.basicHit(m,castId);}
+  return true;
+ }
+ basicHit(m,castId){
+  const p=this.player;if(!m||m.hp<=0||p.hp<=0||held(this.status)||reachTo(p,m)>this.profession.range+.35||!lineClear(p,m,this.nav)){this.emit('castCancel',{castId});return;}
+  const d=this.derived,crit=!!d&&Math.random()<d.crit,magic=!!d?.magic,t=MONSTER_TYPES[m.type];
+  this.damageContext={castId,hitIndex:0,source:'basic'};
+  try{if(d&&!magic&&!m.pvp&&d.hit!=null&&Math.random()>=hitChance(d.hit,monsterFlee(t))){this.emit('miss',{id:m.id,x:m.x,z:m.z});return;}
+   this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),crit?'#ffd27a':magic?'#c9a8ff':undefined);
+  }finally{this.damageContext=null;}
  }
  skill(index){
+  if(this.basicPending||this.legacyPending)return false;
   if(this.roleCombat&&!this.roleCombat.legacy)return this.roleCombat.cast(index);
   if(Number.isInteger(index)&&this.skills[index])this.clearEmote();
   const level=this.skillLevels[index]??1;if(this.skills[index]&&level<1){this.notice('ยังไม่ได้เรียนสกิลนี้');return false;}
@@ -248,6 +257,7 @@ export class CombatWorld{
    if(hit&&lineClear(p,hit,this.nav)){m=hit;this.select(m.id);p.face={x:m.x-p.x,z:m.z-p.z};}else{air=this.airPoint(Math.min(s.range,4),m);m=null;}}
   const from={x:p.x,z:p.z};
   p.mp-=s.cost;this.cooldowns[index]=s.cd;
+  const release=()=>{
   if(s.type==='heal'){p.hp=Math.min(p.maxHp,p.hp+(s.heal??48));this.emit('heal',{x:p.x,z:p.z,amount:s.heal??48,color:s.color});}
   else if(s.type==='shield'){p.shield=s.duration??8;this.notice(s.name+' · ลดความเสียหาย '+p.shield+' วินาที');}
   else if(s.type==='mana'){p.mp=Math.min(p.maxMp,p.mp+48);this.notice(s.name+' · มานา +48');}
@@ -256,17 +266,23 @@ export class CombatWorld{
   else if(s.type==='area'){const c=m??air;this.foes().filter(v=>v.hp>0&&distance(v,c)<=s.radius&&lineClear(c,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
   // 0.111.3 bosses take the damage but are never rooted or pushed back
   else if(m){this.hurt(m,this.power(s.damage,m),s.color);const firm=MONSTER_TYPES[m.type]?.boss;if(s.type==='root'&&!firm)m.root=3.5;if(s.type==='push'&&!firm){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
-  this.emit('cast',{skillIndex:index,from,to:s.type==='dash'?{x:p.x,z:p.z}:m?{x:m.x,z:m.z}:air??{x:p.x,z:p.z},air:!!air,color:s.color,kind:s.type,radius:s.radius??1});return true;
+  };
+  const event={skillIndex:index,from,to:m?{x:m.x,z:m.z}:air??{x:p.x,z:p.z},air:!!air,color:s.color,kind:s.type,radius:s.radius??1};
+  if(this.roleCombat){const track=skillTrack(this.profession.id,index),scale=Math.max(1,(track?.strikes[0]??.42)*(track?.duration??.6)/.25,(track?.duration??.6)/.7),duration=(track?.duration??.6)/scale,timing={duration,impacts:[(track?.strikes[0]??.42)*duration]},castId=++this.castSerial||(this.castSerial=1);
+   this.legacyPending={castId,left:timing.impacts[0],release:()=>{if(m&&(m.hp<=0||!lineClear(p,m,this.nav)||(s.range&&reachTo(p,m)>s.range+.35))){this.emit('castCancel',{castId});return;}this.damageContext={castId,source:'skill',hitIndex:0};try{release();}finally{this.damageContext=null;}}};this.emit('cast',{...event,castId,timing});
+  }else{release();this.emit('cast',event);}return true;
  }
  update(dt,input={x:0,z:0,attack:false},{monsters=true}={}){
   dt=Math.min(.05,Math.max(0,dt));this.time+=dt;tickPetEffects(this,dt);const p=this.player;
   this.emote=activeEmote(this.emote,this.time);if(Math.hypot(input.x,input.z)>.08||input.attack||this.auto||p.hp<=0)this.clearEmote();
-  p.attackCD=Math.max(0,p.attackCD-dt);p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt*(this.derived?.mpRegen??1));
+  p.attackCD=Math.max(0,p.attackCD-dt);if(p.attackCD<1e-8)p.attackCD=0;p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt*(this.derived?.mpRegen??1));
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;
   for(const k in this.status){this.status[k]-=dt;if(this.status[k]<=0)delete this.status[k];}
   if(this.food&&(this.food.left-=dt)<=0){this.food=null;this.notice('ฤทธิ์อาหารหมดแล้ว');}
   if(this.status.poison&&!this.roleDebuffs?.poison&&p.hp>1&&(this.poisonTick+=dt)>=1){this.poisonTick=0;const n=Math.min(p.hp-1,Math.max(1,Math.round(p.maxHp*.03)));p.hp-=n;this.emit('playerHit',{x:p.x,z:p.z,amount:n});}
   const stop=held(this.status),wantsRun=input.run===true&&Math.hypot(input.x,input.z)>.08,speed=this.walkSpeed(wantsRun);
+  if(this.basicPending){const c=this.basicPending;if(p.hp<=0||held(this.status)){this.emit('castCancel',{castId:c.castId});this.basicPending=null;}else if((c.left-=dt)<=1e-8){this.basicPending=null;this.basicHit(c.target,c.castId);}}
+  if(this.legacyPending){const c=this.legacyPending;if(p.hp<=0||held(this.status)||this.status.silence){this.emit('castCancel',{castId:c.castId});this.legacyPending=null;}else if((c.left-=dt)<=1e-8){this.legacyPending=null;c.release();p.attackCD=Math.max(p.attackCD,.16);}}
   this.mercStep(dt);this.roleCombat?.step(dt,input);if(monsters&&this.roleCombat)stepRoleMonsters(this.mobs,dt,()=>this);
   if(p.hp<=0){p.moving=false;p.running=false;p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
   // 0.100.11 HP comes back on its own: towns 4 % of max HP a second, the field 1 % a second after 6 s out of combat
@@ -286,7 +302,7 @@ export class CombatWorld{
    if(m){
     // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
     this.autoCast=Math.max(0,this.autoCast-dt);
-    if(this.autoCast===0&&lineClear(p,m,this.nav)){const i=this.roleCombat&&!this.roleCombat.legacy?this.roleCombat.autoIndex(this.autoConfig):pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0){this.autoCast=.5;this.skill(i);}}
+    if(this.autoCast===0&&!this.basicPending&&!this.legacyPending&&lineClear(p,m,this.nav)){const i=this.roleCombat&&!this.roleCombat.legacy?this.roleCombat.autoIndex(this.autoConfig):pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0){this.autoCast=.5;this.skill(i);}}
     if(reachTo(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      // 0.99.11 open ground (nothing between us): walk straight at it and skip the grid search, which is the costly part

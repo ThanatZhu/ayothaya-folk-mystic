@@ -25,7 +25,8 @@ export const gaitStep=(distance,dt,classId,mode='walk')=>Math.min(Math.max(0,dis
 // Per-class values return here if a redrawn walk in the original style is added later.
 const WALK_CYCLE={};
 export const walkCycle=classId=>WALK_CYCLE[classId]??2.1;
-export const attackDuration=id=>({boxer:.40,rogue:.36,lancer:.66,hunter:.64,swordsman:.60,shaman:.70,acolyte:.78}[id]??.6);
+import {attackDuration} from './combat-timing.js';
+export {attackDuration} from './combat-timing.js';
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side'}={}){
  const t=Math.max(0,Number.isFinite(time)?time:0),p={mode,time:Math.max(0,Number.isFinite(time)?time:0),phase,reduced,artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
  if(reduced)return p;

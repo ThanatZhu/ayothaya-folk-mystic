@@ -75,7 +75,7 @@ export function createCombatEffect(art,track,options={}){
  const bill=m=>m.quaternion.copy(billboardQ),floor=m=>m.rotation.set(-Math.PI/2,0,0);
  const place=(m,x,y,z,s)=>{m.position.set(x,y,z);m.scale.setScalar(s);};
  const contact=profile.kind==='area'&&['novice','swordsman','lancer','boxer','rogue'].includes(profile.classId)?0:dist;
- const impact=(b,x=dist,y=targetY+1,strength=1,delay=0)=>{strength*=profile.basic?1:1.35;
+ const impact=(b,x=dist,y=targetY+1,strength=1,delay=0)=>{if(options.synced)delay=0;strength*=profile.basic?1:1.35;
   add('star',accent,b,.19,(m,t)=>{place(m,x,y,0,(.25+t*.45)*pulse(t)*strength);bill(m);m.rotateZ(.22+b*.8);},delay);
   if(!low)add('plane',flashMaterial,b,.28,(m,t)=>{place(m,x,y,0,(.6+t*.8)*(1-t)*strength);bill(m);},delay);
   if(!profile.basic)add('ring',accent,b,.32,(m,t)=>{place(m,x,targetY+.06,0,(.5+t*1.6)*strength);floor(m);},delay);
@@ -95,13 +95,13 @@ export function createCombatEffect(art,track,options={}){
   impact(b,dist,targetY+1,heavy?1.3:.85,.1);
  };
  const shot=(b,attack=profile.attack,heavy=false)=>{
-  const travel=clamp(dist*.045,.16,.36),shape=attack==='arrow'?'arrow':attack==='light'?'petal':'plane',mat=attack==='spirit'?spiritMaterial:attack==='talisman'?paperMaterial:accent;
+  const travel=options.synced?Math.min(beats[b]*duration,clamp(dist*.045,.16,.36)):clamp(dist*.045,.16,.36),shape=attack==='arrow'?'arrow':attack==='light'?'petal':'plane',mat=attack==='spirit'?spiritMaterial:attack==='talisman'?paperMaterial:accent;
   add(shape,mat,b,travel+.09,(m,t,age)=>{
    const f=clamp(age/travel);place(m,.3+(dist-.3)*f,1.04+targetY*f+Math.sin(f*Math.PI)*.12,0,1);
    if(attack==='arrow'||attack==='light'){m.rotation.z=-Math.PI/2;m.scale.set(attack==='light'?.55:heavy?.65:.46,attack==='light'?.8:heavy?.9:.7,1);}else{bill(m);m.scale.set(.36,.6,1);m.rotateZ(attack==='talisman'?Math.sin(f*6)*.35:0);}
    m.scale.multiplyScalar(Math.min(1,Math.max(0,(1-t)*8)));
-  });
-  add('spear',material,b,travel+.12,(m,t,age)=>{const f=clamp(age/travel);place(m,dist*f-.18,1.02+targetY*f,0,1);m.scale.set((heavy?1.1:.65)*pulse(t),attack==='arrow'?.45:1.3,1);m.rotation.x=.4;},.035);
+  },options.synced?-travel:0);
+  add('spear',material,b,travel+.12,(m,t,age)=>{const f=clamp(age/travel);place(m,dist*f-.18,1.02+targetY*f,0,1);m.scale.set((heavy?1.1:.65)*pulse(t),attack==='arrow'?.45:1.3,1);m.rotation.x=.4;},options.synced?-travel:.035);
   impact(b,dist,targetY+1,heavy?1.4:.8,travel);
  };
  const punch=(b,heavy=false,aoe=false)=>{
@@ -187,7 +187,7 @@ export function createCombatEffect(art,track,options={}){
  if(particles){particles.name='Contact sparks';particles.frustumCulled=false;particles.instanceMatrix.setUsage(THREE.DynamicDrawUsage);particles.renderOrder=5;group.add(particles);}
  group.userData.particleBudget=particleCount;group.userData.meshBudget=meshBudget+2;
  const projectile=['arrow','spirit','light'].includes(profile.attack)&&(profile.kind==='attack'||profile.kind==='push'&&profile.classId==='hunter');
- const particleDelay=projectile?clamp(dist*.045,.16,.36):profile.kind==='area'&&profile.classId==='hunter'?.4:.09;
+ const particleDelay=options.synced?0:projectile?clamp(dist*.045,.16,.36):profile.kind==='area'&&profile.classId==='hunter'?.4:.09;
  const e={group,material,glyphMaterial,flashMaterial,materials,track,profile,age:0,life:duration+1.1,
   releaseResources(){if(disposed)return;disposed=true;particles?.dispose();for(const m of materials)m.dispose();},
   sample(time,camera){

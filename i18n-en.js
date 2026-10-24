@@ -3540,5 +3540,13 @@ Object.assign(globalThis.I18N_EN,{
  "คูลดาวน์ {10} วินาที": "Cooldown {10} seconds",
  "สกิลอัตโนมัติ {20}": "Auto skill {20}",
  "ของขวัญจากทีมงาน": "A gift from the team",
- "ขอบคุณที่ร่วมผจญภัยในอโยธยา กดรับของแนบจากจดหมายฉบับนี้ได้เลยครับ": "Thank you for adventuring in Ayothaya. Claim your attachments from this letter."
+ "ขอบคุณที่ร่วมผจญภัยในอโยธยา กดรับของแนบจากจดหมายฉบับนี้ได้เลยครับ": "Thank you for adventuring in Ayothaya. Claim your attachments from this letter.",
+ "นับดาเมจที่ลด HP จริง รวมพิษและสัตว์เลี้ยง · DPS ใช้เวลาตั้งแต่โจมตีครั้งแรกจนบอสล้ม": "Effective HP damage, including poison and pets. DPS covers the encounter from first hit to defeat.",
+ "ผลการต่อสู้ล่าสุด": "Recent battles",
+ "สรุปดาเมจบอส": "Boss damage report",
+ "ผู้ทำดาเมจสูงสุด": "Top damage dealer",
+ "ดาเมจ": "Damage",
+ "สัดส่วน": "Share",
+ "· ออกจากแผนที่แล้ว": "- Left the area"
+
 });

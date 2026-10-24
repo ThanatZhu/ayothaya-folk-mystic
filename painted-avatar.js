@@ -1,4 +1,4 @@
-import {createRiggedSprite} from './rigged-sprite.js?v=106.0';
+import {createRiggedSprite} from './rigged-sprite.js?v=combat129';
 import {loadDirectionalArt} from './directional-sprite.js?v=size1';
 import {createDirectionalActor} from './directional-actor.js?v=size1';
 import {stableViewDirection} from './directional-motion.js';

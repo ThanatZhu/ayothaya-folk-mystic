@@ -3664,3 +3664,10 @@ Object.assign(globalThis.I18N_EN,{
  "MMORPG แฟนตาซีไทย เล่นฟรีบนคอมและมือถือ · 7 อาชีพ 14 สาย Master ตีบวกครบ 6 ช่อง คู่หู 10 ตัว บอส 9 พื้นที่ ปาร์ตี้ กิลด์วอร์ ตลาด และจดหมายในเกม": "A free Thai fantasy MMORPG for desktop and mobile: 7 classes, 14 Master paths, 6 refinement slots, 10 companions, bosses in 9 regions, parties, guild wars, trading and in-game mail.",
  "เลือกสาย Master ปั้นอุปกรณ์ +10 ออกล่าบอสกับปาร์ตี้และคู่หู แล้วสร้างเรื่องราวของคุณในอโยธยา เล่นฟรี ไม่ต้องติดตั้ง": "Choose a Master path, refine gear to +10 and hunt bosses with your party and companion. Make your story in Ayothaya, free in your browser."
 });
+Object.assign(globalThis.I18N_EN,{
+ "รายการภารกิจ":"Quest list",
+ "ภารกิจปัจจุบัน":"Current quest",
+ "จบเนื้อเรื่อง":"Story complete",
+ "สำเร็จแล้ว":"Completed",
+ "ขั้น {0}/{1}":"Step {0}/{1}"
+});

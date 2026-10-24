@@ -13,6 +13,9 @@ const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 const TIER=['ง่าย','กลาง','ยาก','หัวหน้า'];
 
 export function createQuestsUI({game,account,map,bagUI}){
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./quests-journal.css?v=139',import.meta.url).href;document.head.append(css);
+ const desktop=matchMedia('(min-width:901px) and (pointer:fine)');
+ let selectedQuest=null,lastQuest=-1;
  const world=game.world,slot=(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const load=k=>{try{return JSON.parse(localStorage.getItem(k+slot));}catch{return null;}},keep=(k,v)=>{try{localStorage.setItem(k+slot,JSON.stringify(v));}catch{}};
  let localBounty=load('ayothaya-bounty:'),localAlbum=normalizeAlbum(load('ayothaya-album:')),tab='story',shown='';
@@ -42,18 +45,49 @@ export function createQuestsUI({game,account,map,bagUI}){
  dialog.querySelectorAll('[data-qt]').forEach(b=>b.onclick=()=>{tab=b.dataset.qt;render(true);});
  bagUI.talkHooks.push(n=>{$('npc-bounty')?.remove();if(n.name!=='ขุนอินทร์')return;const b=document.createElement('button');b.id='npc-bounty';b.type='button';b.textContent='📜 กระดานค่าหัวประจำวัน';b.onclick=()=>{$('close-npc').click();open('bounty');};$('close-npc').before(b);});
  const storyState=()=>{if(game.online)return normalizeStory(world.story);try{return normalizeStory(JSON.parse(localStorage.getItem('ayothaya-story:'+slot)));}catch{return normalizeStory(null);}};
+ // Browsing a recap never sends a quest action or changes authoritative progress.
+ function renderStory(body,state){
+  const obj=currentObjective(state),previousScroll=lastQuest===state.quest?(body.querySelector('.quest-journal-list')?.scrollTop??0):0;
+  const focused=body.contains(document.activeElement)?document.activeElement?.dataset.questIndex:null;
+  if(lastQuest!==state.quest){selectedQuest=state.quest;lastQuest=state.quest;}
+  const index=selectedQuest??state.quest,active=index===state.quest,quest=STORY[index];
+  body.replaceChildren();
+  const layout=document.createElement('div');layout.className='quest-journal-layout';
+  const nav=document.createElement('aside');nav.className='quest-journal-nav';
+  const summary=document.createElement('button');summary.type='button';summary.className='quest-journal-toggle';summary.textContent='รายการภารกิจ';summary.setAttribute('aria-controls','quest-journal-list');summary.setAttribute('aria-expanded',String(desktop.matches));nav.append(summary);
+  const list=document.createElement('nav');list.id='quest-journal-list';list.className='quest-journal-list';list.setAttribute('aria-label','รายการภารกิจ');list.hidden=!desktop.matches;
+  summary.onclick=()=>{list.hidden=!list.hidden;summary.setAttribute('aria-expanded',String(!list.hidden));};
+  const addQuest=(i,title,label)=>{
+   const b=document.createElement('button');b.type='button';b.dataset.questIndex=String(i);b.setAttribute('aria-pressed',String(i===index));
+   const status=document.createElement('small');status.textContent=label;
+   const name=document.createElement('span');name.textContent=title;b.append(status,name);
+   b.onclick=()=>{selectedQuest=i;render(true);if(!desktop.matches)body.querySelector('.quest-journal-detail').focus({preventScroll:true});};list.append(b);
+  };
+  addQuest(state.quest,obj?.quest.title??'จบเนื้อเรื่องที่มีในตอนนี้แล้ว',obj?'ภารกิจปัจจุบัน':'จบเนื้อเรื่อง');
+  for(let i=state.quest-1;i>=0;i--)addQuest(i,STORY[i].title,'สำเร็จแล้ว');
+  nav.append(list);layout.append(nav);
+  const section=document.createElement('section');section.className='quest-journal-detail story-recap';section.tabIndex=-1;section.setAttribute('aria-labelledby','quest-detail-title');
+  const status=document.createElement('small');status.className='quest-journal-state';status.textContent=active?(obj?'ภารกิจปัจจุบัน':'จบเนื้อเรื่อง'):'สำเร็จแล้ว';section.append(status);
+  const heading=document.createElement('h3');heading.id='quest-detail-title';heading.textContent=quest?.title??'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';section.append(heading);
+  if(quest){const art=storyArt(quest.id,active&&obj?obj.stepNumber:1),image=document.createElement('img');image.src=art.src;image.alt=art.alt;image.className='story-recap-art';image.width=640;image.height=360;image.decoding='async';image.onerror=()=>image.remove();section.append(image);}
+  const recap=document.createElement('p');recap.textContent=quest?STORY_RECAP[quest.id]:'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';section.append(recap);
+  if(active&&obj){
+   const goal=document.createElement('div');goal.className='quest-journal-goal';
+   const label=document.createElement('small');label.textContent=`ขั้น ${obj.stepNumber}/${obj.steps}`;
+   const hint=document.createElement('p');hint.textContent=obj.step.hint;goal.append(label,hint);
+   if(obj.step.count){const progress=document.createElement('small');progress.textContent=`${obj.count}/${obj.step.count}`;goal.append(progress);}
+   section.insertBefore(goal,section.querySelector('.story-recap-art')??recap);
+  }
+  layout.append(section);body.append(layout);list.scrollTop=previousScroll;
+  if(focused!=null)list.querySelector(`[data-quest-index="${focused}"]`)?.focus({preventScroll:true});
+ }
+ desktop.addEventListener('change',()=>{const list=dialog.querySelector('.quest-journal-list');if(list){list.hidden=!desktop.matches;dialog.querySelector('.quest-journal-toggle').setAttribute('aria-expanded',String(desktop.matches));}});
  function render(force=false){
   if(!dialog.open)return;const s=bounty(),al=album(),wk=normalizeWeekly(world.weekly,Date.now()),sig=JSON.stringify([tab,s,al,wk,storyState()]);if(!force&&sig===shown)return;shown=sig;
   dialog.querySelectorAll('[data-qt]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.qt===tab)));
-  const body=$('quests-body');
+  const body=$('quests-body');dialog.dataset.questTab=tab;
   if(tab==='story'){
-   const state=storyState(),obj=currentObjective(state);body.replaceChildren();
-   const section=document.createElement('section');section.className='story-recap';
-   const heading=document.createElement('h3');heading.textContent=obj?.quest.title??'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';section.append(heading);if(obj){const art=storyArt(obj.quest.id,obj.stepNumber),image=document.createElement('img');image.src=art.src;image.alt=art.alt;image.className='story-recap-art';image.width=640;image.height=360;image.decoding='async';image.onerror=()=>image.remove();section.append(image);}
-   const recap=document.createElement('p');recap.textContent=obj?STORY_RECAP[obj.quest.id]:'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';section.append(recap);
-   if(obj){const goal=document.createElement('small');goal.textContent=obj.step.hint;section.append(goal);}
-   body.append(section);
-   for(let i=state.quest-1;i>=0;i--){const details=document.createElement('details'),summary=document.createElement('summary'),text=document.createElement('p');details.className='story-recap';summary.textContent=STORY[i].title;text.textContent=STORY_RECAP[STORY[i].id];details.append(summary,text);body.append(details);}
+   renderStory(body,storyState());
   }else if(tab==='bounty'){
    body.innerHTML=`<p class="social-note">ค่าหัวเปลี่ยนทุกวันตอนเที่ยงคืน · ล่าได้ทุกแผนที่ · รับรางวัลในเมือง${map.safe?'':' (ตอนนี้อยู่นอกเมือง)'}</p><ul class="social-list">`+dailyBounties(Date.now()).map((b,i)=>{
     const n=Math.min(s.progress[i],b.count),done=n>=b.count;

@@ -3,10 +3,10 @@ import {openHudPanel} from './hud-panels.js?v=34';
 import {createInspectUI} from './inspect-ui.js?v=108.1';
 import {iconStyle} from './bag-ui.js?v=107';
 import {emblemId,emoteId} from './items.js?v=107';
-import {createPetView} from './pet-ui.js?v=pets126';
+import {createPetView} from './pet-ui.js?v=pets128';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
-import {groundHeight} from './combat-core.js?v=pets126';
+import {groundHeight} from './combat-core.js?v=pets128';
 import {MultiplayerClient} from './multiplayer-client.js?v=life1';
 import {CHANNELS,CHANNEL_KEY,normalizeChannel} from './realm-state.js?v=62';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
@@ -165,6 +165,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
     // 1.10.2 how long ago this happened: snapshot delay on the server plus half the ping (capped)
     const ping=Number(button?.dataset.ping)||80;game.world.events.push({...e,lag:Math.min(.4,Math.max(0,(Number.isFinite(e.at)&&Number.isFinite(s.time)?s.time-e.at:.05)+ping/2000))});continue;}
    const v=views.get(e.actor);if(!v||v.loading)continue;
+   if(e.type==='petSkill'){v.pet?.attack(e.to,Math.max(0,s.time-e.at));const ids={fireBurst:'sky-spear',lotusCleanse:'cleanse',moonBarrier:'sanctuary',roarGuard:'guard',trueSight:'mark',flowerBind:'vine-trap',riceHeal:'heal',jadeShell:'sanctuary',waterMana:'regen',echoSlow:'hamstring'};game.roleEffects?.spawn({roleSkillId:ids[e.kind],from:{x:e.x,z:e.z},to:e.to??{x:e.x+.5,z:e.z},lag:Math.max(0,s.time-e.at)});}
    if(e.type==='damage'&&Number.isInteger(e.id))game.popup?.(e); // 0.99.3 everyone's numbers float over the monster they hit
    if(e.type==='playerHit')game.popup?.({...e,hurt:true},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2+v.sprite.position.y,z:v.state.player.z})});
    if(e.roleSkillId&&['cast','rolePassive'].includes(e.type)){game.roleEffects?.spawn({...e,lag:Math.max(0,s.time-e.at)});if(e.type==='cast')v.roleAction={id:e.roleSkillId,start:clock-Math.max(0,s.time-e.at)};continue;}

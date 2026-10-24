@@ -1,3 +1,4 @@
+import {MAIL_ACTIONS,composeMail,deliverMail,mailboxAction,publicInbox,inboxSummary,hasMailGift} from '../mailbox.js';
 import {PET_MUTATIONS,petAccountAction,publicPetAccount} from '../pet-account.js';
 import {STORY_VERSION} from '../story-quests.js';
 import {statsAfterClassChange} from '../character-stats.js';
@@ -26,13 +27,15 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  if(!catalog)catalog=JSON.parse(await readFile(path.join(root,'maps/world.json'),'utf8'));
  // A replacement instance (zero-downtime redeploy) starts while the old one still owns the world.
  // It serves /health and answers sockets with 503 until the old lease is released or expires, then takes over.
+ let mailReady=!store?.loadMailAnnouncements;
  let bossTimersReady=mode==='local'||!store?.loadMapBosses;
- const authoritative=()=>(mode!=='firebase'||Date.now()<=store.authorityUntil)&&bossTimersReady;
+ const authoritative=()=>(mode!=='firebase'||Date.now()<=store.authorityUntil)&&bossTimersReady&&mailReady;
  let renewing=false,authorityError='';
- const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(!bossTimersReady){realm.mapBosses.restore(await store.loadMapBosses());bossTimersReady=true;}if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
+ const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(!bossTimersReady){realm.mapBosses.restore(await store.loadMapBosses());bossTimersReady=true;}if(!mailReady){realm.mailAnnouncements=await store.loadMailAnnouncements();mailReady=true;}if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
  let savedList={at:0,rows:[]};
  const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,roleSkills:process.env.ROLE_SKILLS!=='off',warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set(),metrics={bytesSent:0,messagesSent:0,startedAt:Date.now()};let closing=false;
+ if(mode==='local'&&store?.loadMailAnnouncements){realm.mailAnnouncements=await store.loadMailAnnouncements();mailReady=true;}
  if(mode==='local'&&store?.loadMapBosses)realm.mapBosses.restore(await store.loadMapBosses());
  if(store?.saveMapBosses)realm.mapBosses.onChange=rows=>store.saveMapBosses(rows);
  const toDiscord=discordPoster();if(toDiscord)realm.onAnnounce=toDiscord; // 0.96 war + tournament news (DISCORD_WEBHOOK_URL)
@@ -48,7 +51,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,mapBossSchema:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:1,classStatReset:true,roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,mapBossSchema:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,mailboxSchema:1,premiumCurrency:'gold-bar',classStatReset:true,roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.99.16 back-office (admin.html): online players and gifts. Production needs a Google ID token whose verified
   // email is in ADMIN_EMAILS; the local server trusts its own origin. Every gift is logged.
@@ -74,19 +77,20 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(store?.listProfiles&&(url.searchParams.get('fresh')==='1'||Date.now()-savedList.at>120000)){try{savedList={at:Date.now(),rows:await store.listProfiles()};}catch(e){console.error('admin-list',e.message);}}
     reply(200,{players:adminPlayers(realm,savedList.rows),savedAt:savedList.at||null});return;
    }
-   if(url.pathname==='/admin/pets'&&req.method==='POST'){
-    let data='';for await(const chunk of req){data+=chunk;if(data.length>4096){reply(413,{error:'too-large'});return;}}
-    try{const body=JSON.parse(data),action={type:'petGrant',requestId:body.requestId,gems:body.gems,pet:body.pet??null};let state;
-     if(String(body.peer??'').startsWith('off:')){const m=/^off:([^:]{1,128}):(slot-[1-5])$/.exec(body.peer);if(!m)throw Error('player-offline');if([...sessions.values()].some(s=>s.peer.uid===m[1]))throw Error('player-online');const r=await store.giveOffline({uid:m[1],slotId:m[2]},r=>({...r,petCollection:petAccountAction(r.petCollection,action).state}));state=r.petCollection;savedList.at=0;}
-     else{const session=[...sessions.values()].find(s=>s.peer.id===body.peer&&!s.closing);if(!session)throw Error('player-offline');state=(await persistPets(session,action)).state;}
-     console.log('admin-pets',who,body.peer,action.gems,action.pet,action.requestId);reply(200,{ok:true,petCollection:publicPetAccount(state)});
+   if(['/admin/pets','/admin/give','/admin/mail'].includes(url.pathname)&&req.method==='POST'){
+    if(!authoritative()){reply(503,{error:'authority-unavailable'});return;}
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>12000){reply(413,{error:'too-large'});return;}}
+    try{const b=JSON.parse(data),attachments=url.pathname==='/admin/pets'?{goldBars:b.gems??0,pets:b.pet?[b.pet]:[]}:url.pathname==='/admin/give'?{coins:b.coins??0,items:b.items??[]}:b.attachments??{};
+     const mail=composeMail({id:b.requestId??randomUUID(),title:b.title??'ของขวัญจากทีมงาน',body:b.body??'ขอบคุณที่ร่วมผจญภัยในอโยธยา กดรับของแนบจากจดหมายฉบับนี้ได้เลยครับ',sender:'ทีมงานอโยธยา',attachments,serverId:b.serverId??'all'});
+     if(b.peer==='all'){
+      if(hasMailGift(mail.attachments))throw Error('broadcast-gifts-disabled');
+      const r=await store.saveMailAnnouncement(mail);realm.mailAnnouncements=r.mailbox.messages;console.log('admin-announcement-mail',who,mail.id);reply(200,{ok:true,mail:r.mail,replayed:r.replayed});return;
+     }
+     let record,replayed=false;
+     if(String(b.peer??'').startsWith('off:')){const m=/^off:([^:]{1,128}):(slot-[1-5])$/.exec(b.peer);if(!m)throw Error('player-offline');if([...sessions.values()].some(s=>s.peer.uid===m[1]))throw Error('player-online');record=await store.giveOffline({uid:m[1],slotId:m[2]},r=>{const x=deliverMail(r.mailbox,mail);replayed=x.replayed;return {...r,mailbox:x.mailbox};});}
+     else{const session=[...sessions.values()].find(s=>s.peer.id===b.peer&&!s.closing);if(!session)throw Error('player-offline');record=await persistMail(session,r=>{const x=deliverMail(r.mailbox,mail);replayed=x.replayed;return {...r,mailbox:x.mailbox};});}
+     savedList.at=0;console.log('admin-mail',who,b.peer,mail.id);reply(200,{ok:true,name:record.character.name,mail,replayed});
     }catch(e){reply(400,{error:e.message});}return;
-   }
-   if(url.pathname==='/admin/give'&&req.method==='POST'){
-    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>4096){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
-    try{const body=JSON.parse(data),offline=String(body?.peer??'').startsWith('off:'),result=offline?await adminGiveOffline(realm,store,body):adminGive(realm,body);
-     if(offline)savedList.at=0;console.log('admin-give',who,offline?'offline':'online',result.name,JSON.stringify({coins:body.coins??0,items:body.items??[]}));reply(200,result);}catch(e){reply(400,{error:e.message});}
-    return;
    }
    // 0.100.6 balance edits: production commits balance-data.js to GitHub (redeploys game and server); local writes the file
    if(url.pathname==='/admin/balance'&&req.method==='POST'){
@@ -172,6 +176,14 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    s.peer.petCollection=result.state;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return result;
   });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;}
  }
+ async function persistMail(s,apply){
+  if(s.trainingBusy||s.closing||s.peer.trade)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;s.peer.mailMutationBusy=true;
+  const job=s.queue.catch(()=>{}).then(async()=>{const record=apply(realm.record(s.peer,s.lease.record));let timer;
+   try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,no)=>{timer=setTimeout(()=>no(Error('save-timeout')),15000);})]);}
+   catch(error){s.closing=true;s.released=true;realm.leave(s.peer.id);s.ws.close(4010,'save-failed');throw error;}finally{clearTimeout(timer);}
+   s.peer.mailbox=record.mailbox;realm.setBag(s.peer,record.bag);s.peer.petCollection=record.petCollection??s.peer.petCollection;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return record;
+  });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;s.peer.mailMutationBusy=false;if(!s.closing){for(const gift of s.peer.mailLootQueue??[])realm.grantLoot(s.peer,gift.loot,gift.at);}s.peer.mailLootQueue=[];}
+ }
  wss.on('connection',ws=>{
   let session=null,authenticating=false;ws.alive=true;
   const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}const raw=JSON.stringify(data);metrics.bytesSent+=Buffer.byteLength(raw);metrics.messagesSent++;ws.send(raw);}};
@@ -181,7 +193,12 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let message;try{message=JSON.parse(raw.toString());}catch{ws.close(4002,'invalid-json');return;}
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
    if(session){if(session.closing||session.trainingBusy){if(message.type==='save'&&typeof message.id==='string'){const id=message.id.slice(0,50);session.queue.then(()=>send({type:'saved',id}),()=>{});return;} // the busy job checkpoints; answer once it lands
-    if(!['input','ping'].includes(message.type)){const reply=PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(!['input','ping'].includes(message.type)){const reply=MAIL_ACTIONS.includes(message.type)?'mailError':PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(MAIL_ACTIONS.includes(message.type)){
+     const p=session.peer,id=message.id;if(typeof id!=='string'||id.length>80||!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'mailError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
+     try{if(message.type!=='mailList')await persistMail(session,r=>mailboxAction(r,message,realm.mailAnnouncements??[]));send({type:'mailChanged',id,mails:publicInbox(p.mailbox,realm.mailAnnouncements??[],p.serverId),summary:inboxSummary(p.mailbox,realm.mailAnnouncements??[],p.serverId),petCollection:publicPetAccount(p.petCollection),bag:p.bag});}
+     catch(e){send({type:'mailError',id,code:e.message});}return;
+    }
     if(PET_MUTATIONS.includes(message.type)){
      const p=session.peer,id=message.id;
      if(!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'petError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;

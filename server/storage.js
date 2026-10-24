@@ -1,3 +1,4 @@
+import {deliverMail} from '../mailbox.js';
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
@@ -19,6 +20,8 @@ export class LocalStore{
   if(row.serverId!==identity.serverId)throw new Error('character-server');
   this.leases.set(identity.uid,{id:leaseId,expires:Date.now()+ttl});return {identity,leaseId,record:copy(row)};
  }
+ async loadMailAnnouncements(){try{return JSON.parse(await readFile(path.join(this.directory,'mail-announcements.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return [];throw e;}}
+ saveMailAnnouncement(mail){const job=(this.mailQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const rows=await this.loadMailAnnouncements(),r=deliverMail({messages:rows},mail);const file=path.join(this.directory,'mail-announcements.json');await writeFile(file+'.tmp',JSON.stringify(r.mailbox.messages),{mode:0o600});await rename(file+'.tmp',file);return r;});this.mailQueue=job;return job;}
  async loadDashboardLogs(){try{return JSON.parse(await readFile(path.join(this.directory,'dashboard-logs.json'),'utf8'));}catch{return [];}}
  async loadMapBosses(){try{return JSON.parse(await readFile(path.join(this.directory,'map-bosses.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return [];throw e;}}
  saveMapBosses(rows){const data=JSON.stringify(rows);this.bossQueue=(this.bossQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'map-bosses.json'),tmp=file+'.tmp';await writeFile(tmp,data,{mode:0o600});await rename(tmp,file);});return this.bossQueue;}
@@ -66,6 +69,8 @@ export class FirebaseStore{
  }
  async checkAuthority(tx){const snap=await tx.get(this.authorityRef);if(!snap.exists||snap.data().id!==this.authorityId||snap.data().expires<Date.now())throw new Error('authority-lost');}
  async releaseAuthority(){await this.db.runTransaction(async tx=>{const s=await tx.get(this.authorityRef);if(s.exists&&s.data().id===this.authorityId)tx.delete(this.authorityRef);});this.authorityUntil=0;}
+ async loadMailAnnouncements(){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);const snap=await tx.get(this.db.collection('multiplayerRuntime').doc('mailAnnouncements'));return snap.exists?snap.data().messages??[]:[];});}
+ saveMailAnnouncement(mail){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);const ref=this.db.collection('multiplayerRuntime').doc('mailAnnouncements'),snap=await tx.get(ref),r=deliverMail({messages:snap.exists?snap.data().messages??[]:[]},mail);tx.set(ref,{messages:r.mailbox.messages,updatedAt:Date.now()});return r;});}
  async loadGuilds(){return (await this.db.collection('multiplayerGuilds').get()).docs.map(d=>d.data());}
  async loadMapBosses(){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);const snap=await tx.get(this.db.collection('multiplayerRuntime').doc('mapBossTimers'));return snap.exists?snap.data().rows??[]:[];});}
  saveMapBosses(rows){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);tx.set(this.db.collection('multiplayerRuntime').doc('mapBossTimers'),{rows,updatedAt:Date.now()});});}
@@ -118,7 +123,7 @@ export class FirebaseStore{
    const [online,legacy,lease]=await Promise.all([tx.get(refs.profile),tx.get(refs.legacy),tx.get(refs.lease)]);
    if(!takeover&&lease.exists&&lease.data().expires>Date.now())throw new Error('already-online');
    if(!legacy.exists)throw new Error('character-not-found');
-   const record=online.exists?online.data().record:legacy.data();if(!online.exists)delete record.petCollection; // Never import a premium wallet from the client-writable mirror.
+   const record=online.exists?online.data().record:legacy.data();if(!online.exists){delete record.petCollection;delete record.mailbox;} // Never import a premium wallet from the client-writable mirror.
    if(record.serverId!==identity.serverId||legacy.data().serverId!==identity.serverId)throw new Error('character-server');
    character(record.character); // Legacy XP is imported once; later joins use the private server profile.
    if(online.exists){const next=character({...legacy.data().character,classId:record.character.classId,jobId:record.character.jobId??''});validateCharacterChange(record.character,next,record.state);record.character=next;}
@@ -135,7 +140,7 @@ export class FirebaseStore{
    if(!legacy.exists||legacy.data().revision!==session.mirrorRevision)throw new Error('save-conflict');
    const next={...copy(record),revision:session.mirrorRevision+1};delete next.slotId;
    // Skill levels stay in the private profile; the client-readable mirror keeps its rule-checked shape.
-   const mirror={...next};delete mirror.skills;delete mirror.roleSkillBackup;delete mirror.roleCooldowns;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.daily;delete mirror.dungeonDay;delete mirror.pet;delete mirror.petCollection;delete mirror.bounty;delete mirror.weekly;delete mirror.rebirth;delete mirror.xpCurve;delete mirror.album;delete mirror.trade;delete mirror.stats;delete mirror.gear;
+   const mirror={...next};delete mirror.skills;delete mirror.roleSkillBackup;delete mirror.roleCooldowns;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.daily;delete mirror.dungeonDay;delete mirror.pet;delete mirror.petCollection;delete mirror.mailbox;delete mirror.bounty;delete mirror.weekly;delete mirror.rebirth;delete mirror.xpCurve;delete mirror.album;delete mirror.trade;delete mirror.stats;delete mirror.gear;
    tx.set(session.refs.profile,{record:next,updatedAt:Date.now()});tx.set(session.refs.legacy,{...mirror,updatedAt:new Date()});
    if(release)tx.delete(session.refs.lease);else tx.update(session.refs.lease,{expires:Date.now()+ttl});return next.revision;
   });session.mirrorRevision=revision;

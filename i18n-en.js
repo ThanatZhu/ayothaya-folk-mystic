@@ -3676,3 +3676,5 @@ Object.assign(globalThis.I18N_EN,{
  "ปิดแชต":"Close chat",
  "เปิดแชต · Enter":"Open chat · Enter"
 });
+
+Object.assign(globalThis.I18N_EN,{'เลือกเป้าหมายถัดไป':'Select next target'});

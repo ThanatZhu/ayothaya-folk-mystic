@@ -16,11 +16,7 @@
  html body.field-hud.hud63 #online-dock.desktop-chat-drawer>header{display:flex!important;grid-column:1;grid-row:2/4;min-width:0;padding:12px 8px!important;align-items:stretch;gap:0;border:0;border-right:1px solid #d4b56c33;background:#091f1c80;height:auto!important}
  html body.field-hud.hud63 #online-dock.desktop-chat-drawer .mp-tabs{display:flex!important;flex-direction:column;width:100%;gap:8px;overflow:visible}
  html body.field-hud.hud63 #online-dock.desktop-chat-drawer .mp-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:66px;padding:6px 2px;font-size:12px;border-radius:9px;white-space:normal;flex-shrink:0}
- #online-dock.desktop-chat-drawer .mp-tabs button::before{font-size:21px;line-height:1;content:'◉';color:#d9c58c}
- #online-dock.desktop-chat-drawer .mp-tabs button[data-channel=world]::before{content:'✦'}
- #online-dock.desktop-chat-drawer .mp-tabs button[data-channel=party]::before{content:'♟'}
- #online-dock.desktop-chat-drawer .mp-tabs button[data-channel=guild]::before{content:'⚑'}
- #online-dock.desktop-chat-drawer .mp-tabs button[data-channel=system]::before{content:'⋯'}
+ #online-dock.desktop-chat-drawer .mp-tabs button::before{content:none!important;display:none!important}
  html body.field-hud.hud63 #online-dock.desktop-chat-drawer #dock-toggle{display:none!important}
  html body.field-hud.hud63 #online-dock.desktop-chat-drawer #online-messages{display:block!important;grid-column:2;grid-row:2;min-height:0;height:auto!important;max-height:none!important;padding:16px 18px;overflow:auto;overscroll-behavior:contain;font-size:14px;line-height:1.6;background:linear-gradient(180deg,#16382c33,transparent);scrollbar-color:#c5a55b99 transparent}
  html body.field-hud.hud63 #online-dock.desktop-chat-drawer #online-messages p{position:relative;margin:0 0 18px;padding-left:46px;min-height:42px;text-shadow:none}
@@ -38,7 +34,6 @@
  html body.field-hud.hud63 #online-dock.desktop-chat-drawer #online-chat button{font-size:14px!important;min-height:44px;padding:6px 18px;border-radius:9px}
  @media(max-height:650px){
   html body.field-hud.hud63 #online-dock.desktop-chat-drawer .mp-tabs button{min-height:48px;gap:2px;padding:4px 2px}
-  #online-dock.desktop-chat-drawer .mp-tabs button::before{font-size:17px}
  }
  @media(prefers-reduced-motion:reduce){#desktop-chat-launcher img{transition:none}}
 }

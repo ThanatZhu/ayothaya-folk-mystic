@@ -1,5 +1,5 @@
 import {createPartyLayout} from './party-layout.js?v=overlay143';
-import {createDesktopChat} from './desktop-chat-ui.js?v=overlay143';
+import {createDesktopChat} from './desktop-chat-ui.js?v=channel144';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
 import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';

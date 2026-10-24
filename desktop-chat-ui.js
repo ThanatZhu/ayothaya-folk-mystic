@@ -1,7 +1,7 @@
 // Desktop presentation for the existing chat transport and message history.
 export function createDesktopChat({shell,dock,game,setCollapsed}){
  const query=matchMedia('(min-width:901px) and (pointer:fine)'),input=dock.querySelector('#online-text');
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./desktop-chat-ui.css?v=overlay143',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./desktop-chat-ui.css?v=channel144',import.meta.url).href;document.head.append(css);
  const heading=document.createElement('div');heading.className='desktop-chat-heading';
  heading.innerHTML='<div><small>AYOTHAYA</small><h2 id="desktop-chat-title">สนทนา</h2></div><button type="button" id="desktop-chat-close" aria-label="ปิดแชต">×</button>';dock.prepend(heading);
  const launcher=document.createElement('button');launcher.type='button';launcher.id='desktop-chat-launcher';launcher.hidden=true;

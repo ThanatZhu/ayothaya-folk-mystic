@@ -8,7 +8,7 @@ export function skillPage(slots,page=0,size=4){
 }
 export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  const body=document.body,$=id=>document.getElementById(id),query=matchMedia('(any-pointer:coarse),(max-width:900px)');
- const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=menu135';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=channel144';document.head.append(css);
  const skills=$('skills'),bank=$('skill-bank'),nav=$('game-menu'),toggle=$('menu-toggle'),quest=$('quest-tracker');
  const oldBank=bank?.onclick;let page=0,refreshing=false,skillSignature='';
  const online=$('online-button'),onlineHome=document.createComment('online chip home');if(online)online.before(onlineHome);
@@ -25,7 +25,17 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  if($('online-label'))new MutationObserver(statusLabels).observe($('online-label'),{subtree:true,childList:true,characterData:true});
  if(chips)new MutationObserver(statusLabels).observe(chips,{subtree:true,childList:true,characterData:true});statusLabels();
  const minimap=document.querySelector('.mini-panel');
- const railSize=()=>{const bottom=query.matches?Math.max(profile?.getBoundingClientRect().bottom??0,rail.getBoundingClientRect().bottom):0;body.style.setProperty('--mobile-profile-bottom',bottom+'px');if(minimap)body.style.setProperty('--events-top',(minimap.getBoundingClientRect().bottom+8)+'px');};
+ const railSize=()=>{
+  const bottom=query.matches?Math.max(profile?.getBoundingClientRect().bottom??0,rail.getBoundingClientRect().bottom):0;
+  body.style.setProperty('--mobile-profile-bottom',bottom+'px');if(!minimap)return;
+  const r=minimap.getBoundingClientRect();body.style.setProperty('--events-top',(r.bottom+8)+'px');
+  // Use the real map bounds; reserve space only for event icons beside the button.
+  const eventEdges=[...chips?.children??[]].filter(n=>!n.hidden).map(n=>n.getBoundingClientRect())
+   .filter(e=>e.width&&e.left>=r.left&&e.left<r.right&&e.top<r.bottom+52&&e.bottom>r.bottom+8).map(e=>e.left-6);
+  const end=Math.min(r.right-4,...eventEdges);
+  body.style.setProperty('--channel-map-left',(r.left+4)+'px');
+  body.style.setProperty('--channel-map-width',Math.min(144,Math.max(44,end-r.left-4))+'px');
+ };
  new ResizeObserver(railSize).observe(rail);
  if(minimap)new ResizeObserver(railSize).observe(minimap);
  const arrows='<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M26 12a11 11 0 0 0-19-4L4 12m0-7v7h7M6 20a11 11 0 0 0 19 4l3-4m0 7v-7h-7"/></svg>';

@@ -1,4 +1,4 @@
-import {createMobileReferenceUI} from './mobile-reference-ui.js?v=144';
+import {createMobileReferenceUI} from './mobile-reference-ui.js?v=147';
 import {createMobileHudEditor} from './mobile-hud-editor.js?v=143';
 // A single owner for the touch HUD. Reuse live buttons so cooldowns and saved
 // hotbar order stay with game-controls / auto-settings rather than a second UI.
@@ -15,6 +15,7 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  const profile=document.querySelector('.player-panel'),channel=$('channel-button'),channelRow=$('hud-channel-row'),dock=$('online-dock'),dockToggle=$('dock-toggle'),attackControls=document.querySelector('.attack-controls');
  const chips=$('hud-chips'),chipsHome=document.createComment('event chips home');if(chips)chips.before(chipsHome);
  const rail=document.createElement('div');rail.id='mobile-status-rail';rail.hidden=true;body.append(rail);
+ const events=document.createElement('div');events.id='mobile-event-row';events.hidden=true;body.append(events);
  const onlineCount=document.createElement('span');onlineCount.className='mobile-online-count';onlineCount.setAttribute('aria-hidden','true');online?.append(onlineCount);
  const statusLabels=()=>{
   const label=$('online-label')?.textContent??'',count=label.match(/\d+/)?.[0]??'…';
@@ -29,6 +30,8 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
   const bottom=query.matches?Math.max(profile?.getBoundingClientRect().bottom??0,rail.getBoundingClientRect().bottom):0;
   body.style.setProperty('--mobile-profile-bottom',bottom+'px');if(!minimap)return;
   const r=minimap.getBoundingClientRect();body.style.setProperty('--events-top',(r.bottom+8)+'px');
+  const channelBounds=channel?.getBoundingClientRect(),profileEnd=Math.max(profile?.getBoundingClientRect().right??0,channelBounds?.right??0),discordLeft=r.left-52;
+  for(const [name,value] of Object.entries({'--mobile-map-bottom':r.bottom,'--mobile-map-left':r.left,'--mobile-map-right':innerWidth-r.right,'--mobile-map-width':r.width,'--mobile-discord-left':discordLeft,'--mobile-event-width':Math.max(44,discordLeft-profileEnd-12)}))body.style.setProperty(name,value+'px');
   // Use the real map bounds; reserve space only for event icons beside the button.
   const eventEdges=[...chips?.children??[]].filter(n=>!n.hidden).map(n=>n.getBoundingClientRect())
    .filter(e=>e.width&&e.left>=r.left&&e.left<r.right&&e.top<r.bottom+52&&e.bottom>r.bottom+8).map(e=>e.left-6);
@@ -57,8 +60,8 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
   if(refreshing)return;refreshing=true;
   body.classList.toggle('mobile-play',query.matches);
   if(query.matches)body.dataset.skillBank='all';
-  rail.hidden=!query.matches;
-  if(query.matches){if(summary.parentElement!==rail)rail.prepend(summary);if(online&&online.parentElement!==rail)rail.append(online);if(chips&&chips.parentElement!==rail)rail.append(chips);}
+  rail.hidden=!query.matches;events.hidden=!query.matches;
+  if(query.matches){if(summary.parentElement!==rail)rail.prepend(summary);if(online&&online.parentElement!==rail)rail.append(online);if(chips&&chips.parentElement!==events)events.append(chips);}
   else{if(summaryHome.parentElement)summaryHome.after(summary);if(online&&onlineHome.parentElement)onlineHome.after(online);if(chips&&chipsHome.parentElement)chipsHome.after(chips);}
   if(channel){if(query.matches&&profile)profile.append(channel);else channelRow?.append(channel);}
   if(bank){if(query.matches&&skills&&bank.parentElement!==skills)skills.append(bank);else if(!query.matches&&attackControls&&bank.parentElement!==attackControls)attackControls.prepend(bank);}

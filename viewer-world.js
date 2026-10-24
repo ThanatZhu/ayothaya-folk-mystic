@@ -50,7 +50,7 @@ import {createLifeNPC} from './life-npc.js?v=106.0';
 import {createFeedback} from './feedback.js?v=compact-notice1';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=99.11';
 import {createMarketBoardUI} from './market-board-ui.js?v=107';
-import {createHud63} from './hud-63.js?v=drag146';
+import {createHud63} from './hud-63.js?v=mobile147';
 import {bindRenderLifecycle} from './render-lifecycle.js';
 import {resolveMap} from './world-state.js?v=101.5';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=106.1-lablae';

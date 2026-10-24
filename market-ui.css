@@ -59,3 +59,27 @@
 .rank-list li span{font-weight:700;color:#ffe5ab}
 .rank-list li.r1 b{color:#ffd24a}.rank-list li.r2 b{color:#d8dde0}.rank-list li.r3 b{color:#e0a36a}
 .rank-list li.me{outline:2px solid #e9c46a}
+
+/* Item exchange: center the window inside the usable viewport, including the mobile keyboard viewport. */
+#game-shell #market-window[data-hud-panel]:is([data-market-view=trade],[data-market-view=ask],[data-market-view=pick]){position:fixed!important;inset:0!important;bottom:calc(100dvh - var(--visible-height,100dvh))!important;margin:auto!important;width:min(900px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;height:fit-content!important;min-height:0!important;max-height:calc(var(--visible-height,100dvh) - 32px)!important;transform:none!important;translate:none!important;zoom:1!important;box-sizing:border-box;overflow:auto!important}
+#market-window[data-market-view=trade]>header{padding:16px 20px;gap:16px}
+#game-shell #market-window[data-market-view=trade] #market-title{font-size:21px}
+#market-window[data-market-view=trade] #market-body{padding:12px 14px 16px}
+#market-window[data-market-view=trade] .market-cols{gap:16px;margin-bottom:18px}
+#market-window[data-market-view=trade] .market-cols>section{min-width:0;padding:8px 0 12px;border:1px solid #b7995e55;border-radius:9px;background:#0a211b55}
+#market-window[data-market-view=trade] h3{font-size:16px;margin:10px 12px}
+#market-window[data-market-view=trade] .market-cols p{font-size:14px;margin:8px 12px}
+#market-window[data-market-view=trade] .market-cols .market-list{max-height:220px;overflow-y:auto;min-height:64px}
+#market-window[data-market-view=trade] .market-list{gap:8px;padding:0 10px}
+#market-window[data-market-view=trade] .market-list li{min-height:58px;gap:10px;padding:8px 10px;font-size:14px}
+#market-window[data-market-view=trade] .market-list li strong{white-space:normal;overflow-wrap:anywhere;line-height:1.65}
+#market-window[data-market-view=trade] .market-list li small{font-size:12px}
+#market-window[data-market-view=trade] .market-list .item-icon{width:40px;height:40px;flex-shrink:0}
+#market-window[data-market-view=trade] .market-coin{font-size:14px;margin:12px}
+#market-window[data-market-view=trade] .market-coin input{min-width:0;min-height:44px;font-size:16px;padding:8px 10px}
+#market-window[data-market-view=trade] .market-list [data-d]{width:44px;height:44px;flex-shrink:0;font-size:20px}
+#market-window[data-market-view=trade] .market-actions{position:sticky;bottom:0;z-index:2;gap:10px;padding:14px 10px 12px;background:#15332ef5;border-top:1px solid #b7995e66;margin-top:16px}
+#market-window[data-market-view=trade] .market-actions button{min-height:46px;font-size:14px;padding:8px 22px}
+#market-window[data-market-view=trade] .market-note{font-size:13px;margin:12px;line-height:1.8}
+@media(min-width:700px){#market-window[data-market-view=trade] #market-body>.market-list{grid-template-columns:repeat(2,minmax(0,1fr));max-height:270px;overflow-y:auto}}
+@media(max-width:520px){#market-window[data-market-view=trade]>header{padding:10px 12px;gap:6px}#game-shell #market-window[data-market-view=trade] #market-title{font-size:17px}#market-window[data-market-view=trade] #market-body{padding:8px 4px 12px}#market-window[data-market-view=trade] .market-cols{gap:12px;margin-bottom:12px}#market-window[data-market-view=trade] .market-list li{gap:7px;padding:6px;font-size:12px}#market-window[data-market-view=trade] .market-list [data-d]{width:40px;min-height:44px}#market-window[data-market-view=trade] .market-actions{justify-content:center;gap:6px;padding:12px 4px}#market-window[data-market-view=trade] .market-actions button{flex:1 1 90px;font-size:12px;padding:8px 10px}}

@@ -102,16 +102,16 @@ body.mobile-play dialog::backdrop{background:#06140dbb}
 .mobile-online-count{display:none}
 body.mobile-play.field-hud.hud63 #mobile-status-rail:not([hidden]){position:fixed;left:calc(var(--edge) + 242px);right:calc(var(--edge-r) + var(--touch-map) + 64px);top:var(--edge-t);z-index:25;display:flex;align-content:flex-start;align-items:flex-start;flex-wrap:wrap;gap:4px;pointer-events:none}
 body.mobile-play.field-hud.hud63 #mobile-status-rail #hud-chips{display:contents!important}
-body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#online-button,#hud-chips>button){position:relative!important;inset:auto!important;display:flex!important;flex:0 0 44px!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:1px!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:48px!important;min-height:44px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;transform:none!important;font-size:9px!important;line-height:12px!important;color:#fff0cc;pointer-events:auto;overflow:hidden!important}
+body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#online-button,#hud-chips>button){position:relative!important;inset:auto!important;display:flex!important;flex:0 0 44px!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:1px!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:52px!important;min-height:44px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;transform:none!important;font-size:9px!important;line-height:12px!important;color:#fff0cc;pointer-events:auto;overflow:hidden!important}
 body.mobile-play.field-hud.hud63 #mobile-status-rail #online-button{flex-basis:44px!important;width:44px!important}
 body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#weather-chip,#events-chip){flex-basis:44px!important;width:44px!important}
-body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#online-button,#hud-chips>button)::before{content:'';display:block;flex:0 0 32px;width:32px;height:32px;background:var(--status-icon) center/contain no-repeat;filter:drop-shadow(0 2px 2px #000e) drop-shadow(0 0 1px #000)}
-#mobile-status-rail #online-button{--status-icon:url('assets/ui-mobile/status/players.svg')}
-#hud-chips #mvp-chip{--status-icon:url('assets/ui-mobile/status/mvp.svg')}
-#hud-chips #event-chip{--status-icon:url('assets/ui-mobile/status/festival.svg')}
-#hud-chips #surge-chip{--status-icon:url('assets/ui-mobile/status/frenzy.svg')}
-#hud-chips #events-chip{--status-icon:url('assets/ui-mobile/status/events.svg')}
-#hud-chips #weather-chip{--status-icon:url('assets/ui-mobile/status/weather.svg')}
+body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#online-button,#hud-chips>button)::before{content:'';display:block;flex:0 0 36px;width:36px;height:36px;background:var(--status-icon) center/contain no-repeat;filter:drop-shadow(0 2px 2px #000e) drop-shadow(0 0 1px #000)}
+#mobile-status-rail #online-button{--status-icon:url('assets/ui-mobile/status-ai-v1/players.webp')}
+#hud-chips #mvp-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/mvp.webp')}
+#hud-chips #event-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/festival.webp')}
+#hud-chips #surge-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/frenzy.webp')}
+#hud-chips #events-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/events.webp')}
+#hud-chips #weather-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/weather.webp')}
 body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#online-button,#hud-chips>button)>:is(i,.item-icon,#online-meta){display:none!important}
 body.mobile-play.field-hud.hud63 #mobile-status-rail #hud-chips>button>span{display:none!important}
 body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#online-label,#hud-chips>button>b){display:block!important;max-width:100%;font-size:9px!important;line-height:12px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

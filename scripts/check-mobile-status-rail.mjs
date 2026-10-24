@@ -46,7 +46,7 @@ try{
     for(let i=0;i<rectangles.length;i++)for(let j=i+1;j<rectangles.length;j++)assert.ok(!overlaps(rectangles[i],rectangles[j]),width+' overlap '+JSON.stringify([rectangles[i],rectangles[j]]));
     assert.equal(await page.locator('#game-menu #hud-chips,#game-menu #online-button').count(),0);
     assert.equal(await page.locator('#skills .mobile-skill-empty').count(),0);
-    const paint=await page.locator('#hud-chips>button:visible').evaluateAll(nodes=>nodes.map(b=>({bg:getComputedStyle(b).backgroundImage,color:getComputedStyle(b).backgroundColor,shadow:getComputedStyle(b,'::before').filter})));for(const p of paint){assert.equal(p.bg,'none');assert.equal(p.color,'rgba(0, 0, 0, 0)');assert.match(p.shadow,/drop-shadow/);}
+    const paint=await page.locator('#hud-chips>button:visible').evaluateAll(nodes=>nodes.map(b=>({bg:getComputedStyle(b).backgroundImage,color:getComputedStyle(b).backgroundColor,shadow:getComputedStyle(b,'::before').filter,image:getComputedStyle(b,'::before').backgroundImage})));for(const p of paint){assert.equal(p.bg,'none');assert.equal(p.color,'rgba(0, 0, 0, 0)');assert.match(p.shadow,/drop-shadow/);assert.match(p.image,/status-ai-v1\/.*\.webp/);}
     assert.equal(await page.locator('#quick-slots > button[id^="quick-"]:visible').count(),4);
     const reached=new Set(),pages=await page.locator('#skill-bank').getAttribute('aria-label');
     const total=Number(pages.match(/\d+/g)?.at(-1)??1);

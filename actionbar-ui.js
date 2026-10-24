@@ -5,7 +5,7 @@ import {applySkillArt} from './skill-art.js?v=icons117';
 
 export function createActionbar({game,bagUI,account={}}){
  const world=game.world,body=document.body,$=id=>document.getElementById(id),phone=matchMedia('(any-pointer:coarse),(max-width:900px)');
- const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=mobile130';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=painted131';document.head.append(css);
  const key='ayothaya-actionbar-v1:'+[(account.serverId??'local'),(account.slotId??'guest'),world.profession.id,world.jobId??'',world.roleCombat?'role':'legacy'].join(':');
  const fallback=defaultActionbar(world.skills,game.hotbar,bagUI.quickItems);
  let saved;try{saved=JSON.parse(localStorage.getItem(key));}catch{}

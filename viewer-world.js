@@ -1,3 +1,4 @@
+import {createAutoTargetUI} from './auto-target-ui.js?v=139';
 import {createBossBrowserUI} from './boss-browser-ui.js?v=138';
 import './role-i18n.js?v=116';
 import {createActionbar} from './actionbar-ui.js?v=painted141';
@@ -7,7 +8,7 @@ import {groundHeight} from './combat-core.js?v=pets128';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=world125';
-import {createMultiplayer} from './multiplayer-ui.js?v=chat140';
+import {createMultiplayer} from './multiplayer-ui.js?v=mobile141';
 import {createEquipmentUI} from './equipment-ui.js?v=size1';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=talk137';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=106.0';
@@ -28,7 +29,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=talk137';
+import {createGame} from './game-controls.js?v=mobile139';
 import {atlasPath,className} from './classes.js?v=112.1';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=activity138';
@@ -49,7 +50,7 @@ import {createLifeNPC} from './life-npc.js?v=106.0';
 import {createFeedback} from './feedback.js?v=compact-notice1';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=99.11';
 import {createMarketBoardUI} from './market-board-ui.js?v=107';
-import {createHud63} from './hud-63.js?v=activity138';
+import {createHud63} from './hud-63.js?v=mobile139';
 import {bindRenderLifecycle} from './render-lifecycle.js';
 import {resolveMap} from './world-state.js?v=101.5';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=106.1-lablae';
@@ -197,7 +198,7 @@ try {
   camera.updateProjectionMatrix();controls.update();
  }
  account.bind({clearInput:game.clearInput,capture:()=>captureSave(game.world,map,camera,controls,motionPlaying)});
- multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu({game,account});createSkillWindow({game,classId:account.character.classId});createMmoHud({game,account});createAutoSettings({game,classId:account.character.classId});
+ multiplayer=createMultiplayer({scene,camera,controls,game,account,frame});createGameMenu({game,account});createSkillWindow({game,classId:account.character.classId});createMmoHud({game,account});createAutoSettings({game,classId:account.character.classId});createAutoTargetUI({game});
  const equipmentUI=createEquipmentUI({account,game,hero:heroMesh,onArtwork:(canvas,gear)=>{
   directionalStatus();game.refreshAnimationCapabilities();
   const icon=document.createElement('canvas');icon.width=icon.height=256;drawCharacterFrame(icon.getContext('2d'),canvas,0,0);

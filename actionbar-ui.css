@@ -1,0 +1,52 @@
+/* Separate layouts: desktop uses eight-column rows, touch uses a compact wheel. */
+body.actionbar-desktop.field-hud.hud63 .combat-controls,body.actionbar-desktop.field-hud.hud63 #quick-slots{display:none!important}
+#desktop-actionbar[hidden]{display:none!important}
+#desktop-actionbar{--action-size:52px;position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;width:max-content;min-height:136px;align-items:flex-end;z-index:110;pointer-events:auto;max-width:calc(100vw - 24px);color:#f8e4ad}
+.actionbar-rows{display:flex;flex-direction:column;gap:5px;padding:6px;background:linear-gradient(#18382be6,#081c18f2);border:1px solid #b18d4e;border-radius:6px;box-shadow:0 3px 12px #0008}
+.actionbar-row{display:grid;grid-template-columns:repeat(8,var(--action-size));gap:4px}
+#desktop-actionbar .action-slot{position:relative;display:block;width:var(--action-size);height:var(--action-size);padding:3px;margin:0;min-width:0;min-height:0;border:1px solid #b9a46b;border-radius:4px;background:#10241d;box-shadow:inset 0 0 0 1px #050f0d;cursor:pointer;overflow:hidden;touch-action:none}
+#desktop-actionbar .slot-icon{display:block;width:100%;height:100%;border-radius:2px;background-size:100% 100%;background-position:center;pointer-events:none;font-size:0}
+#desktop-actionbar .action-slot.empty{border-color:#9f915866;background:#081b17b3}
+#desktop-actionbar .action-slot.empty:before{content:'+';position:absolute;inset:0;display:grid;place-items:center;color:#d1c18c35;font-size:18px}
+#desktop-actionbar kbd{position:absolute;left:3px;top:1px;z-index:2;font:10px Arial,sans-serif;color:#fff4cf;text-shadow:0 1px 3px #000,1px 0 2px #000;pointer-events:none}
+#desktop-actionbar small{position:absolute;right:3px;bottom:1px;z-index:2;font:bold 10px Arial,sans-serif;color:#fff5d5;text-shadow:0 1px 3px #000;pointer-events:none}
+#desktop-actionbar em{position:absolute;inset:0;z-index:3;display:grid;place-items:center;color:#fff;font:bold 22px Arial,sans-serif;text-shadow:0 1px 3px #000;pointer-events:none}
+#desktop-actionbar .action-slot.cooling:after{content:'';position:absolute;inset:auto 0 0;height:var(--cooldown);background:#0009;pointer-events:none}
+#desktop-actionbar .action-slot:is(.locked,.depleted) .slot-icon{filter:grayscale(1);opacity:.4}
+#desktop-actionbar .action-slot.no-mana:not(.locked){border-color:#8872b4}
+#desktop-actionbar .action-slot:hover,#desktop-actionbar .action-slot.drop-over{border-color:#fff4ad;box-shadow:0 0 0 2px #f6d173,0 0 12px #eac66c88}
+#desktop-actionbar button:focus-visible{outline:2px solid #b7f5dd;outline-offset:2px}
+.actionbar-tools{position:absolute;left:calc(100% + 10px);bottom:0;display:flex;flex-direction:column;gap:5px;align-items:stretch;flex-shrink:0}
+.actionbar-resize,#actionbar-life,#actionbar-combat{display:flex;gap:5px;align-items:center;justify-content:flex-start}
+.actionbar-resize button{width:32px;height:28px;border:1px solid #b29a63;border-radius:4px;background:#183229;color:#ffebbc;font:22px Arial,sans-serif;padding:0;cursor:pointer}
+.actionbar-resize button:disabled{opacity:.3;cursor:default}
+#desktop-actionbar #actionbar-life button{position:relative!important;inset:auto!important;width:42px!important;height:42px!important;min-width:0!important;border-radius:6px;border:1px solid #b69d60;background:#19362e;color:#ffecba;padding:3px;font-size:11px}
+#desktop-actionbar #emote-open .item-icon{width:32px;height:32px;display:block}
+#desktop-actionbar #auto-control{position:relative!important;inset:auto!important;display:flex!important;width:auto!important;height:44px!important;gap:3px;align-items:center}
+#desktop-actionbar #auto-attack{width:44px!important;height:44px!important;min-width:0!important;font-size:10px!important;padding:0!important}
+#desktop-actionbar #auto-settings-open{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;flex-shrink:0;position:relative!important;inset:auto!important}
+#desktop-actionbar #attack{position:relative!important;inset:auto!important;width:52px!important;height:52px!important;min-width:0!important;padding:0!important}
+#desktop-actionbar .actionbar-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(100%)}
+body.actionbar-desktop :is(#bag-window,#skill-window)[open]{max-height:calc(100dvh - var(--actionbar-height,180px) - 40px)!important;top:12px!important;bottom:auto!important;margin-top:0!important;overflow-y:auto}
+body.actionbar-desktop #skill-window .skill-node strong{cursor:grab;touch-action:none}
+body.actionbar-desktop.field-hud.hud63 #online-dock{max-width:380px!important}
+@media(max-width:1300px){body.actionbar-desktop.field-hud.hud63 #online-dock{bottom:calc(var(--actionbar-height,180px) + 32px)!important;max-height:240px!important}}
+.actionbar-ghost{position:fixed;z-index:10000;width:48px;height:48px;transform:translate(-50%,-50%);pointer-events:none;border:2px solid #ffdf85;border-radius:4px;background:#123126}
+.actionbar-ghost strong{display:block;width:100%;height:100%;background-size:100% 100%;pointer-events:none}
+body.actionbar-dragging{user-select:none}
+@media(max-width:1280px){#desktop-actionbar{--action-size:46px;gap:6px}}
+@media(max-width:1050px){#desktop-actionbar{--action-size:42px}}
+/* Four skills per page sit around attack; the central circular arrows change page. */
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel{position:fixed!important;right:var(--edge-r)!important;bottom:var(--touch-bottom)!important;width:242px!important;height:228px!important;display:block!important;translate:none!important;scale:1!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill{position:absolute!important;inset:auto!important;left:var(--arc-x)!important;top:var(--arc-y)!important;width:48px!important;height:48px!important;min-width:44px!important;min-height:44px!important;border-radius:50%!important;border:2px solid #d5b875!important;padding:3px!important;background:#112d25!important;box-shadow:0 2px 5px #0008}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill strong{position:absolute!important;inset:3px!important;display:block!important;width:auto!important;height:auto!important;margin:0!important;max-width:none!important;max-height:none!important;border-radius:50%!important;background-size:100% 100%!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skill-bank{position:absolute!important;left:116px!important;top:85px!important;width:48px!important;height:48px!important;inset-block-end:auto!important;border-radius:50%!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel .attack-controls{position:absolute!important;inset:0!important;display:block!important;pointer-events:none}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-control{position:absolute!important;inset:auto!important;left:70px!important;top:178px!important;display:flex!important;align-items:center;width:90px!important;height:48px!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-attack{width:48px!important;height:48px!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #attack{position:absolute!important;inset:auto!important;left:170px!important;top:160px!important;width:68px!important;height:68px!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill[data-mobile-away]{display:none!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .mobile-skill-empty{position:absolute!important;left:var(--arc-x)!important;top:var(--arc-y)!important;width:48px!important;height:48px!important;border:1px dashed #d5b87588!important;border-radius:50%!important;background:#112d2577!important;padding:0!important;opacity:.7!important}
+body.actionbar-mobile #skills .mobile-skill-empty[hidden]{display:none!important}
+@media(orientation:landscape){body.actionbar-mobile.mobile-play.field-hud.hud63 #online-dock.collapsed{right:calc(var(--edge-r) + 252px)!important;max-width:560px!important}}

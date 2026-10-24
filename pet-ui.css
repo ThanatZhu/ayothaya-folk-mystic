@@ -20,3 +20,5 @@
 @media(max-width:650px){#pet-premium{padding:14px}.pet-wallet{align-items:flex-start}.pet-wallet h3{font-size:20px}.pet-wallet>small{max-width:120px}.pet-collection-layout{grid-template-columns:1fr}.pet-roster{grid-template-columns:repeat(3,minmax(0,1fr))}.pet-roster img{height:80px}.pet-inspect{border-left:0;border-top:1px solid #dfbd7633}.pet-inspect>img{height:160px}.pet-live-skill{align-items:stretch}.pet-live-skill button{flex:1}.pet-live-skill>div{width:100%}}
 
 .pet-skill-title{display:flex;align-items:center;justify-content:center;gap:10px}.pet-skill-title img.pet-skill-art{width:52px;height:52px;object-fit:contain;border-radius:50%}
+
+#pet-window[data-hud-panel]{z-index:180}

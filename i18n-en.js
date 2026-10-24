@@ -3426,7 +3426,21 @@ Object.assign(globalThis.I18N_EN,{
  "ยังไม่ได้เลือกคู่ขวัญ": "No companion equipped",
  "พร้อมอีก": "Ready in",
  "ใช้สกิลสัตว์เลี้ยง": "Use Pet Skill",
- "สัตว์เลี้ยงเดิมและการให้อาหาร": "Legacy Pets and Feeding"
+ "สัตว์เลี้ยงเดิมและการให้อาหาร": "Legacy Pets and Feeding",
+ "ตารางปุ่มลัดสกิลและไอเท็ม": "Skill and Item Shortcut Grid",
+ "ช่องปุ่มลัด": "Shortcut Slots",
+ "ช่องสกิลว่าง": "Empty Skill Slot",
+ "เพิ่มแถวปุ่มลัด 8 ช่อง": "Add a row of 8 shortcuts",
+ "ซ่อนแถวบนสุด 8 ช่อง": "Hide the top row of 8 shortcuts",
+ "แถวหลัก ลบไม่ได้": "Permanent bottom row",
+ "แถวปุ่มลัด": "Shortcut Row",
+ "ช่องว่าง · ลากสกิลหรือไอเท็มมาวาง": "Empty slot · Drag a skill or item here",
+ "· คลิกขวาเพื่อล้างช่อง": "· Right-click to clear",
+ "แถว ·": "rows ·",
+ "ตั้งปุ่มลัดแล้ว": "Shortcut assigned",
+ "ลากไอเท็มไปวางในตารางปุ่มลัดด้านล่าง": "Drag an item to the shortcut grid below",
+ "จัดวงล้อมือถือ": "Arrange Mobile Wheel",
+ "ใช้กับวงล้อมือถือ · บนคอมให้ลากสกิลหรือไอเท็มลงตารางโดยตรง": "For the mobile wheel · On desktop, drag skills or items directly to the grid"
 });
 
 Object.assign(globalThis.I18N_EN,{

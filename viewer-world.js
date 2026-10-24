@@ -1,4 +1,5 @@
 import './role-i18n.js?v=116';
+import {createActionbar} from './actionbar-ui.js?v=2';
 import {drawCharacterFrame,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {peoplePlacement} from './npc-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=pets128';
@@ -11,7 +12,7 @@ import {createCityLife,clearCourtTrees} from './city-life.js?v=106.1-lablae';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=106.0';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=icons117';
-import {createAutoSettings} from './auto-settings.js?v=icons117';
+import {createAutoSettings} from './auto-settings.js?v=actionbar128';
 import {createMmoHud} from './mmo-hud.js?v=role116';
 import {createSoftLook} from './soft-look.js?v=82';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
@@ -26,12 +27,12 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=world125-pets128';
+import {createGame} from './game-controls.js?v=actionbar-mail128';
 import {atlasPath,className} from './classes.js?v=112.1';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=story124';
 import {createStoryUI} from './story-ui.js?v=pets125';
-import {createBagUI} from './bag-ui.js?v=109.5';
+import {createBagUI} from './bag-ui.js?v=actionbar128';
 import {createStatusUI} from './status-ui.js?v=story123';
 import {createProfileUI} from './profile-ui.js?v=107';
 import {createRefineUI} from './refine-ui.js?v=107';
@@ -211,6 +212,7 @@ try {
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
  worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});createHud63({game});
+ createActionbar({game,bagUI,account});
  document.querySelector('.player-heading small').textContent=(jobFor(account.character.classId,account.character.jobId)?.name??className(account.character.classId,account.character.gender))+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
  motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};

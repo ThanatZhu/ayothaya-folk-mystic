@@ -1,6 +1,6 @@
 // A single owner for the touch HUD. Reuse live buttons so cooldowns and saved
 // hotbar order stay with game-controls / auto-settings rather than a second UI.
-export function skillPage(slots,page=0,size=5){
+export function skillPage(slots,page=0,size=4){
  const pages=Math.max(1,Math.ceil(slots.length/size)),index=((page%pages)+pages)%pages;
  return {index,pages,slots:slots.slice(index*size,(index+1)*size)};
 }
@@ -8,6 +8,7 @@ export function createMobilePlayUI({clearInput=()=>{}}={}){
  const body=document.body,$=id=>document.getElementById(id),query=matchMedia('(any-pointer:coarse),(max-width:900px),(max-height:600px)');
  const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=square119';document.head.append(css);
  const skills=$('skills'),bank=$('skill-bank'),nav=$('game-menu'),toggle=$('menu-toggle'),quest=$('quest-tracker');
+ const emptySlots=Array.from({length:4},()=>{const b=document.createElement('button');b.type='button';b.className='mobile-skill-empty';b.disabled=true;b.hidden=true;b.setAttribute('aria-label','ช่องสกิลว่าง');skills?.append(b);return b;});
  const oldBank=bank?.onclick;let page=0,refreshing=false,skillSignature='';
  const online=$('online-button'),onlineHome=document.createComment('online chip home');if(online)online.before(onlineHome);
  const profile=document.querySelector('.player-panel'),channel=$('channel-button'),channelRow=$('hud-channel-row'),dock=$('online-dock'),dockToggle=$('dock-toggle'),attackControls=document.querySelector('.attack-controls');
@@ -35,7 +36,9 @@ export function createMobilePlayUI({clearInput=()=>{}}={}){
   if(bank){if(query.matches&&skills&&bank.parentElement!==skills)skills.append(bank);else if(!query.matches&&attackControls&&bank.parentElement!==attackControls)attackControls.prepend(bank);}
   const buttons=[...skills?.querySelectorAll('.skill')??[]],available=buttons.map((b,i)=>!b.hidden?i:null).filter(i=>i!==null),selection=skillPage(available,page);page=selection.index;
   skillSignature=buttons.map(b=>b.hidden?'0':'1').join('');
-  buttons.forEach((b,i)=>{const off=query.matches&&!selection.slots.includes(i);if(b.hasAttribute('data-mobile-away')!==off)b.toggleAttribute('data-mobile-away',off);});
+  const arc=[[0,124],[18,58],[82,10],[158,22]];
+  buttons.forEach((b,i)=>{const off=query.matches&&!selection.slots.includes(i);if(b.hasAttribute('data-mobile-away')!==off)b.toggleAttribute('data-mobile-away',off);const pos=selection.slots.indexOf(i);if(pos>=0){b.style.setProperty('--arc-x',arc[pos][0]+'px');b.style.setProperty('--arc-y',arc[pos][1]+'px');}});
+  emptySlots.forEach((b,i)=>{b.hidden=!query.matches||i<selection.slots.length;b.style.setProperty('--arc-x',arc[i][0]+'px');b.style.setProperty('--arc-y',arc[i][1]+'px');});
   skills?.setAttribute('aria-label',query.matches?`สกิลชุด ${page+1} จาก ${selection.pages}`:'สกิลทั้งหมด');
   if(bank){if(query.matches){if(!bank.querySelector('svg'))bank.innerHTML=arrows;}else bank.textContent='สกิล 1–5 ⇄';bank.setAttribute('aria-label',query.matches?`สลับชุดสกิล ชุด ${page+1} จาก ${selection.pages}`:'แสดงสกิล 6 ถึง 0');}
   overlay();refreshing=false;

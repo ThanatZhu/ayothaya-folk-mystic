@@ -331,14 +331,19 @@ export class CombatWorld{
 // Online client prediction: move our own character every frame with the server's movement rule (moveBody + class speed)
 // so walking is immediate and smooth. Server snapshots (10 Hz) only correct drift: snap on big jumps (dash, respawn),
 // ease onto the server position whenever we are not steering (stopping, auto-pathing).
-export function predictMove(world,server,dt,dir){
+export function predictMove(world,server,dt,dir,{pendingStop=false,inputAge=0}={}){
  const p=world.player;if(p.hp<=0||!server)return;
  const ox=p.x,oz=p.z,knocked=world.knockStep(dt),manual=!knocked&&!held(world.status)&&Math.hypot(dir.x,dir.z)>.08,speed=world.walkSpeed(dir.run===true);
  if(Math.hypot(dir.x,dir.z)>.08||dir.attack)world.clearEmote();
  if(manual){const n=Math.max(1,Math.hypot(dir.x,dir.z));moveBody(p,dir.x/n*speed*dt,dir.z/n*speed*dt,world.nav);p.face={x:dir.x,z:dir.z};}
 
  const ex=server.x-p.x,ez=server.z-p.z,error=Math.hypot(ex,ez);
- if(error>2.5){p.x=server.x;p.z=server.z;}
- else if(!manual&&error>.002){const f=1-Math.exp(-dt*10);p.x+=ex*f;p.z+=ez*f;if(server.moving)p.face=server.face;}
- p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;p.running=p.moving&&(manual?dir.run===true:server.running===true);
+ // In-flight input can legitimately put us ahead of an older snapshot.
+ const snapDistance=manual?Math.max(2.5,speed*(Math.min(.75,Math.max(0,inputAge))+.1)):2.5;
+ if(error>snapDistance&&(!pendingStop||!server.moving||knocked)){p.x=server.x;p.z=server.z;}
+ else if(!manual&&(!pendingStop||knocked)&&error>.002){const f=1-Math.exp(-dt*10);p.x+=ex*f;p.z+=ez*f;if(server.moving)p.face=server.face;}
+ // Old walking snapshots must not pull a released player backwards. Once the
+ // stop is acknowledged, settling an idle position must not restart the walk art.
+ p.moving=Math.hypot(p.x-ox,p.z-oz)>.001&&(manual||!pendingStop&&server.moving);
+ p.running=p.moving&&(manual?dir.run===true:server.running===true);
 }

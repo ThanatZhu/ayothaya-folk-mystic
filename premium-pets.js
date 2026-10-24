@@ -1,5 +1,5 @@
 // Preview catalog. Balance, currency and rates remain draft; this module does not create a paid wallet.
-export const PET_CURRENCY={id:'khwan-gem',name:'แก้วขวัญ',nameEn:'Khwan Gems'};
+export const PET_CURRENCY={id:'gold-bar',name:'ทองแท่ง',nameEn:'Gold Bars'};
 export const PREMIUM_PETS=[
  {id:'garuda-dawn',name:'ครุฑอรุณ',nameEn:'Dawn Garuda',tier:'S',movement:'fly',bonus:{str:5,dex:3},skill:{id:'flame-wings',name:'ปีกเพลิงคุ้มขวัญ',nameEn:'Guardian Flame Wings',kind:'fireBurst',tip:'โจมตีศัตรูเป็นกลุ่มด้วยเปลวเพลิง',tipEn:'Strike a group of enemies with sacred fire.',cooldown:18,power:2.5,color:'#f27d42'}},
  {id:'lotus-naga',name:'นาคบัวมณี',nameEn:'Lotus Jewel Naga',tier:'S',movement:'fly',bonus:{int:5,vit:3},skill:{id:'lotus-cleanse',name:'ธาราบัวพิสุทธิ์',nameEn:'Purifying Lotus Stream',kind:'lotusCleanse',tip:'ฟื้นฟูพลังชีวิตและล้างพิษให้เจ้าของ',tipEn:'Restore your owner’s health and cleanse poison.',cooldown:24,power:.18,color:'#54d8c2'}},

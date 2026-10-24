@@ -37,3 +37,5 @@ html body.field-hud.hud63 #account-panel:not([data-blocking=true]) .account-card
  width:min(640px,100%)!important;max-height:var(--window-height)!important;
  min-height:0;box-sizing:border-box;margin:0;overflow:auto;overscroll-behavior:contain;
 }
+
+html body.field-hud.hud63 #mail-window[data-hud-panel][open]{height:min(660px,var(--window-height))!important;overflow:hidden}

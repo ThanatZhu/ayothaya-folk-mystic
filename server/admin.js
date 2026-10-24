@@ -10,7 +10,7 @@ import {isSlot} from '../realm-state.js';
 
 const MAX_COINS=10_000_000,MAX_COUNT=999,MAX_LINES=20;
 // icons and reserved entries in ITEMS are not things a player can hold
-export const giftable=id=>!!ITEMS[id]&&!['ui','reserved'].includes(ITEMS[id].kind);
+export const giftable=id=>!!ITEMS[id]&&!ITEMS[id].retired&&!['ui','reserved'].includes(ITEMS[id].kind);
 
 // commas, semicolons or spaces between addresses; stray quotes from the dashboard are ignored
 // the key is matched loosely (ADMIN_EMAILS, admin_email, "ADMIN EMAILS "...) since it is typed by hand in the Render dashboard

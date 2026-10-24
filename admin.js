@@ -1,3 +1,4 @@
+import {legacyPetItem} from './mailbox.js';
 import {petGrantHTML,bindPetGrant} from './admin-pet-panel.js?v=127';
 import {paintAdminSkills,paintAdminMonsters} from './admin-art.js?v=127';
 import {liveRoleSkills} from './role-skill-progress.js';
@@ -40,7 +41,7 @@ try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});
 let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',mapId:'',minutes:30};
 let bossMsg='',bossMaps=null,bx={serverId:'server-1',channel:1,mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
-let petGrantPending=null,petGrantSending=false,giftPane='pets';const petGrantDrafts=new Map();
+let itemGrantPending=null,itemGrantSending=false,petGrantPending=null,petGrantSending=false,giftPane='pets';const petGrantDrafts=new Map();
 let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',gearClass='all',itemQuery='',pickCount=1;
 const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
 const itemName=id=>ITEMS[id]?.name??id;
@@ -67,7 +68,9 @@ function set(r,f,v){
 }
 // 0.101.2 side menu: what each page is for, in one line
 const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP']};
+const announcementDraft={title:'',body:'',serverId:'all',pending:null,busy:false,message:''};
 function tabs(){
+ PAGES.mail=['✉','จดหมายและประกาศ','ส่งประกาศเข้าจดหมายผู้เล่น · ของแจกส่งได้ที่หน้าผู้เล่น'];
  PAGES.mapbosses=['🏔️','บอสประจำแมพ','9 แมพ · HP ไล่ตามพื้นที่ · เกิดใหม่ 60 นาทีหลังตาย แยกตามเซิร์ฟ/CH'];
  $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();$('page-title').scrollIntoView({block:'start'});});
@@ -94,7 +97,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses','mail'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
  $('page-title').textContent=name;$('page-help').textContent=(tab==='skills'&&skillSet==='live'?'ชุดสกิลที่ใช้ในเกมปัจจุบัน · ดูรูป บทบาท และสาย Master':help)+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -115,7 +118,7 @@ function render(withFilters=true){
  if(withFilters)filters();pageHead();
  if(tab==='skills'&&skillSet==='live'){currentSkills();return;}
  if(tab==='table'){$('view').innerHTML=skillTable();paintAdminSkills($('view'),tableView==='compare'?classId:tableView);return;}
- if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
+ if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
  const rows=rowsFor(),cols=columns(rows),cards=['skills','monsters'].includes(tab)&&viewMode==='cards';
  const undo=(r,i)=>`<button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button>`;
  const note=tab==='skills'?'<p class="admin-legacy-note">ชุดสกิลเดิมก่อนปรับระบบอาชีพ · ไม่ใช่ชุดสกิลปัจจุบันที่แสดงในเกม</p>':'';
@@ -282,7 +285,7 @@ async function adminFetch(path,body){
  const r=await fetch(API+path,{method:body?'POST':'GET',headers,body:body&&JSON.stringify(body)}),j=await r.json().catch(()=>({}));
  if(!r.ok)throw new Error(j.error??String(r.status));return j;
 }
-const ADMIN_ERRORS={'player-online':'ผู้เล่นคนนี้เพิ่งเข้าเกม · กดรีเฟรชแล้วส่งใหม่','bag-full':'กระเป๋าผู้เล่นเต็ม · ส่งของน้อยลงหรือส่งเป็นเบี้ยแทน','character-not-found':'ไม่พบตัวละครนี้ในเซฟ','not-admin':'อีเมลนี้ไม่อยู่ในรายชื่อ ADMIN_EMAILS บน Render','admin-unset':'เซิร์ฟเวอร์ยังไม่เห็นค่า ADMIN_EMAILS · ตั้งที่ Render แล้วกด Save, rebuild and deploy','bad-token':'ตรวจการล็อกอิน Google ไม่ผ่าน · ออกแล้วล็อกอินใหม่','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน','github-unset':'เซิร์ฟเวอร์ยังไม่มี GITHUB_TOKEN (ตั้งที่ Render)','github-failed':'ส่งขึ้น GitHub ไม่สำเร็จ · ตรวจสิทธิ์ของ GITHUB_TOKEN','github-conflict':'ไฟล์บน GitHub เพิ่งเปลี่ยน · กดบันทึกอีกครั้ง','invalid':'ข้อมูลไม่ถูกต้อง'};
+const ADMIN_ERRORS={'mailbox-full':'กล่องจดหมายเต็ม','player-online':'ผู้เล่นคนนี้เพิ่งเข้าเกม · กดรีเฟรชแล้วส่งใหม่','bag-full':'กระเป๋าผู้เล่นเต็ม · ส่งของน้อยลงหรือส่งเป็นเบี้ยแทน','character-not-found':'ไม่พบตัวละครนี้ในเซฟ','not-admin':'อีเมลนี้ไม่อยู่ในรายชื่อ ADMIN_EMAILS บน Render','admin-unset':'เซิร์ฟเวอร์ยังไม่เห็นค่า ADMIN_EMAILS · ตั้งที่ Render แล้วกด Save, rebuild and deploy','bad-token':'ตรวจการล็อกอิน Google ไม่ผ่าน · ออกแล้วล็อกอินใหม่','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน','github-unset':'เซิร์ฟเวอร์ยังไม่มี GITHUB_TOKEN (ตั้งที่ Render)','github-failed':'ส่งขึ้น GitHub ไม่สำเร็จ · ตรวจสิทธิ์ของ GITHUB_TOKEN','github-conflict':'ไฟล์บน GitHub เพิ่งเปลี่ยน · กดบันทึกอีกครั้ง','invalid':'ข้อมูลไม่ถูกต้อง'};
 // Firebase connects as soon as the tab opens, so the click below can open the Google popup straight away
 // (a popup opened after an await is no longer a click, and the browser blocks it).
 function warmFirebase(){if(LOCAL||fbWarm)return;fbWarm=import('./firebase-client.js').then(m=>m.deadline(m.connectFirebase())).then(c=>{fbConn=c;if(tab==='players')playersTab();}).catch(()=>{fbWarm=null;adminMsg='เชื่อมต่อ Google ไม่ได้ · ลองรีโหลดหน้า';if(tab==='players')playersTab();});}
@@ -301,7 +304,7 @@ async function loadPlayers(quiet=false,fresh=false){
  catch(e){adminMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}
  if(tab==='players')playersTab();
 }
-function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(petGrantSending||document.activeElement?.closest?.('#give,.admin-pet-grant'))return;loadPlayers(true);},15000);}
+function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(itemGrantSending||petGrantSending||document.activeElement?.closest?.('#give,.admin-pet-grant'))return;loadPlayers(true);},15000);}
 // 0.109.7 weather tab: set rain / mist / storm (or clear) on a realm for some minutes, or hand it back to the clock.
 async function loadWeather(){try{weatherState=(await adminFetch('/admin/weather')).servers;weatherMsg='';}catch(e){weatherMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}if(tab==='weather')weatherTab();}
 async function setWeather(weather){
@@ -398,7 +401,7 @@ function playersTab(){
  const pic=(id,n)=>`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>${n?`<em>${n}</em>`:''}`;
  const KINDS=[['all','ทั้งหมด'],['potion','ยา/อาหาร'],['gear','อุปกรณ์'],['card','การ์ด'],['loot','วัตถุดิบ'],['other','อื่น ๆ']];
  const kindOf=id=>['potion','gear','card','loot'].includes(ITEMS[id].kind)?ITEMS[id].kind:'other';
- const picks=Object.keys(ITEMS).filter(id=>!['ui','reserved'].includes(ITEMS[id].kind)&&(itemKind==='all'||kindOf(id)===itemKind)&&(itemKind!=='gear'||gearClass==='all'||(ITEMS[id].classes?.includes(gearClass)??gearClass==='any'))&&(!itemQuery||itemName(id).includes(itemQuery))).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
+ const picks=Object.keys(ITEMS).filter(id=>!legacyPetItem(id)&&!['ui','reserved'].includes(ITEMS[id].kind)&&(itemKind==='all'||kindOf(id)===itemKind)&&(itemKind!=='gear'||gearClass==='all'||(ITEMS[id].classes?.includes(gearClass)??gearClass==='any'))&&(!itemQuery||itemName(id).includes(itemQuery))).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
  // 0.103 offline characters (from the saves) are listed too: filter chips with counts, online first, 50 rows at a time
  const isOn=x=>!x.offline,all=players??[],counts={all:all.length,online:all.filter(isOn).length,offline:all.filter(x=>x.offline).length};
  const list=all.filter(x=>(presence==='all'||(presence==='online')===isOn(x))&&(!search||x.name.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>isOn(b)-isOn(a)),p=players?.find(x=>x.id===picked);
@@ -416,8 +419,8 @@ function playersTab(){
   const bag=Object.entries(p.items).filter(([id,n])=>n>0&&ITEMS[id]).map(([id,n])=>`<span class="cell" title="${esc(itemName(id))} ×${n}">${pic(id,n)}</span>`).join('')||'<span class="hint">ว่าง</span>';
   const quick=QUICK.map(([id,n],i)=>`<button type="button" class="qbtn" data-quick="${i}">${id==='coins'?`<i class="ico" style="${iconStyle('cowrie')}"></i>`:`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>`}<span>+${id==='coins'?n.toLocaleString('th-TH')+' เบี้ย':esc(itemName(id))+' ×'+n}</span></button>`).join('');
   const lines=basket.map((l,i)=>`<li>${pic(l.id)}<span>${esc(itemName(l.id))}</span><b>×${l.count}</b><button type="button" data-drop="${i}" aria-label="เอาออก">×</button></li>`).join('')+(giftCoins?`<li><i class="ico" style="${iconStyle('cowrie')}"></i><span>เบี้ย</span><b>${giftCoins.toLocaleString('th-TH')}</b><button type="button" data-drop="coins" aria-label="เอาออก">×</button></li>`:'');
-  gift=`<nav class="admin-gift-tabs" aria-label="ประเภทของที่จะมอบ"><button type="button" data-gift-pane="pets" aria-pressed="${giftPane==='pets'}">สัตว์เลี้ยงและแก้วขวัญ</button><button type="button" data-gift-pane="items" aria-pressed="${giftPane==='items'}">กระเป๋าและไอเท็ม</button></nav><form id="give" ${giftPane==='pets'?'hidden':''}><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small> ${state(p)}</div></div>`+
-   (p.offline?'<p class="hint offline-note">ผู้เล่นออฟไลน์อยู่ · ของที่ส่งจะเข้ากระเป๋าในเซฟทันที และเห็นตอนเข้าเกมครั้งถัดไป</p>':'')+
+  gift=`<nav class="admin-gift-tabs" aria-label="ประเภทของที่จะมอบ"><button type="button" data-gift-pane="pets" aria-pressed="${giftPane==='pets'}">สัตว์เลี้ยงและทองแท่ง</button><button type="button" data-gift-pane="items" aria-pressed="${giftPane==='items'}">กระเป๋าและไอเท็ม</button></nav><form id="give" ${giftPane==='pets'?'hidden':''}><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small> ${state(p)}</div></div>`+
+   (p.offline?'<p class="hint offline-note">ผู้เล่นออฟไลน์อยู่ · ของที่ส่งจะเข้าจดหมาย ให้ผู้เล่นกดรับเมื่อเข้าเกม</p>':'')+
    `<h4>กระเป๋า</h4><div class="grid bag">${bag}</div>`+
    `<h4>ส่งด่วน</h4><div class="quick">${quick}</div>`+
    `<h4>เลือกไอเท็ม <small>แตะรูปเพื่อใส่ในรายการ · จำนวนต่อครั้ง</small> <input id="give-count" type="number" min="1" max="999" value="${pickCount}" aria-label="จำนวนต่อครั้ง"></h4>`+
@@ -444,7 +447,7 @@ function playersTab(){
  if(p)bindPetGrant($('view'),{player:p,draft:petGrantDrafts.get(p.id),busy:petGrantSending,onSend:async()=>{
   if(petGrantSending)return;const draft=petGrantDrafts.get(p.id),payload={peer:p.id,gems:draft.gems,pet:draft.pet||null},signature=JSON.stringify(payload);
   if(!petGrantPending||petGrantPending.signature!==signature)petGrantPending={signature,id:crypto.randomUUID()};petGrantSending=true;playersTab();
-  try{const r=await adminFetch('/admin/pets',{...payload,requestId:petGrantPending.id});p.petCollection=r.petCollection;petGrantPending=null;draft.gems=0;draft.pet=null;adminMsg='มอบสัตว์เลี้ยงและแก้วขวัญเรียบร้อยแล้ว';}
+  try{const r=await adminFetch('/admin/mail',{peer:payload.peer,attachments:{goldBars:payload.gems,pets:payload.pet?[payload.pet]:[]},requestId:petGrantPending.id});petGrantPending=null;draft.gems=0;draft.pet=null;adminMsg='ส่งสัตว์เลี้ยงและทองแท่งเข้าจดหมายเรียบร้อยแล้ว';}
   catch(e){adminMsg='ยังไม่สำเร็จ · '+e.message;}finally{petGrantSending=false;playersTab();}
  }});
  const form=$('give');if(!form)return;
@@ -457,9 +460,9 @@ function playersTab(){
  form.querySelectorAll('[data-drop]').forEach(b=>b.onclick=()=>{keep();if(b.dataset.drop==='coins')giftCoins=0;else basket.splice(+b.dataset.drop,1);playersTab();});
  refocus('item-search',v=>{keep();itemQuery=v.trim();});
  on('give-coins','onchange',()=>{keep();playersTab();});on('give-count','onchange',keep);
- form.onsubmit=async e=>{e.preventDefault();keep();const send=form.querySelector('.send');send.disabled=true;send.textContent='กำลังส่ง…';
-  try{const r=await adminFetch('/admin/give',{peer:p.id,coins:giftCoins,items:basket});adminMsg='✔ ส่งให้ '+r.name+' แล้ว'+(p.offline?' (เข้าเซฟแล้ว เห็นตอนเข้าเกม)':'');Object.assign(p,{coins:r.coins,items:r.items});basket=[];giftCoins=0;}
-  catch(e){adminMsg=ADMIN_ERRORS[e.message]??'ส่งไม่สำเร็จ · '+e.message;}
+ form.onsubmit=async e=>{e.preventDefault();if(itemGrantSending)return;keep();itemGrantSending=true;const send=form.querySelector('.send');send.disabled=true;send.textContent='กำลังส่ง…';
+  try{const payload={peer:p.id,coins:giftCoins,items:basket},signature=JSON.stringify(payload);if(!itemGrantPending||itemGrantPending.signature!==signature)itemGrantPending={signature,id:crypto.randomUUID()};const r=await adminFetch('/admin/mail',{peer:payload.peer,attachments:{coins:payload.coins,items:payload.items},requestId:itemGrantPending.id});adminMsg='✔ ส่งเข้าจดหมายของ '+r.name+' แล้ว';basket=[];giftCoins=0;itemGrantPending=null;}
+  catch(e){adminMsg=ADMIN_ERRORS[e.message]??'ส่งไม่สำเร็จ · '+e.message;}finally{itemGrantSending=false;}
   playersTab();};
 }
 
@@ -493,4 +496,13 @@ function formulaTab(){
   <h3>เทียบกับมอนทุกตัว (ตีธรรมดา)</h3><div class="scroll"><table><thead><tr><th class="l">มอน</th><th>DEF / MDEF</th><th>FLEE / HIT</th><th>ตีโดน</th><th>ดาเมจต่อครั้ง</th><th>ตีกี่ครั้งตาย</th><th>โดนตีครั้งละ</th><th>หลบได้</th></tr></thead><tbody>${rows}</tbody></table></div>
  </div>`;
  $('view').querySelectorAll('[data-fx]').forEach(el=>el.onchange=()=>{const k=el.dataset.fx;fx[k]=k==='classId'?el.value:Math.max(+el.min||0,Math.min(+el.max||999,Math.floor(Number(el.value)||0)));keep();formulaTab();});
+}
+
+function announcementTab(){
+ warmFirebase();const d=announcementDraft;
+ $('view').innerHTML=`<section class="admin-announcement"><small>PLAYER MAIL</small><h2>ประกาศจากทีมงาน</h2><p>ส่งเข้าจดหมายของผู้เล่นทั้งออนไลน์และออฟไลน์ · ฉบับนี้ไม่มีของแนบ</p><form id="announcement-form"><label>ผู้รับ<select id="announcement-scope"><option value="all">ทุกเซิร์ฟเวอร์</option><option value="server-1">เซิร์ฟเวอร์ 1</option><option value="server-2">เซิร์ฟเวอร์ 2</option></select></label><label>หัวเรื่อง<input id="announcement-title" maxlength="100" required value="${esc(d.title)}"></label><label>ข้อความ<textarea id="announcement-body" maxlength="4000" rows="9" required>${esc(d.body)}</textarea></label><aside><small>ตัวอย่างจดหมาย · ทีมงานอโยธยา</small><h3 id="announcement-preview-title"></h3><p id="announcement-preview-body"></p></aside><button type="submit" class="primary" ${d.busy?'disabled':''}>${d.busy?'กำลังส่ง…':'ส่งประกาศเข้าจดหมาย'}</button><p role="status">${esc(d.message)}</p></form></section>`;
+ $('announcement-scope').value=d.serverId;
+ const keep=()=>{d.title=$('announcement-title').value;d.body=$('announcement-body').value;d.serverId=$('announcement-scope').value;$('announcement-preview-title').textContent=d.title;$('announcement-preview-body').textContent=d.body;};keep();
+ for(const id of ['announcement-scope','announcement-title','announcement-body'])$(id).oninput=keep;
+ $('announcement-form').onsubmit=async e=>{e.preventDefault();if(d.busy)return;keep();const payload={peer:'all',title:d.title,body:d.body,serverId:d.serverId},signature=JSON.stringify(payload);if(!d.pending||d.pending.signature!==signature)d.pending={signature,id:crypto.randomUUID()};d.busy=true;d.message='';announcementTab();try{await adminFetch('/admin/mail',{...payload,requestId:d.pending.id});d.message='ส่งประกาศเข้าจดหมายเรียบร้อยแล้ว';d.title='';d.body='';d.pending=null;}catch(e){d.message=ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}finally{d.busy=false;announcementTab();}};
 }

@@ -11,7 +11,7 @@ const base='http://127.0.0.1:8923',store=await new LocalStore(fileURLToPath(new 
 const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8'));
 const host=await createHost({mode:'local',store,catalog,origins:[base],serveStatic:true});await new Promise(r=>host.server.listen(8923,'127.0.0.1',r));
 const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true}),errors=[],checks=[];
-const menus=[['menu-bag','#bag-window'],['menu-skills','#skill-window'],['menu-quests','#quests-window'],['menu-market','#market-board'],['menu-rank','#leaderboard'],['menu-social','#social-window'],['menu-status','#status-window'],['menu-pet','#pet-window'],['menu-settings','#account-panel .account-card'],['open-account','#profile-card'],['events-chip','#events-window']];
+const menus=[['menu-bag','#bag-window'],['menu-skills','#skill-window'],['menu-quests','#quests-window'],['menu-market','#market-board'],['menu-rank','#leaderboard'],['menu-social','#social-window'],['menu-status','#status-window'],['menu-pet','#pet-window'],['menu-mail','#mail-window'],['menu-settings','#account-panel .account-card'],['open-account','#profile-card'],['events-chip','#events-window']];
 try{
  for(const mobile of [false,true]){
   const seed=await store.createLocal({name:'WindowQA',gender:'male'}),record=store.rows.get(seed.uid);

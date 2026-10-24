@@ -72,8 +72,8 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   const action=resolved.mode,clip=life?.[currentGender]?.clips[action];
   if(resolved.transition){transitionFlip??=flip;flip=transitionFlip;}else transitionFlip=null;
   const clipDuration=clip?.frameDurations?.reduce((a,b)=>a+b,0)??(clip?.frames.length??0)/(clip?.fps??1);
-  const clipTime=['run','walk'].includes(action)&&Number.isFinite(pose.phase)?(((pose.phase%1)+1)%1)*clipDuration:resolved.time;
-  const lifeIndex=lifeFrameAt(clip,clipTime,pose.reduced);
+  const clipTime=action==='attack'&&Number.isFinite(pose.actionPhase)?Math.min(.999999,Math.max(0,pose.actionPhase))*clipDuration:['run','walk'].includes(action)&&Number.isFinite(pose.phase)?(((pose.phase%1)+1)%1)*clipDuration:resolved.time;
+  const lifeIndex=pose.profileFrame?-1:lifeFrameAt(clip,clipTime,pose.reduced);
   let frame=Math.max(0,Math.min(FRAME_COUNT-1,Math.round(pose.artFrame??0)));
   // Front/back walk only where that art exists; otherwise the side cycle (with its left/right flip).
   // A class without front/back art: walking falls back to the side cycle, standing to the original idle frame.

@@ -17,8 +17,8 @@ export class MultiplayerClient extends EventTarget{
     else if(m.type==='equipment-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
     else if(m.type==='trained'){this.training=m.training;if(m.advanced)this.stopped=true;this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
     else if(m.type==='training-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
-    else if(m.type==='petChanged'){this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
-    else if(m.type==='petError'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
+    else if(['petChanged','mailChanged'].includes(m.type)){this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
+    else if(['petError','mailError'].includes(m.type)){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
     else if(m.type==='saved'){this.pending.get(m.id)?.resolve();this.pending.delete(m.id);this.emit('saved',m);}
     else if(m.type==='traveled'){this.stopped=true;this.pending.get(m.id)?.resolve();this.pending.delete(m.id);}
     else if(m.type==='travel-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}

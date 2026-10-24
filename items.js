@@ -37,12 +37,12 @@ export const ITEMS={
  'spirit-lamp':{atlas:'items48',icon:2,name:'ตะเกียงวิญญาณ',kind:'gear',slot:'accessory',matk:8,bonus:{int:3,dex:2},level:18,sell:1500,text:'MATK +8 · INT +3 · DEX +2 · Lv.18 · ของดันเจี้ยน'},
  'king-ember':{atlas:'items48',icon:3,name:'ถ่านเพลิงราชาหุ่นฟาง',kind:'loot',sell:1500,text:'รางวัลผู้ได้ MVP · ขายได้ราคาดี'},
  // 0.50 pets and the festival
- 'pet-lure':{atlas:'items48',icon:4,name:'ข้าวเหนียวล่อสัตว์',kind:'lure',buy:300,tokens:6,sell:75,text:'เลือก หนู/หุ่นฟาง/ตั๊กแตน/ลูกลิง แล้วใช้ · ยิ่งมอนเลือดน้อยยิ่งจับง่าย'},
- 'pet-food':{atlas:'social',icon:19,name:'ข้าวคลุกปลา',kind:'petfood',buy:20,sell:5,text:'อาหารสัตว์เลี้ยง · ให้ตอนหิวจะสนิทขึ้น'},
- 'egg-rat':{atlas:'items48',icon:5,name:'ไข่หนูยุ้งข้าว',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ LUK +2'},
- 'egg-straw':{atlas:'items48',icon:6,name:'ไข่หุ่นฟางหลง',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ STR +1 DEX +1'},
- 'egg-hopper':{atlas:'items48',icon:7,name:'ไข่ตั๊กแตนเกราะ',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ VIT +2'},
- 'egg-monkey':{atlas:'items48',icon:8,name:'ไข่ลูกลิงฉกของ',kind:'egg',sell:50,text:'ฟักเป็นสัตว์เลี้ยง · สนิทมากได้ AGI +2'},
+ 'pet-lure':{atlas:'items48',icon:4,name:'ข้าวเหนียวล่อสัตว์',kind:'loot',sell:75,retired:true,text:'ของจากระบบสัตว์เลี้ยงเดิมที่ยุติแล้ว · ขายคืนร้านค้าได้'},
+ 'pet-food':{atlas:'social',icon:19,name:'ข้าวคลุกปลา',kind:'loot',sell:5,retired:true,text:'ของจากระบบสัตว์เลี้ยงเดิมที่ยุติแล้ว · ขายคืนร้านค้าได้'},
+ 'egg-rat':{atlas:'items48',icon:5,name:'ไข่หนูยุ้งข้าว',kind:'loot',sell:50,retired:true,text:'ของจากระบบสัตว์เลี้ยงเดิมที่ยุติแล้ว · ขายคืนร้านค้าได้'},
+ 'egg-straw':{atlas:'items48',icon:6,name:'ไข่หุ่นฟางหลง',kind:'loot',sell:50,retired:true,text:'ของจากระบบสัตว์เลี้ยงเดิมที่ยุติแล้ว · ขายคืนร้านค้าได้'},
+ 'egg-hopper':{atlas:'items48',icon:7,name:'ไข่ตั๊กแตนเกราะ',kind:'loot',sell:50,retired:true,text:'ของจากระบบสัตว์เลี้ยงเดิมที่ยุติแล้ว · ขายคืนร้านค้าได้'},
+ 'egg-monkey':{atlas:'items48',icon:8,name:'ไข่ลูกลิงฉกของ',kind:'loot',sell:50,retired:true,text:'ของจากระบบสัตว์เลี้ยงเดิมที่ยุติแล้ว · ขายคืนร้านค้าได้'},
  'event-token':{atlas:'social',icon:23,name:'เหรียญงานวัด',kind:'loot',text:'ได้จากมอนช่วงเทศกาล · แลกของที่เจ้าจุก'},
  'krathong':{atlas:'social',icon:22,name:'กระทงใบตอง',kind:'potion',tokens:4,hp:300,mp:150,sell:10,text:'อธิษฐานแล้วฟื้น HP 300 · MP 150'},
  'green-herb':{atlas:'items48',icon:0,tokens:2,name:'ยาเขียว',kind:'potion',buy:40,sell:10,cure:true,text:'แก้ทุกอาการ: พิษ ใบ้ ตาพร่า คำสาป'},
@@ -286,9 +286,9 @@ for(const b of GEAR_BRACKETS)for(const boss of b.bosses)DROPS[boss].items.push(.
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
 export const SHOPS={
- 'แม่บัว':{mapId:'ayutthaya',title:'แผงยาแม่บัว',expand:true,stock:['hp-small','hp-large','mp-small','mp-large','green-herb','sticky-rice','return-incense','fly-wing','pet-food','pet-lure']},
+ 'แม่บัว':{mapId:'ayutthaya',title:'แผงยาแม่บัว',expand:true,stock:['hp-small','hp-large','mp-small','mp-large','green-herb','sticky-rice','return-incense','fly-wing']},
  // 0.50 festival exchange: paid in event tokens instead of cowries.
- 'เจ้าจุก':{mapId:'ayutthaya',title:'ซุ้มงานวัดเจ้าจุก',currency:'event-token',stock:['krathong','green-herb','hp-large','pet-lure','lek-lai']},
+ 'เจ้าจุก':{mapId:'ayutthaya',title:'ซุ้มงานวัดเจ้าจุก',currency:'event-token',stock:['krathong','green-herb','hp-large','lek-lai']},
  'ป้าละไม':{mapId:'rice-fields',title:'ยุ้งป้าละไม',stock:['hp-small','mp-small','sticky-rice']},
  'ครูแสนดาบ':{mapId:'ayutthaya',title:'โรงตีอาวุธครูแสนดาบ',refine:true,stock:['iron-ore','laterite','wrap-novice','sword-iron','spear-bamboo','bow-bamboo','gloves-hemp','daggers-twin','staff-wan','beads-wood','knuckle-brass','sword-silver','spear-steel','bow-horn','gloves-leather','daggers-ivory','staff-candle','beads-sandal','hat-headband','hat-ngob','cloak-cotton','cloak-yant','shoes-woven','shoes-buffalo','shoes-ranger','vest-cotton','vest-buffalo','takrut-silver','ring-ruby','anklet-silver','cloth-yant','sword-ajna','spear-panchang','bow-sinchai','gloves-leklai','daggers-stingray','staff-octa','beads-mani','vest-chain']},
  // 0.107 Lv.45–99 common class gear, second safe town (the shop list shows only the player's class)

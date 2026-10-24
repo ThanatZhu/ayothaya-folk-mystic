@@ -3547,6 +3547,19 @@ Object.assign(globalThis.I18N_EN,{
  "ผู้ทำดาเมจสูงสุด": "Top damage dealer",
  "ดาเมจ": "Damage",
  "สัดส่วน": "Share",
- "· ออกจากแผนที่แล้ว": "- Left the area"
-
+ "· ออกจากแผนที่แล้ว": "- Left the area",
+ "เพิ่มคน": "Add player",
+ "ผู้เล่นทั้งหมด": "All players",
+ "ผู้เล่นในแนล": "Players in this channel",
+ "ค้นหาชื่อผู้เล่น": "Search player name",
+ "+ เพิ่มคน": "+ Add player",
+ "เปิดหน้าจัดการปาร์ตี้": "Open party management",
+ "เลือกผู้เล่นเพื่อเชิญ": "Choose a player to invite",
+ "ปาร์ตี้เต็ม 5 คน": "Party is full (5 players)",
+ "หัวหน้าปาร์ตี้เท่านั้นที่เพิ่มสมาชิกได้": "Only the party leader can invite members",
+ "เชิญผู้เล่นที่ยังไม่มีปาร์ตี้ในแนลเดียวกัน": "Invite players without a party in the same channel",
+ "เลือกสมาชิกเพื่อจัดการปาร์ตี้": "Choose a member to manage your party",
+ "ยังไม่มีผู้เล่นที่เชิญได้ในแนลนี้": "No available players to invite in this channel",
+ "ไม่พบผู้เล่นที่ค้นหา": "No players match your search",
+ "เพิ่มสมาชิกปาร์ตี้": "Add party member"
 });

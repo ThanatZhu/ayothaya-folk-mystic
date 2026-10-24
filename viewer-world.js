@@ -1,3 +1,4 @@
+import {createAnnouncementUI} from './announcement-ui.js?v=149';
 import {createAutoTargetUI} from './auto-target-ui.js?v=139';
 import {createBossBrowserUI} from './boss-browser-ui.js?v=138';
 import './role-i18n.js?v=116';
@@ -39,7 +40,7 @@ import {createStatusUI} from './status-ui.js?v=talk137';
 import {createProfileUI} from './profile-ui.js?v=107';
 import {createRefineUI} from './refine-ui.js?v=talk137';
 import {createCraftUI} from './craft-ui.js?v=107';
-import {createWeather} from './weather-fx.js?v=109.7';
+import {createWeather} from './weather-fx.js?v=announce149';
 import {createMarketUI} from './market-ui.js?v=trade-center122';
 import {createSocialUI} from './social-ui.js?v=107';
 import {createLifeUI} from './life-ui.js?v=boss138';
@@ -178,6 +179,7 @@ try {
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
  const monsterArt=await loadMonsterFrames(map);
  await heroMesh.userData.ready;if(heroMesh.userData.artError)throw new Error('Character animation unavailable');directionalStatus();loading.stage(4);
+ createAnnouncementUI(document.getElementById('game-shell'));
  const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,monsterArt,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,roleSkills:true,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender,name:account.character.name},isPaused:()=>loading.active||!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  // Local test hook (dev server only) for automated walk/bridge/portal checks; absent on the deployed site.

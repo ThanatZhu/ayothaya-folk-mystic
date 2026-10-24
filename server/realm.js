@@ -1,5 +1,6 @@
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from '../role-skill-progress.js';
 import {stepRoleMonsters} from '../role-combat.js';
+import {MapBossClock} from './map-bosses.js';
 import {normalizeAuto,pickPotion} from '../auto-play.js';
 import {activeEmote,canonicalAction,EMOTE_ACTIONS} from '../character-action-state.js';
 import {markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from '../monster-catalog.js';
@@ -38,7 +39,7 @@ const copy=v=>structuredClone(v);
 // 0.99.11 bandwidth: each player gets only the monsters within MOB_VIEW m, and of those only the fields that changed since
 // that player last got them (the client merges monsters with Object.assign). Server-only timers stay home; positions are
 // rounded to 1 cm, other numbers to 0.1, and the respawn countdown to whole seconds.
-const PLAYER_STATIC=['equipment','partyId','pet','stall','guild','rebirth'],MOB_VIEW=50,MOB_SKIP=new Set(['home','attackCD','leapCD','step','strike','flee','justEnraged','pressure','slamCD']);
+const PLAYER_STATIC=['equipment','partyId','pet','stall','guild','rebirth'],MOB_VIEW=50,MOB_SKIP=new Set(['home','attackCD','leapCD','flee','justEnraged','pressure','slamCD']);
 const mobValue=(k,v)=>typeof v!=='number'?v:k==='x'||k==='z'?Math.round(v*100)/100:k==='dead'?Math.ceil(v):Math.round(v*10)/10;
 // 0.93 duels: a challenge lasts 20 s, a bout 90 s; players hit each other for 35% of their monster damage (then the
 // target's dodge, shield and DEF apply as for a monster blow). Walking 20 m apart ends the bout as a draw.
@@ -61,7 +62,7 @@ function autoPotionFor(realm,p){
 }
 export class RealmServer{
  autoPotion(p){autoPotionFor(this,p);}
- constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false,roleSkills=false}={}){this.roleSkills=roleSkills===true;this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];}
+ constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false,roleSkills=false}={}){this.roleSkills=roleSkills===true;this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];this.mapBosses=new MapBossClock({now});}
  channelCounts(mapId){return CHANNELS.map(c=>{let n=0;for(const p of this.peers.values())if((!p.suspended||(p.resumeUntil&&p.resumeUntil>this.now()))&&(p.channel??1)===c.id&&(!mapId||p.room?.map?.id===mapId))n++;return {channel:c.id,name:c.name,subtitle:c.subtitle,players:n};});}
  join({uid,serverId,slotId,channel,record,send}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
@@ -452,6 +453,7 @@ export class RealmServer{
  hurt(p,mob,damage,color='#fff0a6'){
   if(mob?.pvp)return String(mob.id).startsWith('war:')?this.warHit(p,mob,damage,color):this.duelHit(p,mob,damage,color);
   if(!mob||mob.hp<=0||p.room.map.safe)return;
+  if(MONSTER_TYPES[mob.type]?.worldBoss&&!mob.summoned&&this.mapBosses.remaining(p.room)>0){mob.hp=0;mob.dead=this.mapBosses.remaining(p.room);return;}
   const amount=Math.min(mob.hp,damage);mob.hp-=amount;markMonsterHit(mob,p.world.player);rallyPack(p.room.mobs,mob);
   let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
   if(mob.summoned){const all=(p.room.bossDamage??=new Map()),d=all.get(mob.id)??new Map();all.set(mob.id,d);d.set(p.id,(d.get(p.id)??0)+amount);} // each summoned boss keeps its own damage table
@@ -459,6 +461,7 @@ export class RealmServer{
   p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color,magic:!!p.world.derived?.magic});
   if(mob.hp>0)return;mob.dead=p.room.map.instance?1e9:mobRespawn(mob);mob.aggro=false;
   if(mob.summoned)this.summonDown(p.room,mob);else if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob);
+  if(MONSTER_TYPES[mob.type].worldBoss&&!mob.summoned){this.mapBosses.killed(p.room,mob,MONSTER_TYPES);const type=MONSTER_TYPES[mob.type];logMvp(this.logs,this.now(),type.name,p.room.channel??1,p.room.map.id,p.character.name);this.announce(p.serverId,'👑 '+type.name+' ถูกปราบที่ '+p.room.map.name+' · CH '+(p.room.channel??1)+' · เกิดใหม่อีก 60 นาที');}
   if(p.room.map.instance&&MONSTER_TYPES[mob.type].boss)this.dungeonClear(p.room);
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
@@ -490,9 +493,10 @@ export class RealmServer{
     let type=MONSTER_TYPES[m.type];if(m.roleStatus?.slow)type={...type,speed:type.speed*(type.boss?.8:.5)};
     const taunter=this.peers.get(m.roleStatus?.taunt?.owner);if(taunter?.room===room&&taunter.world.player.hp>0&&distance(taunter.world.player,m)<15)target=taunter;
     if(type.mvp&&m.hp<=0&&!m.summoned)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
+    if(type.worldBoss&&!m.summoned){const left=this.mapBosses.remaining(room);if(left>0){m.hp=0;m.dead=left;room.contributors.delete(m.id);continue;}if(m.hp<=0)m.dead=0;}
     const decoyOwner=this.peers.get(m.roleStatus?.decoy?.owner);if(decoyOwner?.room===room)target={world:{player:{...decoyOwner.world.player,x:decoyOwner.world.player.x+1.2,hp:1},takeMonsterHit(){}}};
     const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
-    if(result==='respawn'){room.contributors.delete(m.id);if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);else if(type.awakened)this.announce(room.serverId,`⚡ ${type.name} (Lv.${type.level}) ตื่นขึ้นที่ ${room.map.name}!`);}
+    if(result==='respawn'){room.contributors.delete(m.id);if(type.worldBoss)this.announce(room.serverId,'👑 บอสประจำแมพ '+type.name+' ปรากฏที่ '+room.map.name+' · CH '+(room.channel??1));else if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);else if(type.awakened)this.announce(room.serverId,`⚡ ${type.name} (Lv.${type.level}) ตื่นขึ้นที่ ${room.map.name}!`);}
     if(m.justEnraged){m.justEnraged=false;for(const id of room.peers)this.peers.get(id).world.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
     if(result==='burst')for(const id of room.peers){const a=this.peers.get(id);if(!a.suspended&&a.world.player.hp>0&&distance(a.world.player,m)<=MONSTER_BEHAVIOUR[type.id].aoe)a.world.takeMonsterHit(type,type.damage,m);}
     if(result==='slam')for(const id of room.peers){const a=this.peers.get(id);if(!a.suspended&&a.world.player.hp>0)a.world.takeSlam(type,m,MONSTER_BEHAVIOUR[type.id].slam);}
@@ -611,7 +615,7 @@ export class RealmServer{
  // ---- 0.49 timed MVP and party dungeon.
  mvpState(serverId){let s=this.mvps.get(serverId);if(!s){s={nextAt:this.born+MVP_FIRST};this.mvps.set(serverId,s);}return s;}
  // A fresh room hides its MVP until the server-wide timer is due, so leaving and re-entering cannot reset it.
- wakeMvp(room){const wait=(this.mvpState(room.serverId).nextAt-this.now())/1000;for(const m of room.mobs)if(MONSTER_TYPES[m.type].mvp&&wait>0){m.hp=0;m.dead=wait;}}
+ wakeMvp(room){const wait=(this.mvpState(room.serverId).nextAt-this.now())/1000;for(const m of room.mobs)if(MONSTER_TYPES[m.type].mvp&&wait>0){m.hp=0;m.dead=wait;}this.mapBosses.wake(room,MONSTER_TYPES);}
  // 0.109.7 back-office weather: an override per realm (all outdoor maps, or one map) for some minutes; clients get the
  // time left with every snapshot and fall back to the clock-rolled weather when it runs out or is cleared.
  setWeather({serverId='server-1',weather,minutes=30,mapId=null}={}){
@@ -628,12 +632,13 @@ export class RealmServer{
   return type&&map?{name:type.name,map:map.name,in:Math.max(0,Math.ceil((s.nextAt-this.now())/1000))}:null;}
  // 0.109.8 back-office world boss: a one-off boss on any outdoor field map; it does not respawn and does not touch the
  // timed MVP's clock. Top damage gets the MVP prize, the whole realm hears about it.
- summonBoss({serverId='server-1',mapId,typeId=null,count=1,x=null,z=null}={}){
+ summonBoss({serverId='server-1',mapId,channel=null,typeId=null,count=1,x=null,z=null}={}){
   const map=this.catalog.maps.find(m=>m.id===mapId);if(!map||map.instance||map.guildHall||map.safe)throw new Error('bad-map');
   const t=typeId===null||typeId===undefined||typeId===''?MONSTER_TYPES.findIndex(x=>x.mvp):Number(typeId),type=MONSTER_TYPES[t];
   if(!type?.boss)throw new Error('bad-boss');
-  const roomId=serverId+':'+map.id;let room=this.rooms.get(roomId);
-  if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,serverId,channel:typeof hasChannel==='boolean'&&hasChannel?ch:null,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);this.wakeMvp(room);}
+  const ch=channel===null?null:Number(channel);if(ch!==null&&(!Number.isInteger(ch)||ch<1||ch>5))throw new Error('bad-channel');
+  const legacy=serverId+':'+map.id,roomId=ch!==null?serverId+':ch'+ch+':'+map.id:this.rooms.has(legacy)?legacy:this.rooms.has(serverId+':ch1:'+map.id)?serverId+':ch1:'+map.id:legacy;let room=this.rooms.get(roomId);
+  if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,serverId,channel:ch,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);this.wakeMvp(room);}
   // 0.109.9 any number (up to 20 per call, 60 alive per map), at a chosen spot or random; a chosen spot snaps to the nearest
   // walkable ground, and a group spreads in a ring around it
   const n=Math.min(20,Math.max(1,Math.round(Number(count)||1)));

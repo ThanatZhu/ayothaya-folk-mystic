@@ -1,4 +1,6 @@
 import {statsAfterClassChange} from '../character-stats.js';
+import {MONSTER_TYPES} from '../combat-core.js';
+import {DROPS} from '../items.js';
 import http from 'node:http';
 import {discordPoster} from './discord-webhook.js';
 import {randomUUID} from 'node:crypto';
@@ -22,12 +24,15 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  if(!catalog)catalog=JSON.parse(await readFile(path.join(root,'maps/world.json'),'utf8'));
  // A replacement instance (zero-downtime redeploy) starts while the old one still owns the world.
  // It serves /health and answers sockets with 503 until the old lease is released or expires, then takes over.
- const authoritative=()=>mode!=='firebase'||Date.now()<=store.authorityUntil;
+ let bossTimersReady=mode==='local'||!store?.loadMapBosses;
+ const authoritative=()=>(mode!=='firebase'||Date.now()<=store.authorityUntil)&&bossTimersReady;
  let renewing=false,authorityError='';
- const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
+ const renew=async()=>{if(mode!=='firebase'||renewing)return;renewing=true;try{await store.renewAuthority();if(!bossTimersReady){realm.mapBosses.restore(await store.loadMapBosses());bossTimersReady=true;}if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}}catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}finally{renewing=false;}};
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
  let savedList={at:0,rows:[]};
  const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,roleSkills:process.env.ROLE_SKILLS!=='off',warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set(),metrics={bytesSent:0,messagesSent:0,startedAt:Date.now()};let closing=false;
+ if(mode==='local'&&store?.loadMapBosses)realm.mapBosses.restore(await store.loadMapBosses());
+ if(store?.saveMapBosses)realm.mapBosses.onChange=rows=>store.saveMapBosses(rows);
  const toDiscord=discordPoster();if(toDiscord)realm.onAnnounce=toDiscord; // 0.96 war + tournament news (DISCORD_WEBHOOK_URL)
  // 0.47 guilds: loaded once, written on each change (rare: create/join/leave/emblem), outside the per-player saves.
  // 0.70 market: shops stay open while their owners are offline, so they live outside the player saves.
@@ -41,7 +46,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,questDialogue:1,classStatReset:true,roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,mapBossSchema:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,classStatReset:true,roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.99.16 back-office (admin.html): online players and gifts. Production needs a Google ID token whose verified
   // email is in ADMIN_EMAILS; the local server trusts its own origin. Every gift is logged.
@@ -57,6 +62,12 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    }
    // 0.103 saved characters come from the store at most every 2 minutes (Firestore bills a read per character);
    // ?fresh=1 (the refresh button) reads again at once.
+   if(url.pathname==='/admin/map-bosses'&&req.method==='GET'){
+    const serverId=url.searchParams.get('serverId')??'server-1',channel=Number(url.searchParams.get('channel')??1);
+    if(!['server-1','server-2'].includes(serverId)||!Number.isInteger(channel)||channel<1||channel>5){reply(400,{error:'bad-scope'});return;}
+    const bosses=realm.mapBosses.overview(catalog,MONSTER_TYPES,realm.rooms,serverId,channel).map(b=>({...b,drops:DROPS[b.id]?.items??[]}));
+    reply(200,{bosses,serverTime:realm.now(),respawnSeconds:3600});return;
+   }
    if(url.pathname==='/admin/players'&&req.method==='GET'){
     if(store?.listProfiles&&(url.searchParams.get('fresh')==='1'||Date.now()-savedList.at>120000)){try{savedList={at:Date.now(),rows:await store.listProfiles()};}catch(e){console.error('admin-list',e.message);}}
     reply(200,{players:adminPlayers(realm,savedList.rows),savedAt:savedList.at||null});return;
@@ -92,7 +103,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     let data='';for await(const chunk of req){data+=chunk;if(data.length>1024){reply(413,{error:'too-large'});return;}}
     try{const b=JSON.parse(data),serverId=['server-1','server-2'].includes(b?.serverId)?b.serverId:'server-1';
      const num=v=>v===null||v===undefined||v===''?null:Number(v); // the page sends in-game X / Y (Y = -z)
-     const r=realm.summonBoss({serverId,mapId:String(b?.mapId??''),typeId:b?.typeId??null,count:b?.count??1,x:num(b?.x),z:num(b?.y)===null?null:-num(b?.y)});console.log('admin-boss',who,serverId,b?.mapId,r.name);reply(200,{serverId,...r});}catch(e){reply(400,{error:e.message});}
+     const r=realm.summonBoss({serverId,mapId:String(b?.mapId??''),channel:b?.channel??null,typeId:b?.typeId??null,count:b?.count??1,x:num(b?.x),z:num(b?.y)===null?null:-num(b?.y)});console.log('admin-boss',who,serverId,b?.mapId,r.name);reply(200,{serverId,...r});}catch(e){reply(400,{error:e.message});}
     return;
    }
    reply(404,{error:'not-found'});return;
@@ -208,7 +219,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  // Step by real elapsed time in fixed 50 ms slices: timers fire late (especially on Windows), and a fixed
  // step per callback ran the world ~20% slow, so predicted clients were pulled back when they stopped.
  let lastTick=performance.now(),carry=0;
- const tick=setInterval(()=>{const now=performance.now();carry=Math.min(.25,carry+(now-lastTick)/1000);lastTick=now;if(mode==='firebase'&&Date.now()>store.authorityUntil){carry=0;for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}while(carry>=.05){carry-=.05;realm.step(.05);}},50);
+ const tick=setInterval(()=>{const now=performance.now();carry=Math.min(.25,carry+(now-lastTick)/1000);lastTick=now;if(!authoritative()){carry=0;for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}while(carry>=.05){carry-=.05;realm.step(.05);}},50);
  // Waiting for authority: retry every 5 s (a read while another host holds it). Holding it: renew every 40 s.
  let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();
  // Save only what changed, at most once a minute; an idle player just keeps the lease alive (see storage.js budget).
@@ -217,8 +228,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const autosave=setInterval(()=>{for(const s of sessions.values())if(!s.closing&&dueForSave(s))checkpoint(s).catch(()=>{s.closing=true;s.peer.send({type:'error',code:'save-failed'});s.ws.close(4010,'save-failed');});},10000);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
   let lastLogSaveCount=realm.logs.length;
-  const logSaver=setInterval(()=>{if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;store?.saveDashboardLogs?.(realm.logs).catch(()=>{});}},10000);
- return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(logSaver);await store?.saveDashboardLogs?.(realm.logs).catch(()=>{});await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
+  const logSaver=setInterval(()=>{if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;store?.saveDashboardLogs?.(realm.logs).catch(()=>{});}},10000);
+ return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(logSaver);await realm.mapBosses.flush().catch(e=>console.error('map-boss-save',e.message));await store?.saveDashboardLogs?.(realm.logs).catch(()=>{});await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
 }
 export async function start(){
  const mode=process.env.AUTH_MODE??'firebase',port=Number(process.env.PORT??8787),host=mode==='local'?'127.0.0.1':(process.env.HOST??'0.0.0.0');

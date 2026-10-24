@@ -70,18 +70,21 @@ def main():
     manifest = json.loads((ART / "designs.json").read_text(encoding="utf-8-sig"))
     specs = json.loads((ART / "production-prompts-v2.json").read_text(encoding="utf-8-sig"))
     heights = {m["id"]: m["height"] for m in specs["idles"]}
+    old_boss_file = ART / "world-boss-designs.json"
+    old_bosses = json.loads(old_boss_file.read_text(encoding="utf-8-sig")) if old_boss_file.exists() else {"monsters": []}
     report = []
     names = ["idle", "move-a", "move-b", "windup", "strike", "hurt", "recover", "down"]
-    for map_ in manifest["maps"]:
+    for map_ in [*manifest["maps"], {"monsters": old_bosses["monsters"]}]:
         for monster in map_["monsters"]:
             id_ = monster["id"]
             source = f"{id_}-idle-v1.png"
-            image = Image.open(ART / source).convert("RGBA")
-            alpha = np.asarray(image)[:, :, 3]
-            assert (alpha == 0).mean() > .15, f"{id_}: missing transparent background"
-            monster.update(art=source, sourceSize=list(image.size), contentRect=bounds(alpha >= 8),
-                           height=heights.get(id_, monster.get("height")), gameReady=False,
-                           stage="animation-review", animation=f"animations/{id_}.json")
+            if (ART / source).exists():
+                image = Image.open(ART / source).convert("RGBA")
+                alpha = np.asarray(image)[:, :, 3]
+                assert (alpha == 0).mean() > .15, f"{id_}: missing transparent background"
+                monster.update(art=source, sourceSize=list(image.size), contentRect=bounds(alpha >= 8))
+            monster.update(height=heights.get(id_, monster.get("height")), gameReady=monster.get("gameReady", False),
+                           stage=monster.get("stage", "animation-review"), animation=f"animations/{id_}.json")
             sheet = f"{id_}-poses-v1.png"
             atlas_image = Image.open(ART / "animations" / sheet).convert("RGBA")
             pixels = np.asarray(atlas_image)
@@ -126,9 +129,10 @@ def main():
                            "poseHeightRatios": [round(f["rect"][3]/meta["idlePixels"], 3) for f in frames],
                            "boundaryForeground": edge_pixels,
                            "sourceSHA256": hashlib.sha256((ART / "animations" / sheet).read_bytes()).hexdigest()})
-    manifest.update(version=2, status="animation-review",
-                    note="ภาพครบ 25 ตัว / 5 แมพ พร้อมชุดท่าหลักตัวละ 8 เฟรมสำหรับพรีวิว ยังไม่เชื่อมจุดเกิด ดาเมจ ดรอป หรือเควส เมืองลับแลเป็นเมืองปลอดภัย")
+    manifest.update(version=2, status=manifest.get("status", "animation-review"))
     (ART / "designs.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+    if old_boss_file.exists():
+        old_boss_file.write_text(json.dumps(old_bosses, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
     out = ROOT / "outputs/monster-chapter2"
     out.mkdir(parents=True, exist_ok=True)
     (out / "atlas-inspection.json").write_text(json.dumps(report, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")

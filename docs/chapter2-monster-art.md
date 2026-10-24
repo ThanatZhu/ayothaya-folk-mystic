@@ -1,14 +1,15 @@
 # Chapter 2 monster art and animation review
 
-The roster now has **25 original creature designs across five hostile maps**:
+The original roster has **25 original creature designs across five hostile maps**:
 bamboo-grove, ruined-temple, himmapan-edge, naga-cave and kailash-peak.
 Each map has three common creatures, one elite and one boss. Lablae remains a
-safe town. Heights, level bands and behaviors remain design proposals.
+safe town. The approved heights, level bands and behaviors are connected to
+the live game in release 125; see [world-bosses125.md](world-bosses125.md).
 
-This delivery adds 20 new transparent idle illustrations and 25 authored
-eight-pose animation atlases (200 poses total), including the original bamboo
-set. It does **not** add live spawns, damage, drops, quests or catalog indices.
-Every manifest entry remains explicitly `gameReady: false`.
+The first art delivery added 20 idle illustrations and 25 eight-pose atlases.
+Release 125 adds four bosses for the older maps, for 29 creatures and 232 poses,
+and integrates spawns, damage, drops and append-only catalog entries.
+Manifest entries are now marked `gameReady: true`. This does not add new quests.
 
 ## Files and generation
 
@@ -45,9 +46,9 @@ off a wing or importing pieces of the next pose. Alpha >= 8 defines the retained
 silhouette. Every source atlas is untouched. Stone Garuda's strike is mirrored
 at render time to keep its facing direction consistent.
 
-`chapter2-monster-art.js` loads only the active map's five atlases and prepares
-its frame canvases. It provides a renderer and state-to-frame selection for the
-review. It does not modify the production loader `monster-art.js`.
+`chapter2-monster-art.js` prepares frame canvases for both the review and the
+production loader `monster-art.js`. Only creatures present on the active map
+are loaded, with lazy loading for admin summons.
 
 ## Review and validation
 
@@ -72,7 +73,6 @@ canvas clipping and horizontal overflow, exercises real locomotion playback,
 and captures all five maps on dark/light backgrounds. Reports and screenshots
 are in `outputs/monster-chapter2/`.
 
-After art approval, integrate through an explicit new-loader path, append-only
-catalog IDs, safe spawn positions, stats, drops and server/client data checks.
-Do not replace existing monster indices or treat this art preview as populated
-production maps.
+The integration uses an explicit loader path and appends catalog IDs, preserving
+all existing monster indices. See the release note for live spawn, loot, server
+timer and administration verification.

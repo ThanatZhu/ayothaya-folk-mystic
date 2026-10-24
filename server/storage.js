@@ -20,6 +20,8 @@ export class LocalStore{
   this.leases.set(identity.uid,{id:leaseId,expires:Date.now()+ttl});return {identity,leaseId,record:copy(row)};
  }
  async loadDashboardLogs(){try{return JSON.parse(await readFile(path.join(this.directory,'dashboard-logs.json'),'utf8'));}catch{return [];}}
+ async loadMapBosses(){try{return JSON.parse(await readFile(path.join(this.directory,'map-bosses.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return [];throw e;}}
+ saveMapBosses(rows){const data=JSON.stringify(rows);this.bossQueue=(this.bossQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'map-bosses.json'),tmp=file+'.tmp';await writeFile(tmp,data,{mode:0o600});await rename(tmp,file);});return this.bossQueue;}
  async saveDashboardLogs(logs){try{const recent=Array.isArray(logs)?logs.slice(-200):[];await writeFile(path.join(this.directory,'dashboard-logs.json'),JSON.stringify(recent),{mode:0o600});}catch{}}
  async checkpoint(session,record,{release=false}={}){
   const lock=this.leases.get(session.identity.uid);if(!lock||lock.id!==session.leaseId||lock.expires<Date.now())throw new Error('session-lost');
@@ -65,6 +67,8 @@ export class FirebaseStore{
  async checkAuthority(tx){const snap=await tx.get(this.authorityRef);if(!snap.exists||snap.data().id!==this.authorityId||snap.data().expires<Date.now())throw new Error('authority-lost');}
  async releaseAuthority(){await this.db.runTransaction(async tx=>{const s=await tx.get(this.authorityRef);if(s.exists&&s.data().id===this.authorityId)tx.delete(this.authorityRef);});this.authorityUntil=0;}
  async loadGuilds(){return (await this.db.collection('multiplayerGuilds').get()).docs.map(d=>d.data());}
+ async loadMapBosses(){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);const snap=await tx.get(this.db.collection('multiplayerRuntime').doc('mapBossTimers'));return snap.exists?snap.data().rows??[]:[];});}
+ saveMapBosses(rows){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);tx.set(this.db.collection('multiplayerRuntime').doc('mapBossTimers'),{rows,updatedAt:Date.now()});});}
  saveGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).set(g);}
  async loadShops(){return (await this.db.collection('multiplayerShops').get()).docs.map(d=>d.data());}
  saveShop(s){return this.db.collection('multiplayerShops').doc(s.id).set(s);}

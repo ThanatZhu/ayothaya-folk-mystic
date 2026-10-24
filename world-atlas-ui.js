@@ -55,6 +55,8 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onClose}){
   else if(map.instance)detail='ดันเจี้ยนปาร์ตี้ · เข้าจากโรงสีใต้เงาจันทร์';
   else if(cost===null)detail='ยังไม่มีเส้นทางวาร์ปไปที่นี่';
   else if(money<cost)detail='เบี้ยไม่พอสำหรับการเดินทาง';
+  if(map.levelBand)detail+=' · แนะนำ Lv.'+map.levelBand.join('–');
+  if(map.worldBoss)detail+=' · บอส HP '+map.worldBoss.hp.toLocaleString('th-TH')+' · เกิดใหม่ 60 นาทีหลังตาย';
   $('#atlas-detail').textContent=detail;
   $('#atlas-wallet').textContent=`มี ${money.toLocaleString('th-TH')} เบี้ย`;
   warp.textContent=cost===null?'วาร์ป':`วาร์ป · ${cost} เบี้ย`;

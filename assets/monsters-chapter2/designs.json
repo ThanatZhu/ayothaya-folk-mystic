@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "status": "animation-review",
+  "status": "live-world125",
   "generation": "built-in image_gen",
-  "note": "ภาพครบ 25 ตัว / 5 แมพ พร้อมชุดท่าหลักตัวละ 8 เฟรมสำหรับพรีวิว ยังไม่เชื่อมจุดเกิด ดาเมจ ดรอป หรือเควส เมืองลับแลเป็นเมืองปลอดภัย",
+  "note": "เชื่อมเกมรุ่น 125: มอนสเตอร์ใหม่ 29 ตัว ชุดท่า 232 เฟรม บอสประจำ 9 แมพ ดรอปและแอดมินพร้อม เมืองลับแลปลอดภัย",
   "safeTown": "lablae",
   "maps": [
     {
@@ -21,8 +21,8 @@
           "hook": "ตัวเล็กพบเป็นกลุ่ม ให้ฝึกอ่านจังหวะและโจมตีเป็นวง",
           "attack": "สะบัดใบไผ่ระยะประชิด",
           "art": "bamboo-sprout-idle-v1.png",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "sourceSize": [
             1312,
             1199
@@ -43,8 +43,8 @@
           "hook": "ประชิดไว ถอยหลอกหลังโจมตี ทำให้สายระยะไกลต้องรักษาระยะ",
           "attack": "ตะปบสองมือ",
           "art": "hungry-pop-idle-v1.png",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "sourceSize": [
             1312,
             1199
@@ -65,8 +65,8 @@
           "hook": "บินอยู่ต่ำ เข้าจิกแล้วถอย รูปร่างแนวนอนแยกจากตัวอื่น",
           "attack": "โฉบผ่านระยะสั้น",
           "art": "bamboo-bat-idle-v1.png",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "sourceSize": [
             1536,
             1024
@@ -87,8 +87,8 @@
           "hook": "ตัวพิเศษเกราะหนา มีจังหวะชาร์จหมัดให้ขัดท่าหรือหลบ",
           "attack": "ทุบพื้นเป็นวงแคบ",
           "art": "bamboo-ward-idle-v1.png",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "sourceSize": [
             1222,
             1287
@@ -109,8 +109,8 @@
           "hook": "บอสประจำแมพ ใช้พลองกวาดและคำรามเรียกลูกน้อง มีสัญญาณก่อนโจมตี",
           "attack": "พลองกวาดวงและกระแทกพื้น",
           "art": "pop-grove-lord-idle-v1.png",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "sourceSize": [
             1312,
             1199
@@ -138,8 +138,8 @@
           "name": "ตุ๊กตาดินเฝ้าวัด",
           "rank": "normal",
           "hook": "ตัวเล็กเนื้อดินเผา",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "clay-temple-doll-idle-v1.png",
           "sourceSize": [
             1312,
@@ -159,8 +159,8 @@
           "name": "ระฆังผี",
           "rank": "normal",
           "hook": "ระฆังลอยต่ำ โจมตีคลื่นเสียงระยะกลาง",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "haunted-bell-idle-v1.png",
           "sourceSize": [
             1312,
@@ -180,8 +180,8 @@
           "name": "กองอิฐเดินได้",
           "rank": "normal",
           "hook": "อิฐโบราณรวมร่าง เคลื่อนช้าแต่ทนทาน",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "walking-bricks-idle-v1.png",
           "sourceSize": [
             1312,
@@ -201,8 +201,8 @@
           "name": "ยักษ์ศิลาเฝ้าประตู",
           "rank": "elite",
           "hook": "ผู้พิทักษ์หิน พุ่งเป็นเส้นให้หลบด้านข้าง",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "stone-gate-guardian-idle-v1.png",
           "sourceSize": [
             1312,
@@ -222,8 +222,8 @@
           "name": "อาถรรพ์ระฆังร้าง",
           "rank": "boss",
           "hook": "บอสระฆังสำริดยักษ์ คุมพื้นที่ด้วยคลื่นเสียง",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "abandoned-bell-curse-idle-v1.png",
           "sourceSize": [
             1312,
@@ -253,8 +253,8 @@
           "name": "เห็ดลายหมอก",
           "rank": "normal",
           "hook": "เห็ดหมอกทรงกลม ปล่อยสปอร์เป็นพื้นที่",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "mist-cap-idle-v1.png",
           "sourceSize": [
             1312,
@@ -274,8 +274,8 @@
           "name": "หมูป่าเขาแก้ว",
           "rank": "normal",
           "hook": "สัตว์สี่เท้าเขาผลึก ชาร์จเป็นเส้น",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "crystal-tusk-boar-idle-v1.png",
           "sourceSize": [
             1312,
@@ -295,8 +295,8 @@
           "name": "นกเปลวใบไม้",
           "rank": "normal",
           "hook": "นกตัวเล็กหางใบไม้โจมตีระยะกลาง",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "leaf-flame-bird-idle-v1.png",
           "sourceSize": [
             1312,
@@ -316,8 +316,8 @@
           "name": "เสือเถาวัลย์",
           "rank": "elite",
           "hook": "เสือขนาดใหญ่ กระโจนและผูกเถาวัลย์",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "vine-tiger-idle-v1.png",
           "sourceSize": [
             1536,
@@ -337,8 +337,8 @@
           "name": "คชสารพฤกษ์",
           "rank": "boss",
           "hook": "ช้างป่าร่างพฤกษ์ งาใหญ่ กระแทกพื้น",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "woodland-elephant-idle-v1.png",
           "sourceSize": [
             1312,
@@ -368,8 +368,8 @@
           "name": "อึ่งแก้วถ้ำ",
           "rank": "normal",
           "hook": "กบหินตัวกลม กระโดดพร้อมวงเตือน",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "cave-crystal-toad-idle-v1.png",
           "sourceSize": [
             1312,
@@ -389,8 +389,8 @@
           "name": "ลูกงูเกล็ดหยก",
           "rank": "normal",
           "hook": "งูเล็กเคลื่อนคด",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "jade-scale-hatchling-idle-v1.png",
           "sourceSize": [
             1312,
@@ -410,8 +410,8 @@
           "name": "ปูหินเรืองแสง",
           "rank": "normal",
           "hook": "ปูทรงกว้าง เกราะหน้าแข็ง",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "glowstone-crab-idle-v1.png",
           "sourceSize": [
             1536,
@@ -431,8 +431,8 @@
           "name": "อสรพิษเฝ้าธาร",
           "rank": "elite",
           "hook": "งูใหญ่คุมแนวธารน้ำด้วยพิษ",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "stream-serpent-idle-v1.png",
           "sourceSize": [
             1312,
@@ -452,8 +452,8 @@
           "name": "นาคพิทักษ์บาดาล",
           "rank": "boss",
           "hook": "นาคใหญ่ มีท่ากวาดหางและคลื่นน้ำ",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "underwater-naga-guardian-idle-v1.png",
           "sourceSize": [
             1312,
@@ -483,8 +483,8 @@
           "name": "กระต่ายหมอกศิลา",
           "rank": "normal",
           "hook": "สัตว์เล็กขนเทาหมอก เข้าปะทะแล้วถอย",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "stone-mist-hare-idle-v1.png",
           "sourceSize": [
             1312,
@@ -504,8 +504,8 @@
           "name": "ปักษาวายุ",
           "rank": "normal",
           "hook": "นกภูเขาปีกเรียว โจมตีเป็นแนวลม",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "wind-mountain-bird-idle-v1.png",
           "sourceSize": [
             1312,
@@ -525,8 +525,8 @@
           "name": "แพะเขาผลึก",
           "rank": "normal",
           "hook": "สัตว์ภูเขาสี่เท้า เขาผลึกและท่าพุ่ง",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "crystal-horn-goat-idle-v1.png",
           "sourceSize": [
             1312,
@@ -546,8 +546,8 @@
           "name": "ครุฑศิลาฝึกศึก",
           "rank": "elite",
           "hook": "นักรบปักษาเนื้อศิลา เตรียมท่าก่อนพุ่ง",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "stone-garuda-idle-v1.png",
           "sourceSize": [
             1312,
@@ -567,8 +567,8 @@
           "name": "ยักษ์เมฆาคุ้มขุนเขา",
           "rank": "boss",
           "hook": "ยักษ์ขุนเขา ใช้แรงลมและกระแทกพื้น",
-          "stage": "animation-review",
-          "gameReady": false,
+          "stage": "live-world125",
+          "gameReady": true,
           "art": "cloud-peak-yaksha-idle-v1.png",
           "sourceSize": [
             1312,

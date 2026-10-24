@@ -1,3 +1,4 @@
+import {CHAPTER2_MONSTERS} from './chapter2-monsters.js';
 // Ragnarok-style elements and sizes (0.44). Pure data + one multiplier, shared by the offline world and the server.
 export const ELEMENT_NAME={neutral:'ไม่มีธาตุ',earth:'ดิน',fire:'ไฟ',water:'น้ำ',wind:'ลม',holy:'ศักดิ์สิทธิ์',ghost:'ผี'};
 export const SIZE_NAME={small:'เล็ก',medium:'กลาง',large:'ใหญ่'};
@@ -8,6 +9,7 @@ export const MONSTER_AFFINITY={
  monkey:{element:'earth',size:'medium'},vine:{element:'earth',size:'medium'},lantern:{element:'ghost',size:'small'},
  'rat-chief':{element:'neutral',size:'medium'},'monkey-chief':{element:'earth',size:'large'},'mill-keeper':{element:'ghost',size:'large'},'lantern-lord':{element:'ghost',size:'large'},'straw-king':{element:'fire',size:'large'},'marsh-rat':{element:'water',size:'small'},'bog-hopper':{element:'water',size:'medium'},'lotus-vine':{element:'earth',size:'medium'},'bog-lantern':{element:'ghost',size:'medium'},'marsh-ape':{element:'water',size:'large'},
 };
+for(const m of CHAPTER2_MONSTERS)MONSTER_AFFINITY[m.id]={element:m.element,size:m.boss||m.elite?'large':m.height<=1.4?'small':'medium'};
 export const affinityOf=id=>MONSTER_AFFINITY[id]??{element:'neutral',size:'medium'};
 
 // Attack element → defender element multiplier (missing pairs are 1).

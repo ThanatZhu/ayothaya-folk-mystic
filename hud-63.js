@@ -5,7 +5,7 @@
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
 import {createActivityDock} from './activity-dock.js?v=overlay143';
-import {createMobilePlayUI} from './mobile-play-ui.js?v=142';
+import {createMobilePlayUI} from './mobile-play-ui.js?v=143';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];

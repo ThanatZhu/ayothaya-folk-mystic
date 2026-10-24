@@ -3484,3 +3484,11 @@ Object.assign(globalThis.I18N_EN,{
  "-poses-v1.png\" target=\"_blank\" rel=\"noopener\">ภาพท่า": "-poses-v1.png\" target=\"_blank\" rel=\"noopener\">Pose Sheet",
  "ภาพท่า": "Pose Sheet"
 });
+
+Object.assign(globalThis.I18N_EN,{
+ "ไกด์":"Guide",
+ "เปิดไกด์":"Show guide",
+ "ปิดไกด์":"Hide guide",
+ "เปิดไกด์แล้ว":"Guide enabled",
+ "ปิดไกด์แล้ว · กด 💡 ในกล่องเควสเพื่อเปิดใหม่":"Guide disabled · Tap 💡 in the quest panel to enable it again"
+});

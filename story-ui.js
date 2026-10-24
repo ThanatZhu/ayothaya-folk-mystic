@@ -45,12 +45,12 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  // Tracker panel (own stylesheet, so game.html needs no edit).
  if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=99.2';css.dataset.storyUi='';document.head.append(css);}
  const panel=document.createElement('section');panel.id='quest-tracker';panel.setAttribute('aria-label','เควสเนื้อเรื่อง');
- panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ลูกศรแนะนำ"><b>💡</b><span>ลูกศร</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
+ panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ไกด์"><b aria-hidden="true">💡</b><span>ไกด์</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
  document.body.append(panel);
  // 0.99 arrows that point at the next button to press, and a welcome card for a brand-new character
  const coach=createCoach({game,account,objective:()=>currentObjective(state()),paused:()=>!!document.querySelector('#welcome-card[open],#job-ready[open],#world-atlas-dialog[open]')||[...document.querySelectorAll('.journey-loading,#travel-loading')].some(e=>!e.classList.contains('leaving')&&e.checkVisibility?.({checkVisibilityCSS:true}))});
- const coachButton=()=>{$('quest-coach').setAttribute('aria-pressed',String(!coach.off));$('quest-coach').title=coach.off?'เปิดลูกศรแนะนำ':'ปิดลูกศรแนะนำ';$('quest-coach').classList.toggle('off',coach.off);};
- $('quest-coach').onclick=e=>{e.stopPropagation();coach.setOff(!coach.off);coachButton();world.notice(coach.off?'ปิดลูกศรแนะนำแล้ว · กด 💡 ในกล่องเควสเพื่อเปิดใหม่':'เปิดลูกศรแนะนำแล้ว');};coachButton();
+ const coachButton=()=>{$('quest-coach').setAttribute('aria-pressed',String(!coach.off));$('quest-coach').title=coach.off?'เปิดไกด์':'ปิดไกด์';$('quest-coach').classList.toggle('off',coach.off);};
+ $('quest-coach').onclick=e=>{e.stopPropagation();coach.setOff(!coach.off);coachButton();world.notice(coach.off?'ปิดไกด์แล้ว · กด 💡 ในกล่องเควสเพื่อเปิดใหม่':'เปิดไกด์แล้ว');};coachButton();
  const welcomeKey='ayothaya-welcome:'+key;
  function welcome(){
   const s=state();if(s.quest!==0||s.step!==0)return;try{if(localStorage.getItem(welcomeKey))return;localStorage.setItem(welcomeKey,'1');}catch{}

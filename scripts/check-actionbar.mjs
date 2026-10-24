@@ -60,6 +60,9 @@ try{
   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(200);
   const r=await page.locator('#desktop-actionbar').boundingBox();assert.ok(r&&r.x>=0&&r.x+r.width<=w&&r.y+r.height<=h);
   const grid=await page.locator('.actionbar-rows').boundingBox(),tools=await page.locator('.actionbar-tools').boundingBox();assert.ok(Math.abs(grid.x+grid.width/2-w/2)<1,'the grid itself is centered');assert.ok(tools.x>=grid.x+grid.width&&tools.x+tools.width<=w,'side controls stay outside the grid and inside the screen');
+  const events=await page.evaluate(()=>{const map=document.querySelector('.mini-panel').getBoundingClientRect();return [...document.querySelectorAll('#hud-chips>button')].filter(b=>!b.hidden).map(b=>{const s=getComputedStyle(b),r=b.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,mapBottom:map.bottom,bg:s.backgroundImage,color:s.backgroundColor,shadow:s.boxShadow,iconShadow:getComputedStyle(b,'::before').filter};});});
+  assert.ok(events.length>0);for(const e of events){assert.equal(e.bg,'none');assert.equal(e.color,'rgba(0, 0, 0, 0)');assert.equal(e.shadow,'none');assert.match(e.iconShadow,/drop-shadow/);assert.ok(e.y>=e.mapBottom,'desktop events begin below the map');assert.ok(e.bottom<=h,'desktop event column fits');}
+  for(let i=1;i<events.length;i++){assert.equal(events[i].x,events[0].x);assert.ok(events[i].y>=events[i-1].bottom,'desktop events form a vertical column');}
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:fileURLToPath(new URL('desktop-'+w+'.png',out))});console.log('desktop',w,h,'8 columns, fits');
  }
  while(!(await page.locator('#actionbar-add').isDisabled()))await page.locator('#actionbar-add').click();await page.screenshot({path:fileURLToPath(new URL('desktop-four-rows.png',out))});
@@ -70,7 +73,7 @@ try{
   assert.ok(geometry.length>0&&geometry.length<=4);assert.ok(geometry.every(r=>r.radius==='50%'&&r.w>=44&&r.x>=0&&r.x+r.w<=w&&r.y>=0&&r.y+r.h<=h),JSON.stringify(geometry));
   assert.equal(await page.locator('#quick-slots > button[id^="quick-"]:visible').count(),4);
   for(let i=0;i<4;i++)assert.ok(await page.locator('#quick-'+i).isEnabled(),'all four owned quick items are usable');
-  const blanks=await page.locator('#skills .mobile-skill-empty:visible').count();assert.equal(geometry.length+blanks,4,'each wheel page keeps four skill positions');
+  assert.equal(await page.locator('#skills .mobile-skill-empty').count(),0,'unused skill positions never paint floating disks');
   for(let i=0;i<geometry.length;i++)for(let j=i+1;j<geometry.length;j++){const a=geometry[i],b=geometry[j];assert.ok(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y,'mobile skill targets do not overlap');}
   await page.locator('#skill-bank').click();await page.screenshot({path:fileURLToPath(new URL('mobile-'+w+'.png',out))});console.log('mobile',w,h,'circular skills, fits');
  }

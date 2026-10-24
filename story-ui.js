@@ -2,7 +2,7 @@ import {createStoryDialogue} from './story-dialogue-ui.js?v=pets125';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=refine136';
-import {createCoach} from './coach.js?v=refine136';
+import {createCoach} from './coach.js?v=walk149';
 import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
 
@@ -43,7 +43,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  };
 
  // Tracker panel (own stylesheet, so game.html needs no edit).
- if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=99.2';css.dataset.storyUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=walk149';css.dataset.storyUi='';document.head.append(css);}
  const panel=document.createElement('section');panel.id='quest-tracker';panel.setAttribute('aria-label','เควสเนื้อเรื่อง');
  panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ไกด์"><b aria-hidden="true">💡</b><span>ไกด์</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><span id="quest-distance" hidden></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
  document.body.append(panel);
@@ -227,7 +227,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
     if(m){
      walking=true;
      const done=()=>{walking=false;render();};
-     game.walkTo({x:m.x,z:m.z},{radius:2.4,kind:'quest',onArrive:()=>{done();world.select(m.id);setTimeout(()=>world.setAuto?.(true),150);},onFail:()=>{done();}});
+     game.walkTo({x:m.x,z:m.z},{radius:2.4,kind:'quest',mobId:m.id,onArrive:()=>{done();world.select(m.id);setTimeout(()=>world.setAuto?.(true),150);},onFail:()=>{done();}});
      render();
     }
     return;
@@ -248,7 +248,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
    const index=MONSTER_TYPES.findIndex(t=>t.id===s.monster);
    const near=()=>world.mobs.filter(m=>m.type===index&&m.hp>0).sort((a,b)=>Math.hypot(a.x-world.player.x,a.z-world.player.z)-Math.hypot(b.x-world.player.x,b.z-world.player.z))[0];
    const first=near();if(!first){done();world.notice('รอมอนสเตอร์เกิดใหม่สักครู่');return;}
-   game.walkTo(()=>{const m=near();return m&&{x:m.x,z:m.z};},{radius:2.4,kind:'quest',onArrive:()=>{done();const m=near();if(m)world.select(m.id);setTimeout(()=>world.setAuto(true,index),150);},onFail:()=>{done();world.notice('เดินไปหามอนสเตอร์ไม่ได้');}});
+   game.walkTo(()=>{const m=world.mobs.find(m=>m.id===first.id&&m.hp>0);return m&&{x:m.x,z:m.z};},{radius:2.4,kind:'quest',mobId:first.id,onArrive:()=>{done();const m=near();if(m)world.select(m.id);setTimeout(()=>world.setAuto(true,index),150);},onFail:()=>{done();world.notice('เดินไปหามอนสเตอร์ไม่ได้');}});
   }else done();
   render();
  }

@@ -88,7 +88,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  function talk(n){
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
   if(world.player.hp<=0||traveling)return;
-  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
+  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',npc:n.name,onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
   endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;const reply=api.onTalk?.(n);if(reply?.handled)return;$('npc-text').textContent=reply??n.text;$('npc-dialog').hidden=false;$('close-npc').focus();api.afterTalk?.(n);
  }
  const npcSprites=[];scene.traverse(o=>{if(o.isSprite&&o.userData.npc)npcSprites.push(o);});

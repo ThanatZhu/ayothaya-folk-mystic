@@ -44,3 +44,4 @@
 #welcome-go{display:block;width:100%;min-height:46px;border:0;border-radius:12px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 16px Mali,Tahoma,sans-serif;cursor:pointer}
 #quest-tracker #quest-chapter,#quest-tracker #quest-title,#quest-tracker #quest-hint{grid-column:1}
 #quest-tracker #quest-how{grid-column:1/-1;grid-row:4}
+#coach .coach-tip[hidden]{display:none!important}

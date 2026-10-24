@@ -18,7 +18,7 @@ import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
 import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=movement146';
 import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=role116';
-import {createRouteWalker} from './route-walk.js?v=01';
+import {createRouteWalker} from './route-walk.js?v=walk149';
 
 import {className} from './classes.js?v=112.1';
 import {rebirthRank} from './character-stats.js?v=107';
@@ -61,11 +61,17 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const walker=createRouteWalker(()=>world.nav),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),groundHit=new THREE.Vector3();
  const marker=new THREE.Mesh(new THREE.RingGeometry(.2,.3,32),new THREE.MeshBasicMaterial({color:'#f4cf7a',transparent:true,opacity:0,depthWrite:false,depthTest:false,side:THREE.DoubleSide}));
  marker.rotation.x=-Math.PI/2;marker.renderOrder=5;marker.visible=false;scene.add(marker);let markerAge=0;
+ let walkJob=null,arrivalPending=null,serverWalkState=null;
+ function cancelWalk(){const id=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null);walker.cancel();arrivalPending=null;if(id&&network?.walkSchema===1)network.command('walkCancel',{id});walkJob=null;serverWalkState=null;marker.visible=false;}
  const listeners=new Set(); // story/quest UI listens to the same events the HUD does (offline and online)
  function walkTo(target,opts={}){
-  if(world.player.hp<=0)return false;
-  walker.go(target,{radius:opts.radius,kind:opts.kind,onArrive:opts.onArrive,onFail:reason=>{marker.visible=false;if(opts.onFail)opts.onFail(reason);else world.notice('ไปตรงนั้นไม่ได้');}});
-  if(opts.marker!==false&&typeof target!=='function'){marker.position.set(target.x,.12,target.z);marker.visible=true;markerAge=0;}else marker.visible=false;
+  if(world.player.hp<=0)return false;cancelWalk();
+  const goal=typeof target==='function'?target():target;if(!goal||!Number.isFinite(goal.x)||!Number.isFinite(goal.z))return false;
+  const remote=network?.walkSchema===1,id=crypto.randomUUID();
+  const failed=reason=>{marker.visible=false;if(opts.onFail)opts.onFail(reason);else world.notice('ไปตรงนั้นไม่ได้');};
+  if(remote){walkJob={id,target,opts};if(!network.command('walkTo',{id,mapId:config.id,x:goal.x,z:goal.z,radius:opts.radius??.18,kind:opts.kind??'ground',...(opts.npc?{npc:opts.npc}:{}),...(Number.isInteger(opts.mobId)?{mob:opts.mobId}:{})})){walkJob=null;return false;}}
+  world.auto=false;walker.go(target,{radius:opts.radius,kind:opts.kind,onArrive:()=>{if(!remote)arrivalPending={opts};},onFail:reason=>{if(!remote)failed(reason);}});
+  if(opts.marker!==false&&typeof target!=='function'){marker.position.set(goal.x,.12,goal.z);marker.visible=true;markerAge=0;}else marker.visible=false;
   return true;
  }
  const makeMobView=m=>{
@@ -260,7 +266,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const joystick=$('joystick'),knob=$('stick');
  function updateStick(e){const b=joystick.getBoundingClientRect(),r=b.width*.34;let x=(e.clientX-b.left-b.width/2)/r,y=(b.top+b.height/2-e.clientY)/r,n=Math.max(1,Math.hypot(x,y));joy.x=x/n;joy.y=y/n;knob.style.transform=`translate(${joy.x*r}px,${-joy.y*r}px)`;}
  function clearStick(){joy.id=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)';joystick.classList.remove('held');}
- joystick.addEventListener('pointerdown',e=>{if(isPaused()||joy.id!==null)return;e.preventDefault();joy.id=e.pointerId;joystick.setPointerCapture(e.pointerId);joystick.classList.add('held');updateStick(e);});
+ joystick.addEventListener('pointerdown',e=>{if(isPaused()||joy.id!==null)return;e.preventDefault();cancelWalk();joy.id=e.pointerId;joystick.setPointerCapture(e.pointerId);joystick.classList.add('held');updateStick(e);});
  joystick.addEventListener('pointermove',e=>{if(e.pointerId===joy.id){e.preventDefault();updateStick(e);}});
  for(const name of ['pointerup','pointercancel','lostpointercapture'])joystick.addEventListener(name,e=>{if(e.pointerId===joy.id)clearStick();});
  function clearInput(){
@@ -313,14 +319,15 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  $('reset').onclick=()=>{cancelCameraTurn();controls.target.set(world.player.x,1,world.player.z);camera.position.copy(controls.target).add(initialOffset);camera.zoom=defaultZoom();camera.updateProjectionMatrix();controls.update();};
  function update(dt){
   const renderDt=presentationDelta(dt,{hidden:document.hidden}),paused=isPaused();if(paused)clearInput();
-  dt=document.hidden||paused?0:Math.min(.05,Math.max(0,dt));const visualDt=network?renderDt:dt;
+  dt=document.hidden?0:Math.min(.05,Math.max(0,dt));const visualDt=network?renderDt:dt;
   const x=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joy.x,y=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)+joy.y;
   let direction=screenDirection(x,y,controls.getAzimuthalAngle());
   // Keys / joystick always win over a tapped route; otherwise the route steers like a held joystick.
-  if(Math.hypot(x,y)>.08||world.player.hp<=0)walker.cancel();else if(!paused){const routed=walker.step(world.player,dt);if(routed)direction=routed;}
+  if(Math.hypot(x,y)>.08||world.player.hp<=0)cancelWalk();else{const routed=walker.step(world.player,dt);if(routed)direction=routed;}
   refreshAnimationCapabilities();
-  const steering=paused?{x:0,z:0,attack:false,run:false}:{...direction,attack:input.attack||keys.has('Space'),run:supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'))};
-  if(marker.visible){markerAge+=dt;if(walker.active){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}if(network){network.setInput(steering);world.time+=renderDt;predictMove(world,serverSelf,dt,steering,{pendingStop:network.waitingForStop(serverSelf?.inputAck),inputAge:network.inputAge(serverSelf?.inputAck)});}else if(!paused)world.update(dt,steering);
+  const steering=paused&&!walker.active&&!walkJob?{x:0,z:0,attack:false,run:false}:{...direction,attack:input.attack||keys.has('Space'),run:supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'))};
+  if(marker.visible){markerAge+=dt;if(walker.active||walkJob){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}if(network){network.setInput(network.walkSchema===1&&(walkJob||serverWalkState?.status==='walking')?{...steering,x:0,z:0}:steering);world.time+=renderDt;predictMove(world,serverSelf,dt,steering,{pendingStop:network.waitingForStop(serverSelf?.inputAck),inputAge:network.inputAge(serverSelf?.inputAck)});}else if(!paused||walker.active||arrivalPending)world.update(dt,steering);
+  if(arrivalPending&&!document.hidden&&!isPaused()){const done=arrivalPending;arrivalPending=null;done.opts.onArrive?.();}
   if(network&&world.auto&&!paused)predictAuto(dt);
   roleUI.update();roleDecor.update();const roleShake=roleEffects.update(visualDt);
   world.events.splice(0).forEach(e=>{effect(e);for(const fn of listeners)fn(e);});
@@ -413,17 +420,18 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  updateHelp();addEventListener('resize',updateHelp);
  toast(mobileLayout()?'ลากจอยเดิน · แตะมอนและสกิลด้านขวา':'WASD เดิน · คลิกมอนเลือกเป้า · Space คุยกับ NPC / โจมตี · F ออโต้');
- function setNetwork(client){network=client;clearInput();world.auto=false;autoSent='';client.addEventListener('welcome',()=>{autoSent='';}); // a fresh server world starts on default AUTO settings
+ function setNetwork(client){network=client;clearInput();world.auto=false;autoSent='';client.addEventListener('welcome',()=>{autoSent='';});client.addEventListener('walkError',e=>{if(walkJob?.id!==e.detail.id)return;const job=walkJob;walkJob=null;walker.cancel();marker.visible=false;if(job.opts.onFail)job.opts.onFail(e.detail.code);else world.notice('เดินไปจุดนั้นไม่ได้');}); // a fresh server world starts on default AUTO settings
   // 0.97 the AUTO button shows only what the server reports.
   world.skill=i=>{world.clearEmote();const point=world.roleGround;world.roleGround=null;return client.command('skill',{index:i,roleSchema:1,...(point?{point}: {})});};world.basicAttack=()=>{world.clearEmote();return client.command('attack');};world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=(on,hunt,target)=>client.command('auto',{on,hunt,...(target?{target}: {})});world.questTalk=(npc,expected)=>client.command('questTalk',{npc,expected});world.storyCheck=()=>client.command('storyCheck');world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard,attempt)=>client.command('refine',{slot,npc,lekLai,guard,attempt});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.petCommand=(type,data={},id=crypto.randomUUID())=>client.request(type,id,data);world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});world.discard=(item,count)=>client.command('discard',{item,count});
  }
  function applyNetworkSnapshot(snapshot){const s=snapshot.self;world.networkSelfId=s.id;{const o=snapshot.weather;world.weatherOverride=o?{id:o.id,mapId:o.mapId??null,endsAt:Date.now()+o.left}:null;} // 0.109.7 admin weather
  if('weekly' in s)world.weekly=s.weekly??null;world.rebirth=s.rebirth??0;if(s.story)world.story=s.story;if('stall' in s)world.myStall=s.stall??null;if('guild' in s)world.myGuild=s.guild??null;world.status=s.status??{};world.supportTargetId=s.supportTargetId;world.supportRoster=s.supportRoster??[];world.roleFieldsView=snapshot.roleFields??[];world.rolePetsView=snapshot.rolePets??[];world.food=s.food??null;if('mvp' in s)world.mvp=s.mvp??null;if('pet' in s)world.pet=s.pet??null;if('mailbox' in s)world.mailbox=s.mailbox;if('petCollection' in s)world.petCollection=s.petCollection;if('bounty' in s)world.bounty=s.bounty??null;world.mercLeft=s.merc??0;if('album' in s)world.album=s.album??[];if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face,inputAck:s.inputAck};world.cooldowns=[...s.cooldowns];cooldownsAt=performance.now()/1000;world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.autoTarget=s.autoTarget??null;world.hunt=s.hunt??null;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
+  serverWalkState=s.walkRoute??null;if(walkJob&&serverWalkState?.id===walkJob.id&&serverWalkState.status!=='walking'){const job=walkJob;walkJob=null;walker.cancel();if(serverWalkState.status==='arrived')arrivalPending=job;else if(serverWalkState.status==='failed')job.opts.onFail?.(serverWalkState.reason);}
   serverSelf.running=s.player.running===true;world.emote=activeEmote(s.emote,snapshot.time);
   for(const mob of snapshot.mobs){const existing=world.mobs.find(m=>m.id===mob.id);if(existing)Object.assign(existing,mob);else if('type' in mob)addNetworkMob(mob);}
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
- return {roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
+ return {roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

@@ -11,7 +11,7 @@ import {createPetView} from './pet-ui.js?v=pets128';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=pets128';
-import {MultiplayerClient} from './multiplayer-client.js?v=movement146';
+import {MultiplayerClient} from './multiplayer-client.js?v=walk149';
 import {CHANNELS,CHANNEL_KEY,normalizeChannel} from './realm-state.js?v=62';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
 import {atlasPath,className} from './classes.js?v=112.1';
@@ -250,6 +250,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  // System lines (EXP, level ups, notices) appear only in this player's chat, never sent to others.
  addEventListener('game-notice',({detail})=>{if(!active||typeof detail!=='string')return;log({id:'sys-'+performance.now()+Math.random(),channel:'system',name:'ระบบ',text:detail,time:Date.now()});});
  addEventListener('pagehide',()=>client?.stop());
+ addEventListener('pageshow',e=>{if(e.persisted&&active&&client?.status!=='online')client?.connect();});
  // 0.99.15 tap another player's character: a small menu with party, trade, friend, whisper and duel
  const tapRay=new THREE.Raycaster(),tapPoint=new THREE.Vector2(),playerMenu=el('div');playerMenu.id='player-menu';playerMenu.hidden=true;shell.append(playerMenu);
  const closeMenu=()=>{playerMenu.hidden=true;};

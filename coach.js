@@ -1,3 +1,4 @@
+import {placeCoachTip} from './coach-layout.js?v=walk149';
 // 0.99 tutorial coach: a gold arrow and a tip bubble point at the next thing to press for the current story step.
 // Each guide lists targets from the LAST action back to the FIRST; the first one on screen wins, so the arrow moves
 // along by itself as the player opens the bag, picks the item, and so on. It lives in a popover so it can sit above
@@ -45,7 +46,7 @@ export function createCoach({game,account,objective,paused=()=>false}){
  const show=on=>{if(popover){if(on&&!el.matches(':popover-open'))el.showPopover();if(!on&&el.matches(':popover-open'))el.hidePopover();}el.hidden=!on;};
  tip.querySelector('button').onclick=()=>api.setOff(true);
  tip.onclick=e=>{if(e.target.closest('button'))return;const obj=objective();if(!obj)return;const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'wrap-novice';const steps=guide(obj.step,{world,weapon,walking:game.walking}).map(g=>({...g,node:document.querySelector(g.sel)}));const pick=steps.find(g=>shown(g.node));if(pick?.node)pick.node.click();};
- let lastTop=null,lastText='';
+ let lastTop=null,lastText='',lastLayout='';
  const api={
   get off(){return off;},
   setOff(v){off=v;try{localStorage.setItem(OFF,v?'1':'0');}catch{}if(off)show(false);},
@@ -67,12 +68,13 @@ export function createCoach({game,account,objective,paused=()=>false}){
    arrow.textContent=below?'▲':'▼';arrow.classList.toggle('below',below);
    arrow.style.left=r.left+r.width/2+'px';arrow.style.top=(below?r.bottom+8:r.top-34)+'px';
    if(pick.text!==lastText){lastText=pick.text;text.textContent=pick.text;}
-   const tw=Math.min(260,innerWidth-24),tx=Math.min(Math.max(12,r.left+r.width/2-tw/2),innerWidth-tw-12);
-   let left=tx,ty=below?r.bottom+40:Math.max(8,r.top-84);
-   // never lay the tip over the quest tracker: beside it on the left instead (past the 💡 toggle)
-   const q=document.getElementById('quest-tracker')?.getBoundingClientRect();
-   if(q&&q.width&&left<q.right&&left+tw>q.left&&ty<q.bottom&&ty+60>q.top){left=Math.max(12,q.left-tw-70);ty=Math.max(8,Math.min(r.top-10,innerHeight-80));}
-   Object.assign(tip.style,{left:left+'px',width:tw+'px',top:ty+'px'});
+   const layout=[r.left,r.top,r.width,r.height,innerWidth,innerHeight,pick.text,top?.id,document.getElementById('quest-tracker')?.getBoundingClientRect().height].join(':');if(layout===lastLayout)return;lastLayout=layout;
+   const tw=Math.min(260,innerWidth-24);tip.style.width=tw+'px';tip.style.visibility='hidden';tip.hidden=false;
+   const measured=tip.getBoundingClientRect(),q=document.getElementById('quest-tracker'),quest=shown(q)?q.getBoundingClientRect():null;
+   const obstacles=[...document.querySelectorAll('button,input,textarea,select')].filter(n=>n!==tip.querySelector('button')&&!el.contains(n)&&shown(n)).map(n=>n.getBoundingClientRect());
+   const pos=placeCoachTip({target:r,quest,width:tw,height:measured.height,viewportWidth:innerWidth,viewportHeight:innerHeight,obstacles});
+   tip.hidden=!pos;if(pos)Object.assign(tip.style,{left:pos.left+'px',top:pos.top+'px',visibility:'visible'});
+
   },
  };
  return api;

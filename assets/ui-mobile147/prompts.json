@@ -1,0 +1,12 @@
+{
+  "tool": "built-in image_gen",
+  "transparent_background": true,
+  "prompts": {
+    "menu": "Use case: stylized-concept. Create ONE production game UI button asset, square, transparent alpha background. A compact hand-painted 2D Thai Ayothaya fantasy MMORPG menu button matching old-school painted jade-and-gold HUD artwork: dark forest jade enamel inset with restrained antique gold lotus corner caps and three clear cream-gold horizontal menu bars in the center. Strong clean silhouette, simple readable shapes at 44px. Orthographic flat front view, slightly irregular painted edges, restrained highlights, no photorealism, no glossy 3D, no AI filigree clutter. Single centered button occupying 90% of the square, transparent outside. No letters, no words, no labels, no cast shadow outside the silhouette.",
+    "discord": "Use case: stylized-concept. Create ONE production game UI Discord community button asset on transparent alpha background. Square composition. A clearly recognizable simple cream Discord Clyde controller-face mark with two dark round eyes, centered in a dark forest jade enamel medallion, subtle antique gold rim with small Thai lotus corner ornaments. Match hand-painted 2D old-school Thai fantasy MMORPG jade/gold HUD artwork, clean purposeful contours and restrained painted highlights. Readable at 40px. Orthographic front view, centered emblem occupying 90% of square. Transparent outside the medallion. No lettering, no words, no logo text, no 3D render, no excessive filigree, no glowing blur."
+  },
+  "exports": {
+    "menu": "menu.webp",
+    "discord": "discord.webp"
+  }
+}

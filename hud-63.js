@@ -4,8 +4,8 @@
 // 0.67 follows the approved desktop mockup (outputs/ui-hud63-desktop-mockup.png): four main buttons + เมนู.
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
-import {createActivityDock} from './activity-dock.js?v=138';
-import {createMobilePlayUI} from './mobile-play-ui.js?v=menu135';
+import {createActivityDock} from './activity-dock.js?v=mobile139';
+import {createMobilePlayUI} from './mobile-play-ui.js?v=139';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
@@ -68,13 +68,13 @@ export function createHud63({game,partyUI}={}){
  // to the top of the part that is still visible; when typing ends the page snaps back to its normal size and place.
  const text=$('online-text'),vv=window.visualViewport;
  if(text){text.setAttribute('autocomplete','off');text.setAttribute('autocorrect','off');text.setAttribute('enterkeyhint','send');}
- const place=()=>{if(!body.classList.contains('chat-typing'))return;document.documentElement.style.setProperty('--vv-top',(vv?.offsetTop??0)+'px');document.documentElement.style.setProperty('--vv-h',(vv?.height??innerHeight)+'px');};
+ const place=()=>{document.documentElement.style.setProperty('--vv-top',(vv?.offsetTop??0)+'px');document.documentElement.style.setProperty('--vv-h',(vv?.height??innerHeight)+'px');};
  const touch=matchMedia('(pointer:coarse)');
- document.addEventListener('focusin',e=>{if(touch.matches&&e.target===text){body.classList.add('chat-typing');place();}});
- document.addEventListener('focusout',e=>{if(e.target!==text)return;body.classList.remove('chat-typing');
+ document.addEventListener('focusin',e=>{if(touch.matches&&e.target.matches?.('#online-text,#online-whisper-to')){body.classList.add('chat-typing');place();}});
+ document.addEventListener('focusout',e=>{if(!e.target.matches?.('#online-text,#online-whisper-to'))return;body.classList.remove('chat-typing');
   // iOS leaves the page scrolled/zoomed after the keyboard closes: restore the original view.
   setTimeout(()=>{window.scrollTo(0,0);document.scrollingElement&&(document.scrollingElement.scrollTop=0);dispatchEvent(new Event('resize'));},80);});
- vv?.addEventListener('resize',place);vv?.addEventListener('scroll',place);
+ vv?.addEventListener('resize',place);vv?.addEventListener('scroll',place);addEventListener('resize',place);place();
  // The touch HUD owns event and channel placement; keep their desktop home stable.
  const channel=$('channel-button');
  const channelRow=document.createElement('div');channelRow.id='hud-channel-row';if(channel)channelRow.append(channel);

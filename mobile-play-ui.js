@@ -1,3 +1,4 @@
+import {createMobileReferenceUI} from './mobile-reference-ui.js?v=139';
 // A single owner for the touch HUD. Reuse live buttons so cooldowns and saved
 // hotbar order stay with game-controls / auto-settings rather than a second UI.
 export function skillPage(slots,page=0,size=4){
@@ -52,7 +53,7 @@ export function createMobilePlayUI({clearInput=()=>{}}={}){
   if(bank){if(query.matches&&skills&&bank.parentElement!==skills)skills.append(bank);else if(!query.matches&&attackControls&&bank.parentElement!==attackControls)attackControls.prepend(bank);}
   const buttons=[...skills?.querySelectorAll('.skill')??[]],available=buttons.map((b,i)=>!b.hidden?i:null).filter(i=>i!==null),selection=skillPage(available,page);page=selection.index;
   skillSignature=buttons.map(b=>b.hidden?'0':'1').join('');
-  const arc=[[0,114],[14,54],[68,16],[130,4]];
+  const arc=innerHeight>innerWidth?[[44,92],[44,36],[100,0],[158,32]]:innerHeight<=360?[[0,88],[14,36],[68,8],[130,4]]:[[0,114],[14,54],[68,16],[130,4]];
   buttons.forEach((b,i)=>{const off=query.matches&&!selection.slots.includes(i);if(b.hasAttribute('data-mobile-away')!==off)b.toggleAttribute('data-mobile-away',off);const pos=selection.slots.indexOf(i);if(pos>=0){b.style.setProperty('--arc-x',arc[pos][0]+'px');b.style.setProperty('--arc-y',arc[pos][1]+'px');}});
   skills?.setAttribute('aria-label',query.matches?`สกิลชุด ${page+1} จาก ${selection.pages}`:'สกิลทั้งหมด');
   if(bank){if(query.matches){if(!bank.querySelector('svg'))bank.innerHTML=arrows;}else bank.textContent='สกิล 1–5 ⇄';bank.setAttribute('aria-label',query.matches?`สลับชุดสกิล ชุด ${page+1} จาก ${selection.pages}`:'แสดงสกิล 6 ถึง 0');}
@@ -74,8 +75,8 @@ export function createMobilePlayUI({clearInput=()=>{}}={}){
  addEventListener('keydown',e=>{if(e.code==='Escape'){if(nav?.classList.contains('phone-open'))toggle?.click();if(query.matches&&dock&&!dock.classList.contains('collapsed'))dockToggle?.click();if(query.matches&&$('channel-popover'))$('channel-popover').hidden=true;closeQuest();}});
  // Swallow HUD gestures before they can become a world tap or a camera drag.
  for(const type of ['pointerdown','pointerup','click'])body.addEventListener(type,e=>{if(query.matches&&e.target.closest?.('#game-menu,#menu-toggle,#mobile-menu-backdrop,#mobile-status-rail,#hud-right,dialog,#online-dock,#channel-popover'))e.stopPropagation();});
- addEventListener('resize',railSize);window.visualViewport?.addEventListener('resize',railSize);
+ addEventListener('resize',refresh);window.visualViewport?.addEventListener('resize',refresh);
  query.addEventListener('change',()=>{page=0;closeQuest();refresh();});
  document.addEventListener('pointerdown',e=>{if(query.matches&&body.classList.contains('mobile-quest-open')&&!e.target.closest?.('#hud-right,#mobile-quest-summary'))closeQuest();},{passive:true});
- refresh();return {refresh};
+ refresh();createMobileReferenceUI({clearInput});return {refresh};
 }

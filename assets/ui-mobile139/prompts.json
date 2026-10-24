@@ -1,0 +1,14 @@
+{
+  "mode": "built-in image_gen",
+  "purpose": "Generated transparent production UI assets; existing ui63 painted frames supplied as style references.",
+  "assets": [
+    {
+      "path": "panel.png",
+      "prompt": "Use case: stylized-concept. Asset type: production transparent nine-slice game UI panel frame for Ayothaya Thai fantasy MMORPG. NEW asset; supplied image is STYLE REFERENCE only. Create ONE square frame, front-facing orthographic, straight repeatable horizontal and vertical rails, identical corner footprint, outer silhouette fits within canvas with only 2% transparent margin. Transparent empty center and transparent exterior. Reference the warm gold and deep jade material but simplify: slender aged gold double rails, restrained dark jade inset, small crisp Thai lotus/kranok corner caps, carefully drawn confident contours like classic painted RPG interface art. Each corner occupies at most 12% width/height; middle 70% of each edge is straight, constant thickness, suitable for nine-slice stretching. No title plaque, no text, no letters, no icons, no background, no backdrop, no sparkles, no glow, no excessive filigree or glossy plastic. Readable at small size. Elegant, artisanal restrained game UI matching the reference."
+    },
+    {
+      "path": "ring.png",
+      "prompt": "Use case: stylized-concept. Asset type: transparent circular button rim for Ayothaya Thai fantasy MMORPG, matching supplied STYLE REFERENCE. Generate ONE new perfectly circular centered gold-and-jade rim, front-facing orthographic. Outer diameter 92% canvas, empty central opening 70% canvas; both center and exterior fully transparent. Thin warm aged gold double band around dark jade enamel, four tiny symmetrical Thai lotus leaf accents at cardinal points, restrained expertly painted classic RPG UI with crisp confident outlines, subtle material shading. Readable when displayed 48 pixels wide. No central icon, no letters, no text, no background, no glow, no sparkles, no elaborate AI filigree, no plastic gloss. Keep a clean round silhouette and balanced thickness."
+    }
+  ]
+}

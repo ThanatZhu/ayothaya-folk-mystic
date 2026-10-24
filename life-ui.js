@@ -79,7 +79,7 @@ export function createLifeUI({game,account,camera}){
  // 0.49 MVP timer chip (online) + MVP / dungeon-clear banners.
  const chips=document.createElement('div');chips.id='hud-chips';document.body.append(chips); // MVP + festival chips share one row under the minimap
  const chip=document.createElement('button');chip.type='button';chip.id='mvp-chip';chip.hidden=true;chips.append(chip);let chipSig='';
- chip.onclick=()=>world.notice(world.mvp?`MVP ${world.mvp.name} เกิดที่ ${world.mvp.map} ทุก 60 นาที · คนตีแรงสุดได้รางวัล MVP`:'');
+ chip.onclick=()=>dispatchEvent(new CustomEvent('open-boss-browser'));
  const clock=s=>s>=3600?Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+' ชม.':Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
  function drawChip(){const m=game.online?world.mvp:null,sig=m?m.name+(m.in>0?clock(m.in):'up'):'';if(sig===chipSig)return;chipSig=sig;chip.hidden=!m;
   if(m)chip.innerHTML=`${icon(m.in>0?'boss-timer':'mvp-crown','item-icon small')}<span>MVP ${m.name}</span><b>${m.in>0?'อีก '+clock(m.in):'ปรากฏแล้ว!'}</b>`;chip.classList.toggle('up',!!m&&m.in<=0);}

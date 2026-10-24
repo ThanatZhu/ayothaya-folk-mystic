@@ -1,4 +1,4 @@
-import {createPartyLayout} from './party-layout.js?v=130';
+import {createPartyLayout} from './party-layout.js?v=138';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
 import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';
@@ -184,7 +184,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  }
  function presentEvent(e){
    if(e.type==='presentationSnapshot'){applySnapshot(e.snapshot);return;}
-   if(e.type==='bossResult'){game.world.events.push(e);return;}
+   if(e.type==='bossResult'||e.type==='bossDirectory'){game.world.events.push(e);return;}
    if(e.actor===client.id){game.world.events.push(e);return;}
    const v=views.get(e.actor);if(!v||v.loading)return;
    if(e.type==='petSkill'){v.pet?.attack(e.to,e.lag??0);const ids={fireBurst:'sky-spear',lotusCleanse:'cleanse',moonBarrier:'sanctuary',roarGuard:'guard',trueSight:'mark',flowerBind:'vine-trap',riceHeal:'heal',jadeShell:'sanctuary',waterMana:'regen',echoSlow:'hamstring'};game.roleEffects?.spawn({roleSkillId:ids[e.kind],from:{x:e.x,z:e.z},to:e.to??{x:e.x+.5,z:e.z},lag:e.lag??0});}
@@ -273,7 +273,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   const v=list.find(v=>{for(let o=hit.object;o;o=o.parent)if(o===v.sprite)return true;return false;});if(!v)return false;
   openPlayerMenu(v.state,x,y);return true;
  };
- return {get paused(){return false;},update(dt){
+ return {openParty:openRoster,get partyState(){return {party,online:client?.status==='online'};},get paused(){return false;},update(dt){
   if(!active)return;clock+=presentationDelta(dt);presentation.flush(presentEvent);fx.update(presentationDelta(dt),camera);
   const guildTab=dock.querySelector('[data-channel=guild]');guildTab.disabled=!game.world.myGuild;if(guildTab.disabled&&dock.dataset.channel==='guild')setChannel('room');
   for(const v of views.values()){

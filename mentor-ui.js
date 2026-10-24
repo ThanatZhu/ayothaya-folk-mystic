@@ -53,7 +53,7 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
   ready.querySelector('#job-ready-go').textContent=inTown()?'▶ เดินไปหา Master':'▶ กลับอยุธยา ไปหา Master';if(!ready.open)ready.showModal();}
  // Position from actual visible rectangles, including the profile and online chip. Long lists scroll below the header.
  function stackJournal(){
-  if(journal.hidden)return;
+  if(journal.hidden||journal.closest('#activity-dock'))return;
   const rect=journal.getBoundingClientRect(),viewport=window.visualViewport,profile=document.querySelector('.player-panel')?.getBoundingClientRect();
   const left=Math.max(8,profile?.left??16),right=left+rect.width,bottom=(viewport?.offsetTop??0)+(viewport?.height??innerHeight)-12;
   const visible=selector=>[...document.querySelectorAll(selector)].filter(el=>!el.hidden&&getComputedStyle(el).visibility!=='hidden').map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height&&r.bottom>0&&r.top<bottom);

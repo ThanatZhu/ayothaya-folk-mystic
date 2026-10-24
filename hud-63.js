@@ -4,12 +4,13 @@
 // 0.67 follows the approved desktop mockup (outputs/ui-hud63-desktop-mockup.png): four main buttons + เมนู.
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
+import {createActivityDock} from './activity-dock.js?v=138';
 import {createMobilePlayUI} from './mobile-play-ui.js?v=menu135';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
-export function createHud63({game}={}){
+export function createHud63({game,partyUI}={}){
  const $=id=>document.getElementById(id),body=document.body;
  const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=112.4';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
@@ -79,5 +80,6 @@ export function createHud63({game}={}){
  const channelRow=document.createElement('div');channelRow.id='hud-channel-row';if(channel)channelRow.append(channel);
  right.prepend(channelRow);
  const mobileUI=createMobilePlayUI({clearInput:()=>game?.clearInput?.()});
- return {mobileUI};
+ const activityDock=createActivityDock({game,partyUI});
+ return {mobileUI,activityDock};
 }

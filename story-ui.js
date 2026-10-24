@@ -45,7 +45,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  // Tracker panel (own stylesheet, so game.html needs no edit).
  if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=99.2';css.dataset.storyUi='';document.head.append(css);}
  const panel=document.createElement('section');panel.id='quest-tracker';panel.setAttribute('aria-label','เควสเนื้อเรื่อง');
- panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ไกด์"><b aria-hidden="true">💡</b><span>ไกด์</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
+ panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ไกด์"><b aria-hidden="true">💡</b><span>ไกด์</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><span id="quest-distance" hidden></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
  document.body.append(panel);
  // 0.99 arrows that point at the next button to press, and a welcome card for a brand-new character
  const coach=createCoach({game,account,objective:()=>currentObjective(state()),paused:()=>!!document.querySelector('#welcome-card[open],#job-ready[open],#world-atlas-dialog[open]')||[...document.querySelectorAll('.journey-loading,#travel-loading')].some(e=>!e.classList.contains('leaving')&&e.checkVisibility?.({checkVisibilityCSS:true}))});
@@ -58,7 +58,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   card.innerHTML='<small>ยินดีต้อนรับสู่อโยธยา</small><h2 id="welcome-title">เริ่มการเดินทางของคุณ</h2><ul>'+
    '<li><b>เดิน</b> กด WASD / ปุ่มลูกศร หรือแตะพื้นที่อยากไป · มือถือใช้จอยด้านซ้าย</li>'+
    '<li><b>ตีมอน</b> แตะมอนเพื่อเลือกเป้า แล้วกดปุ่มดาบ (Space) · ปุ่มเลข 1–0 คือสกิล</li>'+
-   '<li><b>เควส</b> ดูกล่องเควสมุมขวา กด ▶ เดินไป แล้วตัวละครจะเดินไปเอง</li>'+
+   '<li><b>เควส</b> เปิดแท็บเควสด้านซ้าย กด ▶ เดินไป แล้วตัวละครจะเดินไปเอง</li>'+
    '<li><b>ลูกศรสีทอง</b> จะชี้ปุ่มที่ต้องกดทีละขั้น ปิดได้ที่ 💡 ในกล่องเควส</li></ul><button type="button" id="welcome-go">เริ่มผจญภัย</button>';
   ($('game-shell')??document.body).append(card);card.querySelector('#welcome-go').onclick=()=>card.close();card.addEventListener('close',()=>card.remove());card.showModal();
  }
@@ -261,9 +261,17 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  // Online progress arrives with the first snapshot; give it a moment before resuming the walk on the new map.
  if(resume)setTimeout(go,1600);
  // Offline only: do/level steps that are already true finish by themselves (the server does this online).
- let checked=0;
+ let checked=0,distanceAt=0;
+ function distanceHint(){
+  if(performance.now()-distanceAt<250)return;distanceAt=performance.now();const obj=currentObjective(state()),step=obj?.step,node=$('quest-distance');let target=null,label='ระยะถึงเป้าหมาย';
+  if(step?.mapId&&step.mapId!==map.id){const hop=nextHop(catalog.maps,map.id,step.mapId);target=map.portals.find(p=>p.to===hop);label='ระยะถึงทางออก';}
+  else if(step?.npc)target=map.npcs.find(n=>n.name===step.npc);
+  else if(step?.type==='defeat'){const type=MONSTER_TYPES.findIndex(t=>t.id===step.monster);target=world.mobs.filter(m=>m.type===type&&m.hp>0).sort((a,b)=>Math.hypot(a.x-world.player.x,a.z-world.player.z)-Math.hypot(b.x-world.player.x,b.z-world.player.z))[0];}
+  node.hidden=!target;if(target){const text=label+' '+Math.ceil(Math.hypot(target.x-world.player.x,target.z-world.player.z))+' ม.';if(node.textContent!==text)node.textContent=text;}
+ }
+
  const api={context:null,update(){if(walking&&!game.walking)walking=false;dialogue.update();
-  coach.update();
+  coach.update();distanceHint();
   if(!game.online&&api.context&&performance.now()-checked>1000){checked=performance.now();for(let i=0;i<30&&offline({type:'check',ctx:api.context()})?.changed;i++);}
   render();}};
  return api;

@@ -22,7 +22,7 @@ export function createPartyLayout({frame,getCount}){
  let scheduled=0,disposed=false;
  const visible=node=>{if(!node||node.hidden||getComputedStyle(node).visibility==='hidden')return null;const r=node.getBoundingClientRect();return r.width&&r.height?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null;};
  const rect=id=>visible(document.getElementById(id));
- function refresh(){scheduled=0;if(disposed)return;watch();if(frame.hidden)return;const profile=visible(document.querySelector('.player-panel')),view=window.visualViewport;
+ function refresh(){scheduled=0;if(disposed)return;watch();if(frame.hidden||frame.closest('#activity-dock'))return;const profile=visible(document.querySelector('.player-panel')),view=window.visualViewport;
   const viewport={left:view?.offsetLeft??0,top:view?.offsetTop??0,width:view?.width??innerWidth,height:view?.height??innerHeight},above=['ailment-row','online-button','mobile-status-rail'].map(rect).filter(Boolean);
   const obstacles=[...document.querySelectorAll('#joystick,#channel-button,#online-dock,#quick-slots,#desktop-actionbar,.combat-controls,#hud-right,.mini-panel,.target-panel,#game-menu,#menu-toggle')].map(visible).filter(Boolean);
   const plan=planPartyLayout({viewport,profile,above,obstacles,count:getCount(),touch:document.body.classList.contains('mobile-play')});frame.toggleAttribute('data-layout-hidden',!!plan.hidden);if(plan.hidden)return;

@@ -11,7 +11,7 @@ import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-s
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
- const npcStyle=document.createElement('link');npcStyle.rel='stylesheet';npcStyle.href='./npc-interaction.css?v=137';document.head.append(npcStyle);
+ const npcStyle=document.createElement('link');npcStyle.rel='stylesheet';npcStyle.href='./npc-interaction.css?v=144';document.head.append(npcStyle);
  const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0,lastBig=0;
  const mentors=createMentorUI({game,account,inTown:()=>map.id==='ayutthaya',recall:()=>api.recall()});
@@ -131,7 +131,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   let npcDistance=2.3;for(const v of npcViews){const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(document.body.classList.contains('mobile-play')?6:v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
   mentors.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!atlas.open&&!mentors.paused;
   $('interact').hidden=!canInteract;
-  if(canInteract){const button=$('interact'),mobile=document.body.classList.contains('mobile-play');button.dataset.kind=nearNPC?'npc':'portal';const text=nearNPC?(mobile?'แตะ NPC เพื่อพูดคุย':'กด Space เพื่อพูดคุย · หรือคลิก NPC'):'เดินทางไป '+lookup(nearest.to).name;if(button.textContent!==text)button.textContent=text;button.title=nearNPC?'คุยกับ '+nearNPC.name:text;}
+  if(canInteract){const button=$('interact'),mobile=document.body.classList.contains('mobile-play');button.dataset.kind=nearNPC?'npc':'portal';const text=nearNPC?(mobile?'พูดคุย':'กด Space เพื่อพูดคุย · หรือคลิก NPC'):'เดินทางไป '+lookup(nearest.to).name;if(button.textContent!==text)button.textContent=text;button.title=nearNPC?'คุยกับ '+nearNPC.name:text;button.setAttribute('aria-label',button.title);}
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
   if(photo===null&&!photoQueued){photoQueued=true;setTimeout(()=>{mapPhoto();lastMini=0;},2500);}
   const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}

@@ -1,4 +1,4 @@
-import {createMobileReferenceUI} from './mobile-reference-ui.js?v=143';
+import {createMobileReferenceUI} from './mobile-reference-ui.js?v=144';
 import {createMobileHudEditor} from './mobile-hud-editor.js?v=143';
 // A single owner for the touch HUD. Reuse live buttons so cooldowns and saved
 // hotbar order stay with game-controls / auto-settings rather than a second UI.
@@ -64,7 +64,7 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
   if(bank){if(query.matches&&skills&&bank.parentElement!==skills)skills.append(bank);else if(!query.matches&&attackControls&&bank.parentElement!==attackControls)attackControls.prepend(bank);}
   const buttons=[...skills?.querySelectorAll('.skill')??[]],available=buttons.map((b,i)=>!b.hidden?i:null).filter(i=>i!==null),selection=skillPage(available,page);page=selection.index;
   skillSignature=buttons.map(b=>b.hidden?'0':'1').join('');
-  const unit=Math.max(36,Math.min(76,(innerHeight>innerWidth?innerWidth*.12:innerHeight*.108)));body.style.setProperty('--ref-unit',unit+'px');const arc=[[0,3.6],[0,2.3],[.9,.9],[2.5,.3]].map(([x,y])=>[x*unit,y*unit]);
+  const unit=Math.max(40,Math.min(76,(innerHeight>innerWidth?innerWidth*.12:innerHeight*.108)));body.style.setProperty('--ref-unit',unit+'px');const arc=[[.54,3.2],[1.06,2.05],[2.02,1.15],[3.305,.74]].map(([x,y])=>[x*unit,y*unit]);
   buttons.forEach((b,i)=>{const off=query.matches&&!selection.slots.includes(i);if(b.hasAttribute('data-mobile-away')!==off)b.toggleAttribute('data-mobile-away',off);const pos=selection.slots.indexOf(i);if(pos>=0){b.style.setProperty('--arc-x',arc[pos][0]+'px');b.style.setProperty('--arc-y',arc[pos][1]+'px');}});
   skills?.setAttribute('aria-label',query.matches?`สกิลชุด ${page+1} จาก ${selection.pages}`:'สกิลทั้งหมด');
   if(bank){if(query.matches){if(!bank.querySelector('svg'))bank.innerHTML=arrows;}else bank.textContent='สกิล 1–5 ⇄';bank.setAttribute('aria-label',query.matches?`สลับชุดสกิล ชุด ${page+1} จาก ${selection.pages}`:'แสดงสกิล 6 ถึง 0');}

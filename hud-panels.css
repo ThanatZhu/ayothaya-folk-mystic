@@ -17,6 +17,14 @@ html body.field-hud.hud63 dialog[data-hud-panel][open]{
  transform:none!important;translate:none!important;scale:1!important;zoom:1!important;
  box-sizing:border-box;overflow:auto;overscroll-behavior:contain;
 }
+/* Emotes belong to the shortcut table: keep the picker just above its top row,
+   including when rows change while the picker is open. */
+html body.actionbar-desktop.field-hud.hud63 #emote-window[data-hud-panel][open]{
+ bottom:calc(100dvh - var(--actionbar-grid-top,calc(100dvh - 178px)) + 10px)!important;
+ margin:auto auto 0!important;
+ max-height:calc(var(--actionbar-grid-top,calc(100dvh - 178px)) - var(--window-top) - 10px)!important;
+ z-index:46;overflow:auto;
+}
 /* Settings reuse the account overlay, so centre its card rather than shrinking
    the overlay itself. Blocking save/error screens keep their own behaviour. */
 html body.field-hud.hud63 #account-panel:not([data-blocking=true]):not([hidden]){

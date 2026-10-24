@@ -65,6 +65,26 @@ try{
   for(let i=1;i<events.length;i++){assert.equal(events[i].x,events[0].x);assert.ok(events[i].y>=events[i-1].bottom,'desktop events form a vertical column');}
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:fileURLToPath(new URL('desktop-'+w+'.png',out))});console.log('desktop',w,h,'8 columns, fits');
  }
+ for(const [width,height] of [[1440,900],[1024,768],[1280,600]]){
+  await page.setViewportSize({width,height});await page.waitForTimeout(100);
+  while(!(await page.locator('#actionbar-remove').isDisabled()))await page.locator('#actionbar-remove').click();
+  await page.locator('#emote-open').click();let previous=null;
+  for(const count of [1,2,3,4,3,2,1]){
+   while((await page.locator('.actionbar-row').count())<count)await page.locator('#actionbar-add').click();
+   while((await page.locator('.actionbar-row').count())>count)await page.locator('#actionbar-remove').click();
+   await page.waitForTimeout(70);
+   const picker=await page.locator('#emote-window').boundingBox(),grid=await page.locator('.actionbar-rows').boundingBox();
+   assert.ok(picker.x>=0&&picker.y>=0&&picker.x+picker.width<=width,'emote picker fits');
+   assert.ok(Math.abs(grid.y-picker.y-picker.height-10)<2,'emotes sit ten pixels above the current top row');
+   if(previous&&previous.count!==count)assert.ok(count>previous.count?picker.y+picker.height<previous.bottom:picker.y+picker.height>previous.bottom,'open picker follows added and removed rows');
+   previous={count,bottom:picker.y+picker.height};
+   const targets=await page.locator('#emote-window [data-b]').evaluateAll(nodes=>nodes.map(b=>{const r=b.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return b===hit||b.contains(hit);}));
+   assert.equal(targets.length,24);if(!targets.every(Boolean))await page.screenshot({path:fileURLToPath(new URL('emote-click-failure.png',out))});assert.ok(targets.every(Boolean),'every emote remains clickable above the table: '+JSON.stringify({width,height,count,targets}));
+   if(count===4)await page.screenshot({path:fileURLToPath(new URL('emotes-four-rows-'+width+'.png',out))});
+  }
+  await page.locator('#emote-window [data-b="24"]').click();assert.ok(!(await page.locator('#emote-window').isVisible()));
+  console.log('emotes',width,height,'follow rows 1–4 and back; all 24 targets clickable');
+ }
  while(!(await page.locator('#actionbar-add').isDisabled()))await page.locator('#actionbar-add').click();await page.screenshot({path:fileURLToPath(new URL('desktop-four-rows.png',out))});
  for(const [w,h] of [[844,390],[667,375]]){
   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(350);await page.evaluate(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();if(document.getElementById('dock-toggle')?.getAttribute('aria-expanded')==='true')document.getElementById('dock-toggle').click();});

@@ -5,7 +5,7 @@ import {applySkillArt} from './skill-art.js?v=icons117';
 
 export function createActionbar({game,bagUI,account={}}){
  const world=game.world,body=document.body,$=id=>document.getElementById(id),phone=matchMedia('(any-pointer:coarse),(max-width:900px)');
- const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=center132';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=emote133';document.head.append(css);
  const key='ayothaya-actionbar-v1:'+[(account.serverId??'local'),(account.slotId??'guest'),world.profession.id,world.jobId??'',world.roleCombat?'role':'legacy'].join(':');
  const fallback=defaultActionbar(world.skills,game.hotbar,bagUI.quickItems);
  let saved;try{saved=JSON.parse(localStorage.getItem(key));}catch{}
@@ -96,7 +96,9 @@ export function createActionbar({game,bagUI,account={}}){
   e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;const column=Number(e.code.slice(-1))-1,row=(e.shiftKey?1:0)+(e.altKey?2:0);
   if(column>=0&&column<8&&row<state.rows)activate(state.slots[row*ACTION_COLUMNS+column]);
  },true);
- new ResizeObserver(()=>document.documentElement.style.setProperty('--actionbar-height',root.offsetHeight+'px')).observe(root);
+ const placePicker=()=>{document.documentElement.style.setProperty('--actionbar-height',root.offsetHeight+'px');if(!root.hidden)document.documentElement.style.setProperty('--actionbar-grid-top',rows.getBoundingClientRect().top+'px');};
+ const layoutObserver=new ResizeObserver(placePicker);layoutObserver.observe(root);layoutObserver.observe(rows);
+ addEventListener('resize',placePicker);window.visualViewport?.addEventListener('resize',placePicker);
  phone.addEventListener('change',mode);mode();const timer=setInterval(update,100);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
  const api={update,get state(){return structuredClone(state);},get desktop(){return !phone.matches;},mark,dropItemAt(id,x,y){const target=hit(x,y);if(!target)return false;return assign(+target.dataset.index,{kind:'item',id});}};
  game.actionBar=api;return api;

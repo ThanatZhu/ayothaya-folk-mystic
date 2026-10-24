@@ -1,8 +1,8 @@
 import {createStoryDialogue} from './story-dialogue-ui.js?v=pets125';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
-import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=pets125';
-import {createCoach} from './coach.js?v=104.1';
+import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=refine136';
+import {createCoach} from './coach.js?v=refine136';
 import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
 

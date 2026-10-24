@@ -237,10 +237,17 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // Keyboard activation of the accessible attack button also works.
  $('attack').addEventListener('click',e=>{if(e.detail===0&&!isPaused())world.basicAttack();});
  function editable(e){return e.target instanceof Element&&!!e.target.closest('input,textarea,select,[contenteditable=true]');}
+ let spaceTalkHeld=false;
  addEventListener('keydown',e=>{
+  if(e.code==='Space'&&spaceTalkHeld){e.preventDefault();return;}
   if(e.altKey&&/^Digit[1-5]$/.test(e.code)&&!isPaused()&&!editable(e)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(!e.repeat)world.skill(hotbar[BASE_SLOTS+Number(e.code.slice(-1))-1]);return;}
   if(isPaused()||editable(e)||e.ctrlKey||e.metaKey||e.altKey)return;
-  if(e.code==='Space'&&e.target.closest?.('[data-hud-panel] button,#account-panel button'))return;
+  if(e.code==='Space'){
+   const button=e.target.closest?.('button,a,[role=button]');
+   if(button&&!['attack','interact'].includes(button.id))return;
+   if(!e.repeat&&npcInteraction?.talkNearest()){spaceTalkHeld=true;e.preventDefault();clearInput();return;}
+   if(button)return; // Native activation of focused HUD buttons remains accessible.
+  }
   if(['KeyW','KeyA','KeyS','KeyD','Space','KeyF'].includes(e.code)||/^Digit[0-9]$/.test(e.code))e.preventDefault();
   if(['KeyW','KeyA','KeyS','KeyD','Space','ShiftLeft','ShiftRight'].includes(e.code))keys.add(e.code);
   if(e.repeat)return;
@@ -248,7 +255,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(e.code==='Space')world.basicAttack();
   if(/^Digit[0-9]$/.test(e.code)){const n=Number(e.code.slice(-1));world.skill(hotbar[n===0?9:n-1]);}
  });
- addEventListener('keyup',e=>keys.delete(e.code));
+ addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='Space')spaceTalkHeld=false;});
  const joystick=$('joystick'),knob=$('stick');
  function updateStick(e){const b=joystick.getBoundingClientRect(),r=b.width*.34;let x=(e.clientX-b.left-b.width/2)/r,y=(b.top+b.height/2-e.clientY)/r,n=Math.max(1,Math.hypot(x,y));joy.x=x/n;joy.y=y/n;knob.style.transform=`translate(${joy.x*r}px,${-joy.y*r}px)`;}
  function clearStick(){joy.id=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)';joystick.classList.remove('held');}
@@ -263,10 +270,12 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   for(const id of touches.keys())if(canvas.hasPointerCapture(id))canvas.releasePointerCapture(id);
   attackPointer=null;clearStick();touches.clear();pinchDistance=0;mouseStart=null;
  }
- addEventListener('blur',clearInput);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearInput();});
+ addEventListener('blur',()=>{spaceTalkHeld=false;clearInput();});document.addEventListener('visibilitychange',()=>{if(document.hidden){spaceTalkHeld=false;clearInput();}});
  // 0.99.15 another player under the tap opens their menu first (multiplayer-ui sets this)
- let playerTap=null;
- function selectAt(x,y){
+ let playerTap=null,npcInteraction=null;
+ function selectAt(x,y,npc=null){
+  if(isPaused())return;
+  if(!world.roleAim&&(npcInteraction?.activate(npc)||npcInteraction?.tap(x,y)))return;
   if(!world.roleAim&&playerTap?.(x,y))return;
   pointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);
   for(const hit of world.roleAim?[]:raycaster.intersectObjects(mobViews.map(v=>v.sprite))){
@@ -281,8 +290,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  function pinchSpan(){const a=[...touches.values()];return a.length===2?Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y):0;}
  canvas.addEventListener('pointerdown',e=>{
-  if(e.pointerType!=='touch'){mouseStart={x:e.clientX,y:e.clientY};return;}
-  e.stopImmediatePropagation();e.preventDefault();canvas.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false});
+  if(e.pointerType!=='touch'){mouseStart={x:e.clientX,y:e.clientY,npc:!world.roleAim?npcInteraction?.pick(e.clientX,e.clientY):null};return;}
+  e.stopImmediatePropagation();e.preventDefault();canvas.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false,npc:!world.roleAim?npcInteraction?.pick(e.clientX,e.clientY):null});
   if(touches.size>1){touches.forEach(p=>p.moved=true);pinchDistance=pinchSpan();}cancelCameraTurn();
  },true);
  canvas.addEventListener('pointermove',e=>{
@@ -292,8 +301,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   else if(p.startX>innerWidth*.45&&p.moved){const offset=camera.position.clone().sub(controls.target),spherical=new THREE.Spherical().setFromVector3(offset);spherical.theta-=dx/innerWidth*Math.PI*2;camera.position.setFromSpherical(spherical).add(controls.target);controls.update();}
  },true);
  function pointerEnd(e){
-  if(e.pointerType!=='touch'){if(mouseStart&&Math.hypot(e.clientX-mouseStart.x,e.clientY-mouseStart.y)<7&&e.type==='pointerup')selectAt(e.clientX,e.clientY);mouseStart=null;return;}
-  e.stopImmediatePropagation();const p=touches.get(e.pointerId);if(p&&!p.moved&&e.type==='pointerup')selectAt(e.clientX,e.clientY);touches.delete(e.pointerId);pinchDistance=0;
+  if(e.pointerType!=='touch'){if(mouseStart&&Math.hypot(e.clientX-mouseStart.x,e.clientY-mouseStart.y)<7&&e.type==='pointerup')selectAt(e.clientX,e.clientY,mouseStart.npc);mouseStart=null;return;}
+  e.stopImmediatePropagation();const p=touches.get(e.pointerId);if(p&&!p.moved&&e.type==='pointerup')selectAt(e.clientX,e.clientY,p.npc);touches.delete(e.pointerId);pinchDistance=0;
  }
  for(const name of ['pointerup','pointercancel'])canvas.addEventListener(name,pointerEnd,true);
  canvas.addEventListener('lostpointercapture',e=>{touches.delete(e.pointerId);if(!touches.size)pinchDistance=0;});
@@ -398,14 +407,14 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  function mobileLayout(){return innerWidth<=800||matchMedia('(pointer:coarse)').matches;}
  function updateHelp(){
-  document.querySelector('.control-hint').textContent=mobileLayout()?'ลากจอยซ้ายเพื่อเดิน'+(supportsAction('run')?' · แตะปุ่มวิ่งเพื่อสลับจังหวะ':'')+' · แตะมอนเลือกเป้า · ลากด้านขวาหมุนกล้อง':'WASD เดิน'+(supportsAction('run')?' · Shift วิ่ง':'')+' · Space โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E ใช้ยา';
+  document.querySelector('.control-hint').textContent=mobileLayout()?'ลากจอยซ้ายเพื่อเดิน'+(supportsAction('run')?' · แตะปุ่มวิ่งเพื่อสลับจังหวะ':'')+' · แตะมอนเลือกเป้า · ลากด้านขวาหมุนกล้อง':'WASD เดิน'+(supportsAction('run')?' · Shift วิ่ง':'')+' · Space คุยกับ NPC / โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E ใช้ยา';
   document.querySelector('.player-foot span:last-child').textContent=mobileLayout()?'จอยซ้าย · เดิน':'W A S D · เดิน';
  }
  updateHelp();addEventListener('resize',updateHelp);
- toast(mobileLayout()?'ลากจอยเดิน · แตะมอนและสกิลด้านขวา':'WASD เดิน · คลิกมอนเลือกเป้า · Space โจมตี · F ออโต้');
+ toast(mobileLayout()?'ลากจอยเดิน · แตะมอนและสกิลด้านขวา':'WASD เดิน · คลิกมอนเลือกเป้า · Space คุยกับ NPC / โจมตี · F ออโต้');
  function setNetwork(client){network=client;clearInput();world.auto=false;autoSent='';client.addEventListener('welcome',()=>{autoSent='';}); // a fresh server world starts on default AUTO settings
   // 0.97 the AUTO button shows only what the server reports.
-  world.skill=i=>{world.clearEmote();const point=world.roleGround;world.roleGround=null;return client.command('skill',{index:i,roleSchema:1,...(point?{point}: {})});};world.basicAttack=()=>{world.clearEmote();return client.command('attack');};world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=(on,hunt)=>client.command('auto',{on,hunt});world.questTalk=(npc,expected)=>client.command('questTalk',{npc,expected});world.storyCheck=()=>client.command('storyCheck');world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard)=>client.command('refine',{slot,npc,lekLai,guard});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.petCommand=(type,data={},id=crypto.randomUUID())=>client.request(type,id,data);world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});world.discard=(item,count)=>client.command('discard',{item,count});
+  world.skill=i=>{world.clearEmote();const point=world.roleGround;world.roleGround=null;return client.command('skill',{index:i,roleSchema:1,...(point?{point}: {})});};world.basicAttack=()=>{world.clearEmote();return client.command('attack');};world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=(on,hunt)=>client.command('auto',{on,hunt});world.questTalk=(npc,expected)=>client.command('questTalk',{npc,expected});world.storyCheck=()=>client.command('storyCheck');world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard,attempt)=>client.command('refine',{slot,npc,lekLai,guard,attempt});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.petCommand=(type,data={},id=crypto.randomUUID())=>client.request(type,id,data);world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});world.discard=(item,count)=>client.command('discard',{item,count});
  }
  function applyNetworkSnapshot(snapshot){const s=snapshot.self;world.networkSelfId=s.id;{const o=snapshot.weather;world.weatherOverride=o?{id:o.id,mapId:o.mapId??null,endsAt:Date.now()+o.left}:null;} // 0.109.7 admin weather
  if('weekly' in s)world.weekly=s.weekly??null;world.rebirth=s.rebirth??0;if(s.story)world.story=s.story;if('stall' in s)world.myStall=s.stall??null;if('guild' in s)world.myGuild=s.guild??null;world.status=s.status??{};world.supportTargetId=s.supportTargetId;world.supportRoster=s.supportRoster??[];world.roleFieldsView=snapshot.roleFields??[];world.rolePetsView=snapshot.rolePets??[];world.food=s.food??null;if('mvp' in s)world.mvp=s.mvp??null;if('pet' in s)world.pet=s.pet??null;if('mailbox' in s)world.mailbox=s.mailbox;if('petCollection' in s)world.petCollection=s.petCollection;if('bounty' in s)world.bounty=s.bounty??null;world.mercLeft=s.merc??0;if('album' in s)world.album=s.album??[];if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face};world.cooldowns=[...s.cooldowns];cooldownsAt=performance.now()/1000;world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
@@ -415,5 +424,5 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
- return {roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
+ return {roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk:()=>walker.cancel(),get walking(){return walker.active;},onEvent:fn=>listeners.add(fn),get online(){return !!network;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

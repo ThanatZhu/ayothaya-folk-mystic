@@ -6,7 +6,7 @@
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
 import {createMobilePlayUI} from './mobile-play-ui.js?v=menu135';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
-const SECONDARY=['menu-social','menu-status','menu-pet','menu-mail','menu-boss-result'];
+const SECONDARY=['menu-social','menu-status','menu-pet','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63({game}={}){

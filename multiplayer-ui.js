@@ -1,3 +1,5 @@
+import {createPartyLayout} from './party-layout.js?v=130';
+import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
 import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';
 import {openHudPanel} from './hud-panels.js?v=34';
@@ -28,6 +30,7 @@ function el(tag,className,text){const node=document.createElement(tag);if(classN
 export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const url=multiplayerURL(),local=['127.0.0.1','localhost'].includes(location.hostname),views=new Map(),fx=createSkillEffects(scene),projection=new THREE.Vector3(),reduced=matchMedia('(prefers-reduced-motion:reduce)');
  const presentation=createCombatPresentation();
+ const partyStyle=document.createElement('link');partyStyle.rel='stylesheet';partyStyle.href='party-ui.css?v=130';document.head.append(partyStyle);let rosterMode='all';
  const shell=document.getElementById('game-shell'),labels=document.getElementById('world-labels'),compact=matchMedia('(pointer:coarse),(max-width:900px)');
  let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0,currentChannel=normalizeChannel(new URLSearchParams(location.search).get('channel')||(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1)),channelCounts=[];const seenMessages=new Set(),bubbles=new Map();
  // HUD chip: connection state dot + label. Opens the room/party roster.
@@ -42,18 +45,24 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const chip=text=>{button.querySelector('#online-label').textContent=text;};
  // Nonmodal roster window for joining, inviting and party management.
  const dialog=el('dialog');dialog.id='online-panel';dialog.dataset.state='offline';dialog.setAttribute('aria-labelledby','online-title');
- dialog.innerHTML='<header><div><small>AYOTHAYA · MAIN SERVER</small><h2 id="online-title">เพื่อนร่วมอโยธยา</h2></div><button id="online-close" class="mp-icon" aria-label="ปิดหน้าผู้เล่นออนไลน์">×</button></header><p id="online-status" class="mp-status" role="status"><i class="mp-dot" aria-hidden="true"></i><span></span></p><div class="online-actions"><button id="online-reload" class="mp-primary" hidden>เชื่อมต่อใหม่</button><button id="online-party-leave" hidden>ออกจากปาร์ตี้</button></div><section class="mp-channels"><h3>เลือกแนล (ย้ายแนลได้ทันที)</h3><div id="online-channels" class="mp-channel-bar"></div></section><section class="mp-roster"><h3>ผู้เล่นในห้อง <small id="online-count"></small></h3><ul id="online-players"></ul></section><p class="online-note">ปาร์ตี้สูงสุด 5 คน · อยู่เซิร์ฟเวอร์และแมพเดียวกันจึงพบกัน · เมืองเป็นเขตปลอดภัย · กด Enter เพื่อแชตระหว่างเล่น</p>';
+ dialog.innerHTML='<header><div><small>AYOTHAYA · MAIN SERVER</small><h2 id="online-title">เพื่อนร่วมอโยธยา</h2></div><button id="online-close" class="mp-icon" aria-label="ปิดหน้าผู้เล่นออนไลน์">×</button></header><p id="online-status" class="mp-status" role="status"><i class="mp-dot" aria-hidden="true"></i><span></span></p><div class="online-actions"><button id="online-reload" class="mp-primary" hidden>เชื่อมต่อใหม่</button><button id="online-party-leave" hidden>ออกจากปาร์ตี้</button></div><section class="party-roster-tools" id="party-roster-tools" hidden><p id="party-role-note"></p><button id="party-roster-invite" class="mp-primary">เพิ่มคน</button><button id="party-show-all">ผู้เล่นทั้งหมด</button></section><section class="mp-channels"><h3>เลือกแนล (ย้ายแนลได้ทันที)</h3><div id="online-channels" class="mp-channel-bar"></div></section><section class="mp-roster"><h3><span id="party-roster-title">ผู้เล่นในแนล</span> <small id="online-count"></small></h3><input type="search" id="party-search" aria-label="ค้นหาชื่อผู้เล่น" placeholder="ค้นหาชื่อผู้เล่น" autocomplete="off"><ul id="online-players"></ul></section><p class="online-note">ปาร์ตี้สูงสุด 5 คน · อยู่เซิร์ฟเวอร์และแมพเดียวกันจึงพบกัน · เมืองเป็นเขตปลอดภัย · กด Enter เพื่อแชตระหว่างเล่น</p>';
  shell.append(dialog);const $=id=>shell.querySelector('#'+id),status=text=>{$('online-status').lastChild.textContent=text;};
  // Chat dock: always visible while online and never pauses the game.
  const dock=el('section');dock.id='online-dock';dock.hidden=true;dock.dataset.channel='room';dock.setAttribute('aria-label','แชตออนไลน์');
  dock.innerHTML='<header><div class="mp-tabs" role="tablist" aria-label="ช่องสนทนา"><button role="tab" data-channel="world" aria-selected="false">โลก</button><button role="tab" data-channel="room" aria-selected="true">ห้องนี้</button><button role="tab" data-channel="party" aria-selected="false" disabled>ปาร์ตี้</button><button role="tab" data-channel="guild" aria-selected="false" disabled>กิลด์</button><button role="tab" data-channel="system" aria-selected="false">ระบบ</button></div><button id="dock-toggle" class="mp-dock-bar" aria-expanded="true"><span id="dock-preview"></span><b id="dock-unread" hidden></b><i aria-hidden="true">▾</i></button></header><div id="online-messages" role="log" aria-label="ข้อความสนทนา" aria-live="polite"></div><p id="dock-note" role="status"></p><form id="online-chat"><input id="online-text" aria-label="ข้อความแชต" maxlength="240" autocomplete="off" enterkeyhint="send" placeholder=""><button type="submit">ส่ง</button></form>';
  shell.append(dock);
- const partyFrame=el('section');partyFrame.id='party-frame';partyFrame.hidden=true;partyFrame.setAttribute('aria-label','สมาชิกปาร์ตี้');partyFrame.innerHTML='<h3>ปาร์ตี้ <small id="party-count"></small></h3><ol id="party-members"></ol>';shell.append(partyFrame);
+ const partyFrame=el('section');partyFrame.id='party-frame';partyFrame.hidden=true;partyFrame.setAttribute('aria-label','สมาชิกปาร์ตี้');partyFrame.innerHTML='<h3 class="party-heading"><button type="button" id="party-manage" aria-label="เปิดหน้าจัดการปาร์ตี้"><span>ปาร์ตี้ <small id="party-count"></small></span><span class="party-open-mark" aria-hidden="true">›</span></button></h3><ol id="party-members"></ol><div class="party-actions"><button type="button" id="party-add">+ เพิ่มคน</button><button type="button" id="party-leave">ออกจากปาร์ตี้</button></div>';shell.append(partyFrame);
+ const partyMenu=el('button');partyMenu.id='menu-party';partyMenu.type='button';partyMenu.hidden=true;partyMenu.innerHTML='<i aria-hidden="true"></i><span>ปาร์ตี้</span>';requestAnimationFrame(()=>{(document.getElementById('menu-drawer')??document.getElementById('game-menu'))?.append(partyMenu);});
+ const partyLayout=createPartyLayout({frame:partyFrame,getCount:()=>party?.members.length??0});partyStyle.addEventListener('load',partyLayout.request);
+ const openRoster=mode=>{rosterMode=mode;$('party-search').value='';drawRoster();game.clearInput();openHudPanel(dialog);if(mode==='invite')requestAnimationFrame(()=>$('party-search').focus({preventScroll:true}));};
+ $('party-manage').onclick=partyMenu.onclick=()=>openRoster('party');$('party-add').onclick=$('party-roster-invite').onclick=()=>{if(partyActions(party,client?.id,client?.status==='online').canInvite)openRoster('invite');};
+ $('party-show-all').onclick=()=>openRoster('all');$('party-search').oninput=()=>drawRoster();$('party-leave').onclick=()=>{game.clearInput();if(partyActions(party,client?.id,client?.status==='online').canLeave)client.command('leaveParty');};
+ for(const name of ['pointerdown','pointerup','click'])partyFrame.addEventListener(name,e=>e.stopPropagation());
  const invites=el('div');invites.id='online-invites';invites.setAttribute('aria-live','assertive');shell.append(invites);
  // Online is automatic: whenever a backend exists and the account can authenticate, entering the game joins the shared world.
  const canJoin=!!url&&(account.cloud||local);
  if(!url){status('กำลังเตรียมเซิร์ฟเวอร์ออนไลน์ · ขณะนี้ยังเป็นโหมดเล่นคนเดียว');button.dataset.state=dialog.dataset.state='unavailable';}else if(!canJoin)status('เข้าเกมด้วย Google เพื่อเล่นออนไลน์');else{status('กำลังเข้าห้อง…');chip('กำลังเข้าห้อง…');}
- button.onclick=()=>{game.clearInput();openHudPanel(dialog);};$('online-close').onclick=()=>dialog.close();dialog.addEventListener('close',()=>button.focus());
+ button.onclick=()=>openRoster('all');$('online-close').onclick=()=>dialog.close();dialog.addEventListener('close',()=>button.focus());
  $('online-reload').onclick=()=>location.reload();
  // Chat dock behaviour.
  function setCollapsed(value){dock.classList.toggle('collapsed',value);$('dock-toggle').setAttribute('aria-expanded',String(!value));$('dock-toggle').setAttribute('aria-label',value?'เปิดแชต':'ย่อแชต');if(!value){unread=0;$('dock-unread').hidden=true;$('online-messages').scrollTop=$('online-messages').scrollHeight;}}
@@ -113,28 +122,35 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  drawChannels();
  function drawRoster(){
   drawChannels();
-  $('online-players').replaceChildren();$('online-count').textContent=roster.length+' คน';
-  for(const p of roster){
-   const li=el('li',p.id===client?.id?'me':''),who=el('div','mp-who'),name=el('b','',p.name);who.append(name,el('small','',className(p.classId)+(p.id===client?.id?' · คุณ':'')+(p.partyId&&p.partyId===party?.id?' · ปาร์ตี้เรา':p.partyId?' · มีปาร์ตี้':'')+(p.here===false?' · '+p.map:'')));
+  if(rosterMode==='party'&&!party)rosterMode='all';dialog.dataset.rosterMode=rosterMode;
+  const controls=partyActions(party,client?.id,client?.status==='online'),list=partyRoster(roster,{mode:rosterMode,party,selfId:client?.id,query:$('party-search').value});
+  $('party-roster-title').textContent=rosterMode==='invite'?'เลือกผู้เล่นเพื่อเชิญ':rosterMode==='party'?'สมาชิกปาร์ตี้':'ผู้เล่นในแนล';
+  $('party-roster-tools').hidden=rosterMode==='all';$('party-roster-invite').hidden=rosterMode==='invite';$('party-roster-invite').disabled=!controls.canInvite;
+  $('party-role-note').textContent=controls.reason==='full'?'ปาร์ตี้เต็ม 5 คน':controls.reason==='leader-only'?'หัวหน้าปาร์ตี้เท่านั้นที่เพิ่มสมาชิกได้':rosterMode==='invite'?'เชิญผู้เล่นที่ยังไม่มีปาร์ตี้ในแนลเดียวกัน':'เลือกสมาชิกเพื่อจัดการปาร์ตี้';
+  $('online-players').replaceChildren();$('online-count').textContent=list.length+' คน';
+  for(const p of list){
+   const li=el('li',p.id===client?.id?'me':''),who=el('div','mp-who'),name=el('b','',p.name);name.dataset.i18nSkip='';li.dataset.playerId=p.id;who.append(name,el('small','',className(p.classId)+(p.id===client?.id?' · คุณ':'')+(p.partyId&&p.partyId===party?.id?' · ปาร์ตี้เรา':p.partyId?' · มีปาร์ตี้':'')+(p.here===false?' · '+p.map:'')));
    if(party?.leader===p.id)name.prepend(el('span','mp-crown','♛ '));li.append(el('span','mp-avatar',(globalThis.I18N?.t(className(p.classId))??className(p.classId)).slice(0,1)),who);
-   const action=(text,type,data,primary)=>{const b=el('button',primary?'mp-primary':'',text);b.onclick=()=>client?.command(type,data);li.append(b);};
+   const action=(text,type,data,primary)=>{const b=el('button',primary?'mp-primary':'',text);b.dataset.command=type;b.type='button';b.disabled=client?.status!=='online'||type==='invite'&&party&&!controls.canInvite;b.onclick=()=>client?.command(type,data);li.append(b);};
    if(p.id!==client?.id&&!p.partyId&&(!party||party.leader===client.id))action('เชิญ','invite',{target:p.id},true);
-   if(p.id!==client?.id&&game.world.myGuild)action('ชวนกิลด์','guildInvite',{name:p.name});
-   if(p.id!==client?.id&&p.here!==false)action('ท้าดวล','duel',{target:p.id});
+   if(rosterMode==='all'&&p.id!==client?.id&&game.world.myGuild)action('ชวนกิลด์','guildInvite',{name:p.name});
+   if(rosterMode==='all'&&p.id!==client?.id&&p.here!==false)action('ท้าดวล','duel',{target:p.id});
    if(p.id!==client?.id&&party?.leader===client?.id&&party.members.includes(p.id)){action('หัวหน้า','leader',{target:p.id});action('นำออก','kick',{target:p.id});}
    $('online-players').append(li);
   }
-  $('online-party-leave').hidden=!party;
+  if(!list.length)$('online-players').append(el('li','party-empty',rosterMode==='invite'?'ยังไม่มีผู้เล่นที่เชิญได้ในแนลนี้':'ไม่พบผู้เล่นที่ค้นหา'));
+  $('online-party-leave').hidden=!party;$('online-party-leave').disabled=!controls.canLeave;
   const partyTab=dock.querySelector('[data-channel=party]');partyTab.disabled=!party;if(!party&&dock.dataset.channel==='party')setChannel('room');
   drawParty();
  }
  function drawParty(){
-  partyFrame.hidden=!party;if(!party)return;$('party-count').textContent=party.members.length+'/5';
+  const controls=partyActions(party,client?.id,client?.status==='online');partyFrame.hidden=!party;partyMenu.hidden=!party;if(!party)return;$('party-count').textContent=party.members.length+'/5';
+  $('party-add').disabled=!controls.canInvite;$('party-leave').disabled=!controls.canLeave;$('party-add').title=controls.reason==='full'?'ปาร์ตี้เต็ม 5 คน':controls.reason==='leader-only'?'หัวหน้าปาร์ตี้เท่านั้นที่เพิ่มสมาชิกได้':'เพิ่มสมาชิกปาร์ตี้';
   $('party-members').replaceChildren(...party.members.map(id=>{
    const info=roster.find(p=>p.id===id),li=el('li',id===client?.id?'me':'');li.dataset.id=id;li.setAttribute('role','button');li.tabIndex=0;li.onclick=()=>{game.selectAlly?.(id);updateParty();};li.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();li.click();}};
    const name=el('b','',(party.leader===id?'♛ ':'')+(info?.name??'…')+(id===client?.id?' (คุณ)':''));
-   const bar=el('span','mp-hp');bar.append(el('i'));li.append(name,el('small','mp-state'),bar);return li;
-  }));updateParty();
+   name.dataset.i18nSkip='';const bar=el('span','mp-hp');bar.append(el('i'));li.append(name,el('small','mp-state'),bar);return li;
+  }));updateParty();partyLayout.refresh();
  }
  function updateParty(){
   if(!party)return;

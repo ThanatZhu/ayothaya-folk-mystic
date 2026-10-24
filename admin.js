@@ -447,7 +447,7 @@ function playersTab(){
  if(p)bindPetGrant($('view'),{player:p,draft:petGrantDrafts.get(p.id),busy:petGrantSending,onSend:async()=>{
   if(petGrantSending)return;const draft=petGrantDrafts.get(p.id),payload={peer:p.id,gems:draft.gems,pet:draft.pet||null},signature=JSON.stringify(payload);
   if(!petGrantPending||petGrantPending.signature!==signature)petGrantPending={signature,id:crypto.randomUUID()};petGrantSending=true;playersTab();
-  try{const r=await adminFetch('/admin/pets',{...payload,requestId:petGrantPending.id});petGrantPending=null;draft.gems=0;draft.pet=null;adminMsg='ส่งสัตว์เลี้ยงและทองแท่งเข้าจดหมายเรียบร้อยแล้ว';}
+  try{const r=await adminFetch('/admin/mail',{peer:payload.peer,attachments:{goldBars:payload.gems,pets:payload.pet?[payload.pet]:[]},requestId:petGrantPending.id});petGrantPending=null;draft.gems=0;draft.pet=null;adminMsg='ส่งสัตว์เลี้ยงและทองแท่งเข้าจดหมายเรียบร้อยแล้ว';}
   catch(e){adminMsg='ยังไม่สำเร็จ · '+e.message;}finally{petGrantSending=false;playersTab();}
  }});
  const form=$('give');if(!form)return;
@@ -461,7 +461,7 @@ function playersTab(){
  refocus('item-search',v=>{keep();itemQuery=v.trim();});
  on('give-coins','onchange',()=>{keep();playersTab();});on('give-count','onchange',keep);
  form.onsubmit=async e=>{e.preventDefault();if(itemGrantSending)return;keep();itemGrantSending=true;const send=form.querySelector('.send');send.disabled=true;send.textContent='กำลังส่ง…';
-  try{const payload={peer:p.id,coins:giftCoins,items:basket},signature=JSON.stringify(payload);if(!itemGrantPending||itemGrantPending.signature!==signature)itemGrantPending={signature,id:crypto.randomUUID()};const r=await adminFetch('/admin/give',{...payload,requestId:itemGrantPending.id});adminMsg='✔ ส่งเข้าจดหมายของ '+r.name+' แล้ว';basket=[];giftCoins=0;itemGrantPending=null;}
+  try{const payload={peer:p.id,coins:giftCoins,items:basket},signature=JSON.stringify(payload);if(!itemGrantPending||itemGrantPending.signature!==signature)itemGrantPending={signature,id:crypto.randomUUID()};const r=await adminFetch('/admin/mail',{peer:payload.peer,attachments:{coins:payload.coins,items:payload.items},requestId:itemGrantPending.id});adminMsg='✔ ส่งเข้าจดหมายของ '+r.name+' แล้ว';basket=[];giftCoins=0;itemGrantPending=null;}
   catch(e){adminMsg=ADMIN_ERRORS[e.message]??'ส่งไม่สำเร็จ · '+e.message;}finally{itemGrantSending=false;}
   playersTab();};
 }

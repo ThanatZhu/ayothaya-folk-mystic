@@ -3689,3 +3689,5 @@ Object.assign(globalThis.I18N_EN,{"ทองแท่งไม่พอ": "Not e
 Object.assign(globalThis.I18N_EN,{"ลบเฉพาะฉบับที่อ่านแล้วและรับของครบแล้ว": "Only read mail with all gifts claimed is deleted", "ลบทั้งหมด": "Delete all", "รับทั้งหมด": "Claim all", "รับแล้ว {0} ฉบับ · ค้างรับ {1} ฉบับ": "Claimed {0} letters · {1} remaining", "ลบแล้ว {0} ฉบับ": "Deleted {0} letters", "· ของที่รับไม่ได้ยังอยู่ในจดหมาย": "· Unclaimed gifts remain in your mail", "เลือกจดหมายเพื่ออ่านรายละเอียด": "Select a letter to read its details"});
 
 Object.assign(globalThis.I18N_EN,{'เดินไปจุดนั้นไม่ได้':'Cannot walk to that destination'});
+
+Object.assign(globalThis.I18N_EN,{'ปุ่มสกิลอยู่ตำแหน่งมาตรฐาน · ลากปรับ AUTO และจอยเดินได้':'Skills use the standard positions. Drag AUTO and the movement stick to adjust them.'});

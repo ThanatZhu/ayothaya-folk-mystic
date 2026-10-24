@@ -1,5 +1,5 @@
 {
-  "version": 67,
+  "version": 125,
   "capital": "ayutthaya",
   "retiredMaps": [
     "ayutthaya-wilds",
@@ -22703,6 +22703,11 @@
           -17.5,
           15,
           20
+        ],
+        [
+          35,
+          -40,
+          49
         ]
       ],
       "portals": [
@@ -22955,7 +22960,17 @@
         }
       ],
       "scene": "maps/v5/rice-fields.glb",
-      "packs": true
+      "packs": true,
+      "levelBand": [
+        1,
+        12
+      ],
+      "worldBoss": {
+        "id": "rice-world-guardian",
+        "order": 1,
+        "hp": 500000,
+        "respawn": 3600
+      }
     },
     {
       "id": "old-orchard",
@@ -23209,6 +23224,11 @@
           -36.5,
           14,
           21
+        ],
+        [
+          33,
+          -39.5,
+          50
         ]
       ],
       "portals": [
@@ -23508,7 +23528,17 @@
         }
       ],
       "scene": "maps/v5/old-orchard.glb",
-      "packs": true
+      "packs": true,
+      "levelBand": [
+        10,
+        22
+      ],
+      "worldBoss": {
+        "id": "orchard-world-guardian",
+        "order": 2,
+        "hp": 1000000,
+        "respawn": 3600
+      }
     },
     {
       "id": "moonlit-mill",
@@ -23752,6 +23782,11 @@
           -25.5,
           14,
           22
+        ],
+        [
+          41,
+          -40,
+          51
         ]
       ],
       "portals": [
@@ -23928,7 +23963,17 @@
         }
       ],
       "scene": "maps/v5/moonlit-mill.glb",
-      "packs": true
+      "packs": true,
+      "levelBand": [
+        20,
+        30
+      ],
+      "worldBoss": {
+        "id": "mill-world-guardian",
+        "order": 3,
+        "hp": 1500000,
+        "respawn": 3600
+      }
     },
     {
       "id": "mill-cellar",
@@ -24517,6 +24562,11 @@
           -25,
           -18.5,
           23
+        ],
+        [
+          35,
+          -40,
+          52
         ]
       ],
       "portals": [
@@ -24650,7 +24700,17 @@
       ],
       "mood": "dusk",
       "scene": "maps/v5/lotus-marsh.glb",
-      "packs": true
+      "packs": true,
+      "levelBand": [
+        25,
+        35
+      ],
+      "worldBoss": {
+        "id": "marsh-world-guardian",
+        "order": 4,
+        "hp": 2000000,
+        "respawn": 3600
+      }
     },
     {
       "id": "guild-hall",
@@ -24985,7 +25045,7 @@
       "name": "ป่าไผ่ผีปอบ",
       "nameEn": "Bamboo Ghost Grove",
       "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
-      "exploration": true,
+      "exploration": false,
       "safe": false,
       "kind": "field",
       "region": "chapter2",
@@ -25190,7 +25250,48 @@
           "text": "เส้นทางนี้เปิดให้สำรวจแล้ว มอนสเตอร์และภารกิจบทใหม่ยังไม่เปิด เดินตามทางไปยังประตูเพื่อชมดินแดนถัดไปได้"
         }
       ],
-      "mobs": [],
+      "mobs": [
+        [
+          -35,
+          -25,
+          24
+        ],
+        [
+          30,
+          -25,
+          25
+        ],
+        [
+          -28.5,
+          2,
+          26
+        ],
+        [
+          34,
+          0,
+          24
+        ],
+        [
+          -30,
+          25,
+          25
+        ],
+        [
+          0,
+          35,
+          26
+        ],
+        [
+          -39,
+          46.5,
+          27
+        ],
+        [
+          35,
+          38,
+          28
+        ]
+      ],
       "portals": [
         {
           "to": "lotus-marsh",
@@ -25790,14 +25891,25 @@
       "leafSources": [],
       "citizens": [],
       "scene": "maps/v4/bamboo-grove.glb",
-      "layoutRevision": "chapter2-v2"
+      "layoutRevision": "chapter2-v2",
+      "levelBand": [
+        35,
+        45
+      ],
+      "worldBoss": {
+        "id": "pop-grove-lord",
+        "order": 5,
+        "hp": 2500000,
+        "respawn": 3600
+      },
+      "packs": true
     },
     {
       "id": "ruined-temple",
       "name": "วัดร้างริมกรุงเก่า",
       "nameEn": "Old Capital Temple Ruins",
       "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
-      "exploration": true,
+      "exploration": false,
       "safe": false,
       "kind": "field",
       "region": "chapter2",
@@ -26002,7 +26114,48 @@
           "text": "เส้นทางนี้เปิดให้สำรวจแล้ว มอนสเตอร์และภารกิจบทใหม่ยังไม่เปิด เดินตามทางไปยังประตูเพื่อชมดินแดนถัดไปได้"
         }
       ],
-      "mobs": [],
+      "mobs": [
+        [
+          -35,
+          -25,
+          29
+        ],
+        [
+          30,
+          -25,
+          30
+        ],
+        [
+          -32,
+          0,
+          31
+        ],
+        [
+          34,
+          0,
+          29
+        ],
+        [
+          -30,
+          25,
+          30
+        ],
+        [
+          0,
+          35,
+          31
+        ],
+        [
+          -39,
+          46.5,
+          32
+        ],
+        [
+          32,
+          41,
+          33
+        ]
+      ],
       "portals": [
         {
           "to": "bamboo-grove",
@@ -26312,7 +26465,18 @@
       "leafSources": [],
       "citizens": [],
       "scene": "maps/v4/ruined-temple.glb",
-      "layoutRevision": "chapter2-v2"
+      "layoutRevision": "chapter2-v2",
+      "levelBand": [
+        45,
+        55
+      ],
+      "worldBoss": {
+        "id": "abandoned-bell-curse",
+        "order": 6,
+        "hp": 3000000,
+        "respawn": 3600
+      },
+      "packs": true
     },
     {
       "id": "lablae",
@@ -28288,7 +28452,7 @@
       "name": "ชายป่าหิมพานต์",
       "nameEn": "Himmapan Forest Edge",
       "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
-      "exploration": true,
+      "exploration": false,
       "safe": false,
       "kind": "field",
       "region": "chapter2",
@@ -28493,7 +28657,48 @@
           "text": "เส้นทางนี้เปิดให้สำรวจแล้ว มอนสเตอร์และภารกิจบทใหม่ยังไม่เปิด เดินตามทางไปยังประตูเพื่อชมดินแดนถัดไปได้"
         }
       ],
-      "mobs": [],
+      "mobs": [
+        [
+          -35,
+          -25,
+          34
+        ],
+        [
+          30,
+          -25,
+          35
+        ],
+        [
+          -32,
+          0,
+          36
+        ],
+        [
+          34,
+          0,
+          34
+        ],
+        [
+          -30,
+          25,
+          35
+        ],
+        [
+          0,
+          35,
+          36
+        ],
+        [
+          -40.5,
+          47,
+          37
+        ],
+        [
+          35,
+          38,
+          38
+        ]
+      ],
       "portals": [
         {
           "to": "lablae",
@@ -28837,14 +29042,25 @@
       "leafSources": [],
       "citizens": [],
       "scene": "maps/v4/himmapan-edge.glb",
-      "layoutRevision": "chapter2-v2"
+      "layoutRevision": "chapter2-v2",
+      "levelBand": [
+        55,
+        70
+      ],
+      "worldBoss": {
+        "id": "woodland-elephant",
+        "order": 7,
+        "hp": 3500000,
+        "respawn": 3600
+      },
+      "packs": true
     },
     {
       "id": "naga-cave",
       "name": "ถ้ำพญานาค",
       "nameEn": "Naga Cave",
       "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
-      "exploration": true,
+      "exploration": false,
       "safe": false,
       "kind": "field",
       "region": "chapter2",
@@ -29049,7 +29265,48 @@
           "text": "เส้นทางนี้เปิดให้สำรวจแล้ว มอนสเตอร์และภารกิจบทใหม่ยังไม่เปิด เดินตามทางไปยังประตูเพื่อชมดินแดนถัดไปได้"
         }
       ],
-      "mobs": [],
+      "mobs": [
+        [
+          -35,
+          -25,
+          39
+        ],
+        [
+          30,
+          -25,
+          40
+        ],
+        [
+          -32,
+          0,
+          41
+        ],
+        [
+          34,
+          0,
+          39
+        ],
+        [
+          -30,
+          25,
+          40
+        ],
+        [
+          0,
+          35,
+          41
+        ],
+        [
+          -40,
+          45,
+          42
+        ],
+        [
+          34.5,
+          36,
+          43
+        ]
+      ],
       "portals": [
         {
           "to": "himmapan-edge",
@@ -29322,14 +29579,25 @@
       "leafSources": [],
       "citizens": [],
       "scene": "maps/v4/naga-cave.glb",
-      "layoutRevision": "chapter2-v2"
+      "layoutRevision": "chapter2-v2",
+      "levelBand": [
+        70,
+        85
+      ],
+      "worldBoss": {
+        "id": "underwater-naga-guardian",
+        "order": 8,
+        "hp": 4000000,
+        "respawn": 3600
+      },
+      "packs": true
     },
     {
       "id": "kailash-peak",
       "name": "ยอดเขาไกรลาส",
       "nameEn": "Kailash Peak",
       "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
-      "exploration": true,
+      "exploration": false,
       "safe": false,
       "kind": "field",
       "region": "chapter2",
@@ -29534,7 +29802,48 @@
           "text": "เส้นทางนี้เปิดให้สำรวจแล้ว มอนสเตอร์และภารกิจบทใหม่ยังไม่เปิด เดินตามทางไปยังประตูเพื่อชมดินแดนถัดไปได้"
         }
       ],
-      "mobs": [],
+      "mobs": [
+        [
+          -35,
+          -25,
+          44
+        ],
+        [
+          30,
+          -25,
+          45
+        ],
+        [
+          -32,
+          0,
+          46
+        ],
+        [
+          34,
+          0,
+          44
+        ],
+        [
+          -30,
+          25,
+          45
+        ],
+        [
+          0,
+          35,
+          46
+        ],
+        [
+          -40,
+          45,
+          47
+        ],
+        [
+          35,
+          38,
+          48
+        ]
+      ],
       "portals": [
         {
           "to": "naga-cave",
@@ -29821,7 +30130,18 @@
       "leafSources": [],
       "citizens": [],
       "scene": "maps/v4/kailash-peak.glb",
-      "layoutRevision": "kailash-v3"
+      "layoutRevision": "kailash-v3",
+      "levelBand": [
+        85,
+        99
+      ],
+      "worldBoss": {
+        "id": "cloud-peak-yaksha",
+        "order": 9,
+        "hp": 4500000,
+        "respawn": 3600
+      },
+      "packs": true
     }
   ]
 }

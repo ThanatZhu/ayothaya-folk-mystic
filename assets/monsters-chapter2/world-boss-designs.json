@@ -1,0 +1,45 @@
+{
+  "mode": "built-in image_gen",
+  "monsters": [
+    {
+      "id": "rice-world-guardian",
+      "name": "ขุนฟางพิทักษ์นา",
+      "height": 3.5,
+      "subject": "A huge two-legged rice-field scarecrow buffalo spirit: straw-bundle muscular torso, dark wooden buffalo mask with TWO ivory horns, woven Thai farmer hat behind head, red cloth sash, exactly two wooden arms and two straw legs. One bronze sickle held in the SAME viewer-left hand throughout. Weathered rice sheaves on shoulders; warm straw gold and burnt orange. Not the reference stone yaksha.",
+      "prompt": "Create a game-ready 8-POSE SPRITE ATLAS for ONE original Thai folk-mystic RPG map boss. Reference1 STYLE ONLY: existing game boss sprites. Reference2 LAYOUT ONLY: 4 columns x 2 rows of 8 distinct key poses. Painted pixel/chibi style with warm dark outlines, same three-quarter facing VIEWER LEFT, fixed camera and identical character size across all8 poses. Truly transparent RGBA, no background, labels, effects, borders, text or shadows. Strict 4x2 grid; reserve 15% transparent padding in EVERY cell, including widest attack. Entire character fits every cell. Frame order row-major: 0 neutral stance, 1 left leg/right arm forward walk, 2 RIGHT leg/LEFT arm forward walk (opposite to frame1), 3 windup weapon/body pulled back, 4 attack towards VIEWER LEFT, 5 hurt recoil, 6 recovery neutral, 7 down on side (no gore). Character identity, head size, limbs and weapon side MUST match in all8poses. Far limbs correctly hidden by body, never duplicate. Down pose lower naturally. A huge two-legged rice-field scarecrow buffalo spirit: straw-bundle muscular torso, dark wooden buffalo mask with TWO ivory horns, woven Thai farmer hat behind head, red cloth sash, exactly two wooden arms and two straw legs. One bronze sickle held in the SAME viewer-left hand throughout. Weathered rice sheaves on shoulders; warm straw gold and burnt orange. Not the reference stone yaksha.",
+      "gameReady": true,
+      "stage": "live-world125",
+      "animation": "animations/rice-world-guardian.json"
+    },
+    {
+      "id": "orchard-world-guardian",
+      "name": "พญาวานรหมากทอง",
+      "height": 3.8,
+      "subject": "A huge chibi Thai orchard monkey king: brown fur, cream monkey muzzle, jade-and-bronze brow band, red sash and indigo waist cloth, exactly two arms, two legs and ONE long curled monkey tail. One golden betel-fruit wooden club held in the SAME viewer-left hand throughout. Betel leaves decorate shoulders. No human torso or extra limbs.",
+      "prompt": "Create a game-ready 8-POSE SPRITE ATLAS for ONE original Thai folk-mystic RPG map boss. Reference1 STYLE ONLY: existing game boss sprites. Reference2 LAYOUT ONLY: 4 columns x 2 rows of 8 distinct key poses. Painted pixel/chibi style with warm dark outlines, same three-quarter facing VIEWER LEFT, fixed camera and identical character size across all8 poses. Truly transparent RGBA, no background, labels, effects, borders, text or shadows. Strict 4x2 grid; reserve 15% transparent padding in EVERY cell, including widest attack. Entire character fits every cell. Frame order row-major: 0 neutral stance, 1 left leg/right arm forward walk, 2 RIGHT leg/LEFT arm forward walk (opposite to frame1), 3 windup weapon/body pulled back, 4 attack towards VIEWER LEFT, 5 hurt recoil, 6 recovery neutral, 7 down on side (no gore). Character identity, head size, limbs and weapon side MUST match in all8poses. Far limbs correctly hidden by body, never duplicate. Down pose lower naturally. A huge chibi Thai orchard monkey king: brown fur, cream monkey muzzle, jade-and-bronze brow band, red sash and indigo waist cloth, exactly two arms, two legs and ONE long curled monkey tail. One golden betel-fruit wooden club held in the SAME viewer-left hand throughout. Betel leaves decorate shoulders. No human torso or extra limbs.",
+      "gameReady": true,
+      "stage": "live-world125",
+      "animation": "animations/orchard-world-guardian.json"
+    },
+    {
+      "id": "mill-world-guardian",
+      "name": "อสุรโรงสีจันทรา",
+      "height": 4.1,
+      "subject": "A huge two-legged cursed Ayutthaya rice mill automaton: dark weathered teak body, a turquoise spirit face carved in a rice-mill stone mask, small wooden water-wheel attached on its BACK, exactly two heavy wooden arms and two wooden legs, indigo apron, red cord knots, one wooden mallet held in the SAME viewer-left hand throughout. Tiny moon-silver metal trim, no flames.",
+      "prompt": "Create a game-ready 8-POSE SPRITE ATLAS for ONE original Thai folk-mystic RPG map boss. Reference1 STYLE ONLY: existing game boss sprites. Reference2 LAYOUT ONLY: 4 columns x 2 rows of 8 distinct key poses. Painted pixel/chibi style with warm dark outlines, same three-quarter facing VIEWER LEFT, fixed camera and identical character size across all8 poses. Truly transparent RGBA, no background, labels, effects, borders, text or shadows. Strict 4x2 grid; reserve 15% transparent padding in EVERY cell, including widest attack. Entire character fits every cell. Frame order row-major: 0 neutral stance, 1 left leg/right arm forward walk, 2 RIGHT leg/LEFT arm forward walk (opposite to frame1), 3 windup weapon/body pulled back, 4 attack towards VIEWER LEFT, 5 hurt recoil, 6 recovery neutral, 7 down on side (no gore). Character identity, head size, limbs and weapon side MUST match in all8poses. Far limbs correctly hidden by body, never duplicate. Down pose lower naturally. A huge two-legged cursed Ayutthaya rice mill automaton: dark weathered teak body, a turquoise spirit face carved in a rice-mill stone mask, small wooden water-wheel attached on its BACK, exactly two heavy wooden arms and two wooden legs, indigo apron, red cord knots, one wooden mallet held in the SAME viewer-left hand throughout. Tiny moon-silver metal trim, no flames.",
+      "gameReady": true,
+      "stage": "live-world125",
+      "animation": "animations/mill-world-guardian.json"
+    },
+    {
+      "id": "marsh-world-guardian",
+      "name": "พญาเต่าบัวทมิฬ",
+      "height": 4.1,
+      "subject": "A huge QUADRUPED lotus marsh turtle beast: exactly FOUR short powerful scaled legs, ONE head and ONE short tail. Dark teal turtle shell planted with pink lotus blossoms and broad lotus leaves, bronze Thai scroll decorations on shell, amber eyes, short curved tusk-like horn on snout. Deep jade water scales. Not an elephant or humanoid. No weapon. Locomotion opposite diagonal leg pairs, windup lowers head, attack lunges shell/body forward, down shell and head resting sideways.",
+      "prompt": "Create a game-ready 8-POSE SPRITE ATLAS for ONE original Thai folk-mystic RPG map boss. Reference1 STYLE ONLY: existing game boss sprites. Reference2 LAYOUT ONLY: 4 columns x 2 rows of 8 distinct key poses. Painted pixel/chibi style with warm dark outlines, same three-quarter facing VIEWER LEFT, fixed camera and identical character size across all8 poses. Truly transparent RGBA, no background, labels, effects, borders, text or shadows. Strict 4x2 grid; reserve 15% transparent padding in EVERY cell, including widest attack. Entire character fits every cell. Frame order row-major: 0 neutral stance, 1 left leg/right arm forward walk, 2 RIGHT leg/LEFT arm forward walk (opposite to frame1), 3 windup weapon/body pulled back, 4 attack towards VIEWER LEFT, 5 hurt recoil, 6 recovery neutral, 7 down on side (no gore). Character identity, head size, limbs and weapon side MUST match in all8poses. Far limbs correctly hidden by body, never duplicate. Down pose lower naturally. A huge QUADRUPED lotus marsh turtle beast: exactly FOUR short powerful scaled legs, ONE head and ONE short tail. Dark teal turtle shell planted with pink lotus blossoms and broad lotus leaves, bronze Thai scroll decorations on shell, amber eyes, short curved tusk-like horn on snout. Deep jade water scales. Not an elephant or humanoid. No weapon. Locomotion opposite diagonal leg pairs, windup lowers head, attack lunges shell/body forward, down shell and head resting sideways.",
+      "gameReady": true,
+      "stage": "live-world125",
+      "animation": "animations/marsh-world-guardian.json"
+    }
+  ]
+}

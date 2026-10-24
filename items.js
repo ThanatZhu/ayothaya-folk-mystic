@@ -1,4 +1,5 @@
 import {patch,patchDrops} from './balance.js';
+import {WORLD_DROP_ITEMS,WORLD_CARD_ATLASES,chapter2Drops} from './chapter2-loot.js';
 // Items, loot, coins (เบี้ย) and NPC shops. Pure rules shared by the client (offline guests + UI) and the realm
 // server (authoritative online bag). Bag state: {coins, items:{[id]:count}}.
 // Art: one atlas, 6x4 cells of 256 px (1536x1024, transparent). Drop a finished file over the same path to re-skin.
@@ -6,6 +7,10 @@ export const ITEM_ATLAS='assets/items42/items.png',GEAR_ATLAS='assets/gear43/gea
 export const CARD_ATLAS='assets/cards45/cards.png',SOCIAL_ATLAS='assets/social46/social.png',EMBLEM_ATLAS='assets/emblems47/emblems.png',EMOTE_ATLAS='assets/emotes48/emotes.png',ITEMS48_ATLAS='assets/items48/items.png';
 export const GEAR85_ATLAS='assets/gear85/gear.svg';
 export const ATLASES={gear85:GEAR85_ATLAS,gear:GEAR_ATLAS,refine:REFINE_ATLAS,cards:CARD_ATLAS,social:SOCIAL_ATLAS,emblems:EMBLEM_ATLAS,emotes:EMOTE_ATLAS,items48:ITEMS48_ATLAS,gear104w:'assets/gear104/weapons.png',gear104a:'assets/gear104/armor.png',gear106a:'assets/gear106/head-garment.png',gear106b:'assets/gear106/shoes.png'}; // item.atlas key → file (default ITEM_ATLAS)
+ATLASES.world125='assets/monsters-chapter2/world-drops-v1.png';
+Object.assign(ATLASES,WORLD_CARD_ATLASES);
+// Cards reuse each creature's authored 4x2 sheet; other item atlases remain 6x4.
+export const ATLAS_LAYOUTS=Object.fromEntries(Object.keys(WORLD_CARD_ATLASES).map(key=>[key,{columns:4,rows:2}]));
 export const BAG_SLOTS=40,MAX_STACK=999,MAX_COINS=9999999;
 // 0.109.6 bag expansion: each bag carries its own size (40 base, +10 per expansion at Mae Bua's, up to 100)
 export const BAG_MAX=100,BAG_STEP=10;
@@ -274,6 +279,8 @@ export const DROPS={
  'marsh-ape':{coins:[300,450],items:[['lotus-seed',1,3],['hp-large',.8,2],['lek-lai',.25],['vest-chain',.08],['card-marsh-ape',0.04]]},
  'mill-keeper':{coins:[400,600],items:[['hat-ricecrown',.2],['spirit-rope',1],['palm-leaf',.5,2],['hp-large',1,3],['vest-lacquer',.25],['bia-gae',.15],['takrut-silver',.3],['lek-lai',.3],['card-mill-keeper',0.15],['sword-ajna',.03],['spear-panchang',.03],['bow-sinchai',.03],['gloves-leklai',.03],['daggers-stingray',.03],['staff-octa',.03],['beads-mani',.03]]},
 };
+Object.assign(ITEMS,WORLD_DROP_ITEMS);
+Object.assign(DROPS,chapter2Drops(ITEMS,bracketGear));
 // 0.107 bracket gear: each fine piece 2%, each elite piece 1% from that bracket's awakened bosses.
 for(const b of GEAR_BRACKETS)for(const boss of b.bosses)DROPS[boss].items.push(...bracketGear(b.key,'fine').map(id=>[id,.02]),...bracketGear(b.key,'elite').map(id=>[id,.01]));
 

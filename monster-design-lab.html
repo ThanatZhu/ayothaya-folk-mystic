@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="th">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>มอนสเตอร์บทใหม่ · 5 แมพ / 25 ตัว</title>
+<link rel="icon" href="assets/brand69/ayothaya-emblem.png"><link rel="stylesheet" href="typography.css"><link rel="stylesheet" href="monster-design-lab.css">
+<main>
+<header><p class="eyebrow">AYOTHAYA · CREATURE & MOTION REVIEW</p><h1>มอนสเตอร์บทใหม่ · 25 ตัว</h1><p>ครบ 5 แมพ · แมพละมอนทั่วไป 3 / ตัวพิเศษ 1 / บอส 1</p><p class="note">ภาพออกแบบครบ พร้อมชุดท่าหลักตัวละ 8 เฟรมสำหรับตรวจการเคลื่อนไหว · ลับแลเป็นเมืองปลอดภัย</p></header>
+<nav id="maps" aria-label="เลือกแมพ"></nav>
+<section>
+<div class="section-head"><div><h2 id="map-title"></h2><p id="map-level" class="note"></p></div><button id="background">พื้นสว่าง / มืด</button></div>
+<div class="controls">
+<label>ดูท่า <select id="action"><option value="sequence">เล่นทุกท่าต่อเนื่อง</option><option value="idle">ยืน</option><option value="move">เดิน / บิน / เลื้อย</option><option value="attack">ง้าง → โจมตี → คืนท่า</option><option value="hurt">ถูกโจมตี → ฟื้นตัว</option><option value="down">ล้ม</option></select></label>
+<button id="pause" aria-pressed="false">หยุดภาพ</button>
+<label>ความเร็ว <select id="speed"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select></label>
+<label>ทีละเฟรม <input id="frame" type="range" min="0" max="7" value="0" step="1"><output id="frame-label">0 · ยืน</output></label>
+</div>
+<div class="lineup"><canvas id="lineup" width="1600" height="480" aria-label="เทียบขนาดผู้เล่นกับมอนสเตอร์ทั้งห้าตัว"></canvas></div>
+<label class="zoom">สเกลเทียบกับผู้เล่น <input id="zoom" type="range" min="36" max="64" value="52"></label>
+<p class="note">ทุกท่าใช้สเกลเดียวจากท่ายืน · ไม่ขยายท่าล้มให้สูงเท่าท่ายืน · ช่วงเลเวลและขนาดยังเป็นข้อเสนอ</p>
+</section>
+<section id="detail">
+<div class="section-head"><h2 id="detail-title"></h2><a id="sheet-link" download>ดาวน์โหลดแผ่นท่า PNG ↗</a></div>
+<canvas id="focus" width="900" height="460" aria-label="พรีวิวมอนสเตอร์ตัวที่เลือก"></canvas>
+<div id="poses" aria-label="เลือกเฟรม"></div>
+<p class="note">ท่ายืน / เคลื่อนที่ A–B / ง้าง / โจมตี / ถูกตี / คืนท่า / ล้ม — ชุดท่าหลักรอบแรก ยังต้องตรวจความลื่นและรายละเอียดท่าเดินก่อนใช้งานจริง</p>
+</section>
+<section><h2>มอนสเตอร์ในแมพนี้</h2><div id="creatures"></div></section>
+<section><h2>สถานะทั้ง 5 แมพ</h2><div id="planned"></div><p class="note">เชื่อมจุดเกิด ค่าพลัง ดรอป และชุดท่าเข้าเกมแล้ว รวมบอสแมพเดิม 4 ตัว เป็น 29 ตัว / 232 ท่าหลัก เมืองลับแลเป็นเมืองปลอดภัย</p></section>
+<footer><a href="assets/monsters-chapter2/designs.json">รายละเอียดและสถานะ</a> · <a href="assets/monsters-chapter2/production-prompts-v2.json">Prompt ภาพใหม่</a> · <a href="assets/monsters-chapter2/animation-prompts-v1.json">Prompt ชุดท่า</a><p id="status" role="status">กำลังโหลดภาพ…</p></footer>
+</main><script type="module" src="monster-design-lab.js"></script></html>

@@ -1,4 +1,5 @@
 import {createRoleWorldDecor} from './role-world-decor.js';
+import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progress.js';
 import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';
 import {createLiveRoleVfx} from './role-skill-vfx.js';
@@ -67,7 +68,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   return true;
  }
  const makeMobView=m=>{
-  const h=(MONSTER_TYPES[m.type].height??1.45)*(m.leader?1.35:1),frames=monsterArt[m.type]?.map(t=>t.clone()),tex=frames?.[0]??monsterTextures[m.type%4].clone(),s=sprite(tex,m.x,-m.z,h*1.1,h,.06),sh=shadow(m.x,-m.z,.36);
+  const type=MONSTER_TYPES[m.type],frames=monsterArt[m.type]?.map(t=>t.clone()),scale=m.leader?1.35:1,h=(frames?.[0]?.userData.monsterHeight??type.height??1.45)*scale,width=h*(frames?.[0]?.userData.monsterAspect??1.1),tex=frames?.[0]??monsterTextures[m.type%4].clone(),s=sprite(tex,m.x,-m.z,width,h,.06),sh=shadow(m.x,-m.z,.36);
   s.userData.monsterId=m.id;
   const label=document.createElement('button');label.className='mob-label'+(m.leader?' leader':'')+(MONSTER_TYPES[m.type].boss?' boss':'');label.type='button';label.setAttribute('aria-label','เลือกเป้า '+MONSTER_TYPES[m.type].name+' '+(m.id+1));
   const text=document.createElement('span');text.textContent=(m.leader?'★ หัวหน้า':'')+MONSTER_TYPES[m.type].name;label.append(text);
@@ -75,7 +76,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   label.addEventListener('click',()=>world.select(m.id));
   const warning=new THREE.Mesh(new THREE.RingGeometry(.15,MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe??MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe?'#ff4a4a':'#ed9b59',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));warning.rotation.x=-Math.PI/2;scene.add(warning);
   const charge=new THREE.Mesh(new THREE.CircleGeometry(MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe??MONSTER_TYPES[m.type].reach??1.35,40),new THREE.MeshBasicMaterial({color:MONSTER_BEHAVIOUR[MONSTER_TYPES[m.type].id]?.aoe?'#ff3b3b':'#ff8a3d',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));charge.rotation.x=-Math.PI/2;charge.visible=false;scene.add(charge);
-  return {sprite:s,shadow:sh,height:h,label,fill,frames,frame:-1,warning,charge,deathStart:null,flashAt:-9};
+  const view={sprite:s,shadow:sh,height:h,width,labelHeight:(type.bodyHeight??type.height??h)*scale,label,fill,frames,frame:-1,warning,charge,deathStart:null,flashAt:-9};
+  if(!frames&&(type.chapter2Art||type.sheet))loadMonsterFrames({mobs:[[0,0,m.type]]}).then(art=>{
+   monsterArt[m.type]=art[m.type];if(!art[m.type])return;
+   s.material.map.dispose();view.frames=art[m.type].map(t=>t.clone());view.height=(view.frames[0].userData.monsterHeight??type.height??1.45)*scale;
+   view.width=view.height*(view.frames[0].userData.monsterAspect??1.1);view.frame=-1;
+  }).catch(e=>console.error('Monster art unavailable',type.id,e));
+  return view;
  };
  const mobViews=world.mobs.map(makeMobView);
  // 0.110.9 monsters the server adds after we joined (back-office world bosses) arrive whole on first sight: make them
@@ -347,14 +354,14 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    const f=monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
    const recoil=reduced?0:Math.sin(Math.PI*Math.min(1,m.hit/.34))*.18;
    const mobFloor=groundHeight(world.nav,m.x,m.z);v.sprite.position.set(m.x+(m.recoil?.x??0)*recoil,mobFloor+.06,m.z+(m.recoil?.z??0)*recoil);v.shadow.position.set(m.x,mobFloor+.073,m.z);
-   v.sprite.scale.set(v.height*1.1,v.height,1);v.sprite.material.rotation=0;
+   v.sprite.scale.set(v.width,v.height,1);v.sprite.material.rotation=0;
    v.sprite.material.transparent=m.hp<=0;v.sprite.material.opacity=m.hp<=0?Math.max(0,1-(deadAge-.5)/.75):1;
    // 0.74 hit flash: overbright tint (>1) burns the sprite near-white for ~0.12 s, then fades back.
    const burn=reduced?0:Math.max(0,1-(t-v.flashAt)/.14);v.sprite.material.color.set(m.root>0?'#9ddacc':'#fff1da');if(burn>0)v.sprite.material.color.multiplyScalar(1+2.6*burn);
-   if(burn>0)v.sprite.scale.set(v.height*1.1*(1+.08*burn),v.height*(1-.06*burn),1);v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
+   if(burn>0)v.sprite.scale.set(v.width*(1+.08*burn),v.height*(1-.06*burn),1);v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
    v.label.toggleAttribute('data-full-health',m.hp>=m.maxHp);
    if(m.aggro){const side=(p.x-m.x)*Math.cos(controls.getAzimuthalAngle())-(p.z-m.z)*Math.sin(controls.getAzimuthalAngle());v.sprite.material.map.repeat.x=side<0?-1:1;v.sprite.material.map.offset.x=side<0?1:0;}
-   project(v.label,m.x,mobFloor+v.height+.24,m.z);
+   project(v.label,m.x,mobFloor+v.labelHeight+.24,m.z);
   });
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}
   skillEffects.update(dt,camera);

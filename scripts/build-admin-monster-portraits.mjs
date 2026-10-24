@@ -1,0 +1,10 @@
+// Mechanical extraction of the same masked idle frame the game renders, kept small for admin lists.
+import {readFile,writeFile,mkdir} from 'node:fs/promises';import {fileURLToPath,pathToFileURL} from 'node:url';
+import {CHAPTER2_MONSTERS} from '../chapter2-monsters.js';
+const output=new URL('../assets/admin127/monsters/',import.meta.url);await mkdir(output,{recursive:true});
+const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true});
+try{const page=await browser.newPage(),records=[];for(const monster of CHAPTER2_MONSTERS){
+ const metadata=new URL('../assets/monsters-chapter2/animations/'+monster.chapter2Art+'.json',import.meta.url),meta=JSON.parse(await readFile(metadata,'utf8')),source=new URL(meta.source,metadata),data=(await readFile(source)).toString('base64');
+ const uri=await page.evaluate(async({meta,data})=>{const image=new Image();image.src='data:image/png;base64,'+data;await image.decode();const frame=meta.frames[0],[x,y,w,h]=frame.rect,c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d'),path=new Path2D();for(const [row,start,length] of frame.clipRows)path.rect(start,row,length,1);ctx.clip(path);ctx.drawImage(image,x,y,w,h,0,0,w,h);const thumb=document.createElement('canvas');thumb.width=thumb.height=160;const g=thumb.getContext('2d'),scale=148/Math.max(w,h);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(c,(160-w*scale)/2,(160-h*scale)/2,w*scale,h*scale);return thumb.toDataURL('image/webp',.9);},{meta,data});
+ const name=monster.id+'.webp',bytes=Buffer.from(uri.split(',')[1],'base64');await writeFile(new URL(name,output),bytes);records.push({id:monster.id,source:'assets/monsters-chapter2/animations/'+monster.id+'.json',frame:0,width:160,height:160,bytes:bytes.length});
+ }await writeFile(new URL('manifest.json',output),JSON.stringify({purpose:'Admin portraits extracted from live masked idle frames; no new artwork',records},null,2));console.log(JSON.stringify({portraits:records.length,bytes:records.reduce((n,r)=>n+r.bytes,0)}));await page.close();}finally{await browser.close();}

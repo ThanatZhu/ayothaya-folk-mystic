@@ -1,3 +1,4 @@
+import {CHAPTER2_MONSTERS,CHAPTER2_BEHAVIOUR} from './chapter2-monsters.js';
 // Append-only IDs preserve existing saves and test fixtures (legacy IDs 0–3).
 export const FRONTIER_MONSTERS=[
  {id:'straw',name:'หุ่นฟางหลง',hp:52,speed:.85,damage:5,baseXp:14,jobXp:9,level:2,sheet:'field-monsters',row:0,height:1.65},
@@ -25,6 +26,7 @@ export const FRONTIER_MONSTERS=[
  {id:'mill-keeper-awakened',name:'ร่างทรงเจ้าหุ่นฟางพันเชือก',hp:45000,speed:.9,damage:150,baseXp:2200,jobXp:1300,level:82,sheet:'elite-monsters',row:2,height:4.2,boss:true,awakened:true,respawn:1800,reach:3,windup:.9},
  {id:'marsh-ape-awakened',name:'ร่างทรงพญาวานรบึง',hp:60000,speed:1.9,damage:190,baseXp:3000,jobXp:1800,level:95,sheet:'elite-monsters',row:1,height:3.6,boss:true,awakened:true,respawn:1800,reach:2.4,windup:.8}
 ];
+FRONTIER_MONSTERS.push(...CHAPTER2_MONSTERS);
 // Presentation timing is independent of frame rate and authoritative world position.
 export function monsterFrame(m,time){
  if(m.hp<=0)return 7;
@@ -52,6 +54,7 @@ export const MONSTER_BEHAVIOUR={'bog-hopper':{leap:true},'bog-lantern':{aoe:2.4,
  'rat-chief':{enrage:true},'mill-keeper':{aoe:2.8,enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'lantern-lord':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.4,1.6,.1,8,6.5)},'straw-king':{aoe:3.4,windup:1.1,enrage:true,slam:slam(5,4,1.8,.12,7,6)},
  'rat-chief-awakened':{enrage:true,slam:slam(4,3.2,1.4,.08,9,7)},'monkey-chief-awakened':{skirmish:1.2,enrage:true,slam:slam(4.2,3.4,1.5,.09,8,6.5)},'mill-keeper-awakened':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.6,1.6,.1,8,6.5)},'marsh-ape-awakened':{skirmish:1.2,enrage:true,slam:slam(4.6,3.8,1.6,.1,8,6)}};
 export const BOSS_SIGHT=10,BOSS_GIVE_UP=25;
+Object.assign(MONSTER_BEHAVIOUR,CHAPTER2_BEHAVIOUR);
 export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear}){
  m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);m.strike=Math.max(0,(m.strike??0)-dt);m.moving=false;
  m.flee=Math.max(0,(m.flee??0)-dt);m.leapCD=Math.max(0,(m.leapCD??0)-dt);

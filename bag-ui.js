@@ -1,6 +1,7 @@
 // Bag (กระเป๋า · B), NPC shops, two quick-use slots (Q / E) and loot notices.
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
 import {activeEvent,surgeOn} from './events.js?v=64';
+import {ATLAS_LAYOUTS} from './items.js?v=107';
 import {levelGifts} from './experience.js?v=105.3';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=107';
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=role116';
@@ -23,6 +24,7 @@ const loaded={};if(typeof Image==='function')for(const k of new Set(Object.value
  for(const el of document.querySelectorAll('[style*="--ph:"]'))el.style.cssText=iconStyle(el.style.getPropertyValue('--ph').trim().slice(1,-1));};im.src=ATLASES[k];}
 export function iconStyle(id){
  const def=itemDef(id);if(!def)return '';
+ if(def.monsterCard){const layout=ATLAS_LAYOUTS[def.atlas];return 'background-image:url('+ATLASES[def.atlas]+');background-size:'+(layout.columns*100)+'% '+(layout.rows*100)+'%;background-position:0 0;background-color:#20382f;box-shadow:inset 0 0 0 2px #d9bc72;border-radius:4px';}
  const ph=def.ph&&!loaded[def.atlas],item=ph?{...def,...def.ph}:def;
  return `background-image:url(${ATLASES[item.atlas]??ITEM_ATLAS});background-size:600% 400%;background-position:${item.icon%6*20}% ${Math.floor(item.icon/6)/3*100}%`+(TINTS[item.tint]?';filter:'+TINTS[item.tint]:'')+(ph?`;--ph:'${id}'`:'');
 }

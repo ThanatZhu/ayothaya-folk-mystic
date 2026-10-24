@@ -4,7 +4,7 @@ import {peoplePlacement} from './npc-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=pets126';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createFrontierScene} from './frontier-scene.js?v=38';
-import {loadMonsterFrames} from './monster-art.js?v=38';
+import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {createMultiplayer} from './multiplayer-ui.js?v=pets126';
 import {createEquipmentUI} from './equipment-ui.js?v=size1';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=106.1-lablae';
@@ -26,7 +26,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=pets126';
+import {createGame} from './game-controls.js?v=world125-pets126';
 import {atlasPath,className} from './classes.js?v=112.1';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=story124';
@@ -66,7 +66,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=108.3');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=world125');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));

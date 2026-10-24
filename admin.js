@@ -6,6 +6,7 @@ import {roleById} from './assets/skills-next/catalog.js';
 // Edits are kept as overrides (balance.js FIELDS); "บันทึกเข้าเกม" posts them to the local dev server, which writes
 // balance-data.js for the next deploy. Player data is not touched here.
 import {ITEMS,DROPS} from './items.js?v=107';
+import {WORLD_MAP_BOSSES} from './chapter2-monsters.js';
 import {CLASSES,NOVICE,classSkills,className} from './classes.js?v=112.1';
 import {multiplayerURL} from './multiplayer-config.js?v=28';
 import {iconStyle} from './bag-ui.js?v=107';
@@ -28,6 +29,7 @@ let draft=JSON.parse(JSON.stringify(BALANCE));
 let saved=JSON.parse(JSON.stringify(BALANCE));
 for(const g of [...Object.keys(FIELDS),'drops'])draft[g]??={};
 let tab='players',classId='swordsman',query='',kind='all',tableView='compare',viewMode='cards',skillSet='live',masterId='',monsterKind='all';
+let mapBossView={serverId:'server-1',channel:1,rows:null,loading:false,message:'',request:0,offset:0};
 // players tab state (declared up here: the first render may already be on that tab)
 const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
 let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
@@ -36,7 +38,7 @@ try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});
 // 0.110.7 weather / world-boss tab state lives up here: the first render() runs at load and may open either tab
 // (the last tab is remembered), so declaring it further down left it uninitialised and crashed the whole page.
 let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',mapId:'',minutes:30};
-let bossMsg='',bossMaps=null,bx={serverId:'server-1',mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
+let bossMsg='',bossMaps=null,bx={serverId:'server-1',channel:1,mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
 let petGrantPending=null,petGrantSending=false,giftPane='pets';const petGrantDrafts=new Map();
 let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',gearClass='all',itemQuery='',pickCount=1;
@@ -66,6 +68,7 @@ function set(r,f,v){
 // 0.101.2 side menu: what each page is for, in one line
 const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP']};
 function tabs(){
+ PAGES.mapbosses=['🏔️','บอสประจำแมพ','9 แมพ · HP ไล่ตามพื้นที่ · เกิดใหม่ 60 นาทีหลังตาย แยกตามเซิร์ฟ/CH'];
  $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();$('page-title').scrollIntoView({block:'start'});});
 }
@@ -91,7 +94,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
  $('page-title').textContent=name;$('page-help').textContent=(tab==='skills'&&skillSet==='live'?'ชุดสกิลที่ใช้ในเกมปัจจุบัน · ดูรูป บทบาท และสาย Master':help)+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -112,7 +115,7 @@ function render(withFilters=true){
  if(withFilters)filters();pageHead();
  if(tab==='skills'&&skillSet==='live'){currentSkills();return;}
  if(tab==='table'){$('view').innerHTML=skillTable();paintAdminSkills($('view'),tableView==='compare'?classId:tableView);return;}
- if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}
+ if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
  const rows=rowsFor(),cols=columns(rows),cards=['skills','monsters'].includes(tab)&&viewMode==='cards';
  const undo=(r,i)=>`<button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button>`;
  const note=tab==='skills'?'<p class="admin-legacy-note">ชุดสกิลเดิมก่อนปรับระบบอาชีพ · ไม่ใช่ชุดสกิลปัจจุบันที่แสดงในเกม</p>':'';
@@ -145,6 +148,7 @@ function dropsTab(){
   return `<tr class="mon"><td class="l" colspan="4"><b>${esc(name)}</b><small>${esc(mid)} · เบี้ย ${d.coins[0]}–${d.coins[1]}</small></td><td><button type="button" class="undo" data-undo-drop="${esc(mid)}" ${over?'':'hidden'}>คืนค่า</button></td></tr>`+
   d.items.map(([id,now,n=1])=>{const b=dropBase(mid,id,now),edited=over?.[id]!==undefined,v=edited?over[id]:b;
    return `<tr><td class="l"><span class="name"><i class="ico sm" data-item="${esc(id)}" style="${iconStyle(id)}"></i><span><b>${esc(itemName(id))}</b><small>${esc(id)}</small></span></span></td><td>${pct(b)}%</td><td><input type="number" min="0" max="100" step="any" data-mid="${esc(mid)}" data-id="${esc(id)}" value="${pct(v)}" class="${edited?'edited':''}" aria-label="${esc(name)} ${esc(itemName(id))} %" title="ค่าเดิม ${pct(b)}%"></td><td>×${n}</td><td></td></tr>`;}).join('');}).join('')||'<tr><td class="l" colspan="5">ไม่พบ</td></tr>'}</tbody></table></div>`;
+ $('view').querySelectorAll('tr.mon td:first-child').forEach((cell,i)=>{const index=MONSTER_TYPES.findIndex((m,k)=>monsterKey(m,k)===list[i].mid);if(index>=0){const image=document.createElement('img');image.className='admin-monster-art';image.dataset.monsterArt=index;image.alt=list[i].name;cell.prepend(image);}});paintAdminMonsters($('view'));
  $('view').querySelectorAll('input[data-mid]').forEach(inp=>inp.onchange=()=>{
   const {mid,id}=inp.dataset,entry=DROPS[mid].items.find(e=>e[0]===id),b=dropBase(mid,id,entry[1]),v=inp.value===''?b:Math.min(100,Math.max(0,Number(inp.value)))/100;
   if(!Number.isFinite(v)||pct(v)===pct(b)){if(draft.drops[mid]){delete draft.drops[mid][id];if(!Object.keys(draft.drops[mid]).length)delete draft.drops[mid];}}
@@ -327,9 +331,31 @@ function weatherTab(){
 async function summonBoss(){
  if(!bx.mapId){bossMsg='เลือกแผนที่ก่อน';bossTab();return;}
  bossMsg='กำลังเสก…';bossTab();
- try{const r=await adminFetch('/admin/boss',{serverId:bx.serverId,mapId:bx.mapId,typeId:+bx.typeId,count:bx.count,x:bx.spot?.x??null,y:bx.spot?.y??null});bossMsg=`👑 เสก ${r.name}${r.count>1?' ×'+r.count:''} ที่ ${r.map} แล้ว (จุด X ${r.x} · Y ${r.y}) · ประกาศทั้งเซิร์ฟแล้ว`;}
+ try{const r=await adminFetch('/admin/boss',{serverId:bx.serverId,channel:bx.channel,mapId:bx.mapId,typeId:+bx.typeId,count:bx.count,x:bx.spot?.x??null,y:bx.spot?.y??null});bossMsg=`👑 เสก ${r.name}${r.count>1?' ×'+r.count:''} ที่ ${r.map} แล้ว (จุด X ${r.x} · Y ${r.y}) · ประกาศทั้งเซิร์ฟแล้ว`;}
  catch(e){bossMsg={'boss-many':'แผนที่นี้มีบอสที่เสกไว้เยอะเกินไปแล้ว (สูงสุด 60 ตัว)','bad-spot':'จุดที่เลือกเดินไม่ได้ · ลองจิ้มบนพื้นสีเขียว','bad-map':'แผนที่นี้เสกบอสไม่ได้ (เมือง ดันเจี้ยน บ้านกิลด์)','bad-boss':'มอนตัวนี้ไม่ใช่บอส'}[e.message]??ADMIN_ERRORS[e.message]??'เสกไม่สำเร็จ · '+e.message;}
  bossTab();
+}
+async function loadMapBosses(){
+ const request=++mapBossView.request;mapBossView.loading=true;mapBossView.message='กำลังอ่านสถานะจากเซิร์ฟเวอร์…';mapBossesTab();
+ try{
+  const result=await adminFetch('/admin/map-bosses?serverId='+encodeURIComponent(mapBossView.serverId)+'&channel='+mapBossView.channel);
+  if(request!==mapBossView.request)return;mapBossView.rows=result.bosses;mapBossView.offset=result.serverTime-Date.now();mapBossView.message='สถานะจากเซิร์ฟเวอร์ · เวลาเกิดจะคงอยู่หลังออกแมพหรือรีสตาร์ต';
+ }catch(e){if(request===mapBossView.request)mapBossView.message=ADMIN_ERRORS[e.message]??'อ่านสถานะไม่ได้: '+e.message;}
+ finally{if(request===mapBossView.request){mapBossView.loading=false;if(tab==='mapbosses')mapBossesTab();}}
+}
+function mapBossesTab(){
+ const rows=mapBossView.rows??WORLD_MAP_BOSSES.map(b=>({...b,drops:DROPS[b.id]?.items??[]}));
+ const clock=Date.now()+mapBossView.offset;
+ $('view').innerHTML='<div class="wx"><div class="wx-pick"><label>เซิร์ฟ <select id="mb-server">'+['server-1','server-2'].map((id,i)=>'<option value="'+id+'"'+(mapBossView.serverId===id?' selected':'')+'>เซิร์ฟ '+(i+1)+'</option>').join('')+'</select></label><label>CH <select id="mb-channel">'+[1,2,3,4,5].map(c=>'<option'+(mapBossView.channel===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label><button id="mb-refresh" type="button"'+(mapBossView.loading?' disabled':'')+'>รีเฟรชสถานะ</button></div><p role="status">'+esc(mapBossView.message||'ตารางบอสประจำแมพ · กดรีเฟรชเพื่อดูเวลาเกิด')+'</p><div class="scroll"><table><thead><tr><th>แมพ / เลเวล</th><th>บอส</th><th>HP / พลังโจมตี</th><th>สถานะ / เกิดใหม่</th><th>ของประจำแมพ</th><th>จัดการ</th></tr></thead><tbody>'+rows.map(b=>{
+  const t=MONSTER_TYPES.find(t=>t.id===b.id),left=b.nextAt?Math.max(0,Math.ceil((b.nextAt-clock)/1000)):0;
+  const status=b.alive===undefined?'ยังไม่โหลดสถานะ':b.alive?'พร้อมต่อสู้':left?Math.floor(left/60)+' นาที '+left%60+' วินาที':'กำลังเกิด';
+  return '<tr><td class="l">'+esc(b.mapName)+'<small>Lv.'+b.minLevel+'–'+b.level+'</small></td><td class="l">'+esc(b.name)+'<small>'+esc(b.id)+'</small></td><td>'+num(t?.hp??b.hp)+'<small>ATK '+num(t?.damage)+' · Lv.'+num(t?.level??b.level)+'</small></td><td>'+status+'<small>60 นาทีหลังตาย · CH '+mapBossView.channel+'</small></td><td class="l"><span class="name"><i class="ico sm" style="'+iconStyle(b.accessory)+'"></i>'+esc(itemName(b.accessory))+'</span><small>'+esc(itemName(b.material))+' ×5 · ตราบอส 8% (ค่าเริ่มต้น)</small></td><td><button type="button" data-mb-edit="'+b.id+'">ค่าบอส</button><button type="button" data-mb-drops="'+b.id+'">ดรอป</button><a href="assets/monsters-chapter2/animations/'+b.id+'-poses-v1.png" target="_blank" rel="noopener">ภาพท่า</a></td></tr>';
+ }).join('')+'</tbody></table></div><p>มอนทั่วไป ตัวพิเศษ และบอสเควสเดิมแยกจากบอสประจำแมพนี้ · เมืองปลอดภัยและดันเจี้ยนส่วนตัวไม่มีบอสประจำแมพเกิดอัตโนมัติ</p></div>';
+ $('view').firstElementChild.classList.add('map-boss-admin');
+ $('view').querySelectorAll('tbody tr').forEach((tr,i)=>{const index=MONSTER_TYPES.findIndex(m=>m.id===rows[i].id);if(index>=0){const image=document.createElement('img');image.className='admin-monster-art';image.dataset.monsterArt=index;image.alt=rows[i].name;tr.children[1].prepend(image);}});paintAdminMonsters($('view'));
+ const scope=()=>{mapBossView.serverId=$('mb-server').value;mapBossView.channel=+$('mb-channel').value;mapBossView.rows=null;loadMapBosses();};
+ $('mb-server').onchange=scope;$('mb-channel').onchange=scope;$('mb-refresh').onclick=loadMapBosses;
+ $('view').querySelectorAll('[data-mb-edit],[data-mb-drops]').forEach(b=>b.onclick=()=>{tab=b.dataset.mbEdit?'monsters':'drops';query=b.dataset.mbEdit??b.dataset.mbDrops;monsterKind='all';remember();tabs();render();});
 }
 function bossTab(){
  warmFirebase();const user=LOCAL||fbConn?.auth.currentUser;
@@ -343,6 +369,8 @@ function bossTab(){
   <div class="bx-map"><canvas id="bx-canvas" width="360" height="360" aria-label="จิ้มบนแผนที่เพื่อเลือกจุดเสก"></canvas><div><p>จุดเสก: <b>${bx.spot?`X ${bx.spot.x} · Y ${bx.spot.y}`:'สุ่มทั้งแผนที่'}</b></p><label>X <input id="bx-x" type="number" value="${bx.spot?.x??''}"></label><label>Y <input id="bx-y" type="number" value="${bx.spot?.y??''}"></label><button type="button" class="wx-auto" id="bx-random">🎲 สุ่มจุด</button><small>จิ้มบนพื้นสีเขียว · X / Y ตรงกับมุมแผนที่ในเกม</small></div></div>
   <button type="button" class="wx-auto bx-go" id="bx-go">👑 เสกบอสโลก</button><p class="wx-msg" role="status">${esc(bossMsg)}</p>
   <small>เสกได้เฉพาะแผนที่สนาม (ไม่ใช่เมือง ดันเจี้ยน บ้านกิลด์) · เสกได้หลายตัว (ครั้งละไม่เกิน 20) · ไม่เกิดซ้ำเมื่อตาย · ไม่กระทบเวลาเกิดของ MVP ปกติ · คนตีแรงสุดได้ ถ่านเพลิงราชาหุ่นฟาง</small></div>`;
+ const chPick=document.createElement('label');chPick.textContent='CH ';const select=document.createElement('select');select.id='bx-channel';
+ for(let c=1;c<=5;c++){const o=document.createElement('option');o.value=String(c);o.textContent='CH '+c;o.selected=c===bx.channel;select.append(o);}select.onchange=()=>bx.channel=+select.value;chPick.append(select);$('view').querySelector('.wx-pick')?.append(chPick);
  $('bx-login')&&($('bx-login').onclick=async()=>{if(await signIn())bossTab();});
  $('bx-server')&&($('bx-server').onchange=e=>{bx.serverId=e.target.value;});$('bx-map')&&($('bx-map').onchange=e=>{bx.mapId=e.target.value;bx.spot=null;bossTab();});$('bx-type')&&($('bx-type').onchange=e=>{bx.typeId=e.target.value;});
  $('bx-go')&&($('bx-go').onclick=summonBoss);

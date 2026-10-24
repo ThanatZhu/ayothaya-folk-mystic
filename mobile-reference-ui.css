@@ -80,3 +80,7 @@ body.mobile-play #auto-settings-open:before{display:none}
 body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) #dock-toggle{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
 body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed),body.mobile-play.field-hud.hud63.chat-typing #online-dock:not(.collapsed){padding-top:54px!important}
 @media(orientation:landscape) and (max-height:360px){body.mobile-play.field-hud.hud63 #mobile-bag-shortcut{right:calc(var(--edge-r) + 108px)}}
+@media(min-width:901px) and (pointer:fine){
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer:not([hidden]){border:8px solid transparent!important;border-image:url('assets/ui-mobile139/panel.png') 220 / 24px / 0 stretch!important;border-radius:0!important;background-clip:padding-box!important}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer .mp-tabs{min-height:0;overflow-y:auto!important;scrollbar-width:thin}
+}

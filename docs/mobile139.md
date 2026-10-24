@@ -18,10 +18,14 @@ image_gen tool using the original ui63 frames as style references. Exact prompts
 are in `assets/ui-mobile139/prompts.json`. Both are 1254 × 1254 RGBA images with
 transparent centers and exteriors. The panel uses nine-slice borders with fixed
 corner caps; the ring surrounds live labels/icons. Text remains DOM content in
-the existing Mali font. No player text is baked into images.
+the existing Mali font. The desktop chat drawer uses the same painted panel.
+No player text is baked into images.
 
 ## Validation
 
+- Full regression suite: 511 tests passed, 0 failed.
+- Desktop/touch chat checks pass in Thai and English, including actual local
+  send/receive, whisper routing, drafts, keyboard shortcuts and viewport bounds.
 - `tests/mobile139.test.mjs` covers target normalization, quest-hunt compatibility,
   live combat filtering and authoritative duel permission checks.
 - `scripts/check-mobile139.mjs` starts a disposable local host and checks actual
@@ -31,7 +35,9 @@ the existing Mali font. No player text is baked into images.
   320×568, 360×640, 390×844 and 412×915. Shortcut/joystick/combat bounds and
   intersections are checked, with HUD, drawer and menu screenshots per size.
 - Visual viewport dimensions update on resize even after keyboard focus ends.
-  This is browser emulation, not a claim of testing every physical iPhone.
+  A reduced visual viewport is simulated to check the chat input remains within
+  the visible area. This is browser emulation, not a claim of testing every
+  physical iPhone.
 
 The backend advertises `autoTargeting: 1` in its health response. Deploy frontend
 and backend together; the new filtering must be authoritative before release.

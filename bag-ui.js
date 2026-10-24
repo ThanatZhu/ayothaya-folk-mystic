@@ -32,7 +32,7 @@ export function iconStyle(id){
 const icon=(id,cls='item-icon')=>`<i class="${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 
 export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
- if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=gacha147';css.dataset.bagUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=mobile148';css.dataset.bagUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-bag:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeBag(JSON.parse(localStorage.getItem(key)));}catch{return normalizeBag(null);}};
  let local=read();
@@ -76,14 +76,14 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  const menuButton=document.createElement('button');menuButton.id='menu-bag';menuButton.type='button';menuButton.title='กระเป๋า';menuButton.setAttribute('aria-label','กระเป๋า');
  menuButton.innerHTML='<i>'+icon('cloth-bag','item-icon menu-item-icon')+'</i><span>กระเป๋า</span>';
  const nav=$('game-menu');if(nav)nav.insertBefore(menuButton,$('menu-players')??null);
- const dialog=document.createElement('dialog');dialog.id='bag-window';dialog.setAttribute('aria-labelledby','bag-title');
+ const dialog=document.createElement('dialog');dialog.id='bag-window';dialog.setAttribute('aria-labelledby','bag-title');dialog.tabIndex=-1;
  // 0.83 owner layout: the dressed character with the worn gear around it on the left, items by category on the right.
  dialog.innerHTML='<header><h2 id="bag-title">กระเป๋า</h2><b class="coins" id="bag-coins"></b><button class="mp-icon" id="bag-close" aria-label="ปิดกระเป๋า">×</button></header>'+
   '<div class="bag-body"><section class="bag-hero"><div class="bag-stage"><canvas id="bag-hero" width="320" height="320" aria-label="ตัวละครพร้อมชุดที่สวมใส่"></canvas><div id="bag-gear"></div></div><button type="button" id="bag-look">เปลี่ยนรูปลักษณ์</button></section>'+
   '<section class="bag-items"><div class="bag-tabs" role="tablist" id="bag-tabs"></div><small id="bag-space"></small><div class="bag-grid" id="bag-grid"></div><div class="bag-trash" id="bag-trash">🗑 ลากไอเทมมาวางที่นี่ (หรือนอกกระเป๋า) เพื่อทิ้ง</div><section class="bag-detail" id="bag-detail"></section></section></div>'+
   '<div class="bag-discard" id="bag-discard" role="dialog" aria-labelledby="discard-title" hidden><div><span id="discard-icon"></span><strong id="discard-title"></strong><label>จำนวนที่จะทิ้ง <input type="number" id="discard-count" min="1" step="1" inputmode="numeric"></label><small id="discard-have"></small><div class="bag-actions"><button type="button" id="discard-all">ทั้งหมด</button><button type="button" id="discard-ok" class="danger">ทิ้ง</button><button type="button" id="discard-cancel">ยกเลิก</button></div></div></div>';
  ($('game-shell')??document.body).append(dialog);
- const open=()=>{game.clearInput();openHudPanel(dialog);render(true);};
+ const open=()=>{game.clearInput();openHudPanel(dialog);render(true);dialog.focus({preventScroll:true});};
  menuButton.onclick=()=>dialog.open?dialog.close():open();
  dialog.querySelector('#bag-close').onclick=()=>dialog.close();
  dialog.querySelector('#bag-look').onclick=()=>{dialog.close();$('open-equipment')?.click();};
@@ -103,25 +103,28 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  // 0.100.10 any item can be dragged: onto the trash zone or out of the bag window asks how many to throw away.
  const inside=(el,x,y)=>{const r=el.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;};
  const toTrash=(x,y)=>inside($('bag-trash'),x,y)||!inside(dialog,x,y);
- function dragStart(e,id){if(e.button<=0)drag={id,x:e.clientX,y:e.clientY,pointer:e.pointerId,ghost:null,potion:quickable(id)};}
+ function dragStart(e,id){if(e.button>0)return;cancelDrag();dragged=false;drag={id,x:e.clientX,y:e.clientY,pointer:e.pointerId,ghost:null,potion:quickable(id)};}
  addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.pointer)return;
   if(!drag.ghost){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;drag.ghost=document.createElement('div');drag.ghost.className='bag-drag';drag.ghost.innerHTML=icon(drag.id,'item-icon big');
    // A nonmodal window's scale/overflow must not offset or clip viewport pointer coordinates.
-   (dialog.matches(':modal')?dialog:document.body).append(drag.ghost);}
+   drag.ghost.setAttribute('aria-hidden','true');(dialog.matches(':modal')?dialog:document.body).append(drag.ghost);
+   try{dialog.setPointerCapture(e.pointerId);}catch{}
+  }
   e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';const hot=game.actionBar?.mark(e.clientX,e.clientY),i=drag.potion?slotAt(e.clientX,e.clientY):undefined;if(drag.potion)marks(i??-1);dialog.classList.add('dragging');document.body.classList.add('actionbar-dragging');$('bag-trash').classList.toggle('over',!hot&&i===undefined&&toTrash(e.clientX,e.clientY));
- },{passive:false});
+ },{capture:true,passive:false});
  function dragEnd(e){
-  if(!drag||e.pointerId!==drag.pointer)return;const d=drag;drag=null;if(!d.ghost)return;
-  d.ghost.remove();marks(null);game.actionBar?.mark(-1,-1);dialog.classList.remove('dragging');document.body.classList.remove('actionbar-dragging');$('bag-trash').classList.remove('over');dragged=true;setTimeout(()=>{dragged=false;},60);
+  if(!drag||e.pointerId!==drag.pointer)return;const d=drag;drag=null;try{if(dialog.hasPointerCapture(d.pointer))dialog.releasePointerCapture(d.pointer);}catch{}if(!d.ghost)return;
+  d.ghost.remove();marks(null);game.actionBar?.mark(-1,-1);dialog.classList.remove('dragging');document.body.classList.remove('actionbar-dragging');$('bag-trash').classList.remove('over');dragged=true;setTimeout(()=>{dragged=false;},180);
   if(e.type!=='pointerup')return;
   if(game.actionBar?.dropItemAt(d.id,e.clientX,e.clientY))return;
   const i=d.potion?slotAt(e.clientX,e.clientY):undefined;if(i===undefined){if(toTrash(e.clientX,e.clientY))askDiscard(d.id);return;}
   quick[i]=d.id;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}world.notice('ปุ่มลัด '+QUICK_KEYS[i]+' · '+itemDef(d.id).name);render(true);
  }
- addEventListener('pointerup',dragEnd);addEventListener('pointercancel',dragEnd);
+ addEventListener('pointerup',dragEnd,true);addEventListener('pointercancel',dragEnd,true);
  const cancelDrag=()=>{if(drag)dragEnd({pointerId:drag.pointer,type:'pointercancel'});};
  dialog.addEventListener('close',cancelDrag);addEventListener('blur',cancelDrag);
+ dialog.addEventListener('lostpointercapture',e=>{if(e.target===dialog&&drag?.pointer===e.pointerId)cancelDrag();});
  let discarding=null;
  const discardCount=()=>Math.min(bag().items[discarding]??0,Math.max(1,Math.floor(+$('discard-count').value)||1));
  function askDiscard(id){
@@ -164,7 +167,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  const api={bag,get quickItems(){return [...quick];},activateShortcut(id){if(!bag().items[id])return fail('no-item');const kind=itemDef(id)?.kind;if(quickable(id)||kind==='food')quickUse(id);else if(kind==='gear')api.onWear?.(id);else{selected=id;worn=null;open();}},setLocal(b){local=normalizeBag(b);save();render(true);},onWear:null,render:()=>render(true),talkHooks:[]};
  // World-map warp: shows the purse, and pays offline (online the realm server charges).
  worldUI.coins=()=>bag().coins;worldUI.payWarp=cost=>{if(local.coins<cost)return false;local={...local,coins:local.coins-cost};save();return true;};
- let shown='';
+ let shown='',shownGear='';
  function render(force=false){
   const b=bag(),gear=api.gearView?.()??{},sig=JSON.stringify([b,world.petCollection?.balance,gear,selected,worn,category,quick,tab,shopNpc?.name,dialog.open,shopDialog.open]);
   if(!force&&sig===shown)return;shown=sig;
@@ -177,8 +180,11 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    const all=Object.keys(b.items),kinds=TABS.find(t=>t[0]===category)[2],ids=kinds?all.filter(id=>kinds.includes(itemDef(id)?.kind)):all;if(selected&&!b.items[selected])selected=null;
    tabs.querySelectorAll('[data-cat]').forEach(t=>{const k=TABS.find(x=>x[0]===t.dataset.cat)[2],n=k?all.filter(id=>k.includes(itemDef(id)?.kind)).length:all.length;t.setAttribute('aria-selected',String(t.dataset.cat===category));t.dataset.count=n;});
    $('bag-space').textContent=`ช่องที่ใช้ ${all.length} / ${bagCap(b)}`;
+   const gearSig=JSON.stringify(gear);if(gearSig!==shownGear){shownGear=gearSig;
    $('bag-gear').innerHTML=GEAR_PLACES.map(([slot,label])=>{const id=gear[slot],it=id&&itemDef(id);return `<button type="button" class="gear-slot g-${slot}${worn===slot?' on':''}${it?' r'+(it.rarity??0):''}" data-gear="${slot}" title="${label}${it?' · '+it.name:''}">${it?icon(id):''}<small>${label}</small></button>`;}).join('');
    $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.onclick=()=>{worn=el.dataset.gear;selected=null;render(true);});
+   }
+   $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.classList.toggle('on',el.dataset.gear===worn));
    $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:bagCap(b),Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
    $('bag-grid').querySelectorAll('[data-id]').forEach(el=>{el.onclick=()=>{if(dragged)return;selected=el.dataset.id;worn=null;render(true);};el.onpointerdown=e=>dragStart(e,el.dataset.id);});
    const wornId=worn&&gear[worn],wornIt=wornId&&itemDef(wornId);

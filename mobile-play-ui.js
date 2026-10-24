@@ -1,4 +1,4 @@
-import {createMobileReferenceUI} from './mobile-reference-ui.js?v=147';
+import {createMobileReferenceUI} from './mobile-reference-ui.js?v=148';
 import {createMobileHudEditor} from './mobile-hud-editor.js?v=143';
 // A single owner for the touch HUD. Reuse live buttons so cooldowns and saved
 // hotbar order stay with game-controls / auto-settings rather than a second UI.

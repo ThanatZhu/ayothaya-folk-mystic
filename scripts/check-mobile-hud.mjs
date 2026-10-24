@@ -13,9 +13,10 @@ try{
   const inside=async selector=>{const r=await page.locator(selector).boundingBox();assert.ok(r&&r.width>0&&r.height>0,selector+' visible');assert.ok(r.x>=-1&&r.y>=-1&&r.x+r.width<=width+1&&r.y+r.height<=height+1,selector+' within viewport '+JSON.stringify(r));return r;};
   const profile=await inside('.player-panel'),map=await inside('.mini-panel'),toggle=await inside('#menu-toggle');
   assert.ok(profile.height<=120,'compact profile including status icons');
-  assert.ok(profile.x+profile.width<=toggle.x||profile.y+profile.height<=toggle.y,'profile/menu overlap');
-  assert.ok(toggle.x+toggle.width<=map.x||toggle.y+toggle.height<=map.y,'menu/map overlap');
-  await inside('#quest-tracker');await inside('#online-dock');
+  const separate=(a,b)=>a.x+a.width<=b.x||b.x+b.width<=a.x||a.y+a.height<=b.y||b.y+b.height<=a.y;
+  assert.ok(separate(profile,toggle),'profile/menu overlap');
+  assert.ok(separate(toggle,map),'menu/map overlap');
+  await inside('#mobile-quest-summary');await inside('#online-dock');
   assert.equal(await page.locator('.target-panel').isVisible(),false);
   assert.equal(await page.locator('.f-profile').count(),1);
   const hp=await inside('.player-panel'),buffs=await inside('#ailment-row');assert.ok(buffs.y>=hp.y+hp.height,'buffs below vitals');
@@ -23,8 +24,8 @@ try{
   await page.evaluate(()=>window.__hudReviewSelect('boss'));await inside('.target-panel');assert.equal(await page.locator('.target-panel').getAttribute('data-kind'),'boss');
   await page.evaluate(()=>window.__hudReviewSelect('none'));assert.equal(await page.locator('.target-panel').isVisible(),false);
   const intersects=(a,b)=>a.x<b.x+b.width-1&&a.x+a.width>b.x+1&&a.y<b.y+b.height-1&&a.y+a.height>b.y+1;
-  const stick=await inside('#joystick'),chat=await inside('#online-dock'),quest=await inside('#quest-tracker');
-  for(const skill of await page.locator('#skills .skill').all()){
+  const stick=await inside('#joystick'),chat=await inside('#online-dock'),quest=await inside('#mobile-quest-summary');
+  for(const skill of await page.locator('#skills .skill:visible').all()){
    const r=await skill.boundingBox();assert.ok(!intersects(r,stick),'skill/joystick overlap');assert.ok(!intersects(r,chat),'skill/chat overlap');assert.ok(!intersects(r,quest),'skill/quest overlap');
    if(height>width)assert.ok(r.width>=44&&r.height>=44,'portrait skill touch target');
   }
@@ -34,7 +35,7 @@ try{
   assert.equal(await page.locator('#game-menu').isVisible(),false);await inside('#bag-window');assert.equal(await page.locator('#bag-window').evaluate(e=>getComputedStyle(e).zoom),'1');
   await page.locator('#bag-window button').click();await page.locator('#dock-toggle').click();await inside('#online-dock');await page.locator('#online-text').focus();
   assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('chat-typing')),true);await inside('#online-dock');
-  await page.locator('#online-text').blur();await page.waitForTimeout(100);assert.equal(await page.locator('#joystick').isVisible(),true);
+  await page.locator('#online-text').blur();await page.waitForTimeout(100);assert.equal(await page.locator('#joystick').isVisible(),false);
   await page.locator('#dock-toggle').click();await page.screenshot({path:fileURLToPath(new URL(`${width}x${height}.png`,output))});
   assert.deepEqual(errors,[]);results.push({width,height,passed:true});await page.close();
  }

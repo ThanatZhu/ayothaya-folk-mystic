@@ -11,17 +11,18 @@ export function createLandscapeGuard({onChange=()=>{},allowPortrait=false}={}){
   fitFrame=0;
   const mobile=matchMedia('(any-pointer: coarse)').matches||navigator.maxTouchPoints>0||innerWidth<=1000||innerHeight<=600;
   root.classList.toggle('mobile-viewport',mobile);
-  if(!mobile){root.classList.remove('keyboard-open');return;}
   const height=Math.min(innerHeight,window.visualViewport?.height??innerHeight);
   root.style.setProperty('--visible-height',`${height}px`);
-  root.classList.toggle('keyboard-open',document.activeElement?.matches('input,textarea')&&height<innerHeight*.8);
+  root.classList.toggle('lobby-short',height<=360);
+  root.classList.toggle('keyboard-open',mobile&&document.activeElement?.matches('input,textarea')&&height<innerHeight*.8);
   if(!layout||blocked)return;
   const top=(header?.getBoundingClientRect().height??0)+2;
   const bottom=parseFloat(getComputedStyle(root).getPropertyValue('--safe-bottom'))||0;
   const available=Math.max(1,height-top-bottom-6);
   root.style.setProperty('--lobby-height',`${available}px`);
-  const scale=Math.min(1,available/Math.max(1,layout.offsetHeight,layout.scrollHeight));
-  root.style.setProperty('--lobby-scale',String(scale));
+  // Reflow / scroll inside the usable viewport. Scaling a whole lobby shrinks
+  // touch targets and makes canvas feet drift relative to CSS decoration.
+  root.style.setProperty('--lobby-scale','1');
   root.style.setProperty('--lobby-top',`${top}px`);
  }
  function scheduleFit(){if(!fitFrame)fitFrame=requestAnimationFrame(fitViewport);}

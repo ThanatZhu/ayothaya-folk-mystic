@@ -1,5 +1,5 @@
 import {ROLE_TREE,roleRequirements,roleSkillOpen} from './role-skill-progress.js';
-import {applySkillArt} from './skill-art.js?v=role116';
+import {applySkillArt} from './skill-art.js?v=icons117';
 import {openHudPanel} from './hud-panels.js?v=34';
 // Skill window (menu "สกิล" or K). 0.84: a skill tree. Each skill opens when the skills it needs reach a level
 // (shared rules in skill-progress.js, enforced by the realm server too); tap a skill for its numbers.

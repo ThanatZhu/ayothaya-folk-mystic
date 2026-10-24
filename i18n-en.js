@@ -2979,6 +2979,24 @@ Object.assign(globalThis.I18N_EN, {
  'เลือกช่องปลายทางเพื่อสลับสกิล':'Choose a destination slot to swap skills',
  'ยกเลิกการย้ายแล้ว':'Move canceled'
 });
+Object.assign(globalThis.I18N_EN,{
+ "ปิดเมนูและกลับเข้าเกม":"Close menu and return to game",
+ "ดูภารกิจ":"View quest",
+ "รายละเอียดภารกิจ:":"Quest details:",
+ "สกิลชุด {0} จาก {1}":"Skill set {0} of {1}",
+ "สกิลทั้งหมด":"All skills",
+ "ชุด {0}/{1} ⇄":"Set {0}/{1} ⇄",
+ "สลับชุดสกิล ชุด {0} จาก {1}":"Switch skill set, set {0} of {1}"
+});
+Object.assign(globalThis.I18N_EN,{
+ "สิ่งที่ปลดล็อก":"Unlocks",
+ "· สิ่งที่ปลดล็อก":"· Unlocks",
+ "+{0} แต้มสถานะ · ดูและอัปค่าได้ในหน้าสถานะ":"+{0} stat points · View and spend them in Status",
+ "ไม่มีอุปกรณ์ใหม่ในเลเวลนี้":"No new equipment at this level",
+ "Lv. {0} · +{1} แต้ม":"Lv. {0} · +{1} points",
+ "เลเวล {0} · +{1} แต้ม · ดูสิ่งที่ปลดล็อก":"Level {0} · +{1} points · View unlocks",
+ "แตะดูสิ่งที่ปลดล็อก":"Tap to view unlocks"
+});
 
 Object.assign(globalThis.I18N_EN, {
  'เล็งจุดวางสกิลบนพื้น':'Aim a ground skill',

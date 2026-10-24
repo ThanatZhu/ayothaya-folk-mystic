@@ -1,8 +1,8 @@
 // 0.53 sound, music and hit feedback. Everything is synthesised with WebAudio (no audio files, nothing to license):
 // Thai pentatonic "ranat" plucks over a drone with ching cymbals in town, klong drums in the fields, a sparse
 // minor-pentatonic air at the mill and in the dungeon. Effects follow the same game events the HUD uses.
-import {ITEMS,itemDef,RARITY_NAME} from './items.js?v=107';
-import {earnedStatPoints} from './character-stats.js?v=107';
+import {itemDef,RARITY_NAME} from './items.js?v=107';
+import {createLevelUpNotice} from './level-up-notice.js?v=1';
 const KEY='ayothaya-audio';
 const THEMES={
  town:{bpm:84,root:72,scale:[0,2,4,7,9],drum:false,ching:true,drone:[48,55],rest:.32},
@@ -17,7 +17,7 @@ const seedOf=s=>[...s].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7);
 
 export function createFeedback({game,map}){
  if(!document.querySelector('link[data-feedback]')){const css=document.createElement('link');css.rel='stylesheet';css.href='feedback.css?v=109.4';css.dataset.feedback='';document.head.append(css);}
- const world=game.world;let settings={music:.35,sfx:.7};try{settings={...settings,...JSON.parse(localStorage.getItem(KEY))};}catch{}
+ const world=game.world,levelNotice=createLevelUpNotice({clearInput:()=>game.clearInput()});let settings={music:.35,sfx:.7};try{settings={...settings,...JSON.parse(localStorage.getItem(KEY))};}catch{}
  let ctx=null,master,musicBus,sfxBus,noise,timer=null;
  function start(){ // browsers only allow audio after a tap / key press
   if(ctx)return ctx.state==='suspended'&&ctx.resume();
@@ -86,6 +86,7 @@ export function createFeedback({game,map}){
  let lastHit=0;
  const banner=(html,cls)=>{const b=document.createElement('div');b.className='big-banner '+cls;b.innerHTML=html;document.body.append(b);setTimeout(()=>b.remove(),3200);};
  game.onEvent(e=>{
+  if(e.type==='cast'||e.type==='playerHit')levelNotice.hide();
   if(e.type==='cast')play(Number.isInteger(e.skillIndex)?'cast':'swing');
   else if(e.type==='damage'){const now=performance.now();if(now-lastHit>45){lastHit=now;play(e.color==='#ffd27a'?'crit':'hit');}}
   else if(e.type==='playerHit')play('hurt');
@@ -98,15 +99,9 @@ export function createFeedback({game,map}){
   else if(['mvp','dungeonClear'].includes(e.type))play('fanfare');
   else if(['daily','tamed','stallSold','refined'].includes(e.type))play('chime');
  });
- // What a new Base level gives: stat points and gear that just became wearable for this class.
- function gains(level){
-  const pts=earnedStatPoints(level)-earnedStatPoints(level-1),cls=world.profession?.id;
-  const unlocked=Object.values(ITEMS).filter(it=>it.kind==='gear'&&it.level===level&&(!it.classes||it.classes.includes(cls))).map(it=>it.name);
-  return `<em>+${pts} แต้มสถานะ · กด สถานะ (C) เพื่ออัปค่า</em>${unlocked.length?`<em>ใส่ได้แล้ว: ${unlocked.join(' · ')}</em>`:''}`;
- }
  // Level ups: Thai lettering between gold kanok scrolls above the hero's name tag with an
- // English line, a ring of light and lotus petals rising from the feet (~2.6 s), and a note under the HP panel with
- // what the new Base level gave. No box over the action.
+ // English line, a ring of light and lotus petals rising from the feet (~2.6 s).
+ // Gains use a short HUD-corner button; the equipment list opens only on request.
  const KANOK='<svg viewBox="0 0 64 30" aria-hidden="true"><path class="k-line" d="M64 18C52 18 46 8 34 8 22 8 15 16 19 23 23 29 33 26 31 18 30 13 24 14 25 19"/><path d="M38 9C37 3 42 0 47 0 44 3 45 6 42 10Z M27 9C24 4 26 0 30-1 29 3 31 6 30 9Z M50 13C51 8 56 6 60 7 56 9 56 12 53 15Z"/><circle cx="64" cy="18" r="2.4"/></svg>';
  function levelUp(e){
   const fx=document.createElement('div');fx.className='rank-up';
@@ -117,9 +112,7 @@ export function createFeedback({game,map}){
   const follow=()=>{const r=tag?.getBoundingClientRect();if(r?.width){fx.style.left=r.left+r.width/2+'px';fx.style.top=r.top+'px';}if(fx.isConnected)requestAnimationFrame(follow);};
   document.body.append(fx);follow();setTimeout(()=>fx.remove(),2700);
   if(!e.baseUp)return;
-  const note=document.createElement('div'),panel=(document.getElementById('online-button')??document.querySelector('.player-panel'))?.getBoundingClientRect();note.className='rank-note';
-  if(panel?.width){note.style.left=panel.left+'px';note.style.top=panel.bottom+6+'px';}
-  note.innerHTML=gains(e.baseLevel);document.body.append(note);setTimeout(()=>note.remove(),4300);
+  levelNotice.show(e.baseLevel,world.profession?.id);
  }
 
  // ---- settings in the profile panel

@@ -26,7 +26,7 @@ try{
   const rect=async selector=>{const r=await page.locator(selector).boundingBox();assert.ok(r&&r.x>=-1&&r.y>=-1&&r.x+r.width<=width+1&&r.y+r.height<=height+1,selector+' on '+width+'x'+height+' '+JSON.stringify(r));return r;};
   const auto=await rect('#auto-attack'),gear=await rect('#auto-settings-open');assert.ok(auto.width>=50,'larger AUTO');assert.ok(gear.width>=44&&gear.height>=44,'44px gear target');
   await page.screenshot({path:fileURLToPath(new URL(width+'x'+height+'-hud.png',out)),fullPage:true});
-  for(const b of await page.locator('#skills .skill,#attack').all()){const r=await b.boundingBox();assert.ok(!overlaps(gear,r),'gear does not cover a skill '+width+'x'+height+' '+JSON.stringify({gear,r,text:await b.textContent()}));}
+  for(const b of await page.locator('#skills .skill:visible,#attack').all()){const r=await b.boundingBox();assert.ok(!overlaps(gear,r),'gear does not cover a skill '+width+'x'+height+' '+JSON.stringify({gear,r,text:await b.textContent()}));}
   await page.screenshot({path:fileURLToPath(new URL(width+'x'+height+'-hud.png',out)),fullPage:true});
   await page.locator('#auto-settings-open').click();await rect('#auto-settings-window');
   assert.ok(await page.evaluate(()=>document.querySelector('#auto-settings-window').scrollWidth<=document.querySelector('#auto-settings-window').clientWidth+1),'no panel horizontal overflow');

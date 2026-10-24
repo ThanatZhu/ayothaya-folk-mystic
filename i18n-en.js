@@ -3669,5 +3669,8 @@ Object.assign(globalThis.I18N_EN,{
  "ภารกิจปัจจุบัน":"Current quest",
  "จบเนื้อเรื่อง":"Story complete",
  "สำเร็จแล้ว":"Completed",
- "ขั้น {0}/{1}":"Step {0}/{1}"
+ "ขั้น {0}/{1}":"Step {0}/{1}",
+ "สนทนา":"Chat",
+ "ปิดแชต":"Close chat",
+ "เปิดแชต · Enter":"Open chat · Enter"
 });

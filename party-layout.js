@@ -20,18 +20,18 @@ export function planPartyLayout({viewport,profile,above=[],obstacles=[],count=1,
 // changes must not compete with the old fixed top offsets in the legacy HUD sheets.
 export function createPartyLayout({frame,getCount}){
  let scheduled=0,disposed=false;
- const visible=node=>{if(!node||node.hidden||getComputedStyle(node).visibility==='hidden')return null;const r=node.getBoundingClientRect();return r.width&&r.height?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null;};
+ const visible=node=>{if(node?.id==='online-dock'&&node.classList.contains('desktop-chat-overlay')&&matchMedia('(min-width:901px) and (pointer:fine)').matches)return null;if(!node||node.hidden||getComputedStyle(node).visibility==='hidden')return null;const r=node.getBoundingClientRect();return r.width&&r.height?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null;};
  const rect=id=>visible(document.getElementById(id));
  function refresh(){scheduled=0;if(disposed)return;watch();if(frame.hidden||frame.closest('#activity-dock'))return;const profile=visible(document.querySelector('.player-panel')),view=window.visualViewport;
   const viewport={left:view?.offsetLeft??0,top:view?.offsetTop??0,width:view?.width??innerWidth,height:view?.height??innerHeight},above=['ailment-row','online-button','mobile-status-rail'].map(rect).filter(Boolean);
-  const obstacles=[...document.querySelectorAll('#joystick,#channel-button,#online-dock,#quick-slots,#desktop-actionbar,.combat-controls,#hud-right,.mini-panel,.target-panel,#game-menu,#menu-toggle')].map(visible).filter(Boolean);
+  const obstacles=[...document.querySelectorAll('#joystick,#channel-button,#online-dock,#quick-slots,#desktop-actionbar,#actionbar-combat,.combat-controls,#hud-right,.mini-panel,.target-panel,#game-menu,#menu-toggle')].map(visible).filter(Boolean);
   const plan=planPartyLayout({viewport,profile,above,obstacles,count:getCount(),touch:document.body.classList.contains('mobile-play')});frame.toggleAttribute('data-layout-hidden',!!plan.hidden);if(plan.hidden)return;
   frame.dataset.compact=String(plan.compact);
   for(const [key,value] of Object.entries({left:plan.left+'px',top:plan.top+'px',width:plan.width+'px',maxHeight:plan.maxHeight+'px'})){const property=key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase());if(frame.style.getPropertyValue(property)!==value)frame.style.setProperty(property,value,'important');}
   frame.style.setProperty('--party-members-height',plan.membersHeight+'px');
  }
  const request=()=>{if(!scheduled&&!disposed)scheduled=requestAnimationFrame(refresh);};
- const observer=new ResizeObserver(request),observed=new Set();function watch(){for(const node of [frame,...document.querySelectorAll('.player-panel,#ailment-row,#online-button,#mobile-status-rail,#joystick,#channel-button,#online-dock,#quick-slots,#desktop-actionbar,.combat-controls,#hud-right,.mini-panel,#game-menu')])if(!observed.has(node)){observed.add(node);observer.observe(node);}}watch();const additions=new MutationObserver(request);additions.observe(document.body,{childList:true});
+ const observer=new ResizeObserver(request),observed=new Set();function watch(){for(const node of [frame,...document.querySelectorAll('.player-panel,#ailment-row,#online-button,#mobile-status-rail,#joystick,#channel-button,#online-dock,#quick-slots,#desktop-actionbar,#actionbar-combat,.combat-controls,#hud-right,.mini-panel,#game-menu')])if(!observed.has(node)){observed.add(node);observer.observe(node);}}watch();const additions=new MutationObserver(request);additions.observe(document.body,{childList:true});
  // HUD resize observers publish CSS offsets after animation-frame callbacks.
  // Re-measure those offsets in the same mutation checkpoint, before painting.
  const mutations=new MutationObserver(refresh);mutations.observe(document.body,{attributes:true,attributeFilter:['class','style']});mutations.observe(document.documentElement,{attributes:true,attributeFilter:['style']});for(const node of document.querySelectorAll('#game-menu,#online-button,#online-dock,.target-panel'))mutations.observe(node,{attributes:true,attributeFilter:['class','hidden']});

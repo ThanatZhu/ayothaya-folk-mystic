@@ -5,7 +5,7 @@ import {WebSocket} from 'ws';
 import {LocalStore} from '../server/storage.js';
 import {createHost} from '../server/host.js';
 import {levelStart,XP_CURVE} from '../experience.js';
-const out=new URL('../outputs/combat142/',import.meta.url);await mkdir(out,{recursive:true});
+const out=new URL('../outputs/overlay143/actionbar/',import.meta.url);await mkdir(out,{recursive:true});
 const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8'));
 const store=await new LocalStore(fileURLToPath(new URL('store/',out))).init(),base='http://127.0.0.1:8920';
 const host=await createHost({mode:'local',store,catalog,origins:[base],serveStatic:true});await new Promise(r=>host.server.listen(8920,'127.0.0.1',r));
@@ -68,7 +68,7 @@ try{
   assert.ok(Math.abs(boxes['actionbar-remove'].x-boxes['actionbar-add'].x)<1&&Math.abs(boxes['emote-open'].x-boxes['run-toggle'].x)<1,'helper pairs are vertical');
   const gap=boxes['actionbar-remove'].y-boxes['actionbar-add'].bottom;assert.ok(gap>=8&&gap<=14,'plus/minus keep a small fixed gap');
   const a=boxes['auto-attack'],g=boxes['auto-settings-open'],s=boxes.attack;assert.ok(a.width>=80&&s.width>=80&&g.width>=32&&g.width<=40,'battle buttons are enlarged with a smaller settings cog');
-  assert.ok(Math.abs(a.x-s.x)<1&&s.y>a.bottom,'auto and attack form a separate vertical column');assert.ok(g.x>a.x+a.width/2&&g.y<a.y+4&&g.bottom>a.y,'settings overlaps the top right corner of AUTO');
+  assert.ok(Math.abs(a.y-s.y)<1&&s.x>a.right,'auto and attack form a horizontal pair');assert.ok(w-s.right>=16&&w-s.right<=32&&h-s.bottom<=24,'battle pair stays at screen bottom-right');assert.ok(g.x>a.x+a.width/2&&g.y<a.y+4&&g.bottom>a.y,'settings overlaps the top right corner of AUTO');
   for(const [id,b] of Object.entries(boxes))assert.ok(b.x>=0&&b.y>=0&&b.right<=w&&b.bottom<=h,id+' fits the viewport');
   for(const id of ['actionbar-add','actionbar-remove','emote-open','run-toggle']){
    const image=page.locator('#'+id+' img');assert.match(await image.getAttribute('src'),/assets\/ui-action141\/.+\.webp/);await image.evaluate(i=>i.decode());assert.ok(await image.isVisible());
@@ -108,7 +108,7 @@ try{
  while(!(await page.locator('#actionbar-add').isDisabled()))await page.locator('#actionbar-add').click();await page.screenshot({path:fileURLToPath(new URL('desktop-four-rows.png',out))});
  for(const [w,h] of [[844,390],[667,375]]){
   await page.setViewportSize({width:w,height:h});await page.waitForTimeout(350);await page.evaluate(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();if(document.getElementById('dock-toggle')?.getAttribute('aria-expanded')==='true')document.getElementById('dock-toggle').click();});
-  assert.ok(!(await page.locator('#desktop-actionbar').isVisible()));assert.ok(await page.locator('.combat-controls').isVisible());
+  assert.ok(!(await page.locator('#desktop-actionbar').isVisible()));assert.ok(!(await page.locator('#actionbar-combat').isVisible()));assert.ok(await page.locator('.combat-controls').isVisible());
   assert.equal(await page.locator('.action-helper-art:visible').count(),0,'mobile controls retain their established layout');
   assert.equal(await page.locator('.combat-control-art:visible').count(),0,'desktop combat artwork does not alter the mobile wheel');
   const geometry=await page.evaluate(()=>[...document.querySelectorAll('#skills .skill')].filter(b=>!b.hidden&&!b.hasAttribute('data-mobile-away')).map(b=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,radius:getComputedStyle(b).borderRadius};}));

@@ -56,7 +56,7 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
   if(journal.hidden||journal.closest('#activity-dock'))return;
   const rect=journal.getBoundingClientRect(),viewport=window.visualViewport,profile=document.querySelector('.player-panel')?.getBoundingClientRect();
   const left=Math.max(8,profile?.left??16),right=left+rect.width,bottom=(viewport?.offsetTop??0)+(viewport?.height??innerHeight)-12;
-  const visible=selector=>[...document.querySelectorAll(selector)].filter(el=>!el.hidden&&getComputedStyle(el).visibility!=='hidden').map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height&&r.bottom>0&&r.top<bottom);
+  const visible=selector=>[...document.querySelectorAll(selector)].filter(el=>!el.hidden&&getComputedStyle(el).visibility!=='hidden'&&!(el.id==='online-dock'&&el.classList.contains('desktop-chat-overlay')&&matchMedia('(min-width:901px) and (pointer:fine)').matches)).map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height&&r.bottom>0&&r.top<bottom);
   const stack=visible('.player-panel,#ailment-row,#online-button,#party-frame,#hud-chips,#rebirth-btn');
   let top=Math.round(Math.max(viewport?.offsetTop??0,...stack.filter(r=>r.left<right&&r.right>left).map(r=>r.bottom))+10),x=left,room=bottom-top;
   // A very tall party/buff stack can exhaust the left edge. Use a free adjacent space instead of covering another HUD.

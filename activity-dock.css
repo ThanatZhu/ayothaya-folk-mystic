@@ -31,3 +31,15 @@ body:is(.mobile-menu-open,.mobile-chat-open,.chat-typing) #activity-dock[data-ov
 @media(prefers-reduced-motion:no-preference){#activity-dock nav button{transition:background .15s,border-color .15s}}
 
 body.field-hud.hud63 #activity-dock #quest-distance{font-size:11px!important;color:#e2bf6e;line-height:1.5}body.field-hud.hud63 #activity-dock #quest-distance[hidden]{display:none!important}
+/* Actual generated button artwork, with live localized labels kept readable. */
+#activity-dock nav .activity-quest-icon{background-image:url('assets/ui-overlay143/quest.webp');background-size:contain;background-position:center}
+#activity-dock nav .activity-party-icon{background-image:url('assets/ui-overlay143/party.webp');background-size:contain;background-position:center}
+#activity-dock #activity-fold{border:0;background:none;box-shadow:none;font-size:0}
+#activity-dock #activity-fold::before{content:'';display:block;width:44px;height:30px;background:url('assets/ui-overlay143/fold.webp') center/contain no-repeat;filter:drop-shadow(0 2px 2px #0008)}
+#activity-dock #activity-fold[aria-expanded=false]::before{transform:rotate(180deg)}
+@media(min-width:901px) and (pointer:fine){
+ #activity-dock:not([data-horizontal=true]) nav button[role=tab]{border:0;border-radius:0;background:none;box-shadow:none;justify-content:flex-end;padding:5px 2px;filter:drop-shadow(0 2px 3px #0008)}
+ #activity-dock:not([data-horizontal=true]) nav i{position:absolute;inset:0;width:100%;height:100%;filter:none;pointer-events:none}
+ #activity-dock:not([data-horizontal=true]) nav button[role=tab] span{position:relative;z-index:1;font-size:9px;line-height:12px;color:#fff0c1;text-shadow:0 1px 2px #000}
+ #activity-dock:not([data-horizontal=true]) nav button[aria-selected=true] i{filter:brightness(1.25) drop-shadow(0 0 2px #ffe49188)}
+}

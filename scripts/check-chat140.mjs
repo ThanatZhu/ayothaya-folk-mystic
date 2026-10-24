@@ -6,12 +6,14 @@ import {WebSocket} from 'ws';
 import {LocalStore} from '../server/storage.js';
 import {createHost} from '../server/host.js';
 import {XP_CURVE} from '../experience.js';
-const out=new URL('../outputs/chat140/',import.meta.url);await mkdir(out,{recursive:true});
+const out=new URL('../outputs/overlay143/chat/',import.meta.url);await mkdir(out,{recursive:true});
 const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8')),origins=[];
 const store=await new LocalStore(await mkdtemp(fileURLToPath(new URL('store-',out)))).init(),host=await createHost({mode:'local',store,catalog,origins,serveStatic:true});
 await new Promise(r=>host.server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+host.server.address().port;origins.push(base);
 const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true}),checks=[],errors=[],sockets=[];
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
+const hudBounds=page=>page.evaluate(()=>Object.fromEntries([...document.querySelectorAll('#activity-dock,.player-panel,#game-menu,.mini-panel,.actionbar-rows,#actionbar-life,#actionbar-combat')].map(e=>{const r=e.getBoundingClientRect();return [e.id||e.className,{x:r.x,y:r.y,width:r.width,height:r.height,visibility:getComputedStyle(e).visibility}];})));
+const unchanged=(a,b)=>{assert.deepEqual(Object.keys(a),Object.keys(b));for(const id of Object.keys(a)){for(const key of ['x','y','width','height'])assert.ok(Math.abs(a[id][key]-b[id][key])<1,id+' '+key+' must not move when chat opens');assert.equal(a[id].visibility,b[id].visibility,id+' stays visible behind chat');}};
 async function waitFor(check){for(let i=0;i<100;i++){if(check())return;await pause(50);}assert.ok(check(),'server message not received');}
 async function seed(name){const session=await store.createLocal({name,gender:'male'}),record=store.rows.get(session.uid);record.xpCurve=XP_CURVE;record.story={v:3,quest:0,step:0,count:0,done:false};record.daily={day:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),streak:1};return {...session,record};}
 try{
@@ -37,7 +39,7 @@ try{
    assert.equal(await page.locator('#desktop-chat-launcher kbd').textContent(),'Enter');await page.screenshot({path:fileURLToPath(new URL(`${lang}-desktop-collapsed.png`,out))});
   }else assert.equal(await page.locator('#desktop-chat-launcher').isVisible(),false);
   const expand=async()=>{if(mobile){if(await page.locator('#dock-toggle').getAttribute('aria-expanded')==='false')await page.locator('#dock-toggle').click();await page.locator('#online-text').focus();}else await page.locator('#desktop-chat-launcher').click();};
-  if(!mobile)await page.keyboard.press('Enter');else await expand();
+  const initialHud=!mobile?await hudBounds(page):null;if(!mobile)await page.keyboard.press('Enter');else await expand();
   await page.waitForFunction(()=>document.activeElement?.id==='online-text');
   const sent=lang==='th'?'พร้อมออกล่าบอสกันไหมครับ 🌸':'Ready to hunt the map boss together?';
   await page.locator('#online-text').fill(sent);await page.keyboard.press('Enter');await waitFor(()=>received.some(m=>m.type==='chat'&&m.name==='ChatHero'&&m.text===sent));
@@ -46,14 +48,14 @@ try{
   const whispered=lang==='th'?'ชวนเข้าปาร์ตี้ได้เลยครับ':'You can invite me to the party.';await pause(1250);await page.locator('#online-text').fill('/w ChatFriend '+whispered);await page.keyboard.press('Enter');await waitFor(()=>received.some(m=>m.channel==='whisper'&&m.text===whispered));assert.equal(await page.locator('#online-text').inputValue(),'/w ChatFriend ');
   await page.locator('#online-text').fill('Draft stays');await page.keyboard.press('Escape');
   if(!mobile){
-   assert.equal(await page.locator('#online-dock').isVisible(),false);assert.equal(await page.locator('#online-text').inputValue(),'Draft stays');
+   assert.equal(await page.locator('#online-dock').isVisible(),false);unchanged(initialHud,await hudBounds(page));assert.equal(await page.locator('#online-text').inputValue(),'Draft stays');
    await reply(lang==='th'?'ใครยังไม่มีปาร์ตี้ มารวมกันได้เลย':'Anyone without a party is welcome to join.');await page.waitForFunction(()=>!document.querySelector('.desktop-chat-unread').hidden);await page.locator('#desktop-chat-launcher').click();
    assert.equal(await page.locator('#online-text').inputValue(),'Draft stays');assert.equal(await page.locator('.desktop-chat-unread').isVisible(),false);
    await page.locator('#online-text').fill('');
   }
   for(const [width,height] of mobile?[[932,430],[667,375],[390,844]]:[[1920,945],[1440,900],[1280,720],[1024,768],[1280,600]]){
    await page.setViewportSize({width,height});await page.waitForTimeout(100);
-   if(!mobile&&!(await page.locator('#online-dock').isVisible()))await expand();
+   if(!mobile){if(await page.locator('#online-dock').isVisible())await page.keyboard.press('Escape');await page.waitForTimeout(100);const before=await hudBounds(page);await expand();await page.waitForTimeout(100);unchanged(before,await hudBounds(page));assert.ok(await page.locator('#online-dock').evaluate(e=>e.matches(':popover-open')),'desktop chat uses the top layer');}
    if(mobile&&await page.locator('#dock-toggle').getAttribute('aria-expanded')==='false')await expand();
    const metrics=await page.locator('#online-dock').evaluate(e=>{
     const rect=n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
@@ -79,7 +81,7 @@ try{
    await page.keyboard.press('Control+Enter');assert.equal(await page.locator('#online-dock').isVisible(),false);
    await page.evaluate(()=>document.body.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',code:'Enter',isComposing:true,bubbles:true})));assert.equal(await page.locator('#online-dock').isVisible(),false);
    // Opening a utility window keeps Enter from stealing focus into chat.
-   if(!await page.locator('#menu-bag').isVisible())await page.locator('#menu-toggle').click();await page.locator('#menu-bag').click();await page.keyboard.press('Enter');assert.equal(await page.locator('#online-dock').isVisible(),false);await page.keyboard.press('Escape');
+   if(!await page.locator('#menu-bag').isVisible())await page.locator('#menu-toggle').click();await page.locator('#menu-bag').click();await page.locator('#bag-window').focus();await page.keyboard.press('Enter');assert.ok(await page.locator('#bag-window').isVisible(),'bag remains open before the chat overlay');assert.equal(await page.locator('#online-dock').isVisible(),false);const beforeOverlay=await hudBounds(page),bagBefore=await page.locator('#bag-window').boundingBox();await page.locator('#desktop-chat-launcher').click();await page.waitForTimeout(100);assert.ok(await page.locator('#bag-window').isVisible(),'chat does not close the open bag');assert.deepEqual(await page.locator('#bag-window').boundingBox(),bagBefore,'bag geometry does not change');unchanged(beforeOverlay,await hudBounds(page));assert.ok(await page.locator('#online-dock').evaluate(e=>{const a=e.getBoundingClientRect(),b=document.getElementById('bag-window').getBoundingClientRect(),x=(Math.max(a.left,b.left)+Math.min(a.right,b.right))/2,y=(Math.max(a.top,b.top)+Math.min(a.bottom,b.bottom))/2;return e.contains(document.elementFromPoint(x,y));}),'chat is above an overlapping HUD window');await page.screenshot({path:fileURLToPath(new URL(lang+'-chat-over-bag.png',out))});await page.keyboard.press('Escape');assert.ok(await page.locator('#bag-window').isVisible(),'Escape closes only chat, not the bag underneath');await page.keyboard.press('Escape');
    await page.locator('#desktop-chat-launcher').click();await page.setViewportSize({width:844,height:390});await page.waitForTimeout(100);assert.equal(await page.locator('#desktop-chat-launcher').isVisible(),false);assert.equal(await page.locator('#dock-toggle').getAttribute('aria-expanded'),'false');
    await page.setViewportSize({width:1440,height:900});await page.waitForTimeout(100);assert.ok(await page.locator('#desktop-chat-launcher').isVisible());
   }

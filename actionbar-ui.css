@@ -62,7 +62,7 @@ body.actionbar-dragging{user-select:none}
 #desktop-actionbar #actionbar-life button:disabled{opacity:.45;filter:grayscale(.7)}
 /* Two level helper pairs, with a larger battle column and a corner settings cog. */
 .combat-control-art{display:none}
-#desktop-actionbar .actionbar-tools{display:grid;grid-template-columns:64px 84px;gap:16px;width:164px;align-items:end}
+#desktop-actionbar .actionbar-tools{display:grid;grid-template-columns:64px;gap:0;width:64px;align-items:end}
 #desktop-actionbar>.actionbar-resize{bottom:-8px;width:64px;height:130px;justify-content:flex-start;gap:10px}
 #desktop-actionbar .actionbar-resize button{display:flex;align-items:flex-start;justify-content:center;width:64px;min-width:64px;height:60px;min-height:60px}
 #desktop-actionbar .actionbar-button-art{width:48px;height:48px}
@@ -70,22 +70,24 @@ body.actionbar-dragging{user-select:none}
 #desktop-actionbar #actionbar-life button{width:64px!important;min-width:64px!important;height:60px!important;min-height:60px!important;justify-content:flex-start;gap:0}
 #desktop-actionbar #actionbar-life .action-helper-art{width:48px;height:48px}
 #desktop-actionbar #actionbar-life :is(.action-helper-label,.movement-label){font-size:11px;line-height:12px}
-#desktop-actionbar #actionbar-combat{display:flex;flex-direction:column;align-items:center;gap:10px;width:84px}
-#desktop-actionbar #auto-control{position:relative!important;inset:auto!important;display:block!important;width:84px!important;height:98px!important;overflow:visible}
-#desktop-actionbar :is(#auto-attack,#attack){position:relative!important;inset:auto!important;display:block!important;width:84px!important;height:98px!important;min-width:84px!important;min-height:98px!important;padding:0!important;border:0!important;border-radius:8px!important;background:none!important;box-shadow:none!important;font-size:0!important;overflow:visible;cursor:pointer;text-shadow:0 1px 3px #000,1px 0 #14251b,-1px 0 #14251b}
-#desktop-actionbar .combat-control-art{position:absolute;top:0;left:0;display:block;width:84px;height:84px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 3px 4px #0008)}
-#desktop-actionbar #auto-attack strong{position:absolute;bottom:0;left:10px;display:block;font:700 11px/14px Mali,Tahoma,sans-serif;color:#f7df9c}
-#desktop-actionbar #auto-state{position:absolute;bottom:0;right:10px;display:block;font:700 11px/14px Mali,Tahoma,sans-serif;color:#f7df9c}
-#desktop-actionbar #auto-attack small{display:none!important}
-#desktop-actionbar #auto-attack.active .combat-control-art{filter:brightness(1.18) drop-shadow(0 0 6px #a4edaa99)}
-#desktop-actionbar #auto-attack.active :is(strong,#auto-state){color:#b7f0bd}
-#desktop-actionbar #attack::before{content:none!important;display:none!important}
-#desktop-actionbar #attack small{position:absolute;bottom:0;left:0;right:0;top:auto;display:block!important;font:700 11px/14px Mali,Tahoma,sans-serif;text-align:center;color:#ffe9b4}
-#desktop-actionbar #auto-settings-open{position:absolute!important;inset:-8px -8px auto auto!important;display:block!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;z-index:6}
-#desktop-actionbar #auto-settings-open :is(svg),#desktop-actionbar #auto-settings-open::before{display:none!important;content:none!important}
-#desktop-actionbar #auto-settings-open .combat-control-art{width:36px;height:36px;filter:drop-shadow(0 2px 2px #000b)}
-#desktop-actionbar #actionbar-combat button:hover .combat-control-art{filter:brightness(1.2) drop-shadow(0 3px 5px #0009)}
-#desktop-actionbar #actionbar-combat button:active .combat-control-art{transform:scale(.95)}
+#actionbar-combat{position:fixed;right:max(24px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));display:flex;flex-direction:row;align-items:flex-end;gap:14px;width:182px;z-index:35;pointer-events:auto}
+#actionbar-combat[hidden]{display:none!important}
+#actionbar-combat button:focus-visible{outline:2px solid #b7f5dd;outline-offset:2px}
+#actionbar-combat #auto-control{position:relative!important;inset:auto!important;display:block!important;width:84px!important;height:98px!important;overflow:visible}
+#actionbar-combat :is(#auto-attack,#attack){position:relative!important;inset:auto!important;display:block!important;width:84px!important;height:98px!important;min-width:84px!important;min-height:98px!important;padding:0!important;border:0!important;border-radius:8px!important;background:none!important;box-shadow:none!important;font-size:0!important;overflow:visible;cursor:pointer;text-shadow:0 1px 3px #000,1px 0 #14251b,-1px 0 #14251b}
+#actionbar-combat .combat-control-art{position:absolute;top:0;left:0;display:block;width:84px;height:84px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 3px 4px #0008)}
+#actionbar-combat #auto-attack strong{position:absolute;bottom:0;left:10px;display:block;font:700 11px/14px Mali,Tahoma,sans-serif;color:#f7df9c}
+#actionbar-combat #auto-state{position:absolute;bottom:0;right:10px;display:block;font:700 11px/14px Mali,Tahoma,sans-serif;color:#f7df9c}
+#actionbar-combat #auto-attack small{display:none!important}
+#actionbar-combat #auto-attack.active .combat-control-art{filter:brightness(1.18) drop-shadow(0 0 6px #a4edaa99)}
+#actionbar-combat #auto-attack.active :is(strong,#auto-state){color:#b7f0bd}
+#actionbar-combat #attack::before{content:none!important;display:none!important}
+#actionbar-combat #attack small{position:absolute;bottom:0;left:0;right:0;top:auto;display:block!important;font:700 11px/14px Mali,Tahoma,sans-serif;text-align:center;color:#ffe9b4}
+#actionbar-combat #auto-settings-open{position:absolute!important;inset:-8px -8px auto auto!important;display:block!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;z-index:6}
+#actionbar-combat #auto-settings-open :is(svg),#actionbar-combat #auto-settings-open::before{display:none!important;content:none!important}
+#actionbar-combat #auto-settings-open .combat-control-art{width:36px;height:36px;filter:drop-shadow(0 2px 2px #000b)}
+#actionbar-combat button:hover .combat-control-art{filter:brightness(1.2) drop-shadow(0 3px 5px #0009)}
+#actionbar-combat button:active .combat-control-art{transform:scale(.95)}
 body.actionbar-mobile .combat-control-art{display:none!important}
 /* Four skills per page sit around attack; the central circular arrows change page. */
 body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel{position:fixed!important;right:var(--edge-r)!important;bottom:var(--touch-bottom)!important;width:228px!important;height:202px!important;display:block!important;translate:none!important;scale:1!important}

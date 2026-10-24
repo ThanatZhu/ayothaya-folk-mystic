@@ -42,3 +42,18 @@
  }
  @media(prefers-reduced-motion:reduce){#desktop-chat-launcher img{transition:none}}
 }
+/* Generated gold/jade frame and controls; the chat occupies the top layer only. */
+@media(min-width:901px) and (pointer:fine){
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer.desktop-chat-overlay:not([hidden]){
+  margin:0!important;border:12px solid transparent!important;border-image:url('assets/ui-overlay143/chat-frame.webp') 175 170 / 28px / 0 stretch!important;border-radius:0!important;
+  padding:5px!important;background:linear-gradient(125deg,#173b30fa,#0c251ff9)!important;background-clip:padding-box!important;z-index:2147483000!important;
+ }
+ #online-dock.desktop-chat-overlay::backdrop{background:none;pointer-events:none}
+ #online-dock.desktop-chat-overlay #desktop-chat-close{width:44px;height:44px;flex-shrink:0;border:0;background:url('assets/ui-overlay143/close.webp') center/contain no-repeat;font-size:0;filter:drop-shadow(0 2px 2px #0008)}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer.desktop-chat-overlay .mp-tabs button{border:0!important;border-radius:0;background:url('assets/ui-overlay143/chat-tab.webp') center/100% 100% no-repeat!important;box-shadow:none;color:#f4dfad;text-shadow:0 1px 2px #000}
+ html body.field-hud.hud63 #online-dock.desktop-chat-overlay .mp-tabs button[aria-selected=true]{filter:brightness(1.35);color:#fff2c4}
+ html body.field-hud.hud63 #online-dock.desktop-chat-overlay .mp-tabs button:disabled{filter:grayscale(.6);opacity:.5}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer.desktop-chat-overlay #online-chat button{width:114px;flex:0 0 114px;min-height:46px;padding:6px 10px 6px 46px;border:0;background:url('assets/ui-overlay143/send.webp') center/100% 100% no-repeat!important;border-radius:0;box-shadow:none;color:#314434;text-shadow:none;font-weight:700}
+ #online-dock.desktop-chat-overlay button:focus-visible{outline:2px solid #ffe6a3;outline-offset:-2px}
+ #online-dock.desktop-chat-overlay button:hover:not(:disabled){filter:brightness(1.2)}
+}

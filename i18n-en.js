@@ -3674,5 +3674,6 @@ Object.assign(globalThis.I18N_EN,{
  "ขั้น {0}/{1}":"Step {0}/{1}",
  "สนทนา":"Chat",
  "ปิดแชต":"Close chat",
- "เปิดแชต · Enter":"Open chat · Enter"
+ "เปิดแชต · Enter":"Open chat · Enter",
+ "ควบคุมการต่อสู้":"Battle controls"
 });

@@ -5,7 +5,7 @@ import {applySkillArt} from './skill-art.js?v=icons117';
 
 export function createActionbar({game,bagUI,account={}}){
  const world=game.world,body=document.body,$=id=>document.getElementById(id),phone=matchMedia('(any-pointer:coarse),(max-width:900px)');
- const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=combat142';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=overlay143';document.head.append(css);
  const key='ayothaya-actionbar-v1:'+[(account.serverId??'local'),(account.slotId??'guest'),world.profession.id,world.jobId??'',world.roleCombat?'role':'legacy'].join(':');
  const fallback=defaultActionbar(world.skills,game.hotbar,bagUI.quickItems);
  let saved;try{saved=JSON.parse(localStorage.getItem(key));}catch{}
@@ -21,7 +21,9 @@ export function createActionbar({game,bagUI,account={}}){
  for(const [id,art,size] of [['auto-attack','auto',84],['auto-settings-open','settings',36],['attack','attack',84]]){
   const button=$(id);if(!button)continue;const image=document.createElement('img');image.className='combat-control-art';image.src='assets/ui-combat142/'+art+'.webp';image.alt='';image.width=image.height=size;button.prepend(image);
  }
- $('game-shell').append(root);const rows=root.querySelector('.actionbar-rows'),status=root.querySelector('[role=status]');
+ const battle=root.querySelector('#actionbar-combat');battle.hidden=true;battle.setAttribute('aria-label','ควบคุมการต่อสู้');
+ // Keep the battle controls outside the translated shortcut grid, anchored to the viewport.
+ $('game-shell').append(root,battle);const rows=root.querySelector('.actionbar-rows'),status=root.querySelector('[role=status]');
  const auto=$('auto-control')??$('auto-attack'),attack=$('attack'),moves=[auto,attack,$('emote-open'),$('run-toggle')].filter(Boolean).map(node=>{const home=document.createComment('shortcut home');node.before(home);return {node,home};});
  const persist=()=>{try{localStorage.setItem(key,JSON.stringify(state));}catch{}};
  const blocked=()=>!game.canUseActions||!!document.querySelector('dialog:modal')||body.classList.contains('controls-editing');
@@ -71,7 +73,7 @@ export function createActionbar({game,bagUI,account={}}){
   }
  }
  function mode(){
-  body.classList.toggle('actionbar-desktop',!phone.matches);body.classList.toggle('actionbar-mobile',phone.matches);root.hidden=phone.matches;
+  body.classList.toggle('actionbar-desktop',!phone.matches);body.classList.toggle('actionbar-mobile',phone.matches);root.hidden=phone.matches;battle.hidden=phone.matches;
   if(!phone.matches){attack.disabled=false;$('auto-attack').disabled=false;}
   for(const {node,home} of moves){if(phone.matches)home.after(node);else $(['emote-open','run-toggle'].includes(node.id)?'actionbar-life':'actionbar-combat').append(node);}
   render();

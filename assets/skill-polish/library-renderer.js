@@ -7,21 +7,21 @@ const smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
 
 // A small lazy atlas cache. All eight UV frames share their source image on the GPU.
 export function createSkillLibraryRenderer(scene){
- const cache=new Map(),loader=new THREE.TextureLoader(),slots=[],plane=new THREE.PlaneGeometry(1,1);let generation=0,needed=new Set(),current=null,disposed=false,tick=0,visibleCount=0,cacheLimit=6;
+ const cache=new Map(),loader=new THREE.TextureLoader(),slots=[],plane=new THREE.PlaneGeometry(1,1);let coordinateMap=null;let generation=0,needed=new Set(),current=null,disposed=false,tick=0,visibleCount=0,cacheLimit=6;
  const sources=key=>{let item=cache.get(key);if(item)return item.promise;item={key,used:++tick,frames:null,base:null,promise:null};cache.set(key,item);
-  item.promise=loader.loadAsync(PAINTED_SHEETS[key]).then(base=>{if(disposed){base.dispose();return null;}base.colorSpace=THREE.SRGBColorSpace;base.minFilter=base.magFilter=THREE.LinearFilter;base.generateMipmaps=false;item.base=base;item.frames=Array.from({length:8},(_,i)=>{const texture=base.clone(),uv=atlasUv(i);texture.offset.set(uv.x,uv.y);texture.repeat.set(uv.w,uv.h);texture.needsUpdate=true;return texture;});trim();return item;}).catch(error=>{cache.delete(key);throw new Error('Cannot load painted atlas '+key+': '+error.message);});return item.promise;
+  item.promise=loader.loadAsync(PAINTED_SHEETS[key]).then(base=>{if(disposed){base.dispose();return null;}if(cacheLimit===4&&base.image.width>1024){const canvas=document.createElement('canvas');canvas.width=Math.round(base.image.width/2);canvas.height=Math.round(base.image.height/2);canvas.getContext('2d').drawImage(base.image,0,0,canvas.width,canvas.height);base.image=canvas;base.needsUpdate=true;}base.colorSpace=THREE.SRGBColorSpace;base.minFilter=base.magFilter=THREE.LinearFilter;base.generateMipmaps=false;item.base=base;item.frames=Array.from({length:8},(_,i)=>{const texture=base.clone(),uv=atlasUv(i);texture.offset.set(uv.x,uv.y);texture.repeat.set(uv.w,uv.h);texture.needsUpdate=true;return texture;});trim();return item;}).catch(error=>{cache.delete(key);throw new Error('Cannot load painted atlas '+key+': '+error.message);});return item.promise;
  };
  function release(item){item.frames?.forEach(t=>t.dispose());item.base?.dispose();cache.delete(item.key);}
  function trim(){const candidates=[...cache.values()].filter(item=>item.frames&&!needed.has(item.key)).sort((a,b)=>a.used-b.used);while(cache.size>Math.max(cacheLimit,needed.size)&&candidates.length)release(candidates.shift());}
  function slot(index){if(slots[index])return slots[index];const spriteMaterial=new THREE.SpriteMaterial({transparent:true,depthWrite:false,depthTest:true}),groundMaterial=new THREE.MeshBasicMaterial({transparent:true,depthWrite:false,depthTest:true,side:THREE.DoubleSide}),sprite=new THREE.Sprite(spriteMaterial),ground=new THREE.Mesh(plane,groundMaterial);sprite.visible=ground.visible=false;ground.rotation.x=-Math.PI/2;scene.add(sprite,ground);return slots[index]={sprite,ground,spriteMaterial,groundMaterial};}
  function hide(clearMaps=false){visibleCount=0;for(const s of slots){s.sprite.visible=s.ground.visible=false;if(clearMaps){s.spriteMaterial.map=s.groundMaterial.map=null;s.spriteMaterial.needsUpdate=s.groundMaterial.needsUpdate=true;}}}
  const projectA=new THREE.Vector3(),projectB=new THREE.Vector3();
- function angle(from,to,camera){projectA.set(from.x,from.y,from.z).project(camera);projectB.set(to.x,to.y,to.z).project(camera);return Math.atan2(projectB.y-projectA.y,projectB.x-projectA.x);}
+ function angle(from,to,camera){if(coordinateMap){from=coordinateMap.point(from);to=coordinateMap.point(to);}projectA.set(from.x,from.y,from.z).project(camera);projectB.set(to.x,to.y,to.z).project(camera);return Math.atan2(projectB.y-projectA.y,projectB.x-projectA.x);}
  function draw(key,frame,position,scale,opacity,rotation=0,{ground=false,base=false,pet=false,color='#ffffff',additive=false}={}){
   if(opacity<.005||visibleCount>=64)return;const atlas=cache.get(key);if(!atlas?.frames)throw new Error('Unprepared atlas '+key);const s=slot(visibleCount++),object=ground?s.ground:s.sprite,mat=ground?s.groundMaterial:s.spriteMaterial;
   const texture=atlas.frames[Math.max(0,Math.min(7,Math.floor(frame)))];if(!mat.map){mat.map=texture;mat.needsUpdate=true;}else mat.map=texture;
-  mat.opacity=opacity;mat.color.set(color);mat.blending=additive?THREE.AdditiveBlending:THREE.NormalBlending;object.visible=true;object.position.set(position.x,position.y,position.z);object.scale.setScalar(scale);
-  if(ground){object.rotation.set(-Math.PI/2,0,rotation);}else{s.sprite.center.set(.5,pet?.17:base?.12:.5);mat.rotation=rotation;}
+  mat.opacity=opacity;mat.color.set(color);mat.blending=additive?THREE.AdditiveBlending:THREE.NormalBlending;object.visible=true;if(coordinateMap)position=coordinateMap.point(position);object.position.set(position.x,position.y,position.z);object.scale.setScalar(scale);
+  if(ground){object.rotation.set(-Math.PI/2,0,rotation+(coordinateMap?.yaw??0));}else{s.sprite.center.set(.5,pet?.17:base?.12:.5);mat.rotation=rotation;}
  }
  function anchor(name,s){if(name==='hero')return {x:s.heroX,y:s.heroY??0,z:s.heroZ??0};if(name==='pet')return {x:-.9,y:0,z:-.55};return {x:s.targetX,y:0,z:0};}
  function sampleLayer(layer,s,camera,quality,reduced){
@@ -62,8 +62,8 @@ export function createSkillLibraryRenderer(scene){
    if(disposed)throw new Error('Painted library renderer disposed');const token=++generation;hide(true);current=null;needed=new Set(profile.layers.map(l=>l.sheet));if(profile.approved==='rooster')needed.add('sword');cacheLimit=quality==='low'?4:6;
    const items=await Promise.all([...needed].map(sources));if(token!==generation||disposed)return false;items.forEach(item=>{if(item)item.used=++tick;});current=profile;trim();return true;
   },
-  sample(s,camera,{quality='high',reduced=false,hidden=false}={}){
-   hide();if(disposed||hidden||!current||s.profile.id!==current.id)return;
+  sample(s,camera,{quality='high',reduced=false,hidden=false,space=null}={}){
+   coordinateMap=space;hide();if(disposed||hidden||!current||s.profile.id!==current.id)return;
    if(s.approved==='sword'){draw('sword',s.fxFrame,{x:1.35,y:1.1,z:.08},s.fxSize,s.fxOpacity);draw('sword',s.fxFrame,{x:1.35,y:1.1,z:.075},s.fxSize*1.045,s.fxOpacity*.12,0,{additive:true});return;}
    if(s.approved==='rooster'){draw('rooster',s.roosterFrame,{x:s.roosterX,y:s.roosterY,z:-.08},1.72,s.roosterOpacity,0,{pet:true});const alpha=Math.max(0,1-Math.abs(s.time-1.02)/.19);draw('sword',7,{x:1.64,y:1,z:.1},.9,alpha);return;}
    if(s.approved==='lotus'){draw('lotus',s.fxFrame,{x:1.55,y:.025,z:-.42},s.fxSize,s.fxOpacity,0,{base:true});return;}

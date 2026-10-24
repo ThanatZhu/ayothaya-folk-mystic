@@ -1,7 +1,7 @@
 // 0.60 "ภารกิจ" window: daily bounty board (claim in a town) and the card album. Online the realm server owns both;
 // offline guests keep them in localStorage and pay out through the same 'reward' / experience events.
 import {itemDef} from './items.js?v=107';
-import {MONSTER_TYPES} from './combat-core.js?v=112.1';
+import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {awardExperience} from './experience.js?v=105.3';
 import {dailyBounties,normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd,ALBUM_CARDS,ALBUM_MILESTONES,WEEKLY,normalizeWeekly} from './bounty.js?v=107';
 import {iconStyle} from './bag-ui.js?v=107';

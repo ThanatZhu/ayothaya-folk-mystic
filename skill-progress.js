@@ -66,6 +66,7 @@ export function scaledSkill(base,level){
  if(!base||!level)return null;
  if(level===1)return base;
  const power=1+.08*(level-1)+(level>=10?.15:0),s={...base};
+ if(s.roleSkillId&&Number.isFinite(s.power)&&!['sanctuary','yantra','link','reflect','lastStand','revive','greatRevive'].includes(s.type))s.power=Math.round(s.power*power);
  if(s.damage)s.damage=Math.round(s.damage*power);
  if(s.heal)s.heal=Math.round(s.heal*power);
  if(s.duration)s.duration=Math.round(s.duration*(1+.04*(level-1))*10)/10;

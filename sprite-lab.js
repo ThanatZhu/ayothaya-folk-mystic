@@ -6,11 +6,11 @@ import {CLASSES,NOVICE,getClass,className,classSkills} from './classes.js?v=112.
 import {DIRECTIONS,loadDirectionalArt} from './directional-sprite.js?v=63';
 import {createDirectionalActor} from './directional-actor.js?v=63';
 import {stableViewDirection} from './directional-motion.js';
-import {SKILLS,screenDirection,groundHeight} from './combat-core.js?v=112.1';
+import {SKILLS,screenDirection,groundHeight} from './combat-core.js?v=role116';
 import {attackDuration} from './character-motion.js?v=37';
 import {skillTrack,skillPose} from './skill-choreography.js?v=101';
 import {createSkillEffects} from './skill-effects.js?v=74';
-import {applySkillArt} from './skill-art.js?v=101';
+import {applySkillArt} from './skill-art.js?v=role116';
 import {prepareSceneV2,disposeScene} from './scene-v2.js?v=92';
 const $=id=>document.getElementById(id),labels={S:'หน้า',SE:'หน้าขวา',E:'ขวา',NE:'หลังขวา',N:'หลัง',NW:'หลังซ้าย',W:'ซ้าย',SW:'หน้าซ้าย'};
 try{

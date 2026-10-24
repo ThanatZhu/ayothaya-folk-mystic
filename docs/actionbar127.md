@@ -40,3 +40,5 @@ Run the static build before the browser checks or preview server. Preview:
 http://127.0.0.1:8921/actionbar-review.html
 
 Validation result: 476/476 node tests passed; five desktop and two mobile browser sizes passed, including inventory use and Master skills.
+
+Friendly control polish (129): rounded jade/gold add/remove buttons with labels, a labeled emote button, and walk/run glyphs that follow the toggle state. Browser checks cover all five desktop and two mobile sizes, including emote opening and run toggling; original touch controls remain compact.

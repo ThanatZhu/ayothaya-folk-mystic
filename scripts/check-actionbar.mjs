@@ -31,6 +31,12 @@ try{
  await page.waitForTimeout(1200);await page.evaluate(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();if(document.getElementById('dock-toggle')?.getAttribute('aria-expanded')==='true')document.getElementById('dock-toggle').click();});
  assert.ok(await page.locator('#desktop-actionbar').isVisible());assert.ok(!(await page.locator('.combat-controls').isVisible()));assert.ok(!(await page.locator('#quick-slots').isVisible()));
  assert.ok(await page.locator('#attack').isEnabled());assert.equal(await page.locator('#actionbar-life #emote-open').count(),1);
+ await page.locator('#emote-open').click();assert.ok(await page.locator('#emote-window').isVisible());await page.keyboard.press('Escape');
+ if(await page.locator('#run-toggle').isEnabled()){
+  const before=await page.evaluate(()=>window.__ayothaya.game.runningRequested);await page.locator('#run-toggle').click();
+  assert.equal(await page.evaluate(()=>window.__ayothaya.game.runningRequested),!before);assert.equal(await page.locator('#run-toggle .movement-label').textContent(),before?'วิ่ง':'เดิน');
+  assert.equal(await page.locator('#run-toggle svg:visible').count(),1);await page.locator('#run-toggle').click();
+ }
  while(!(await page.locator('#actionbar-remove').isDisabled()))await page.locator('#actionbar-remove').click();
  const bottom=await page.locator('.actionbar-row[data-row="0"]').boundingBox(),entries=await page.evaluate(()=>window.__ayothaya.game.actionBar.state.slots.slice(0,8));
  await page.locator('#actionbar-add').click();const same=await page.locator('.actionbar-row[data-row="0"]').boundingBox();assert.equal(Math.round(bottom.y),Math.round(same.y));assert.equal(await page.locator('.actionbar-row').first().getAttribute('data-row'),'1');

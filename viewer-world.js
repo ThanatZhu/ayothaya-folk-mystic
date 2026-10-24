@@ -1,5 +1,5 @@
 import './role-i18n.js?v=116';
-import {createActionbar} from './actionbar-ui.js?v=2';
+import {createActionbar} from './actionbar-ui.js?v=friendly129';
 import {drawCharacterFrame,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {peoplePlacement} from './npc-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=pets126';
@@ -40,7 +40,7 @@ import {createCraftUI} from './craft-ui.js?v=107';
 import {createWeather} from './weather-fx.js?v=109.7';
 import {createMarketUI} from './market-ui.js?v=trade-center122';
 import {createSocialUI} from './social-ui.js?v=107';
-import {createLifeUI} from './life-ui.js?v=role116';
+import {createLifeUI} from './life-ui.js?v=friendly129';
 import {createPetUI} from './pet-ui.js?v=pets126';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=pets125';

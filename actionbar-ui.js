@@ -5,13 +5,16 @@ import {applySkillArt} from './skill-art.js?v=icons117';
 
 export function createActionbar({game,bagUI,account={}}){
  const world=game.world,body=document.body,$=id=>document.getElementById(id),phone=matchMedia('(any-pointer:coarse),(max-width:900px)');
- const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=2';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=friendly129';document.head.append(css);
  const key='ayothaya-actionbar-v1:'+[(account.serverId??'local'),(account.slotId??'guest'),world.profession.id,world.jobId??'',world.roleCombat?'role':'legacy'].join(':');
  const fallback=defaultActionbar(world.skills,game.hotbar,bagUI.quickItems);
  let saved;try{saved=JSON.parse(localStorage.getItem(key));}catch{}
  let state=normalizeActionbar(saved,fallback,world.skills,id=>!!itemDef(id)),buttons=[],drag=null,suppressClick=false;
  const root=document.createElement('section');root.id='desktop-actionbar';root.setAttribute('aria-label','ตารางปุ่มลัดสกิลและไอเท็ม');
  root.innerHTML='<div class="actionbar-rows" role="group" aria-label="ช่องปุ่มลัด"></div><div class="actionbar-tools"><div class="actionbar-resize"><button type="button" id="actionbar-add" aria-label="เพิ่มแถวปุ่มลัด 8 ช่อง">+</button><button type="button" id="actionbar-remove" aria-label="ซ่อนแถวบนสุด 8 ช่อง">−</button></div><div id="actionbar-life"></div><div id="actionbar-combat"></div></div><span class="actionbar-status" role="status"></span>';
+ for(const [id,sign,label,title] of [['actionbar-add','+','เพิ่ม','เพิ่มแถวปุ่มลัด 8 ช่อง'],['actionbar-remove','−','ลด','ซ่อนแถวบนสุด · แถวหลักเก็บไว้เสมอ']]){
+  const button=root.querySelector('#'+id);button.innerHTML='<i class="actionbar-row-sign" aria-hidden="true">'+sign+'</i><span>'+label+'</span>';button.title=title;
+ }
  $('game-shell').append(root);const rows=root.querySelector('.actionbar-rows'),status=root.querySelector('[role=status]');
  const auto=$('auto-control')??$('auto-attack'),attack=$('attack'),moves=[auto,attack,$('emote-open'),$('run-toggle')].filter(Boolean).map(node=>{const home=document.createComment('shortcut home');node.before(home);return {node,home};});
  const persist=()=>{try{localStorage.setItem(key,JSON.stringify(state));}catch{}};

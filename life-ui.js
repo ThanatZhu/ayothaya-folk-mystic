@@ -29,9 +29,9 @@ export function createLifeUI({game,account,camera}){
  }
 
  // Emote picker beside the quick slots; own bubble floats over the hero.
- const button=document.createElement('button');button.type='button';button.id='emote-open';button.title='อีโมต';button.setAttribute('aria-label','อีโมต');button.innerHTML=icon(emoteId(3));
+ const button=document.createElement('button');button.type='button';button.id='emote-open';button.title='อีโมต';button.setAttribute('aria-label','อีโมต');button.innerHTML=icon(emoteId(3))+'<span class="action-helper-label">อีโมต</span>';
  ($('quick-slots')??document.body).append(button);
- const runButton=document.createElement('button');runButton.id='run-toggle';runButton.type='button';runButton.textContent='วิ่ง';runButton.setAttribute('aria-label','เปิดโหมดวิ่ง');runButton.setAttribute('aria-pressed','false');($('quick-slots')??document.body).append(runButton);
+ const runButton=document.createElement('button');runButton.id='run-toggle';runButton.type='button';runButton.dataset.moveAction='run';runButton.innerHTML='<span class="movement-glyph" aria-hidden="true"><svg class="walk-glyph" viewBox="0 0 32 32"><circle cx="18" cy="5" r="3"/><path d="m14 12 4-3 4 6 5 2M17 10l-3 9 5 5 1 6M14 19l-4 10M14 12l-3 5H6"/></svg><svg class="run-glyph" viewBox="0 0 32 32"><circle cx="22" cy="5" r="3"/><path d="m14 13 5-4 4 5 5-1M19 10l-4 9 6 4-1 7M15 19l-6 5-5-1M14 13l-4 5H5M2 9h7M1 14h5"/></svg></span><span class="movement-label">วิ่ง</span>';runButton.setAttribute('aria-label','เปิดโหมดวิ่ง');runButton.setAttribute('aria-pressed','false');($('quick-slots')??document.body).append(runButton);
  runButton.onclick=()=>{game.setRunning(!game.runningRequested);drawActions();};
  const picker=document.createElement('dialog');picker.id='emote-window';picker.setAttribute('aria-label','อีโมต');
  picker.innerHTML='<div class="emote-grid">'+Array.from({length:24},(_,i)=>`<button type="button" data-b="${i+1}" aria-label="อีโมต ${i+1}">${icon(emoteId(i+1))}</button>`).join('')+'</div><div class="emote-poses" style="flex-wrap:wrap">'+POSES.map(([k,n])=>`<button type="button" data-pose="${k}" style="flex:1 0 28%" aria-pressed="false">${n}</button>`).join('')+'</div><p class="animation-availability" aria-live="polite"></p>';
@@ -46,7 +46,7 @@ export function createLifeUI({game,account,camera}){
   const missing=['run','sit','sleep'].filter(k=>!game.supportsAction(k)),active=world.emote?.name??'idle',signature=missing.join(',')+'/'+active+'/'+game.runningRequested;
   if(signature===actionSignature)return;actionSignature=signature;
   for(const b of picker.querySelectorAll('[data-pose]')){b.disabled=!game.supportsAction(b.dataset.pose);b.title=b.disabled?'กำลังรอภาพแอนิเมชันของตัวละครชุดนี้':'';b.setAttribute('aria-pressed',String(active===b.dataset.pose));}
-  runButton.disabled=!game.supportsAction('run');runButton.setAttribute('aria-pressed',String(game.runningRequested));runButton.setAttribute('aria-label',game.runningRequested?'เปลี่ยนกลับเป็นเดิน':'เปิดโหมดวิ่ง');runButton.textContent=game.runningRequested?'เดิน':'วิ่ง';runButton.title=runButton.disabled?'ท่าวิ่งกำลังรอภาพแอนิเมชันของตัวละครชุดนี้':'แตะสลับเดิน / วิ่ง · คีย์บอร์ดกด Shift ค้าง';
+  runButton.disabled=!game.supportsAction('run');runButton.setAttribute('aria-pressed',String(game.runningRequested));runButton.setAttribute('aria-label',game.runningRequested?'เปลี่ยนกลับเป็นเดิน':'เปิดโหมดวิ่ง');runButton.querySelector('.movement-label').textContent=game.runningRequested?'เดิน':'วิ่ง';runButton.dataset.moveAction=game.runningRequested?'walk':'run';runButton.title=runButton.disabled?'ท่าวิ่งกำลังรอภาพแอนิเมชันของตัวละครชุดนี้':'แตะสลับเดิน / วิ่ง · คีย์บอร์ดกด Shift ค้าง';
   picker.querySelector('.animation-availability').textContent=missing.length?'รอภาพของตัวละครชุดนี้: '+missing.map(k=>({run:'วิ่ง',sit:'นั่ง',sleep:'นอน'}[k])).join(' · '):'เดินหรือโจมตีเพื่อลุกจากท่านั่ง / นอน';
  }
  addEventListener('character-animation-capabilities',drawActions);drawActions();

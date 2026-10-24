@@ -1,7 +1,7 @@
 /* Separate layouts: desktop uses eight-column rows, touch uses a compact wheel. */
 body.actionbar-desktop.field-hud.hud63 .combat-controls,body.actionbar-desktop.field-hud.hud63 #quick-slots{display:none!important}
 #desktop-actionbar[hidden]{display:none!important}
-#desktop-actionbar{--action-size:52px;position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;width:max-content;min-height:136px;align-items:flex-end;z-index:110;pointer-events:auto;max-width:calc(100vw - 24px);color:#f8e4ad}
+#desktop-actionbar{--action-size:52px;position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;width:max-content;min-height:158px;align-items:flex-end;z-index:110;pointer-events:auto;max-width:calc(100vw - 24px);color:#f8e4ad}
 .actionbar-rows{display:flex;flex-direction:column;gap:5px;padding:6px;background:linear-gradient(#18382be6,#081c18f2);border:1px solid #b18d4e;border-radius:6px;box-shadow:0 3px 12px #0008}
 .actionbar-row{display:grid;grid-template-columns:repeat(8,var(--action-size));gap:4px}
 #desktop-actionbar .action-slot{position:relative;display:block;width:var(--action-size);height:var(--action-size);padding:3px;margin:0;min-width:0;min-height:0;border:1px solid #b9a46b;border-radius:4px;background:#10241d;box-shadow:inset 0 0 0 1px #050f0d;cursor:pointer;overflow:hidden;touch-action:none}
@@ -16,12 +16,24 @@ body.actionbar-desktop.field-hud.hud63 .combat-controls,body.actionbar-desktop.f
 #desktop-actionbar .action-slot.no-mana:not(.locked){border-color:#8872b4}
 #desktop-actionbar .action-slot:hover,#desktop-actionbar .action-slot.drop-over{border-color:#fff4ad;box-shadow:0 0 0 2px #f6d173,0 0 12px #eac66c88}
 #desktop-actionbar button:focus-visible{outline:2px solid #b7f5dd;outline-offset:2px}
-.actionbar-tools{position:absolute;left:calc(100% + 10px);bottom:0;display:flex;flex-direction:column;gap:5px;align-items:stretch;flex-shrink:0}
-.actionbar-resize,#actionbar-life,#actionbar-combat{display:flex;gap:5px;align-items:center;justify-content:flex-start}
-.actionbar-resize button{width:32px;height:28px;border:1px solid #b29a63;border-radius:4px;background:#183229;color:#ffebbc;font:22px Arial,sans-serif;padding:0;cursor:pointer}
-.actionbar-resize button:disabled{opacity:.3;cursor:default}
-#desktop-actionbar #actionbar-life button{position:relative!important;inset:auto!important;width:42px!important;height:42px!important;min-width:0!important;border-radius:6px;border:1px solid #b69d60;background:#19362e;color:#ffecba;padding:3px;font-size:11px}
-#desktop-actionbar #emote-open .item-icon{width:32px;height:32px;display:block}
+.actionbar-tools{position:absolute;left:calc(100% + 12px);bottom:0;display:flex;width:146px;flex-direction:column;gap:6px;align-items:stretch;flex-shrink:0}
+.actionbar-resize,#actionbar-life,#actionbar-combat{display:flex;gap:6px;align-items:center;justify-content:flex-start}
+#desktop-actionbar :is(.actionbar-resize button,#actionbar-life button){color:#fff0bb;border:1px solid #c6a66a;border-radius:12px;background:linear-gradient(155deg,#39634f,#1b3c30 58%,#102c23);box-shadow:inset 0 1px 0 #e7d39b55,inset 0 -2px 0 #081d1999,0 3px 6px #0005;font-family:inherit;cursor:pointer;transition:background .16s,box-shadow .16s,transform .16s}
+#desktop-actionbar .actionbar-resize button{display:flex;align-items:center;justify-content:center;gap:5px;width:70px;height:36px;min-width:70px;min-height:36px;padding:4px 6px;font-size:12px;font-weight:700}
+#desktop-actionbar .actionbar-row-sign{display:grid;place-items:center;width:19px;height:19px;flex-shrink:0;border-radius:50%;color:#243b2b;background:linear-gradient(#fff2bd,#d4b26c);box-shadow:inset 0 1px 0 #fff9;font:bold 18px/1 Arial,sans-serif}
+#desktop-actionbar .actionbar-resize button:disabled{opacity:.4;cursor:default;box-shadow:inset 0 1px 0 #e7d39b22}
+#desktop-actionbar #actionbar-life button{position:relative!important;inset:auto!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:70px!important;height:58px!important;min-width:70px!important;padding:5px!important;font-size:12px;font-weight:700;line-height:15px}
+#desktop-actionbar #emote-open .item-icon{width:28px;height:28px;display:block;filter:drop-shadow(0 1px 2px #0006)}
+.action-helper-label,.movement-glyph{display:none}
+#desktop-actionbar .action-helper-label,#desktop-actionbar .movement-glyph{display:block}
+#desktop-actionbar .movement-glyph{width:29px;height:29px;color:#ffe8a6;filter:drop-shadow(0 1px 1px #0008)}
+.movement-glyph svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.movement-glyph svg circle{fill:currentColor;stroke:none}
+#run-toggle[data-move-action=run] .walk-glyph,#run-toggle[data-move-action=walk] .run-glyph{display:none}
+#desktop-actionbar #run-toggle[aria-pressed=true]{background:linear-gradient(155deg,#58754c,#254c35 60%,#173925);border-color:#e6d28b}
+#desktop-actionbar :is(.actionbar-resize button,#actionbar-life button):not(:disabled):hover{background:linear-gradient(155deg,#557b57,#2d5741 60%,#193c2d);border-color:#fff0ac;box-shadow:inset 0 1px 0 #fff6,0 3px 8px #0006,0 0 8px #ead28a33;transform:translateY(-1px)}
+#desktop-actionbar :is(.actionbar-resize button,#actionbar-life button):not(:disabled):active{transform:translateY(1px) scale(.97);box-shadow:inset 0 2px 4px #071e1999}
+@media(prefers-reduced-motion:reduce){#desktop-actionbar :is(.actionbar-resize button,#actionbar-life button){transition:none;transform:none!important}}
 #desktop-actionbar #auto-control{position:relative!important;inset:auto!important;display:flex!important;width:auto!important;height:44px!important;gap:3px;align-items:center}
 #desktop-actionbar #auto-attack{width:44px!important;height:44px!important;min-width:0!important;font-size:10px!important;padding:0!important}
 #desktop-actionbar #auto-settings-open{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;flex-shrink:0;position:relative!important;inset:auto!important}

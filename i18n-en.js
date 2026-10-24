@@ -3432,6 +3432,7 @@ Object.assign(globalThis.I18N_EN,{
  "ช่องสกิลว่าง": "Empty Skill Slot",
  "เพิ่มแถวปุ่มลัด 8 ช่อง": "Add a row of 8 shortcuts",
  "ซ่อนแถวบนสุด 8 ช่อง": "Hide the top row of 8 shortcuts",
+ "ซ่อนแถวบนสุด · แถวหลักเก็บไว้เสมอ": "Hide the top row · The bottom row always stays",
  "แถวหลัก ลบไม่ได้": "Permanent bottom row",
  "แถวปุ่มลัด": "Shortcut Row",
  "ช่องว่าง · ลากสกิลหรือไอเท็มมาวาง": "Empty slot · Drag a skill or item here",

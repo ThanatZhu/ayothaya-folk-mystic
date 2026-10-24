@@ -40,6 +40,16 @@ Neither fixture signs in, changes a save, spends an item, or contacts the realm.
 
 ## Validation
 
+The screenshot's large left-hand equipment list came from `feedback.js` level-up
+gains, independently of the quest tracker. `level-up-notice.js` now shows one
+short corner button (`Lv. 45 · +12 points`); it replaces rapid repeated notices,
+expires after 4.3 seconds and is dismissed when combat actions occur. All newly
+wearable equipment remains in a dialog opened only when the player taps the
+notice. No equipment list opens automatically. `scripts/check-level-up-notice.mjs`
+tests the level-45 shaman case across nine sizes including 1280×590, confirms the
+hero's central region stays clear and checks that the full unlock list is still
+available on request. This does not publish the pending mobile HUD to the live site.
+
 `scripts/check-mobile-play-ui.mjs` exercises 320×568, 390×844, 430×932,
 568×320, 667×375, 844×390, 932×430 and 1024×768 with touch input, plus a
 desktop-to-portrait-to-desktop resize. Checks include five slots per page,

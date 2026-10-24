@@ -18,7 +18,7 @@ const fixture=async()=>{
  <div id="ailment-row"><span class="buff" title="เกราะอาคม">◇<b>8</b></span><span title="ติดพิษ">☠<b>5</b></span></div>
  <div class="review-monster"><div class="review-monster-art"></div><button class="mob-label" id="review-mob" aria-label="เลือกเป้าหมูป่า"><span>หมูป่า</span><i><b style="width:65%"></b></i></button></div>
  <script type="module">
- import {paintTargetHud,targetHudState} from './target-hud.js';
+ import {paintTargetHud,targetHudState} from './target-hud.js';import {createLevelUpNotice} from './level-up-notice.js';
  import {createHud63} from './hud-63.js';import {createSkillWindow} from './skill-window.js';import {createAutoSettings} from './auto-settings.js';import {CombatWorld} from './combat-core.js';import {applySkillArt} from './skill-art.js';import {HOTBAR_KEYS} from './skill-progress.js';import {activeStatusIcons,statusBadgeHTML,loadStatusStyles} from './status-icons.js';import {createMmoHud} from './mmo-hud.js';import {createGameMenu} from './game-menu.js';
  document.querySelector('#journey-loading')?.remove();document.querySelector('#orientation-gate')?.remove();
  document.querySelector('#game-shell').append(document.querySelector('#online-button'),document.querySelector('#channel-button'),document.querySelector('#online-dock'));
@@ -33,7 +33,7 @@ const fixture=async()=>{
  for(const [id,label] of [['menu-bag','กระเป๋า'],['menu-quests','เควส'],['menu-status','สถานะ'],['menu-social','สังคม'],['menu-pet','สัตว์เลี้ยง']]){const b=document.createElement('button');b.id=id;b.innerHTML='<i>✦</i><span>'+label+'</span>';document.querySelector('#game-menu').append(b);}
  for(let i=0;i<15;i++){const b=document.createElement('button');b.className='skill'+(i>=10?' master-slot':'');b.innerHTML='<strong>✦</strong><kbd>'+(i+1)+'</kbd>';document.querySelector('#skills').append(b);}
  document.querySelector('#skills').classList.add('skills');paintReview();
- createMmoHud({game,account});createAutoSettings({game,classId});createHud63({game});
+ createMmoHud({game,account});createAutoSettings({game,classId});createHud63({game});window.__levelReview=createLevelUpNotice({clearInput:()=>game.clearInput()});if(new URL(location.href).searchParams.has("levelup"))window.__levelReview.show(45,classId);
  const auto=document.getElementById('auto-attack');auto.disabled=false;auto.onclick=()=>{world.auto=!world.auto;auto.setAttribute('aria-pressed',String(world.auto));auto.classList.toggle('active',world.auto);document.getElementById('auto-state').textContent=world.auto?'เปิด':'ปิด';};
  loadStatusStyles();document.getElementById('ailment-row').innerHTML=activeStatusIcons(world).map(statusBadgeHTML).join('');
  const types=[{name:'หมูป่า'},{name:'ราชาฟาง',boss:true}],normal={type:0,hp:65,maxHp:100,x:4,z:4},boss={type:1,hp:750,maxHp:1000,x:6,z:6,aggro:true};

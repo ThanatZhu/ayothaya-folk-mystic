@@ -2988,3 +2988,12 @@ Object.assign(globalThis.I18N_EN,{
  "ชุด {0}/{1} ⇄":"Set {0}/{1} ⇄",
  "สลับชุดสกิล ชุด {0} จาก {1}":"Switch skill set, set {0} of {1}"
 });
+Object.assign(globalThis.I18N_EN,{
+ "สิ่งที่ปลดล็อก":"Unlocks",
+ "· สิ่งที่ปลดล็อก":"· Unlocks",
+ "+{0} แต้มสถานะ · ดูและอัปค่าได้ในหน้าสถานะ":"+{0} stat points · View and spend them in Status",
+ "ไม่มีอุปกรณ์ใหม่ในเลเวลนี้":"No new equipment at this level",
+ "Lv. {0} · +{1} แต้ม":"Lv. {0} · +{1} points",
+ "เลเวล {0} · +{1} แต้ม · ดูสิ่งที่ปลดล็อก":"Level {0} · +{1} points · View unlocks",
+ "แตะดูสิ่งที่ปลดล็อก":"Tap to view unlocks"
+});

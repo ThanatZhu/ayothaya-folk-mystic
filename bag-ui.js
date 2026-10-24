@@ -106,11 +106,11 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.pointer)return;
   if(!drag.ghost){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;drag.ghost=document.createElement('div');drag.ghost.className='bag-drag';drag.ghost.innerHTML=icon(drag.id,'item-icon big');dialog.append(drag.ghost);}
-  e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';const hot=game.actionBar?.mark(e.clientX,e.clientY),i=drag.potion?slotAt(e.clientX,e.clientY):undefined;if(drag.potion)marks(i??-1);dialog.classList.add('dragging');$('bag-trash').classList.toggle('over',!hot&&i===undefined&&toTrash(e.clientX,e.clientY));
+  e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';const hot=game.actionBar?.mark(e.clientX,e.clientY),i=drag.potion?slotAt(e.clientX,e.clientY):undefined;if(drag.potion)marks(i??-1);dialog.classList.add('dragging');document.body.classList.add('actionbar-dragging');$('bag-trash').classList.toggle('over',!hot&&i===undefined&&toTrash(e.clientX,e.clientY));
  },{passive:false});
  function dragEnd(e){
   if(!drag||e.pointerId!==drag.pointer)return;const d=drag;drag=null;if(!d.ghost)return;
-  d.ghost.remove();marks(null);game.actionBar?.mark(-1,-1);dialog.classList.remove('dragging');$('bag-trash').classList.remove('over');dragged=true;setTimeout(()=>{dragged=false;},60);
+  d.ghost.remove();marks(null);game.actionBar?.mark(-1,-1);dialog.classList.remove('dragging');document.body.classList.remove('actionbar-dragging');$('bag-trash').classList.remove('over');dragged=true;setTimeout(()=>{dragged=false;},60);
   if(e.type!=='pointerup')return;
   if(game.actionBar?.dropItemAt(d.id,e.clientX,e.clientY))return;
   const i=d.potion?slotAt(e.clientX,e.clientY):undefined;if(i===undefined){if(toTrash(e.clientX,e.clientY))askDiscard(d.id);return;}

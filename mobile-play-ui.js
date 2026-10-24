@@ -6,7 +6,7 @@ export function skillPage(slots,page=0,size=4){
 }
 export function createMobilePlayUI({clearInput=()=>{}}={}){
  const body=document.body,$=id=>document.getElementById(id),query=matchMedia('(any-pointer:coarse),(max-width:900px)');
- const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=painted131';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=center132';document.head.append(css);
  const skills=$('skills'),bank=$('skill-bank'),nav=$('game-menu'),toggle=$('menu-toggle'),quest=$('quest-tracker');
  const oldBank=bank?.onclick;let page=0,refreshing=false,skillSignature='';
  const online=$('online-button'),onlineHome=document.createComment('online chip home');if(online)online.before(onlineHome);

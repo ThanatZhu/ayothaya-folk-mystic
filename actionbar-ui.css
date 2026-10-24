@@ -1,7 +1,8 @@
 /* Separate layouts: desktop uses eight-column rows, touch uses a compact wheel. */
 body.actionbar-desktop.field-hud.hud63 .combat-controls,body.actionbar-desktop.field-hud.hud63 #quick-slots{display:none!important}
 #desktop-actionbar[hidden]{display:none!important}
-#desktop-actionbar{--action-size:52px;position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;width:max-content;min-height:158px;align-items:flex-end;z-index:110;pointer-events:auto;max-width:calc(100vw - 24px);color:#f8e4ad}
+#desktop-actionbar{--action-size:52px;position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;width:max-content;min-height:158px;align-items:flex-end;z-index:35;pointer-events:auto;max-width:calc(100vw - 24px);color:#f8e4ad}
+body.actionbar-dragging #desktop-actionbar{z-index:110}
 .actionbar-rows{display:flex;flex-direction:column;gap:5px;padding:6px;background:linear-gradient(#18382be6,#081c18f2);border:1px solid #b18d4e;border-radius:6px;box-shadow:0 3px 12px #0008}
 .actionbar-row{display:grid;grid-template-columns:repeat(8,var(--action-size));gap:4px}
 #desktop-actionbar .action-slot{position:relative;display:block;width:var(--action-size);height:var(--action-size);padding:3px;margin:0;min-width:0;min-height:0;border:1px solid #b9a46b;border-radius:4px;background:#10241d;box-shadow:inset 0 0 0 1px #050f0d;cursor:pointer;overflow:hidden;touch-action:none}
@@ -39,7 +40,6 @@ body.actionbar-desktop.field-hud.hud63 .combat-controls,body.actionbar-desktop.f
 #desktop-actionbar #auto-settings-open{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;flex-shrink:0;position:relative!important;inset:auto!important}
 #desktop-actionbar #attack{position:relative!important;inset:auto!important;width:52px!important;height:52px!important;min-width:0!important;padding:0!important}
 #desktop-actionbar .actionbar-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(100%)}
-body.actionbar-desktop :is(#bag-window,#skill-window)[open]{max-height:calc(100dvh - var(--actionbar-height,180px) - 40px)!important;top:12px!important;bottom:auto!important;margin-top:0!important;overflow-y:auto}
 body.actionbar-desktop #skill-window .skill-node strong{cursor:grab;touch-action:none}
 body.actionbar-desktop.field-hud.hud63 #online-dock{max-width:380px!important}
 @media(max-width:1300px){body.actionbar-desktop.field-hud.hud63 #online-dock{bottom:calc(var(--actionbar-height,180px) + 32px)!important;max-height:240px!important}}

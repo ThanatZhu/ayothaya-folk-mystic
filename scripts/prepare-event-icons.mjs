@@ -8,7 +8,7 @@ const output=new URL('../assets/ui-mobile/status-ai-v1/',import.meta.url);await 
 const browser=await chromium.launch({channel:'msedge',headless:true});
 try{
  const page=await browser.newPage();
- for(const id of ['weather','mvp','festival','frenzy','events','players']){
+ for(const id of (process.argv.length>3?process.argv.slice(3):['weather','mvp','festival','frenzy','events','players'])){
   const png=await readFile(new URL(id+'.png',source));
   const result=await page.evaluate(async data=>{
    const image=new Image();image.src=data;await image.decode();

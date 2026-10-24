@@ -20,7 +20,7 @@ body.mobile-play.field-hud.hud63 #menu-toggle b{font-size:20px}body.mobile-play.
 body.mobile-play.field-hud.hud63 #hud-right{left:var(--edge)!important;right:auto!important;top:calc(var(--edge-t) + var(--profile-height,62px) + var(--status-height,26px) + 16px)!important;width:44px!important;max-height:none!important;overflow:visible!important;padding:0!important;gap:0;z-index:20}
 #mobile-quest-summary{display:none}
 body.mobile-play #mobile-quest-summary{display:flex;width:44px;height:44px;min-height:44px;align-items:center;justify-content:center;padding:0;border:1px solid #cba65a55;border-radius:50%;background:#102a24b3;color:#fff0ce;pointer-events:auto}
-#mobile-quest-summary i{width:28px;height:28px;background:url('assets/ui63/ui-menu63.png') 0 33.333333% / 600% 400% no-repeat}
+#mobile-quest-summary i{width:28px;height:28px;background:url('assets/ui-mobile/status-ai-v1/letter.webp') center / contain no-repeat;filter:drop-shadow(0 2px 2px #000a)}
 body.mobile-play #mobile-quest-summary[aria-expanded=true]{border-color:#f2cc78;background:#5a4228}
 body.mobile-play.field-hud.hud63 #hud-right #quest-tracker{display:none!important;position:absolute!important;inset:0 auto auto 52px!important;width:min(320px,calc(100vw - var(--edge) - var(--edge-r) - 52px))!important;max-height:min(240px,calc(var(--visible-height,100dvh) - var(--edge-t) - var(--profile-height,62px) - var(--status-height,26px) - 52px));overflow:auto;border:1px solid #b9985b!important;border-image:none!important;background:#102a24f5!important;padding:12px!important;margin:0!important;box-sizing:border-box;pointer-events:auto}
 body.mobile-play.mobile-quest-open.field-hud.hud63 #hud-right #quest-tracker{display:flex!important;flex-direction:column;gap:8px}
@@ -79,7 +79,6 @@ body.mobile-play.field-hud .mob-label[data-full-health]:not(.selected,.boss,.lea
 body.mobile-play.field-hud.hud63 .experience-bars{height:4px!important;bottom:0!important;left:0!important;right:0!important;pointer-events:none}
 body.mobile-play.field-hud.hud63 .experience-bars span{display:none!important}
 body.mobile-play.field-hud.hud63 #notice{top:calc(var(--edge-t) + 154px)!important;max-width:70vw!important;pointer-events:none}
-body.mobile-play.field-hud.hud63 :is(dialog[data-hud-panel][open],#account-panel:not([hidden])){position:fixed!important;left:var(--edge)!important;right:var(--edge-r)!important;top:var(--edge-t)!important;bottom:auto!important;transform:none!important;translate:none!important;margin:0 auto!important;width:min(720px,calc(100vw - var(--edge) - var(--edge-r)))!important;max-height:calc(var(--visible-height,100dvh) - var(--edge-t) - var(--touch-bottom))!important;overflow:auto!important;zoom:1!important;box-sizing:border-box}
 body.mobile-play dialog::backdrop{background:#06140dbb}
 @media(orientation:portrait){
  body.mobile-play.field-hud.hud63{--touch-map:72px;--touch-pad:172px;--touch-slot:48px}
@@ -110,7 +109,7 @@ body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#online-button,#hud-chi
 #hud-chips #mvp-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/mvp.webp')}
 #hud-chips #event-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/festival.webp')}
 #hud-chips #surge-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/frenzy.webp')}
-#hud-chips #events-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/events.webp')}
+#hud-chips #events-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/letter.webp')}
 #hud-chips #weather-chip{--status-icon:url('assets/ui-mobile/status-ai-v1/weather.webp')}
 body.mobile-play.field-hud.hud63 #mobile-status-rail :is(#online-button,#hud-chips>button)>:is(i,.item-icon,#online-meta){display:none!important}
 body.mobile-play.field-hud.hud63 #mobile-status-rail #hud-chips>button>span{display:none!important}
@@ -147,3 +146,5 @@ body.field-hud.hud63:not(.mobile-play) #hud-right #hud-chips{position:static!imp
 body.field-hud.hud63:not(.mobile-play) #hud-right #hud-channel-row{grid-column:1;grid-row:1}
 body.field-hud.hud63:not(.mobile-play) #hud-right #quest-tracker{grid-column:1;grid-row:2;min-width:0}
 body.field-hud.hud63:not(.mobile-play) #hud-right #war-line{grid-column:1;grid-row:3}
+
+body.field-hud.hud63 #game-menu #menu-quests>i::after{background:url('assets/ui-mobile/status-ai-v1/letter.webp') center / contain no-repeat!important}

@@ -1,9 +1,12 @@
+import {createPremiumPetPanel} from './pet-collection-ui.js?v=pets126';
+import {activePremiumPet} from './pet-account.js';
+import {PREMIUM_PET_IDS} from './premium-pets.js';
 // Pets (0.50): pet window, bag actions (lure / hatch / feed), the pet that trots after its owner.
 // Online the realm server owns the pet; offline it lives in localStorage beside the bag. Remote pets: multiplayer-ui.js.
 import * as THREE from 'three';
 import {ITEM_ERRORS,itemDef} from './items.js?v=107';
 import {PETS,FOOD,LOYAL,INTIMACY_MAX,mood,normalizePet,tame,hatch,feedPet,returnPet,petTick,petBonus} from './pets.js?v=107';
-import {MONSTER_TYPES,groundHeight} from './combat-core.js?v=role116';
+import {MONSTER_TYPES,groundHeight} from './combat-core.js?v=pets126';
 import {loadMonsterFrames} from './monster-art.js?v=38';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
@@ -14,7 +17,15 @@ const typeOf=id=>MONSTER_TYPES.findIndex(t=>t.id===id);
 // Shared by the owner's pet and remote pets: a small copy of the monster sprite that follows a point.
 let frames=null;
 const petFrames=()=>frames??=loadMonsterFrames({mobs:Object.keys(PETS).map(id=>[0,0,typeOf(id)])});
+const premiumTextures=new Map();
+function premiumTexture(id){if(!premiumTextures.has(id)){const t=new THREE.TextureLoader().load('assets/pets125/'+id+'.webp');t.colorSpace=THREE.SRGBColorSpace;premiumTextures.set(id,t);}return premiumTextures.get(id);}
+function createPremiumView(scene,id){
+ const pet=PREMIUM_PET_IDS[id],mat=new THREE.SpriteMaterial({map:premiumTexture(id),alphaTest:.25,transparent:true,depthWrite:false}),s=new THREE.Sprite(mat);s.center.set(.5,0);s.scale.set(1.05,1.05,1);scene.add(s);let clock=0,ready=false;
+ return {id,sprite:s,follow(owner,dt){clock+=dt;if(!ready){s.position.set(owner.x-.9,0,owner.z+.7);ready=true;}const dx=owner.x-s.position.x,dz=owner.z-s.position.z,d=Math.hypot(dx,dz);if(d>12)s.position.set(owner.x-.9,s.position.y,owner.z+.7);else if(d>1.2){const step=Math.min(d-1.2,(2.6+d)*dt);s.position.x+=dx/d*step;s.position.z+=dz/d*step;}s.position.y=(owner.y??0)+(pet.movement==='fly'?.75+Math.sin(clock*2)*.07:d>1.2?Math.abs(Math.sin(clock*7))*.045:0);if(Math.abs(dx)>.1)s.scale.x=Math.abs(s.scale.x)*(dx<0?-1:1);},dispose(){scene.remove(s);mat.dispose();}};
+}
 export function createPetView(scene,id){
+ if(Object.hasOwn(PREMIUM_PET_IDS,id))return createPremiumView(scene,id);
+ if(!Object.hasOwn(PETS,id))return {id,follow(){},dispose(){}};
  const t=typeOf(id),h=(MONSTER_TYPES[t].height??1.2)*.72,mat=new THREE.SpriteMaterial({alphaTest:.45,transparent:false,depthWrite:true,color:'#fff1da'}),s=new THREE.Sprite(mat);
  s.center.set(.5,0);s.scale.set(h*1.1,h,1);s.visible=false;scene.add(s);let art=null,gait=0;
  petFrames().then(f=>{art=f[t];if(art){mat.map=art[0];mat.needsUpdate=true;s.visible=true;}});
@@ -31,7 +42,7 @@ export function createPetView(scene,id){
 }
 
 export function createPetUI({game,account,scene,bagUI}){
- if(!document.querySelector('link[data-pet-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='pet-ui.css?v=pets125';css.dataset.petUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-pet-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='pet-ui.css?v=pets126';css.dataset.petUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-pet:'+(account?.serverId??'local')+':'+(account?.slotId??'guest'),fail=c=>world.notice(ITEM_ERRORS[c]??c);
  let local=null;try{local=normalizePet(JSON.parse(localStorage.getItem(key)));}catch{}
  const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};
@@ -55,9 +66,10 @@ export function createPetUI({game,account,scene,bagUI}){
  menu.innerHTML='<i>'+icon('pet-bell','item-icon menu-item-icon')+'</i><span>สัตว์เลี้ยง</span>';
  const nav=$('game-menu');if(nav)nav.insertBefore(menu,$('menu-players')??null);
  const dialog=document.createElement('dialog');dialog.id='pet-window';dialog.setAttribute('aria-labelledby','pet-title');
- dialog.innerHTML='<header><h2 id="pet-title">สัตว์เลี้ยง</h2><button class="mp-icon" id="pet-close" aria-label="ปิด">×</button></header><div class="pet-preview-entry"><a href="pet-gacha-lab.html?v=125" target="_blank" rel="noopener">พรีวิวสัตว์เลี้ยงใหม่ 10 ตัว</a><small>กาชาและอัปดาว · ใช้เงินทดสอบเท่านั้น</small></div><div id="pet-body"></div>';
+ dialog.innerHTML='<header><h2 id="pet-title">สัตว์เลี้ยง</h2><button class="mp-icon" id="pet-close" aria-label="ปิด">×</button></header><details class="pet-legacy"><summary>สัตว์เลี้ยงเดิมและการให้อาหาร</summary><div id="pet-body"></div></details>';
  ($('game-shell')??document.body).append(dialog);
- menu.onclick=()=>{if(dialog.open)dialog.close();else{game.clearInput();openHudPanel(dialog);render(true);}};
+ menu.onclick=()=>{if(dialog.open)dialog.close();else{game.clearInput();openHudPanel(dialog);render(true);premiumPanel.render(true);}};
+ const premiumPanel=createPremiumPetPanel({game,dialog});
  dialog.querySelector('#pet-close').onclick=()=>dialog.close();
  function render(force=false){
   if(!dialog.open)return;const p=pet(),food=bagUI.bag().items[FOOD]??0,sig=JSON.stringify([p&&[p.id,Math.round(p.intimacy),Math.round(p.hunger)],food]);if(!force&&sig===shown)return;shown=sig;
@@ -73,11 +85,11 @@ export function createPetUI({game,account,scene,bagUI}){
   body.querySelector('#pet-return').onclick=()=>{if(confirm('คืน '+def.name+' เป็นไข่? ความสนิทจะเริ่มใหม่'))act('petReturn');};
  }
  return {update(dt){
-  const p=pet();
+  const p=pet(),premium=activePremiumPet(world.petCollection);premiumPanel.render();
   if(!game.online&&local){petTick(local,dt);if(performance.now()>saveAt){saveAt=performance.now()+15000;save();}}
-  world.petBonus=petBonus(p);
-  if(view&&view.id!==p?.id){view.dispose();view=null;}
-  if(p&&!view)view=createPetView(scene,p.id);
+  world.petBonus=premium?.bonus??petBonus(p);
+  if(view&&view.id!==(premium?.id??p?.id)){view.dispose();view=null;}
+  if((premium||p)&&!view)view=createPetView(scene,premium?.id??p.id);
   view?.follow({x:world.player.x,z:world.player.z,y:groundHeight(world.nav,world.player.x,world.player.z)},dt);
   render();
  }};

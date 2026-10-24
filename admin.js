@@ -1,3 +1,4 @@
+import {PREMIUM_PETS} from './premium-pets.js';
 // 0.85 back-office dashboard: every tunable game number in one place (paths, skills, items, monsters).
 // Edits are kept as overrides (balance.js FIELDS); "บันทึกเข้าเกม" posts them to the local dev server, which writes
 // balance-data.js for the next deploy. Player data is not touched here.
@@ -34,6 +35,7 @@ try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});
 let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',mapId:'',minutes:30};
 let bossMsg='',bossMaps=null,bx={serverId:'server-1',mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
+let petGrantPending=null;
 let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',gearClass='all',itemQuery='',pickCount=1;
 const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
 const itemName=id=>ITEMS[id]?.name??id;
@@ -80,7 +82,7 @@ function filters(){
 }
 function pageHead(){
  const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss'].includes(tab);
- $('page-title').textContent=icon+' '+name;$('page-help').textContent=help+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
+ $('page-title').textContent=name;$('page-help').textContent=help+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
 function showCount(){const n=count();$('changes').textContent=n?`แก้ไว้ ${n} ช่อง · ยังไม่บันทึก`:'ยังไม่มีการแก้';$('changes').classList.toggle('dirty',!!n);$('save').disabled=!n;$('reset-all').disabled=!n;}
@@ -376,7 +378,8 @@ function playersTab(){
    `<div class="grid pick">${picks.map(id=>`<button type="button" class="cell" data-add="${esc(id)}" title="${esc(itemName(id))}">${pic(id)}<small>${esc(itemName(id))}</small></button>`).join('')||'<span class="hint">ไม่พบไอเท็ม</span>'}</div>`+
    `<div class="sendbar"><h4>รายการที่จะส่ง</h4><ul class="basket">${lines||'<li class="empty">ยังว่าง · แตะรูปไอเท็มหรือปุ่มส่งด่วน</li>'}</ul>`+
    `<label class="coins">+ เบี้ย <input id="give-coins" type="number" min="0" max="10000000" value="${giftCoins}"></label>`+
-   `<button type="submit" class="primary send"${!basket.length&&!giftCoins?' disabled':''}>🎁 ส่งให้ ${esc(p.name)}</button></div></form>`;
+   `<button type="submit" class="primary send"${!basket.length&&!giftCoins?' disabled':''}>🎁 ส่งให้ ${esc(p.name)}</button></div></form>`+
+   `<section class="admin-pet-grant"><p class="eyebrow">COMPANION COLLECTION</p><h3>สัตว์เลี้ยงและแก้วขวัญ</h3><p>ยอดปัจจุบัน ${(p.petCollection?.balance??0).toLocaleString('th-TH')} แก้วขวัญ · มี ${Object.keys(p.petCollection?.collection??{}).length}/10 ตัว</p><p class="hint">มอบโดยแอดมิน · ยังไม่มีระบบเติมเงินจริง</p><label>แก้วขวัญที่จะมอบ <input id="grant-pet-gems" type="number" min="0" max="1000000" step="1" value="0"></label><label>สัตว์เลี้ยง / ตัวซ้ำ 1 ตัว <select id="grant-pet-id"><option value="">ไม่มอบสัตว์เลี้ยง</option>${PREMIUM_PETS.map(x=>`<option value="${x.id}">${x.tier} · ${x.name}</option>`).join('')}</select></label><button type="button" id="give-pets" class="primary">มอบเข้าคอลเลกชัน</button><p id="give-pets-status" role="status"></p></section>`;
  }
  $('view').innerHTML=`<div class="players">${head}${user?`<div class="players-body">${plist}<section class="gift">${gift}</section></div>`:'<p class="hint big">ล็อกอินด้วยอีเมลแอดมินเพื่อดูผู้เล่นที่ออนไลน์อยู่ และส่งไอเท็มหรือเบี้ยให้</p>'}</div>`;
  const on=(id,ev,fn)=>{const el=$(id);if(el)el[ev]=fn;};
@@ -388,6 +391,12 @@ function playersTab(){
  $('view').querySelectorAll('[data-presence]').forEach(b=>b.onclick=()=>{presence=b.dataset.presence;shownRows=50;playersTab();});
  refocus('player-search',v=>{search=v;shownRows=50;});
  $('view').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{if(picked!==b.dataset.pick){picked=b.dataset.pick;basket=[];giftCoins=0;}adminMsg='';playersTab();});
+ const petGive=$('give-pets');if(petGive)petGive.onclick=async()=>{
+  const payload={peer:p.id,gems:Number($('grant-pet-gems').value),pet:$('grant-pet-id').value||null},signature=JSON.stringify(payload);
+  if(!petGrantPending||petGrantPending.signature!==signature)petGrantPending={signature,id:crypto.randomUUID()};petGive.disabled=true;
+  try{const r=await adminFetch('/admin/pets',{...payload,requestId:petGrantPending.id});p.petCollection=r.petCollection;petGrantPending=null;adminMsg='มอบสัตว์เลี้ยงและแก้วขวัญเรียบร้อยแล้ว';playersTab();}
+  catch(e){$('give-pets-status').textContent='ยังไม่สำเร็จ · '+e.message;petGive.disabled=false;}
+ };
  const form=$('give');if(!form)return;
  const keep=()=>{giftCoins=Math.max(0,Math.min(1e7,Math.floor(Number($('give-coins').value)||0)));pickCount=Math.max(1,Math.min(999,Math.floor(Number($('give-count').value)||1)));};
  const addItem=(id,count)=>{const line=basket.find(l=>l.id===id);if(line)line.count=Math.min(999,line.count+count);else if(basket.length<20)basket.push({id,count});};

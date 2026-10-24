@@ -1,8 +1,9 @@
+import {PET_MUTATIONS,petAccountAction,publicPetAccount} from '../pet-account.js';
 import {STORY_VERSION} from '../story-quests.js';
 import {statsAfterClassChange} from '../character-stats.js';
 import http from 'node:http';
 import {discordPoster} from './discord-webhook.js';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,randomInt} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -42,7 +43,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,classStatReset:true,roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:1,classStatReset:true,roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.99.16 back-office (admin.html): online players and gifts. Production needs a Google ID token whose verified
   // email is in ADMIN_EMAILS; the local server trusts its own origin. Every gift is logged.
@@ -61,6 +62,14 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(url.pathname==='/admin/players'&&req.method==='GET'){
     if(store?.listProfiles&&(url.searchParams.get('fresh')==='1'||Date.now()-savedList.at>120000)){try{savedList={at:Date.now(),rows:await store.listProfiles()};}catch(e){console.error('admin-list',e.message);}}
     reply(200,{players:adminPlayers(realm,savedList.rows),savedAt:savedList.at||null});return;
+   }
+   if(url.pathname==='/admin/pets'&&req.method==='POST'){
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>4096){reply(413,{error:'too-large'});return;}}
+    try{const body=JSON.parse(data),action={type:'petGrant',requestId:body.requestId,gems:body.gems,pet:body.pet??null};let state;
+     if(String(body.peer??'').startsWith('off:')){const m=/^off:([^:]{1,128}):(slot-[1-5])$/.exec(body.peer);if(!m)throw Error('player-offline');if([...sessions.values()].some(s=>s.peer.uid===m[1]))throw Error('player-online');const r=await store.giveOffline({uid:m[1],slotId:m[2]},r=>({...r,petCollection:petAccountAction(r.petCollection,action).state}));state=r.petCollection;savedList.at=0;}
+     else{const session=[...sessions.values()].find(s=>s.peer.id===body.peer&&!s.closing);if(!session)throw Error('player-offline');state=(await persistPets(session,action)).state;}
+     console.log('admin-pets',who,body.peer,action.gems,action.pet,action.requestId);reply(200,{ok:true,petCollection:publicPetAccount(state)});
+    }catch(e){reply(400,{error:e.message});}return;
    }
    if(url.pathname==='/admin/give'&&req.method==='POST'){
     let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>4096){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}
@@ -142,6 +151,16 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  });
  // 0.97.2 a save that hangs fails after 15 s, so a session can never stay busy (and drop commands) forever.
  const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;const record=s.travelRecord??realm.record(s.peer,s.lease.record);let timer;await Promise.race([store.checkpoint(s.lease,record,{release}),new Promise((_,no)=>{timer=setTimeout(()=>no(new Error('save-timeout')),15000);})]).finally(()=>clearTimeout(timer));s.autoSavedAt=Date.now();s.savedJson=JSON.stringify(record);if(release)s.released=true;});return s.queue;};
+ async function persistPets(s,action){
+  if(s.trainingBusy||s.closing)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;
+  const job=s.queue.catch(()=>{}).then(async()=>{
+   const result=petAccountAction(s.peer.petCollection,action,()=>randomInt(1000000000)/1000000000);if(result.replayed)return result;
+   const record=realm.record(s.peer,s.lease.record);record.petCollection=result.state;
+   let timer;try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('save-timeout')),15000);})]);}
+   catch(error){s.closing=true;s.peer.suspended=true;s.released=true;realm.leave(s.peer.id);s.ws.close(4010,'save-failed');throw error;}finally{clearTimeout(timer);} // Reconnect reloads the durable receipt without writing the old collection over it.
+   s.peer.petCollection=result.state;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return result;
+  });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;}
+ }
  wss.on('connection',ws=>{
   let session=null,authenticating=false;ws.alive=true;
   const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}const raw=JSON.stringify(data);metrics.bytesSent+=Buffer.byteLength(raw);metrics.messagesSent++;ws.send(raw);}};
@@ -151,7 +170,13 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let message;try{message=JSON.parse(raw.toString());}catch{ws.close(4002,'invalid-json');return;}
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
    if(session){if(session.closing||session.trainingBusy){if(message.type==='save'&&typeof message.id==='string'){const id=message.id.slice(0,50);session.queue.then(()=>send({type:'saved',id}),()=>{});return;} // the busy job checkpoints; answer once it lands
-    if(!['input','ping'].includes(message.type)){const reply={equip:'equipment-error',train:'training-error'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(!['input','ping'].includes(message.type)){const reply=PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(PET_MUTATIONS.includes(message.type)){
+     const p=session.peer,id=message.id;
+     if(!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'petError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
+     try{const r=await persistPets(session,{...message,requestId:id});send({type:'petChanged',id,petCollection:publicPetAccount(r.state),results:r.result.results??[],replayed:r.replayed});}
+     catch(e){send({type:'petError',id,code:e.message});}return;
+    }
     // 0.97 outfit changes carry a request id; stat gear from the bag (equip without id) goes on to the realm.
     if(message.type==='equip'&&typeof message.id==='string'){
      if(message.id.length>50)return;

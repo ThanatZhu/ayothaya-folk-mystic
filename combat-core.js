@@ -1,3 +1,4 @@
+import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js';
 import {createRoleCombat,stepRoleMonsters} from './role-combat.js';
 import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js';
@@ -184,7 +185,7 @@ export class CombatWorld{
  }
  knockStep(dt){const k=this.knock;if(!k)return false;moveBody(this.player,k.vx*Math.min(dt,k.t),k.vz*Math.min(dt,k.t),this.nav);if((k.t-=dt)<=0)this.knock=null;return true;}
  takeMonsterHit(type,raw=type.damage,source=null){
-  const p=this.player,baseDamage=monsterHit(this,raw,Math.random,type.id),damage=this.roleCombat?this.roleCombat.incoming(baseDamage,source):baseDamage;if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
+  const p=this.player,baseDamage=monsterHit(this,raw,Math.random,type.id),damage=this.roleCombat?this.roleCombat.incoming(baseDamage,source):petIncoming(this,baseDamage);if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
   p.hp=Math.max(0,p.hp-damage);this.calm=0;this.emit('playerHit',{x:p.x,z:p.z,amount:damage});delete this.status.sleep;
   if(p.hp>0){this.inflict(rollAilment(type.id));return true;}
   this.fall();return true;
@@ -193,7 +194,7 @@ export class CombatWorld{
   const lost=deathPenalty(this);this.notice((this.roleCombat?'หมดแรง · รอเพื่อนชุบหรือกลับลานใน 20 วินาที':'หมดแรง · กลับลานใน 3 วินาที')+(lost?' · Base EXP -'+lost:''));}
  // 0.58 combo: a skill on a rooted monster hits 30% harder.
  // 0.103 skill damage also passes the monster's DEF (MDEF for magic classes); duels and war targets are handled elsewhere
- guardOf(mob,magic){if(!mob||mob.pvp)return 1;const t=MONSTER_TYPES[mob.type];return defFactor(magic?monsterMdef(t):monsterDef(t));}
+ guardOf(mob,magic){if(!mob||mob.pvp)return 1;const t=MONSTER_TYPES[mob.type];return defFactor((magic?monsterMdef(t):monsterDef(t))*(mob.petArmor?.left>0?1-mob.petArmor.power:1));}
  power(n,mob=null){const combo=mob?.root>0&&mob.hp>0;if(combo)this.emit('combo',{x:mob.x,z:mob.z});return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false)*this.guardOf(mob,!!this.derived?.magic):1)*(combo?1.3:1));}
  // 0.44 element + size (affinity.js). Basic attacks: weapon element, physical. Skills: class element; magic classes ignore size.
  affinity(mob,basic){if(mob.pvp)return this.weakness();const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
@@ -212,7 +213,7 @@ export class CombatWorld{
  setAuto(on,hunt=null){const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;return ok;}
  toggleAuto(){this.hunt=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0||mob.pvp)return;this.calm=0;mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
+  if(!mob||mob.hp<=0||mob.pvp)return;this.calm=0;damage=Math.round(damage*petBlessing(this));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a'}); // 1.09 kind for the number colour
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
@@ -258,7 +259,7 @@ export class CombatWorld{
   this.emit('cast',{skillIndex:index,from,to:s.type==='dash'?{x:p.x,z:p.z}:m?{x:m.x,z:m.z}:air??{x:p.x,z:p.z},air:!!air,color:s.color,kind:s.type,radius:s.radius??1});return true;
  }
  update(dt,input={x:0,z:0,attack:false},{monsters=true}={}){
-  dt=Math.min(.05,Math.max(0,dt));this.time+=dt;const p=this.player;
+  dt=Math.min(.05,Math.max(0,dt));this.time+=dt;tickPetEffects(this,dt);const p=this.player;
   this.emote=activeEmote(this.emote,this.time);if(Math.hypot(input.x,input.z)>.08||input.attack||this.auto||p.hp<=0)this.clearEmote();
   p.attackCD=Math.max(0,p.attackCD-dt);p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt*(this.derived?.mpRegen??1));
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;
@@ -298,7 +299,7 @@ export class CombatWorld{
   p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;p.running=p.moving&&manual&&wantsRun;
   if(!monsters)return; // Shared-room servers advance each monster exactly once per tick.
   for(const m of this.mobs){
-   const baseType=MONSTER_TYPES[m.type],type=m.roleStatus?.slow?{...baseType,speed:baseType.speed*(baseType.boss?.8:.5)}:baseType,decoy=m.roleStatus?.decoy,aim=decoy?{...p,x:p.x+1.2,hp:1}:p,outcome=advanceMonster(m,aim,type,dt,this.nav,{moveBody,lineClear});
+   const baseType=MONSTER_TYPES[m.type],type=m.roleStatus?.slow||m.petSlow>0?{...baseType,speed:baseType.speed*(baseType.boss?.8:.5)}:baseType,decoy=m.roleStatus?.decoy,aim=decoy?{...p,x:p.x+1.2,hp:1}:p,outcome=advanceMonster(m,aim,type,dt,this.nav,{moveBody,lineClear});
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
    if(m.justEnraged){m.justEnraged=false;this.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
    if(outcome==='burst'&&Math.hypot(p.x-m.x,p.z-m.z)<=MONSTER_BEHAVIOUR[type.id].aoe&&this.takeMonsterHit(type,type.damage,m)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}

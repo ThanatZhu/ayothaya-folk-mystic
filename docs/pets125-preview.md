@@ -1,5 +1,7 @@
 # Pet gacha preview and retired capture quest
 
+Historical preview milestone. The subsequent user-approved live integration is documented in pets126-live.md; the isolated lab remains separate from live balances.
+
 User-approved scope: preview only, no real-money top-up. Ten newly generated transparent creatures, S ×3 / A ×3 / B ×4, including five flying and five ground pets. Each has a stat bonus and a different special skill. `premium-pets.js` is the shared draft catalog; `pet-skill-preview.js` demonstrates numerical damage, healing, mana, shields, mitigation, roots, slows, armor breaks and cleanse effects in an isolated training sandbox. The following demo moves the starting artwork; it is not a finished multi-frame gait or wing animation.
 
 The draft currency is Khwan Gems (แก้วขวัญ), separate from cowries. The lab starts with 10,000 test gems, permits test grants and reset, charges 100 per pull, and supports 1 or 10 pulls. Draft base rates: S 3%, A 17%, B 80%; within each tier pets are equally likely. A run of 79 non-S pulls guarantees S on pull 80. Any S resets this counter. Stars remain 1 when duplicates arrive; the player spends 1/2/3/4 same-pet duplicate copies through an explicit upgrade button for stars 2/3/4/5. Draft stat scaling is +25% of the original bonus per star, and skill potency +15% per star with one second less cooldown per star. All values are reviewable, not approved paid-store balance or prices.

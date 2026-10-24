@@ -46,3 +46,6 @@ html body.mobile-play #activity-dock #activity-fold{font-size:0!important}
  #activity-dock:not([data-horizontal=true]) #activity-party-tab span{top:76%}
  #activity-dock:not([data-horizontal=true]) nav button[aria-selected=true] i{filter:brightness(1.25) drop-shadow(0 0 2px #ffe49188)}
 }
+
+@media(min-width:901px) and (pointer:fine){#activity-dock:not([data-horizontal=true]) #activity-fold{display:block;width:64px;min-width:64px;height:44px;min-height:44px;padding:0;flex-shrink:0}
+ #activity-dock:not([data-horizontal=true]) #activity-fold::before{width:64px;height:44px}}

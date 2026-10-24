@@ -31,7 +31,7 @@ export function iconStyle(id){
 const icon=(id,cls='item-icon')=>`<i class="${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 
 export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
- if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=110.4';css.dataset.bagUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-bag-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='bag-ui.css?v=drag146';css.dataset.bagUi='';document.head.append(css);}
  const world=game.world,key='ayothaya-bag:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeBag(JSON.parse(localStorage.getItem(key)));}catch{return normalizeBag(null);}};
  let local=read();
@@ -105,7 +105,9 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  function dragStart(e,id){if(e.button<=0)drag={id,x:e.clientX,y:e.clientY,pointer:e.pointerId,ghost:null,potion:quickable(id)};}
  addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.pointer)return;
-  if(!drag.ghost){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;drag.ghost=document.createElement('div');drag.ghost.className='bag-drag';drag.ghost.innerHTML=icon(drag.id,'item-icon big');dialog.append(drag.ghost);}
+  if(!drag.ghost){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;drag.ghost=document.createElement('div');drag.ghost.className='bag-drag';drag.ghost.innerHTML=icon(drag.id,'item-icon big');
+   // A nonmodal window's scale/overflow must not offset or clip viewport pointer coordinates.
+   (dialog.matches(':modal')?dialog:document.body).append(drag.ghost);}
   e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';const hot=game.actionBar?.mark(e.clientX,e.clientY),i=drag.potion?slotAt(e.clientX,e.clientY):undefined;if(drag.potion)marks(i??-1);dialog.classList.add('dragging');document.body.classList.add('actionbar-dragging');$('bag-trash').classList.toggle('over',!hot&&i===undefined&&toTrash(e.clientX,e.clientY));
  },{passive:false});
  function dragEnd(e){
@@ -117,6 +119,8 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
   quick[i]=d.id;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}world.notice('ปุ่มลัด '+QUICK_KEYS[i]+' · '+itemDef(d.id).name);render(true);
  }
  addEventListener('pointerup',dragEnd);addEventListener('pointercancel',dragEnd);
+ const cancelDrag=()=>{if(drag)dragEnd({pointerId:drag.pointer,type:'pointercancel'});};
+ dialog.addEventListener('close',cancelDrag);addEventListener('blur',cancelDrag);
  let discarding=null;
  const discardCount=()=>Math.min(bag().items[discarding]??0,Math.max(1,Math.floor(+$('discard-count').value)||1));
  function askDiscard(id){

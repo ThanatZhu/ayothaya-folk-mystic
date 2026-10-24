@@ -37,7 +37,7 @@ export const STORY=[
   {type:'do',action:'skill',hint:'อัปสกิลใหม่ 1 ครั้ง',how:'กด สกิล → แตะสกิลที่กรอบสว่าง → กด + (เรียนฟรี) · ลากลงแถบลัด แล้วกดเลข 1–0 ใช้สกิล'},
  ]},
  {id:'t7',title:'หนูในยุ้งข้าว',reward:{baseXp:48,jobXp:26,coins:500,items:[{id:'iron-ore',count:2},{id:'hp-small',count:5}]},steps:[
-  {type:'do',action:'auto',hint:'เปิดออโต้',how:'กดปุ่ม AUTO มุมขวาล่าง (หรือคีย์ F) ตัวละครจะล่าเอง · ตั้งให้ใช้สกิลและดื่มยาเองได้ในหน้าสกิล'},
+  {type:'do',action:'auto',hint:'เปิดออโต้',how:'กดปุ่ม AUTO มุมขวาล่าง (หรือคีย์ F) ตัวละครจะล่าเอง · กดฟันเฟืองที่ปุ่ม AUTO เพื่อตั้งค่าสกิลและยา'},
   {type:'defeat',monster:'rat',count:6,mapId:'rice-fields',hint:'ไล่หนูยุ้งข้าว'},
   {type:'talk',npc:'ป้าละไม',mapId:'rice-fields',hint:'เอาเศษสายใยไปให้ป้าละไม',say:'หนูพวกนี้ฟันคมนัก เอาเศษเหล็กนี่ไปให้ครูแสนดาบตีอาวุธให้แกร่งขึ้นเถิด'},
  ]},

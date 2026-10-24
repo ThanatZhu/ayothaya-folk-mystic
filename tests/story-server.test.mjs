@@ -47,3 +47,12 @@ test('entering a map completes an "enter" step; kills count toward a defeat step
  for(const mob of hunt.peer.room.mobs){Object.assign(hunt.peer.world.player,{x:mob.x,z:mob.z+1});hunt.realm.hurt(hunt.peer,mob,9999);}
  assert.deepEqual(hunt.realm.snapshot(hunt.peer).self.story,{v:2,quest:4,step:1,count:0,done:false});
 });
+
+test('a delayed dialogue confirmation cannot advance a different quest or pay a reward twice',()=>{
+ const {peer,send}=setup(city);Object.assign(peer.world.player,{x:4,z:0});
+ assert.equal(send('questTalk',{npc:'ลุงเรือง',expected:{quest:0,step:0}}),true);
+ assert.equal(send('questTalk',{npc:'ลุงเรือง',expected:{quest:0,step:0}}),false);
+ Object.assign(peer.world.player,{x:-10,z:0});assert.equal(send('questTalk',{npc:'ครูแสนดาบ',expected:{quest:0,step:0}}),false);
+ assert.equal(send('questTalk',{npc:'ครูแสนดาบ',expected:{quest:0,step:1}}),true);const xp=peer.world.baseXp,coins=peer.bag.coins;
+ assert.equal(send('questTalk',{npc:'ครูแสนดาบ',expected:{quest:0,step:1}}),false);assert.equal(peer.world.baseXp,xp);assert.equal(peer.bag.coins,coins);
+});

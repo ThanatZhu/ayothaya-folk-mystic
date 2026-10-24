@@ -16,6 +16,10 @@ export function normalizeStats(stats){
  for(const k of STATS)out[k]=Number.isSafeInteger(s[k])?Math.min(Math.max(s[k],1),STAT_MAX):1;
  return out;
 }
+// A class/Master change refunds allocations by clearing spending, never by adding earned points.
+export const statPath=hero=>(hero?.classId??'novice')+':'+(hero?.jobId??'');
+export const statsAfterClassChange=(before,after,stats)=>normalizeStats(statPath(before)===statPath(after)?stats:null);
+
 // Cost to raise a stat from x to x+1 (Ragnarok curve: 2 points up to 10, then +1 every 10).
 export const raiseCost=x=>Math.floor((x-1)/10)+2;
 // Points earned by Base Level L: 3 + floor(level/5) for every level gained after 1.

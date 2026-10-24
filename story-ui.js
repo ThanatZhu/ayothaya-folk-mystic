@@ -1,6 +1,7 @@
+import {createStoryDialogue} from './story-dialogue-ui.js?v=story123';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
-import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=98';
+import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=story123';
 import {createCoach} from './coach.js?v=104.1';
 import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
@@ -30,12 +31,15 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(e.type==='storyDo'&&!game.online)offline({type:'do',action:e.action}); // 0.98 offline tutorial actions (craft, pet, shop)
   if(e.type==='story'){if(e.story)world.story=e.story;if(e.completed)world.notice('เควสสำเร็จ · '+e.completed);render();}
  });
- // Talking to the quest NPC shows the story line instead of their idle chatter.
+ const dialogue=createStoryDialogue({game,worldUI,objective:()=>currentObjective(state()),state,
+  complete(n,index){if(!sameState(index))return;if(game.online)world.questTalk?.(n.name,index);else offline({type:'talk',npc:n.name,mapId:map.id});}
+ });
+ const sameState=index=>state().quest===index.quest&&state().step===index.step&&!state().done;
+ // A normal NPC click opens the story; opening/closing/asking cannot finish a talk step.
  worldUI.onTalk=n=>{
-  const obj=currentObjective(state());const step=obj?.step;
-  if(!step||step.type!=='talk'||step.npc!==n.name||step.mapId!==map.id)return null;
-  if(game.online){world.questTalk?.(n.name);return storyEvent(state(),{type:'talk',npc:n.name,mapId:map.id}).say??null;}
-  return offline({type:'talk',npc:n.name,mapId:map.id})?.say??null;
+  const step=currentObjective(state())?.step;
+  if(step?.type!=='talk'||step.npc!==n.name||step.mapId!==map.id)return null;
+  return dialogue.open(n)?{handled:true}:null;
  };
 
  // Tracker panel (own stylesheet, so game.html needs no edit).
@@ -272,7 +276,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  if(resume)setTimeout(go,1600);
  // Offline only: do/level steps that are already true finish by themselves (the server does this online).
  let checked=0;
- const api={context:null,update(){if(walking&&!game.walking)walking=false;
+ const api={context:null,update(){if(walking&&!game.walking)walking=false;dialogue.update();
   coach.update();
   if(!game.online&&api.context&&performance.now()-checked>1000){checked=performance.now();for(let i=0;i<30&&offline({type:'check',ctx:api.context()})?.changed;i++);}
   render();}};

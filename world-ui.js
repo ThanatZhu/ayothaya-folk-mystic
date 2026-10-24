@@ -2,7 +2,7 @@ import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=112.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
-import {createMentorUI} from './mentor-ui.js?v=112.6';
+import {createMentorUI} from './mentor-ui.js?v=story123';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=role116';
@@ -86,7 +86,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  function talk(n){
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
   if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
-  endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;$('npc-text').textContent=api.onTalk?.(n)??n.text;$('npc-dialog').hidden=false;$('close-npc').focus();api.afterTalk?.(n);
+  endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;const reply=api.onTalk?.(n);if(reply?.handled)return;$('npc-text').textContent=reply??n.text;$('npc-dialog').hidden=false;$('close-npc').focus();api.afterTalk?.(n);
  }
  $('close-npc').onclick=endTalk;
  $('interact').onclick=()=>{if(nearest)travel(nearest.to);else if(nearNPC)talk(nearNPC);};
@@ -127,7 +127,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   if(dialog.open&&now-lastBig>250){lastBig=now;drawCityMap();} // 0.64.1 the open map follows you live
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
- const api={update,get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),
+ const api={update,endTalk,get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),
   guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
   // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
   recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},

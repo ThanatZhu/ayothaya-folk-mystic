@@ -1,0 +1,9 @@
+# Class stat refunds and story dialogue
+
+Class training completion now clears the six allocated base stats to 1, including advancement to a Master path. The existing level/rebirth budget consequently becomes available again; no points are added to the earned budget. Accepting or cancelling a trial, changing appearance, or reconnecting preserves allocations. The authoritative server checkpoints the refund with the class change before releasing the session. Offline status records bind to class + Master path; older records without a path keep their existing allocations on first load. Gear and Base EXP are retained.
+
+All 18 talk objectives in the existing 23-quest story have three manually authored pages, an optional contextual question and an explicit final response. Opening a conversation, asking questions, going back or closing midway never advances it. AUTO is turned off while reading; death, separation from the NPC or an objective change closes stale dialogue. The server checks the original quest/step index before processing a confirmation, alongside existing proximity and reward rules. Older clients remain compatible until refreshed.
+
+The existing quest window now defaults to a Story tab with current context and collapsible recaps for completed quests. Bounties, weekly tasks and cards remain in their tabs. The original quest order, objective counts, rewards and save version 2 are retained; there is no progress reset or automatic replay of completed conversations. TH/EN and the existing Mali font are supported.
+
+Validation: 448 unit/integration tests; real WebSocket class and Master completion + reconnect; browser test `scripts/check-story123.mjs` covers real game conversation gating, four viewport sizes, ordinary NPC interactions after completion, all 18 conversations, English and offline stat migration. It uses a local test account and leaves production player records alone. Build before running because the local host serves dist/.

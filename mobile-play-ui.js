@@ -35,7 +35,8 @@ export function createMobilePlayUI({clearInput=()=>{}}={}){
   if(bank){if(query.matches&&skills&&bank.parentElement!==skills)skills.append(bank);else if(!query.matches&&attackControls&&bank.parentElement!==attackControls)attackControls.prepend(bank);}
   const buttons=[...skills?.querySelectorAll('.skill')??[]],available=buttons.map((b,i)=>!b.hidden?i:null).filter(i=>i!==null),selection=skillPage(available,page);page=selection.index;
   skillSignature=buttons.map(b=>b.hidden?'0':'1').join('');
-  buttons.forEach((b,i)=>{const off=query.matches&&!selection.slots.includes(i);if(b.hasAttribute('data-mobile-away')!==off)b.toggleAttribute('data-mobile-away',off);});
+  const arc=[[0,124],[6,66],[42,16],[102,0],[162,22]];
+  buttons.forEach((b,i)=>{const off=query.matches&&!selection.slots.includes(i);if(b.hasAttribute('data-mobile-away')!==off)b.toggleAttribute('data-mobile-away',off);const pos=selection.slots.indexOf(i);if(pos>=0){b.style.setProperty('--arc-x',arc[pos][0]+'px');b.style.setProperty('--arc-y',arc[pos][1]+'px');}});
   skills?.setAttribute('aria-label',query.matches?`สกิลชุด ${page+1} จาก ${selection.pages}`:'สกิลทั้งหมด');
   if(bank){if(query.matches){if(!bank.querySelector('svg'))bank.innerHTML=arrows;}else bank.textContent='สกิล 1–5 ⇄';bank.setAttribute('aria-label',query.matches?`สลับชุดสกิล ชุด ${page+1} จาก ${selection.pages}`:'แสดงสกิล 6 ถึง 0');}
   overlay();refreshing=false;

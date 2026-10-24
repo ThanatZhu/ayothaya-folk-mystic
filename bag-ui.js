@@ -97,7 +97,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  QUICK_IDX.forEach(i=>$('quick-'+i).onclick=()=>quickUse(quick[i]));
  // 0.99.17 drag a potion from the bag onto the Q / E slot at the bottom (mouse or finger)
  let drag=null,dragged=false;
- const slotAt=(x,y)=>QUICK_IDX.find(i=>{const r=$('quick-'+i).getBoundingClientRect();return x>=r.left-10&&x<=r.right+10&&y>=r.top-10&&y<=r.bottom+10;});
+ const slotAt=(x,y)=>game.actionBar?.desktop?undefined:QUICK_IDX.find(i=>{const r=$('quick-'+i).getBoundingClientRect();return x>=r.left-10&&x<=r.right+10&&y>=r.top-10&&y<=r.bottom+10;});
  const marks=i=>{bar.classList.toggle('drop-ready',i!==null);QUICK_IDX.forEach(k=>$('quick-'+k).classList.toggle('drop-over',k===i));};
  // 0.100.10 any item can be dragged: onto the trash zone or out of the bag window asks how many to throw away.
  const inside=(el,x,y)=>{const r=el.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;};
@@ -106,12 +106,13 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.pointer)return;
   if(!drag.ghost){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;drag.ghost=document.createElement('div');drag.ghost.className='bag-drag';drag.ghost.innerHTML=icon(drag.id,'item-icon big');dialog.append(drag.ghost);}
-  e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';const i=drag.potion?slotAt(e.clientX,e.clientY):undefined;if(drag.potion)marks(i??-1);dialog.classList.add('dragging');$('bag-trash').classList.toggle('over',i===undefined&&toTrash(e.clientX,e.clientY));
+  e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';const hot=game.actionBar?.mark(e.clientX,e.clientY),i=drag.potion?slotAt(e.clientX,e.clientY):undefined;if(drag.potion)marks(i??-1);dialog.classList.add('dragging');$('bag-trash').classList.toggle('over',!hot&&i===undefined&&toTrash(e.clientX,e.clientY));
  },{passive:false});
  function dragEnd(e){
   if(!drag||e.pointerId!==drag.pointer)return;const d=drag;drag=null;if(!d.ghost)return;
-  d.ghost.remove();marks(null);dialog.classList.remove('dragging');$('bag-trash').classList.remove('over');dragged=true;setTimeout(()=>{dragged=false;},60);
+  d.ghost.remove();marks(null);game.actionBar?.mark(-1,-1);dialog.classList.remove('dragging');$('bag-trash').classList.remove('over');dragged=true;setTimeout(()=>{dragged=false;},60);
   if(e.type!=='pointerup')return;
+  if(game.actionBar?.dropItemAt(d.id,e.clientX,e.clientY))return;
   const i=d.potion?slotAt(e.clientX,e.clientY):undefined;if(i===undefined){if(toTrash(e.clientX,e.clientY))askDiscard(d.id);return;}
   quick[i]=d.id;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}world.notice('ปุ่มลัด '+QUICK_KEYS[i]+' · '+itemDef(d.id).name);render(true);
  }
@@ -136,7 +137,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  addEventListener('keydown',e=>{
   if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target.closest?.('input,textarea,select')||document.querySelector('dialog:modal'))return;
   if(e.code==='KeyB'){e.preventDefault();menuButton.click();}
-  const k=e.code.startsWith('Key')?QUICK_KEYS.indexOf(e.code.slice(3)):-1;if(k>=0)quickUse(quick[k]);
+  const k=e.code.startsWith('Key')?QUICK_KEYS.indexOf(e.code.slice(3)):-1;if(k>=0&&!game.actionBar?.desktop)quickUse(quick[k]);
  });
 
  // Shop: the NPC dialog gets a button; the shop window closes if the player walks away.
@@ -155,7 +156,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  const talk=worldUI.afterTalk;worldUI.afterTalk=n=>{talk(n);for(const f of api.talkHooks)f(n);};
 
  // Status window hooks: it reads and writes the offline bag through here and handles 'สวมใส่'.
- const api={bag,setLocal(b){local=normalizeBag(b);save();render(true);},onWear:null,render:()=>render(true),talkHooks:[]};
+ const api={bag,get quickItems(){return [...quick];},activateShortcut(id){if(!bag().items[id])return fail('no-item');const kind=itemDef(id)?.kind;if(quickable(id)||kind==='food')quickUse(id);else if(kind==='gear')api.onWear?.(id);else{selected=id;worn=null;open();}},setLocal(b){local=normalizeBag(b);save();render(true);},onWear:null,render:()=>render(true),talkHooks:[]};
  // World-map warp: shows the purse, and pays offline (online the realm server charges).
  worldUI.coins=()=>bag().coins;worldUI.payWarp=cost=>{if(local.coins<cost)return false;local={...local,coins:local.coins-cost};save();return true;};
  let shown='';
@@ -179,7 +180,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    if(worn){$('bag-detail').innerHTML=wornIt?`${icon(wornId,'item-icon big')}<div><strong class="r${wornIt.rarity??0}">${wornIt.name}${wornIt.refine?' +'+wornIt.refine:''}</strong><p>${wornIt.text??''}</p>${wornIt.card?`<small>การ์ด: ${itemDef(wornIt.card)?.text??''}</small>`:''}<div class="bag-actions"><button type="button" data-act="off">ถอด</button><button type="button" data-act="status">ใส่การ์ด · หน้าสถานะ</button></div></div>`:`<p class="bag-hint">ช่อง${GEAR_PLACES.find(g=>g[0]===worn)[1]}ว่าง · แตะอุปกรณ์ในแท็บ อุปกรณ์ แล้วกด สวมใส่</p>`;
     $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{if(el.dataset.act==='off'){api.onTakeOff?.(worn);}else{dialog.close();$('menu-status')?.click();}});}
    const it=!worn&&selected&&itemDef(selected);
-   if(!worn)$('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong class="r${it.rarity??0}">${it.name} ×${b.items[selected]}</strong><p>${it.text??''}</p><small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'||it.kind==='wing'?'<button type="button" data-act="use">'+(it.kind==='wing'?'ใช้ · วาร์ปสุ่ม':'ใช้')+'</button>':''}${quickable(selected)?QUICK_KEYS.map((k,i)=>'<button type="button" data-act="q'+i+'">'+'ปุ่มลัด '+k+'</button>').join(''):''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='lure'?'<button type="button" data-act="tame">ล่อสัตว์ (เป้าที่เลือก)</button>':''}${it.kind==='egg'?'<button type="button" data-act="hatch">ฟักไข่</button>':''}${it.kind==='petfood'?'<button type="button" data-act="petFeed">ให้อาหารสัตว์เลี้ยง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}<button type="button" data-act="discard" class="danger">ทิ้ง</button></div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
+   if(!worn)$('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong class="r${it.rarity??0}">${it.name} ×${b.items[selected]}</strong><p>${it.text??''}</p><small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'||it.kind==='wing'?'<button type="button" data-act="use">'+(it.kind==='wing'?'ใช้ · วาร์ปสุ่ม':'ใช้')+'</button>':''}${game.actionBar?.desktop?'<small>ลากไอเท็มไปวางในตารางปุ่มลัดด้านล่าง</small>':quickable(selected)?QUICK_KEYS.map((k,i)=>'<button type="button" data-act="q'+i+'">'+'ปุ่มลัด '+k+'</button>').join(''):''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='lure'?'<button type="button" data-act="tame">ล่อสัตว์ (เป้าที่เลือก)</button>':''}${it.kind==='egg'?'<button type="button" data-act="hatch">ฟักไข่</button>':''}${it.kind==='petfood'?'<button type="button" data-act="petFeed">ให้อาหารสัตว์เลี้ยง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}<button type="button" data-act="discard" class="danger">ทิ้ง</button></div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
    if(!worn)$('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='use')use(selected);else if(a==='discard')askDiscard(selected);else if(a==='wear')api.onWear?.(selected);else if(['tame','hatch','petFeed'].includes(a))api.onPet?.(a,selected);else if(a==='recall'){if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[selected]--;if(!b.items[selected])delete b.items[selected];local=b;save();}}else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
   }
   if(shopDialog.open&&shopNpc){

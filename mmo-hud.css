@@ -7,7 +7,8 @@ body.mmo-hud .combat-controls.wheel .attack-controls{position:static;display:blo
 body.mmo-hud .combat-controls.wheel #skill-bank{display:none}
 body.mmo-hud .combat-controls.wheel .skill{position:absolute;width:var(--wheel-slot);height:var(--wheel-slot);min-height:0;padding:2px;margin:0;border-radius:8px;display:grid;place-items:center;background:#102a24;border:2px solid #d0a75e;box-shadow:0 3px 9px #000a,inset 0 0 0 1px #0006;overflow:visible;pointer-events:auto}
 body.mmo-hud .combat-controls.wheel .skill:hover{border-color:#ffe2a0;box-shadow:0 0 12px #ffd98a88,0 3px 9px #000a}
-body.mmo-hud .combat-controls.wheel .skill strong{width:100%;height:100%;min-width:0;min-height:0;border-radius:4px;font-size:20px;line-height:1;text-align:center;box-shadow:none}
+/* Empty atlas elements have no intrinsic width; anchor them to the button instead of a shrinkable grid track. */
+body.mmo-hud .combat-controls.wheel .skill strong{position:absolute;inset:2px;display:block;width:auto;height:auto;min-width:0;min-height:0;border-radius:4px;font-size:20px;line-height:1;text-align:center;box-shadow:none}
 body.mmo-hud .combat-controls.wheel .skill span{display:none}
 body.mmo-hud .combat-controls.wheel .skill kbd{position:absolute;left:-5px;top:-5px;width:19px;height:19px;border-radius:4px;display:grid;place-items:center;background:#2a1d10;border:1px solid #d0a75e;color:#ffe7a6;font:700 10px Mali,Tahoma,sans-serif;z-index:3}
 body.mmo-hud .combat-controls.wheel .skill .skill-level{left:50%;right:auto;top:auto;bottom:-7px;transform:translateX(-50%);padding:0 5px;border-radius:7px;background:#1c1209e0;border:1px solid #d0a75e88;z-index:3;white-space:nowrap}

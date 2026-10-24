@@ -14,7 +14,7 @@ Existing story, awakened and rotating MVP bosses remain separate.
 | Lotus Marsh | 25–35 | พญาเต่าบัวทมิฬ | 2,000,000 |
 | Bamboo Grove | 35–45 | ปอบเจ้าดง | 2,500,000 |
 | Ruined Temple | 45–55 | อาถรรพ์ระฆังร้าง | 3,000,000 |
-| Himmapan Edge | 55–70 | คชสารพฤกษา | 3,500,000 |
+| Himmapan Edge | 55–70 | คชสารพฤกษ์ | 3,500,000 |
 | Naga Cave | 70–85 | นาคพิทักษ์บาดาล | 4,000,000 |
 | Kailash Peak | 85–99 | ยักษ์เมฆาคุ้มขุนเขา | 4,500,000 |
 
@@ -85,3 +85,6 @@ overlap neighboring cells.
 Publish requires both the frontend world.json version 125 and the backend
 /health contentVersion 125, mapBossSchema 1 and monsterTypes 53. A frontend-only
 deployment cannot enable authoritative monster combat.
+
+Release validation after merging the companion system: 473/473 node tests passed;
+nine live map checks and the admin boss/drop views passed without browser errors.

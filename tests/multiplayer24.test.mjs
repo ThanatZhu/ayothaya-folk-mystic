@@ -156,3 +156,11 @@ test('server simulation keeps pace with real time even when timers fire late',as
   assert.ok(Math.abs(simulated-real)<.12,`simulated ${simulated.toFixed(3)}s vs real ${real.toFixed(3)}s`);
  }finally{await host.close();await cleanup(directory);}
 });
+
+ test('premium wallets are never imported from the mirror and only persist in the private server profile',async()=>{
+  const db=transactionDB(),store=new FirebaseStore(db),identity={uid:'pet-user',serverId:'server-1',slotId:'slot-1'},ref='players/pet-user/characters/slot-1';
+  db.docs.set(ref,{serverId:'server-1',revision:1,character:{name:'PetUser',gender:'male',classId:'novice'},state:initialSave(),petCollection:{balance:9999999,equipped:'garuda-dawn'}});await store.renewAuthority();
+  let session=await store.acquire(identity,'pets-first');assert.equal(session.record.petCollection,undefined);
+  session.record.petCollection={v:1,balance:800,pulls:2,pity:2,collection:{'rice-rabbit':{stars:1,copies:1}},equipped:'rice-rabbit',receipts:[]};await store.checkpoint(session,session.record,{release:true});assert.equal(db.docs.get(ref).petCollection,undefined);
+  db.docs.get(ref).petCollection={balance:9000000};session=await store.acquire(identity,'pets-second');assert.equal(session.record.petCollection.balance,800);assert.equal(session.record.petCollection.collection['rice-rabbit'].copies,1);await store.checkpoint(session,session.record,{release:true});assert.equal(db.docs.get(ref).petCollection,undefined);
+ });

@@ -1,3 +1,4 @@
+import {petIncoming} from './pet-combat.js';
 import {roleById} from './assets/skills-next/catalog.js';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {scaledSkill} from './skill-progress.js?v=role116';
@@ -96,7 +97,7 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   return null;
  }
  function incoming(amount,source){
-  if(!Number.isFinite(amount)||amount<=0)return 0;if(source?.roleStatus?.curse)amount*=.75;const m=mods(),st=w.status;let n=amount;
+  if(!Number.isFinite(amount)||amount<=0)return 0;if(source?.roleStatus?.curse)amount*=.75;const m=mods(),st=w.status;let n=petIncoming(w,amount);
   if((st.evade||st.smoke)&&Math.random()<.65){w.emit('dodge',{x:p.x,z:p.z});return 0;}
   const guard=state.meta.guard,facing=guard?.facing??p.face;if(st.guard&&(!source||(source.x-p.x)*facing.x+(source.z-p.z)*facing.z>=0))n*=.35;
   let protection=0;for(const ally of allies())for(const f of ally.world.roleCombat?.state.fields??[])if(['sanctuary','yantra'].includes(f.kind)&&dist(p,f)<=f.radius)protection=Math.max(protection,f.power/100);n*=1-clamp(protection,0,.7);

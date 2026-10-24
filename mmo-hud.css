@@ -5,14 +5,14 @@ body.mmo-hud .combat-controls.wheel>*{pointer-events:auto}
 body.mmo-hud .combat-controls.wheel .skills{position:static;display:block;padding:0;margin:0;background:none;border:0;box-shadow:none;border-radius:0;grid-template-columns:none}
 body.mmo-hud .combat-controls.wheel .attack-controls{position:static;display:block;padding:0}
 body.mmo-hud .combat-controls.wheel #skill-bank{display:none}
-body.mmo-hud .combat-controls.wheel .skill{position:absolute;width:var(--wheel-slot);height:var(--wheel-slot);min-height:0;padding:0;margin:0;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,#4a5643,#1b261e 72%);border:2px solid #d0a75e;box-shadow:0 3px 9px #000a,inset 0 0 0 2px #0006;overflow:visible;pointer-events:auto}
+body.mmo-hud .combat-controls.wheel .skill{position:absolute;width:var(--wheel-slot);height:var(--wheel-slot);min-height:0;padding:2px;margin:0;border-radius:8px;display:grid;place-items:center;background:#102a24;border:2px solid #d0a75e;box-shadow:0 3px 9px #000a,inset 0 0 0 1px #0006;overflow:visible;pointer-events:auto}
 body.mmo-hud .combat-controls.wheel .skill:hover{border-color:#ffe2a0;box-shadow:0 0 12px #ffd98a88,0 3px 9px #000a}
-body.mmo-hud .combat-controls.wheel .skill strong{width:calc(var(--wheel-slot) - 10px);height:calc(var(--wheel-slot) - 10px);border-radius:50%;font-size:20px;line-height:calc(var(--wheel-slot) - 10px);text-align:center;box-shadow:none}
+body.mmo-hud .combat-controls.wheel .skill strong{width:100%;height:100%;min-width:0;min-height:0;border-radius:4px;font-size:20px;line-height:1;text-align:center;box-shadow:none}
 body.mmo-hud .combat-controls.wheel .skill span{display:none}
-body.mmo-hud .combat-controls.wheel .skill kbd{position:absolute;left:-5px;top:-5px;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;background:#2a1d10;border:1px solid #d0a75e;color:#ffe7a6;font:700 10px Mali,Tahoma,sans-serif;z-index:3}
+body.mmo-hud .combat-controls.wheel .skill kbd{position:absolute;left:-5px;top:-5px;width:19px;height:19px;border-radius:4px;display:grid;place-items:center;background:#2a1d10;border:1px solid #d0a75e;color:#ffe7a6;font:700 10px Mali,Tahoma,sans-serif;z-index:3}
 body.mmo-hud .combat-controls.wheel .skill .skill-level{left:50%;right:auto;top:auto;bottom:-7px;transform:translateX(-50%);padding:0 5px;border-radius:7px;background:#1c1209e0;border:1px solid #d0a75e88;z-index:3;white-space:nowrap}
 body.mmo-hud .combat-controls.wheel .skill em{position:absolute;inset:0;display:grid;place-items:center;font:700 17px Mali,Tahoma,sans-serif;color:#fff;text-shadow:0 1px 3px #000;z-index:2;pointer-events:none}
-body.mmo-hud .combat-controls.wheel .skill.cooling:after{content:'';position:absolute;inset:2px!important;width:auto!important;height:auto!important;border-radius:50%!important;background:conic-gradient(#000000b0 var(--cooldown),transparent 0)!important;z-index:1}
+body.mmo-hud .combat-controls.wheel .skill.cooling:after{content:'';position:absolute;inset:2px!important;width:auto!important;height:auto!important;border-radius:5px!important;background:conic-gradient(#000000b0 var(--cooldown),transparent 0)!important;z-index:1}
 body.mmo-hud .combat-controls.wheel .skill.no-mana{border-color:#6f9fd8;filter:saturate(.45)}
 body.mmo-hud .combat-controls.wheel #attack{position:absolute;right:6px;bottom:6px;width:var(--wheel-attack);height:var(--wheel-attack);border-radius:50%;border:3px solid #e2bd73;box-shadow:0 0 0 4px #0005,0 6px 16px #000a,inset 0 0 18px #ffd98a55}
 body.mmo-hud .combat-controls.wheel #auto-attack{position:absolute;width:54px;height:54px;border-radius:50%;padding:0;display:grid;place-items:center;align-content:center;gap:0;font-size:10px}

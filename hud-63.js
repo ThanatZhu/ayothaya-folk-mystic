@@ -4,7 +4,7 @@
 // 0.67 follows the approved desktop mockup (outputs/ui-hud63-desktop-mockup.png): four main buttons + เมนู.
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
-import {createMobilePlayUI} from './mobile-play-ui.js?v=2';
+import {createMobilePlayUI} from './mobile-play-ui.js?v=square119';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
@@ -13,7 +13,7 @@ export function createHud63({game}={}){
  const $=id=>document.getElementById(id),body=document.body;
  const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=112.4';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
- const minimalStyle=document.createElement('link');minimalStyle.rel='stylesheet';minimalStyle.href='./minimal-combat-hud.css?v=3';document.head.append(minimalStyle);
+ const minimalStyle=document.createElement('link');minimalStyle.rel='stylesheet';minimalStyle.href='./minimal-combat-hud.css?v=shadow119';document.head.append(minimalStyle);
  const mobileStyle=document.createElement('link');mobileStyle.rel='stylesheet';mobileStyle.href='./mobile-hud-stability.css?v=4';document.head.append(mobileStyle);
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
  const profile=document.querySelector('.player-panel');deco(profile,'f-profile');

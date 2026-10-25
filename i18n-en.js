@@ -3766,3 +3766,38 @@ Object.assign(globalThis.I18N_EN,{
  'โหลดฉากไม่สำเร็จ · กดดูอีกครั้งเพื่อลองใหม่ หรือกลับไปเล่นต่อ':'Scene could not load. Replay to retry, or return to the game.',
  'ดูคัตซีน · ขั้น':'Watch scene · step','กระดานค่าหัว ·':'Bounty board ·','ตัว · รับรางวัลในเมือง':'targets · claim in town','· รับรางวัลในเมือง':'· claim in town'
 });
+Object.assign(globalThis.I18N_EN,{
+ 'ใส่ใน':'Fits in','ใส่การ์ดในอุปกรณ์':'Slot an equipment card','ช่องการ์ดว่าง 1 ช่อง':'1 empty card slot',
+ 'เลือกการ์ดเพื่อดูรายละเอียดก่อนยืนยัน':'Select a card to review before confirming','ปิดหน้าใส่การ์ด':'Close card selection','การ์ดที่ใส่ได้':'Compatible cards','ยืนยันการ์ดที่เลือก':'Confirm selected card','มี {3} ใบ':'Owned: {3}',
+ 'ยังไม่มีการ์ดที่ใส่กับอุปกรณ์นี้ได้ในกระเป๋า':'No compatible card for this equipment in your bag.',
+ 'ใส่แล้วถอดไม่ได้ · ใช้การ์ดจากกระเป๋า 1 ใบ':'Permanent and cannot be removed · consumes 1 card from your bag',
+ 'ใช้การ์ด 1 ใบ ใส่ในอุปกรณ์นี้ถาวร':'Consume 1 card to slot it permanently into this equipment.',
+ 'เลือกใบอื่น':'Choose another card','ยืนยันใส่การ์ด':'Confirm slotting card','อุปกรณ์เปลี่ยนแล้ว กรุณาเลือกการ์ดใหม่':'Equipment changed. Please select the card again.',
+ 'เลือกการ์ด{1}':'Choose card{1}','ชนิด':'types'
+});
+
+Object.assign(globalThis.I18N_EN,{
+ "VIT +2 · HP +5%": "VIT +2 · HP +5%",
+ "แรงขึ้น 15% กับมอนตัวเล็ก": "+15% damage to small monsters",
+ "AGI +2 · หลบหลีก +2%": "AGI +2 · Flee +2%",
+ "STR +2 · คริติคอล +3%": "STR +2 · Critical +3%",
+ "DEF +4": "DEF +4",
+ "แรงขึ้น 20% กับมอนธาตุผี": "+20% damage to Ghost monsters",
+ "เบี้ยจากมอน +40% · LUK +4 · DEX +2": "Bia from monsters +40% · LUK +4 · DEX +2",
+ "ATK +15% · ความเร็วโจมตี +8%": "ATK +15% · Attack speed +8%",
+ "รับดาเมจจากผีลด 40% · HP +18%": "Damage from ghosts -40% · HP +18%",
+ "ATK +12% · คริ +6%": "ATK +12% · Crit +6%",
+ "เบี้ยจากมอน +25% · LUK +2": "Bia from monsters +25% · LUK +2",
+ "ATK +10% · ความเร็วโจมตี +5%": "ATK +10% · Attack speed +5%",
+ "ต้านผี 20% · หลบ +5%": "Ghost resist 20% · Flee +5%",
+ "ตีตัวใหญ่ +20% · ATK +5%": "+20% damage to large monsters · ATK +5%",
+ "ตีตัวเล็ก +20%": "+20% damage to small monsters",
+ "หลบ +6%": "Flee +6%",
+ "HP สูงสุด +12%": "Max HP +12%",
+ "INT +3": "INT +3",
+ "ATK +8% · คริ +3%": "ATK +8% · Crit +3%",
+ "รับดาเมจจากผีลด 30% · HP +10%": "Ghost damage taken -30% · HP +10%",
+ "โจมตีธาตุประจำตัวแรงขึ้น 12%": "Deal 12% more damage to the monster's element",
+ "หลบ +3% · VIT +2": "Dodge +3% · VIT +2",
+ "HP +8% · ต้านธาตุประจำตัว 18%": "HP +8% · Resist the monster's element by 18%"
+});

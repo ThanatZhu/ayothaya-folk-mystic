@@ -1,4 +1,5 @@
-import {loadConversationStyle} from './npc-conversation155.js?v=155';
+import {loadConversationStyle} from './npc-conversation155.js?v=npc159';
+import {skinNPCChoices} from './npc-choice-ui.js?v=npc159';
 import {paintNPCPortrait} from './npc-portrait155.js?v=155';
 import {trainingStatus,mentorById,trialItemsShort,MASTER_COURT,TRIAL} from './city-life-data.js?v=98';
 import {advanceReady} from './advancement.js?v=73';
@@ -19,6 +20,7 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
  const copy=document.createElement('section');copy.className='npc-copy';header.className='npc-heading';header.querySelector('small').remove();header.append($('mentor-role'));copy.append(header);oldSection.className='npc-reading';copy.append(oldSection);actions.classList.add('npc-actions');leave.textContent='ลาก่อน';actions.append(leave);
  const cinema=document.createElement('button');cinema.type='button';cinema.textContent='ดูคัตซีน';cinema.id='mentor-cinematic';actions.append(cinema);
  const x=document.createElement('button');x.className='npc-x';x.type='button';x.textContent='×';x.setAttribute('aria-label','ปิดบทสนทนา');x.onclick=()=>leave.click();panel.replaceChildren(portrait,copy,actions,x);
+ skinNPCChoices(panel,leave);
  cinema.onclick=()=>{if(!current)return;dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{kind:'training',title:$('mentor-quest').textContent,goal:$('mentor-objective').textContent,npc:current}}));};
  panel.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='SELECT'){e.preventDefault();e.stopImmediatePropagation();}},true);
  const journal=document.createElement('aside');journal.id='training-journal';journal.hidden=true;journal.innerHTML='<button type="button" id="training-toggle" aria-controls="training-details" aria-label="ย่อหรือขยายรายการภารกิจ"><strong>บททดสอบจากครู</strong><b aria-hidden="true"></b></button><div id="training-details"><span class="training-lines"></span><small></small></div><span id="training-summary" hidden></span>';document.getElementById('game-shell').append(journal);

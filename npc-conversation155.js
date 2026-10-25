@@ -1,5 +1,6 @@
 import {paintNPCPortrait} from './npc-portrait155.js?v=155';
-export function loadConversationStyle(){if(document.querySelector('link[data-conversation155]'))return;const css=document.createElement('link');css.rel='stylesheet';css.href='./npc-conversation155.css?v=155';css.dataset.conversation155='';document.head.append(css);}
+import {skinNPCChoices} from './npc-choice-ui.js?v=npc159';
+export function loadConversationStyle(){if(document.querySelector('link[data-conversation155]'))return;const css=document.createElement('link');css.rel='stylesheet';css.href='./npc-conversation155.css?v=npc159';css.dataset.conversation155='';document.head.append(css);}
 // Existing service hooks insert before #close-npc; keep that button inside the actions column.
 export function createNPCConversation({game,onClose}){
  loadConversationStyle();const panel=document.getElementById('npc-dialog');panel.classList.add('npc-conversation');panel.tabIndex=-1;
@@ -11,6 +12,7 @@ export function createNPCConversation({game,onClose}){
  back.type=next.type=ask.type=replay.type='button';back.textContent='ย้อนอ่าน';replay.textContent='ดูคัตซีน';next.className='npc-primary';answer.className='npc-answer';
  next.id='npc-story-next';back.id='npc-story-back';ask.id='npc-story-ask';replay.id='npc-story-cinematic';
  actions.prepend(next,back,ask,replay);reading.append(answer);let active=null,page=0,sent=false;
+ skinNPCChoices(panel,leave);
  function render(){const d=active?.reply;const pages=d?.pages??[active?.n.text??''];text.textContent=pages[page]??'';text.dataset.page=String(page);reading.scrollTop=0;answer.hidden=true;
   next.hidden=!d;back.hidden=!d||page===0;ask.hidden=!d?.question;replay.hidden=!d?.play;next.disabled=sent;next.textContent=page<pages.length-1?'อ่านต่อ':d?.accept??'รับภารกิจ';ask.textContent=d?.question??'';
   panel.querySelector('.npc-key-hint').textContent=pages.length>1?`${page+1} / ${pages.length} · Space / แตะเพื่ออ่านต่อ`:'Space / แตะเพื่ออ่านต่อ';

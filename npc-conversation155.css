@@ -26,3 +26,24 @@ html body #mentor-panel .npc-actions #mentor-close{position:static;width:100%!im
 html body .npc-conversation .npc-x:not(#close-npc):not(#mentor-close){width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important;padding:0!important;border:0!important;border-image:none!important;border-radius:50%!important;background:url('./assets/ui63/frames/ring.png') center / contain no-repeat,#16382b!important;font:700 20px/1 Mali,Tahoma,sans-serif!important;box-shadow:none!important;color:#f4d583!important}
 @media(max-width:900px),(pointer:coarse){html body dialog.npc-conversation{width:96vw!important;max-width:96vw!important;bottom:max(6px,env(safe-area-inset-bottom))!important;height:clamp(175px,43dvh,265px)!important;padding:18px 24px!important;grid-template-columns:minmax(70px,19%) minmax(0,1fr) minmax(115px,24%);gap:12px}.npc-speaker{margin-top:-45px;min-height:150px;height:calc(100% + 45px)}.npc-heading{padding-bottom:4px!important}.npc-heading strong,.npc-heading h2{font-size:18px!important}.npc-reading p{font-size:14px;line-height:1.5}html body .npc-conversation .npc-actions button{min-height:40px;font-size:12px;padding:6px}.npc-key-hint{font-size:10px}}
 @media(max-width:520px) and (orientation:portrait){html body dialog.npc-conversation{height:48dvh!important;grid-template-columns:64px minmax(0,1fr);gap:8px;padding:20px!important}.npc-speaker{grid-row:1 / 3;min-height:150px;height:100%;margin:0}.npc-actions{grid-column:2;display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:140px}.npc-copy{max-height:23dvh}}
+
+/* New authored dialogue plaques. Farewell stays outside the scrollable choices. */
+html body .npc-conversation .npc-choice-actions{display:flex!important;flex-direction:column;flex-wrap:nowrap!important;justify-content:normal;gap:8px;overflow:hidden!important;padding:0 20px 0 0;max-height:100%}
+.npc-option-list{display:flex;flex-direction:column;justify-content:safe center;gap:8px;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b89b53 #0b241d;padding:1px 2px}
+html body :is(#npc-dialog,#mentor-panel).npc-conversation .npc-choice-actions :is(button#close-npc,button#mentor-close,button){
+ min-height:50px!important;width:100%;height:auto;max-width:100%;box-sizing:border-box;flex:none;
+ border:0 solid transparent!important;border-radius:0!important;
+ border-image:url('./assets/npc159/dialogue-choice.webp') 0 210 fill / 0 38px / 0 stretch!important;
+ background:none!important;box-shadow:none!important;
+ padding:12px 38px!important;margin:0;white-space:normal;overflow-wrap:anywhere;
+ color:#f6df9b!important;text-shadow:0 1px 2px #071d13!important;font:600 14px/1.45 Mali,Tahoma,sans-serif!important;
+}
+html body .npc-conversation .npc-choice-actions :is(#close-npc,#mentor-close){color:#f7ebc7!important}
+@media(max-width:900px),(pointer:coarse){
+ html body .npc-conversation .npc-choice-actions{gap:3px;padding-right:24px}
+ .npc-option-list{gap:3px;padding-block:0}
+ html body :is(#npc-dialog,#mentor-panel).npc-conversation .npc-choice-actions :is(button#close-npc,button#mentor-close,button){min-height:44px!important;padding:9px 26px!important;border-image-width:0 27px!important;font-size:12px!important}
+}
+@media(orientation:landscape) and (max-width:900px),(orientation:landscape) and (pointer:coarse){
+ html body dialog.npc-conversation{height:clamp(200px,43dvh,265px)!important;grid-template-columns:minmax(70px,19%) minmax(0,1fr) minmax(128px,28%)}
+}

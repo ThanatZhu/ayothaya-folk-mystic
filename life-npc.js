@@ -5,7 +5,6 @@ import {CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=siz
 import {createRiggedSprite} from './rigged-sprite.js?v=106.0';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=life1';
 import {walkable,groundHeight} from './combat-core.js?v=role116';
-const MERC_COST=200,MERC_TIME=1200;
 const NAMES=['นายแก่น','แม่จันทร์','ทิดคำ','อ้ายพรม','นางแก้ว','ขุนทอง','อีแป้น','ตาผล'];
 const CLASSES=['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
 const blank=()=>{const t=new THREE.Texture();t.image=document.createElement('canvas');return t;};
@@ -30,17 +29,6 @@ export function createLifeNPC({game,map,scene,camera,controls,bagUI}){
  // ---- mercenary
  let merc=null;const mercActive=()=>game.online?(world.mercLeft??0)>0:!!world.merc;
  game.onEvent(e=>{if(e.type==='merc'&&merc){merc.attackAt=world.time;merc.face={x:e.x-merc.x,z:e.z-merc.z};}});
- bagUI.talkHooks.push(n=>{
-  document.getElementById('npc-hire')?.remove();if(n.name!=='ครูแสนดาบ')return;
-  const b=document.createElement('button');b.id='npc-hire';b.type='button';b.textContent=`⚔ จ้างทหารรับจ้าง · ${MERC_COST} เบี้ย / 20 นาที`;
-  b.onclick=()=>{
-   if(mercActive())return world.notice('มีทหารรับจ้างอยู่แล้ว');
-   if(game.online)world.market?.('hire',{});
-   else{const bag=bagUI.bag();if(bag.coins<MERC_COST)return world.notice('เบี้ยไม่พอ');bagUI.setLocal({...bag,coins:bag.coins-MERC_COST});world.hire(MERC_TIME);world.notice('จ้างทหารรับจ้างแล้ว · 20 นาที');}
-   document.getElementById('close-npc').click();
-  };
-  document.getElementById('close-npc').before(b);
- });
  // ---- wandering adventurers on field maps (not towns, not party instances)
  const wanderers=[];
  if(!map.safe&&!map.instance){

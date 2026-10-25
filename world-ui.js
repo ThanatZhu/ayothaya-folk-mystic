@@ -1,10 +1,10 @@
-import {createNPCConversation} from './npc-conversation155.js?v=155';
+import {createNPCConversation} from './npc-conversation155.js?v=npc159';
 import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=112.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
-import {createMentorUI} from './mentor-ui.js?v=npc155';
+import {createMentorUI} from './mentor-ui.js?v=npc159';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=role116';

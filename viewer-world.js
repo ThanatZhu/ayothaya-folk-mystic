@@ -1,6 +1,6 @@
 import {createAnnouncementUI} from './announcement-ui.js?v=149';
 import {createAutoTargetUI} from './auto-target-ui.js?v=139';
-import {createBossBrowserUI} from './boss-browser-ui.js?v=150';
+import {createBossBrowserUI} from './boss-browser-ui.js?v=travel161';
 import './role-i18n.js?v=116';
 import {createActionbar} from './actionbar-ui.js?v=overlay143';
 import {drawCharacterFrame,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
@@ -34,7 +34,7 @@ import {createAmbientMotion} from './ambient-motion.js?v=size1';
 import {createGame} from './game-controls.js?v=run153';
 import {atlasPath,className} from './classes.js?v=112.1';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=story160';
+import {createWorldUI} from './world-ui.js?v=travel161';
 import {createStoryUI} from './story-ui.js?v=story160';
 import {createBagUI} from './bag-ui.js?v=mobile148';
 import {createStatusUI} from './status-ui.js?v=cards156';

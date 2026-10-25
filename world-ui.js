@@ -1,7 +1,7 @@
 import {createNPCConversation} from './npc-conversation155.js?v=npc159';
 import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
-import {createWorldAtlas} from './world-atlas-ui.js?v=112.4';
+import {createWorldAtlas} from './world-atlas-ui.js?v=travel161';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
 import {createMentorUI} from './mentor-ui.js?v=npc159';
@@ -142,6 +142,16 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
  const api={update,endTalk,get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,onConversationOpened:null,travelTo:id=>travel(id),
+  // Directory destinations can be several maps away. Preserve free gate travel when
+  // permitted; otherwise let the existing atlas show the fare and confirm the warp.
+  travelToMap(id){
+   const destination=lookup(id);if(traveling||world.player.hp<=0||!destination||id===map.id)return false;
+   if(destination.instance||destination.guildHall||warpCost(catalog,map.id,id)===null){world.notice('ยังไม่มีเส้นทางวาร์ปไปที่นี่');return false;}
+   game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);
+   const gate=map.portals.find(p=>p.to===id);
+   if(gate&&(map.safe||Math.hypot(world.player.x-gate.x,world.player.z-gate.z)<2.5)){travel(id);return true;}
+   endTalk();atlas.show(id);return true;
+  },
   guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
   // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
   recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},

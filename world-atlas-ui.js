@@ -92,11 +92,11 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onClose}){
  dialog.addEventListener('close',()=>{busy=false;onClose?.();});
  return {
   get open(){return dialog.open;},close(){dialog.close();},
-  show(){
+  show(destinationId=currentId){
    for(const panel of document.querySelectorAll('dialog[data-hud-panel][open]'))panel.close();
-   busy=false;zoom=OPEN_ZOOM;choose(currentId);dialog.showModal();fit();
-   // 0.112.4 open zoomed in on where the player is, so the crowded plain is readable
-   const pin=pins.get(currentId);if(pin){const v=viewport.getBoundingClientRect(),p=pin.getBoundingClientRect();viewport.scrollLeft+=p.left-v.left-v.width/2;viewport.scrollTop+=p.top-v.top-v.height/2;}else viewport.scrollTo(0,0);
+   busy=false;zoom=OPEN_ZOOM;choose(catalog.maps.some(m=>m.id===destinationId)?destinationId:currentId);dialog.showModal();fit();
+   // Center the requested destination; ordinary map opens still start at the player.
+   const pin=pins.get(selected);if(pin){const v=viewport.getBoundingClientRect(),p=pin.getBoundingClientRect();viewport.scrollLeft+=p.left-v.left-v.width/2;viewport.scrollTop+=p.top-v.top-v.height/2;}else viewport.scrollTo(0,0);
    $('#atlas-close').focus();
   }
  };

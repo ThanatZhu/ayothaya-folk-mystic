@@ -10,7 +10,7 @@ import {openHudPanel} from './hud-panels.js?v=34';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 export function createProfileUI({game,account,statusUI,equipmentUI}){
- const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-ui.css?v=85';document.head.append(link);
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-ui.css?v=profile171';document.head.append(link);
  const world=game.world,person=account.character;
  // Settings: keep the old toggle (cloud-save.js owns open/close and the blocking state) on a gear button.
  const toggleSettings=$('open-account').onclick;
@@ -22,7 +22,7 @@ export function createProfileUI({game,account,statusUI,equipmentUI}){
  setTimeout(()=>{const nav=$('game-menu'),drawer=$('menu-drawer');if(drawer)drawer.append(gear);else nav?.append(gear);});
 
  const dialog=document.createElement('dialog');dialog.id='profile-card';dialog.setAttribute('aria-labelledby','profile-title');
- dialog.innerHTML=`<header><div><small id="profile-class"></small><h2 id="profile-title"></h2></div><button class="mp-icon" id="profile-close" aria-label="ปิดโปรไฟล์">×</button></header>
+ dialog.innerHTML=`<header><div><small id="profile-class"></small><div class="profile-name-row"><h2 id="profile-title"></h2></div></div><button class="mp-icon" id="profile-close" aria-label="ปิดโปรไฟล์">×</button></header>
  <div class="profile-body"><section class="profile-hero"><canvas id="profile-hero" width="320" height="320" aria-label="ตัวละครพร้อมชุดที่สวมใส่"></canvas><b id="profile-power"></b></section>
  <section class="profile-stats"><div id="profile-levels"></div><ol id="profile-base"></ol><dl id="profile-derived"></dl><div class="profile-actions"><button type="button" id="profile-raise"></button></div></section></div>`;
  ($('game-shell')??document.body).append(dialog);

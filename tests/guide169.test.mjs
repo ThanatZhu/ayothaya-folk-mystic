@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,existsSync} from 'node:fs';
+import {readFileSync,existsSync,statSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {ROLES} from '../assets/skills-next/catalog.js';
@@ -40,4 +40,21 @@ test('guide is linked from home and game without loading the game or auth runtim
  assert.match(html,/https:\/\/ayothayaonline.com\/guide.html/);assert.match(html,/typography.css/);
  assert.doesNotMatch(js,/localStorage\.setItem|firebase|WebSocket|saveCharacter|server\//);
  assert.match(read('build-vercel.mjs'),/import\('\.\/scripts\/build-guide169.mjs'\)/);
+});
+test('illustrated walkthroughs have real optimized images, valid chapter links and readable callout text',()=>{
+ const {pictures}=JSON.parse(read('assets/guide169/visuals.json'));
+ const ids=new Set(book.trim().split(/\n@/).map(s=>s.replace(/^@/,'').split('|')[0]));
+ assert.equal(pictures.length,17);assert.equal(new Set(pictures.map(p=>p.id)).size,pictures.length);
+ let bytes=0;
+ for(const p of pictures){
+  assert.ok(p.title&&p.alt&&p.description,p.id);assert.ok(p.width>300&&p.height>250,p.id);
+  const file=new URL(p.src,root),image=readFileSync(file);bytes+=statSync(file).size;
+  assert.equal(image.toString('ascii',0,4),'RIFF');assert.equal(image.toString('ascii',8,12),'WEBP');
+  for(const id of p.chapters)assert.ok(ids.has(id),p.id+' '+id);
+  for(const pin of p.pins){assert.ok(pin.text.length>8,p.id);assert.ok(pin.x>0&&pin.x<100&&pin.y>0&&pin.y<100,p.id);}
+ }
+ assert.ok(bytes<2_000_000,'walkthrough images should remain light on mobile');
+ for(const id of ['refine','auto','cards','album','mail','bosses','navigation'])assert.ok(pictures.some(p=>p.chapters.includes(id)),id);
+ for(const c of data.classes)assert.ok(existsSync(new URL('assets/landing98/class-'+c.id+'-m.webp',root)),c.id);
+ const js=read('guide.js');assert.match(js,/pictureDialog\.showModal\(\)/);assert.match(js,/loading="lazy"/);assert.match(js,/pictureOpener\?\.focus/);
 });

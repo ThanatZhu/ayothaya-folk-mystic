@@ -54,7 +54,7 @@ export function createLandscapeGuard({onChange=()=>{},allowPortrait=false}={}){
   update();
  }
  document.getElementById('rotate-fullscreen').onclick=enterFullscreen;
- document.getElementById('enter-fullscreen').onclick=enterFullscreen;
+ const fullscreenButton=document.getElementById('enter-fullscreen');if(fullscreenButton)fullscreenButton.onclick=enterFullscreen;
  addEventListener('resize',update);addEventListener('orientationchange',update);document.addEventListener('fullscreenchange',update);
  update();return {get blocked(){return blocked;},update};
 }

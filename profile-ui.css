@@ -34,3 +34,11 @@ html body.field-hud #account-panel:not([data-blocking=true]) .account-card{width
 #profile-card .profile-actions button.glow{background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210}
 #profile-derived{grid-template-columns:repeat(6,1fr)!important}
 #profile-derived div:nth-child(-n+2),#profile-derived div:nth-child(n+6){grid-column:span 3}#profile-derived div:nth-child(n+3):nth-child(-n+5){grid-column:span 2}
+
+/* Rename belongs to the profile title plate, separate from the live HUD. */
+#profile-card>header>div{min-width:0}
+#profile-card .profile-name-row{position:relative;min-width:0}
+:root #profile-card .profile-name-row h2{min-height:44px;padding-right:56px!important;display:flex;align-items:center;overflow-wrap:anywhere}
+#profile-card .profile-name-row #rename-pen{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:40px;height:40px;min-height:0;padding:6px;border:0;background:none;cursor:pointer;z-index:1}
+#profile-card #rename-pen:focus-visible{outline:2px solid #f4cf7a;outline-offset:-3px;border-radius:6px}
+#profile-card #rename-pen:hover{filter:brightness(1.2)}

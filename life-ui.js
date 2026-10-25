@@ -1,3 +1,4 @@
+import {announce} from './announcement-ui.js?v=149';
 // 0.48 everyday UI: ailment icons on the HUD, RO-style emote bubbles (picker + own bubble), daily login popup.
 // Remote players' bubbles are drawn by multiplayer-ui.js; the server rewards the daily login online, this file offline.
 import {emoteId,itemDef} from './items.js?v=107';
@@ -101,7 +102,7 @@ export function createLifeUI({game,account,camera}){
   if((e?.id??null)===festId)return;festId=e?.id??null;fest.hidden=!e;if(!e)return;
   const end=new Date(e.end+'T00:00:00+07:00').toLocaleDateString(globalThis.I18N?.locale??'th-TH',{day:'numeric',month:'short'});
   fest.innerHTML=`${icon('krathong','item-icon small')}<span>${e.name}</span><b>ถึง ${end}</b>`;fest.onclick=openEvents;
-  setTimeout(()=>world.notice('🏮 '+e.name+' · '+e.text),6000);}
+  setTimeout(()=>announce('🏮 '+e.name+' · '+e.text,{id:'festival:'+e.id,kind:'festival'}),6000);}
   // 0.100.5 events window: every running and weekly event explained in one place, with live countdowns
  const eventsChip=document.createElement('button');eventsChip.type='button';eventsChip.id='events-chip';eventsChip.innerHTML='<i aria-hidden="true">📜</i><span>กิจกรรม</span>';eventsChip.onclick=openEvents;chips.append(eventsChip);
  const eventsWin=document.createElement('dialog');eventsWin.id='events-window';eventsWin.setAttribute('aria-labelledby','events-title');($('game-shell')??document.body).append(eventsWin);

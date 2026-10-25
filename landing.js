@@ -3,7 +3,6 @@ import {warWindow} from './guild-war.js?v=98';
 import {arenaEnds} from './arena.js?v=98';
 import {MULTIPLAYER_URL} from './multiplayer-config.js?v=28';
 
-const DISCORD_INVITE='https://discord.gg/Be9WwsX6'; // the Discord buttons and links show only when this is set
 const $=id=>document.getElementById(id);
 // Film playback is an explicit action; the hero uses clean artwork without the gameplay HUD.
 const film=$('promo-dialog'),video=film?.querySelector('video');
@@ -11,14 +10,6 @@ $('open-film')?.addEventListener('click',()=>{film.showModal();video.play().catc
 $('close-film')?.addEventListener('click',()=>film.close());
 film?.addEventListener('close',()=>video.pause());
 film?.addEventListener('click',e=>{if(e.target===film){const r=film.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)film.close();}});
-const nav=$('site-nav'),toggle=$('nav-toggle');
-const closeNav=()=>{nav.classList.remove('open');toggle.setAttribute('aria-expanded','false');};
-toggle.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));nav.classList.toggle('open',open);});
-nav.addEventListener('click',e=>{if(e.target.closest('a'))closeNav();});
-addEventListener('keydown',e=>{if(e.key==='Escape')closeNav();});
-addEventListener('resize',()=>{if(innerWidth>1000)closeNav();});
-if(DISCORD_INVITE)for(const a of document.querySelectorAll('[data-discord]')){a.href=DISCORD_INVITE;a.hidden=false;}
-
 // Public server status. Keep connection failures distinct from an actual server restart.
 async function status(){
  const box=$('status'),say=(state,text)=>{box.dataset.state=state;box.querySelector('span').textContent=text;};

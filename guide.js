@@ -190,6 +190,7 @@ async function copyLink(hash){
 async function load(){
  const [snapshot,words,book,visuals]=await Promise.all([fetch('assets/guide169/game-data.json?v=170').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=170').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),fetch('assets/guide169/handbook.md?v=170').then(r=>{if(!r.ok)throw Error('book');return r.text();}),fetch('assets/guide169/visuals.json?v=170').then(r=>{if(!r.ok)throw Error('visuals');return r.json();})]);
  data=snapshot;ui=words;pictures=visuals.pictures;setupPictureViewer();
+ new ResizeObserver(()=>document.documentElement.style.setProperty('--guide-tools-height',Math.ceil($('.searchbar').getBoundingClientRect().height)+'px')).observe($('.searchbar'));
  articles=book.trim().split(/\n@/).map(section=>{const [head,...body]=section.replace(/^@/,'').split('\n'),[id,group,title]=head.split('|');return {id,group,title,body:body.join('\n')};});
  // Keep the four TOC groups together without changing stable article IDs.
  const groups=[...new Set(articles.map(a=>a.group))];articles.sort((a,b)=>groups.indexOf(a.group)-groups.indexOf(b.group));

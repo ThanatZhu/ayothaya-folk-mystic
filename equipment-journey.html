@@ -1,13 +1,17 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="th"><head><script src="i18n-en.js?v=luxury171"></script><script src="i18n.js?v=100"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#10251f"><title>เส้นทางอุปกรณ์ ตั้งแต่เริ่มเกมถึงเอ็นเกม · อโยธยา</title>
 <meta name="description" content="ดูเส้นทางอุปกรณ์อโยธยาตามอาชีพและเลเวล รูปไอเท็ม รางวัลเควส ร้านค้า มอนสเตอร์ที่ดรอป สูตรคราฟ การ์ด และเป้าหมายเอ็นเกม">
 <link rel="icon" href="assets/brand69/ayothaya-emblem.png"><link rel="stylesheet" href="typography.css"><link rel="stylesheet" href="equipment-journey170.css?v=170">
-</head><body>
+<link rel="stylesheet" href="companion-luxury171.css?v=171"><link rel="stylesheet" href="site-header.css?v=171"></head><body class="journey-page">
 <a class="skip" href="#journey">ข้ามไปเส้นทางอุปกรณ์</a>
-<header class="site-header"><a class="brand" href="./"><img src="assets/brand69/ayothaya-emblem.png" width="36" height="36" alt="">AYOTHAYA <span>คู่มือนักเดินทาง</span></a><nav aria-label="หน้าเว็บ"><a href="world-atlas.html">แผนที่โลก</a><a class="button gold" href="play.html">เข้าเกม</a></nav></header>
+<header class="site-masthead">
+ <a class="mark" href="./" aria-label="อโยธยา หน้าแรก"><img src="assets/brand69/ayothaya-emblem.png" width="40" height="40" alt=""><span>AYOTHAYA <b>FOLK MYSTIC</b></span></a>
+ <nav id="site-nav" aria-label="หัวข้อ"><a href="./#features">ระบบเด่น</a><a href="./#classes">อาชีพ</a><a href="./#world">แผนที่</a><a href="./#events">กิจกรรม</a><a href="./#news">อัปเดต</a><a href="guide.html">คู่มือเกม</a><a href="equipment-journey.html">เส้นทางอุปกรณ์</a><a data-discord href="https://discord.gg/Be9WwsX6" target="_blank" rel="noopener">Discord</a></nav>
+ <div class="nav-actions"><button type="button" class="lang-toggle" data-lang-toggle>TH / EN</button><a class="site-play" href="play.html">เข้าเกม</a><button class="nav-toggle" id="nav-toggle" type="button" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button></div>
+</header>
+<section class="hero"><div class="companion-rail" aria-hidden="true">AYOTHAYA / EQUIPMENT JOURNAL<span></span></div><div class="hero-copy"><p class="eyebrow">เส้นทางอุปกรณ์ของคุณ</p><h1>จากอาวุธชิ้นแรก<br>ถึงชุด<span>หิมพานต์</span></h1><p>ชิ้นต่อไปคืออะไร หาได้จากไหน และควรลงทุนกับชิ้นไหน<br class="desktop"> ไล่ไปทีละช่วง แล้วเลือกเส้นทางที่เหมาะกับอาชีพของคุณ</p><a class="button gold" href="#journey">เริ่มดูเส้นทาง</a><a class="quiet" href="#endgame">ดูเป้าหมายเอ็นเกม</a></div><div class="hero-foot"><span>รับของจากเควส</span><span>ซื้อของหลัก</span><span>คราฟและล่าบอส</span><span>พัฒนาชิ้นเอ็นเกม</span></div></section>
 <main>
-<section class="hero"><div class="hero-copy"><p class="eyebrow">เส้นทางอุปกรณ์ของคุณ</p><h1>จากอาวุธชิ้นแรก<br>ถึงชุด<span>หิมพานต์</span></h1><p>ชิ้นต่อไปคืออะไร หาได้จากไหน และควรลงทุนกับชิ้นไหน<br class="desktop"> ไล่ไปทีละช่วง แล้วเลือกเส้นทางที่เหมาะกับอาชีพของคุณ</p><a class="button gold" href="#journey">เริ่มดูเส้นทาง</a><a class="quiet" href="#endgame">ดูเป้าหมายเอ็นเกม</a></div><div class="hero-foot"><span>รับของจากเควส</span><span>ซื้อของหลัก</span><span>คราฟและล่าบอส</span><span>พัฒนาชิ้นเอ็นเกม</span></div></section>
 <section class="reader" aria-label="เลือกตัวละครที่ต้องการดู"><div><span class="eyebrow">เลือกเส้นทาง</span><h2>ตอนนี้คุณอยู่ตรงไหน</h2></div><label>อาชีพ<select id="class-select"></select></label><label>Base Lv.<input id="level-input" type="number" min="1" max="99" value="1" inputmode="numeric"></label><button id="find-stage" class="button" type="button">ไปช่วงของฉัน</button><p id="player-position" aria-live="polite"></p></section>
 <p id="page-status" role="status">กำลังอ่านรายการไอเท็มและแหล่งดรอป…</p>
 <noscript><p class="notice">เปิด JavaScript เพื่อดูเส้นทางแยกอาชีพและค้นแหล่งไอเท็ม</p></noscript>
@@ -26,4 +30,4 @@
 </main><footer>ข้อมูลร้าน รางวัลเควส ดรอป และสูตร อ่านจากข้อมูลเกมชุดเดียวกับระบบไอเท็ม · โอกาสดรอปที่แสดงเป็นค่าพื้นฐานต่อการสุ่ม ไม่ใช่จำนวนครั้งที่รับประกัน</footer>
 <dialog id="item-dialog" aria-labelledby="detail-title"><div class="dialog-heading"><p class="eyebrow">สมุดเส้นทางไอเท็ม</p><button type="button" id="close-detail" aria-label="ปิดรายละเอียด">×</button></div><div id="item-detail"></div></dialog>
 <script type="module" src="equipment-journey170.js?v=170"></script>
-</body></html>
+<script type="module" src="site-header.js?v=171"></script></body></html>

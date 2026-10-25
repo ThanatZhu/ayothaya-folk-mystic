@@ -5,7 +5,7 @@ const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>
 const number=v=>Number(v??0).toLocaleString('th-TH',{maximumFractionDigits:2}),pct=v=>number(v*100)+'%';
 const normalize=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim();
 const matches=(text,q)=>normalize(q).split(' ').every(t=>normalize(text).includes(t));
-let data,ui,articles=[],index=[],current='skills',limit=16,searchLimit=30,focused=null,searchTimer,toastTimer;
+let data,ui,pictures=[],articles=[],index=[],current='skills',limit=16,searchLimit=30,focused=null,searchTimer,toastTimer,pictureDialog,pictureOpener;
 const kinds=['skills','items','monsters','maps','recipes','pets','story'];
 const label=k=>ui?.[k]??k,name=id=>data.items.find(i=>i.id===id)?.name??id;
 const className=id=>data.classes.find(c=>c.id===id)?.name??label(id);
@@ -35,6 +35,37 @@ function markdown(text){
   close();out+=line.startsWith('### ')?`<h3>${esc(line.slice(4))}</h3>`:line.startsWith('! ')?`<p class="note">${esc(line.slice(2))}</p>`:`<p>${esc(line)}</p>`;
  }close();return out;
 }
+function pictureFrame(p){
+ return `<span class="picture-frame" style="aspect-ratio:${p.width}/${p.height}"><img src="${esc(p.src)}" alt="${esc(p.alt)}" width="${p.width}" height="${p.height}" loading="lazy" decoding="async">${p.pins.map((pin,i)=>`<span class="picture-pin" style="left:${pin.x}%;top:${pin.y}%" aria-hidden="true">${i+1}</span>`).join('')}</span>`;
+}
+function pictureNotes(p){return p.pins.length?`<ol class="picture-notes">${p.pins.map((pin,i)=>`<li><b aria-hidden="true">${i+1}</b><span>${esc(pin.text)}</span></li>`).join('')}</ol>`:'';}
+function visualFigures(id){
+ return pictures.filter(p=>p.chapters.includes(id)).map(p=>`<figure class="guide-picture"><figcaption><span class="eyebrow">${esc(label('picture'))}</span><h3>${esc(p.title)}</h3><p>${esc(p.description)}</p></figcaption><button type="button" class="picture-open" data-picture="${esc(p.id)}" aria-label="${esc(label('enlarge')+': '+p.title)}">${pictureFrame(p)}<span class="picture-enlarge">${esc(label('enlarge'))}</span></button>${pictureNotes(p)}<small class="picture-example">${esc(label('pictureNote'))}</small></figure>`).join('');
+}
+function pictureTiles(id){
+ const tiles=(title,rows)=>`<section class="visual-examples" aria-label="${esc(title)}"><h3>${esc(title)}</h3><div class="visual-tiles">${rows.join('')}</div></section>`;
+ const itemTile=i=>`<a class="visual-tile" href="#ref-items-${esc(i.id)}">${art(i.art)}<strong>${esc(i.name)}</strong><small>${esc(i.text??'')}</small></a>`;
+ if(id==='classes')return tiles(label('classPictures'),data.classes.map(c=>`<a class="visual-tile class-tile" href="#database" data-library="skills" data-query="${esc(c.name)}"><img src="assets/landing98/class-${esc(c.id)}-m.webp" loading="lazy" decoding="async" width="180" height="180" alt="${esc(c.name)}"><strong>${esc(c.name)}</strong><small>${esc(c.role)}</small></a>`));
+ if(id==='equipment')return tiles(label('equipmentPictures'),['weapon','head','armor','garment','shoes','accessory'].map(slot=>itemTile(data.items.find(i=>i.kind==='gear'&&i.slot===slot))));
+ if(id==='advancement')return tiles(label('materialPictures'),[...new Set(Object.values(data.rules.training).flatMap(t=>t.items.map(([id])=>id)))].map(id=>itemTile(data.items.find(i=>i.id===id))));
+ if(id==='cards')return tiles(label('cardPictures'),data.items.filter(i=>i.kind==='card').slice(0,3).map(itemTile));
+ if(id==='pets')return tiles(label('petPictures'),data.pets.map(p=>`<a class="visual-tile pet-tile" href="#ref-pets-${esc(p.id)}"><img src="${esc(p.art.src)}" alt="${esc(p.name)}" width="150" height="150" loading="lazy" decoding="async"><strong>${esc(p.name)} <span class="badge">${p.tier}</span></strong><small>${esc(p.skill.tip)}</small></a>`));
+ return '';
+}
+function setupPictureViewer(){
+ pictureDialog=document.createElement('dialog');pictureDialog.id='guide-picture-viewer';pictureDialog.setAttribute('aria-labelledby','guide-picture-title');
+ pictureDialog.innerHTML=`<header><h2 id="guide-picture-title"></h2><button type="button" id="guide-picture-zoom">${esc(label('zoomPicture'))}</button><button type="button" id="guide-picture-close" aria-label="${esc(label('closePicture'))}">×</button></header><div class="picture-scroll"><div class="picture-large"></div></div><div class="picture-viewer-notes"></div>`;document.body.append(pictureDialog);
+ const close=()=>pictureDialog.close();$('#guide-picture-close').addEventListener('click',close);
+ pictureDialog.addEventListener('click',e=>{if(e.target===pictureDialog)close();});
+ pictureDialog.addEventListener('close',()=>{pictureOpener?.focus({preventScroll:true});});
+ $('#guide-picture-zoom').addEventListener('click',()=>{const zoom=pictureDialog.classList.toggle('actual-size');$('#guide-picture-zoom').textContent=label(zoom?'fitPicture':'zoomPicture');$('#guide-picture-zoom').setAttribute('aria-pressed',String(zoom));});
+}
+function openPicture(id,opener){
+ const p=pictures.find(p=>p.id===id);if(!p)return;pictureOpener=opener;pictureDialog.classList.remove('actual-size');
+ $('#guide-picture-title').textContent=p.title;$('#guide-picture-zoom').textContent=label('zoomPicture');$('#guide-picture-zoom').setAttribute('aria-pressed','false');
+ pictureDialog.querySelector('.picture-large').innerHTML=pictureFrame(p);pictureDialog.querySelector('.picture-large').style.setProperty('--natural-width',p.width+'px');
+ pictureDialog.querySelector('.picture-viewer-notes').innerHTML=pictureNotes(p);pictureDialog.showModal();pictureDialog.querySelector('.picture-scroll').scrollTo(0,0);$('#guide-picture-close').focus();
+}
 function supplemental(id){
  if(id==='classes')return table([label('class'),label('summary'),label('branches')],data.classes.map(c=>[c.name,c.role,(c.branches??[]).map(b=>b.name).join(' / ')]));
  if(id==='advancement')return `<h3>${esc(label('trainTitle'))}</h3>`+table([label('tier'),label('needJob'),label('kills'),label('boss'),label('ingredients'),label('price')],Object.entries(data.rules.training).map(([k,t])=>[label(k==='class'?'trainingClass':'trainingMaster'),k==='class'?10:40,t.kills,t.bossName,t.items.map(([id,n])=>name(id)+' ×'+n).join(' · '),number(t.coins)]))+table([label('class'),'NPC','X / Y'],data.classes.map(c=>[c.name,c.mentor?.name??'',`${c.mentor?.x??''} / ${-(c.mentor?.z??0)}`]));
@@ -47,7 +78,7 @@ function supplemental(id){
 }
 
 function renderArticles(){
- $('#articles').innerHTML=articles.map((a,i)=>`<article class="chapter" id="${esc(a.id)}"><div class="chapter-top"><span class="chapter-number">${String(i+1).padStart(2,'0')} / ${esc(a.group)}</span>${copyButton(a.id)}</div><h2>${esc(a.title)}</h2>${markdown(a.body)}${supplemental(a.id)}</article>`).join('');
+ $('#articles').innerHTML=articles.map((a,i)=>{const body=markdown(a.body),intro=body.indexOf('</p>')+4;return `<article class="chapter" id="${esc(a.id)}"><div class="chapter-top"><span class="chapter-number">${String(i+1).padStart(2,'0')} / ${esc(a.group)}</span>${copyButton(a.id)}</div><h2>${esc(a.title)}</h2>${body.slice(0,intro)}${pictureTiles(a.id)}${visualFigures(a.id)}${body.slice(intro)}${supplemental(a.id)}</article>`;}).join('');
  let last='';$('#toc').innerHTML=articles.map(a=>{const title=a.group!==last?`<strong>${esc(a.group)}</strong>`:'';last=a.group;return title+`<a href="#${esc(a.id)}">${esc(a.title)}</a>`;}).join('');
  const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){$('#toc a.active')?.classList.remove('active');$(`#toc a[href="#${entry.target.id}"]`)?.classList.add('active');}},{rootMargin:'-150px 0px -55% 0px'});
  document.querySelectorAll('#articles article').forEach(a=>observer.observe(a));
@@ -157,8 +188,8 @@ async function copyLink(hash){
  $('#toast').textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2600);
 }
 async function load(){
- const [snapshot,words,book]=await Promise.all([fetch('assets/guide169/game-data.json?v=169').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=169').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),fetch('assets/guide169/handbook.md?v=169').then(r=>{if(!r.ok)throw Error('book');return r.text();})]);
- data=snapshot;ui=words;
+ const [snapshot,words,book,visuals]=await Promise.all([fetch('assets/guide169/game-data.json?v=170').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=170').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),fetch('assets/guide169/handbook.md?v=170').then(r=>{if(!r.ok)throw Error('book');return r.text();}),fetch('assets/guide169/visuals.json?v=170').then(r=>{if(!r.ok)throw Error('visuals');return r.json();})]);
+ data=snapshot;ui=words;pictures=visuals.pictures;setupPictureViewer();
  articles=book.trim().split(/\n@/).map(section=>{const [head,...body]=section.replace(/^@/,'').split('\n'),[id,group,title]=head.split('|');return {id,group,title,body:body.join('\n')};});
  // Keep the four TOC groups together without changing stable article IDs.
  const groups=[...new Set(articles.map(a=>a.group))];articles.sort((a,b)=>groups.indexOf(a.group)-groups.indexOf(b.group));
@@ -175,8 +206,8 @@ async function load(){
  $('#library-search').addEventListener('input',()=>{focused=null;limit=16;renderLibrary();});$('#library-filter').addEventListener('change',()=>{focused=null;limit=16;renderLibrary();});
  $('#load-more').addEventListener('click',()=>{limit+=16;renderLibrary();});
  $('#contents-toggle').addEventListener('click',()=>{const open=$('#contents').classList.toggle('open');$('#contents-toggle').setAttribute('aria-expanded',String(open));if(open)$('#toc a')?.focus();});
- document.addEventListener('click',e=>{const button=e.target.closest('[data-copy]');if(button)copyLink(button.dataset.copy);const tab=e.target.closest('[data-library]');if(tab){if(tab.tagName==='A')e.preventDefault();setLibrary(tab.dataset.library,tab.dataset.query??'');if(tab.tagName==='A')$('#database').scrollIntoView({block:'start'});}if(e.target.closest('#more-search')){searchLimit+=30;search();}if(e.target.closest('#toc a'))closeContents();});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeContents();$('#search-results').hidden=true;$('#contents-toggle').focus();}if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$('#guide-search').focus();}});
+ document.addEventListener('click',e=>{const picture=e.target.closest('[data-picture]');if(picture)openPicture(picture.dataset.picture,picture);const button=e.target.closest('[data-copy]');if(button)copyLink(button.dataset.copy);const tab=e.target.closest('[data-library]');if(tab){if(tab.tagName==='A')e.preventDefault();setLibrary(tab.dataset.library,tab.dataset.query??'');if(tab.tagName==='A')$('#database').scrollIntoView({block:'start'});}if(e.target.closest('#more-search')){searchLimit+=30;search();}if(e.target.closest('#toc a'))closeContents();});
+ document.addEventListener('keydown',e=>{if(pictureDialog.open)return;if(e.key==='Escape'){closeContents();$('#search-results').hidden=true;$('#contents-toggle').focus();}if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$('#guide-search').focus();}});
  window.addEventListener('hashchange',route);
 }
 load().catch(()=>{const node=$('#load-status');node.className='load-error';node.textContent=ui?.error??'Unable to load the guide. Please reload this page.';});

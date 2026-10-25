@@ -79,6 +79,7 @@ export function prepareSceneV2({scene,model,map,waterEnabled=true}){
 export function disposeScene(root){
  const textures=new Set();
  root.traverse(o=>o.userData.disposeWater158?.());
+ root.traverse(o=>o.userData.disposeLighting159?.());
  root.traverse(o=>{o.geometry?.dispose();for(const m of [].concat(o.material??[])){for(const v of Object.values(m))if(v?.isTexture)textures.add(v);m.dispose();}});
  textures.forEach(t=>t.dispose());
 }

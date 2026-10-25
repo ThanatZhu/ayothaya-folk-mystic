@@ -10,9 +10,9 @@ import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 // signs and labels near the screen edges stay readable), lifted shadows,
 // slightly lower contrast, warm highlights and a light vignette.
 const SoftLookShader={
- uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(1,1)},focus:{value:.48},band:{value:.3},blur:{value:1.3},warmth:{value:.05},vignette:{value:.32}},
+ uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(1,1)},focus:{value:.48},band:{value:.3},blur:{value:1.3},warmth:{value:.05},vignette:{value:.32},contrast:{value:.93},lift:{value:.04},saturation:{value:1}},
  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
- fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 resolution;uniform float focus,band,blur,warmth,vignette;varying vec2 vUv;
+ fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 resolution;uniform float focus,band,blur,warmth,vignette,contrast,lift,saturation;varying vec2 vUv;
  void main(){
   vec3 c=texture2D(tDiffuse,vUv).rgb;
   float amount=smoothstep(band,band+.34,abs(vUv.y-focus))*blur;
@@ -22,7 +22,7 @@ const SoftLookShader={
    c=sum/13.;
   }
   float l=dot(c,vec3(.2126,.7152,.0722));
-  c=c*.93+.04;
+  c=mix(vec3(l),c,saturation)*contrast+lift;
   c+=vec3(warmth,warmth*.5,-warmth*.4)*smoothstep(.4,1.,l);
   vec2 d=vUv-.5;c*=1.-vignette*dot(d,d)*1.5;
   gl_FragColor=vec4(c,1.);
@@ -31,13 +31,14 @@ const SoftLookShader={
 const KEY='ayothaya-graphics';
 function preferred(){try{const v=localStorage.getItem(KEY);if(v==='high'||v==='low')return v==='high';}catch{}return !matchMedia('(pointer:coarse)').matches;}
 
-export function createSoftLook({renderer,scene,camera}){
+export function createSoftLook({renderer,scene,camera,finish=null,mobile=false}){
  const composer=new EffectComposer(renderer);
  composer.addPass(new RenderPass(scene,camera));
  // Only genuinely bright pixels (lanterns, flames, skill effects) glow.
- const bloom=new UnrealBloomPass(new THREE.Vector2(256,256),.28,.5,.9);composer.addPass(bloom);
+ const bloom=new UnrealBloomPass(new THREE.Vector2(256,256),finish?.bloom??.28,.5,finish?.threshold??.9);bloom.enabled=!mobile;composer.addPass(bloom);
  composer.addPass(new OutputPass());
  const look=new ShaderPass(SoftLookShader);composer.addPass(look);
+ if(finish)for(const key of ['blur','warmth','vignette','contrast','lift','saturation'])if(Number.isFinite(finish[key]))look.uniforms[key].value=finish[key];
  let enabled=preferred();
  function setSize(width,height){const ratio=renderer.getPixelRatio();composer.setPixelRatio(ratio);composer.setSize(width,height);look.uniforms.resolution.value.set(width*ratio,height*ratio);}
  return {

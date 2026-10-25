@@ -17,7 +17,8 @@ import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=layout154';
 import {createAutoSettings} from './auto-settings.js?v=hud143';
 import {createMmoHud} from './mmo-hud.js?v=role116';
-import {createSoftLook} from './soft-look.js?v=82';
+import {createSoftLook} from './soft-look.js?v=light159';
+import {lightingProfile,applyWorldLighting,applyMeadowLighting,createActorLighting,contactShadowTexture} from './world-lighting159.js?v=159';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=108';
 import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=99.11';
@@ -54,7 +55,7 @@ import {createMarketBoardUI} from './market-board-ui.js?v=shops155';
 import {createHud63} from './hud-63.js?v=combat151';
 import {bindRenderLifecycle} from './render-lifecycle.js';
 import {resolveMap} from './world-state.js?v=101.5';
-import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=water158';
+import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=light159';
 import {createRoofCutaway} from './roof-cutaway.js?v=106.1-lablae';
 import {createLandscapeGuard} from './mobile-layout.js?v=mobile2';
 import {prepareCloud} from './cloud-save.js?v=112.7';
@@ -86,8 +87,8 @@ try {
  const camera=new THREE.OrthographicCamera(-20,20,15,-15,.1,700),initial=new THREE.Vector3(25,27,31),target=new THREE.Vector3(0,1,-1.3);camera.position.copy(initial);
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.copy(target);controls.enableDamping=true;controls.dampingFactor=.1;controls.enablePan=false;
  controls.minPolarAngle=controls.maxPolarAngle=Math.atan2(Math.hypot(23,28),24);controls.minZoom=.65;controls.maxZoom=2.7;controls.rotateSpeed=.6;controls.update();
- const softLook=createSoftLook({renderer,scene,camera});
- const night=map.procedural==='mill',dusk=map.mood==='dusk',mood=map.scene?MOODS[moodOf(map)]:null;scene.add(mood?new THREE.HemisphereLight(...mood.hemi):new THREE.HemisphereLight(night?'#b4d5dd':dusk?'#ffd2a8':'#fffdf4',night?'#4e6260':dusk?'#5d5a72':'#a3af84',night?(map.instance?.5:.85):dusk?1.05:1.35));
+ const lightProfile=lightingProfile(map),softLook=createSoftLook({renderer,scene,camera,finish:lightProfile.finish,mobile:matchMedia('(pointer:coarse)').matches});
+ const night=map.procedural==='mill',dusk=map.mood==='dusk',mood=map.scene?MOODS[moodOf(map)]:null,hemi=mood?new THREE.HemisphereLight(...mood.hemi):new THREE.HemisphereLight(night?'#b4d5dd':dusk?'#ffd2a8':'#fffdf4',night?'#4e6260':dusk?'#5d5a72':'#a3af84',night?(map.instance?.5:.85):dusk?1.05:1.35);scene.add(hemi);
  const sun=mood?new THREE.DirectionalLight(...mood.sun):new THREE.DirectionalLight(night?'#bed9ed':'#ffefd2',night?.7:1.3);sun.position.set(-8,20,9);sun.castShadow=true;const shadowSize=matchMedia('(pointer:coarse)').matches?1024:2048;sun.shadow.mapSize.set(shadowSize,shadowSize);
  Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:70});sun.shadow.bias=-.0005;sun.shadow.normalBias=.05;sun.shadow.radius=4;sun.shadow.intensity=.84; // 0.82 a little deeper and crisper for depth
  scene.add(sun);scene.add(sun.target);
@@ -95,8 +96,8 @@ try {
  // ("flicker") while walking. Texel size = shadow box width / map size.
  const sunPoint=new THREE.Vector3(),sunTexel=64/shadowSize;
  function followSun(p){
-  sun.position.set(p.x-14,25,p.z+12);sun.target.position.set(p.x,0,p.z);sun.updateMatrixWorld();sun.target.updateMatrixWorld();sun.shadow.updateMatrices(sun);
-  sunPoint.set(p.x,0,p.z).applyMatrix4(sun.shadow.camera.matrixWorldInverse);const dx=Math.round(sunPoint.x/sunTexel)*sunTexel-sunPoint.x,dy=Math.round(sunPoint.y/sunTexel)*sunTexel-sunPoint.y;
+  const floor=groundHeight(map.nav,p.x,p.z),offset=worldLight.offset;sun.position.set(p.x+offset.x,floor+offset.y,p.z+offset.z);sun.target.position.set(p.x,floor,p.z);sun.updateMatrixWorld();sun.target.updateMatrixWorld();sun.shadow.updateMatrices(sun);
+  sunPoint.set(p.x,floor,p.z).applyMatrix4(sun.shadow.camera.matrixWorldInverse);const dx=Math.round(sunPoint.x/sunTexel)*sunTexel-sunPoint.x,dy=Math.round(sunPoint.y/sunTexel)*sunTexel-sunPoint.y;
   sunPoint.set(dx,dy,0).applyQuaternion(sun.shadow.camera.quaternion);sun.position.add(sunPoint);sun.target.position.add(sunPoint);
  }
  let rotating=null;
@@ -123,15 +124,17 @@ try {
    if(name==='amber'||name==='flame'){m.color.set('#ffbc5d');m.emissive.set('#ff7c12');m.emissiveIntensity=name==='flame'?1.3:.7;}if(name==='water')m.color.set('#68a5a1');if(name==='bark19'){m.map=tiles.wood;m.color.set('#a58a62');}if(name==='stone19')m.color.set('#b8b9a0');m.vertexColors=!!colors;cache.set(cacheKey,name==='ground19'?capitalLook.ground:name.startsWith('canopy')?capitalLook.canopy(name):['water','amber','flame'].includes(name)?m:paintify(m));
   }o.material=cache.get(cacheKey);
  }});scene.add(gltf.scene);
+ const worldLight=applyWorldLighting({scene,model:gltf.scene,map,sun,hemi,renderer});
  // v2 scenes already contain their trees, props and ground detail: never layer the old procedural set on top.
  const idle={update(){}};if(!map.scene)createCapitalProps({scene,map});
  const landscapeDetails=map.scene?idle:createLandscapeDetails({scene,map});
  const meadow=map.scene&&MEADOW_MAPS.has(map.id)?createMeadow({scene,map,model:gltf.scene,quality:QUALITY[readPerf().quality].meadow,reduced:matchMedia('(prefers-reduced-motion:reduce)').matches}):idle;
+ applyMeadowLighting(meadow);
  const cityTrees=map.scene?idle:createCapitalTrees({scene,map,texture:leafAtlas,crownTexture:capitalLook.crownTexture});
  const botanic={tree:frame(flora.image,[0,0,.558,.612]),banana:frame(flora.image,[.56,0,.44,.602]),hedge:frame(flora.image,[0,.68,.55,.30]),pots:frame(flora.image,[.587,.608,.409,.386])};
  for(const [i,kind] of ['forest','palm','bamboo','rice'].entries())botanic[kind]=frame(regionalFlora.image,[(i%2)*.5,Math.floor(i/2)*.5,.5,.5]);
  const personTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(people.image,r));
- const shadowMat=new THREE.MeshBasicMaterial({color:'#273325',transparent:true,opacity:.18,depthWrite:false});
+ const shadowMat=new THREE.MeshBasicMaterial({map:contactShadowTexture(),color:'#ffffff',transparent:true,opacity:.65,depthWrite:false});
  function shadow(x,y,r){const m=new THREE.Mesh(new THREE.CircleGeometry(r,24),shadowMat);m.rotation.x=-Math.PI/2;m.position.set(x,.072,-y);m.scale.y=.64;scene.add(m);return m;}
  function sprite(tex,x,y,w,h,z=.05){const m=new THREE.SpriteMaterial({map:tex,alphaTest:.45,transparent:false,depthWrite:true,color:'#fff1da'}),s=new THREE.Sprite(m);s.center.set(.5,0);s.position.set(x,z,-y);s.scale.set(w,h,1);scene.add(s);return s;}
  const plants=[],characters=[];
@@ -174,7 +177,8 @@ try {
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
  const frontier=map.procedural&&!map.scene?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
  // Leaving the map reloads the page; free the scene's GPU memory first so the next map starts clean.
- bindRenderLifecycle({dispose:()=>{disposeScene(scene);renderer.dispose();},resize});
+ const actorLighting=createActorLighting({scene,camera,renderer,map,profile:lightProfile});
+ bindRenderLifecycle({dispose:()=>{actorLighting.dispose();disposeScene(scene);renderer.dispose();},resize});
  const motion=sceneMotion??frontier??createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
  const monsterArt=await loadMonsterFrames(map);
@@ -183,7 +187,7 @@ try {
  const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,monsterArt,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,roleSkills:true,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender,name:account.character.name},isPaused:()=>loading.active||!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  // Local test hook (dev server only) for automated walk/bridge/portal checks; absent on the deployed site.
- if(['127.0.0.1','localhost'].includes(location.hostname))window.__ayothaya={game,map,camera,renderer,scene};
+ if(['127.0.0.1','localhost'].includes(location.hostname))window.__ayothaya={game,map,camera,renderer,scene,lighting:{world:worldLight,actors:actorLighting,profile:lightProfile}};
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
  // Extract one atlas cell so a circular portrait can preserve the sprite's natural aspect ratio.
@@ -243,6 +247,6 @@ try {
   flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;followSun(game.world.player);
   const viewDistance=camera.position.distanceTo(controls.target);scene.fog.near=viewDistance+14;scene.fog.far=viewDistance+102; // haze follows the camera (overview moves it 6x further)
   weather.update(document.hidden||landscape.blocked?0:dt);
-  const shake=game.shakeOffset(shakeVector);camera.position.add(shake);softLook.render();camera.position.sub(shake);if(firstFrame){firstFrame=false;loading.finish();}
+  const shake=game.shakeOffset(shakeVector);camera.position.add(shake);actorLighting.update();softLook.render();camera.position.sub(shake);if(firstFrame){firstFrame=false;loading.finish();}
  });
 }catch(error){console.error(error);$('status').textContent='เปิดฉากไม่สำเร็จ';loading.fail();}

@@ -16,12 +16,15 @@ html body #cbt-event[open]{display:flex;flex-direction:column}
 #cbt-event .cbt-tabs button{flex:1 0 auto;min-height:40px;padding:6px 14px;border:1px solid #b999564f;border-radius:6px;background:#0d2b23;color:#d7dbc6;font:700 13px Mali;white-space:nowrap;cursor:pointer}
 #cbt-event .cbt-tabs button[aria-pressed=true]{background:#e0bd73;color:#162b23;border-color:#ffdfa1}
 #cbt-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-color:#b9a162 #0b251d;scrollbar-width:thin;background:#0c251fd9}
-#cbt-event .cbt-poster{position:relative;margin:0 auto;max-width:980px;overflow:hidden;aspect-ratio:1672/941;background:#0c241d}
-#cbt-event .cbt-poster>img{display:block;width:100%;height:100%;object-fit:cover}
-#cbt-event .cbt-poster-heading{position:absolute;left:5%;right:5%;top:1%;text-align:center;text-shadow:0 2px 3px #071811}
+#cbt-event .cbt-poster{margin:0 auto;max-width:840px;background:#0c241d}
+#cbt-event .cbt-poster>img{display:block;width:100%;height:auto;border-block:1px solid #ba995c}
+#cbt-event .cbt-poster-heading{padding:10px 16px;text-align:center;text-shadow:0 2px 3px #071811;background:radial-gradient(ellipse at bottom,#45633a66,transparent 75%),#0d3026}
 #cbt-event .cbt-poster-heading small{font-size:12px;letter-spacing:1px;color:#ddc895}
-#cbt-event .cbt-poster-heading h3{font-size:clamp(17px,2.4vw,30px);line-height:1.4;margin:0;color:#ffe8ae}
-#cbt-event .cbt-poster-labels{position:absolute;left:3%;right:3%;bottom:5%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;text-align:center;color:#ffe9ae;text-shadow:0 2px 3px #000}
+#cbt-event .cbt-poster-heading h3{font-size:clamp(17px,2.4vw,26px);line-height:1.4;margin:0;color:#ffe8ae}
+#cbt-event .cbt-reward-callout{display:block;margin-top:4px;color:#ffdc7c;font-size:clamp(26px,3.4vw,34px);line-height:1.4;text-shadow:0 2px 2px #051b12,0 0 20px #d8a13b55}
+#cbt-event .cbt-reward-preview{display:block;font-size:11px;color:#d6d3b7}
+#cbt-event .cbt-poster-labels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:12px 10px 16px;text-align:center;color:#ffe9ae;text-shadow:0 2px 3px #000}
+#cbt-event .cbt-poster-labels>div{min-width:0;overflow-wrap:anywhere}
 #cbt-event .cbt-poster-labels strong{display:block;font-size:clamp(14px,2.1vw,26px)}
 #cbt-event .cbt-poster-labels span{font-size:clamp(10px,1.3vw,15px);color:#efe2be}
 #cbt-event .cbt-intro{display:flex;align-items:center;gap:20px;padding:22px 28px}
@@ -96,7 +99,9 @@ html body #cbt-event[open]{display:flex;flex-direction:column}
  #cbt-event .cbt-tabs button{min-height:32px}
  #cbt-event .cbt-footer{padding:0 12px}
  #cbt-event[data-cbt-tab=overview] #cbt-content{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto;align-content:start;align-items:start;container-type:inline-size}
- #cbt-event .cbt-poster{grid-column:1;grid-row:1;width:min(54.54cqw,calc(177.7dvh - 370px));max-width:100%;height:min(30.7cqw,calc(100dvh - 208.25px))}
+ #cbt-event .cbt-poster{grid-column:1;grid-row:1;width:100%;max-width:100%;height:auto}
+ #cbt-event .cbt-poster-heading{padding:8px}
+ #cbt-event .cbt-reward-callout{font-size:24px}
  #cbt-event .cbt-poster-heading small{display:none}
  #cbt-event .cbt-poster-heading h3{font-size:14px}
  #cbt-event .cbt-poster-labels{bottom:2%;gap:3px}

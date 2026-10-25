@@ -4385,5 +4385,7 @@ Object.assign(globalThis.I18N_EN,{
  "โหลดคู่มือไม่สำเร็จ ลองรีเฟรชหน้านี้อีกครั้ง": "Could not load the guide. Please refresh this page.",
  "เส้นทางอุปกรณ์ถึงเอ็นเกม": "Equipment journey to endgame",
  "เส้นทางอุปกรณ์": "Equipment progression",
- "พื้นที่ตั้งแต่ป่าไผ่ผีปอบถึงยอดเขาไกรลาสมีมอนสเตอร์ บอสแมพ วัตถุดิบ และตราประจำแมพแล้ว ดูเส้นทางหาอุปกรณ์และสูตรคราฟแยกเลเวลได้ที่คู่มือเส้นทางอุปกรณ์": "The areas from the haunted bamboo grove to Kailash Peak now have monsters, map bosses, materials and map seals. See the equipment progression guide for level-specific gear and crafting routes."
+ "พื้นที่ตั้งแต่ป่าไผ่ผีปอบถึงยอดเขาไกรลาสมีมอนสเตอร์ บอสแมพ วัตถุดิบ และตราประจำแมพแล้ว ดูเส้นทางหาอุปกรณ์และสูตรคราฟแยกเลเวลได้ที่คู่มือเส้นทางอุปกรณ์": "The areas from the haunted bamboo grove to Kailash Peak now have monsters, map bosses, materials and map seals. See the equipment progression guide for level-specific gear and crafting routes.",
+ "ได้รับรางวัล": "Earn rewards",
+ "เมื่อทำตามเงื่อนไขกิจกรรม · พรีวิวรางวัลที่เสนอ": "Meet the event requirements · Proposed rewards preview"
 });

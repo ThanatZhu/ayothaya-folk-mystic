@@ -53,7 +53,7 @@ import {createQuestsUI} from './quests-ui.js?v=story163';
 import {createLifeNPC} from './life-npc.js?v=arena166';
 import {createFeedback} from './feedback.js?v=compact-notice1';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=podium153';
-import {createCbtEventUI} from './cbt-event-ui.js?v=162.1';
+import {createCbtEventUI} from './cbt-event-ui.js?v=cbt172';
 import {createMarketBoardUI} from './market-board-ui.js?v=shops155';
 import {createHud63} from './hud-63.js?v=combat151';
 import {bindRenderLifecycle} from './render-lifecycle.js';

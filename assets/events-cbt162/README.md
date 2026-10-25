@@ -7,3 +7,5 @@ Created with built-in image_gen. These are decorative preview assets; they do no
 - `close-source.png` → `close.webp`: a new square jade close button with ornamental antique-gold framing and a large clear gold X, with a transparent outer background.
 
 The descriptions above summarize the source briefs; they are not a verbatim prompt transcript. The daily bounty batch has its separate exact prompt set in `../bounty163/prompts.json`.
+
+CBT172: `poster-v2-source.png` → `poster-v2.webp` replaces the poster in the UI. Built-in image generation redrew the duel with visible hand grips and crossed blades above the arms, and removed the empty text bands. The exact edit prompt is saved in `poster-v2-prompt.json`. Title, reward heading and captions now occupy separate HTML rows around the art.

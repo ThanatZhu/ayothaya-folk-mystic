@@ -1,3 +1,4 @@
+import {normalizeAlbumState,depositAlbumCard,ALBUM_ERRORS} from './card-album.js?v=152';
 import {STORY,currentObjective,normalizeStory} from './story-quests.js?v=pets125';
 import {STORY_RECAP,storyArt} from './story-dialogue.js?v=pets125';
 // 0.60 "ภารกิจ" window: daily bounty board (claim in a town) and the card album. Online the realm server owns both;
@@ -5,26 +6,32 @@ import {STORY_RECAP,storyArt} from './story-dialogue.js?v=pets125';
 import {itemDef} from './items.js?v=107';
 import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {awardExperience} from './experience.js?v=105.3';
-import {dailyBounties,normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,albumAdd,ALBUM_CARDS,ALBUM_MILESTONES,WEEKLY,normalizeWeekly} from './bounty.js?v=107';
+import {dailyBounties,normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,ALBUM_CARDS,ALBUM_MILESTONES,WEEKLY,normalizeWeekly} from './bounty.js?v=107';
 import {iconStyle} from './bag-ui.js?v=gacha147';
 import {openHudPanel} from './hud-panels.js?v=34';
 const $=id=>document.getElementById(id);
 const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
+// Crop the atlas cell's transparent side gutters without stretching the painted card.
+function albumArt(id){
+ const def=itemDef(id);
+ if(def.monsterCard)return `<img class="album-image" src="assets/cards147/${id.slice(5)}.webp" alt="${def.name}" width="384" height="576" loading="lazy" decoding="async">`;
+ const x=(def.icon%6)*256+32,y=Math.floor(def.icon/6)*256;
+ return `<svg class="album-image${def.tint==='gold'?' album-awakened':''}" viewBox="${x} ${y} 192 256" aria-label="${def.name}" role="img"><image href="assets/cards45/cards.png" width="1536" height="1024"/></svg>`;
+}
 const TIER=['ง่าย','กลาง','ยาก','หัวหน้า'];
 
 export function createQuestsUI({game,account,map,bagUI}){
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./quests-journal.css?v=gacha147',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./quests-journal.css?v=album152',import.meta.url).href;document.head.append(css);
  const desktop=matchMedia('(min-width:901px) and (pointer:fine)');
  let selectedQuest=null,lastQuest=-1;
  const world=game.world,slot=(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const load=k=>{try{return JSON.parse(localStorage.getItem(k+slot));}catch{return null;}},keep=(k,v)=>{try{localStorage.setItem(k+slot,JSON.stringify(v));}catch{}};
- let localBounty=load('ayothaya-bounty:'),localAlbum=normalizeAlbum(load('ayothaya-album:')),tab='story',shown='';
- const bounty=()=>normalizeBounty(game.online?world.bounty:localBounty,Date.now()),album=()=>normalizeAlbum(game.online?world.album:localAlbum);
+ let localBounty=load('ayothaya-bounty:'),localAlbum=normalizeAlbumState(load('ayothaya-album-deposits:')??{album:load('ayothaya-album:')}),tab='story',shown='';
+ const bounty=()=>normalizeBounty(game.online?world.bounty:localBounty,Date.now()),album=()=>normalizeAlbum(game.online?world.album:localAlbum.album);
  game.onEvent(e=>{
-  if(game.online){if(e.type==='album')world.notice(`สมุดการ์ดครบ ${e.count} ใบ · ได้รับรางวัล!`);return;}
+  if(game.online){if(e.type==='album')world.notice(`สมุดการ์ดครบ ${e.count} ใบ · ได้รับรางวัล!`);if(e.type==='notice'&&tab==='album')render(true);return;}
   if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const r=bountyDefeat(localBounty,Date.now(),id,mob.leader);if(r.changed){localBounty=r.state;keep('ayothaya-bounty:',localBounty);}}}
-  if(e.type==='drop'){const cards=e.items.map(i=>i.id).filter(id=>itemDef(id)?.kind==='card');if(cards.length){const r=albumAdd(localAlbum,cards);if(r.added){localAlbum=r.album;keep('ayothaya-album:',localAlbum);
-   for(const m of r.milestones){world.notice(`สมุดการ์ดครบ ${m.count} ใบ · ได้รับรางวัล!`);world.emit('reward',m.reward);}}}}
+
  });
  function claim(i){
   if(!map.safe)return world.notice('รับรางวัลค่าหัวได้ในเมือง');
@@ -83,9 +90,9 @@ export function createQuestsUI({game,account,map,bagUI}){
  }
  desktop.addEventListener('change',()=>{const list=dialog.querySelector('.quest-journal-list');if(list){list.hidden=!desktop.matches;dialog.querySelector('.quest-journal-toggle').setAttribute('aria-expanded',String(desktop.matches));}});
  function render(force=false){
-  if(!dialog.open)return;const s=bounty(),al=album(),wk=normalizeWeekly(world.weekly,Date.now()),sig=JSON.stringify([tab,s,al,wk,storyState()]);if(!force&&sig===shown)return;shown=sig;
+  if(!dialog.open)return;const s=bounty(),al=album(),wk=normalizeWeekly(world.weekly,Date.now()),sig=JSON.stringify([tab,s,al,wk,storyState(),tab==='album'?bagUI.bag():null,world.albumRewards]);if(!force&&sig===shown)return;shown=sig;
   dialog.querySelectorAll('[data-qt]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.qt===tab)));
-  const body=$('quests-body');dialog.dataset.questTab=tab;
+  const body=$('quests-body'),scroll=body.scrollTop;dialog.dataset.questTab=tab;
   if(tab==='story'){
    renderStory(body,storyState());
   }else if(tab==='bounty'){
@@ -100,9 +107,21 @@ export function createQuestsUI({game,account,map,bagUI}){
     return `<li class="${wk.claimed[i]?'':done?'on':''}"><div><strong>${q.name}</strong><small>${n}/${q.count} · รางวัล ${loot(q.reward)}</small></div>${wk.claimed[i]?'<span class="claimed">รับแล้ว ✔</span>':`<button type="button" data-wclaim="${i}" ${done&&map.safe?'':'disabled'}>รับรางวัล</button>`}</li>`;}).join('')+'</ul>':'<p class="social-note">ภารกิจรายสัปดาห์ใช้ได้เมื่อเล่นออนไลน์</p>';
    body.querySelectorAll('[data-wclaim]').forEach(b=>b.onclick=()=>{if(!map.safe)return world.notice('รับรางวัลได้ในเมือง');world.market?.('weeklyClaim',{index:+b.dataset.wclaim});});
   }else{
-   const next=ALBUM_MILESTONES.find(m=>al.length<m.count);
-   body.innerHTML=`<p class="social-note">สะสมการ์ดแล้ว ${al.length}/${ALBUM_CARDS.length} ใบ${next?` · ครบ ${next.count} ใบ รับ ${next.reward.coins} เบี้ย + ${next.reward.items.map(i=>itemDef(i.id).name).join(', ')}`:' · ครบทุกรางวัลแล้ว'}</p><div class="album-grid">`+
-    ALBUM_CARDS.map(id=>`<span class="${al.includes(id)?'got':''}" title="${al.includes(id)?itemDef(id).name:'ยังไม่พบ'}">${icon(id)}</span>`).join('')+'</div>';
+   const paid=game.online?(world.albumRewards??[]):localAlbum.albumRewards;
+   const next=ALBUM_MILESTONES.find(m=>!paid.includes(m.count)),bag=bagUI.bag();
+   body.innerHTML=`<p class="social-note">สะสมการ์ดแล้ว ${al.length}/${ALBUM_CARDS.length} ใบ${next?` · ครบ ${next.count} ใบ รับ ${next.reward.coins} เบี้ย + ${next.reward.items.map(i=>itemDef(i.id).name).join(', ')}`:' · ครบทุกรางวัลแล้ว'}</p><p class="album-rule">กดฝากการ์ดจากกระเป๋า 1 ใบ เพื่อสะสมการ์ดชนิดนั้น · การ์ดที่ฝากจะถูกใช้ไป</p><div class="album-grid">`+
+    ALBUM_CARDS.map(id=>{
+     const got=al.includes(id),count=bag.items[id]??0,def=itemDef(id);
+     return `<article class="album-entry${got?' got':''}" data-card="${id}"><div class="album-art${got||count?'':' undiscovered'}">${albumArt(id)}</div><strong title="${def.name}">${def.name}</strong><small>${got?'สะสมแล้ว':count?'มีในกระเป๋า '+count+' ใบ':'ยังไม่มีการ์ดในกระเป๋า'}</small><button type="button" data-deposit="${id}"${got||!count?' disabled':''}>${got?'ฝากแล้ว':'ฝากการ์ด 1 ใบ'}</button></article>`;
+    }).join('')+'</div>';
+   body.querySelectorAll('[data-deposit]').forEach(button=>button.onclick=()=>{
+    const card=button.dataset.deposit;
+    if(game.online){button.disabled=true;world.market?.('albumDeposit',{card});return;}
+    try{const r=depositAlbumCard(localAlbum,bagUI.bag(),card);bagUI.setLocal(r.bag);localAlbum=r.state;keep('ayothaya-album-deposits:',localAlbum);
+     world.notice('ฝากการ์ดแล้ว · '+itemDef(card).name);for(const m of r.milestones)world.notice(`สมุดการ์ดครบ ${m.count} ใบ · ได้รับรางวัล!`);
+    }catch(e){world.notice(ALBUM_ERRORS[e.message]??e.message);}render(true);
+   });
+   body.scrollTop=scroll;
   }
  }
  return {update(){render();}};

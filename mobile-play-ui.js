@@ -1,5 +1,6 @@
+import {createMobileCombatLayout} from './mobile-combat-ui.js?v=151';
 import {createMobileReferenceUI} from './mobile-reference-ui.js?v=148';
-import {createMobileHudEditor} from './mobile-hud-editor.js?v=143';
+import {createMobileHudEditor} from './mobile-hud-editor.js?v=151';
 // A single owner for the touch HUD. Reuse live buttons so cooldowns and saved
 // hotbar order stay with game-controls / auto-settings rather than a second UI.
 export function skillPage(slots,page=0,size=4){
@@ -10,7 +11,7 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  const body=document.body,$=id=>document.getElementById(id),query=matchMedia('(any-pointer:coarse),(max-width:900px)');
  const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=channel144';document.head.append(css);
  const skills=$('skills'),bank=$('skill-bank'),nav=$('game-menu'),toggle=$('menu-toggle'),quest=$('quest-tracker');
- const oldBank=bank?.onclick;let page=0,refreshing=false,skillSignature='';
+ const oldBank=bank?.onclick;let page=0,refreshing=false,skillSignature='',combatLayout=null;
  const online=$('online-button'),onlineHome=document.createComment('online chip home');if(online)online.before(onlineHome);
  const profile=document.querySelector('.player-panel'),channel=$('channel-button'),channelRow=$('hud-channel-row'),dock=$('online-dock'),dockToggle=$('dock-toggle'),attackControls=document.querySelector('.attack-controls');
  const chips=$('hud-chips'),chipsHome=document.createComment('event chips home');if(chips)chips.before(chipsHome);
@@ -71,10 +72,10 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
   buttons.forEach((b,i)=>{const off=query.matches&&!selection.slots.includes(i);if(b.hasAttribute('data-mobile-away')!==off)b.toggleAttribute('data-mobile-away',off);const pos=selection.slots.indexOf(i);if(pos>=0){b.style.setProperty('--arc-x',arc[pos][0]+'px');b.style.setProperty('--arc-y',arc[pos][1]+'px');}});
   skills?.setAttribute('aria-label',query.matches?`สกิลชุด ${page+1} จาก ${selection.pages}`:'สกิลทั้งหมด');
   if(bank){if(query.matches){if(!bank.querySelector('svg'))bank.innerHTML=arrows;}else bank.textContent='สกิล 1–5 ⇄';bank.setAttribute('aria-label',query.matches?`สลับชุดสกิล ชุด ${page+1} จาก ${selection.pages}`:'แสดงสกิล 6 ถึง 0');}
-  railSize();overlay();refreshing=false;dispatchEvent(new Event('mobile-hud-refreshed'));
+  railSize();overlay();combatLayout?.refresh();refreshing=false;dispatchEvent(new Event('mobile-hud-refreshed'));
  }
  if(bank)bank.onclick=e=>{if(query.matches){e.stopPropagation();page++;refresh();clearInput();}else oldBank?.call(bank,e);};
- if(skills)new MutationObserver(()=>{if([...skills.querySelectorAll('.skill')].map(b=>b.hidden?'0':'1').join('')!==skillSignature)refresh();}).observe(skills,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
+ if(skills)new MutationObserver(records=>{if(records.some(r=>r.type==='childList'&&r.target===skills)||[...skills.querySelectorAll('.skill')].map(b=>b.hidden?'0':'1').join('')!==skillSignature)refresh();}).observe(skills,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
  let blocked=false;
  function overlay(){
   const menu=query.matches&&nav?.classList.contains('phone-open'),panel=query.matches&&!!document.querySelector('dialog[open],#npc-dialog:not([hidden]),#account-panel:not([hidden]),#channel-popover:not([hidden])'),chat=query.matches&&dock&&!dock.classList.contains('collapsed');
@@ -92,5 +93,5 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  addEventListener('resize',refresh);window.visualViewport?.addEventListener('resize',refresh);
  query.addEventListener('change',()=>{page=0;closeQuest();refresh();});
  document.addEventListener('pointerdown',e=>{if(query.matches&&body.classList.contains('mobile-quest-open')&&!e.target.closest?.('#hud-right,#mobile-quest-summary'))closeQuest();},{passive:true});
- refresh();createMobileReferenceUI({clearInput,selectTarget});const hudEditor=createMobileHudEditor({clearInput});return {refresh,hudEditor};
+ refresh();createMobileReferenceUI({clearInput,selectTarget});combatLayout=createMobileCombatLayout();combatLayout.refresh();const hudEditor=createMobileHudEditor({clearInput});return {refresh,hudEditor};
 }

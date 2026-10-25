@@ -2,7 +2,7 @@
 import {ITEMS,addLoot,MAX_COINS} from './items.js';
 import {normalizePetAccount,petAccountAction} from './pet-account.js';
 import {premiumPet} from './premium-pets.js';
-export const MAIL_ACTIONS=['mailList','mailRead','mailClaim'];
+export const MAIL_ACTIONS=['mailList','mailRead','mailClaim','mailClaimAll','mailDeleteAll'];
 export const MAIL_LIMIT=200;
 export const MAIL_BYTES=350000; // Leave room for the rest of a private Firestore character document.
 const idOK=id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{8,56}$/.test(id);
@@ -25,20 +25,22 @@ export function composeMail({id,title,body,sender='ทีมงานอโย�
 export function normalizeMailbox(raw){
  const v=raw??{},messages=[],seen=new Set();
  for(const m of Array.isArray(v.messages)?v.messages:[]){try{const c=composeMail(m,m.createdAt);if(seen.has(c.id))continue;seen.add(c.id);messages.push({...c,readAt:Number.isSafeInteger(m.readAt)&&m.readAt>0?m.readAt:0,claimedAt:Number.isSafeInteger(m.claimedAt)&&m.claimedAt>0?m.claimedAt:0});}catch{}}
- const read={};for(const [id,at] of Object.entries(v.broadcastRead??{}))if(idOK(id)&&Number.isSafeInteger(at)&&at>0)read[id]=at;
- return {v:1,messages,broadcastRead:read};
+ const dates=raw=>Object.assign(Object.create(null),Object.fromEntries(Object.entries(raw??{}).filter(([id,at])=>idOK(id)&&Number.isSafeInteger(at)&&at>0)));
+ return {v:1,messages,broadcastRead:dates(v.broadcastRead),deleted:dates(v.deleted),broadcastDeleted:dates(v.broadcastDeleted)};
 }
 const signature=m=>JSON.stringify([m.title,m.body,m.sender,m.attachments,m.serverId]);
 export function deliverMail(raw,mail){
  const box=normalizeMailbox(raw),old=box.messages.find(m=>m.id===mail.id);
+ // A delivery ID is immutable even after deletion: an admin retry must never recreate a claimed gift.
+ if(Object.hasOwn(box.deleted,mail.id))return {mailbox:box,mail,replayed:true};
  if(old){if(signature(old)!==signature(mail))throw Error('request-conflict');return {mailbox:box,mail:old,replayed:true};}
  if(box.messages.length>=MAIL_LIMIT)throw Error('mailbox-full');
  const next={...box,messages:[...box.messages,mail]};if(new TextEncoder().encode(JSON.stringify(next)).length>MAIL_BYTES)throw Error('mailbox-full');
  return {mailbox:next,mail,replayed:false};
 }
 export function publicInbox(raw,broadcasts=[],serverId){
- const box=normalizeMailbox(raw),personal=box.messages.map(m=>({...m,broadcast:false}));
- const global=broadcasts.filter(m=>m.serverId==='all'||m.serverId===serverId).map(m=>({...m,broadcast:true,readAt:box.broadcastRead[m.id]??0,claimedAt:0}));
+ const box=normalizeMailbox(raw),personal=box.messages.filter(m=>!Object.hasOwn(box.deleted,m.id)).map(m=>({...m,broadcast:false}));
+ const global=broadcasts.filter(m=>(m.serverId==='all'||m.serverId===serverId)&&!Object.hasOwn(box.broadcastDeleted,m.id)).map(m=>({...m,broadcast:true,readAt:box.broadcastRead[m.id]??0,claimedAt:0}));
  return [...personal,...global].sort((a,b)=>b.createdAt-a.createdAt||a.id.localeCompare(b.id));
 }
 const summaries=new WeakMap();
@@ -49,6 +51,7 @@ export function inboxSummary(raw,broadcasts,serverId){
  if(raw&&typeof raw==='object')summaries.set(raw,{broadcasts,serverId,summary});return summary;
 }
 export function mailboxAction(record,action,broadcasts=[],now=Date.now()){
+ if(['mailClaimAll','mailDeleteAll'].includes(action.type))return mailboxBulkAction(record,action,broadcasts,now).record;
  const mailbox=normalizeMailbox(record.mailbox),mail=publicInbox(mailbox,broadcasts,record.serverId).find(m=>m.id===action.mailId&&m.broadcast===(action.broadcast===true));
  if(!mail)throw Error('mail-not-found');
  if(!['mailRead','mailClaim'].includes(action.type))throw Error('bad-mail-action');
@@ -64,4 +67,23 @@ export function mailboxAction(record,action,broadcasts=[],now=Date.now()){
  for(let i=0;i<a.pets.length;i++)petCollection=petAccountAction(petCollection,{type:'petGrant',requestId:'mail-pet-'+i+'-'+mail.id,gems:0,pet:a.pets[i]}).state;
  target.claimedAt=now;
  return {...record,bag,petCollection,mailbox};
+}
+export const canDeleteMail=mail=>!!mail.readAt&&(!hasMailGift(mail.attachments)||!!mail.claimedAt);
+export function mailboxBulkAction(record,action,broadcasts=[],now=Date.now()){
+ const rows=publicInbox(record.mailbox,broadcasts,record.serverId),summary={claimed:0,deleted:0,remaining:0,blocked:[]};
+ if(action.type==='mailDeleteAll'){
+  const mailbox=normalizeMailbox(record.mailbox),remove=new Set();
+  for(const m of rows){if(!canDeleteMail(m))continue;summary.deleted++;if(m.broadcast){mailbox.broadcastDeleted[m.id]=now;delete mailbox.broadcastRead[m.id];}else{remove.add(m.id);mailbox.deleted[m.id]=now;}}
+  mailbox.messages=mailbox.messages.filter(m=>!remove.has(m.id));
+  return {record:{...record,mailbox},summary};
+ }
+ if(action.type!=='mailClaimAll')throw Error('bad-mail-action');
+ let next=record;
+ for(const m of rows.slice().reverse()){
+  if(m.broadcast||m.claimedAt||!hasMailGift(m.attachments))continue;
+  try{next=mailboxAction(next,{type:'mailClaim',mailId:m.id},broadcasts,now);summary.claimed++;}
+  catch(error){if(!['bag-full','coin-cap','bad-gems'].includes(error.message))throw error;summary.blocked.push({id:m.id,code:error.message});}
+ }
+ summary.remaining=publicInbox(next.mailbox,broadcasts,next.serverId).filter(m=>!m.claimedAt&&hasMailGift(m.attachments)).length;
+ return {record:next,summary};
 }

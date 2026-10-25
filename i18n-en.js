@@ -4389,3 +4389,17 @@ Object.assign(globalThis.I18N_EN,{
  "ได้รับรางวัล": "Earn rewards",
  "เมื่อทำตามเงื่อนไขกิจกรรม · พรีวิวรางวัลที่เสนอ": "Meet the event requirements · Proposed rewards preview"
 });
+
+Object.assign(globalThis.I18N_EN,{
+ "ลงบัญชีรายจ่ายได้จากปุ่มในแต่ละแถว ทั้งรายเดือน รายปี และจ่ายครั้งเดียว โดยตรวจข้อมูลก่อนบันทึก ส่วนปุ่มต้นทุนเดือนนี้รวมเฉพาะรายเดือนที่ใช้อยู่": "Use each row to prepare a monthly, annual or one-time expense and review it before saving. The monthly shortcut includes only active monthly costs.",
+ "ค่าโดเมน / เว็บไซต์": "Domain / website fees",
+ "ค่าหน้าเว็บ / ฐานข้อมูล": "Website / database fees",
+ "ลงบัญชีรายจ่าย": "Record expense",
+ "ระบุยอดบาทมากกว่า 0 ก่อนลงบัญชี": "Enter a baht amount greater than zero before recording",
+ "เตรียมรายการนี้ในแบบฟอร์มรายจ่าย": "Prepare this item in the expense form",
+ "ตรวจวันที่และยอดเงิน แล้วกดบันทึกรายการ": "Review the date and amount, then save the entry",
+ "เตรียมรายการในแบบฟอร์มรายจ่ายแล้ว": "The expense form is ready for review",
+ "บันทึกรายการเรียบร้อยแล้ว": "Entry saved",
+ "ไม่มีต้นทุนรายเดือนที่ใช้อยู่ · รายปีหรือจ่ายครั้งเดียวให้เลือกลงบัญชีที่แถวนั้น": "No active monthly costs. Use the row action for annual or one-time payments.",
+ "บันทึกต้นทุนรายเดือนแล้ว {0} รายการ": "Recorded {0} monthly cost entries"
+});

@@ -151,3 +151,5 @@ button,input,select{font:inherit;color:inherit}
 .admin-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--jade);background:#132821;padding:6px 14px;border-radius:999px;border:1px solid #7fe3b055;font-weight:700}
 .btn-logout{cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid #ef856b55;background:#2b1816;color:var(--danger);font-size:12px;font-weight:700}
 .btn-logout:hover{background:#3d1e1a}
+
+.cost-row-actions{display:flex;align-items:center;gap:8px;white-space:nowrap}.btn-record-expense{cursor:pointer;padding:6px 10px;border:1px solid #d8b56788;border-radius:5px;background:#243e2e;color:var(--gold);font:inherit;font-size:11px}.btn-record-expense:hover{background:#335039}.btn-record-expense:disabled{opacity:.4;cursor:default}.finance-help{font-size:12px;line-height:1.85;color:var(--muted);margin:14px 0 6px}.finance-status{font-size:12px;color:var(--gold);line-height:1.85;margin:6px 0}.finance-status:empty{display:none}

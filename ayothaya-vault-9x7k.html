@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="th">
 <head>
- <script src="i18n-en.js?v=pets128"></script>
+ <script src="i18n-en.js?v=finance172"></script>
  <script src="i18n.js?v=102"></script>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -12,7 +12,7 @@
  <link rel="preload" href="assets/fonts/Mali-Medium.ttf" as="font" type="font/ttf" crossorigin>
  <link rel="preload" href="assets/fonts/Mali-Bold.ttf" as="font" type="font/ttf" crossorigin>
  <link rel="stylesheet" href="typography.css?v=10">
- <link rel="stylesheet" href="dashboard.css?v=03">
+ <link rel="stylesheet" href="dashboard.css?v=finance172">
 <link rel="stylesheet" href="backoffice-luxury.css?v=126"></head>
 <body class="luxury-office">
   <!-- Security Gate (Visible before login) -->
@@ -167,6 +167,7 @@
     </table>
    </div>
 
+   <p class="finance-help">ลงบัญชีรายจ่ายได้จากปุ่มในแต่ละแถว ทั้งรายเดือน รายปี และจ่ายครั้งเดียว โดยตรวจข้อมูลก่อนบันทึก ส่วนปุ่มต้นทุนเดือนนี้รวมเฉพาะรายเดือนที่ใช้อยู่</p><p id="cost-ledger-status" class="finance-status" role="status"></p>
    <form id="cost-form" class="inline-form">
     <h3>+ เพิ่มรายการต้นทุนใหม่</h3>
     <div class="form-row">
@@ -188,7 +189,7 @@
       <option value="free">ฟรี (0 ฿)</option>
      </select>
      <input id="cost-usd" type="number" step="0.01" min="0" placeholder="USD ($)" value="0">
-     <input id="cost-thb" type="number" step="1" min="0" placeholder="บาท (฿)" required>
+     <input id="cost-thb" type="number" step="0.01" min="0" placeholder="บาท (฿)" required>
      <select id="cost-status">
       <option value="active">ใช้อยู่ (คิดเงิน)</option>
       <option value="free">ใช้อยู่ (ฟรี)</option>
@@ -233,6 +234,8 @@
      <label>หมวดหมู่
       <select id="tx-category">
        <option value="ค่าเซิร์ฟเวอร์ (DigitalOcean/Render)">ค่าเซิร์ฟเวอร์ (DigitalOcean/Render)</option>
+       <option value="ค่าโดเมน / เว็บไซต์">ค่าโดเมน / เว็บไซต์</option>
+       <option value="ค่าหน้าเว็บ / ฐานข้อมูล">ค่าหน้าเว็บ / ฐานข้อมูล</option>
        <option value="ค่าพัฒนาเกม / อาร์ต / เสียง">ค่าพัฒนาเกม / อาร์ต / เสียง</option>
        <option value="ค่าโฆษณา / โปรโมท">ค่าโฆษณา / โปรโมท</option>
        <option value="รายรับโดเนท / สนับสนุนจากผู้เล่น">รายรับโดเนท / สนับสนุนจากผู้เล่น</option>
@@ -252,7 +255,7 @@
      <label>หมายเหตุเพิ่มเติม
       <input id="tx-note" type="text" placeholder="เช่น ตัดบัตรเดบิต $5 (ได้ Bandwidth 50 GB)">
      </label>
-     <button type="submit" class="btn-gold">บันทึกรายการ</button>
+     <button type="submit" class="btn-gold">บันทึกรายการ</button><p id="tx-status" class="finance-status" role="status"></p>
     </form>
 
     <div class="tx-list-wrap">
@@ -293,6 +296,6 @@
    </div>
   </section>
  </div>
- <script type="module" src="dashboard.js?v=pets128"></script>
+ <script type="module" src="dashboard.js?v=finance172"></script>
 </body>
 </html>

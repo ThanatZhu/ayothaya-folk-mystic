@@ -9,7 +9,7 @@ import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 import {prepareSceneV2,disposeScene,MOODS} from './scene-v2.js?v=106.1-lablae';
 import {createMeadow} from './meadow.js?v=108';
-import {applyRiceLight,addMeadowContacts} from './rice-light156.js?v=156';
+import {applyRiceLight,addMeadowContacts,enableMeadowShadows,enableActorShadows} from './rice-light156.js?v=shadows157';
 import {groundHeight} from './combat-core.js?v=run153';
 import {createPaintedAvatar} from './painted-avatar.js?v=combat129';
 import {atlasCell} from './sprite-motion.js';
@@ -29,12 +29,14 @@ const camera=new THREE.OrthographicCamera(-20,20,15,-15,.1,700);
 const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.enablePan=false;
 controls.minPolarAngle=controls.maxPolarAngle=Math.atan2(Math.hypot(23,28),24);controls.minZoom=.65;controls.maxZoom=2.7;
 const scenes=[],views={path:[0,35],bridge:[13,3],grove:[-43,5]};
-let split=.5,paused=matchMedia('(prefers-reduced-motion:reduce)').matches,time=0,measuring=null,ready=false,disposed=false;
+let split=.5,paused=matchMedia('(prefers-reduced-motion:reduce)').matches,time=0,measuring=null,ready=false,disposed=false,avatarMotion=false;
 function focus(name){const [x,z]=views[name]??views.path;controls.target.set(x,1,z);camera.position.set(x+23,28,z+28);camera.zoom=1.25;camera.updateProjectionMatrix();controls.update();for(const b of document.querySelectorAll('[data-view]'))b.setAttribute('aria-pressed',String(b.dataset.view===name));}
 focus(params.get('view')??'path');
 for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>focus(b.dataset.view);
 function updateMotion(){const b=$('motion');b.textContent=paused?'เปิดลม':'หยุดลม';b.setAttribute('aria-pressed',String(paused));}
 $('motion').onclick=()=>{paused=!paused;updateMotion();};updateMotion();
+function setAvatarMotion(value){avatarMotion=!!value;$('walk').setAttribute('aria-pressed',String(avatarMotion));$('walk').textContent=avatarMotion?'หยุดเดิน':'ลองเดิน';}
+$('walk').onclick=()=>{setAvatarMotion(!avatarMotion);if(avatarMotion){paused=false;updateMotion();}};
 $('split').oninput=()=>{split=+$('split').value/100;$('divider').style.left=split*100+'%';document.querySelector('.before').hidden=split===0;document.querySelector('.after').hidden=split===1;};
 const dividerUniforms={before:{value:null},after:{value:null},split:{value:.5}};
 const screenScene=new THREE.Scene(),screenCamera=new THREE.Camera();
@@ -56,8 +58,8 @@ const shadowPoint=new THREE.Vector3();
 function followSun(v){const p=controls.target,texel=64/v.sun.shadow.mapSize.x;v.sun.position.copy(p).add(v.offset);v.sun.target.position.set(p.x,0,p.z);v.sun.updateMatrixWorld();v.sun.target.updateMatrixWorld();v.sun.shadow.updateMatrices(v.sun);shadowPoint.set(p.x,0,p.z).applyMatrix4(v.sun.shadow.camera.matrixWorldInverse);const dx=Math.round(shadowPoint.x/texel)*texel-shadowPoint.x,dy=Math.round(shadowPoint.y/texel)*texel-shadowPoint.y;shadowPoint.set(dx,dy,0).applyQuaternion(v.sun.shadow.camera.quaternion);v.sun.position.add(shadowPoint);v.sun.target.position.add(shadowPoint);}
 function renderView(v,dt){renderer.shadowMap.type=v.warm?THREE.PCFSoftShadowMap:THREE.PCFShadowMap;
  v.motion.update(paused?0:dt);v.meadow.update(time);followSun(v);
- const p=controls.target,y=groundHeight(v.map.nav,p.x,p.z);v.hero.position.set(p.x,y+.04,p.z);v.foot.position.set(p.x,y+.028,p.z);
- v.hero.userData.pose({mode:'idle',time:paused?0:time});v.hero.quaternion.copy(camera.quaternion);
+ const p=controls.target,x=p.x+(avatarMotion?Math.sin(time*1.2)*2.4:0),z=p.z+(avatarMotion?Math.cos(time*1.2)*.6:0),y=groundHeight(v.map.nav,x,z);v.hero.position.set(x,y+.04,z);v.foot.position.set(x,y+.028,z);
+ v.hero.userData.pose({mode:avatarMotion?'walk':'idle',time:paused?0:time,phase:time*2.5,artFrame:avatarMotion?12+Math.floor(time*10)%8:0});v.hero.quaternion.copy(camera.quaternion);v.actorShadows?.update();
  renderer.info.reset();v.composer.render(dt);return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};}
 function draw(dt){controls.update();if(!paused)time+=dt;
  const active=measuring===null?scenes.filter(v=>v.warm?split<1:split>0):[scenes[measuring]];
@@ -87,6 +89,10 @@ try{
   const contact=warm?addMeadowContacts({scene,meadow,map,mobile}):null;
   if(warm){const m=meadow.group.children[0]?.material;if(m){const compile=m.onBeforeCompile;m.onBeforeCompile=(s,r)=>{compile.call(m,s,r);s.vertexShader='varying float meadowRoot156;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nmeadowRoot156=smoothstep(.03,.8,position.y);');s.fragmentShader='varying float meadowRoot156;\n'+s.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb*=mix(vec3(.72,.78,.63),vec3(1.02,1.01,.98),meadowRoot156);');};m.customProgramCacheKey=()=>'meadow75-rice156';}}
   const hero=createPaintedAvatar(frame(art.image),{directional:false,classId:'novice',gender:'male'});hero.scale.setScalar(2.1);scene.add(hero);const foot=footShade(scene);
+  // Three's alpha-tested depth pass uses the current painted frame and posed
+  // geometry, so a face/weapon silhouette casts instead of the whole quad.
+  const actorShadows=warm?enableActorShadows(hero):null;
+  const meadowShadows=warm?enableMeadowShadows(meadow):null;
   const composer=new EffectComposer(renderer);composer.renderToScreen=false;composer.addPass(new RenderPass(scene,camera));
   // Match the live desktop's existing bloom/finish in the baseline; the phone
   // preview deliberately omits all bloom and blur on BOTH sides.
@@ -94,7 +100,7 @@ try{
   composer.addPass(new OutputPass());
   if(warm)composer.addPass(new ShaderPass(grade));
   else if(!mobile)composer.addPass(new ShaderPass(baselineShader));
-  scenes.push({scene,model,motion,meadow,contact,sun,hemi,hero,foot,composer,map,offset:profile.offset,warm});
+  scenes.push({scene,model,motion,meadow,meadowShadows,actorShadows,contact,sun,hemi,hero,foot,composer,map,offset:profile.offset,warm});
  }
  size();ready=true;$('status').textContent=mobile?'โหมดมือถือ · เงา 1024 · ไม่มีบลูมหรือเบลอ':'โหมดคอม · เงา 2048 · บลูมบางเฉพาะจุดสว่าง';
  let last=performance.now();renderer.setAnimationLoop(ms=>{if(disposed||document.hidden)return;const dt=Math.min(.08,Math.max(0,(ms-last)/1000));last=ms;if(measuring!==null)return;draw(dt);});
@@ -129,8 +135,9 @@ async function measure({samples=90}={}){
  }finally{measuring=null;paused=wasPaused;$('measure').disabled=false;}
 }
 $('measure').onclick=()=>measure();
-// Public read-only review diagnostics; no game state, wallet, login or server I/O.
+// Review-only controls/diagnostics; no game state, wallet, login or server I/O.
 window.__riceLight={get ready(){return ready;},get scenes(){return scenes;},renderer,camera,controls,measure,focus,
  setSplit(value){$('split').value=Math.max(0,Math.min(100,value));$('split').oninput();},
+ setAvatarMotion,renderOnce(){draw(0);},
  setPaused(value){paused=!!value;updateMotion();}};
-addEventListener('pagehide',()=>{disposed=true;renderer.setAnimationLoop(null);controls.dispose();for(const v of scenes){v.contact?.dispose();v.meadow.dispose();v.composer.passes.forEach(p=>p.dispose?.());v.composer.dispose();disposeScene(v.scene);}screenScene.children[0].geometry.dispose();screenMaterial.dispose();renderer.dispose();},{once:true});
+addEventListener('pagehide',()=>{disposed=true;renderer.setAnimationLoop(null);controls.dispose();for(const v of scenes){v.contact?.dispose();v.actorShadows?.dispose();v.hero.userData.dispose();v.meadowShadows?.dispose();v.model.traverse(o=>o.customDepthMaterial?.dispose());v.meadow.dispose();v.composer.passes.forEach(p=>p.dispose?.());v.composer.dispose();disposeScene(v.scene);}screenScene.children[0].geometry.dispose();screenMaterial.dispose();renderer.dispose();},{once:true});

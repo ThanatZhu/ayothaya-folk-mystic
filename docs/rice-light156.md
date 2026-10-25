@@ -17,6 +17,16 @@ profile uses a 1024 shadow map, low meadow density, fewer contact stamps and no
 bloom/blur. Contact masks are code-native radial gradients, not generated art.
 The existing rice/grass wind shader remains attached when root shading is added.
 
+Revision shadows157: all raised scene props and vegetation cast shadows,
+including the instanced meadow, reeds and authored rice/grass blades. Horizontal
+ground/water layers remain receivers. Custom depth materials reuse the visible
+material's atlas UV transform and shared wind uniforms. Both phone and desktop
+profiles include these shadows; phone density and map resolution stay lower.
+Painted characters cast alpha-tested silhouettes from their current posed frame
+and use a restrained Lambert material to receive tree/building shade. Playback
+continues to own its source material, synchronized after each pose. The "ลองเดิน"
+button demonstrates the changing silhouette without altering any game save.
+
 The slider is a full-camera wipe; it does not compare different camera crops.
 Three view presets, shared orbit/zoom, wind pause and a timing button are included.
 At either end of the slider only the visible scene is rendered. During comparison
@@ -28,13 +38,16 @@ the two profiles sequentially at identical viewport and pixel ratio with 30
 warmup frames and 90 measured frames per profile. GPU timings use the disjoint
 timer extension when available; CPU submission timings are separately labelled.
 The loopback test uses desktop Edge touch emulation, **not an actual phone GPU**.
-Output: `outputs/light156/checks.json` and before/after screenshots. There is no
+Output: `outputs/light156/checks.json`, `benchmark.json` and screenshots. There is no
 automatic performance pass threshold or assertion that the new profile is faster.
 
 Verified 2026-10-25: all three viewport checks passed, with no page/GLSL errors,
-overflow or offscreen controls. On the test desktop, GPU medians at the canal
-view were 28.30 → 23.04 ms (1440×900 desktop profile) and 7.15 → 7.26 ms
-(844×390 emulated touch profile), DPR 1, 90 frames each. These are local samples,
+overflow or offscreen controls. Shadow validation additionally checks actual
+pixel differences with the actor's casting toggled (814 desktop, 218 landscape
+phone, 113 portrait phone), alpha cutoff, shadow receiving, shared meadow wind
+uniform identity and moving-character positions. In the shadows157 revision,
+GPU medians at the canal view were 32.61 → 35.38 ms (1440×900 desktop profile)
+and 5.93 → 7.04 ms (844×390 emulated touch profile), DPR 1, 90 frames each. These are local samples,
 not device-independent frame-rate guarantees.
 
 Before enabling in the game: review the look, measure real iPhone/Android GPUs,

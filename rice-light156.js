@@ -1,6 +1,42 @@
 import * as THREE from 'three';
 import {groundHeight} from './combat-core.js?v=run153';
 
+// Only horizontal receiver layers are excluded: every raised prop, leaf,
+// flower, reed and blade casts. Water/terrain must not shadow the entire map.
+const RECEIVER_ONLY=/^(Ground|Soil foundation|Water surface|Damp canal|Streets|Tracks|Courtyard|Feathered|Earthen rice|Dense low rice canopy)/;
+function windDepth(material){
+ const depth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking});
+ // Reuse the *same* atlas UV and wind uniforms as the visible material; Three
+ // supplies its current map/alphaTest on each shadow render. This avoids solid
+ // rectangular card shadows and shadows that lag behind animated grass.
+ depth.onBeforeCompile=(shader,renderer)=>material.onBeforeCompile(shader,renderer);
+ depth.customProgramCacheKey=()=>material.customProgramCacheKey()+'-shadow157';
+ return depth;
+}
+
+export function enableMeadowShadows(meadow){
+ const material=meadow.group.children[0]?.material;if(!material)return {dispose(){}};
+ const depth=windDepth(material);
+ for(const mesh of meadow.group.children){mesh.castShadow=true;mesh.receiveShadow=true;mesh.customDepthMaterial=depth;}
+ return {dispose(){for(const mesh of meadow.group.children)mesh.customDepthMaterial=undefined;depth.dispose();}};
+}
+
+export function enableActorShadows(actor){
+ const source=actor.material;
+ const lit=new THREE.MeshLambertMaterial({map:source.map,emissiveMap:source.map,emissive:source.color,emissiveIntensity:.28,
+  alphaTest:source.alphaTest,side:source.side,shadowSide:THREE.DoubleSide,depthWrite:source.depthWrite});
+ actor.material=lit;actor.castShadow=true;actor.receiveShadow=true;
+ return {
+  update(){
+   // Painted-avatar playback owns the source material and replaces its map.
+   // Synchronize after pose(), including both visible art and shadow alpha.
+   lit.map=source.map;lit.emissiveMap=source.map;lit.color.copy(source.color).multiplyScalar(.52);
+   lit.emissive.copy(source.color);lit.visible=source.visible;
+  },
+  dispose(){actor.material=source;lit.dispose();}
+ };
+}
+
 // Opt-in rice-field study. Nothing in the live viewer imports this profile yet.
 // Keep the weather system's base light values intact when this is integrated.
 export function applyRiceLight({scene,model,sun,hemi,mobile=false}){
@@ -12,7 +48,12 @@ export function applyRiceLight({scene,model,sun,hemi,mobile=false}){
  const materials=new Set();
  model.traverse(o=>{
   if(!o.isMesh)return;
-  if(mobile&&/Fine[ _](outer|leafy)|Rice[ _]seed/i.test(o.name))o.castShadow=false;
+  o.receiveShadow=true;o.castShadow=!RECEIVER_ONLY.test(o.name.replace(/_/g,' '));
+  const windMaterial=[].concat(o.material).find(m=>/rice|grain|grassblade|grassdry/i.test(m.name));
+  if(o.castShadow&&windMaterial){
+   // These source GLB meshes contain real blade triangles, not impostor boxes.
+   windMaterial.shadowSide=THREE.DoubleSide;o.customDepthMaterial=windDepth(windMaterial);
+  }
   for(const m of [].concat(o.material)){
    if(materials.has(m))continue;materials.add(m);
    const grass=/rice|grassblade|grassdry|stubble|reeds/.test(m.name);

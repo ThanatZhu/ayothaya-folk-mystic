@@ -1,6 +1,7 @@
 import {multiplayerURL} from './multiplayer-config.js?v=28';
 import {CHANNELS} from './realm-state.js?v=21';
 import {connectFirebase, deadline} from './firebase-client.js';
+import {costExpenseDraft,monthlyBillableCosts,financeDay} from './dashboard-finance172.js';
 
 export const ALLOWED_ADMINS = ['chokkungfn@gmail.com'];
 export const DO_SERVER_URL = 'https://hammerhead-app-nhswh.ondigitalocean.app';
@@ -64,7 +65,7 @@ function defaultHttpUrl(){
 
 let serverUrl=defaultHttpUrl();
 if($('srv-url-input'))$('srv-url-input').value=serverUrl;
-if($('tx-date'))$('tx-date').value=new Date().toISOString().slice(0,10);
+if($('tx-date'))$('tx-date').value=financeDay();
 setTimeout(renderLogs, 0);
 
 const LOG_STORAGE_KEY='ayothaya-dashboard-logs-cache-v1';
@@ -275,7 +276,7 @@ document.querySelectorAll('[data-filter]').forEach(btn=>{
 function loadCosts(){
  try{
   const raw=localStorage.getItem(COSTS_KEY);
-  if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed)&&parsed.length)return parsed;}
+  if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed;}
  }catch{}
  return structuredClone(DEFAULT_COSTS);
 }
@@ -322,7 +323,7 @@ function renderCosts(){
    if(item.cycle==='monthly'){monthlyTotalThb+=Number(item.thb||0);monthlyTotalUsd+=Number(item.usd||0);}
    else if(item.cycle==='yearly'){monthlyTotalThb+=Number(item.thb||0)/12;monthlyTotalUsd+=Number(item.usd||0)/12;}
   }
-  const tr=document.createElement('tr');
+  const tr=document.createElement('tr');tr.dataset.costId=item.id;
   tr.innerHTML=`
    <td><input type="text" class="inline-text inp-name" aria-label="รายการต้นทุน / บริการ"></td>
    <td><input type="text" class="inline-text inp-payer" placeholder="ระบุชื่อผู้จ่าย..."></td>
@@ -330,7 +331,7 @@ function renderCosts(){
    <td><input type="text" class="inline-text inp-role" aria-label="หน้าที่ในเกม"></td>
    <td>${CYCLE_LABELS[item.cycle]||item.cycle}</td>
    <td><span class="money-cell"><span class="money-unit">$</span><input type="number" step="0.01" min="0" class="inline-num inp-usd" value="${Number(item.usd||0)}"></span></td>
-   <td><span class="money-cell"><input type="number" step="1" min="0" class="inline-num inp-thb" value="${Number(item.thb||0)}"><span class="money-unit">฿</span></span></td>
+   <td><span class="money-cell"><input type="number" step="0.01" min="0" class="inline-num inp-thb" value="${Number(item.thb||0)}"><span class="money-unit">฿</span></span></td>
    <td>
     <select class="sel-status" style="padding:4px 8px;border-radius:8px;background:#13261f;border:1px solid #75907766;font-size:11px">
      <option value="active" ${item.status==='active'?'selected':''}>${STATUS_LABELS.active}</option>
@@ -339,17 +340,29 @@ function renderCosts(){
      <option value="paused" ${item.status==='paused'?'selected':''}>${STATUS_LABELS.paused}</option>
     </select>
    </td>
-   <td><button type="button" class="btn-del">ลบ</button></td>
+   <td><div class="cost-row-actions"><button type="button" class="btn-record-expense">ลงบัญชีรายจ่าย</button><button type="button" class="btn-del">ลบ</button></div></td>
   `;
   const nameInp=tr.querySelector('.inp-name');nameInp.value=trText(item.name);nameInp.onchange=e=>{item.name=e.target.value.trim()||item.name;saveCosts(costs);};
   const payerInp=tr.querySelector('.inp-payer');payerInp.value=item.payer||'';payerInp.onchange=e=>{item.payer=e.target.value.trim();saveCosts(costs);};
   tr.querySelector('.cost-cat-cell').textContent=item.category;
   const roleInp=tr.querySelector('.inp-role');roleInp.value=trText(item.role);roleInp.onchange=e=>{item.role=e.target.value.trim();saveCosts(costs);};
 
-  tr.querySelector('.inp-usd').oninput=e=>{item.usd=Math.max(0,Number(e.target.value||0));item.thb=toThb(item.usd);tr.querySelector('.inp-thb').value=item.thb;saveCosts(costs);updateCostKpi();};
-  tr.querySelector('.inp-usd').onchange=e=>{item.usd=Math.max(0,Number(e.target.value||0));item.thb=toThb(item.usd);saveCosts(costs);renderCosts();};
-  tr.querySelector('.inp-thb').onchange=e=>{item.thb=Math.max(0,Number(e.target.value||0));saveCosts(costs);renderCosts();};
-  tr.querySelector('.sel-status').onchange=e=>{item.status=e.target.value;saveCosts(costs);renderCosts();};
+  const recordButton=tr.querySelector('.btn-record-expense');
+  const updateRow=()=>{recordButton.disabled=!(Number.isFinite(Number(item.thb))&&Number(item.thb)>0);recordButton.title=recordButton.disabled?'ระบุยอดบาทมากกว่า 0 ก่อนลงบัญชี':'เตรียมรายการนี้ในแบบฟอร์มรายจ่าย';updateCostKpi();};
+  recordButton.onclick=()=>{
+   const draft=costExpenseDraft(item);
+   for(const [key,value]of Object.entries(draft))$('tx-'+key).value=String(value);
+   $('tx-date').value=financeDay();
+   $('tx-status').textContent='ตรวจวันที่และยอดเงิน แล้วกดบันทึกรายการ';
+   $('cost-ledger-status').textContent='เตรียมรายการในแบบฟอร์มรายจ่ายแล้ว';
+   $('tx-form').scrollIntoView({behavior:'smooth',block:'center'});$('tx-amount').focus({preventScroll:true});
+  };
+  tr.querySelector('.inp-usd').oninput=e=>{item.usd=Math.max(0,Number(e.target.value||0));item.thb=toThb(item.usd);tr.querySelector('.inp-thb').value=item.thb;saveCosts(costs);updateRow();};
+  // Keep the focused row in place: replacing it on blur used to swallow the following button click.
+  tr.querySelector('.inp-usd').onchange=()=>{saveCosts(costs);updateRow();};
+  tr.querySelector('.inp-thb').oninput=e=>{item.thb=Math.max(0,Number(e.target.value||0));saveCosts(costs);updateRow();};
+  tr.querySelector('.sel-status').onchange=e=>{item.status=e.target.value;saveCosts(costs);updateRow();};
+  updateRow();
   tr.querySelector('.btn-del').onclick=()=>{costs=costs.filter(c=>c.id!==item.id);saveCosts(costs);renderCosts();};
   tbody.append(tr);
  }
@@ -418,6 +431,11 @@ function saveLedger(list){
  localStorage.setItem(LEDGER_KEY,JSON.stringify(list));
 }
 let ledger=loadLedger();
+function ensureLedgerTypeVisible(type){
+ if(currentTxFilter==='all'||currentTxFilter===type)return;
+ currentTxFilter=type;
+ document.querySelectorAll('[data-tx-filter]').forEach(b=>b.classList.toggle('active',b.dataset.txFilter===type));
+}
 
 function updateLedgerSummary(){
  let totalIncome=0,totalExpense=0;
@@ -497,7 +515,7 @@ function renderLedger(){
    <td><input type="text" class="inline-text inp-tx-payer" placeholder="ระบุชื่อผู้จ่าย..."></td>
    <td><input type="text" class="inline-text inp-tx-title" aria-label="ชื่อรายการ"></td>
    <td><input type="text" class="inline-text inp-tx-note" aria-label="หมายเหตุ"></td>
-   <td><span class="money-cell"><span class="money-unit ${isInc?'txt-jade':'txt-danger'}">${isInc?'+':'-'}</span><input type="number" step="1" min="0" class="inline-num inp-tx-amount" value="${Number(tx.amount||0)}"><span class="money-unit">฿</span></span></td>
+   <td><span class="money-cell"><span class="money-unit ${isInc?'txt-jade':'txt-danger'}">${isInc?'+':'-'}</span><input type="number" step="0.01" min="0" class="inline-num inp-tx-amount" value="${Number(tx.amount||0)}"><span class="money-unit">฿</span></span></td>
 
 
 
@@ -523,7 +541,7 @@ $('tx-form').onsubmit=e=>{
  ledger.unshift({
   id:'tx-'+Date.now(),
   type:$('tx-type').value,
-  date:$('tx-date').value||new Date().toISOString().slice(0,10),
+  date:$('tx-date').value||financeDay(),
   category:$('tx-category').value,
   title:$('tx-title').value.trim(),
   payer:$('tx-payer')?.value.trim()||'',
@@ -531,31 +549,31 @@ $('tx-form').onsubmit=e=>{
   note:$('tx-note').value.trim()
  });
  saveLedger(ledger);
+ ensureLedgerTypeVisible($('tx-type').value);
  renderLedger();
  $('tx-title').value='';
  if($('tx-payer'))$('tx-payer').value='';
  $('tx-amount').value='';
  $('tx-note').value='';
+ $('tx-status').textContent='บันทึกรายการเรียบร้อยแล้ว';
 };
 
 $('btn-record-monthly-cost').onclick=()=>{
- const today=new Date().toISOString().slice(0,10);
- const activeCosts=costs.filter(c=>c.status==='active'&&Number(c.thb)>0);
- if(!activeCosts.length)return;
+ const today=financeDay();
+ const activeCosts=monthlyBillableCosts(costs);
+ if(!activeCosts.length){$('cost-ledger-status').textContent='ไม่มีต้นทุนรายเดือนที่ใช้อยู่ · รายปีหรือจ่ายครั้งเดียวให้เลือกลงบัญชีที่แถวนั้น';return;}
  for(const c of activeCosts){
   ledger.unshift({
    id:'tx-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),
    type:'expense',
    date:today,
-   category:'ค่าเซิร์ฟเวอร์ (DigitalOcean/Render)',
-   title:c.name,
-   payer:c.payer||'',
-   amount:Number(c.thb),
-   note:c.role
+   ...costExpenseDraft(c)
   });
  }
  saveLedger(ledger);
+ ensureLedgerTypeVisible('expense');
  renderLedger();
+ $('cost-ledger-status').textContent=`บันทึกต้นทุนรายเดือนแล้ว ${activeCosts.length} รายการ`;
 };
 
 document.querySelectorAll('[data-tx-filter]').forEach(btn=>{

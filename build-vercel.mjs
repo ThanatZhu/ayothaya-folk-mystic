@@ -3,6 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
+await import('./scripts/sync-site-header171.mjs');
 // Freeze public reference data from the same gameplay modules shipped by this build.
 await import('./scripts/build-guide169.mjs');
 const output=path.resolve(root,'dist');

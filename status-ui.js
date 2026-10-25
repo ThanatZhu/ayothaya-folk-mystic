@@ -1,7 +1,8 @@
+import {refineTierBadge} from './refine-tier-ui.js';
 // Status window (สถานะ · C): STR AGI VIT INT DEX LUK with status points, combat numbers, and the three
 // stat-gear slots. Online the server validates and owns everything; offline guests keep it in this browser.
-import {statPath,STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=refine136';
-import {ITEMS,ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=refine136';
+import {statPath,STATS,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=tier167';
+import {ITEMS,ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=tier167';
 import {baseProgress} from './experience.js?v=105.3';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
@@ -71,7 +72,7 @@ export function createStatusUI({game,account,bagUI}){
   const total=v.derived.total??v.stats;
   // 0.104 permanent rebirth bonus, shown green apart from gear/pet/food
   const reborn=v.derived.rebirthBonus??0,rebirthTag=reborn?` <em class="rebirth-bonus" title="โบนัสจุติถาวร">+${reborn}</em>`:'';
-  $('status-stats').innerHTML=STATS.map(k=>{const cost=raiseCost(v.stats[k]),bonus=(total[k]??v.stats[k])-v.stats[k]-reborn;
+  $('status-stats').innerHTML=STATS.map(k=>{const cost=raiseCost(v.stats[k]),bonus=Math.round(((total[k]??v.stats[k])-v.stats[k]-reborn)*100)/100;
    return `<li><b>${STAT_LABEL[k]}</b><span>${v.stats[k]+rebirthTag}${bonus?` <em>+${bonus}</em>`:''}</span><small>${STAT_HINT[k]}</small><button type="button" data-stat="${k}" ${v.points<cost?'disabled':''} aria-label="เพิ่ม ${STAT_LABEL[k]}">+<i>${cost}</i></button></li>`;}).join('');
   $('status-stats').querySelectorAll('[data-stat]').forEach(b=>b.onclick=()=>raise(b.dataset.stat));
   const d=v.derived,pct=n=>Math.round(n*100)+'%';
@@ -81,7 +82,7 @@ export function createStatusUI({game,account,bagUI}){
    const cards=Object.keys(bagItems).filter(c=>itemDef(c)?.kind==='card'&&itemDef(c).slot===slot);
    const cardRow=it&&it.slots!==0?(it.card?`<div class="card-equipped">${cardArt(it.card)}<span><strong>${itemDef(it.card).name}</strong><small>${cardEffectText(it.card)}</small></span></div>`:`<span class="card-pick"><button type="button" data-slotcard="${slot}">เลือกการ์ด${cards.length?' · '+cards.length+' ชนิด':''}</button></span>`):'';
    const name=it?.card?it.name.replace(' ['+itemDef(it.card).name+']',''):it?.name;
-   return `<li><i class="item-icon" style="${it?iconStyle(id):''}"></i><div><small>${SLOT_LABEL[slot]}</small><strong>${it?name:'— ว่าง —'}</strong><em>${it?it.text:'แตะอุปกรณ์ในกระเป๋าแล้วกด สวมใส่'}</em>${cardRow}</div>${it?`<button type="button" data-off="${slot}">ถอด</button>`:''}</li>`;}).join('');
+   return `<li><i class="item-icon" style="${it?iconStyle(id):''}"></i><div><small>${SLOT_LABEL[slot]}</small><strong>${it?name:'— ว่าง —'}</strong>${refineTierBadge(it)}<em>${it?it.text:'แตะอุปกรณ์ในกระเป๋าแล้วกด สวมใส่'}</em>${cardRow}</div>${it?`<button type="button" data-off="${slot}">ถอด</button>`:''}</li>`;}).join('');
   $('status-gear').querySelectorAll('[data-slotcard]').forEach(b=>b.onclick=()=>cardPicker.open(b.dataset.slotcard,b));
   $('status-gear').querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>takeOff(b.dataset.off));
  }

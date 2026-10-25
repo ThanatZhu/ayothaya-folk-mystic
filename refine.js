@@ -1,10 +1,11 @@
-// Refining +1..+10 at ครูแสนดาบ (0.44). The refine level travels with the item as an id suffix ("sword-iron+5"),
+// Refining +1..+20 at ครูแสนดาบ. The refine level travels with the item as an id suffix ("sword-iron+5"),
 // so a refined piece keeps its level in the bag. +1..+4 are safe; from +5 a failure breaks the item (Ragnarok).
-import {normalizeBag,itemDef,composeId} from './items.js?v=107';
-import {normalizeGear} from './character-stats.js?v=107';
+import {normalizeBag,itemDef,composeId} from './items.js?v=tier167';
+import {normalizeGear} from './character-stats.js?v=tier167';
 
-export const REFINE_MAX=10;
-export const REFINE_RATE=[1,1,1,1,.9,.7,.5,.3,.2,.1]; // chance to reach +1 … +10
+import {REFINE_MAX} from './refine-tiers.js';
+export {REFINE_MAX,REFINE_TIERS,refineTier,refinePercent} from './refine-tiers.js';
+export const REFINE_RATE=[1,1,1,1,.9,.7,.5,.3,.2,.1,...Array(10).fill(.1)]; // +11..+20 retain the +10 success rate.
 export const REFINE_SLOTS={weapon:'อาวุธ',head:'หมวก',armor:'เสื้อเกราะ',garment:'ผ้าคลุม',shoes:'รองเท้า',accessory:'เครื่องประดับ'};
 export const REFINE_ORE={weapon:'iron-ore',head:'laterite',armor:'laterite',garment:'laterite',shoes:'laterite',accessory:'laterite'};
 export const refineCost=next=>next*100; // coins

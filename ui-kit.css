@@ -75,3 +75,8 @@
 #game-shell .target-panel small{color:var(--uk-muted)!important}
 #game-shell .target-panel .target-meter{height:8px!important;margin-top:5px;border-radius:5px!important;background:#0b1c19!important;box-shadow:inset 0 0 0 1px #c9a35a99,inset 0 2px 3px #000!important;overflow:hidden}
 #game-shell #target-fill{border-radius:5px;background:linear-gradient(#ff8a6a,#c0392b 60%,#7d1d12)!important}
+.refine-tier{display:inline-block;align-self:start;width:max-content;max-width:100%;padding:2px 7px;border:1px solid #bca06088;border-radius:4px;background:#163c33;color:#d1eac5;font:700 10px Mali,Tahoma,sans-serif;line-height:1.5;white-space:nowrap}
+.refine-tier[data-refine-tier="2"]{color:#a8e6f0;border-color:#55a8bb88}.refine-tier[data-refine-tier="3"]{color:#d8b8f5;border-color:#a576d188}.refine-tier[data-refine-tier="4"]{color:#ffe09a;border-color:#e9bd69;background:#47391d}
+#bag-window .gear-slot .refine-tier{position:absolute;left:50%;bottom:-27px;transform:translateX(-50%);padding:0 3px;font-size:8px;line-height:12px;pointer-events:none;z-index:2}
+#status-gear .refine-tier,.bag-detail .refine-tier{margin:3px 0}
+#bag-window .bag-stage:has(.refine-tier){width:100%;height:276px;min-height:276px;aspect-ratio:auto}#bag-window .bag-hero:has(.refine-tier){overflow:auto}

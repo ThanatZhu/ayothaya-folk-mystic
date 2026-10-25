@@ -10,7 +10,7 @@ import {initialSave} from '../realm-state.js';
 
 test('refined ids resolve, keep their level in the bag, and are worth more', () => {
  assert.equal(itemDef('sword-iron+5').refine,5);assert.equal(itemDef('sword-iron+5').name,'ดาบเหล็กกล้า +5');
- assert.equal(itemDef('ring-ruby+3').refine,3,'accessories can now be refined');assert.equal(itemDef('sword-iron+11'),null);
+ assert.equal(itemDef('ring-ruby+3').refine,3,'accessories can now be refined');assert.equal(itemDef('sword-iron+21'),null);
  assert.deepEqual(normalizeBag({items:{'sword-iron+5':1,'hp-small+2':1}}).items,{'sword-iron+5':1});
  assert.ok(itemDef('sword-iron+5').sell>itemDef('sword-iron').sell);
  const r=unequipGear({items:{}},{weapon:'sword-iron+5'},'weapon');assert.equal(r.bag.items['sword-iron+5'],1,'unequip keeps the refine');
@@ -25,7 +25,7 @@ test('refining spends coins + ore, +1..+4 never break, a failure from +5 destroy
  r=refineGear(r.bag,{weapon:'sword-iron+4'},'weapon',{rand:()=>.95});assert.equal(r.result,'broken');assert.equal(r.gear.weapon,null);
  r=refineGear(bag,{weapon:'sword-iron+4'},'weapon',{lekLai:true,rand:()=>.95});assert.equal(r.result,'success','lek-lai lifts 90% to 100%');assert.equal(r.bag.items['lek-lai'],undefined);
  assert.equal(refineGear(bag,{accessory:'ring-ruby'},'accessory',{rand:()=>0}).gear.accessory,'ring-ruby+1');
- assert.throws(()=>refineGear(bag,{weapon:'sword-iron+10'},'weapon'),/refine-max/);
+ assert.throws(()=>refineGear(bag,{weapon:'sword-iron+20'},'weapon'),/refine-max/);
  assert.throws(()=>refineGear({coins:10,items:{'iron-ore':1}},{weapon:'sword-iron'},'weapon'),/no-coins/);
  assert.throws(()=>refineGear({coins:9999,items:{}},{armor:'vest-cotton'},'armor'),/no-ore/);
  assert.deepEqual(REFINE_RATE.slice(0,4),[1,1,1,1]);

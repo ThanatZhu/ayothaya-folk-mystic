@@ -1,8 +1,9 @@
 // Ragnarok-style status (STR AGI VIT INT DEX LUK) and stat-bearing gear (weapon / armor / accessory).
 // Pure rules shared by the client (offline guests + UI) and the realm server. Gear lives in the bag until
 // equipped; it is separate from the cosmetic look in equipment.js, so costumes stay free choices.
-import {BAG_SLOTS,bagCap,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=107';
+import {BAG_SLOTS,bagCap,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=tier167';
 import {dodgeChance,monsterHit} from './combat-formulas.js';
+import {effectiveGearStats,roundGearStat} from './refine-tiers.js';
 
 export const STATS=['str','agi','vit','int','dex','luk'];
 export const STAT_LABEL={str:'STR',agi:'AGI',vit:'VIT',int:'INT',dex:'DEX',luk:'LUK'};
@@ -84,22 +85,22 @@ export function combatPower(d,level=1){
 }
 export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=null,reborn=0}){
  const s=normalizeStats(stats),g=normalizeGear(gear),worn=GEAR_SLOTS.map(k=>g[k]&&itemDef(g[k])).filter(Boolean);
- // Refine: weapons +max(2, 8% of base) ATK/MATK per level, all non-weapon equipment +1 DEF per level, including accessories without base DEF.
- const up=(it,k)=>(it[k]??0)?(it[k]+it.refine*Math.max(2,Math.round(it[k]*.08))):0;
+ // Existing per-level gains remain. Each item then gains its own milestone multiplier (5/10/15/20%).
+ const equipment=worn.map(effectiveGearStats);
  const cards=worn.map(it=>it.card&&ITEMS[it.card]?.effect).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
- const add=k=>worn.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0)+(food?.[k]??0),S={}; // pet: loyal pet bonus (0.50); food: meal buff (0.94)
- const rebirthBonus=rebirthStatBonus(reborn);for(const k of STATS)S[k]=s[k]+rebirthBonus+add(k);
+ const add=k=>equipment.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0)+(food?.[k]??0),S={}; // Cards, pet, food and rebirth are not multiplied by an item's Tier.
+ const rebirthBonus=rebirthStatBonus(reborn);for(const k of STATS)S[k]=roundGearStat(s[k]+rebirthBonus+add(k));
  const atkStat=RANGED.has(classId)?S.dex:S.str;
- const weaponAtk=worn.reduce((n,it)=>n+up(it,'atk'),0),weaponMatk=worn.reduce((n,it)=>n+up(it,'matk'),0);
+ const weaponAtk=equipment.reduce((n,it)=>n+it.atk,0),weaponMatk=equipment.reduce((n,it)=>n+it.matk,0);
  // 0.103 status ATK: the main stat (STR, or DEX for ranged) plus small help from the other one and from LUK
  const sideStat=RANGED.has(classId)?S.str:S.dex;
- const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+Math.floor(sideStat/5)+Math.floor(S.luk/3)+weaponAtk)*(1+sum(e=>e.atkPct))),matk=Math.round((S.int-1)*1.5)+Math.floor(S.int/7)**2+weaponMatk;
+ const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+Math.floor(sideStat/5)+Math.floor(S.luk/3)+weaponAtk)*(1+sum(e=>e.atkPct))),matk=Math.round((S.int-1)*1.5+Math.floor(S.int/7)**2+weaponMatk);
  const magic=MAGIC.has(classId);
  return {
   total:S,rebirthBonus,magic,atk,matk,
   maxHp:Math.round((140+(level-1)*12)*(1+(S.vit-1)*.02)*(1+sum(e=>e.hpPct))),
   maxMp:Math.round((100+(level-1)*5)*(1+(S.int-1)*.02)),
-  def:worn.reduce((n,it)=>n+((it.def??0)+(it.slot!=='weapon'?it.refine:0)),0)+Math.floor((S.vit-1)/2)+sum(e=>e.def),
+  def:roundGearStat(equipment.reduce((n,it)=>n+it.def,0)+Math.floor((S.vit-1)/2)+sum(e=>e.def)),
   weaponElement:worn.find(it=>it.slot==='weapon')?.element??'neutral',
   // 0.102.1 magic classes hit with their full MATK on basic attacks too (owner)
   basicBonus:magic?matk:atk,
@@ -107,7 +108,7 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
   // 0.103 HIT (DEX) against monster FLEE, FLEE (AGI) against monster HIT, MDEF (INT) against magic blows;
   // flee = the dodge chance against a monster of the same level, for the status window
   hit:level+S.dex+Math.floor(S.luk/3)+sum(e=>e.hit),fleeStat:level+S.agi+Math.floor(S.luk/5),
-  mdef:Math.floor((S.int-1)/2)+worn.reduce((n,it)=>n+(it.mdef??0),0)+sum(e=>e.mdef),
+  mdef:roundGearStat(Math.floor((S.int-1)/2)+equipment.reduce((n,it)=>n+it.mdef,0)+sum(e=>e.mdef)),
   flee:Math.min(.75,dodgeChance(level+S.agi+Math.floor(S.luk/5),monsterHit({level}),S.luk)+sum(e=>e.flee)),
   crit:Math.min(.4,.01+(S.luk-1)*.004+sum(e=>e.crit)),
   delay:Math.max(.5,(1-(S.agi-1)*.006-(S.dex-1)*.002)*(1-sum(e=>e.delay))),

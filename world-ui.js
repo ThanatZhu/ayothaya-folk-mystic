@@ -1,7 +1,7 @@
 import {createNPCConversation} from './npc-conversation155.js?v=npc159';
 import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
-import {createWorldAtlas} from './world-atlas-ui.js?v=travel161';
+import {createWorldAtlas} from './world-atlas-ui.js?v=arena166';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
 import {createMentorUI} from './mentor-ui.js?v=training164';
@@ -26,7 +26,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
  async function travel(id,recall=false,warp=false){
-  if(traveling||!(reachable.has(id)||recall||warp)||world.player.hp<=0)return;
+  if(traveling||!(reachable.has(id)||recall||warp||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||world.player.hp<=0)return;
   if(lookup(id)?.guildHall&&!game.online){world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');return;}
   if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return;}
   traveling=true;game.clearInput();

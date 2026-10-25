@@ -9,7 +9,7 @@ export function hops(maps,from,to){
  return null;
 }
 export function warpCost(catalog,from,to){
- const dest=catalog.maps.find(m=>m.id===to);if(!dest||dest.instance||dest.guildHall||from===to)return null;
+ const dest=catalog.maps.find(m=>m.id===to);if(!dest||dest.id==='duel-arena'||dest.instance||dest.guildHall||from===to)return null;
  const h=hops(catalog.maps,from,to);return h===null?null:to===catalog.capital?30:50*h;
 }
 const bounded=(v,max,fallback)=>Number.isFinite(v)?Math.max(0,Math.min(max,v)):fallback;

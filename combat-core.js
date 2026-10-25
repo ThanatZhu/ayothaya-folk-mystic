@@ -61,6 +61,7 @@ export function groundHeight(nav,x,z){
  return weight?sum/weight:0;
 }
 export function walkable(x,z,r=.28,nav=DEFAULT_NAV){
+ if(nav.circle&&Math.hypot(x-nav.circle.x,z-nav.circle.z)>nav.circle.radius-r)return false;
  const g=nav.grid;if(g){ // every cell the body's bounding square touches must be open
   const i0=Math.round((x-r-g.x0)/g.cell),i1=Math.round((x+r-g.x0)/g.cell),j0=Math.round((z-r-g.z0)/g.cell),j1=Math.round((z+r-g.z0)/g.cell);
   for(let j=j0;j<=j1;j++){const row=g.rows[j];if(!row)return false;for(let i=i0;i<=i1;i++)if((row[i]??'.')==='.')return false;}

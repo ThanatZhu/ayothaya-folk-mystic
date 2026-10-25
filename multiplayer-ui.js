@@ -14,7 +14,7 @@ import {createPetView} from './pet-ui.js?v=pets128';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=pets128';
-import {MultiplayerClient} from './multiplayer-client.js?v=run153';
+import {MultiplayerClient} from './multiplayer-client.js?v=reset166';
 import {CHANNELS,CHANNEL_KEY,normalizeChannel} from './realm-state.js?v=62';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
 import {atlasPath,className} from './classes.js?v=112.1';
@@ -224,9 +224,9 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    client.addEventListener('channelSwitched',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}}for(const [id,v] of views){if(!v.loading)remove(v);views.delete(id);}presentation.clear();if(detail.snapshot)acceptSnapshot(detail.snapshot);drawChannels();});
    client.addEventListener('welcome',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}drawChannels();}for(const m of detail.history)log(m);
     // 1.01 the server decides the map (someone no longer in a guild wakes up in the capital, not the hall): follow it.
-    const parts=String(detail.room??'').split(':'),mapId=parts[1]?.startsWith('ch')?parts[2]:parts[1];if(mapId&&document.body.dataset.map&&mapId!==document.body.dataset.map){const go=()=>location.assign('?server='+account.serverId+'&channel='+currentChannel+'&map='+encodeURIComponent(mapId));
+    const parts=String(detail.room??'').split(':'),mapId=detail.snapshot?.self?.mapId??(parts[1]?.startsWith('ch')?parts[2]:parts[1]);if(mapId&&document.body.dataset.map&&mapId!==document.body.dataset.map){const go=()=>location.assign('?server='+account.serverId+'&channel='+currentChannel+'&map='+encodeURIComponent(mapId));
      // the page opens the saved map first, so save the server's choice before reloading (else it would loop)
-     Promise.resolve(account.data&&account.save?.({...account.data,mapId,position:null})).catch(()=>{}).finally(go);}});
+     account.applyMap?.(mapId);Promise.resolve(account.data&&account.save?.({...account.data,mapId,position:null})).catch(()=>{}).finally(go);}});
    client.addEventListener('snapshot',({detail})=>acceptSnapshot(detail));
    client.addEventListener('events',({detail})=>game.world.events.push(...detail.events));
    client.addEventListener('chat',({detail})=>{log(detail,true);if(realmAnnouncement(detail))announce(detail.text,{id:detail.id});});
@@ -303,6 +303,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    v.sprite.userData.setFacing?.(p.face,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0||(p.down??0)>0;game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
    if((state.rebirth??0)!==v.rankShown){v.rankShown=state.rebirth??0;const t=v.label.querySelector('.rank-title');if(t){t.hidden=!v.rankShown;t.textContent=v.rankShown?'✦ '+rebirthRank(v.rankShown)+' ✦':'';}}
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
+   if(v.label.querySelector('b').textContent!==state.character.name)v.label.querySelector('b').textContent=state.character.name;
    const tag=state.guild?state.guild.emblem+':'+(state.guild.castle?'👑 ':'')+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append((state.guild.castle?'👑 ':'')+state.guild.name);v.label.append(g);}}
    const head=characterHead(v.sprite,camera);
    v.label.hidden=p.hp<=0||!place(v.label,head.x,head.y,head.z);

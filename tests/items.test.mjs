@@ -7,8 +7,9 @@ import {MONSTER_TYPES} from '../combat-core.js';
 const world=JSON.parse(readFileSync(new URL('../maps/world.json',import.meta.url),'utf8'));
 
 test('atlas cells are unique and every drop, shop and monster reference is real', () => {
- for(const atlas of [undefined,'gear','refine','cards','social','emblems','emotes','items48']){const icons=Object.values(ITEMS).filter(i=>i.atlas===atlas&&!i.tint).map(i=>i.icon); // tinted tier 3/4 gear reuses a tier-2 cell on purpose
+ for(const atlas of [undefined,'gear','refine','cards','social','emblems','emotes','items48']){const icons=Object.values(ITEMS).filter(i=>i.atlas===atlas&&!i.tint&&!i.image).map(i=>i.icon); // tinted tier 3/4 gear reuses a tier-2 cell on purpose
   assert.equal(new Set(icons).size,icons.length,'unique cells in '+(atlas??'items'));assert.ok(icons.every(i=>i>=0&&i<24));}
+ for(const item of Object.values(ITEMS).filter(i=>i.image))assert.ok(readFileSync(new URL('../'+item.image,import.meta.url)).length>100,'standalone item artwork exists');
  for(const [monster,d] of Object.entries(DROPS)){
   assert.ok(MONSTER_TYPES.some(t=>t.id===monster),monster);
   for(const [id,chance] of d.items){assert.ok(ITEMS[id],id);assert.ok(chance>0&&chance<=1);}

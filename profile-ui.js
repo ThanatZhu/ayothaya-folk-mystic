@@ -38,7 +38,7 @@ export function createProfileUI({game,account,statusUI,equipmentUI}){
   if(!dialog.open)return;
   try{equipmentUI?.paint(ctx);}catch{} // a preview must never stop the game loop
   const v=statusUI.view(),d=v.derived,total=d.total??v.stats,base=baseProgress(world),job=jobProgress(world,world.profession.id,world.jobId);
-  const sig=JSON.stringify([v,base.level,base.current,job.level,job.current]);if(!force&&sig===shown)return;shown=sig;
+  const sig=JSON.stringify([person.name,v,base.level,base.current,job.level,job.current]);if(!force&&sig===shown)return;shown=sig;
   $('profile-title').textContent=person.name;
   $('profile-class').textContent=(jobFor(person.classId,person.jobId)?.name??className(person.classId,person.gender));
   $('profile-power').innerHTML=`ค่าพลัง <span>${combatPower(d,base.level).toLocaleString('th-TH')}</span>`;

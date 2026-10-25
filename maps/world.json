@@ -1,5 +1,5 @@
 {
-  "version": 125,
+  "version": 166,
   "capital": "ayutthaya",
   "retiredMaps": [
     "ayutthaya-wilds",
@@ -30142,6 +30142,57 @@
         "respawn": 3600
       },
       "packs": true
+    },
+    {
+      "id": "duel-arena",
+      "name": "ลานประลองอโยธยา",
+      "subtitle": "สนามวงกลม · ประลอง 1 ต่อ 1",
+      "color": "#d6c38e",
+      "safe": false,
+      "kind": "arena",
+      "region": "ayutthaya",
+      "procedural": "arena",
+      "pvpArena": true,
+      "spawn": {
+        "x": -5,
+        "z": 0
+      },
+      "bounds": {
+        "x": -14,
+        "z": -14,
+        "w": 28,
+        "d": 28
+      },
+      "nav": {
+        "circle": {
+          "x": 0,
+          "z": 0,
+          "radius": 11
+        },
+        "zones": [
+          {
+            "x": -11,
+            "z": -11,
+            "w": 22,
+            "d": 22
+          }
+        ],
+        "obstacles": [],
+        "props": []
+      },
+      "mobs": [],
+      "npcs": [],
+      "portals": [],
+      "plants": [],
+      "waterAreas": [],
+      "bridges": [],
+      "decor": [],
+      "roads": [],
+      "leafSources": [],
+      "plazas": [],
+      "landmarks": [],
+      "districts": [],
+      "packs": false
     }
   ]
 }

@@ -129,7 +129,8 @@ test('real local HTTP reset disconnects connected players, blocks new mutations,
   const result=await api(url,'/admin/world-reset/execute',confirm(p.data));assert.equal(result.status,202);assert.equal((await api(url,'/game-status')).data.maintenance,true);
   assert.equal((await api(url,'/dev/session',{name:'Blocked Player'})).status,503);assert.equal((await api(url,'/admin/weather',{weather:'clear'})).status,503);
   release();await wait(()=>messages.some(m=>m.code==='world-reset'));const done=await wait(async()=>{const s=(await api(url,'/admin/world-reset')).data;return s.job?.status==='completed'&&s;});
-  assert.equal(done.maintenance,false);assert.equal(store.rows.size,0);for(const key of ['peers','rooms','guilds','shops','leaders','prices'])assert.equal(host.realm[key].size,0,key);
+  assert.equal(done.maintenance,false);assert.equal(store.rows.size,0);for(const key of ['peers','rooms','guilds','shops','prices','arenaRooms'])assert.equal(host.realm[key]?.size??0,0,key);
+  for(const board of host.realm.leaders.values())assert.equal(Object.keys(board.rows??board).filter(k=>k===a.uid+':slot-1').length,0);
   const backup=JSON.parse(await readFile(path.join(store.directory,'reset-backups',done.job.id+'.json')));assert.equal(backup.documents['localProfiles/'+a.uid].bag.coins,4567);
  }finally{socket?.terminate();await host.close();}
  const restarted=await hosted(await new LocalStore(store.directory).init());try{assert.equal((await api(restarted.url,'/game-status')).data.maintenance,false);assert.equal(restarted.host.realm.peers.size,0);}finally{await restarted.host.close();}
@@ -153,6 +154,7 @@ test('a standby host reloads completed reset state and cannot revive its pre-res
   assert.equal(host.realm.guilds.size,1);assert.equal((await api(url,'/game-status')).data.maintenance,true);
   db.docs.delete('multiplayerGuilds/g');db.docs.delete('multiplayerLeaders/server-1');db.docs.set('multiplayerRuntime/worldReset',{id,status:'completed',phase:'completed',completedAt:Date.now()});await old.releaseAuthority();
   for(let i=0;i<120;i++){if((await api(url,'/health')).data.authority)break;await new Promise(r=>setTimeout(r,50));}
-  assert.equal((await api(url,'/health')).data.authority,true);assert.equal((await api(url,'/game-status')).data.maintenance,false);assert.equal(host.realm.guilds.size,0);assert.equal(host.realm.leaders.size,0);
+  assert.equal((await api(url,'/health')).data.authority,true);assert.equal((await api(url,'/game-status')).data.maintenance,false);assert.equal(host.realm.guilds.size,0);assert.equal(host.realm.leaders.has('server-1'),false);
+  for(const board of host.realm.leaders.values())assert.equal(Object.keys(board.rows??{}).length,0);
  }finally{await host.close();}
 });

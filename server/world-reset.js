@@ -24,7 +24,7 @@ export class WorldReset{
   this.job=resetPending(this.job)?{...this.job,status:'preparing',error:null}:{id:c.id,status:'preparing',phase:'quiescing',actor,startedAt:this.now(),updatedAt:this.now(),backedUp:0,deleted:0,summary:null};
   this.running=this.run().finally(()=>{this.running=null;});this.running.catch(()=>{});return this.status();
  }
- async mark(fields){Object.assign(this.job,fields,{updatedAt:this.now()});await this.repository.mark({...this.job});}
+ async mark(fields){const next={...this.job,...fields,updatedAt:this.now()};await this.repository.mark(next);this.job=next;}
  async run(){
   try{
    await this.mark({status:'preparing',phase:'quiescing'});this.log('world-reset-start',this.job.actor,this.job.id);

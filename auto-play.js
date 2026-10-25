@@ -1,7 +1,7 @@
 // 0.90 AUTO helpers shared by the browser and the realm server (owner: AUTO also casts skills and drinks potions,
 // set from the AUTO gear panel). Pure functions: the caller owns the world, the bag and the timing.
 import {ITEMS} from './items.js?v=107';
-import {SLOTS} from './skill-progress.js?v=role116';
+import {SLOTS} from './skill-progress.js?v=novice174';
 export const AUTO_DEFAULT={skills:[0],hp:40,mp:0};
 const SELF=new Set(['heal','shield','mana','focus','blessing']);
 // Clean a config from the client: skill slots 0-14 (unique; 10-14 are Master skills), potion thresholds 0-90 % (0 = off).
@@ -15,7 +15,7 @@ export function normalizeAuto(raw){
 export function pickAutoSkill(world,cfg,scaled){
  const p=world.player,m=world.target;if(!cfg?.skills?.length||p.hp<=0)return -1;
  for(const i of cfg.skills){
-  const base=world.skills[i],level=world.skillLevels?.[i]??1;if(!base||level<1||world.cooldowns[i]>0)continue;
+  const base=world.skills[i],level=world.skillLevels?.[i]??1;if(!base||base.reserved||base.passive||level<1||world.cooldowns[i]>0)continue;
   const s=scaled(base,level);if(!s||p.mp<(s.cost??0))continue;
   if(s.type==='heal'){if(p.hp<p.maxHp*.6)return i;continue;}
   if(s.type==='shield'){if(!(p.shield>0)&&m)return i;continue;}

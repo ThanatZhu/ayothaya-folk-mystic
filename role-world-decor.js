@@ -1,5 +1,5 @@
 import * as THREE from './vendor/build/three.module.js';
-import {groundHeight} from './combat-core.js?v=role116';
+import {groundHeight} from './combat-core.js?v=novice174';
 import {atlasUv} from './assets/skill-polish/timing.js';
 const urls={rooster:'./assets/skill-polish/rooster-dash-v1.png',spirit:'./assets/skill-polish/library/spirit-v1.png'};
 // Persistent companions and field boundaries use one shared atlas per kind, not one texture per pet.

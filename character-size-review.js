@@ -1,7 +1,7 @@
 import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {BODY_HEIGHT,FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE,CHARACTER_WORLD_SCALE,WORLD_BODY_HEIGHT,standingHeight} from './character-size.js?v=size1';
 import {PEOPLE_BODY_CALIBRATION,peoplePlacement,citizenBodyHeight} from './npc-size.js?v=size1';
-import {CLASSES,NOVICE,className} from './classes.js?v=112.1';
+import {CLASSES,NOVICE,className} from './classes.js?v=novice174';
 import {MENTORS,CITIZEN_STYLES} from './city-life-data.js?v=98';
 
 // A fixed orthographic comparison: one canvas pixel ratio for every actor.

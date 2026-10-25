@@ -9,12 +9,12 @@ import {roleById} from './assets/skills-next/catalog.js';
 // balance-data.js for the next deploy. Player data is not touched here.
 import {ITEMS,DROPS} from './items.js?v=107';
 import {WORLD_MAP_BOSSES} from './chapter2-monsters.js';
-import {CLASSES,NOVICE,classSkills,className} from './classes.js?v=112.1';
+import {CLASSES,NOVICE,classSkills,className} from './classes.js?v=novice174';
 import {multiplayerURL} from './multiplayer-config.js?v=28';
 import {iconStyle} from './bag-ui.js?v=107';
-import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=role116';
+import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
-import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=role116';
+import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=novice174';
 import {WEATHERS} from './weather.js?v=97';
 import {deriveStats} from './character-stats.js';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';

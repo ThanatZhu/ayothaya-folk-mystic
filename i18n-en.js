@@ -1,5 +1,6 @@
 // English for every player-facing Thai string (Thai source -> English). Regenerate gaps with scripts/i18n-missing.mjs.
-globalThis.I18N_EN={"ตัวละครในบัญชีนี้ยังอยู่ในเกม ออกจากเกมแล้วรอสักครู่ค่อยลบ":"A character on this account is still in the game. Leave the game, wait a moment, then delete.",
+globalThis.I18N_EN={"หมัดพื้นฐานสำหรับโจมตีเป้าหมายเดียว":"A basic punch against one target","พักฟื้นพลังชีวิตของตนเอง":"Rest to recover your own HP","ตั้งรับเพื่อลดความเสียหายชั่วคราว":"Brace to briefly reduce incoming damage","ขั้นสูงสุดของผู้ฝึกตนแล้ว":"Maximum Novice rank reached","เรียนฟรีเมื่อเงื่อนไขครบ":"Learn for free when requirements are met","วิชาพื้นฐาน":"Basic Training","3 วิชาพื้นฐาน · สูงสุดขั้น 4 · Job 10 ได้ 9 แต้ม · เรียนตั้งรับเมื่อพักหายใจถึงขั้น 2":"3 basics \u00b7 4 ranks each \u00b7 9 points by Job 10 \u00b7 Learn Guard after Rest rank 2",
+"ตัวละครในบัญชีนี้ยังอยู่ในเกม ออกจากเกมแล้วรอสักครู่ค่อยลบ":"A character on this account is still in the game. Leave the game, wait a moment, then delete.",
 "ไม่พบตัวละครนี้แล้ว ลองโหลดหน้าใหม่":"This character is gone. Try reloading the page.",
 "การล็อกอินหมดอายุ กรุณาโหลดหน้าใหม่":"Your sign-in expired. Please reload the page.",
 "กำลังลบตัวละคร…":"Deleting character…",

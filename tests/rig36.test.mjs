@@ -31,10 +31,10 @@ test('painted silhouettes stay on one intact quad during kicks, casts, flips and
   const mesh=createRiggedSprite(null,{classId:id}),position=mesh.geometry.attributes.position;
   mesh.userData.pose(characterMotion({reduced:true}));const rest=position.array.slice();assert.equal(position.count,4);assert.equal(mesh.children.length,0);assert.equal(mesh.userData.rigType,'painted-frames');
   for(const slot of [0,3,9])for(const q of [.14,.47,.65,.79]){
-   mesh.userData.pose(skillPose(id,slot,skillTrack(id,slot).duration*q));
-   assert.deepEqual(position.array,rest);
+   const pose=skillPose(id,slot,skillTrack(id,slot).duration*q);mesh.userData.pose(pose);
+   for(let i=0;i<4;i++){near(position.getX(i),rest[i*3]+(pose.paintOffsetX??0));near(position.getY(i),rest[i*3+1]+(pose.paintOffsetY??0));}
    mesh.userData.pose(skillPose(id,slot,skillTrack(id,slot).duration*q),true);
-   for(let i=0;i<4;i++){near(position.getX(i),-rest[i*3]);near(position.getY(i),rest[i*3+1]);}
+   for(let i=0;i<4;i++){near(position.getX(i),-rest[i*3]-(pose.paintOffsetX??0));near(position.getY(i),rest[i*3+1]+(pose.paintOffsetY??0));}
   }
   let released=0;mesh.geometry.addEventListener('dispose',()=>released++);mesh.material.addEventListener('dispose',()=>released++);mesh.userData.dispose();assert.equal(released,2);
  }

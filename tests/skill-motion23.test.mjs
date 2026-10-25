@@ -35,9 +35,9 @@ test('reduced motion retains a skill cue without translation or mesh deformation
  }
 });
 const config={nav:{zones:[{x:-15,z:-15,w:30,d:30}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[[1,0,0]]};
-test('all 80 successful casts carry their exact slot; rejected casts create no animation',()=>{
+test('all active skill casts carry their exact slot; rejected casts create no animation',()=>{
  for(const {id} of classes)for(let i=0;i<10;i++){
-  const w=new CombatWorld({...config,classId:id});w.select(0);const start={x:w.player.x,z:w.player.z};assert.equal(w.skill(i),true);
+  const w=new CombatWorld({...config,classId:id});if(w.skills[i].reserved){assert.equal(w.skill(i),false);continue;}w.select(0);const start={x:w.player.x,z:w.player.z};assert.equal(w.skill(i),true);
   const events=w.events.filter(e=>e.type==='cast');assert.equal(events.length,1);assert.equal(events[0].skillIndex,i);assert.deepEqual(events[0].from,start);
   w.events=[];assert.equal(w.skill(i),false);assert.equal(w.events.filter(e=>e.type==='cast').length,0);
  }

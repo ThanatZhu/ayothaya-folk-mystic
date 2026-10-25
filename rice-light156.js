@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {groundHeight} from './combat-core.js?v=run153';
+import {groundHeight} from './combat-core.js?v=novice174';
 import {stabilizeBillboardLighting} from './world-lighting159.js?v=shadow160';
 
 // Only horizontal receiver layers are excluded: every raised prop, leaf,

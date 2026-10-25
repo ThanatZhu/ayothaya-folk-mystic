@@ -121,3 +121,9 @@ html body #skill-window .skill-node{background:transparent!important;box-shadow:
 #skill-window .skill-node.picked{--skill-node-fill:#234839}
 #skill-window .skill-node.picked::after{filter:brightness(1.2)}
 @media(max-width:640px),(orientation:landscape) and (max-height:560px){html body #skill-window .skill-node{--skill-node-inset:7px 4px}}
+
+/* Novice is a short introduction, without empty branches or a Master tab. */
+#skill-window[data-profession=novice] .skill-tabs[hidden]{display:none}
+#skill-window[data-profession=novice] .skill-tree{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-content:start}
+#skill-window[data-profession=novice] .skill-node>span{white-space:normal;line-height:1.5}
+@media(max-width:600px){#skill-window[data-profession=novice] .skill-tree{grid-template-columns:1fr}#skill-window[data-profession=novice] .skill-node{grid-column:1!important;grid-row:auto!important}}

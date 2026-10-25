@@ -1,9 +1,10 @@
+import {novicePunchPose} from './novice-combat174.js';
 import {skillFrame} from './animation-frames.js?v=37';
 // Authored skill tracks over the existing sprite rig. Timing is visual, not combat balance.
-import {characterMotion} from './character-motion.js?v=life1';
+import {characterMotion} from './character-motion.js?v=novice174';
 import {JOINT_CHANNELS} from './character-rig.js?v=37';
 import {gestureJoints} from './joint-gestures.js?v=37';
-import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=role116';
+import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=novice174';
 const gestures={
  ready:{lean:-.032,crouch:.027,armL:.016,armR:-.025},
  jab:{lean:.055,armR:.065,armL:-.014,legR:.025,x:.16},
@@ -164,6 +165,7 @@ export function skillPose(classId,index,time,{reduced=false}={}){
  const nearest=track.times.reduce((best,t,n)=>Math.abs(t-q)<Math.abs(track.times[best]-q)?n:best,0);
  p.frame=q>=.22&&q<.85&&attackArt.has(track.sequence[nearest])?3:0;
  p.artFrame=skillFrame(track,time,reduced);
+ if(classId==='novice'&&index===0)Object.assign(p,novicePunchPose(q,{impact:track.strikes[0],heavy:true,reduced}));
  // Weight transfer comes from bent knees and hips, never scaling the artwork.
  return p;
 }

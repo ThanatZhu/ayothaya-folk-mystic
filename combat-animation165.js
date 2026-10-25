@@ -1,5 +1,5 @@
 import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';
-import {characterMotion} from './character-motion.js?v=combat129';
+import {characterMotion} from './character-motion.js?v=novice174';
 
 export function ageQueuedCombatEvent(event,now){
  if(!Number.isFinite(event.presentationQueuedAt))return event;

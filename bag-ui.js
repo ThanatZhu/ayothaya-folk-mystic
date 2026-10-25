@@ -5,9 +5,9 @@ import {activeEvent,surgeOn} from './events.js?v=64';
 import {ATLAS_LAYOUTS} from './items.js?v=tier167';
 import {levelGifts} from './experience.js?v=105.3';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=tier167';
-import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=role116';
+import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=novice174';
 import {openHudPanel} from './hud-panels.js?v=34';
-import {pickPotion} from './auto-play.js';
+import {pickPotion} from './auto-play.js?v=novice174';
 import {normalizePetAccount} from './pet-account.js';
 
 const $=id=>document.getElementById(id);

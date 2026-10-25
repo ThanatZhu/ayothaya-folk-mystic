@@ -1,10 +1,10 @@
 // Procedural articulation of the painted turnaround art. These are rig poses,
 // not newly authored walk/attack frames. Coordinates are normalized canvas UVs
 // (x right, y down), shared by all eight views and their fixed sole baseline.
-import {isClass} from './classes.js';
+import {isClass} from './classes.js?v=novice174';
 import {DIRECTIONS,viewDirection} from './directional-sprite.js';
 import {sampleRig,transformPoint} from './character-rig.js';
-import {attackDuration} from './character-motion.js';
+import {attackDuration} from './character-motion.js?v=novice174';
 import {DIRECTIONAL_LANDMARKS} from './directional-landmarks.js';
 
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));

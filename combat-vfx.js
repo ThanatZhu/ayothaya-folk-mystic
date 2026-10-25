@@ -105,6 +105,12 @@ export function createCombatEffect(art,track,options={}){
   impact(b,dist,targetY+1,heavy?1.4:.8,travel);
  };
  const punch=(b,heavy=false,aoe=false)=>{
+  if(profile.classId==='novice'&&!aoe){
+   // Brief fist trail and contact sparks; no magic seal or screen-filling blast.
+   add('spear',material,b,.16,(m,t)=>{place(m,.40+Math.min(dist,reach)*clamp(t*3),.98,0,1);m.scale.set(.28*pulse(t),.65*pulse(t),1);},options.synced?-.055:0);
+   if(!options.air){impact(b,dist,targetY+1,heavy?1:.68);if(!low)add('sweep',accent,b,.18,(m,t)=>{place(m,dist,targetY+1,0,.24+t*.28);bill(m);m.rotateZ(.6);m.scale.y*=.45;});}
+   return;
+  }
   add('spear',material,b,.25,(m,t)=>{place(m,.35+Math.min(dist,reach)*clamp(t*2),.98,0,1);m.scale.set((heavy?.7:.4)*pulse(t),(heavy?4:2)*pulse(t),1);m.rotation.x=b%2?.55:-.5;});
   if(aoe)add('wideSweep',material,b,.3,(m,t)=>{place(m,0,.75,0,radius*.7*pulse(t)**.35);m.rotation.x=Math.PI/2;});
   impact(b,aoe?Math.min(dist,reach):dist,targetY+1,heavy?1.4:1,.07);
@@ -116,7 +122,7 @@ export function createCombatEffect(art,track,options={}){
   specs.push({mesh:cue,start:0,life:Math.max(.12,beats[0]*duration),fn:(m,t)=>{const aimed=['attack','bind','push'].includes(profile.kind);place(m,aimed?.5:0,.025,0,(magical?.9:.45)*Math.sin(Math.PI*t)*.8);floor(m);if(aimed)m.scale.x*=1.35;}});
  }
  // 0.74 cast circle: every skill (not basic attacks) draws the class seal under the caster while it winds up.
- if(!reduced&&!profile.basic){const big=profile.kind==='ultimate'?radius*1.5:1.9;
+ if(!reduced&&!profile.basic&&profile.classId!=='novice'){const big=profile.kind==='ultimate'?radius*1.5:1.9;
   add('plane',glyphMaterial,0,Math.max(.5,beats[0]*duration+.45),(m,t)=>{place(m,0,.03,0,big*Math.min(1,t*5)*(1-Math.max(0,t-.75)*4));floor(m);m.rotation.z=t*2.2;},-beats[0]*duration);
   add('plane',flashMaterial,0,.42,(m,t)=>{place(m,0,.05,0,big*.9*pulse(t));floor(m);});}
  for(let b=0;b<beats.length;b++){

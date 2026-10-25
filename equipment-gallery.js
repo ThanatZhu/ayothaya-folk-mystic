@@ -3,7 +3,7 @@ import {EQUIPMENT,normalizeEquipment,equipItem,starterEquipment} from './equipme
 import {equipmentIcon} from './equipment-ui.js?v=41.2';
 import {loadPaintedCharacter} from './painted-character.js?v=41.2';
 import {motionFrame} from './animation-frames.js?v=37';
-import {className} from './classes.js?v=112.1';
+import {className} from './classes.js?v=novice174';
 const $=id=>document.getElementById(id),select=$('gallery-class'),canvas=$('gallery-art'),ctx=canvas.getContext('2d');
 for(const id of new Set(EQUIPMENT.map(i=>i.classId))){const o=document.createElement('option');o.value=id;o.textContent=className(id,'male');select.append(o);}
 let gear=normalizeEquipment(null,'novice'),art=null,version=0;

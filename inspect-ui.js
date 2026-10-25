@@ -1,7 +1,7 @@
 // 0.108.1 tap another player -> "ดูอุปกรณ์": the server sends what they wear (same map only) and this card shows it.
 import {itemDef} from './items.js?v=107';
 import {iconStyle} from './bag-ui.js?v=107';
-import {className} from './classes.js?v=112.1';
+import {className} from './classes.js?v=novice174';
 import {rebirthRank} from './character-stats.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 

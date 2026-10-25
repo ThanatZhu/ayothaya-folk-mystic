@@ -1,5 +1,5 @@
 import * as THREE from './vendor/build/three.module.js';
-import {createRiggedSprite} from './rigged-sprite.js?v=106.0';
+import {createRiggedSprite} from './rigged-sprite.js?v=novice174';
 import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=106.0';
 import {CLIPS,sampleClip,atlasUv} from './assets/skill-polish/timing.js';

@@ -1,7 +1,7 @@
 import {createSkillLibraryRenderer} from './assets/skill-polish/library-renderer.js?v=align169';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleEffectTime,sampleRoleEffect} from './combat-animation165.js?v=align169';
-import {groundHeight} from './combat-core.js?v=pets126';
+import {groundHeight} from './combat-core.js?v=novice174';
 export function roleEffectSpace(from,to,nav,canonicalFrom=-2,canonicalTo=1.55){
  const dx=to.x-from.x,dz=to.z-from.z,d=Math.hypot(dx,dz),ux=d>.01?dx/d:1,uz=d>.01?dz/d:0;
  return {yaw:Math.atan2(uz,ux),point(p,origin=null){

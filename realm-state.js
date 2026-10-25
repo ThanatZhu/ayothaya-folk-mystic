@@ -1,6 +1,6 @@
 import {validateAppearance} from './appearance-state.js';
 import {jobFor,validateJob} from './advancement.js?v=73';
-import {isClass} from './classes.js?v=112.1';
+import {isClass} from './classes.js?v=novice174';
 export const SERVERS=[{id:'server-1',name:'เซิร์ฟ 1',subtitle:'อยุธยา · ริมเจ้าพระยา'},{id:'server-2',name:'เซิร์ฟ 2',subtitle:'อยุธยา · แสงจันทร์'}];
 export const CHANNELS=[{id:1,name:'แนล 1',subtitle:'อยุธยา · ริมเจ้าพระยา'},{id:2,name:'แนล 2',subtitle:'อยุธยา · แสงจันทร์'},{id:3,name:'แนล 3',subtitle:'อยุธยา · ตลาดน้ำ'},{id:4,name:'แนล 4',subtitle:'อยุธยา · ลานไทรทอง'},{id:5,name:'แนล 5',subtitle:'อยุธยา · ท่าเรือสำเภา'}];
 export const CHANNEL_KEY='ayothaya-channel-v1';

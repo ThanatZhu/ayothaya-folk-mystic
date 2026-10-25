@@ -2,7 +2,7 @@ import {createPremiumPetPanel} from './pet-collection-ui.js?v=ritual148';
 import {activePremiumPet} from './pet-account.js';
 import {createAnimatedPet} from './pet-motion.js?v=128';
 import {createMailboxUI} from './mailbox-ui.js?v=150';
-import {groundHeight} from './combat-core.js';
+import {groundHeight} from './combat-core.js?v=novice174';
 import {iconStyle} from './bag-ui.js';
 import {openHudPanel} from './hud-panels.js';
 export const createPetView=createAnimatedPet;

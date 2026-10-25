@@ -56,7 +56,7 @@ test('every profession and gender renders authored skill pixels instead of direc
   // The Novice and older skill tracks must bypass an available generic cast clip too.
   for(let i=0;i<10;i++){const p=skillPose(classId,i,skillTrack(classId,i).duration*.5);mesh.userData.pose(p);assert.equal(p.profileFrame,true);assert.equal(mesh.material.map.image.label,classId+'/'+gender+'/'+p.artFrame);assert.equal(mesh.userData.directionalActive,false);}
   // An ordinary high-ASPD attack uses normalized progress in its authored action clip.
-  const timing=basicTiming(classId,.2),pose={...characterMotion({classId,mode:'attack',time:.1}),actionPhase:.8};mesh.userData.pose(pose);assert.equal(mesh.userData.directionalActive,false);assert.equal(mesh.userData.lifeAction,'attack');assert.equal(mesh.userData.lifeFrame,3);assert.ok(timing.duration<=.18+.00001);
+  const timing=basicTiming(classId,.2),pose={...characterMotion({classId,mode:'attack',time:.1}),actionPhase:.8};mesh.userData.pose(pose);assert.equal(mesh.userData.directionalActive,false);if(classId==='novice'){assert.equal(mesh.userData.lifeAction,null);assert.equal(mesh.material.map.image.label,classId+'/'+gender+'/'+pose.artFrame);}else{assert.equal(mesh.userData.lifeAction,'attack');assert.equal(mesh.userData.lifeFrame,3);}assert.ok(timing.duration<=.18+.00001);
   mesh.userData.pose(characterMotion({classId,mode:'idle'}));assert.equal(mesh.userData.directionalActive,true);assert.equal(mesh.material.visible,false);mesh.userData.dispose();
  }
 });

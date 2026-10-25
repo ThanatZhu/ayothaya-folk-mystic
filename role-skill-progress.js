@@ -1,5 +1,5 @@
 import {roleById} from './assets/skills-next/catalog.js';
-import {normalizeSkills,availablePoints,SKILL_MAX} from './skill-progress.js?v=role116';
+import {normalizeSkills,availablePoints,SKILL_MAX} from './skill-progress.js?v=novice174';
 export const ROLE_SCHEMA=1,ROLE_MARK='_roles116',ROLE_START=[1,0,0,0,1,0,0,0,0,0,0,0,0,0,0];
 export const ROLE_TREE=[{slot:0,req:[]},{slot:4,req:[]},{slot:1,req:[[0,2]]},{slot:2,req:[[0,2]]},{slot:5,req:[[4,2]]},{slot:3,req:[[1,2]]},{slot:10,req:[[0,10]]},{slot:11,req:[[1,10]]},{slot:12,req:[[4,10]]},{slot:13,req:[[0,10]]},{slot:14,req:[[4,10]]}];
 export const roleRequirements=slot=>ROLE_TREE.find(n=>n.slot===slot)?.req??[];

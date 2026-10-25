@@ -1,5 +1,5 @@
-import {SLOTS} from './skill-progress.js?v=role116';
-import {normalizeAuto} from './auto-play.js';
+import {SLOTS} from './skill-progress.js?v=novice174';
+import {normalizeAuto} from './auto-play.js?v=novice174';
 
 export function swapSkillSlots(order,from,to){
  if(!Array.isArray(order)||order.length!==SLOTS||new Set(order).size!==SLOTS||order.some(k=>!Number.isInteger(k)||k<0||k>=SLOTS))return null;

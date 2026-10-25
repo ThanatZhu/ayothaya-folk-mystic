@@ -2,6 +2,10 @@
 // browser and the authoritative realm server; the server is the only writer for Google accounts.
 import {jobProgress} from './experience.js?v=105.3';
 export const SKILL_MAX=10;
+// Three basics at four ranks use exactly the nine points earned before Novice Job 10.
+export const NOVICE_SLOTS=Object.freeze([0,4,5]),NOVICE_MAX=4;
+export const skillMax=classId=>classId==='novice'?NOVICE_MAX:SKILL_MAX;
+export const skillAllowed=(classId,slot)=>classId!=='novice'||NOVICE_SLOTS.includes(slot);
 // 0.101 owner: every skill levels to 10 with points (the planned trial quests for 5 and 10 were never built and
 // held every skill at 4). Slots 10-14 are the Master skills: each opens when its MASTER_FROM skill reaches 10.
 export const BASE_SLOTS=10;
@@ -21,8 +25,8 @@ export const SKILL_TREE=[
  ...MASTER_FROM.map((from,i)=>({slot:BASE_SLOTS+i,tier:'master',req:[[from,SKILL_MAX]]})),
 ];
 export const START_LEVELS=[1,0,0,0,1,0,0,0,0,0,0,0,0,0,0];
-export const requirements=slot=>SKILL_TREE.find(n=>n.slot===slot)?.req??[];
-export const skillOpen=(levels,slot)=>requirements(slot).every(([s,l])=>(levels?.[s]??0)>=l);
+export const requirements=(slot,classId)=>classId==='novice'?(slot===5?[[4,2]]:[]):SKILL_TREE.find(n=>n.slot===slot)?.req??[];
+export const skillOpen=(levels,slot,classId)=>skillAllowed(classId,slot)&&requirements(slot,classId).every(([s,l])=>(levels?.[s]??0)>=l);
 const clampLevel=v=>Number.isInteger(v)&&v>=0&&v<=SKILL_MAX?v:1;
 
 // One skill point per Job Level gained, carried across class changes:
@@ -44,6 +48,8 @@ export function normalizeSkills(raw,classId){
   if(typeof id==='string'&&id.length<=24&&Array.isArray(levels)&&(levels.length===SLOTS||levels.length===BASE_SLOTS))out[id]=marked?[...levels.map(clampLevel),...START_LEVELS.slice(levels.length)]:[...START_LEVELS];
  }
  if(!out[classId])out[classId]=[...START_LEVELS];
+ // Retired Novice allocations return to the point pool; other paths keep their ranks.
+ if(out.novice)out.novice=out.novice.map((level,i)=>NOVICE_SLOTS.includes(i)?Math.min(NOVICE_MAX,level):0);
  out[TREE_MARK]=Array(SLOTS).fill(0);
  return out;
 }
@@ -55,9 +61,10 @@ export function availablePoints(skills,progress){return earnedPoints(progress)-s
 export function upgradeSkill(skills,classId,index,progress){
  if(!Number.isInteger(index)||index<0||index>=SLOTS)throw new Error('invalid-skill');
  const levels=skills[classId];if(!levels)throw new Error('invalid-skill');
+ if(!skillAllowed(classId,index))throw new Error('skill-locked');
  const level=levels[index];
- if(level<1){if(!skillOpen(levels,index))throw new Error('skill-locked');return {...skills,[classId]:levels.map((l,i)=>i===index?1:l)};}
- if(level>=SKILL_MAX)throw new Error('skill-max');
+ if(level<1){if(!skillOpen(levels,index,classId))throw new Error('skill-locked');return {...skills,[classId]:levels.map((l,i)=>i===index?1:l)};}
+ if(level>=skillMax(classId))throw new Error('skill-max');
  if(availablePoints(skills,progress)<1)throw new Error('no-skill-points');
  return {...skills,[classId]:levels.map((l,i)=>i===index?l+1:l)};
 }
@@ -74,9 +81,10 @@ export function scaledSkill(base,level){
  if(s.cd)s.cd=Math.round(s.cd*(level>=10?.85:level>=7?.95:1)*100)/100;
  return s;
 }
-export function nextLevelText(level,slot){
+export function nextLevelText(level,slot,classId){
+ if(classId==='novice')return level>=NOVICE_MAX?'ขั้นสูงสุดของผู้ฝึกตนแล้ว':level<1?'เรียนฟรีเมื่อเงื่อนไขครบ':'ขั้น '+(level+1)+': พลัง +8%';
  if(level<1)return 'เรียนจากเควสต์เรียนวิชา';
- if(level>=SKILL_MAX)return 'ขั้นสูงสุดแล้ว';
+ if(level>=skillMax(classId))return 'ขั้นสูงสุดแล้ว';
  if(level+1===5)return 'ขั้น 5: ระยะกว้างขึ้น';
  if(level+1===7)return 'ขั้น 7: พลัง +8% · คูลดาวน์ −5%';
  if(level+1===10)return 'ขั้น 10: พลังพิเศษ +15% · คูลดาวน์ −15%'+(MASTER_FROM.includes(slot)?' · ปลดล็อกสกิล Master':'');

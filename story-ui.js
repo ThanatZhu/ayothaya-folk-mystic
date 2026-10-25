@@ -4,7 +4,7 @@ import {createQuestCinematics} from './quest-cinematic155.js?v=story163';
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=refine136';
 import {createCoach} from './coach.js?v=walk149';
-import {MONSTER_TYPES} from './combat-core.js?v=role116';
+import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
 import {storyReady} from './story-navigation173.js';
 

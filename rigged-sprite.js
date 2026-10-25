@@ -88,7 +88,9 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   // A sub-pixel breath about the planted contact; no joint cuts, moving bag or gait deformation.
   const breath=pose.reduced?1:['idle','sit','sleep','rest'].includes(action)?1+Math.sin((pose.time??0)*Math.PI*2/(action==='sleep'?4.8:4.1))*.0025:1;
   positions.setXYZ(0,(flip?.5:-.5)*extent,foot*breath,0);positions.setXYZ(1,(flip?-.5:.5)*extent,foot*breath,0);
-  positions.setXYZ(2,(flip?.5:-.5)*extent,(foot-extent)*breath,0);positions.setXYZ(3,(flip?-.5:.5)*extent,(foot-extent)*breath,0);positions.needsUpdate=true;
+  positions.setXYZ(2,(flip?.5:-.5)*extent,(foot-extent)*breath,0);positions.setXYZ(3,(flip?-.5:.5)*extent,(foot-extent)*breath,0);// Cosmetic weight transfer follows facing, while combat position and hit range stay unchanged.
+  if(currentClass==='novice'&&!pose.reduced){const dx=(pose.paintOffsetX??0)*(flip?-1:1),dy=pose.paintOffsetY??0;for(let i=0;i<positions.count;i++)positions.setXYZ(i,positions.getX(i)+dx,positions.getY(i)+dy,0);}
+  positions.needsUpdate=true;
  };
  mesh.userData.dispose=()=>{if(disposed)return;disposed=true;version++;release();geometry.dispose();material.dispose();};
  mesh.userData.setRig(classId,gender);return mesh;

@@ -1,6 +1,6 @@
 import {ITEMS,DROPS,SHOPS,GEAR_CLASSES,itemDef} from './items.js?v=tier167';
 import {RECIPES} from './crafting.js?v=107';
-import {MONSTER_TYPES} from './combat-core.js?v=role116';
+import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {STORY,STARTER_WEAPON} from './story-quests.js';
 import {WORLD_MAP_BOSSES} from './chapter2-monsters.js';
 import {REFINE_MAX,REFINE_TIERS} from './refine-tiers.js';

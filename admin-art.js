@@ -1,6 +1,6 @@
 // Reuse the exact in-game portraits and measured atlas cells; no substitute artwork.
 import {applySkillArt} from './skill-art.js?v=icons117';
-import {MONSTER_TYPES} from './combat-core.js?v=pets126';
+import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 const images=new Map(),metadata=new Map(),portraits=new Map();
 function loadImage(url){if(!images.has(url)){const image=new Image();image.src=url;images.set(url,image.decode().then(()=>image).catch(e=>{images.delete(url);throw e;}));}return images.get(url);}
 async function portrait(index){

@@ -1,6 +1,6 @@
 import {applySkillArt} from './skill-art.js?v=icons117';
 import {openHudPanel} from './hud-panels.js?v=34';
-import {HOTBAR_KEYS,isMaster} from './skill-progress.js?v=role116';
+import {HOTBAR_KEYS,isMaster} from './skill-progress.js?v=novice174';
 import {swapSkillSlots,orderedAutoConfig} from './auto-settings-model.js';
 
 export function createAutoSettings({game,classId}){

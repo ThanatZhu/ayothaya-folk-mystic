@@ -1,5 +1,5 @@
 import {paintedPanels} from './painted-panels.js?v=150';
-import {MONSTER_TYPES} from './combat-core.js?v=role116';
+import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {MONSTER_BEHAVIOUR} from './monster-catalog.js';
 import {bossEntries,bossCountdown,bossClock} from './boss-directory.js?v=138';
 import {DROPS,itemDef} from './items.js?v=107';

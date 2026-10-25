@@ -1,3 +1,4 @@
+import {novicePunchPose} from './novice-combat174.js';
 import {motionFrame} from './animation-frames.js?v=37';
 import {neutralJoints} from './character-rig.js?v=37';
 // Joint targets drive fixed-length arms/legs. Root motion is translation, not scale.
@@ -28,7 +29,7 @@ export const walkCycle=classId=>WALK_CYCLE[classId]??2.1;
 import {attackDuration} from './combat-timing.js';
 export {attackDuration} from './combat-timing.js';
 export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side'}={}){
- const t=Math.max(0,Number.isFinite(time)?time:0),p={mode,time:Math.max(0,Number.isFinite(time)?time:0),phase,reduced,artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
+ const t=Math.max(0,Number.isFinite(time)?time:0),p={mode,time:Math.max(0,Number.isFinite(time)?time:0),phase,reduced,artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,paintOffsetX:0,paintOffsetY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
  if(reduced)return p;
  if(mode==='walk'||mode==='run'){
   // 0.29: livelier gait. Bigger stride and arm swing, a forward lean, a rise while the feet pass,
@@ -73,7 +74,8 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
   p.handLX=p.armL;p.handRX=p.armR;p.handLY=-(p.armLY??0)-p.armL*.5;p.handRY=-(p.armRY??0)-p.armR*.5;
   p.footLX=p.legL;p.footRX=p.legR;p.footLY=-p.liftL;p.footRY=-p.liftR;
  }
- p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId,view);p.stand=mode==='idle'?1:0;
+ p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId,view);
+ if(classId==='novice'&&mode==='attack'){Object.assign(p,novicePunchPose(t/attackDuration(classId),{reduced}));p.profileFrame=true;}p.stand=mode==='idle'?1:0;
  return p;
 }
 // Continuous soft weights avoid cutting a sprite into disconnected rectangles.

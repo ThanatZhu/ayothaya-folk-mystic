@@ -4,7 +4,7 @@ import {SHOPS,ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=tier167';
 import {REFINE_RATE,REFINE_ORE,REFINE_SLOTS,REFINE_MAX,LEK_LAI_BONUS,refineCost,refineGear} from './refine.js?v=tier167';
 import {createRefineSequence,forgePose,FORGE_DURATION} from './refine-sequence.js?v=136';
 import {affinityOf,ELEMENT_NAME,SIZE_NAME} from './affinity.js?v=02';
-import {MONSTER_TYPES} from './combat-core.js?v=role116';
+import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 

@@ -16,8 +16,8 @@ test('every one of the 84 active role skills executes through the live combat en
   }
  }assert.equal(ids.size,84);
 });
-test('role save migration refunds old allocation once, keeps Novice and does not destroy the input',()=>{
- const raw={_tree84:Array(15).fill(0),swordsman:Array(15).fill(10),novice:[1,2,0,0,1,0,0,0,0,0,0,0,0,0,0]},before=JSON.stringify(raw),next=normalizeRoleSkills(raw,'swordsman');assert.equal(JSON.stringify(raw),before);assert.equal(next.swordsman.reduce((n,v)=>n+Math.max(0,v-1),0),0);assert.deepEqual(next.novice,raw.novice);assert.ok(next[ROLE_MARK]);assert.deepEqual(normalizeRoleSkills(next,'swordsman'),next);
+test('role save migration refunds old allocation once, keeps active Novice skills and does not destroy the input',()=>{
+ const raw={_tree84:Array(15).fill(0),swordsman:Array(15).fill(10),novice:[1,2,0,0,1,0,0,0,0,0,0,0,0,0,0]},before=JSON.stringify(raw),next=normalizeRoleSkills(raw,'swordsman');assert.equal(JSON.stringify(raw),before);assert.equal(next.swordsman.reduce((n,v)=>n+Math.max(0,v-1),0),0);assert.deepEqual(next.novice,raw.novice.map((n,i)=>[0,4,5].includes(i)?n:0));assert.ok(next[ROLE_MARK]);assert.deepEqual(normalizeRoleSkills(next,'swordsman'),next);
  assert.throws(()=>upgradeRoleSkill(next,'swordsman',10,{jobId:'',classId:'swordsman'}),/locked/);assert.throws(()=>upgradeRoleSkill(next,'swordsman',6,{jobId:'guardian',classId:'swordsman'}),/locked/);
  for(const role of ROLES)for(const b of role.branches)assert.equal(liveRoleSkills(role.id,b.id).filter(s=>!s.reserved).length,11);
 });

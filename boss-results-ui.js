@@ -1,4 +1,4 @@
-import {className} from './classes.js?v=112.1';
+import {className} from './classes.js?v=novice174';
 const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;};
 const format=n=>Math.max(0,Math.round(Number(n)||0)).toLocaleString();
 export function createBossResultsUI({game,container=null,onOpen=null,onClose=null}){

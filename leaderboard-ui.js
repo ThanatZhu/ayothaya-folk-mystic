@@ -1,5 +1,5 @@
 // Public top-ten rankings. Character art uses the same saved look and calibrated sprites as the game.
-import {className,isClass} from './classes.js?v=112.1';
+import {className,isClass} from './classes.js?v=novice174';
 import {jobFor} from './advancement.js';
 import {loadPaintedStanding} from './painted-character.js?v=podium153';
 import {FRAME_FOOT} from './character-size.js?v=41.2';

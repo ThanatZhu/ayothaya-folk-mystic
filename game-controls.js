@@ -12,19 +12,19 @@ import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=icons117';
 import {presentationDelta} from './combat-timing.js';
-import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=combat129';
+import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=106.0';
-import {skillTrack,skillPose} from './skill-choreography.js?v=combat165';
-import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
+import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
+import {createSkillEffects,createFootDust} from './skill-effects.js?v=novice174';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=bridge164';
-import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=role116';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=novice174';
+import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,NOVICE_SLOTS,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=novice174';
 import {createRouteWalker} from './route-walk.js?v=bridge164';
 
-import {className} from './classes.js?v=112.1';
+import {className} from './classes.js?v=novice174';
 import {rebirthRank} from './character-stats.js?v=107';
-import {normalizeAuto,pickAutoSkill} from './auto-play.js';
+import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=novice174';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
@@ -232,6 +232,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // 0.101 five more slots (keys Alt+1-5) hold the Master skills; a ten-slot hotbar saved before keeps its order.
  const order=[...Array(SLOTS).keys()],isOrder=h=>Array.isArray(h)&&h.length===SLOTS&&[...h].sort((a,b)=>a-b).join()===order.join();
  let hotbar=order;try{let h=JSON.parse(localStorage.getItem(HOT_KEY));if(Array.isArray(h)&&h.length===BASE_SLOTS)h=[...h,...order.slice(BASE_SLOTS)];if(isOrder(h))hotbar=h;}catch{}
+ if(world.profession.id==='novice')hotbar=[...hotbar.filter(i=>NOVICE_SLOTS.includes(i)),...hotbar.filter(i=>!NOVICE_SLOTS.includes(i))];
  try{world.autoConfig=normalizeAuto(JSON.parse(localStorage.getItem(AUTO_KEY)));}catch{world.autoConfig=normalizeAuto(null);}
  let autoSent='';
  const skillButtons=world.skills.map((s,i)=>{

@@ -2,17 +2,17 @@ import {normalizeAutoTarget,autoTargetAllows} from './auto-targets.js';
 import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js';
 import {createRoleCombat,stepRoleMonsters} from './role-combat.js';
 import {patch,monsterKey} from './balance.js';
-import {normalizeAuto,pickAutoSkill} from './auto-play.js';
+import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=novice174';
 import {activeEmote,canonicalAction,EMOTE_ACTIONS,movementSpeed} from './character-action-state.js?v=life1';
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
-import {skillTrack} from './skill-choreography.js';
+import {skillTrack} from './skill-choreography.js?v=novice174';
 import {basicTiming} from './combat-timing.js';
 import {affinityMultiplier,affinityOf,CLASS_SKILL_ELEMENT} from './affinity.js?v=02';
 import {awardExperience,deathPenalty,baseProgress} from './experience.js?v=105.3';
 import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=73';
-import {getClass,classSkills} from './classes.js?v=112.1';
-import {scaledSkill} from './skill-progress.js?v=role116';
+import {getClass,classSkills} from './classes.js?v=novice174';
+import {scaledSkill} from './skill-progress.js?v=novice174';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[
@@ -159,7 +159,7 @@ export class CombatWorld{
   this.nav=config.nav??DEFAULT_NAV;this.spawn=config.spawn??{x:-1.8,z:1.2};this.safe=!!config.safe;
   this.player={...this.spawn,hp:140,maxHp:140,mp:100,maxMp:100,shield:0,attackCD:0,down:0,moving:false,running:false,face:{x:1,z:0}};this.emote=null;
   this.mobs=(this.safe?[]:packSpawns(config.mobs??[[2,.3,0],[5,1,1],[1,-3.6,2],[-3.7,-2.9,3],[5.3,-5.2,1],[-6.5,1.8,0]],config)).map(([x,z,type,pack,leader],id)=>({id,type,pack,leader:!!leader,x,z,home:{x,z},hp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),maxHp:MONSTER_TYPES[type].hp*(leader?LEADER.hp:1),attackCD:0,root:0,dead:0,hit:0,aggro:false,step:0}));
-  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.autoIdle=0;this.foe=null;this.rivals=[];this.food=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.master?0:1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;this.roleCombat=config.roleSkills===true?createRoleCombat(this,{moveBody,lineClear,types:MONSTER_TYPES}):null;if(this.roleCombat){this.skills=this.roleCombat.skills;this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.reserved||s.master?0:1);}
+  this.autoConfig=normalizeAuto(null);this.autoCast=0;this.autoIdle=0;this.foe=null;this.rivals=[];this.food=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.reserved||s.master?0:1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;this.roleCombat=config.roleSkills===true?createRoleCombat(this,{moveBody,lineClear,types:MONSTER_TYPES}):null;if(this.roleCombat){this.skills=this.roleCombat.skills;this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.reserved||s.master?0:1);}
  }
  // 0.61 hired mercenary: attacks your target (or, on AUTO, the nearest monster) within 6, every 1.4 s, 10 + 2·level damage.
  hire(seconds){this.merc={left:seconds,cd:0};}
@@ -251,10 +251,11 @@ export class CombatWorld{
  }
  skill(index){
   if(this.basicPending||this.legacyPending)return false;
+  if(this.skills[index]?.reserved)return false;
   if(this.roleCombat&&!this.roleCombat.legacy)return this.roleCombat.cast(index);
   if(Number.isInteger(index)&&this.skills[index])this.clearEmote();
   const level=this.skillLevels[index]??1;if(this.skills[index]&&level<1){this.notice('ยังไม่ได้เรียนสกิลนี้');return false;}
-  const s=scaledSkill(this.skills[index],level),p=this.player;if(!s||p.hp<=0||held(this.status))return false;
+  const s=scaledSkill(this.skills[index],level),p=this.player;if(!s||s.reserved||p.hp<=0||held(this.status))return false;
   if(this.status.silence){this.notice('ใบ้ · ใช้สกิลไม่ได้');return false;}
   if(this.cooldowns[index]>0){this.notice('สกิลยังไม่พร้อม');return false;}
   if(p.mp<s.cost){this.notice('มานาไม่พอ');return false;}

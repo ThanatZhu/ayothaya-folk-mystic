@@ -1,7 +1,7 @@
 import {paintIcon,skillById} from './assets/skills-next/catalog.js?v=icons117';
 import {paintSkillRegion,clearSkillIcon} from './assets/skills-next/icon-renderer.js';
-import {isClass} from './classes.js?v=112.1';
-import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=role116';
+import {isClass} from './classes.js?v=novice174';
+import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=novice174';
 export const skillAtlas=id=>{if(!isClass(id))throw new Error('invalid-class');return new URL('./assets/skills/'+id+'-21.png',import.meta.url).href;};
 const requests=new WeakMap();
 export async function applySkillArt(buttons,classId,order=null,definitions=null){ // order[i] = skill shown on button i (0.90 hotbar)

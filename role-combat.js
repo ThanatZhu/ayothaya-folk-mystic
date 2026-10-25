@@ -3,7 +3,7 @@ import {applyPoison,poisonFor,takePoison,tickPoison} from './role-poison.js';
 import {petIncoming} from './pet-combat.js';
 import {roleById} from './assets/skills-next/catalog.js';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
-import {scaledSkill} from './skill-progress.js?v=role116';
+import {scaledSkill} from './skill-progress.js?v=novice174';
 import {liveRoleSkills} from './role-skill-progress.js';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z),harmful=['poison','curse','fear','root','slow','break','brand','mark'];
 const groundKinds=new Set(['zone','wall','storm','trap','rain','thorns','holyField','mine','meteor']);

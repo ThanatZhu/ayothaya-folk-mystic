@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import {CLASSES,NOVICE,atlasPath,classSkills,className} from './classes.js?v=112.1';
-import {SKILLS} from './combat-core.js?v=role116';
-import {skillTrack,skillPose} from './skill-choreography.js?v=101';
-import {createRiggedSprite} from './rigged-sprite.js?v=41.2';
-import {createSkillEffects} from './skill-effects.js?v=74';
-import {characterMotion,attackDuration} from './character-motion.js?v=37';
+import {CLASSES,NOVICE,atlasPath,classSkills,className} from './classes.js?v=novice174';
+import {SKILLS} from './combat-core.js?v=novice174';
+import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
+import {createRiggedSprite} from './rigged-sprite.js?v=novice174';
+import {createSkillEffects} from './skill-effects.js?v=novice174';
+import {characterMotion,attackDuration} from './character-motion.js?v=novice174';
 import {applySkillArt} from './skill-art.js?v=role116';
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion:reduce)');
 try{

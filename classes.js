@@ -1,5 +1,5 @@
 import {patch} from './balance.js';
-import {MASTER_FROM} from './skill-progress.js?v=role116';
+import {MASTER_FROM,NOVICE_SLOTS,NOVICE_MAX} from './skill-progress.js?v=novice174';
 // Shared profession catalogue: lobby, persistence, combat and sprite renderer.
 export const CLASSES=[
  {id:'swordsman',name:'นักดาบ',icon:'⚔',role:'แนวหน้า · ดาบและโล่',description:'เข้าประชิด ฟันกวาด และตั้งรับด้วยโล่',color:'#e5b867',range:1.65,damage:21,delay:.8,speed:4.08,kind:'slash',names:['ฟันเปิดทาง','ดาบกวาด','ตีสกัด','โล่กระแทก','พักหายใจ','ตั้งโล่','ดาบผ่าเกราะ','พุ่งเข้าหา','รวบรวมแรง','วงดาบพิทักษ์']},
@@ -36,6 +36,9 @@ function masterSkill(s,name,n){
 }
 export function classSkills(id,base){
  const skills=baseSkills(id,base);
+ if(id==='novice')return [...skills,...MASTER_FROM.map(()=>({}))].map((s,i)=>NOVICE_SLOTS.includes(i)?{
+  ...s,key:String(NOVICE_SLOTS.indexOf(i)+1),maxLevel:NOVICE_MAX,...(i===0?{damage:22,cost:5,cd:3,tip:'หมัดพื้นฐานสำหรับโจมตีเป้าหมายเดียว'}:i===4?{heal:32,cost:8,cd:12,tip:'พักฟื้นพลังชีวิตของตนเอง'}:{duration:4,cost:8,cd:10,tip:'ตั้งรับเพื่อลดความเสียหายชั่วคราว'})
+ }:{name:'ช่องสำรอง',short:'—',key:i<10?String((i+1)%10):'Alt+'+(i-9),icon:'',cost:0,cd:0,type:'reserved',reserved:true});
  return [...skills,...MASTER_FROM.map((from,i)=>masterSkill(skills[from],MASTER_NAMES[id][i],i+1))];
 }
 function baseSkills(id,base){

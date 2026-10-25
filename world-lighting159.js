@@ -1,5 +1,5 @@
 import * as THREE from './vendor/build/three.module.js';
-import {groundHeight} from './combat-core.js?v=run153';
+import {groundHeight} from './combat-core.js?v=novice174';
 import {isWaterMaterial} from './water-surface158.js?v=158';
 
 const PROFILES={

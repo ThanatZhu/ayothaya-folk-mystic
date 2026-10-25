@@ -1,4 +1,4 @@
-import {MONSTER_TYPES} from './combat-core.js?v=role116';
+import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {openHudPanel} from './hud-panels.js?v=34';
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;};
 export function createAutoTargetUI({game}){

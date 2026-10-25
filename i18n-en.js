@@ -4136,3 +4136,17 @@ Object.assign(globalThis.I18N_EN, {
  "ชนะ ·": "Wins ·",
  "สนามวงกลม · ประลอง 1 ต่อ 1": "Circular arena · 1 vs 1 duels"
 });
+
+// Per-item refinement milestones through +20.
+Object.assign(globalThis.I18N_EN, {
+ "ขายได้ {6} เบี้ย": "Sells for {6} Bia",
+ "ตีบวกครบ 6 ช่อง · สูงสุด +20": "Refine all 6 slots · Up to +20",
+ "เลือกอุปกรณ์ได้ทั้ง 6 ช่อง ดูวัสดุและโอกาสสำเร็จ พร้อมลำดับการลงค้อนและแสดงผลตีบวกสูงสุด +20": "Select any of 6 equipment slots, review materials and success chances, and watch the hammer sequence reveal the result, up to +20.",
+ "เลือกสาย Master ปั้นอุปกรณ์ +20 ออกล่าบอสกับปาร์ตี้และคู่หู แล้วสร้างเรื่องราวของคุณในอโยธยา เล่นฟรี ไม่ต้องติดตั้ง": "Choose a Master path, refine gear to +20 and hunt bosses with your party and companion. Make your story in Ayothaya, free in your browser.",
+ "ตีบวกสูงสุด +20 แล้ว": "Already refined to max +20",
+ "โบนัสเพิ่มเฉพาะสเตตัสของอุปกรณ์ชิ้นนี้ ไม่รวมการ์ด": "Bonus applies only to this item’s stats, excluding cards",
+ "โบนัส Tier ของอุปกรณ์": "Equipment Tier bonuses",
+ "ปลดล็อก Tier {0} · สเตตัสอุปกรณ์ +{1}%": "Unlock Tier {0} · Item stats +{1}%",
+ "โอกาสสำเร็จ {5}% · {6} เบี้ย · {7} 1 (มี {8})": "Success {5}% · {6} Bia · {7} 1 (owned {8})",
+ "{0} · ตีบวกสูงสุด +20": "{0} · Maximum refinement +20"
+});

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ITEMS,itemDef,normalizeBag} from '../items.js';
 import {GEAR_SLOTS,deriveStats,equipGear,unequipGear} from '../character-stats.js';
+import {effectiveGearStats} from '../refine-tiers.js';
 import {REFINE_ORE,REFINE_SLOTS,refineGear} from '../refine.js';
 import {createRefineSequence,forgePose,FORGE_DURATION,FORGE_TIMEOUT} from '../refine-sequence.js';
 import {RealmServer} from '../server/realm.js';
@@ -10,11 +11,11 @@ import {initialSave} from '../realm-state.js';
 const gear={weapon:'sword-iron',head:'hat-headband',armor:'vest-cotton',garment:'cloak-cotton',shoes:'shoes-woven',accessory:'ring-ruby'};
 const bag={coins:50000,items:{'iron-ore':50,laterite:50,'lek-lai':3,'break-guard':3}};
 
-test('every stat equipment item accepts +1 through +10 and persists through a bag/equip round trip',()=>{
+test('every stat equipment item accepts +1 through +20 and persists through a bag/equip round trip',()=>{
  assert.deepEqual(Object.keys(REFINE_ORE),GEAR_SLOTS);assert.deepEqual(Object.keys(REFINE_SLOTS),GEAR_SLOTS);
  for(const [id,d] of Object.entries(ITEMS).filter(([,d])=>d.kind==='gear')){
-  for(let n=1;n<=10;n++)assert.equal(itemDef(id+'+'+n)?.refine,n,id);
-  assert.equal(itemDef(id+'+11'),null);assert.equal(itemDef(id+'+0'),null);
+  for(let n=1;n<=20;n++)assert.equal(itemDef(id+'+'+n)?.refine,n,id);
+  assert.equal(itemDef(id+'+21'),null);assert.equal(itemDef(id+'+0'),null);
  }
  assert.equal(itemDef('hp-small+1'),null);
  for(const slot of GEAR_SLOTS){const id=gear[slot]+'+3!v2',worn=equipGear({items:{[id]:1}},{},id,{classId:'swordsman',level:99});assert.equal(worn.gear[slot],id);assert.equal(unequipGear(worn.bag,worn.gear,slot).bag.items[id],1);assert.equal(normalizeBag({items:{[id]:1}}).items[id],1);}
@@ -32,10 +33,16 @@ test('each slot spends the right ore and coins once; successes and failures pres
  assert.deepEqual({bag,gear},original);assert.throws(()=>refineGear(bag,gear,'__proto__'),/not-refinable/);
 });
 
-test('non-weapon refinement grants DEF even on accessories with no base defence and keeps their stat bonuses',()=>{
- for(const slot of GEAR_SLOTS){const plain=deriveStats({gear}),up=deriveStats({gear:{...gear,[slot]:gear[slot]+'+7'}});if(slot==='weapon'){assert.ok(up.atk>plain.atk);assert.equal(up.def,plain.def);}else{assert.equal(up.def-plain.def,7);assert.deepEqual(up.total,plain.total);}}
+test('all six slots keep per-level gains and gain item-only Tier bonuses from +5',()=>{
+ for(const slot of GEAR_SLOTS){
+  const plain=deriveStats({gear}),up=deriveStats({gear:{...gear,[slot]:gear[slot]+'+7'}}),before=effectiveGearStats(itemDef(gear[slot])),after=effectiveGearStats(itemDef(gear[slot]+'+7'));
+  if(slot==='weapon')assert.ok(up.atk>plain.atk);
+  assert.equal(Math.round((up.def-plain.def)*100),Math.round((after.def-before.def)*100));
+  for(const k of Object.keys(plain.total))assert.equal(Math.round((up.total[k]-plain.total[k])*100),Math.round(((after.bonus[k]??0)-(before.bonus[k]??0))*100));
+ }
  assert.match(itemDef('ring-ruby+3').text,/DEF \+3/);assert.match(itemDef('hat-headband+3').text,/DEF \+4/);
- const plain=deriveStats({gear}),all=deriveStats({gear:Object.fromEntries(GEAR_SLOTS.map(s=>[s,gear[s]+'+10']))});assert.equal(all.def-plain.def,50);
+ const all=deriveStats({gear:Object.fromEntries(GEAR_SLOTS.map(s=>[s,gear[s]+'+10']))});
+ assert.ok(all.def>50);assert.equal(itemDef('ring-ruby+10').refineTier,2);
 });
 
 test('forge waits for both the real response and final hammer beat, ignores duplicates and never invents a late result',()=>{

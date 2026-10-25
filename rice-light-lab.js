@@ -9,7 +9,7 @@ import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 import {prepareSceneV2,disposeScene,MOODS} from './scene-v2.js?v=water158';
 import {createMeadow} from './meadow.js?v=108';
-import {applyRiceLight,addMeadowContacts,enableMeadowShadows,enableActorShadows} from './rice-light156.js?v=shadows157';
+import {applyRiceLight,addMeadowContacts,enableMeadowShadows,enableActorShadows} from './rice-light156.js?v=shadow160';
 import {groundHeight} from './combat-core.js?v=run153';
 import {createPaintedAvatar} from './painted-avatar.js?v=combat129';
 import {atlasCell} from './sprite-motion.js';

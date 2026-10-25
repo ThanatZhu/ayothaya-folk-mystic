@@ -59,6 +59,21 @@ export function isWorldActor(o){
  const m=o.material;return !!(!o.userData?.lightingProxy159&&(o.isSprite||o.isMesh&&m?.isMeshBasicMaterial)&&m?.map&&m.alphaTest>=.1&&m.toneMapped!==false&&m.fog!==false&&m.blending===THREE.NormalBlending);
 }
 
+export function stabilizeBillboardLighting(material){
+ const before=material.onBeforeCompile,key=material.customProgramCacheKey();
+ material.flatShading=false;
+ material.onBeforeCompile=(shader,renderer)=>{
+  before.call(material,shader,renderer);
+  // Mirroring painted positions reverses triangle winding, not the actor's
+  // surface. Double-sided shading must not turn its light-facing normal away
+  // from the sun or invert hemisphere lighting whenever playback flips left.
+  shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_begin>',
+   '#include <normal_fragment_begin>\nnormal=normalize(vNormal);\nnonPerturbedNormal=normal;');
+ };
+ material.customProgramCacheKey=()=>key+'-billboard-normal160';material.needsUpdate=true;
+ return material;
+}
+
 // The original objects remain visible to picking and gameplay. Only their
 // colour/depth writes are suppressed; animated maps/tints/opacity stay owned by
 // their existing renderer. Lit proxies share those maps and posed geometry.
@@ -73,6 +88,7 @@ export function createActorLighting({scene,camera,renderer,map,profile=lightingP
  function add(source){
   const m=source.material,saved=hide(m),geometry=source.isSprite?new THREE.PlaneGeometry(1,1):source.geometry;
   const lit=new THREE.MeshLambertMaterial({map:m.map,emissiveMap:m.map,emissiveIntensity:.28,alphaTest:m.alphaTest,side:THREE.DoubleSide,shadowSide:THREE.DoubleSide,depthWrite:saved.depthWrite});
+  stabilizeBillboardLighting(lit);
   const proxy=new THREE.Mesh(geometry,lit);proxy.matrixAutoUpdate=false;proxy.castShadow=proxy.receiveShadow=true;proxy.frustumCulled=source.frustumCulled;proxy.userData.lightingProxy159=true;group.add(proxy);
   const foot=new THREE.Mesh(footprintGeometry,new THREE.MeshBasicMaterial({map:footprintTexture,transparent:true,opacity:.25,depthWrite:false}));foot.userData.lightingProxy159=true;group.add(foot);
   actors.set(source,{source,proxy,lit,foot,material:m,cx:NaN,cy:NaN,castShadow:source.castShadow});source.castShadow=false;

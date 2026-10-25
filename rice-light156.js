@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {groundHeight} from './combat-core.js?v=run153';
+import {stabilizeBillboardLighting} from './world-lighting159.js?v=shadow160';
 
 // Only horizontal receiver layers are excluded: every raised prop, leaf,
 // flower, reed and blade casts. Water/terrain must not shadow the entire map.
@@ -25,6 +26,7 @@ export function enableActorShadows(actor){
  const source=actor.material;
  const lit=new THREE.MeshLambertMaterial({map:source.map,emissiveMap:source.map,emissive:source.color,emissiveIntensity:.28,
   alphaTest:source.alphaTest,side:source.side,shadowSide:THREE.DoubleSide,depthWrite:source.depthWrite});
+ stabilizeBillboardLighting(lit);
  actor.material=lit;actor.castShadow=true;actor.receiveShadow=true;
  return {
   update(){

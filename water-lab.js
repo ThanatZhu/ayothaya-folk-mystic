@@ -4,7 +4,7 @@ import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=light159';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=108';
-import {lightingProfile,applyWorldLighting,applyMeadowLighting,createActorLighting} from './world-lighting159.js?v=159';
+import {lightingProfile,applyWorldLighting,applyMeadowLighting,createActorLighting} from './world-lighting159.js?v=shadow160';
 import {createPaintedAvatar} from './painted-avatar.js?v=combat129';
 import {atlasCell} from './sprite-motion.js';
 import {groundHeight} from './combat-core.js?v=run153';

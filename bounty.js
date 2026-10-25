@@ -1,6 +1,6 @@
 // 0.60 daily bounty board and card album, shared by the offline game and the realm server.
 // Bounties: three per Thai day (easy · middle · hard), the same for everyone, paid out in a town.
-// Album: every card ever obtained is recorded once; milestones pay out automatically.
+// Legacy album helpers; explicit deposits and the reward ledger live in card-album.js.
 import {ITEMS} from './items.js?v=107';
 import {MONSTER_TYPES} from './combat-core.js?v=role116';
 import {thaiDay} from './daily.js?v=01';

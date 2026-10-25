@@ -3691,3 +3691,13 @@ Object.assign(globalThis.I18N_EN,{"ลบเฉพาะฉบับที่อ
 Object.assign(globalThis.I18N_EN,{'เดินไปจุดนั้นไม่ได้':'Cannot walk to that destination'});
 
 Object.assign(globalThis.I18N_EN,{'ปุ่มสกิลอยู่ตำแหน่งมาตรฐาน · ลากปรับ AUTO และจอยเดินได้':'Skills use the standard positions. Drag AUTO and the movement stick to adjust them.'});
+Object.assign(globalThis.I18N_EN,{
+ 'เลือกการ์ดมอนสเตอร์ที่ต้องการฝาก':'Choose a monster card to deposit',
+ 'ไม่มีการ์ดใบนี้ในกระเป๋า':'You do not have this card in your bag',
+ 'ฝากการ์ดชนิดนี้แล้ว':'This card type has already been deposited',
+ 'เว้นช่องกระเป๋าเพื่อรับรางวัลก่อนฝากการ์ด':'Make room for the reward before depositing this card',
+ 'เบี้ยเต็มแล้ว · ใช้เบี้ยก่อนรับรางวัลสะสม':'Your cowries are full. Spend some before collecting the album reward',
+ 'กดฝากการ์ดจากกระเป๋า 1 ใบ เพื่อสะสมการ์ดชนิดนั้น · การ์ดที่ฝากจะถูกใช้ไป':'Deposit one card from your bag to collect that type. The deposited card is consumed.',
+ 'สะสมแล้ว':'Collected', 'มีในกระเป๋า':'In bag', 'ใบ':'cards',
+ 'ยังไม่มีการ์ดในกระเป๋า':'No copy in your bag', 'ฝากแล้ว':'Deposited', 'ฝากการ์ด 1 ใบ':'Deposit 1 card', 'ฝากการ์ดแล้ว ·':'Card deposited ·'
+});

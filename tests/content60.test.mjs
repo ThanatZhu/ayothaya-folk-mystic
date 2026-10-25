@@ -26,13 +26,13 @@ test('chapter 2 continues after chapter 1 and the marsh is reached from the mill
  assert.ok(STORY.length>=21);assert.equal(STORY.find(q=>q.chapter)?.chapter,'บทที่ 2 · โคมผีกลางบึง');
  assert.ok(catalog.maps.find(m=>m.id==='moonlit-mill').portals.some(p=>p.to==='lotus-marsh'));
 });
-test('server: bounty claim only in a town, pays EXP + coins; first card fills the album', () => {
+test('server: bounty claim only in a town, pays EXP + coins; obtaining a card does not fill the album', () => {
  const realm=new RealmServer({catalog});let time=Date.now();realm.now=()=>time;
  const state=initialSave();const p=realm.join({uid:'ub',serverId:'server-1',slotId:'slot-1',record:{character:{name:'นักล่า',gender:'male',classId:'novice'},state,daily:{day:'2099-01-01',streak:1}},send:()=>{}});
  const b=dailyBounties(time)[0];p.bounty={...normalizeBounty(null,time),progress:[b.count,0,0]};
  const xp=p.world.baseXp,coins=p.bag.coins;time+=1000;assert.equal(realm.receive(p.id,{type:'bountyClaim',seq:1,index:0}),true);
  assert.ok(p.world.baseXp>xp&&p.bag.coins>coins);assert.equal(realm.record(p,{state:initialSave()}).bounty.claimed[0],true);
- realm.grantLoot(p,{coins:0,items:[{id:'card-rat',count:1}]});assert.deepEqual(p.album,['card-rat']);
+ realm.grantLoot(p,{coins:0,items:[{id:'card-rat',count:1}]});assert.deepEqual(p.album,[]);assert.equal(p.bag.items['card-rat'],1);
 });
 test('0.64 camps: one leader per camp with triple HP and slower respawn; surge doubles EXP on one field map; level gifts once each', async () => {
  const {CombatWorld,LEADER,mobXp,mobRespawn,MONSTER_TYPES}=await import('../combat-core.js');

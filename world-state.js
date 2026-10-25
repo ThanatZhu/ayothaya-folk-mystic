@@ -1,6 +1,6 @@
 import {experienceOf} from './experience.js?v=105.3';
 // Only transient player resources cross map boundaries; positions and targets never do.
-export function resolveMap(catalog,id){return catalog.maps.find(m=>m.id===id)??catalog.maps.find(m=>m.id===catalog.capital);}
+export function resolveMap(catalog,id,fallbackId){return catalog.maps.find(m=>m.id===id)??catalog.maps.find(m=>m.id===fallbackId)??catalog.maps.find(m=>m.id===catalog.capital);}
 export function destinations(catalog,map){return new Set(map.portals.map(p=>p.to));}
 // 0.59 warp from the world map: 30 coins to the capital, 50 per portal hop elsewhere; party instances only on foot.
 export function hops(maps,from,to){

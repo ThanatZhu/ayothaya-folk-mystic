@@ -4387,5 +4387,7 @@ Object.assign(globalThis.I18N_EN,{
  "เส้นทางอุปกรณ์": "Equipment progression",
  "พื้นที่ตั้งแต่ป่าไผ่ผีปอบถึงยอดเขาไกรลาสมีมอนสเตอร์ บอสแมพ วัตถุดิบ และตราประจำแมพแล้ว ดูเส้นทางหาอุปกรณ์และสูตรคราฟแยกเลเวลได้ที่คู่มือเส้นทางอุปกรณ์": "The areas from the haunted bamboo grove to Kailash Peak now have monsters, map bosses, materials and map seals. See the equipment progression guide for level-specific gear and crafting routes.",
  "ได้รับรางวัล": "Earn rewards",
- "เมื่อทำตามเงื่อนไขกิจกรรม · พรีวิวรางวัลที่เสนอ": "Meet the event requirements · Proposed rewards preview"
+ "เมื่อทำตามเงื่อนไขกิจกรรม · พรีวิวรางวัลที่เสนอ": "Meet the event requirements · Proposed rewards preview",
+ "กำลังโหลดเควสจากเซิร์ฟเวอร์…": "Loading quests from the server…",
+ "รอข้อมูลเควสล่าสุดก่อนเดินทางต่อ": "Waiting for your latest quest progress before continuing"
 });

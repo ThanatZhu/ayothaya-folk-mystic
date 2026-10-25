@@ -65,6 +65,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const invites=el('div');invites.id='online-invites';invites.setAttribute('aria-live','assertive');shell.append(invites);
  // Online is automatic: whenever a backend exists and the account can authenticate, entering the game joins the shared world.
  const canJoin=!!url&&(account.cloud||local);
+ if(canJoin)game.expectNetwork?.();
  if(!url){status('กำลังเตรียมเซิร์ฟเวอร์ออนไลน์ · ขณะนี้ยังเป็นโหมดเล่นคนเดียว');button.dataset.state=dialog.dataset.state='unavailable';}else if(!canJoin)status('เข้าเกมด้วย Google เพื่อเล่นออนไลน์');else{status('กำลังเข้าห้อง…');chip('กำลังเข้าห้อง…');}
  button.onclick=()=>openRoster('all');$('online-close').onclick=()=>dialog.close();dialog.addEventListener('close',()=>button.focus());
  $('online-reload').onclick=()=>location.reload();

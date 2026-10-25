@@ -27,3 +27,22 @@ export function loadPaintedCharacter(classId,appearance={},equipment=null){
   return result;
  })();cache.set(key,pending);if(cache.size>8)cache.delete(cache.keys().next().value);pending.catch(()=>{if(cache.get(key)===pending)cache.delete(key);});return pending;
 }
+// A leaderboard needs one standing frame, not forty animation canvases per player.
+// Keep a separate small cache so browsing the board does not evict live avatar animations.
+const standingCache=new Map();
+export function loadPaintedStanding(classId,gender='male',appearance={},equipment=null){
+ const gear=normalizeEquipment(equipment,classId),directory=equipmentItem(gear.weapon).art==='crafted'?'equipment41':'animation37';
+ const styledAppearance=equipmentAppearance(appearance,gear,classId),sex=gender==='female'?'female':'male',key=JSON.stringify([classId,sex,directory,styledAppearance]);
+ if(standingCache.has(key))return standingCache.get(key);
+ const pending=(async()=>{
+  const response=await fetch('./assets/'+directory+'/'+classId+'.json');if(!response.ok)throw new Error('Standing metadata: '+classId);
+  const meta=await response.json(),frame=meta.frames[sex][0],image=new Image();image.src='./assets/'+directory+'/'+frame.source;await image.decode();
+  const {rect,anchor,scale}=frame,{factor,foot}=paintedFrameCalibration(directory,classId,sex,0,frame,frame.scale);
+  const cell=document.createElement('canvas');cell.width=cell.height=256;const ctx=cell.getContext('2d');ctx.imageSmoothingEnabled=false;
+  const [x,y,w,h]=rect;ctx.drawImage(image,x,y,w,h,128-anchor*scale,244-h*scale,w*scale,h*scale);
+  const styled=customizeAtlas(cell,styledAppearance,classId,{columns:1,rows:1,anchors:[[50,38]]});
+  const result=document.createElement('canvas');result.width=result.height=FRAME_SIZE;const out=result.getContext('2d');out.imageSmoothingEnabled=false;
+  out.drawImage(styled,FRAME_SIZE/2-128*factor,FRAME_FOOT-foot*factor,256*factor,256*factor);return result;
+ })();standingCache.set(key,pending);if(standingCache.size>24)standingCache.delete(standingCache.keys().next().value);
+ pending.catch(()=>{if(standingCache.get(key)===pending)standingCache.delete(key);});return pending;
+}

@@ -49,7 +49,7 @@ import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=album152';
 import {createLifeNPC} from './life-npc.js?v=106.0';
 import {createFeedback} from './feedback.js?v=compact-notice1';
-import {createLeaderboardUI} from './leaderboard-ui.js?v=99.11';
+import {createLeaderboardUI} from './leaderboard-ui.js?v=podium153';
 import {createMarketBoardUI} from './market-board-ui.js?v=107';
 import {createHud63} from './hud-63.js?v=combat151';
 import {bindRenderLifecycle} from './render-lifecycle.js';

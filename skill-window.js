@@ -1,4 +1,5 @@
 import {ROLE_TREE,roleRequirements,roleSkillOpen} from './role-skill-progress.js';
+import {getClass} from './classes.js';
 import {applySkillArt} from './skill-art.js?v=icons117';
 import {openHudPanel} from './hud-panels.js?v=34';
 // Skill window (menu "สกิล" or K). 0.84: a skill tree. Each skill opens when the skills it needs reach a level
@@ -9,10 +10,13 @@ const reasons={'no-skill-points':'แต้มสกิลไม่พอ · ไ
 // 0.101 the Master tab reuses the grid: each Master skill sits in its parent's column.
 const PLACE={0:[1,0],4:[3,0],1:[0,1],2:[1,1],5:[3,1],3:[0,2],6:[1,2],8:[3,2],7:[0,3],9:[2,3],10:[1,0],11:[0,0],12:[3,0],13:[1,1],14:[2,1]};
 export function createSkillWindow({game,classId}){
- if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=auto1';css.dataset.skillTree='';document.head.append(css);}
- const dialog=document.createElement('dialog');dialog.id='skill-window';dialog.setAttribute('aria-labelledby','skill-window-title');
+ if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=skill150';css.dataset.skillTree='';document.head.append(css);}
+ const dialog=document.createElement('dialog');dialog.id='skill-window';dialog.dataset.profession=classId||'shaman';dialog.setAttribute('aria-labelledby','skill-window-title');
  dialog.innerHTML='<header><div><small>SKILL TREE</small><h2 id="skill-window-title">ต้นไม้สกิล</h2></div><b id="skill-points"></b><button class="mp-icon" id="skill-close" aria-label="ปิดหน้าสกิล">×</button></header><p class="skill-hint">เริ่มจากสกิลแถวบน · อัปให้ถึงขั้นที่กำหนดเพื่อปลดล็อกสกิลถัดไป (เรียนฟรี) · ขั้น 2–10 ใช้ขั้นละ 1 แต้ม · สกิลถึง Lv 10 ปลดล็อกสกิล Master</p><div class="skill-tabs" role="tablist"><button type="button" role="tab" data-tab="base" aria-selected="true">สกิลหลัก</button><button type="button" role="tab" data-tab="master" aria-selected="false">Master <small id="master-count"></small></button></div><div class="skill-tree" id="skill-tree"><svg id="skill-links" aria-hidden="true"></svg></div><section id="skill-detail" aria-live="polite"></section><p id="skill-note" role="status"></p>';
  document.getElementById('game-shell').append(dialog);
+ dialog.querySelector('header small').textContent=getClass(classId||'shaman').name+' · SKILL TREE';
+ const workspace=document.createElement('div');workspace.className='skill-workspace';
+ dialog.querySelector('.skill-tree').before(workspace);workspace.append(dialog.querySelector('.skill-tree'),dialog.querySelector('#skill-detail'));
  const $=id=>dialog.querySelector('#'+id),world=game.world,tree=$('skill-tree'),roleMode=world.roleCombat&&!world.roleCombat.legacy,req=roleMode?roleRequirements:requirements,canOpen=(levels,i)=>roleMode?roleSkillOpen(levels,i,world.jobId):skillOpen(levels,i);let picked=0;
  const nodes=world.skills.map((s,i)=>{
   const node=document.createElement('div'),icon=document.createElement('strong'),name=document.createElement('span'),level=document.createElement('b'),button=document.createElement('button');
@@ -60,6 +64,8 @@ export function createSkillWindow({game,classId}){
  let timer=0;
  const open=()=>{$('skill-note').textContent='';openHudPanel(dialog);requestAnimationFrame(draw);clearInterval(timer);timer=setInterval(draw,500);};
  dialog.addEventListener('close',()=>clearInterval(timer));$('skill-close').onclick=()=>dialog.close();
+ // Recompute connector endpoints when the lazily loaded frame/type styles settle.
+ const resize=new ResizeObserver(()=>{if(dialog.open)links();});resize.observe(tree);
  addEventListener('resize',()=>{if(dialog.open)links();});
  addEventListener('keydown',e=>{if(e.code!=='KeyK'||e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target.closest?.('input,textarea,select'))return;if(dialog.open)dialog.close();else if(!document.querySelector('dialog:modal'))open();});
  addEventListener('open-skill-window',()=>{if(!dialog.open)open();});

@@ -25,6 +25,7 @@ try{
    await page.locator('[data-tab='+tab+']').click();await page.waitForTimeout(40);
    const result=await page.evaluate(()=>{const d=document.getElementById('skill-window'),t=d.querySelector('.skill-tree'),r=d.getBoundingClientRect();return {classId:d.dataset.profession,count:[...t.querySelectorAll('.skill-node')].filter(n=>!n.hidden).length,frame:getComputedStyle(d,'::before').borderImageSource,nodeFrame:getComputedStyle(t.querySelector('.skill-node:not([hidden])'),'::after').borderImageSource,width:r.width,height:r.height,x:r.x,y:r.y,treeScroll:t.scrollWidth-t.clientWidth,windowScroll:d.scrollHeight-d.clientHeight};});
    assert.equal(result.classId,role.id);assert.equal(result.count,role.id==='novice'?(tab==='base'?10:5):(tab==='base'?6:5));assert.ok(result.frame.includes('ui-skill150/window.webp'));assert.ok(result.nodeFrame.includes('ui-skill150/node.webp'));assert.ok(result.windowScroll<2,JSON.stringify(result));assert.ok(result.treeScroll<2,JSON.stringify(result));checks.push({role:role.id,branch:branch.id,tab,...result});
+   const fill=await page.locator('#skill-window').evaluate(d=>{const s=getComputedStyle(d),f=getComputedStyle(d,'::after');return {background:s.backgroundColor,image:s.backgroundImage,shadow:s.boxShadow,inset:[f.top,f.right,f.bottom,f.left].map(parseFloat)};});assert.equal(fill.background,'rgba(0, 0, 0, 0)');assert.equal(fill.image,'none');assert.equal(fill.shadow,'none');assert.ok(fill.inset.every(n=>n>0));
    await page.screenshot({path:fileURLToPath(new URL(role.id+'-'+branch.id+'-'+tab+'.png',out))});
   }
  }

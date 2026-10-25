@@ -11,6 +11,8 @@ including all 14 Master branches. No skill IDs, progression, damage, costs or pr
 The header shows the profession. Nine-sliced images keep corners crisp across panel sizes;
 decorative layers do not intercept pointer events. Actual DOM text and icons remain live.
 The skill icon art keeps its aspect ratio on narrow screens.
+The green backing is a separate inset layer placed inside the painted gold rails;
+the dialog itself stays transparent so no green rectangle spills beyond the artwork.
 
 Desktop uses the full tree with the details underneath. Short landscape phone screens place
 details to the right of the tree. Portrait uses compact cards. On especially short screens,

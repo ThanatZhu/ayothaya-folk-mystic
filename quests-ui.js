@@ -10,6 +10,7 @@ import {awardExperience} from './experience.js?v=105.3';
 import {dailyBounties,normalizeBounty,bountyDefeat,bountyClaim,normalizeAlbum,ALBUM_CARDS,ALBUM_MILESTONES,WEEKLY,normalizeWeekly} from './bounty.js?v=107';
 import {iconStyle} from './bag-ui.js?v=gacha147';
 import {openHudPanel} from './hud-panels.js?v=34';
+import {storyReady} from './story-navigation173.js';
 const $=id=>document.getElementById(id);
 const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 // Crop the atlas cell's transparent side gutters without stretching the painted card.
@@ -52,9 +53,10 @@ export function createQuestsUI({game,account,map,bagUI}){
  dialog.querySelector('#quests-close').onclick=()=>dialog.close();
  dialog.querySelectorAll('[data-qt]').forEach(b=>b.onclick=()=>{tab=b.dataset.qt;render(true);});
  bagUI.talkHooks.push(n=>{$('npc-bounty')?.remove();if(n.name!=='ขุนอินทร์')return;const b=document.createElement('button');b.id='npc-bounty';b.type='button';b.textContent='📜 กระดานค่าหัวประจำวัน';b.onclick=()=>{$('close-npc').click();open('bounty');};$('close-npc').before(b);});
- const storyState=()=>{if(game.online)return normalizeStory(world.story);try{return normalizeStory(JSON.parse(localStorage.getItem('ayothaya-story:'+slot)));}catch{return normalizeStory(null);}};
+ const storyState=()=>{if(!storyReady(game,account,map.id))return null;if(game.online)return normalizeStory(world.story);try{return normalizeStory(JSON.parse(localStorage.getItem('ayothaya-story:'+slot)));}catch{return normalizeStory(null);}};
  // Browsing a recap never sends a quest action or changes authoritative progress.
  function renderStory(body,state){
+  if(!state){body.innerHTML='<p class="social-note" role="status">กำลังโหลดเควสจากเซิร์ฟเวอร์…</p>';return;}
   const obj=currentObjective(state),previousScroll=lastQuest===state.quest?(body.querySelector('.quest-journal-list')?.scrollTop??0):0;
   const focused=body.contains(document.activeElement)?document.activeElement?.dataset.questIndex:null;
   if(lastQuest!==state.quest){selectedQuest=state.quest;lastQuest=state.quest;}

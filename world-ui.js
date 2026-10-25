@@ -26,16 +26,17 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
  async function travel(id,recall=false,warp=false){
-  if(traveling||!(reachable.has(id)||recall||warp||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||world.player.hp<=0)return;
-  if(lookup(id)?.guildHall&&!game.online){world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');return;}
-  if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return;}
+  if(traveling||!(reachable.has(id)||recall||warp||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||world.player.hp<=0)return false;
+  if(lookup(id)?.guildHall&&!game.online){world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');return false;}
+  if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return false;}
   traveling=true;game.clearInput();
   getLoadingScreen().show(id,{travel:true});
   if(account){
-   if(!await account.travel(lookup(id),{warp})){traveling=false;getLoadingScreen().hide();world.notice(warp?'วาร์ปไม่สำเร็จ · เบี้ยไม่พอหรือเชื่อมต่อขัดข้อง':'เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return;}
+   if(!await account.travel(lookup(id),{warp})){traveling=false;getLoadingScreen().hide();world.notice(warp?'วาร์ปไม่สำเร็จ · เบี้ยไม่พอหรือเชื่อมต่อขัดข้อง':'เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return false;}
   }else try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
   getLoadingScreen().stage(1,'กำลังเดินทางไป '+lookup(id).name+'…');
   location.assign('?server='+account.serverId+'&map='+encodeURIComponent(id));
+  return true;
  }
  // 0.59 realistic map: render the real scene straight down once (sprites hidden, no fog) and draw labels over it.
  let photo=null,photoQueued=false; // 0.112.4 taken a moment after load, so the minimap shows the real map at once

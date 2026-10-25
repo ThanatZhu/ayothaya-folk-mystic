@@ -1,3 +1,5 @@
+import {loadConversationStyle} from './npc-conversation155.js?v=155';
+import {paintNPCPortrait} from './npc-portrait155.js?v=155';
 import {trainingStatus,mentorById,trialItemsShort,MASTER_COURT,TRIAL} from './city-life-data.js?v=98';
 import {advanceReady} from './advancement.js?v=73';
 import {itemDef} from './items.js?v=107';
@@ -11,6 +13,14 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
  const panel=document.createElement('dialog');panel.id='mentor-panel';panel.setAttribute('aria-labelledby','mentor-name');
  panel.innerHTML='<header><div><small>ลานครูแห่งอโยธยา</small><h2 id="mentor-name"></h2></div><button id="mentor-close" aria-label="ปิดบทสนทนา">×</button></header><div class="mentor-content"><div class="mentor-portrait" role="img"></div><section><p id="mentor-role"></p><p id="mentor-story"></p><h3 id="mentor-quest"></h3><p id="mentor-objective"></p><progress id="mentor-progress"></progress><label id="mentor-branch-label">เลือกสาย Master<select id="mentor-branch"></select></label><p id="mentor-stat-note">เมื่อเปลี่ยนอาชีพหรือสาย Master จะคืนแต้มสถานะทั้งหมดให้จัดใหม่</p><p id="mentor-result" role="status"></p><div class="mentor-actions"><button id="mentor-accept">รับบททดสอบ</button><button id="mentor-complete">ส่งบททดสอบ</button><button id="mentor-cancel">ยกเลิกบททดสอบ</button></div></section></div>';
  document.getElementById('game-shell').append(panel);const $=id=>panel.querySelector('#'+id);let current=null,busy=false,last='';
+ loadConversationStyle();panel.classList.add('npc-conversation','mentor-conversation');
+ const oldSection=panel.querySelector('.mentor-content section'),header=panel.querySelector('header'),actions=panel.querySelector('.mentor-actions'),leave=$('mentor-close');
+ const portrait=document.createElement('figure');portrait.className='npc-speaker';portrait.innerHTML='<canvas width="320" height="360"></canvas>';
+ const copy=document.createElement('section');copy.className='npc-copy';header.className='npc-heading';header.querySelector('small').remove();header.append($('mentor-role'));copy.append(header);oldSection.className='npc-reading';copy.append(oldSection);actions.classList.add('npc-actions');leave.textContent='ลาก่อน';actions.append(leave);
+ const cinema=document.createElement('button');cinema.type='button';cinema.textContent='ดูคัตซีน';cinema.id='mentor-cinematic';actions.append(cinema);
+ const x=document.createElement('button');x.className='npc-x';x.type='button';x.textContent='×';x.setAttribute('aria-label','ปิดบทสนทนา');x.onclick=()=>leave.click();panel.replaceChildren(portrait,copy,actions,x);
+ cinema.onclick=()=>{if(!current)return;dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{kind:'training',title:$('mentor-quest').textContent,goal:$('mentor-objective').textContent,npc:current}}));};
+ panel.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='SELECT'){e.preventDefault();e.stopImmediatePropagation();}},true);
  const journal=document.createElement('aside');journal.id='training-journal';journal.hidden=true;journal.innerHTML='<button type="button" id="training-toggle" aria-controls="training-details" aria-label="ย่อหรือขยายรายการภารกิจ"><strong>บททดสอบจากครู</strong><b aria-hidden="true"></b></button><div id="training-details"><span class="training-lines"></span><small></small></div><span id="training-summary" hidden></span>';document.getElementById('game-shell').append(journal);
  const compact=matchMedia('(max-height:600px)'),foldButton=journal.querySelector('#training-toggle');let folded=compact.matches,manualFold=false;
  function fold(){journal.dataset.folded=String(folded);journal.querySelector('#training-details').hidden=folded;journal.querySelector('#training-summary').hidden=!folded;foldButton.setAttribute('aria-expanded',String(!folded));foldButton.querySelector('b').textContent=folded?'+':'−';}
@@ -32,7 +42,7 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
   $('mentor-branch-label').hidden=!allowed||!s.own||s.tier!=='master';
  }
  function open(n){if(busy)return;if(current)current.talking=false;current=n;n.talking=true;game.clearInput();$('mentor-name').textContent=n.name;$('mentor-story').textContent=n.text;$('mentor-result').textContent='';
-  const portrait=panel.querySelector('.mentor-portrait');portrait.style.backgroundImage=`url("./assets/citizens40/${n.sheet}.png")`;portrait.style.backgroundPosition=`0% ${n.row/3*100}%`;portrait.setAttribute('aria-label',n.name);
+  paintNPCPortrait(panel.querySelector('.npc-speaker canvas'),n);
   $('mentor-branch').replaceChildren(...trainingStatus(account.character,account.training,game.world,n.mentorId).branches.map(j=>{const o=document.createElement('option');o.value=j.id;o.textContent=j.name+' · '+j.style;return o;}));render();if(!panel.open)panel.showModal();$('mentor-close').focus();
  }
  // 0.98 the moment the Job bar is full, a quest card pops up and points the player to the masters' court.

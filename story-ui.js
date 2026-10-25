@@ -1,4 +1,5 @@
-import {createStoryDialogue} from './story-dialogue-ui.js?v=pets125';
+import {dialogueFor} from './story-dialogue.js?v=pets125';
+import {createQuestCinematics} from './quest-cinematic155.js?v=155';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=refine136';
@@ -31,15 +32,14 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(e.type==='storyDo'&&!game.online)offline({type:'do',action:e.action}); // 0.98 offline tutorial actions (craft, pet, shop)
   if(e.type==='story'){if(e.story)world.story=e.story;if(e.completed)world.notice('เควสสำเร็จ · '+e.completed);render();}
  });
- const dialogue=createStoryDialogue({game,worldUI,objective:()=>currentObjective(state()),state,
-  complete(n,index){if(!sameState(index))return;if(game.online)world.questTalk?.(n.name,index);else offline({type:'talk',npc:n.name,mapId:map.id});}
- });
+ const cinematics=createQuestCinematics({game,account,catalog,map,state});
  const sameState=index=>state().quest===index.quest&&state().step===index.step&&!state().done;
  // A normal NPC click opens the story; opening/closing/asking cannot finish a talk step.
  worldUI.onTalk=n=>{
-  const step=currentObjective(state())?.step;
+  const obj=currentObjective(state()),step=obj?.step;
   if(step?.type!=='talk'||step.npc!==n.name||step.mapId!==map.id)return null;
-  return dialogue.open(n)?{handled:true}:null;
+  const index={quest:state().quest,step:state().step},data=dialogueFor(obj);
+  return {...data,valid:()=>sameState(index),play:()=>cinematics.story(index.quest,index.step),complete(){if(!sameState(index))return;if(game.online)world.questTalk?.(n.name,index);else offline({type:'talk',npc:n.name,mapId:map.id});}};
  };
 
  // Tracker panel (own stylesheet, so game.html needs no edit).
@@ -270,7 +270,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   node.hidden=!target;if(target){const text=label+' '+Math.ceil(Math.hypot(target.x-world.player.x,target.z-world.player.z))+' ม.';if(node.textContent!==text)node.textContent=text;}
  }
 
- const api={context:null,update(){if(walking&&!game.walking)walking=false;dialogue.update();
+ const api={context:null,cinematics,update(){if(walking&&!game.walking)walking=false;cinematics.observe();
   coach.update();distanceHint();
   if(!game.online&&api.context&&performance.now()-checked>1000){checked=performance.now();for(let i=0;i<30&&offline({type:'check',ctx:api.context()})?.changed;i++);}
   render();}};

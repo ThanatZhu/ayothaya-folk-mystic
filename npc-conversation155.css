@@ -1,0 +1,28 @@
+/* One bottom dialogue strip. The backing is inset inside the authored gold frame. */
+html body dialog.npc-conversation{position:fixed!important;inset:auto 0 max(12px,env(safe-area-inset-bottom))!important;margin:0 auto!important;width:min(1320px,94vw)!important;max-width:94vw!important;height:clamp(220px,30vh,340px)!important;max-height:78dvh!important;box-sizing:border-box;padding:24px 34px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;color:#f4e4b8;font-family:inherit;isolation:isolate;grid-template-columns:minmax(140px,21%) minmax(0,1fr) minmax(165px,22%);gap:24px;align-items:stretch;transform:none!important;scale:none!important}
+html body dialog.npc-conversation[open]{display:grid!important}
+html body dialog.npc-conversation::before{content:"";position:absolute;inset:14px 12px;background:linear-gradient(125deg,#183b32f7,#081e19f7);z-index:-2;pointer-events:none}
+html body dialog.npc-conversation::after{content:"";position:absolute;inset:0;border:22px solid transparent;border-image:url('./assets/ui63/frames/tooltip.png') 72 fill / 22px / 0 stretch;z-index:-1;pointer-events:none}
+html body dialog.npc-conversation::backdrop{background:#06161130}
+.npc-speaker{margin:-90px 0 -8px;align-self:end;height:calc(100% + 90px);min-height:210px;pointer-events:none;display:flex;align-items:end;justify-content:center}
+.npc-speaker canvas{max-width:100%;width:280px;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 6px 5px #0006)}
+.npc-copy{min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.npc-heading{display:flex!important;flex-direction:column;align-items:start!important;gap:2px;padding:0 0 8px!important;border:0!important;background:none!important}
+.npc-heading strong,.npc-heading h2{color:#f4d27c;margin:0!important;font-size:clamp(18px,2vw,26px)!important;line-height:1.3}
+.npc-heading small{color:#b4c5b3;font-size:12px}.npc-heading small:empty{display:none}
+.npc-reading{overflow:auto;min-height:0;flex:1;overscroll-behavior:contain;scrollbar-width:thin}
+.npc-reading p{font-size:clamp(14px,1.2vw,18px);line-height:1.65;margin:0 0 8px}.npc-reading h3{margin:6px 0;font-size:16px;color:#f5d683}
+.npc-reading small,.npc-reading label{font-size:12px}.npc-key-hint{font-size:11px;color:#adbda6;margin-top:6px}
+.npc-actions{min-height:0;display:flex;flex-direction:column;gap:6px;overflow:auto;padding:0 20px 0 3px;overscroll-behavior:contain;scrollbar-width:thin;justify-content:safe center}
+html body .npc-conversation .npc-actions button{min-height:38px;flex-shrink:0;width:100%;padding:8px 12px;border:1px solid #b49650;border-radius:6px;background:#163e31;color:#f3dfaa;font:inherit;font-size:13px;line-height:1.25;cursor:pointer}
+html body .npc-conversation .npc-actions button.npc-primary{color:#382a12;background:linear-gradient(#f7e1a2,#d5ac55);font-weight:bold}
+html body .npc-conversation button[hidden],html body .npc-conversation [hidden]{display:none!important}
+html body .npc-conversation button:disabled{opacity:.5;cursor:default}
+html body .npc-conversation .npc-x{position:absolute;right:15px;top:10px;width:32px;height:32px;border-radius:50%;background:#143b2e;border:2px solid #c09d52;color:#f4d583;font-size:23px;padding:0;z-index:2}
+.npc-answer{border-left:2px solid #ad8f46;padding-left:10px;color:#acd5be}.npc-conversation progress{width:100%}
+html body #mentor-panel .npc-actions{flex-wrap:nowrap}
+html body #mentor-panel #mentor-role{margin:2px 0;font-size:12px;line-height:1.4}
+html body #mentor-panel .npc-actions #mentor-close{position:static;width:100%!important;min-width:0;height:auto;min-height:40px;padding:8px 12px!important;border:1px solid #b49650!important;border-radius:6px!important;background:#163e31!important;font:inherit!important;font-size:13px!important;line-height:1.3!important;filter:none}
+html body .npc-conversation .npc-x:not(#close-npc):not(#mentor-close){width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important;padding:0!important;border:0!important;border-image:none!important;border-radius:50%!important;background:url('./assets/ui63/frames/ring.png') center / contain no-repeat,#16382b!important;font:700 20px/1 Mali,Tahoma,sans-serif!important;box-shadow:none!important;color:#f4d583!important}
+@media(max-width:900px),(pointer:coarse){html body dialog.npc-conversation{width:96vw!important;max-width:96vw!important;bottom:max(6px,env(safe-area-inset-bottom))!important;height:clamp(175px,43dvh,265px)!important;padding:18px 24px!important;grid-template-columns:minmax(70px,19%) minmax(0,1fr) minmax(115px,24%);gap:12px}.npc-speaker{margin-top:-45px;min-height:150px;height:calc(100% + 45px)}.npc-heading{padding-bottom:4px!important}.npc-heading strong,.npc-heading h2{font-size:18px!important}.npc-reading p{font-size:14px;line-height:1.5}html body .npc-conversation .npc-actions button{min-height:40px;font-size:12px;padding:6px}.npc-key-hint{font-size:10px}}
+@media(max-width:520px) and (orientation:portrait){html body dialog.npc-conversation{height:48dvh!important;grid-template-columns:64px minmax(0,1fr);gap:8px;padding:20px!important}.npc-speaker{grid-row:1 / 3;min-height:150px;height:100%;margin:0}.npc-actions{grid-column:2;display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:140px}.npc-copy{max-height:23dvh}}

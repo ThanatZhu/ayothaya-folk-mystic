@@ -1,9 +1,10 @@
+import {createNPCConversation} from './npc-conversation155.js?v=155';
 import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=112.4';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
-import {createMentorUI} from './mentor-ui.js?v=overlay143';
+import {createMentorUI} from './mentor-ui.js?v=npc155';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=role116';
@@ -15,7 +16,8 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0,lastBig=0;
  const mentors=createMentorUI({game,account,inTown:()=>map.id==='ayutthaya',recall:()=>api.recall()});
- function endTalk(){if(conversation)conversation.talking=false;conversation=null;$('npc-dialog').hidden=true;game.clearInput();}
+ const conversationUI=createNPCConversation({game,onClose:()=>endTalk()});
+ function endTalk(){if(conversation)conversation.talking=false;conversation=null;conversationUI.close();game.clearInput();}
  if(!account)try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}
  document.title=map.name+' · อโยธยา Folk Mystic';$('status').textContent=map.name+(map.safe?' · เขตปลอดภัย':' · นอกเมือง');
  const mapHeading=document.querySelector('.field-map-title');if(mapHeading)mapHeading.textContent=map.name+' · CH '+(account?.serverId?.slice(-1)||'1');
@@ -89,7 +91,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
   if(world.player.hp<=0||traveling)return;
   if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',npc:n.name,onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
-  endTalk();if(n.mentorId){mentors.open(n);return;}game.clearInput();conversation=n;n.talking=true;$('npc-name').textContent=n.name;const reply=api.onTalk?.(n);if(reply?.handled)return;$('npc-text').textContent=reply??n.text;$('npc-dialog').hidden=false;$('close-npc').focus();api.afterTalk?.(n);
+  endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);return;}conversation=n;n.talking=true;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);
  }
  const npcSprites=[];scene.traverse(o=>{if(o.isSprite&&o.userData.npc)npcSprites.push(o);});
  const npcRay=new THREE.Raycaster(),npcPointer=new THREE.Vector2();
@@ -102,6 +104,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  $('close-npc').onclick=endTalk;
  $('interact').onclick=()=>{if(nearNPC)talk(nearNPC);else if(nearest)travel(nearest.to);};
  addEventListener('keydown',e=>{
+  if(document.querySelector('#quest-cinematic[open],#mentor-panel[open]'))return;
   if($('settings-panel')?.open||e.repeat||e.ctrlKey||e.altKey||e.metaKey||e.target.closest?.('input,textarea,select'))return;
   if(e.code==='KeyM'){e.preventDefault();atlas.open?atlas.close():dialog.open?dialog.close():openMap();}
   if(e.code==='Escape'&&conversation)endTalk();
@@ -129,7 +132,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   $('mini-area').textContent=(area?.name??'ระหว่างทาง')+' · '+(map.safe?'ปลอดภัย':'นอกเมือง');
   for(const v of views){const d=Math.hypot(p.x-v.p.x,p.z-v.p.z);if(d<best){best=d;nearest=v.p;}v.ring.material.opacity=.52+Math.sin(t*2)*.2;position(v.label,v.p.x,v.p.z,.36);v.label.classList.toggle('near',d<2);}
   let npcDistance=2.3;for(const v of npcViews){const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(document.body.classList.contains('mobile-play')?6:v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
-  mentors.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!atlas.open&&!mentors.paused;
+  mentors.update();conversationUI.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!atlas.open&&!mentors.paused;
   $('interact').hidden=!canInteract;
   if(canInteract){const button=$('interact'),mobile=document.body.classList.contains('mobile-play');button.dataset.kind=nearNPC?'npc':'portal';const text=nearNPC?(mobile?'พูดคุย':'กด Space เพื่อพูดคุย · หรือคลิก NPC'):'เดินทางไป '+lookup(nearest.to).name;if(button.textContent!==text)button.textContent=text;button.title=nearNPC?'คุยกับ '+nearNPC.name:text;button.setAttribute('aria-label',button.title);}
   $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;

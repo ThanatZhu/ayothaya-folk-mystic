@@ -23,3 +23,23 @@
 #training-details[hidden],#training-summary[hidden]{display:none;}
 #training-summary{font-size:11px;color:#dfd4b4;}
 @media(max-height:600px){#training-journal{width:190px;padding:5px 9px;}#training-toggle{min-height:36px;}}
+
+/* Each unfinished trial requirement links to its actual monster/drop source. */
+#training-journal .training-lines{display:flex;flex-direction:column;gap:3px;min-width:0}
+#training-journal .training-objective{display:block;box-sizing:border-box;width:100%;min-width:0;margin:0;padding:4px 0;border:0;background:transparent;color:#f6e2b8;text-align:left;font:inherit;line-height:1.6;overflow-wrap:anywhere}
+#training-journal button.training-objective{min-height:42px;padding:6px;border:1px solid #c9a35a66;border-radius:6px;background:#0d2924;cursor:pointer}
+#training-journal .training-objective span{display:block;white-space:normal}
+#training-journal .training-objective small{display:block;color:#aee0ce;line-height:1.6}
+#training-journal .training-objective[data-done=true]{color:#d8e6c3}
+#training-journal .training-objective:disabled{opacity:.65;cursor:default}
+#training-journal .training-heading{display:flex;align-items:center;gap:4px;flex:none}
+#training-next{flex:1;min-width:0;min-height:44px;margin:0;padding:4px 0;border:0;border-radius:4px;background:transparent;color:#edc57b;font:700 12px Mali,Tahoma,sans-serif;cursor:pointer;text-align:left}
+#training-next strong,#training-next small{display:block;line-height:1.6}
+#training-next small{color:#aee0ce;font-size:10px;font-weight:400}
+#training-journal .training-heading #training-toggle{flex:none;width:32px;min-height:44px;justify-content:center}
+#training-next:disabled{opacity:.5;cursor:default}
+#training-journal button:is(:hover,:focus-visible):not(:disabled){filter:brightness(1.15)}
+#training-journal button:focus-visible{outline:2px solid #f2d27e;outline-offset:2px}
+#training-journal .training-help{line-height:1.6;color:#d9cba4;padding-bottom:3px}
+#training-journal .training-completed{margin-top:4px;color:#cbd7b8}
+#training-journal .training-completed summary{min-height:32px;display:list-item;align-content:center;cursor:pointer;font-size:11px}

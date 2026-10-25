@@ -4,13 +4,15 @@ import {paintNPCPortrait} from './npc-portrait155.js?v=155';
 import {trainingStatus,mentorById,trialItemsShort,MASTER_COURT,TRIAL} from './city-life-data.js?v=98';
 import {advanceReady} from './advancement.js?v=73';
 import {itemDef} from './items.js?v=107';
+import {trainingMonsterSources,trainingNextGoal,trainingGoalKey} from './training-targets164.js';
+import {createTrainingWalk} from './training-walk164.js';
 // 0.98 the three parts of a trial (hunt · boss · materials); online the server checks the last two.
 const trialLines=(s,bag,online)=>{const t=s.trial,items=bag?.items??{};return ['มอนสเตอร์ '+s.progress+'/'+s.target,...(online?[(s.bossDone?'✔ ':'✘ ')+'ล้ม'+t.bossName,...t.items.map(([id,n])=>((items[id]??0)>=n?'✔ ':'✘ ')+itemDef(id).name+' '+Math.min(items[id]??0,n)+'/'+n),((bag?.coins??0)>=t.coins?'✔ ':'✘ ')+t.coins.toLocaleString('th-TH')+' เบี้ย']:[])];};
 const trialReady=(s,bag,online)=>s.own&&s.progress>=s.target&&(!online||s.bossDone&&!trialItemsShort(bag,s.trial).length);
 import {className} from './classes.js?v=112.1';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 const errors={'trainer-boss':'ยังไม่ได้ล้มบอสของบททดสอบ','trainer-items':'วัตถุดิบหรือเบี้ยยังไม่ครบ','trainer-level':'ระดับยังไม่ถึงเงื่อนไขของครู','trainer-distance':'เดินเข้าใกล้ครูก่อนนะ','trainer-active':'มีบททดสอบที่รับไว้แล้ว ให้กลับหาครูสายเดิมก่อน','trainer-incomplete':'ยังทำบททดสอบไม่ครบ','trainer-class':'ครูท่านนี้สอนอีกสายอาชีพ','trainer-finished':'คุณผ่านการเลื่อนขั้นแล้ว','trainer-quest':'ยังไม่ได้รับบททดสอบนี้','action-rate':'รอสักครู่แล้วลองอีกครั้ง','online-required':'ต้องเชื่อมต่อเซิร์ฟเวอร์ก่อนรับบททดสอบ','not-connected':'กำลังเชื่อมต่อเซิร์ฟเวอร์ กรุณารอสักครู่'};
-export function createMentorUI({game,account,inTown=()=>false,recall=()=>false}){
+export function createMentorUI({game,account,catalog,map,inTown=()=>false,recall=()=>false,travel=()=>false,talkTo=()=>false}){
  const panel=document.createElement('dialog');panel.id='mentor-panel';panel.setAttribute('aria-labelledby','mentor-name');
  panel.innerHTML='<header><div><small>ลานครูแห่งอโยธยา</small><h2 id="mentor-name"></h2></div><button id="mentor-close" aria-label="ปิดบทสนทนา">×</button></header><div class="mentor-content"><div class="mentor-portrait" role="img"></div><section><p id="mentor-role"></p><p id="mentor-story"></p><h3 id="mentor-quest"></h3><p id="mentor-objective"></p><progress id="mentor-progress"></progress><label id="mentor-branch-label">เลือกสาย Master<select id="mentor-branch"></select></label><p id="mentor-stat-note">เมื่อเปลี่ยนอาชีพหรือสาย Master จะคืนแต้มสถานะทั้งหมดให้จัดใหม่</p><p id="mentor-result" role="status"></p><div class="mentor-actions"><button id="mentor-accept">รับบททดสอบ</button><button id="mentor-complete">ส่งบททดสอบ</button><button id="mentor-cancel">ยกเลิกบททดสอบ</button></div></section></div>';
  document.getElementById('game-shell').append(panel);const $=id=>panel.querySelector('#'+id);let current=null,busy=false,last='';
@@ -23,7 +25,54 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
  skinNPCChoices(panel,leave);
  cinema.onclick=()=>{if(!current)return;dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{kind:'training',title:$('mentor-quest').textContent,goal:$('mentor-objective').textContent,npc:current}}));};
  panel.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='SELECT'){e.preventDefault();e.stopImmediatePropagation();}},true);
- const journal=document.createElement('aside');journal.id='training-journal';journal.hidden=true;journal.innerHTML='<button type="button" id="training-toggle" aria-controls="training-details" aria-label="ย่อหรือขยายรายการภารกิจ"><strong>บททดสอบจากครู</strong><b aria-hidden="true"></b></button><div id="training-details"><span class="training-lines"></span><small></small></div><span id="training-summary" hidden></span>';document.getElementById('game-shell').append(journal);
+ const journal=document.createElement('aside');journal.id='training-journal';journal.hidden=true;journal.innerHTML='<div class="training-heading"><button type="button" id="training-next"><strong>บททดสอบจากครู</strong><small></small></button><button type="button" id="training-toggle" aria-controls="training-details" aria-label="ย่อหรือขยายรายการภารกิจ"><b aria-hidden="true"></b></button></div><div id="training-details"><div class="training-lines"></div><small class="training-help"></small></div><span id="training-summary" hidden></span>';document.getElementById('game-shell').append(journal);
+ const status=()=>{
+  const q=account.training;if(!q)return null;
+  const m=mentorById(q.classId==='acolyte'?'monk-master':({swordsman:'sword-master',lancer:'spear-master',hunter:'hunt-master',boxer:'box-master',rogue:'shadow-master',shaman:'spirit-master'})[q.classId]);
+  return m?trainingStatus(account.character,q,game.world,m.id):null;
+ };
+ function resolveGoal(goal){
+  const s=status(),bag=game.world.bag;if(!s?.own||s.completed)return null;
+  if(goal.kind==='mentor')return trialReady(s,bag,game.online)?{mapId:'ayutthaya',mapName:'อยุธยา',name:s.mentor.name,npc:s.mentor.name,x:s.mentor.x,z:s.mentor.z}:null;
+  if(goal.kind==='item'&&(!game.online||!s.trial.items.some(([id,n])=>id===goal.id&&(bag?.items?.[id]??0)<n)))return null;
+  if(goal.kind==='boss'&&(!game.online||s.bossDone||goal.id!==s.trial.boss))return null;
+  if(goal.kind==='hunt'&&s.progress>=s.target)return null;
+  if(goal.kind==='coins'&&(!game.online||(bag?.coins??0)>=s.trial.coins))return null;
+  return trainingMonsterSources(catalog,map?.id,goal,game.world.player)[0]??null;
+ }
+ let owner='';try{owner=JSON.parse(sessionStorage.getItem('ayothaya-entry-v1')??'null')?.owner??'';}catch{}
+ const walkScope=[owner,account.serverId??'local',account.slotId??'guest',account.character?.name??''].map(encodeURIComponent).join(':');
+ const trainingWalk=createTrainingWalk({game,catalog,map:map??{id:'ayutthaya',portals:[]},scope:walkScope,
+  signature:()=>JSON.stringify(account.training&&[account.training.classId,account.training.tier,account.training.startKills]),resolve:resolveGoal,travel,talkTo});
+ addEventListener('keydown',e=>{if(trainingWalk.resuming&&['KeyW','KeyA','KeyS','KeyD'].includes(e.code)&&!e.target.closest?.('input,textarea,select'))trainingWalk.cancelResume();});
+ addEventListener('pointerdown',e=>{if(trainingWalk.resuming&&e.target.closest?.('#joystick,#game-shell>canvas,#city-map'))trainingWalk.cancelResume();},true);
+ function goGoal(goal){if(busy)return;if(panel.open)panel.close();trainingWalk.go(goal);}
+ function renderJournal(s){
+  const lines=journal.querySelector('.training-lines');lines.replaceChildren();
+  const profession=document.createElement('strong');profession.textContent=className(account.training.classId,account.character.gender);lines.append(profession);
+  const completed=document.createElement('details');completed.className='training-completed';const summary=document.createElement('summary');completed.append(summary);let doneCount=0;
+  function row(label,done,goal){
+   const target=!done&&goal?resolveGoal(goal):null,node=document.createElement(done||!goal?'div':'button');
+   node.className='training-objective';node.dataset.done=String(done);
+   if(node.tagName==='BUTTON'){node.type='button';node.dataset.trainingGoal=trainingGoalKey(goal);node.disabled=!target;node.onclick=()=>goGoal(goal);}
+   const text=document.createElement('span');text.textContent=(done?'✔ ':'✘ ')+label;node.append(text);
+   if(!done&&goal){const hint=document.createElement('small');hint.textContent=target?(goal.kind==='item'?'ดรอป: ':'เป้าหมาย: ')+target.name+' · '+target.mapName:'ยังไม่พบแหล่งที่เดินทางได้';node.append(hint);if(target)node.title='กดเพื่อเดินไปหา '+target.name+' · '+target.mapName;}
+   if(done){completed.append(node);doneCount++;}else lines.append(node);
+  }
+  row('มอนสเตอร์ '+s.progress+'/'+s.target,s.progress>=s.target,{kind:'hunt'});
+  if(game.online){
+   row('ล้ม'+s.trial.bossName,s.bossDone,{kind:'boss',id:s.trial.boss});
+   for(const [id,n]of s.trial.items)row(itemDef(id).name+' '+Math.min(game.world.bag?.items?.[id]??0,n)+'/'+n,(game.world.bag?.items?.[id]??0)>=n,{kind:'item',id});
+   row(s.trial.coins.toLocaleString('th-TH')+' เบี้ย',(game.world.bag?.coins??0)>=s.trial.coins,{kind:'coins'});
+  }
+  if(doneCount){summary.textContent='ครบแล้ว '+doneCount+' รายการ';lines.append(completed);}
+  const next=trainingNextGoal(s,game.world.bag,game.online),button=journal.querySelector('#training-next');
+  button.querySelector('small').textContent=next.kind==='item'?'ไปหา '+itemDef(next.id).name:({mentor:'กลับไปหาครู',boss:'ไปหาบอส',hunt:'ไปล่ามอนสเตอร์',coins:'ไปหาเบี้ย'})[next.kind];
+  button.setAttribute('aria-label',next.kind==='mentor'?'กลับไปหาครูเพื่อส่งบททดสอบ':'เดินไปหาเป้าหมายที่ยังขาด');
+  const destination=resolveGoal(next);button.disabled=!destination;button.title=destination?'เดินไปหา '+destination.name+' · '+destination.mapName:'';button.onclick=()=>{const current=status();if(current)goGoal(trainingNextGoal(current,game.world.bag,game.online));};
+  journal.querySelector('#training-summary').textContent='มอนสเตอร์ '+s.progress+'/'+s.target;
+  journal.querySelector('.training-help').textContent=trialReady(s,game.world.bag,game.online)?'ครบแล้ว · กลับลานครูเพื่อส่งบททดสอบ':'กดรายการที่ยังขาดเพื่อเดินไปหา · ข้ามแผนที่ให้อัตโนมัติ';
+ }
  const compact=matchMedia('(max-height:600px)'),foldButton=journal.querySelector('#training-toggle');let folded=compact.matches,manualFold=false;
  function fold(){journal.dataset.folded=String(folded);journal.querySelector('#training-details').hidden=folded;journal.querySelector('#training-summary').hidden=!folded;foldButton.setAttribute('aria-expanded',String(!folded));foldButton.querySelector('b').textContent=folded?'+':'−';}
  fold();foldButton.onclick=e=>{e.stopPropagation();game.clearInput();manualFold=true;folded=!folded;fold();stackJournal();};journal.addEventListener('pointerdown',e=>e.stopPropagation());compact.addEventListener('change',()=>{if(!manualFold){folded=compact.matches;fold();}stackJournal();});
@@ -86,6 +135,12 @@ export function createMentorUI({game,account,inTown=()=>false,recall=()=>false})
 
  }
 
- function update(){jobReady();stackJournal();const q=account.training,key=JSON.stringify([q,game.world.kills,game.world.bag]);if(key===last)return;last=key;journal.hidden=!q;if(q){const m=mentorById(q.classId==='acolyte'?'monk-master':({swordsman:'sword-master',lancer:'spear-master',hunter:'hunt-master',boxer:'box-master',rogue:'shadow-master',shaman:'spirit-master'})[q.classId]);const s=trainingStatus(account.character,q,game.world,m.id);journal.querySelector('.training-lines').textContent=className(q.classId,account.character.gender)+'\n'+trialLines(s,game.world.bag,game.online).join('\n');journal.querySelector('#training-summary').textContent='มอนสเตอร์ '+s.progress+'/'+s.target;journal.querySelector('small').textContent=trialReady(s,game.world.bag,game.online)?'กลับลานครูเพื่อส่งบททดสอบ':'ฝึกนอกเมือง · บันทึกอัตโนมัติ';}stackJournal();render();}
+ function update(){jobReady();stackJournal();
+  if(trainingWalk.resuming){const loading=[...document.querySelectorAll('.journey-loading,#travel-loading')].some(n=>!n.classList.contains('leaving')&&n.checkVisibility?.({checkVisibilityCSS:true}));
+   trainingWalk.update(!loading&&(!game.online||!!game.world.bag)&&!document.querySelector('#orientation-gate[open]'));
+  }
+  const q=account.training,key=JSON.stringify([q,game.world.kills,game.world.bag,game.online]);if(key===last)return;last=key;journal.hidden=!q;
+  const s=status();if(s)renderJournal(s);stackJournal();render();
+ }
  return {open,update,get paused(){return panel.open;}};
 }

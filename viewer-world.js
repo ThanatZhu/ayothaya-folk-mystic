@@ -37,7 +37,7 @@ import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=npc155';
 import {createStoryUI} from './story-ui.js?v=npc155';
 import {createBagUI} from './bag-ui.js?v=mobile148';
-import {createStatusUI} from './status-ui.js?v=talk137';
+import {createStatusUI} from './status-ui.js?v=cards156';
 import {createProfileUI} from './profile-ui.js?v=107';
 import {createRefineUI} from './refine-ui.js?v=talk137';
 import {createCraftUI} from './craft-ui.js?v=107';

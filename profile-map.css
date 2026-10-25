@@ -18,3 +18,19 @@
 #city-map{width:calc(100% * var(--map-zoom,1));height:calc(100% * var(--map-zoom,1));max-width:none;object-fit:fill}
 @media(max-width:900px),(pointer:coarse),(max-height:600px){#city-map-viewport{height:calc(94dvh - 66px);width:min(calc((94dvh - 66px) * 1.031),calc(96vw - 28px))}#city-map{height:calc(100% * var(--map-zoom,1))}#world-map h1{font-size:14px}}
 #city-map{cursor:crosshair}
+
+/* The central desktop map must not inherit the old 330px utility-window width. */
+@media(min-width:901px) and (pointer:fine){
+ html body.field-hud.hud63 #world-map[data-hud-panel]{
+  --city-map-height:min(78dvh,900px,calc((100vw - 80px) / 1.031),calc(var(--window-height,100dvh) - 120px));
+  width:calc(var(--city-map-height) * 1.031 + 40px)!important;
+  padding:14px!important;overflow:hidden!important;
+ }
+ html body.field-hud.hud63 #world-map #city-map-viewport{
+  width:calc(var(--city-map-height) * 1.031)!important;
+  height:var(--city-map-height)!important;
+  max-width:100%;margin-inline:auto;
+ }
+ html body.field-hud.hud63 #world-map header{gap:16px;padding-bottom:10px}
+ html body.field-hud.hud63 #world-map h1{font-size:22px;line-height:1.45}
+}

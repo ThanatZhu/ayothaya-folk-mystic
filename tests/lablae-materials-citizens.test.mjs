@@ -5,7 +5,7 @@ import * as THREE from '../vendor/build/three.module.js';
 import {lablaeCitizens} from '../lablae-citizens.js';
 import {sampleRoute,routeDuration} from '../citizen-routes.js';
 import {walkable} from '../combat-core.js';
-const source=fs.readFileSync(new URL('../scene-v2.js',import.meta.url),'utf8').replace("'three'",JSON.stringify(new URL('../vendor/build/three.module.js',import.meta.url).href));
+const source=fs.readFileSync(new URL('../scene-v2.js',import.meta.url),'utf8').replace("'three'",JSON.stringify(new URL('../vendor/build/three.module.js',import.meta.url).href)).replace("'./water-surface158.js?v=158'",JSON.stringify(new URL('../water-surface158.js',import.meta.url).href));
 const {prepareSceneV2}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 globalThis.matchMedia=()=>({matches:false});
 test('Lablae pavilion cutaway activates on its 40 cm deck without changing capital thresholds',async()=>{

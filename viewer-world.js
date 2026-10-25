@@ -54,7 +54,7 @@ import {createMarketBoardUI} from './market-board-ui.js?v=shops155';
 import {createHud63} from './hud-63.js?v=combat151';
 import {bindRenderLifecycle} from './render-lifecycle.js';
 import {resolveMap} from './world-state.js?v=101.5';
-import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=106.1-lablae';
+import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=water158';
 import {createRoofCutaway} from './roof-cutaway.js?v=106.1-lablae';
 import {createLandscapeGuard} from './mobile-layout.js?v=mobile2';
 import {prepareCloud} from './cloud-save.js?v=112.7';

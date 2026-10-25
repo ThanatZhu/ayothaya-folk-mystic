@@ -7,7 +7,7 @@ import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
-import {prepareSceneV2,disposeScene,MOODS} from './scene-v2.js?v=106.1-lablae';
+import {prepareSceneV2,disposeScene,MOODS} from './scene-v2.js?v=water158';
 import {createMeadow} from './meadow.js?v=108';
 import {applyRiceLight,addMeadowContacts,enableMeadowShadows,enableActorShadows} from './rice-light156.js?v=shadows157';
 import {groundHeight} from './combat-core.js?v=run153';
@@ -80,7 +80,7 @@ try{
  gltf.scene.traverse(o=>{if(!o.isMesh||!/^Organic[ _]tree[ _]trunks/.test(o.name))return;const p=o.geometry.attributes.position;for(let i=0;i<p.count;i++){point.fromBufferAttribute(p,i).applyMatrix4(o.matrixWorld);if(point.y>.16)continue;const d=(point.x+20)**2+(point.z-46)**2;if(d<treeDistance){treeDistance=d;views.grove=[point.x-2,point.z+3];}}});
  if(params.get('view')==='grove')focus('grove');
  for(const warm of [false,true]){
-  const scene=new THREE.Scene(),model=cloneModel(gltf.scene),motion=prepareSceneV2({scene,model,map});scene.add(model);
+  const scene=new THREE.Scene(),model=cloneModel(gltf.scene),motion=prepareSceneV2({scene,model,map,waterEnabled:warm});scene.add(model);
   const hemi=new THREE.HemisphereLight(...MOODS.day.hemi),sun=new THREE.DirectionalLight(...MOODS.day.sun);scene.add(hemi,sun,sun.target);
   sun.castShadow=true;sun.shadow.mapSize.set(mobile?1024:2048,mobile?1024:2048);
   Object.assign(sun.shadow.camera,{left:-32,right:32,top:32,bottom:-32,near:.5,far:85});sun.shadow.bias=-.0005;sun.shadow.normalBias=.05;sun.shadow.radius=4;sun.shadow.intensity=.84;

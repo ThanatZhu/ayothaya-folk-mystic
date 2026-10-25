@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {createWaterSurface} from './water-surface158.js?v=158';
 
 // 0.62: Blender v2 environments keep their own textured PBR materials (no Lambert repaint).
 // Mood presets stand in for the Cycles lights, which the GLB does not carry.
@@ -20,7 +21,7 @@ const FLAT=/^(Ground|Soil foundation|Water surface|Damp canal|Streets|Tracks|Cou
 // the foundation rule matches both spellings, the others keep the ranking every map was tuned with.
 const LAYERS=[[/^(Soil|Cellar)[ _]foundation/,-1],[/^(Ground|Island meadow)/,0],[/^(Damp canal|Wetland islands|Earthen rice)/,1],[/^Tracks/,2],[/^Feathered/,3],[/^(Courtyard|Raised flagstone|Spirit arena paved)/,4],[/^Streets/,5],[/^(Dense low rice|Stone moss|Arena inlays)/,6]];
 const TOP_RANK=Math.max(...LAYERS.map(([,r])=>r));
-export function prepareSceneV2({scene,model,map}){
+export function prepareSceneV2({scene,model,map,waterEnabled=true}){
  const mood=MOODS[moodOf(map)],converted=new Map(),water=[],wind={value:0};
  // glTF can share one atlas texture between roofs, timber, foliage and water.
  // Sliding that atlas changes every material's tile, even if the Texture is cloned.
@@ -65,8 +66,11 @@ export function prepareSceneV2({scene,model,map}){
  const flowing=new Map();
  for(const m of water)for(const [key,x,z] of [['map',-.004,.006],['normalMap',.012,.02]]){const t=m[key];if(t&&!fixedImages.has(t.image)){t.wrapS=t.wrapT=THREE.RepeatWrapping;flowing.set(t,{x,z,offset:t.offset.clone()});}}
  let running=!matchMedia('(prefers-reduced-motion:reduce)').matches,time=0;
+ const surface=createWaterSurface({model,map,enabled:waterEnabled});
+ model.userData.disposeWater158=()=>surface.dispose();
  return {
-  update(dt){if(running)time+=Math.min(.08,Math.max(0,dt));wind.value=time;for(const [t,v] of flowing)t.offset.set(v.offset.x+time*v.x,v.offset.y+time*v.z);return time;},
+  water:surface,
+  update(dt){if(running)time+=Math.min(.08,Math.max(0,dt));wind.value=time;surface.clock.value=time;for(const [t,v] of flowing)t.offset.set(v.offset.x+time*v.x,v.offset.y+time*v.z);return time;},
   toggle(){running=!running;return running;},
   guildUpgrades(owned){for(const [o,kind,tier] of upgrades)o.visible=(owned?.[kind]??0)>=tier;},get running(){return running;},
  };
@@ -74,6 +78,7 @@ export function prepareSceneV2({scene,model,map}){
 // Release GPU memory of the current scene (geometry, materials, textures) before the page moves to another map.
 export function disposeScene(root){
  const textures=new Set();
+ root.traverse(o=>o.userData.disposeWater158?.());
  root.traverse(o=>{o.geometry?.dispose();for(const m of [].concat(o.material??[])){for(const v of Object.values(m))if(v?.isTexture)textures.add(v);m.dispose();}});
  textures.forEach(t=>t.dispose());
 }

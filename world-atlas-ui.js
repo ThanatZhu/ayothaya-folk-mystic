@@ -33,7 +33,7 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onClose}){
  document.body.append(dialog);
  const $=s=>dialog.querySelector(s),viewport=$('.atlas-viewport'),surface=$('.atlas-surface'),select=$('#atlas-destination'),warp=$('#atlas-warp');
  const pins=new Map();let selected=currentId,zoom=1,busy=false,drag=null,suppressClick=false;
- for(const map of catalog.maps){
+ for(const map of catalog.maps){if(map.pvpArena&&map.id!==currentId)continue;
   const option=document.createElement('option');option.value=map.id;option.textContent=map.name;select.append(option);
   if(!PLACES[map.id])continue;const anchor=at(PLACES[map.id]);
   const pin=document.createElement('button');pin.type='button';pin.className='atlas-place';pin.dataset.mapId=map.id;
@@ -51,6 +51,7 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onClose}){
   for(const [id,pin] of pins)pin.setAttribute('aria-pressed',String(id===selected));
   let detail=(map.subtitle??'').split(' · ')[0];
   if(selected===currentId)detail='คุณอยู่ที่นี่';
+  else if(map.pvpArena)detail='สนามส่วนตัว · เข้าผ่านเมนูประลอง และกดกลับอยุธยาเพื่อออก';
   else if(map.guildHall)detail='เข้าผ่านหน้ากิลด์หรือขุนพลชุมพล เมื่อเป็นสมาชิกกิลด์';
   else if(map.instance)detail='ดันเจี้ยนปาร์ตี้ · เข้าจากโรงสีใต้เงาจันทร์';
   else if(cost===null)detail='ยังไม่มีเส้นทางวาร์ปไปที่นี่';

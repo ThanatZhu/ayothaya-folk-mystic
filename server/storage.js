@@ -123,7 +123,7 @@ export class FirebaseStore{
    const [online,legacy,lease]=await Promise.all([tx.get(refs.profile),tx.get(refs.legacy),tx.get(refs.lease)]);
    if(!takeover&&lease.exists&&lease.data().expires>Date.now())throw new Error('already-online');
    if(!legacy.exists)throw new Error('character-not-found');
-   const record=online.exists?online.data().record:legacy.data();if(!online.exists){delete record.petCollection;delete record.mailbox;delete record.walkRoute;delete record.albumSchema;delete record.albumRewards;} // Never import a premium wallet from the client-writable mirror.
+   const record=online.exists?online.data().record:legacy.data();if(!online.exists){delete record.identityReceipts;delete record.petCollection;delete record.mailbox;delete record.walkRoute;delete record.albumSchema;delete record.albumRewards;} // Never import a premium wallet from the client-writable mirror.
    if(record.serverId!==identity.serverId||legacy.data().serverId!==identity.serverId)throw new Error('character-server');
    character(record.character); // Legacy XP is imported once; later joins use the private server profile.
    if(online.exists){const next=character({...legacy.data().character,classId:record.character.classId,jobId:record.character.jobId??''});validateCharacterChange(record.character,next,record.state);record.character=next;}
@@ -140,7 +140,7 @@ export class FirebaseStore{
    if(!legacy.exists||legacy.data().revision!==session.mirrorRevision)throw new Error('save-conflict');
    const next={...copy(record),revision:session.mirrorRevision+1};delete next.slotId;
    // Skill levels stay in the private profile; the client-readable mirror keeps its rule-checked shape.
-   const mirror={...next};delete mirror.walkRoute;delete mirror.skills;delete mirror.roleSkillBackup;delete mirror.roleCooldowns;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.daily;delete mirror.dungeonDay;delete mirror.pet;delete mirror.petCollection;delete mirror.mailbox;delete mirror.bounty;delete mirror.weekly;delete mirror.rebirth;delete mirror.xpCurve;delete mirror.album;delete mirror.albumSchema;delete mirror.albumRewards;delete mirror.trade;delete mirror.stats;delete mirror.gear;
+   const mirror={...next};delete mirror.identityReceipts;delete mirror.walkRoute;delete mirror.skills;delete mirror.roleSkillBackup;delete mirror.roleCooldowns;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.daily;delete mirror.dungeonDay;delete mirror.pet;delete mirror.petCollection;delete mirror.mailbox;delete mirror.bounty;delete mirror.weekly;delete mirror.rebirth;delete mirror.xpCurve;delete mirror.album;delete mirror.albumSchema;delete mirror.albumRewards;delete mirror.trade;delete mirror.stats;delete mirror.gear;
    tx.set(session.refs.profile,{record:next,updatedAt:Date.now()});tx.set(session.refs.legacy,{...mirror,updatedAt:new Date()});
    if(release)tx.delete(session.refs.lease);else tx.update(session.refs.lease,{expires:Date.now()+ttl});return next.revision;
   });session.mirrorRevision=revision;

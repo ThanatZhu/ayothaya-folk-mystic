@@ -1,3 +1,5 @@
+import {createArenaStage} from './arena-stage166.js';
+import {createArenaUI} from './arena-ui166.js';
 import {createAnnouncementUI} from './announcement-ui.js?v=149';
 import {createAutoTargetUI} from './auto-target-ui.js?v=139';
 import {createBossBrowserUI} from './boss-browser-ui.js?v=travel161';
@@ -9,7 +11,7 @@ import {groundHeight} from './combat-core.js?v=pets128';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=world125';
-import {createMultiplayer} from './multiplayer-ui.js?v=combat165';
+import {createMultiplayer} from './multiplayer-ui.js?v=arena166';
 import {createEquipmentUI} from './equipment-ui.js?v=size1';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=talk137';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=106.0';
@@ -31,14 +33,14 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=combat165';
+import {createGame} from './game-controls.js?v=arena166';
 import {atlasPath,className} from './classes.js?v=112.1';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=training164';
+import {createWorldUI} from './world-ui.js?v=arena166';
 import {createStoryUI} from './story-ui.js?v=story160';
-import {createBagUI} from './bag-ui.js?v=shop163';
+import {createBagUI} from './bag-ui.js?v=arena166';
 import {createStatusUI} from './status-ui.js?v=cards156';
-import {createProfileUI} from './profile-ui.js?v=107';
+import {createProfileUI} from './profile-ui.js?v=arena166';
 import {createRefineUI} from './refine-ui.js?v=talk137';
 import {createCraftUI} from './craft-ui.js?v=107';
 import {createWeather} from './weather-fx.js?v=announce149';
@@ -48,7 +50,7 @@ import {createLifeUI} from './life-ui.js?v=boss138';
 import {createPetUI} from './pet-ui.js?v=mail150';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=story160';
-import {createLifeNPC} from './life-npc.js?v=npc159';
+import {createLifeNPC} from './life-npc.js?v=arena166';
 import {createFeedback} from './feedback.js?v=compact-notice1';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=podium153';
 import {createMarketBoardUI} from './market-board-ui.js?v=shops155';
@@ -58,7 +60,7 @@ import {resolveMap} from './world-state.js?v=101.5';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=light159';
 import {createRoofCutaway} from './roof-cutaway.js?v=106.1-lablae';
 import {createLandscapeGuard} from './mobile-layout.js?v=mobile2';
-import {prepareCloud} from './cloud-save.js?v=112.7';
+import {prepareCloud} from './cloud-save.js?v=arena166';
 import {captureSave,applySave} from './save-state.js?v=101.5';
 const $=id=>document.getElementById(id),loading=getLoadingScreen(),loader=new THREE.TextureLoader();
 // Sample source atlas cells at runtime; original generated PNGs remain intact.
@@ -71,7 +73,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=world125');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=arena166');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,account.data?.mapId||new URLSearchParams(location.search).get('map'));
@@ -126,8 +128,8 @@ try {
  }});scene.add(gltf.scene);
  const worldLight=applyWorldLighting({scene,model:gltf.scene,map,sun,hemi,renderer});
  // v2 scenes already contain their trees, props and ground detail: never layer the old procedural set on top.
- const idle={update(){}};if(!map.scene)createCapitalProps({scene,map});
- const landscapeDetails=map.scene?idle:createLandscapeDetails({scene,map});
+ const idle={update(){}};if(!map.scene&&!map.pvpArena)createCapitalProps({scene,map});
+ const landscapeDetails=map.scene||map.pvpArena?idle:createLandscapeDetails({scene,map});
  const meadow=map.scene&&MEADOW_MAPS.has(map.id)?createMeadow({scene,map,model:gltf.scene,quality:QUALITY[readPerf().quality].meadow,reduced:matchMedia('(prefers-reduced-motion:reduce)').matches}):idle;
  applyMeadowLighting(meadow);
  const cityTrees=map.scene?idle:createCapitalTrees({scene,map,texture:leafAtlas,crownTexture:capitalLook.crownTexture});
@@ -175,7 +177,7 @@ try {
  const geo=new THREE.BufferGeometry(),positions=new Float32Array(90);let seed=2026;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
  for(let i=0;i<30;i++){positions[i*3]=-16+rnd()*32;positions[i*3+1]=.4+rnd()*4;positions[i*3+2]=-20+rnd()*20;}geo.setAttribute('position',new THREE.BufferAttribute(positions,3));
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
- const frontier=map.procedural&&!map.scene?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
+ const frontier=map.pvpArena?createArenaStage({scene}):map.procedural&&!map.scene?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
  // Leaving the map reloads the page; free the scene's GPU memory first so the next map starts clean.
  const actorLighting=createActorLighting({scene,camera,renderer,map,profile:lightProfile});
  bindRenderLifecycle({dispose:()=>{actorLighting.dispose();disposeScene(scene);renderer.dispose();},resize});
@@ -220,6 +222,7 @@ try {
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
  worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
+ const arenaUI=createArenaUI({game,account,map,catalog,worldUI});
  createActionbar({game,bagUI,account});
  document.querySelector('.player-heading small').textContent=(jobFor(account.character.classId,account.character.jobId)?.name??className(account.character.classId,account.character.gender))+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
@@ -232,7 +235,7 @@ try {
  renderer.setAnimationLoop(ms=>{
   if(!perf.shouldDraw(ms))return;
   if(rotating){const t=Math.min(1,(performance.now()-rotating.start)/350),ease=t*t*(3-2*t),angle=rotating.from+rotating.delta*ease;camera.position.setFromSphericalCoords(rotating.radius,rotating.polar,angle).add(controls.target);if(t===1)rotating=null;}
-  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);meadow.update(t);game.update(dt);{const p=game.world.player;roofCut.update(p.x,groundHeight(map.nav,p.x,p.z),p.z);}storyUI.update();bagUI.update();statusUI.update();profileUI.update();refineUI.update();craftUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
+  const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);meadow.update(t);game.update(dt);{const p=game.world.player;roofCut.update(p.x,groundHeight(map.nav,p.x,p.z),p.z);}arenaUI.update();storyUI.update();bagUI.update();statusUI.update();profileUI.update();refineUI.update();craftUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
   const reducedCharacters=matchMedia('(prefers-reduced-motion:reduce)').matches;
   characters.slice(1).forEach((a,i)=>{
    const action=stationaryNPCAction(game.world.time,i,a.npc.talking);

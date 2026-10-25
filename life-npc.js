@@ -10,6 +10,7 @@ const CLASSES=['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte']
 const blank=()=>{const t=new THREE.Texture();t.image=document.createElement('canvas');return t;};
 
 export function createLifeNPC({game,map,scene,camera,controls,bagUI}){
+ if(map.pvpArena)return {update(){}};
  const world=game.world,labels=document.getElementById('world-labels'),at=new THREE.Vector3();
  function actor(classId,gender,label){
   const sprite=createRiggedSprite(blank(),{classId,gender});sprite.scale.set(CHARACTER_WORLD_SCALE,CHARACTER_WORLD_SCALE,1);scene.add(sprite);

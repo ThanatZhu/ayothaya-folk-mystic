@@ -1,4 +1,4 @@
-import {storyScene} from './quest-cinematic-data155.js?v=story160';
+import {storyScene} from './quest-cinematic-data155.js?v=story163';
 import {normalizeAlbumState,depositAlbumCard,ALBUM_ERRORS} from './card-album.js?v=152';
 import {STORY,currentObjective,normalizeStory} from './story-quests.js?v=pets125';
 import {STORY_RECAP,storyArt} from './story-dialogue.js?v=pets125';
@@ -22,7 +22,7 @@ function albumArt(id){
 const TIER=['ง่าย','กลาง','ยาก','หัวหน้า'];
 
 export function createQuestsUI({game,account,map,bagUI}){
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./quests-journal.css?v=album152',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./quests-journal.css?v=story163',import.meta.url).href;document.head.append(css);
  const desktop=matchMedia('(min-width:901px) and (pointer:fine)');
  let selectedQuest=null,lastQuest=-1;
  const world=game.world,slot=(account?.serverId??'local')+':'+(account?.slotId??'guest');
@@ -79,7 +79,7 @@ export function createQuestsUI({game,account,map,bagUI}){
   const heading=document.createElement('h3');heading.id='quest-detail-title';heading.textContent=quest?.title??'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';section.append(heading);
   if(quest){const art=storyArt(quest.id,active&&obj?obj.stepNumber:1),image=document.createElement('img');image.src=art.src;image.alt=art.alt;image.className='story-recap-art';image.width=640;image.height=360;image.decoding='async';image.onerror=()=>image.remove();section.append(image);}
   if(quest){const clips=document.createElement('div');clips.className='quest-cinematic-links';const lastStep=active&&obj?state.step:quest.steps.length-1;
-   for(const s of [lastStep]){const watch=document.createElement('button');watch.type='button';watch.textContent='ดูเรื่องราวเควสนี้';watch.dataset.cinematicStep=s;watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:storyScene(index,s)}}));clips.append(watch);}section.append(clips);}
+   for(const s of [lastStep]){const watch=document.createElement('button');watch.type='button';watch.className='quest-watch';watch.textContent='ดูเรื่องราวเควสนี้';watch.dataset.cinematicStep=s;watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:storyScene(index,s)}}));clips.append(watch);}section.append(clips);}
   const recap=document.createElement('p');recap.textContent=quest?STORY_RECAP[quest.id]:'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';section.append(recap);
   if(active&&obj){
    const goal=document.createElement('div');goal.className='quest-journal-goal';
@@ -101,15 +101,15 @@ export function createQuestsUI({game,account,map,bagUI}){
   }else if(tab==='bounty'){
    body.innerHTML=`<p class="social-note">ค่าหัวเปลี่ยนทุกวันตอนเที่ยงคืน · ล่าได้ทุกแผนที่ · รับรางวัลในเมือง${map.safe?'':' (ตอนนี้อยู่นอกเมือง)'}</p><ul class="social-list">`+dailyBounties(Date.now()).map((b,i)=>{
     const n=Math.min(s.progress[i],b.count),done=n>=b.count;
-    return `<li class="${s.claimed[i]?'':done?'on':''}"><div><strong>[${TIER[b.tier]}] ล้ม${b.name} ×${b.count}</strong><small>${n}/${b.count} · รางวัล ${b.reward.baseXp} EXP · ${b.reward.coins} เบี้ย</small></div>${s.claimed[i]?'<span class="claimed">รับแล้ว ✔</span>':`<button type="button" data-claim="${i}" ${done&&map.safe?'':'disabled'}>รับรางวัล</button>`}</li>`;}).join('')+'</ul>';
-   for(const [i,row]of [...body.querySelectorAll('.social-list li')].entries()){const task=dailyBounties(Date.now())[i],watch=document.createElement('button');watch.type='button';watch.textContent='ดูคัตซีน';watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{kind:'bounty',title:'กระดานค่าหัว · '+task.name,goal:'ล้ม'+task.name+' '+task.count+' ตัว · รับรางวัลในเมือง',monster:task.monster}}));row.querySelector('div').append(watch);}
+    return `<li class="${s.claimed[i]?'':done?'on':''}"><div class="quest-task-copy"><strong>[${TIER[b.tier]}] ล้ม${b.name} ×${b.count}</strong><div class="quest-task-reward"><small>${n}/${b.count} · รางวัล ${b.reward.baseXp} EXP · ${b.reward.coins} เบี้ย</small></div></div>${s.claimed[i]?'<span class="claimed">รับแล้ว ✔</span>':`<button type="button" data-claim="${i}" ${done&&map.safe?'':'disabled'}>รับรางวัล</button>`}</li>`;}).join('')+'</ul>';
+   for(const [i,row]of [...body.querySelectorAll('.social-list li')].entries()){const task=dailyBounties(Date.now())[i],watch=document.createElement('button');watch.type='button';watch.className='quest-watch';watch.textContent='ดูคัตซีน';watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{kind:'bounty',title:'กระดานค่าหัว · '+task.name,goal:'ล้ม'+task.name+' '+task.count+' ตัว · รับรางวัลในเมือง',monster:task.monster,leader:!!task.leader}}));row.querySelector('.quest-task-reward').append(watch);}
    body.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(+b.dataset.claim));
   }else if(tab==='weekly'){
    // 0.102 weekly quests (online): reset every Monday, claimed in a town
    const loot=r=>[r.coins.toLocaleString('th-TH')+' เบี้ย',...r.items.map(i=>itemDef(i.id).name+' ×'+i.count)].join(' · ');
    body.innerHTML=game.online?`<p class="social-note">ภารกิจใหม่ทุกวันจันทร์ · นับจากทุกแผนที่ · รับรางวัลในเมือง${map.safe?'':' (ตอนนี้อยู่นอกเมือง)'}</p><ul class="social-list">`+WEEKLY.map((q,i)=>{const n=Math.min(wk.progress[i],q.count),done=n>=q.count;
-    return `<li class="${wk.claimed[i]?'':done?'on':''}"><div><strong>${q.name}</strong><small>${n}/${q.count} · รางวัล ${loot(q.reward)}</small></div>${wk.claimed[i]?'<span class="claimed">รับแล้ว ✔</span>':`<button type="button" data-wclaim="${i}" ${done&&map.safe?'':'disabled'}>รับรางวัล</button>`}</li>`;}).join('')+'</ul>':'<p class="social-note">ภารกิจรายสัปดาห์ใช้ได้เมื่อเล่นออนไลน์</p>';
-   for(const [i,row]of [...body.querySelectorAll('.social-list li')].entries()){const task=WEEKLY[i],watch=document.createElement('button');watch.type='button';watch.textContent='ดูคัตซีน';watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{kind:'weekly',title:task.name,goal:task.name+' · รับรางวัลในเมือง',monster:i===2?'marsh-ape':i===1?'rat-chief':'straw'}}));row.querySelector('div').append(watch);}
+    return `<li class="${wk.claimed[i]?'':done?'on':''}"><div class="quest-task-copy"><strong>${q.name}</strong><div class="quest-task-reward"><small>${n}/${q.count} · รางวัล ${loot(q.reward)}</small></div></div>${wk.claimed[i]?'<span class="claimed">รับแล้ว ✔</span>':`<button type="button" data-wclaim="${i}" ${done&&map.safe?'':'disabled'}>รับรางวัล</button>`}</li>`;}).join('')+'</ul>':'<p class="social-note">ภารกิจรายสัปดาห์ใช้ได้เมื่อเล่นออนไลน์</p>';
+   for(const [i,row]of [...body.querySelectorAll('.social-list li')].entries()){const task=WEEKLY[i],watch=document.createElement('button');watch.type='button';watch.className='quest-watch';watch.textContent='ดูคัตซีน';watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{kind:'weekly',title:task.name,goal:task.name+' · รับรางวัลในเมือง',monster:i===2?'marsh-ape':i===1?undefined:'straw',leader:i===1}}));row.querySelector('.quest-task-reward').append(watch);}
    body.querySelectorAll('[data-wclaim]').forEach(b=>b.onclick=()=>{if(!map.safe)return world.notice('รับรางวัลได้ในเมือง');world.market?.('weeklyClaim',{index:+b.dataset.wclaim});});
   }else{
    const paid=game.online?(world.albumRewards??[]):localAlbum.albumRewards;

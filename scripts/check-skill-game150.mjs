@@ -9,7 +9,7 @@ import {initialSave} from '../realm-state.js';
 import {XP_CURVE} from '../experience.js';
 const out=new URL('../outputs/skill150/',import.meta.url);await mkdir(out,{recursive:true});const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8'));
 const store=await new LocalStore(await mkdtemp(fileURLToPath(new URL('store-',out)))).init(),origins=[],service=await createHost({mode:'local',store,catalog,origins,serveStatic:true});await new Promise(r=>service.server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+service.server.address().port;origins.push(base);
-const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true}),errors=[],checks=[];
+const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true,args:['--explicitly-allowed-ports='+service.server.address().port]}),errors=[],checks=[];
 try{
  const seeded=await store.createLocal({name:'FrameReview',gender:'male'}),record=store.rows.get(seeded.uid);record.daily={day:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),streak:1};record.xpCurve=XP_CURVE;record.story={v:3,quest:0,step:0,count:0,done:false};record.bag={coins:1234,items:{}};record.state={...initialSave(),mapId:'ayutthaya',position:{...catalog.maps.find(m=>m.id==='ayutthaya').spawn}};
  const context=await browser.newContext({viewport:{width:1440,height:900}});await context.route('http://127.0.0.1:8787/**',r=>r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'}));

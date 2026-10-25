@@ -15,7 +15,7 @@ const fixture=source.replace('</body>',`<script type="module">
  </script><style>body{background:radial-gradient(ellipse at 50% 45%,#4d6651,#0c211d)}#game-shell{background:repeating-linear-gradient(35deg,#ffffff03 0 1px,transparent 1px 70px)}</style></body>`);
 const server=http.createServer(async(req,res)=>{try{const url=new URL(req.url,'http://localhost');if(url.pathname==='/__skill150'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fixture);return;}const file=path.resolve(root,'.'+decodeURIComponent(url.pathname));if(!file.startsWith(root+path.sep))throw Error('path');const mime={'.js':'text/javascript','.css':'text/css','.html':'text/html','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ttf':'font/ttf','.json':'application/json'};if(!mime[path.extname(file)])throw Error('extension');res.setHeader('Content-Type',mime[path.extname(file)]);res.end(await readFile(file));}catch{res.writeHead(404).end();}});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
-const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true}),errors=[],failed=[],checks=[];
+const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true,args:['--explicitly-allowed-ports='+server.address().port]}),errors=[],failed=[],checks=[];
 try{
  const page=await browser.newPage({viewport:{width:1440,height:900}});page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE',e.message);});page.on('response',r=>{if(r.status()>=400){failed.push(r.url());console.error('HTTP',r.status(),r.url());}});
  const cases=[{id:'novice',branches:[{id:''}]},...ROLES];

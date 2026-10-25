@@ -36,7 +36,7 @@ import {atlasPath,className} from './classes.js?v=112.1';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=travel161';
 import {createStoryUI} from './story-ui.js?v=story160';
-import {createBagUI} from './bag-ui.js?v=mobile148';
+import {createBagUI} from './bag-ui.js?v=shop163';
 import {createStatusUI} from './status-ui.js?v=cards156';
 import {createProfileUI} from './profile-ui.js?v=107';
 import {createRefineUI} from './refine-ui.js?v=talk137';

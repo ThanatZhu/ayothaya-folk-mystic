@@ -1,5 +1,5 @@
 import {createArenaStage} from './arena-stage166.js';
-import {createArenaUI} from './arena-ui166.js?v=icon167';
+import {createArenaUI} from './arena-ui166.js?v=skin168';
 import {createAnnouncementUI} from './announcement-ui.js?v=149';
 import {createAutoTargetUI} from './auto-target-ui.js?v=139';
 import {createBossBrowserUI} from './boss-browser-ui.js?v=travel161';

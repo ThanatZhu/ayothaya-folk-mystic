@@ -28,6 +28,10 @@ export default {
   "marsh-ape-awakened": {
    "hp": 600000,
    "damage": 800
+  },
+  "marsh-ape": {
+   "hp": 50000,
+   "damage": 200
   }
  },
  "drops": {

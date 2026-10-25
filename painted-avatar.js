@@ -20,10 +20,10 @@ export function createPaintedAvatar(texture,options={}){
   setEquipment:mesh.userData.setEquipment,setAppearance:mesh.userData.setAppearance,dispose:mesh.userData.dispose};
  let classId=options.classId??'novice',gender=options.gender??'male',appearance=options.appearance??{},equipment=options.equipment??null;
  const loadArt=options.directionalArtLoader??loadDirectionalArt;
- let actor=null,generation=0,disposed=false,preparing=false,pending=null,wanted=options.directional!==false,context={direction:'S',mode:'idle',time:0};
+ let actor=null,generation=0,disposed=false,preparing=false,pending=null,wanted=options.directional!==false,explicitFrame=false,context={direction:'S',mode:'idle',time:0};
  function visible(){
   const authoredWalk=context.mode==='walk'&&mesh.userData.supportsAuthoredAction('walk');
-  const paintedAction=authoredWalk||['run','sit','sleep','rest','sitDown','standUp'].includes(context.mode)||mesh.userData.lifeTransition;
+  const paintedAction=explicitFrame||authoredWalk||['attack','cast','guard','hit','dash','run','sit','sleep','rest','sitDown','standUp'].includes(context.mode)||mesh.userData.lifeTransition;
   const active=!!(!paintedAction&&!disposed&&!preparing&&wanted&&actor&&!mesh.userData.directionalReason);
   mesh.material.visible=!active;if(actor)actor.visible=active;
   mesh.userData.directionalActive=active;return active;
@@ -56,6 +56,7 @@ export function createPaintedAvatar(texture,options={}){
  mesh.userData.setDirectional=value=>{wanted=!!value;if(!wanted)return Promise.resolve(visible());if(preparing)return pending.then(()=>visible());return actor&&!mesh.userData.directionalReason?Promise.resolve(visible()):requestPreparation();};
  mesh.userData.setFacing=(face,azimuth,options={})=>{context={...context,...options,direction:stableViewDirection(face,azimuth,context.direction)};};
  mesh.userData.pose=(pose={},flip=false)=>{
+  explicitFrame=pose.profileFrame===true;
   // Direct pose callers (preview/NPCs) may not call setFacing first. The authored
   // action still decides when to leave the optional directional mesh.
   if(typeof pose.mode==='string')context={...context,mode:pose.mode,time:pose.time??context.time,phase:pose.phase,reduced:pose.reduced??false};

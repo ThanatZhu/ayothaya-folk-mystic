@@ -5,7 +5,7 @@ import {createPartyLayout} from './party-layout.js?v=overlay143';
 import {createDesktopChat} from './desktop-chat-ui.js?v=channel144';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
-import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';
+import {createRoleAnimation,roleAnimationActive,sampleRolePose} from './combat-animation165.js';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {createInspectUI} from './inspect-ui.js?v=108.1';
 import {iconStyle} from './bag-ui.js?v=107';
@@ -21,10 +21,10 @@ import {atlasPath,className} from './classes.js?v=112.1';
 import {rebirthRank} from './character-stats.js?v=107';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
-import {createPaintedAvatar} from './painted-avatar.js?v=combat129';
+import {createPaintedAvatar} from './painted-avatar.js?v=combat165';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=combat129';
 import {activeEmote,actionChoice,supportsCharacterAction} from './character-action-state.js?v=106.0';
-import {skillPose,skillTrack} from './skill-choreography.js?v=life1';
+import {skillPose,skillTrack} from './skill-choreography.js?v=combat165';
 import {createSkillEffects} from './skill-effects.js?v=74';
 const messages={'invalid-auto-target':'เลือกเป้าหมายออโต้ใหม่อีกครั้ง','client-update-required':'เกมมีสกิลเวอร์ชันใหม่ กรุณารีเฟรชหน้าเกม','server-busy':'เซิร์ฟเวอร์กำลังบันทึกหรือสลับเครื่อง · ลองอีกครั้งในไม่กี่วินาที','stale-command':'คำสั่งซ้ำ/ล่าช้า · ลองกดใหม่อีกครั้ง','rate-limit':'กดเร็วเกินไป · รอสักครู่แล้วลองใหม่','duel-invalid':'ท้าดวลได้เฉพาะนอกเมือง กับผู้เล่นในแผนที่เดียวกัน','duel-busy':'มีคนกำลังประลองอยู่แล้ว','duel-far':'อยู่ห่างกันเกิน 20 ม. · เดินเข้าไปใกล้ก่อนท้าดวล','replaced':'บัญชีนี้เข้าเล่นจากอีกหน้าต่าง/อีกเครื่องแล้ว · หน้านี้ออฟไลน์','already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','inspect-gone':'ผู้เล่นคนนี้ไม่อยู่ในแผนที่นี้แล้ว','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','world-rate':'แชตโลกส่งได้ทุก 8 วินาที','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
 const chatErrors=new Set(['chat-rate','world-rate','no-party','invalid-chat']);
@@ -191,16 +191,16 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  function presentEvent(e){
    if(e.type==='presentationSnapshot'){applySnapshot(e.snapshot);return;}
    if(e.type==='bossResult'||e.type==='bossDirectory'){game.world.events.push(e);return;}
-   if(e.actor===client.id){game.world.events.push(e);return;}
+   if(e.actor===client.id){game.world.events.push({...e,presentationQueuedAt:performance.now()/1000});return;}
    const v=views.get(e.actor);if(!v||v.loading)return;
    if(e.type==='petSkill'){v.pet?.attack(e.to,e.lag??0);const ids={fireBurst:'sky-spear',lotusCleanse:'cleanse',moonBarrier:'sanctuary',roarGuard:'guard',trueSight:'mark',flowerBind:'vine-trap',riceHeal:'heal',jadeShell:'sanctuary',waterMana:'regen',echoSlow:'hamstring'};game.roleEffects?.spawn({roleSkillId:ids[e.kind],from:{x:e.x,z:e.z},to:e.to??{x:e.x+.5,z:e.z},lag:e.lag??0});}
    if(e.type==='damage'&&Number.isInteger(e.id))game.world.events.push(e); // 0.99.3 everyone's numbers float over the monster they hit
    if(e.type==='miss'&&Number.isInteger(e.id))game.world.events.push(e);
    if(e.type==='playerHit')game.popup?.({...e,hurt:true},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2+v.sprite.position.y,z:v.state.player.z})});
-   if(e.roleSkillId&&['cast','rolePassive'].includes(e.type)){game.roleEffects?.spawn({...e,lag:e.lag??0});if(e.type==='cast')v.roleAction={id:e.roleSkillId,castId:e.castId,duration:e.timing?.duration??SKILL_PROFILES[e.roleSkillId].duration,start:clock-(e.lag??0)};return;}
+   if(e.roleSkillId&&['cast','rolePassive'].includes(e.type)){game.roleEffects?.spawn({...e,lag:e.lag??0});if(e.type==='cast'){v.roleAction=createRoleAnimation(e,clock);v.action=null;v.emote=null;v.state.emote=null;}return;}
    if(e.type==='castCancel'){if(v.roleAction?.castId===e.castId)v.roleAction=null;if(v.action?.castId===e.castId)v.action=null;game.roleEffects?.cancel(e.castId,e.actor);fx.cancel(e.castId,e.actor);return;}
    if(e.type==='cast'){
-    v.roleAction=null;
+    if(!roleAnimationActive(v.roleAction,clock))v.roleAction=null;
     const id=v.state.character.classId,skill=skillTrack(id,e.skillIndex),current=skillTrack(id,v.action?.index);
     if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock-(e.lag??0),timing:e.timing,castId:e.castId};
     const track=skill&&e.timing?{...skill,duration:e.timing.duration,strikes:e.timing.impacts.map(at=>at/e.timing.duration)}:skill??{...skillTrack(id,0),duration:e.timing?.duration??attackDuration(id),strikes:[.42]},from=e.from??v.state.player,to=e.to??from;
@@ -292,11 +292,12 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    }
    const elapsed=clock-(v.action?.start??-100),track=skillTrack(state.character.classId,v.action?.index),emote=activeEmote(Object.hasOwn(state,'emote')?state.emote:v.emote,clock);
    const skillActive=track&&elapsed<(v.action.timing?.duration??track.duration),basicActive=v.action&&v.action.index===null&&elapsed<(v.action.timing?.duration??attackDuration(state.character.classId));
-   const chosen=actionChoice({time:clock,hit:clock<(v.hitUntil??0)&&!skillActive&&!basicActive&&!(v.roleAction&&clock-v.roleAction.start<v.roleAction.duration),cast:skillActive,attack:basicActive,emote,moving:p.moving||Math.hypot(v.sprite.position.x-old.x,v.sprite.position.z-old.z)>.001,running:p.running,dead:p.hp<=0}),supported=supportsCharacterAction(chosen,v.sprite.userData.supportsAction?.bind(v.sprite.userData));
+   const roleActive=roleAnimationActive(v.roleAction,clock);
+   const chosen=actionChoice({time:clock,hit:clock<(v.hitUntil??0)&&!skillActive&&!basicActive&&!roleActive,cast:roleActive||skillActive,attack:basicActive,emote,moving:p.moving||Math.hypot(v.sprite.position.x-old.x,v.sprite.position.z-old.z)>.001,running:p.running,dead:p.hp<=0}),supported=supportsCharacterAction(chosen,v.sprite.userData.supportsAction?.bind(v.sprite.userData));
    const mode=['sit','sleep','run'].includes(chosen)&&!supported?(chosen==='run'?'walk':'idle'):chosen,locomotion=mode==='walk'||mode==='run',poseTime=mode==='hit'?clock-v.hitUntil+.28:skillActive||basicActive?elapsed:emote?.name===mode?clock-emote.time:clock;
    v.label.dataset.animationPending=['sit','sleep','run'].includes(chosen)&&!supported?chosen:'';
-   const roleSample=v.roleAction&&clock-v.roleAction.start<v.roleAction.duration&&p.hp>0?sampleSkill(v.roleAction.id,clock-v.roleAction.start,{reduced:reduced.matches}):null;
-   const pose=roleSample?{...characterMotion({classId:state.character.classId,mode:'cast',time:clock-v.roleAction.start,reduced:reduced.matches}),profileFrame:true,artFrame:roleSample.frame,y:roleSample.heroY??0,x:0}:skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed*(v.action.timing?track.duration/v.action.timing.duration:1),{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:basicActive&&mode==='attack'?elapsed*attackDuration(state.character.classId)/(v.action.timing?.duration??attackDuration(state.character.classId)):poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)});
+   const rolePose=p.hp>0?sampleRolePose(v.roleAction,clock,{reduced:reduced.matches}):null;
+   const pose=rolePose??(skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed*(v.action.timing?track.duration/v.action.timing.duration:1),{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:basicActive&&mode==='attack'?elapsed*attackDuration(state.character.classId)/(v.action.timing?.duration??attackDuration(state.character.classId)):poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)}));
    v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'?0:pose.y);const angle=controls.getAzimuthalAngle();{const side=p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle);if(Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
    if(basicActive&&mode==='attack')pose.actionPhase=Math.max(0,Math.min(1,elapsed/(v.action.timing?.duration??attackDuration(state.character.classId))));
    v.sprite.userData.setFacing?.(p.face,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0||(p.down??0)>0;game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));

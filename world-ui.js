@@ -4,7 +4,7 @@ import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=travel161';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
-import {createMentorUI} from './mentor-ui.js?v=npc159';
+import {createMentorUI} from './mentor-ui.js?v=training164';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=role116';
@@ -15,7 +15,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  const npcStyle=document.createElement('link');npcStyle.rel='stylesheet';npcStyle.href='./npc-interaction.css?v=144';document.head.append(npcStyle);
  const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0,lastBig=0;
- const mentors=createMentorUI({game,account,inTown:()=>map.id==='ayutthaya',recall:()=>api.recall()});
+ const mentors=createMentorUI({game,account,catalog,map,inTown:()=>map.id==='ayutthaya',recall:()=>api.recall(),travel:async id=>{await travel(id);return traveling;},talkTo:name=>api.talkTo(name)});
  const conversationUI=createNPCConversation({game,onClose:()=>endTalk()});
  function endTalk(){if(conversation)conversation.talking=false;conversation=null;conversationUI.close();game.clearInput();}
  if(!account)try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}

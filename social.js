@@ -1,5 +1,6 @@
 // Friends, whisper and guild rules (0.47), shared by the realm server and the social window.
 export const FRIEND_MAX=50,GUILD_MAX=30,GUILD_COST=3000,EMBLEMS=24;
+export const GUILD_SEARCH_LIMIT=24,GUILD_APPLICATION_MAX=50,GUILD_APPLICATION_LIMIT=5,GUILD_APPLICATION_TTL=7*864e5;
 export const SOCIAL_ERRORS={'whisper-offline':'ผู้เล่นคนนี้ไม่ได้ออนไลน์อยู่','friend-self':'เพิ่มตัวเองเป็นเพื่อนไม่ได้','friend-already':'เป็นเพื่อนกันอยู่แล้ว','friend-full':'รายชื่อเพื่อนเต็มแล้ว',
  'friend-none':'ไม่มีคำขอเป็นเพื่อนนี้','guild-name':'ชื่อกิลด์ต้องยาว 2–16 ตัวอักษร','guild-taken':'ชื่อกิลด์นี้มีคนใช้แล้ว','guild-already':'อยู่ในกิลด์อยู่แล้ว',
  'guild-none':'ยังไม่ได้อยู่ในกิลด์','guild-leader':'ต้องเป็นหัวหน้ากิลด์','guild-full':'กิลด์เต็มแล้ว','guild-target':'ผู้เล่นคนนี้อยู่ในกิลด์อื่นแล้ว','guild-invite':'ไม่มีคำเชิญเข้ากิลด์นี้'};
@@ -28,3 +29,4 @@ export const guildSeats=g=>GUILD_MAX+GUILD_UPGRADES.stable.seats*(g?.upgrades?.s
 export const cleanNotice=s=>typeof s==='string'?s.normalize('NFC').replace(/[\u0000-\u0009\u000b-\u001f<>]/g,'').trim().slice(0,NOTICE_MAX):'';
 Object.assign(SOCIAL_ERRORS,{'guild-rank':'ยศไม่พอสำหรับคำสั่งนี้','guild-deputies':'มีรองหัวหน้าครบ '+DEPUTY_MAX+' คนแล้ว','guild-treasury':'คลังกิลด์มีเบี้ยไม่พอ',
  'guild-level':'ระดับกิลด์ยังไม่ถึง','guild-max':'อัปเกรดนี้สูงสุดแล้ว','guild-rite':'พิธีปลุกเสกยังมีผลอยู่','guild-hall':'เข้าได้เฉพาะสมาชิกกิลด์','guild-busy':'ออกจากสงคราม/ดวลก่อน'});
+Object.assign(SOCIAL_ERRORS,{'guild-missing':'ไม่พบกิลด์นี้แล้ว','guild-applications-full':'กิลด์นี้มีคำขอเต็มแล้ว ลองใหม่ภายหลัง','guild-application-limit':'ส่งคำขอเข้ากิลด์ได้ครั้งละไม่เกิน 5 กิลด์','guild-application-missing':'คำขอนี้หมดอายุหรือถูกจัดการแล้ว'});

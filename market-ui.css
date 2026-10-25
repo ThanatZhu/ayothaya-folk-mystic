@@ -83,3 +83,31 @@
 #market-window[data-market-view=trade] .market-note{font-size:13px;margin:12px;line-height:1.8}
 @media(min-width:700px){#market-window[data-market-view=trade] #market-body>.market-list{grid-template-columns:repeat(2,minmax(0,1fr));max-height:270px;overflow-y:auto}}
 @media(max-width:520px){#market-window[data-market-view=trade]>header{padding:10px 12px;gap:6px}#game-shell #market-window[data-market-view=trade] #market-title{font-size:17px}#market-window[data-market-view=trade] #market-body{padding:8px 4px 12px}#market-window[data-market-view=trade] .market-cols{gap:12px;margin-bottom:12px}#market-window[data-market-view=trade] .market-list li{gap:7px;padding:6px;font-size:12px}#market-window[data-market-view=trade] .market-list [data-d]{width:40px;min-height:44px}#market-window[data-market-view=trade] .market-actions{justify-content:center;gap:6px;padding:12px 4px}#market-window[data-market-view=trade] .market-actions button{flex:1 1 90px;font-size:12px;padding:8px 10px}}
+
+/* Desktop storage has two usable inventories, each with its own vertical scroll.
+   Keep the header/close button fixed rather than scrolling the whole dialog. */
+@media(min-width:900px){
+ html body:not(.mobile-play) #game-shell #market-window[data-hud-panel][data-market-view=storage][open]{
+  position:fixed!important;inset:24px!important;margin:auto!important;
+  width:min(1120px,calc(100vw - 64px))!important;max-width:calc(100vw - 64px)!important;
+  height:min(720px,calc(var(--visible-height,100dvh) - 64px))!important;
+  max-height:calc(var(--visible-height,100dvh) - 64px)!important;min-height:0!important;
+  display:flex;flex-direction:column;overflow:hidden!important;transform:none!important;zoom:1!important;
+ }
+ body:not(.mobile-play) #market-window[data-market-view=storage]>header{flex:none;padding:14px 20px;gap:16px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] #market-title{font-size:20px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] #market-coins{flex:none;font-size:14px;white-space:nowrap}
+ body:not(.mobile-play) #market-window[data-market-view=storage] #market-body{flex:1;min-height:0;min-width:0;overflow:hidden;padding:14px 16px 18px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-cols{height:100%;min-height:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-cols>section{display:flex;flex-direction:column;min-height:0;min-width:0;border:1px solid #b7995e66;border-radius:8px;background:#0a211b55;padding:0 0 10px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] h3{flex:none;display:flex;justify-content:space-between;align-items:center;font-size:17px;margin:0;padding:12px 16px;border-bottom:1px solid #b7995e55}
+ body:not(.mobile-play) #market-window[data-market-view=storage] h3 small{font-size:13px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-list{flex:1;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;align-content:start;gap:8px;padding:12px;scrollbar-gutter:stable}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-list li{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;min-width:0;min-height:62px;gap:8px;padding:8px;font-size:14px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-list li>div{min-width:0}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-list li strong{white-space:normal;overflow-wrap:anywhere;line-height:1.6}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-list li small{font-size:12px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-list .item-icon{width:36px;height:36px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-list button{min-height:36px;font-size:12px;padding:6px 12px}
+ body:not(.mobile-play) #market-window[data-market-view=storage] .market-list .empty{display:flex;min-height:90px;font-size:14px}
+}

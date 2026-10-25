@@ -13,7 +13,7 @@ test('two guild members enter the same private hall over the network; a non-memb
  assert.ok(catalog.maps.find(m=>m.id===GUILD_HALL)?.guildHall,'world.json has the hall');
  const base=path.resolve('.local-multiplayer');await mkdir(base,{recursive:true});const directory=await mkdtemp(path.join(base,'guild101-')),store=await new LocalStore(directory).init(),origin='http://127.0.0.1:8871';
  const host=await createHost({mode:'local',store,catalog,origins:[origin]});await new Promise(r=>host.server.listen(0,'127.0.0.1',r));const port=host.server.address().port,clients=[];
- const wait=async(predicate,what='')=>{for(let i=0;i<250;i++){if(predicate())return;await new Promise(r=>setTimeout(r,20));}assert.fail('Timed out '+what);};
+ const wait=async(predicate,what='')=>{for(let i=0;i<250;i++){if(await predicate())return;await new Promise(r=>setTimeout(r,20));}assert.fail('Timed out '+what);};
  const open=async token=>{const ws=new WebSocket(`ws://127.0.0.1:${port}/realtime`,{origin}),messages=[];let seq=0;clients.push(ws);ws.on('message',v=>messages.push(JSON.parse(v)));await new Promise((resolve,reject)=>{ws.once('open',resolve);ws.once('error',reject);});
   ws.send(JSON.stringify({type:'join',token,serverId:'server-1',slotId:'slot-1'}));await wait(()=>messages.some(m=>m.type==='welcome'),'welcome');
   return {ws,messages,welcome:messages.find(m=>m.type==='welcome'),cmd:(type,data={})=>ws.send(JSON.stringify({type,seq:++seq,...data})),
@@ -29,6 +29,15 @@ test('two guild members enter the same private hall over the network; a non-memb
   const before=[...host.realm.peers.values()].find(p=>p.character.name==='ทหารสอง').bag.coins;
   await new Promise(r=>setTimeout(r,1100));b.cmd('guildDonate',{coins:1500});await wait(()=>a.events('guild').some(e=>e.guild?.treasury===1500),'donation seen by the leader');
   assert.equal(host.realm.guildOf([...host.realm.peers.values()].find(p=>p.character.name==='ทหารสอง')).members.find(m=>m.name==='ทหารสอง').contrib,150);
+  // Directory and applications use the same real-socket protocol as invitations.
+  c.cmd('guildSearch',{query:'ทัพ'});await wait(()=>c.events('guildDirectory').length,'guild search');
+  const found=c.events('guildDirectory').at(-1).list[0];assert.equal(found.name,'ทัพหน้า');assert.equal(found.members,2);assert.equal(found.treasury,undefined);
+  assert.equal(a.events('guildDirectory').length,0);assert.equal(b.events('guildDirectory').length,0,'directory is only returned to the requester');
+  c.cmd('guildApply',{guild:found.id});await wait(()=>a.events('guild').some(e=>e.guild?.applications?.length===1),'application reaches leader');
+  const application=a.events('guild').at(-1).guild.applications[0];assert.equal(application.name,'คนนอก');assert.equal(application.key,undefined);
+  await wait(async()=>{try{return (await store.loadGuilds()).some(g=>g.applications?.some(a=>a.name==='คนนอก'));}catch{return false;}},'application persisted');
+  assert.equal(b.events('guild').at(-1).guild.applications,undefined,'plain member does not receive applicant data');
+  a.cmd('guildApplicationAnswer',{application:application.id,accept:false});await wait(()=>c.events('guildApplication').some(e=>e.pending===false),'application answer');
   // outsider: refused, stays put
   assert.equal((await travel(c,GUILD_HALL)).code,'guild-hall');
   // members: travel, reconnect, land in the same hall room

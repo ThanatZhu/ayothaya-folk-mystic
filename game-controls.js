@@ -2,8 +2,9 @@ import {characterHead} from './character-label.js?v=149';
 import {createRoleWorldDecor} from './role-world-decor.js';
 import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progress.js';
-import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';
-import {createLiveRoleVfx} from './role-skill-vfx.js?v=combat129';
+import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
+import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent} from './combat-animation165.js';
+import {createLiveRoleVfx} from './role-skill-vfx.js?v=combat165';
 import {createRolePlayUI} from './role-play-ui.js';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
@@ -13,7 +14,7 @@ import {applySkillArt} from './skill-art.js?v=icons117';
 import {presentationDelta} from './combat-timing.js';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=combat129';
 import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=106.0';
-import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
+import {skillTrack,skillPose} from './skill-choreography.js?v=combat165';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
@@ -172,9 +173,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(Math.hypot(m.x-p.x,m.z-p.z)-bodyRadius(m)<=world.profession.range+1.5&&wall()>=nextBasicAt){nextBasicAt=wall()+attackInterval();cast(null,world.profession.kind,world.profession.color);}
  }
  function playCast(e){
-   if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip={id:e.roleSkillId,castId:e.castId,duration:e.timing?.duration??SKILL_PROFILES[e.roleSkillId].duration,start:world.time-Math.max(0,e.lag??0)};castUntil=roleClip.start+roleClip.duration;strikeAt=world.time;actionMode='cast';activeSkill=null;roleEffects.spawn(e);return;}
+   if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip=createRoleAnimation(e,world.time);castUntil=roleClip.start+roleClip.duration;actionStart=roleClip.start;strikeAt=world.time;actionMode='cast';activeSkill=null;basicCastId=null;world.clearEmote();roleEffects.spawn(e);return;}
    if(e.timing&&!Number.isInteger(e.skillIndex)){
-    roleClip=null;activeSkill=null;basicCastId=e.castId;const timing=e.timing,lag=Math.max(0,e.lag??0);actionStart=world.time-lag;castUntil=actionStart+timing.duration;actionMode='attack';swingScale=attackDuration(world.profession.id)/timing.duration;strikeAt=actionStart+timing.impacts[0];strikes=timing.impacts.map(at=>({at:actionStart+at,power:.4}));world.clearEmote();
+    const timing=e.timing,lag=Math.max(0,e.lag??0),start=world.time-lag;
+    if(!roleAnimationActive(roleClip,world.time)){roleClip=null;activeSkill=null;basicCastId=e.castId;actionStart=start;castUntil=actionStart+timing.duration;actionMode='attack';swingScale=attackDuration(world.profession.id)/timing.duration;}
+    strikeAt=start+timing.impacts[0];strikes=timing.impacts.map(at=>({at:start+at,power:.4}));world.clearEmote();
     const track={...skillTrack(world.profession.id,0),duration:timing.duration,strikes:timing.impacts.map(at=>at/timing.duration)},from=e.from??world.player,to=e.to??from;
     const fx=skillEffects.create(track,{...e,skillIndex:null,synced:true,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});fx.age=lag;return;
    }
@@ -353,7 +356,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(arrivalPending&&!document.hidden&&!isPaused()){const done=arrivalPending;arrivalPending=null;done.opts.onArrive?.();}
   if(network&&world.auto&&!paused)predictAuto(dt);
   roleUI.update();roleDecor.update();const roleShake=roleEffects.update(visualDt);
-  world.events.splice(0).forEach(e=>{effect(e);for(const fn of listeners)fn(e);});
+  world.events.splice(0).forEach(e=>{e=ageQueuedCombatEvent(e,wall());effect(e);for(const fn of listeners)fn(e);});
   if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
@@ -363,8 +366,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(distanceMoved<1)gait+=gaitStep(distanceMoved,dt,world.profession.id,mode); // No steps while blocked; teleports do not advance the gait.
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
   const locomotion=mode==='walk'||mode==='run',poseTime=locomotion||mode==='idle'?t:mode==='hit'?t-hitStart:world.emote?.name===mode?t-world.emote.time:mode==='attack'?(t-actionStart)*swingScale:t-actionStart;
-  const roleSample=roleClip&&t>=roleClip.start&&t-roleClip.start<roleClip.duration&&p.hp>0?sampleSkill(roleClip.id,t-roleClip.start,{reduced}):null;
-  const pose=roleSample?{...characterMotion({classId:world.profession.id,mode:'cast',time:t-roleClip.start,reduced}),profileFrame:true,artFrame:roleSample.frame,y:roleSample.heroY??0,x:0}:skillActive?skillPose(world.profession.id,activeSkill,(t-actionStart)*skillScale,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)});
+  const rolePose=p.hp>0?sampleRolePose(roleClip,t,{reduced}):null;
+  const pose=rolePose??(skillActive?skillPose(world.profession.id,activeSkill,(t-actionStart)*skillScale,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)}));
   if(mode==='attack'&&activeSkill===null)pose.actionPhase=Math.max(0,Math.min(1,(t-actionStart)/(attackDuration(world.profession.id)/swingScale)));
   if(visualPose){visualPose.profileFrame=!!pose.profileFrame;visualPose.actionPhase=pose.actionPhase??null;}
   if(!visualPose||reduced)visualPose={...pose};

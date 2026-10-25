@@ -12,4 +12,4 @@ Validation:
 - 33 movement/map/combat regressions pass; another 15 authoritative movement/boss tests pass with localhost/temp-file access. Static build and content validation pass.
 - `scripts/check-bridge164.mjs` boots the real lotus-marsh scene against a disposable local WebSocket realm and calls the game's actual destination action. Outbound and return routes arrive; client positions stay within 0.7 m of the targets, with no browser errors. Combat is disabled in that test realm to isolate walking. Screenshots and browser-report.json live under outputs/bridge164.
 
-This change is local and has not been pushed or deployed. Existing unrelated CBT preview and daily-quest illustration work remains in the workspace.
+The owner approved publishing all pending work on 25 October 2026. Release 166 integrates this repair with the daily-quest illustrations, CBT preview and current production through 830397a. Production rollout is verified separately after push.

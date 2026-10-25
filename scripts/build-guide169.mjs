@@ -1,0 +1,43 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {ITEMS,DROPS,SHOPS,ATLASES,ATLAS_LAYOUTS,ITEM_ATLAS,BAG_SLOTS,BAG_MAX,BAG_STEP} from '../items.js';
+import {MONSTER_TYPES} from '../combat-core.js';
+import {ROLES} from '../assets/skills-next/catalog.js';
+import {roleIconRegion} from '../assets/skills-next/icon-regions.js';
+import {liveRoleSkills,roleRequirements} from '../role-skill-progress.js';
+import {scaledSkill,SKILL_MAX} from '../skill-progress.js';
+import {CLASSES} from '../classes.js';
+import {JOBS} from '../advancement.js';
+import {MENTORS,TRIAL} from '../city-life-data.js';
+import {RECIPES} from '../crafting.js';
+import {PREMIUM_PETS,petAtStars} from '../premium-pets.js';
+import {PET_RATE,PET_PRICE,PET_PITY,PET_STAR_COST} from '../pet-gacha.js';
+import {REFINE_MAX,REFINE_RATE,refineCost} from '../refine.js';
+import {REFINE_TIERS} from '../refine-tiers.js';
+import {DAILY} from '../daily.js';
+import {WEEKLY,ALBUM_MILESTONES,BOUNTY_POOL} from '../bounty.js';
+import {STORY} from '../story-quests.js';
+import {STORAGE_SLOTS} from '../market.js';
+import {GUILD_COST,GUILD_UPGRADES,GUILD_RITE,GUILD_LEVELS,guildSeats} from '../social.js';
+import {WAR} from '../guild-war.js';
+import {CBT_EVENT} from '../cbt-event.js';
+import {RENAME_PRICE} from '../identity166.js';
+import {WEATHERS} from '../weather.js';
+const root=new URL('../',import.meta.url),dest=new URL('assets/guide169/',root);
+const catalog=JSON.parse(await readFile(new URL('maps/world.json',root),'utf8'));
+const name=id=>ITEMS[id]?.name??id;
+const sprite=it=>({src:it.image??ATLASES[it.atlas]??ITEM_ATLAS,...(it.image?{}:{cols:ATLAS_LAYOUTS[it.atlas]?.columns??6,rows:ATLAS_LAYOUTS[it.atlas]?.rows??4,index:it.icon??0})});
+const monsterArt=async(t,i)=>{
+ if(t.chapter2Art)return {src:'assets/admin127/monsters/'+t.chapter2Art+'.webp'};
+ if(t.sheet){const meta=JSON.parse(await readFile(new URL('assets/frontier38/'+t.sheet+'.json',root),'utf8'));return {src:'assets/frontier38/'+t.sheet+'.png',rect:meta.rects[t.row*8],width:meta.width,height:meta.height};}
+ return {src:'assets/brand69/ayothaya-emblem.png'};
+};
+const itemRows=Object.entries(ITEMS).filter(([,i])=>i.kind!=='ui'&&i.kind!=='reserved'&&!i.retired).map(([id,it])=>({id,...it,art:it.monsterCard?{src:'assets/cards147/'+id.slice(5)+'.webp'}:sprite(it),sources:[...Object.entries(SHOPS).filter(([,s])=>s.stock.includes(id)).map(([n,s])=>({type:'shop',name:n,mapId:s.mapId})),...Object.entries(DROPS).filter(([,d])=>d.items.some(([x])=>x===id)).map(([monster,d])=>({type:'drop',name:MONSTER_TYPES.find(t=>t.id===monster)?.name??monster,monster,rate:d.items.find(([x])=>x===id)[1]})),...RECIPES.filter(r=>r.out===id).map(()=>({type:'craft'}))]}));
+const skills=ROLES.flatMap(r=>{
+ const convert=(s,slot,job='')=>{const live=liveRoleSkills(r.id,job)[slot],region=roleIconRegion(s.icon);return {...s,slot,max:slot>=13?1:SKILL_MAX,requires:roleRequirements(slot).map(([index,level])=>({name:r.base[index]?.name??String(index+1),level})),className:r.name,branchName:r.branches.find(b=>b.id===job)?.name??null,levels:s.passive?[]:[1,10].map(n=>({level:n,...scaledSkill(live,n)})),art:{src:'assets/skills-next/'+s.icon.sheet,...region}};};
+ return [...r.base.map((s,i)=>convert(s,i)),...r.branches.flatMap(b=>[...b.active.map((s,i)=>convert(s,10+i,b.id)),...b.passives.map((s,i)=>convert(s,13+i,b.id))])];
+});
+const monsters=await Promise.all(MONSTER_TYPES.map(async(t,i)=>({...t,id:t.id??'legacy-'+i,art:await monsterArt(t,i),locations:catalog.maps.filter(m=>(m.mobs??[]).some(([,,n])=>n===i)).map(m=>({id:m.id,name:m.name})),drops:(DROPS[t.id]?.items??[]).map(([id,rate,count=1])=>({id,name:name(id),rate,count,art:sprite(ITEMS[id])}))})));
+const maps=catalog.maps.map(m=>({id:m.id,name:m.name,subtitle:m.subtitle,safe:!!m.safe,kind:m.kind,spawn:m.spawn,worldBoss:m.worldBoss,portals:(m.portals??[]).map(p=>({to:p.to,name:catalog.maps.find(x=>x.id===p.to)?.name??p.to,x:p.x,y:-p.z})),npcs:(m.npcs??[]).map(n=>({name:n.name,x:n.x,y:-n.z,shop:!!SHOPS[n.name]})),monsters:monsters.filter(t=>t.locations.some(l=>l.id===m.id)).map(t=>({id:t.id,name:t.name,level:t.level??1})),boss:m.worldBoss?monsters.find(t=>t.id===m.worldBoss.id)?.name:null}));
+const output={schema:1,version:catalog.version,classes:CLASSES.map(c=>({...c,role:ROLES.find(r=>r.id===c.id)?.role??c.role,weakness:ROLES.find(r=>r.id===c.id)?.weakness,branches:JOBS[c.id],mentor:MENTORS.find(m=>m.classId===c.id)})),skills,items:itemRows,monsters:monsters.filter(t=>t.locations.length||t.boss||t.elite),maps,recipes:RECIPES.filter(r=>ITEMS[r.out]&&!ITEMS[r.out].retired).map((r,i)=>({...r,id:'recipe-'+i,name:name(r.out),art:sprite(ITEMS[r.out]),ingredients:Object.entries(r.needs).map(([id,count])=>({id,name:name(id),count}))})),pets:PREMIUM_PETS.map(p=>({...p,art:{src:'assets/pets125/'+p.id+'.webp'},five:petAtStars(p.id,5)})),story:STORY.map(q=>({id:q.id,title:q.title,chapter:q.chapter??null,reward:q.reward,steps:q.steps.map(s=>({type:s.type,hint:s.hint,how:s.how,npc:s.npc,mapId:s.mapId,monster:s.monster,count:s.count}))})),rules:{bag:{base:BAG_SLOTS,max:BAG_MAX,step:BAG_STEP,storage:STORAGE_SLOTS},training:TRIAL,refine:{max:REFINE_MAX,tiers:REFINE_TIERS,rates:REFINE_RATE,costs:REFINE_RATE.map((_,i)=>refineCost(i+1))},pets:{rates:PET_RATE,price:PET_PRICE,pity:PET_PITY,starCosts:PET_STAR_COST},daily:DAILY,weekly:WEEKLY,album:ALBUM_MILESTONES,bountyTargets:BOUNTY_POOL.flat(),guild:{cost:GUILD_COST,levels:GUILD_LEVELS,seats:guildSeats({exp:0}),upgrades:GUILD_UPGRADES,rite:GUILD_RITE},war:WAR,cbt:CBT_EVENT,rename:RENAME_PRICE,weather:WEATHERS}};
+await mkdir(dest,{recursive:true});await writeFile(new URL('game-data.json',dest),JSON.stringify(output));
+console.log('Guide reference: '+skills.length+' skills, '+itemRows.length+' items, '+output.monsters.length+' monsters, '+maps.length+' maps, '+output.recipes.length+' recipes.');

@@ -4150,3 +4150,38 @@ Object.assign(globalThis.I18N_EN, {
  "โอกาสสำเร็จ {5}% · {6} เบี้ย · {7} 1 (มี {8})": "Success {5}% · {6} Bia · {7} 1 (owned {8})",
  "{0} · ตีบวกสูงสุด +20": "{0} · Maximum refinement +20"
 });
+
+Object.assign(globalThis.I18N_EN,{
+ "คู่มือเกม · Ayothaya Folk Mystic": "Game Guide · Ayothaya Folk Mystic",
+ "คู่มือเกม": "Game Guide",
+ "หน้าแรก": "Home",
+ "เปิดบันทึก": "Open the handbook",
+ "นักผจญภัยอโยธยา": "An Ayothaya adventurer",
+ "รู้จักโลก เลือกเส้นทาง ปั้นบิลด์ของคุณ": "Explore the world, choose your path, and build your character",
+ "ทุกเรื่องตั้งแต่ก้าวแรกจนถึงศึกกิลด์วอร์": "From your first steps to guild warfare",
+ "เริ่มอ่านคู่มือ": "Read the guide",
+ "ค้นฐานข้อมูล": "Search the database",
+ "คู่มือสำหรับผู้เล่น · เปิดอ่านได้โดยไม่เข้าสู่ระบบ": "Player handbook · No sign-in required",
+ "ค้นหาคู่มือและฐานข้อมูล": "Search the guide and reference library",
+ "หมวดค้นหา": "Search category",
+ "สารบัญ": "Contents",
+ "ผลการค้นหา": "Search results",
+ "ฐานข้อมูลค้นหาได้": "Searchable reference library",
+ "เครื่องคำนวณตีบวก": "Refinement calculator",
+ "กำลังเปิดบันทึกการผจญภัย…": "Opening the adventurer handbook…",
+ "ฐานข้อมูลเกม": "Game reference library",
+ "ค้นจากชื่อและรายละเอียด ตัวเลขเป็นค่าพื้นฐาน ราคาในตลาด เป้าหมายรายวัน และเวลาบอสสดให้ดูในเกม": "Search names and descriptions. Values are base values; check live market prices, daily objectives, and boss timers in the game.",
+ "ค้นในหมวดนี้": "Search this category",
+ "กรองรายการ": "Filter entries",
+ "แสดงเพิ่ม": "Show more",
+ "บันทึกการเดินทางของนักผจญภัย": "An adventurer’s field notes",
+ "เปิด JavaScript เพื่อใช้คู่มือแบบค้นหา หรืออ่าน": "Enable JavaScript to search the guide, or read the",
+ "ฉบับข้อความ": "text edition",
+ "คู่มืออโยธยาฉบับละเอียด เริ่มเล่น อาชีพ Master สกิล สเตตัส ตีบวก +20 การ์ด สัตว์เลี้ยง เควส บอส ปาร์ตี้ กิลด์ และประลอง พร้อมฐานข้อมูลค้นหาได้": "Detailed Ayothaya guide: starting out, classes, Master paths, skills, stats, +20 refinement, cards, pets, quests, bosses, parties, guilds, and PvP, with searchable data.",
+ "อ่านกติกา วางบิลด์ และค้นหาแหล่งดรอปในที่เดียว": "Read the rules, plan builds, and find drops in one place.",
+ "นำทาง": "Navigation",
+ "ค้นหาสกิล ไอเท็ม มอนสเตอร์ หรือคำถาม…": "Search skills, items, monsters, or questions…",
+ "สารบัญคู่มือ": "Guide contents",
+ "เลือกหมวดฐานข้อมูล": "Select a reference category",
+ "ค้นในหมวดนี้…": "Search this category…"
+});

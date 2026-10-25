@@ -3,6 +3,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
+// Freeze public reference data from the same gameplay modules shipped by this build.
+await import('./scripts/build-guide169.mjs');
 const output=path.resolve(root,'dist');
 // Only remove this repository's generated directory, never a linked directory.
 if(path.dirname(output)!==root||path.basename(output)!=='dist')throw new Error('Invalid build output');

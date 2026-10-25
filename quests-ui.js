@@ -1,4 +1,4 @@
-import {storyScene} from './quest-cinematic-data155.js?v=155';
+import {storyScene} from './quest-cinematic-data155.js?v=story160';
 import {normalizeAlbumState,depositAlbumCard,ALBUM_ERRORS} from './card-album.js?v=152';
 import {STORY,currentObjective,normalizeStory} from './story-quests.js?v=pets125';
 import {STORY_RECAP,storyArt} from './story-dialogue.js?v=pets125';
@@ -79,7 +79,7 @@ export function createQuestsUI({game,account,map,bagUI}){
   const heading=document.createElement('h3');heading.id='quest-detail-title';heading.textContent=quest?.title??'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';section.append(heading);
   if(quest){const art=storyArt(quest.id,active&&obj?obj.stepNumber:1),image=document.createElement('img');image.src=art.src;image.alt=art.alt;image.className='story-recap-art';image.width=640;image.height=360;image.decoding='async';image.onerror=()=>image.remove();section.append(image);}
   if(quest){const clips=document.createElement('div');clips.className='quest-cinematic-links';const lastStep=active&&obj?state.step:quest.steps.length-1;
-   for(let s=0;s<=lastStep;s++){const watch=document.createElement('button');watch.type='button';watch.textContent='ดูคัตซีน · ขั้น '+(s+1);watch.dataset.cinematicStep=s;watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:storyScene(index,s)}}));clips.append(watch);}section.append(clips);}
+   for(const s of [lastStep]){const watch=document.createElement('button');watch.type='button';watch.textContent='ดูเรื่องราวเควสนี้';watch.dataset.cinematicStep=s;watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:storyScene(index,s)}}));clips.append(watch);}section.append(clips);}
   const recap=document.createElement('p');recap.textContent=quest?STORY_RECAP[quest.id]:'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';section.append(recap);
   if(active&&obj){
    const goal=document.createElement('div');goal.className='quest-journal-goal';

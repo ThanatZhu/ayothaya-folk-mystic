@@ -1,5 +1,5 @@
 import {dialogueFor} from './story-dialogue.js?v=pets125';
-import {createQuestCinematics} from './quest-cinematic155.js?v=155';
+import {createQuestCinematics} from './quest-cinematic155.js?v=story160';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=refine136';
@@ -33,6 +33,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(e.type==='story'){if(e.story)world.story=e.story;if(e.completed)world.notice('เควสสำเร็จ · '+e.completed);render();}
  });
  const cinematics=createQuestCinematics({game,account,catalog,map,state});
+ worldUI.onConversationOpened=n=>cinematics.onTalk(n);
  const sameState=index=>state().quest===index.quest&&state().step===index.step&&!state().done;
  // A normal NPC click opens the story; opening/closing/asking cannot finish a talk step.
  worldUI.onTalk=n=>{

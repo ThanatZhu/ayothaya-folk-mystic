@@ -91,7 +91,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
   if(world.player.hp<=0||traveling)return;
   if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',npc:n.name,onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
-  endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);return;}conversation=n;n.talking=true;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);
+  endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);api.onConversationOpened?.(n);return;}conversation=n;n.talking=true;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);api.onConversationOpened?.(n);
  }
  const npcSprites=[];scene.traverse(o=>{if(o.isSprite&&o.userData.npc)npcSprites.push(o);});
  const npcRay=new THREE.Raycaster(),npcPointer=new THREE.Vector2();
@@ -141,7 +141,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   if(dialog.open&&now-lastBig>250){lastBig=now;drawCityMap();} // 0.64.1 the open map follows you live
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
- const api={update,endTalk,get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,travelTo:id=>travel(id),
+ const api={update,endTalk,get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,onConversationOpened:null,travelTo:id=>travel(id),
   guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
   // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
   recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},

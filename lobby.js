@@ -6,7 +6,7 @@ import {customizeAtlas} from './character-appearance.js?v=41';
 import {progression,jobFor,CLASS_LEVEL,advanceReady} from './advancement.js?v=73';
 import {CLASSES,getClass,className,atlasPath} from './classes.js?v=112.1';
 import {previewPose} from './sprite-motion.js';
-import {createLandscapeGuard} from './mobile-layout.js?v=fit118';
+import {createLandscapeGuard} from './mobile-layout.js?v=login158';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=114';
@@ -148,7 +148,6 @@ $('enter-world').onclick=()=>{
  if(!record||busy)return;
  try{const srv=record.serverId||selected||'server-1';sessionStorage.setItem(CHANNEL_KEY,String(selectedChannel));sessionStorage.setItem(ENTRY_KEY,JSON.stringify({owner,serverId:srv,slotId:record.slotId,channel:selectedChannel}));getLoadingScreen().show(record.state.mapId,{travel:true,message:'กำลังเข้าสู่โลกอโยธยา…'});requestAnimationFrame(()=>location.assign('./game.html?server='+srv+'&channel='+selectedChannel+'&map='+record.state.mapId));}catch{say('กรุณาเปิดอนุญาตพื้นที่เก็บข้อมูลของเบราว์เซอร์เพื่อเข้าเกม');}
 };
-$('ambient-toggle').onclick=()=>{const off=document.body.classList.toggle('motion-off');$('ambient-toggle').textContent=off?'เปิดโมชั่น':'หยุดโมชั่น';$('ambient-toggle').setAttribute('aria-pressed',String(off));};
 for(let i=0;i<25;i++){const p=document.createElement('i');p.className='ember';p.style.left=((i*37)%100)+'%';p.style.top=(25+(i*23)%75)+'%';p.style.animationDelay=(-i*.71)+'s';p.style.animationDuration=(7+i%8)+'s';$('embers').append(p);}
 
 addEventListener('pageshow',e=>{if(e.persisted)getLoadingScreen().hide();});

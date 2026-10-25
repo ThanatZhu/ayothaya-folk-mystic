@@ -20,7 +20,16 @@ export function planRoute(from,goal,nav){
  const path=findPath(from,goal,nav);
  if(!path.length)return null;
  path.push({x:goal.x,z:goal.z});
- return path;
+ // Grid interiors on one straight segment are not turning points. Keeping
+ // every metre makes different tick rates lose a different fraction of each
+ // stride at each cell, so fast prediction gradually outruns the authority.
+ const turns=[];
+ for(let i=0;i<path.length-1;i++){
+  const a=turns.at(-1)??from,b=path[i],c=path[i+1],ax=b.x-a.x,az=b.z-a.z,bx=c.x-b.x,bz=c.z-b.z;
+  if(Math.abs(ax*bz-az*bx)<1e-7&&ax*bx+az*bz>=0)continue;
+  turns.push(b);
+ }
+ turns.push(path.at(-1));return turns;
 }
 
 // target: {x,z} or a function returning one (a walking NPC). radius: stop distance. onArrive / onFail: callbacks.
@@ -37,7 +46,7 @@ export function createRouteWalker(getNav){
   },
   cancel(){route=null;},
   // Returns a unit world-space direction {x,z} for this frame, or null when idle / arrived.
-  step(player,dt){
+  step(player,dt,maxStep=Infinity){
    if(!route)return null;
    const goal=route.target();if(!goal)return fail('gone');
    if(dist(player,goal)<=route.radius){const r=route;route=null;r.onArrive?.();return null;}
@@ -55,8 +64,10 @@ export function createRouteWalker(getNav){
    if(route.last&&dt>0){const moved=dist(player,route.last);route.stuck=moved<.004?route.stuck+dt:0;}
    route.last={x:player.x,z:player.z};
    if(route.stuck>.7){route.stuck=0;route.path=null;if(++route.replans>3)return fail('stuck');}
-   const d=dist(player,next)||1;
-   return {x:(next.x-player.x)/d,z:(next.z-player.z)/d};
+   const d=dist(player,next)||1,scale=Number.isFinite(maxStep)&&maxStep>0?Math.min(1,d/maxStep):1;
+   // A fast sprint must land on a waypoint, not step past it and oscillate
+   // forever around a destination whose radius is smaller than one server tick.
+   return {x:(next.x-player.x)/d*scale,z:(next.z-player.z)/d*scale};
   },
  };
 }

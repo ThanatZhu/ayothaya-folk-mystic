@@ -14,7 +14,7 @@ import {createPetView} from './pet-ui.js?v=pets128';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=pets128';
-import {MultiplayerClient} from './multiplayer-client.js?v=walk149';
+import {MultiplayerClient} from './multiplayer-client.js?v=run153';
 import {CHANNELS,CHANNEL_KEY,normalizeChannel} from './realm-state.js?v=62';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
 import {atlasPath,className} from './classes.js?v=112.1';

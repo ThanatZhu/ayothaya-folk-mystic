@@ -17,9 +17,9 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=life1';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=movement146';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=run153';
 import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=role116';
-import {createRouteWalker} from './route-walk.js?v=walk149';
+import {createRouteWalker} from './route-walk.js?v=run153';
 
 import {className} from './classes.js?v=112.1';
 import {rebirthRank} from './character-stats.js?v=107';
@@ -62,16 +62,17 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const walker=createRouteWalker(()=>world.nav),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),groundHit=new THREE.Vector3();
  const marker=new THREE.Mesh(new THREE.RingGeometry(.2,.3,32),new THREE.MeshBasicMaterial({color:'#f4cf7a',transparent:true,opacity:0,depthWrite:false,depthTest:false,side:THREE.DoubleSide}));
  marker.rotation.x=-Math.PI/2;marker.renderOrder=5;marker.visible=false;scene.add(marker);let markerAge=0;
- let walkJob=null,arrivalPending=null,serverWalkState=null;
- function cancelWalk(){const id=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null);walker.cancel();arrivalPending=null;if(id&&network?.walkSchema===1)network.command('walkCancel',{id});walkJob=null;serverWalkState=null;marker.visible=false;}
+ let walkJob=null,arrivalPending=null,serverWalkState=null,walkPaceSent=null,walkPredictedArrival=false;
+ function cancelWalk(){const id=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null);walker.cancel();arrivalPending=null;if(id&&network?.walkSchema===1)network.command('walkCancel',{id});walkJob=null;serverWalkState=null;walkPaceSent=null;walkPredictedArrival=false;marker.visible=false;}
+ const wantsRun=()=>supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'));
  const listeners=new Set(); // story/quest UI listens to the same events the HUD does (offline and online)
  function walkTo(target,opts={}){
   if(world.player.hp<=0)return false;cancelWalk();
   const goal=typeof target==='function'?target():target;if(!goal||!Number.isFinite(goal.x)||!Number.isFinite(goal.z))return false;
   const remote=network?.walkSchema===1,id=crypto.randomUUID();
   const failed=reason=>{marker.visible=false;if(opts.onFail)opts.onFail(reason);else world.notice('ไปตรงนั้นไม่ได้');};
-  if(remote){walkJob={id,target,opts};if(!network.command('walkTo',{id,mapId:config.id,x:goal.x,z:goal.z,radius:opts.radius??.18,kind:opts.kind??'ground',...(opts.npc?{npc:opts.npc}:{}),...(Number.isInteger(opts.mobId)?{mob:opts.mobId}:{})})){walkJob=null;return false;}}
-  world.auto=false;walker.go(target,{radius:opts.radius,kind:opts.kind,onArrive:()=>{if(!remote)arrivalPending={opts};},onFail:reason=>{if(!remote)failed(reason);}});
+  if(remote){const run=network.walkRunSchema===1&&wantsRun();walkJob={id,target,opts};if(!network.command('walkTo',{id,mapId:config.id,x:goal.x,z:goal.z,radius:opts.radius??.18,kind:opts.kind??'ground',run,...(opts.npc?{npc:opts.npc}:{}),...(Number.isInteger(opts.mobId)?{mob:opts.mobId}:{})})){walkJob=null;return false;}walkPaceSent={id,run};}
+  world.auto=false;walker.go(target,{radius:opts.radius,kind:opts.kind,onArrive:()=>{if(remote)walkPredictedArrival=true;else arrivalPending={opts};},onFail:reason=>{if(!remote)failed(reason);}});
   if(opts.marker!==false&&typeof target!=='function'){marker.position.set(goal.x,.12,goal.z);marker.visible=true;markerAge=0;}else marker.visible=false;
   return true;
  }
@@ -257,6 +258,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(button)return; // Native activation of focused HUD buttons remains accessible.
   }
   if(['KeyW','KeyA','KeyS','KeyD','Space','KeyF'].includes(e.code)||/^Digit[0-9]$/.test(e.code))e.preventDefault();
+  if(['KeyW','KeyA','KeyS','KeyD'].includes(e.code))cancelWalk();
   if(['KeyW','KeyA','KeyS','KeyD','Space','ShiftLeft','ShiftRight'].includes(e.code))keys.add(e.code);
   if(e.repeat)return;
   if(e.code==='KeyF')world.toggleAuto();
@@ -271,7 +273,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  joystick.addEventListener('pointermove',e=>{if(e.pointerId===joy.id){e.preventDefault();updateStick(e);}});
  for(const name of ['pointerup','pointercancel','lostpointercapture'])joystick.addEventListener(name,e=>{if(e.pointerId===joy.id)clearStick();});
  function clearInput(){
-  walker.cancel();
+  // Menus/focus changes release held controls; only explicit movement cancels
+  // a destination. Its local prediction must keep pace with the authority too.
   keys.clear();input.attack=false;
   if(attackPointer!==null&&$('attack').hasPointerCapture(attackPointer))$('attack').releasePointerCapture(attackPointer);
   if(joy.id!==null&&joystick.hasPointerCapture(joy.id))joystick.releasePointerCapture(joy.id);
@@ -320,14 +323,33 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  $('reset').onclick=()=>{cancelCameraTurn();controls.target.set(world.player.x,1,world.player.z);camera.position.copy(controls.target).add(initialOffset);camera.zoom=defaultZoom();camera.updateProjectionMatrix();controls.update();};
  function update(dt){
   const renderDt=presentationDelta(dt,{hidden:document.hidden}),paused=isPaused();if(paused)clearInput();
-  dt=document.hidden?0:Math.min(.05,Math.max(0,dt));const visualDt=network?renderDt:dt;
+  // The authority keeps simulating during long rendered frames. Dropping every
+  // millisecond beyond 50 ms makes online sprint fall behind on slower devices.
+  // moveBody subdivides collision steps; offline simulation keeps its old cap.
+  dt=document.hidden?0:network?renderDt:Math.min(.05,Math.max(0,dt));const visualDt=network?renderDt:dt;
   const x=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joy.x,y=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)+joy.y;
   let direction=screenDirection(x,y,controls.getAzimuthalAngle());
   // Keys / joystick always win over a tapped route; otherwise the route steers like a held joystick.
-  if(Math.hypot(x,y)>.08||world.player.hp<=0)cancelWalk();else{const routed=walker.step(world.player,dt);if(routed)direction=routed;}
+  if(Math.hypot(x,y)>.08||world.player.hp<=0)cancelWalk();else{const routeRun=wantsRun()&&(network?.walkSchema!==1||network.walkRunSchema===1),step=network?Math.min(.05,dt):dt,routed=walker.step(world.player,step,world.walkSpeed(routeRun)*step);if(routed)direction=routed;}
   refreshAnimationCapabilities();
-  const steering=paused&&!walker.active&&!walkJob?{x:0,z:0,attack:false,run:false}:{...direction,attack:input.attack||keys.has('Space'),run:supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'))};
-  if(marker.visible){markerAge+=dt;if(walker.active||walkJob){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}if(network){network.setInput(network.walkSchema===1&&(walkJob||serverWalkState?.status==='walking')?{...steering,x:0,z:0}:steering);world.time+=renderDt;predictMove(world,serverSelf,dt,steering,{pendingStop:network.waitingForStop(serverSelf?.inputAck),inputAge:network.inputAge(serverSelf?.inputAck)});}else if(!paused||walker.active||arrivalPending)world.update(dt,steering);
+  const routeId=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null),remoteRoute=network?.walkSchema===1&&!!routeId,run=wantsRun();
+  // A route is simulated by the authority even without browser frames. Send
+  // only pace changes; older hosts must also be predicted at walking speed.
+  if(remoteRoute&&network.walkRunSchema===1&&(walkPaceSent?.id!==routeId||walkPaceSent.run!==run)){
+   if(network.command('walkPace',{id:routeId,run}))walkPaceSent={id:routeId,run};
+  }
+  const steering=paused&&!walker.active&&!walkJob&&!remoteRoute?{x:0,z:0,attack:false,run:false}:{...direction,attack:input.attack||keys.has('Space'),run:remoteRoute?network.walkRunSchema===1&&run:run};
+  if(marker.visible){markerAge+=dt;if(walker.active||walkJob){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}
+  if(network){
+   network.setInput(remoteRoute?{...steering,x:0,z:0}:steering);world.time+=renderDt;
+   let remaining=dt,first=true;
+   do{
+    const step=Math.min(.05,remaining);let move=steering;
+    if(!first&&Math.hypot(x,y)<=.08){const routed=walker.step(world.player,step,world.walkSpeed(steering.run)*step);move={...steering,...(routed??{x:0,z:0})};}
+    predictMove(world,serverSelf,step,move,{pendingStop:network.waitingForStop(serverSelf?.inputAck)||!!walkJob&&walkPredictedArrival,inputAge:network.inputAge(serverSelf?.inputAck)});
+    remaining-=step;first=false;
+   }while(remaining>1e-8);
+  }else if(!paused||walker.active||arrivalPending)world.update(dt,steering);
   if(arrivalPending&&!document.hidden&&!isPaused()){const done=arrivalPending;arrivalPending=null;done.opts.onArrive?.();}
   if(network&&world.auto&&!paused)predictAuto(dt);
   roleUI.update();roleDecor.update();const roleShake=roleEffects.update(visualDt);

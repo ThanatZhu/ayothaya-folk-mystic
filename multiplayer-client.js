@@ -10,7 +10,7 @@ export class MultiplayerClient extends EventTarget{
    const socket=this.socket=new this.WebSocket(this.url);
    socket.addEventListener('open',()=>{if(generation!==this.generation){socket.close();return;}socket.send(JSON.stringify({type:'join',...identity}));});
    socket.addEventListener('message',e=>{if(generation!==this.generation)return;let m;try{m=JSON.parse(e.data);}catch{return;}
-    if(m.type==='welcome'){this.walkSchema=m.snapshot.self.walkSchema??0;this.equipment=m.snapshot.self.equipment;this.training=m.snapshot.self.training??null;this.seq=0;this.stopSeq=0;this.inputTimes.clear();this.lastInput=-Infinity;this.input={x:0,z:0,attack:false,run:false};this.id=m.id;this.retries=0;this.everOnline=true;this.state('online');this.emit('welcome',m);this.emit('snapshot',m.snapshot);}
+    if(m.type==='welcome'){this.walkSchema=m.snapshot.self.walkSchema??0;this.walkRunSchema=m.snapshot.self.walkRunSchema??0;this.equipment=m.snapshot.self.equipment;this.training=m.snapshot.self.training??null;this.seq=0;this.stopSeq=0;this.inputTimes.clear();this.lastInput=-Infinity;this.input={x:0,z:0,attack:false,run:false};this.id=m.id;this.retries=0;this.everOnline=true;this.state('online');this.emit('welcome',m);this.emit('snapshot',m.snapshot);}
     else if(m.type==='snapshot'){if(m.self?.equipment)this.equipment=m.self.equipment;if('training' in (m.self??{}))this.training=m.self.training??null;this.emit('snapshot',m);}
     else if(m.type==='channelSwitched'){if(m.snapshot?.self?.equipment)this.equipment=m.snapshot.self.equipment;if('training' in (m.snapshot?.self??{}))this.training=m.snapshot.self.training??null;this.emit('channelSwitched',m);}
     else if(m.type==='equipped'){this.equipment=m.equipment;this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
@@ -31,7 +31,10 @@ export class MultiplayerClient extends EventTarget{
    });socket.addEventListener('error',()=>{});
   }catch(error){this.stopped=true;this.state('error');this.emit('error',{code:error.message});}
  }
- command(type,data={}){if(this.status!=='online'||this.socket?.readyState!==1){if(type!=='input')console.warn('command-blocked',type,this.status,this.socket?.readyState,this.stopped);return false;}this.socket.send(JSON.stringify({type,...data,seq:++this.seq}));return true;}
+ command(type,data={}){if(this.status!=='online'||this.socket?.readyState!==1){if(type!=='input')console.warn('command-blocked',type,this.status,this.socket?.readyState,this.stopped);return false;}this.socket.send(JSON.stringify({type,...data,seq:++this.seq}));
+  // Destination prediction starts at this command, before the next idle input
+  // keepalive. Include that transit time while the first snapshot is in flight.
+  if(type==='walkTo'){this.inputTimes.set(this.seq,performance.now());if(this.inputTimes.size>64)this.inputTimes.delete(this.inputTimes.keys().next().value);}return true;}
  setInput(input){const moving=this.input.x||this.input.z,wasRunning=!!this.input.run;this.input={x:Math.max(-1,Math.min(1,input.x)),z:Math.max(-1,Math.min(1,input.z)),attack:!!input.attack,run:input.run===true&&Math.hypot(input.x,input.z)>.08};const now=performance.now(),stopped=moving&&!this.input.x&&!this.input.z,started=!moving&&(this.input.x||this.input.z),runChanged=wasRunning!==this.input.run;
   // Throttle held steering to ~15/s; send starts/stops immediately so prediction and authority agree at the endpoints.
   if(stopped||started||runChanged||now-this.lastInput>=65){this.lastInput=now;if(this.command('input',this.input)){this.inputTimes.set(this.seq,now);if(this.inputTimes.size>64)this.inputTimes.delete(this.inputTimes.keys().next().value);if(stopped){this.stopSeq=this.seq;this.stopAt=now;}else if(this.input.x||this.input.z)this.stopSeq=0;}}}

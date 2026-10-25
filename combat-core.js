@@ -339,7 +339,10 @@ export function predictMove(world,server,dt,dir,{pendingStop=false,inputAge=0}={
 
  const ex=server.x-p.x,ez=server.z-p.z,error=Math.hypot(ex,ez);
  // In-flight input can legitimately put us ahead of an older snapshot.
- const snapDistance=manual?Math.max(2.5,speed*(Math.min(.75,Math.max(0,inputAge))+.1)):2.5;
+ // When switching from run to walk, an in-flight snapshot still belongs to
+ // the faster stride. Do not shrink its legitimate lead to the new pace yet.
+ const transitSpeed=Math.max(speed,world.walkSpeed(server.running===true));
+ const snapDistance=manual?Math.max(2.5,transitSpeed*(Math.min(.75,Math.max(0,inputAge))+.1+dt)):2.5;
  if(error>snapDistance&&(!pendingStop||!server.moving||knocked)){p.x=server.x;p.z=server.z;}
  else if(!manual&&(!pendingStop||knocked)&&error>.002){const f=1-Math.exp(-dt*10);p.x+=ex*f;p.z+=ez*f;if(server.moving)p.face=server.face;}
  // Old walking snapshots must not pull a released player backwards. Once the

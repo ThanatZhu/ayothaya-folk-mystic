@@ -15,15 +15,16 @@ const money=n=>(n??0).toLocaleString('th-TH')+' เบี้ย';
 const when=t=>t?new Date(t).toLocaleString(globalThis.I18N?.locale??'th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
 
 export function createMarketBoardUI({game,map,scene,camera,bagUI}){
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./market-board-layout.css?v=154',import.meta.url).href;document.head.append(css);
  const world=game.world,cmd=(type,data)=>world.market?.(type,data),fail=c=>world.notice(ITEM_ERRORS[c]??c);
  let tab='search',results={query:'',rows:[],prices:{}},mine={shops:[],perks:tradePerks(0)},shops=[],kind='sell',shown='';
- const dialog=document.createElement('dialog');dialog.id='market-board';dialog.setAttribute('aria-labelledby','board-title');
+ const dialog=document.createElement('dialog');dialog.id='market-board';dialog.tabIndex=-1;dialog.setAttribute('aria-labelledby','board-title');
  dialog.innerHTML=`<header><h2 id="board-title">ตลาดกลาง</h2><button class="mp-icon" id="board-close" aria-label="ปิดตลาดกลาง">×</button></header>
   <nav class="board-tabs" role="tablist"><button type="button" data-tab="search">ค้นหาของ</button><button type="button" data-tab="open">เปิดร้าน</button><button type="button" data-tab="mine">ร้านของฉัน</button></nav><div id="board-body"></div>`;
  ($('game-shell')??document.body).append(dialog);
  dialog.querySelector('#board-close').onclick=()=>dialog.close();
  dialog.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;if(tab==='mine')cmd('shopMine');render(true);});
- function open(t='search'){if(!game.online)return world.notice('ตลาดกลางต้องเข้าโหมดออนไลน์');tab=t;cmd('shopMine');openHudPanel(dialog);render(true);}
+ function open(t='search'){if(!game.online)return world.notice('ตลาดกลางต้องเข้าโหมดออนไลน์');tab=t;cmd('shopMine');openHudPanel(dialog);dialog.focus({preventScroll:true});render(true);}
  // Entry points: a button beside the bag's market bar, the M-key world map is untouched.
  const entry=document.createElement('button');entry.type='button';entry.id='open-market-board';entry.innerHTML=icon('market-stalls','item-icon small')+'ตลาดกลาง';
  entry.onclick=()=>{$('bag-window')?.close();open();};
@@ -66,7 +67,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
  function render(force=false){
   if(!dialog.open)return;const bag=bagUI.bag(),sig=JSON.stringify([tab,kind,results,mine,shops,counter,bag]);if(!force&&sig===shown)return;shown=sig;
   dialog.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
-  const body=$('board-body'),perks=mine.perks??tradePerks(0);
+  const body=$('board-body'),perks=mine.perks??tradePerks(0);dialog.dataset.boardTab=tab;dialog.dataset.boardKind=kind;
   if(tab==='search'){
    body.innerHTML=`<form class="board-search"><input id="board-q" maxlength="30" placeholder="พิมพ์ชื่อของ เช่น ฟันหนู" value="${esc(results.query)}" aria-label="ชื่อของที่ต้องการค้นหา"><button type="submit" class="mp-primary">ค้นหา</button></form>
     <p class="market-note">ค้นทุกร้านค้างและแผงในเซิร์ฟนี้ · ร้านขายเรียงจากถูกไปแพง ร้านรับซื้อเรียงจากให้ราคาดีสุด</p>
@@ -81,7 +82,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
    body.innerHTML=`<p class="market-note">ร้านค้างเปิดต่อแม้ออกจากเกม · ตั้งได้ที่${MARKET_ZONE.name} (${here?'คุณอยู่ในเขตตลาดแล้ว':'ยังไม่อยู่ในเขตตลาด'}) · ภาษีขาย ${Math.round(perks.tax*1000)/10}% · สูงสุด ${perks.slots} ชนิด · ${perks.shops} ร้าน</p>
     <div class="board-kind"><button type="button" data-kind="sell" aria-pressed="${kind==='sell'}">ร้านขายของ</button><button type="button" data-kind="buy" aria-pressed="${kind==='buy'}">ร้านรับซื้อ</button></div>
     <label class="market-coin">ชื่อร้าน <input id="shop-title" maxlength="24" placeholder="${kind==='buy'?'รับซื้อของ':'ร้านค้าง'}"></label>
-    ${kind==='sell'?`<ul class="market-list">${list.map(([id,n])=>`<li data-id="${esc(id)}"><input type="checkbox" aria-label="ขาย ${esc(itemDef(id)?.name)}">${icon(id)}<div><strong>${esc(itemDef(id)?.name)}</strong><small>มี ${n}${(()=>{const p=results.prices?.[priceKey(id)];return p?' · ราคากลาง '+money(p.avg):''})()}</small></div><input class="shop-count" type="number" min="1" max="${n}" value="${n}" aria-label="จำนวน"><input class="shop-price" type="number" min="1" value="10" aria-label="ราคาต่อชิ้น"></li>`).join('')||'<li class="empty">ไม่มีของที่ขายได้ในกระเป๋า</li>'}</ul>`
+    ${kind==='sell'?`<div class="board-offer-columns" aria-hidden="true"><span>สินค้า</span><span>จำนวน</span><span>ราคาต่อชิ้น</span></div><ul class="market-list">${list.map(([id,n])=>`<li data-id="${esc(id)}"><input type="checkbox" aria-label="ขาย ${esc(itemDef(id)?.name)}">${icon(id)}<div><strong>${esc(itemDef(id)?.name)}</strong><small>มี ${n}${(()=>{const p=results.prices?.[priceKey(id)];return p?' · ราคากลาง '+money(p.avg):''})()}</small></div><input class="shop-count" type="number" min="1" max="${n}" value="${n}" aria-label="จำนวน"><input class="shop-price" type="number" min="1" value="10" aria-label="ราคาต่อชิ้น"></li>`).join('')||'<li class="empty">ไม่มีของที่ขายได้ในกระเป๋า</li>'}</ul>`
      :`<p class="market-note">ใส่ชื่อของที่อยากรับซื้อ จำนวน และราคาต่อชิ้น · ร้านจะกันเบี้ยไว้ตามยอดรวม</p><div class="board-want"><input id="want-item" placeholder="ชื่อของ เช่น ฟางมัดเรืองแสง" aria-label="ชื่อของที่รับซื้อ"><input id="want-count" type="number" min="1" value="10" aria-label="จำนวน"><input id="want-price" type="number" min="1" value="5" aria-label="ราคาต่อชิ้น"></div>`}
     <div class="market-actions"><button type="button" class="mp-primary" id="shop-open">เปิดร้านตรงนี้</button></div>`;
    body.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;render(true);});

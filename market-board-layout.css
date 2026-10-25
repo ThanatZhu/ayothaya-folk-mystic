@@ -1,0 +1,49 @@
+/* Keep the original gold/jade art. The content scrolls inside a viewport-sized panel. */
+html body.field-hud.hud63 #market-board[data-hud-panel][open]{width:min(460px,calc(100vw - var(--window-left) - var(--window-right)))!important;height:min(820px,var(--window-height))!important;display:flex;flex-direction:column;padding:0;overflow:hidden!important}
+#market-board>header{flex-shrink:0;position:relative;padding:12px 16px}
+#market-board #board-close{min-width:44px;min-height:44px;flex-shrink:0}
+#market-board>.board-tabs{flex-shrink:0;gap:8px;padding:8px 14px;border-bottom:1px solid #c6aa5c44}
+#market-board>.board-tabs button{min-height:44px}
+#market-board #board-body{min-height:0;min-width:0;flex:1;overflow:auto;overscroll-behavior:contain;padding:12px 14px 16px;scrollbar-width:thin;scrollbar-color:#bba15c #102b22}
+#market-board .board-search input,#market-board .board-want input{min-width:0;box-sizing:border-box}
+#market-board .market-coin{display:flex;align-items:center;gap:10px;min-width:0}
+#market-board .market-coin input{min-width:0;box-sizing:border-box}
+#market-board .board-offer-columns{display:none}
+#market-board .market-list>li{min-width:0}
+#market-board .market-list>li>div{min-width:0}
+#market-board .market-list strong{white-space:normal;overflow-wrap:anywhere}
+#market-board .market-actions{flex-shrink:0;gap:10px}
+#market-board .market-actions button{min-height:44px}
+@media(min-width:901px) and (pointer:fine){
+ html body.field-hud.hud63 #market-board[data-hud-panel][open]{width:min(1160px,calc(100vw - var(--window-left) - var(--window-right)))!important;height:min(820px,var(--window-height))!important}
+ #market-board>header{padding:14px 24px}#market-board>header h2{font-size:22px}
+ #market-board>.board-tabs{padding:10px 24px;gap:12px}#market-board>.board-tabs button{font-size:14px}
+ #market-board #board-body{padding:16px 24px 20px}
+ #market-board .market-note{font-size:13px;line-height:1.7;margin:0 0 12px}
+ #market-board .board-search{gap:10px;margin:0 0 12px}#market-board .board-search input{min-height:46px;font-size:15px}#market-board .board-search button{min-width:120px}
+ #market-board .board-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ #market-board .board-results>.empty{grid-column:1/-1}
+ #market-board .market-list>li{padding:10px;gap:12px}
+ #market-board .market-list strong{font-size:14px;line-height:1.5}#market-board .market-list small{font-size:12px;line-height:1.6}
+ #market-board .market-list .item-icon{width:42px;height:42px;flex-shrink:0}
+ #market-board .board-kind{flex-shrink:0;margin:0 0 12px;gap:10px}#market-board .board-kind button{min-height:44px;font-size:14px}
+ #market-board .market-coin{flex-shrink:0;margin:0 0 14px;font-size:14px}#market-board .market-coin input{min-height:44px;font-size:15px}
+ #market-board[data-board-tab=open][data-board-kind=sell] #board-body{display:flex;flex-direction:column;overflow:hidden}
+ #market-board[data-board-tab=open] #board-body>.market-note{flex-shrink:0}
+ #market-board[data-board-tab=open][data-board-kind=sell] .market-list{min-height:0;flex:1;overflow:auto;margin:0;padding:2px 4px 2px 0;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#bba15c #102b22}
+ #market-board[data-board-tab=open][data-board-kind=sell] .market-list>li[data-id]{display:grid;grid-template-columns:24px 42px minmax(0,1fr) 100px 140px;gap:12px;align-items:center}
+ #market-board .shop-count,#market-board .shop-price{box-sizing:border-box;width:100%;min-width:0;min-height:42px;padding:0 10px;font:700 14px Mali,Tahoma,sans-serif}
+ #market-board .board-offer-columns{display:grid;grid-template-columns:minmax(0,1fr) 100px 140px;gap:12px;flex-shrink:0;padding:0 14px 8px 10px;font-size:12px;color:#d5bc7e}
+ #market-board .board-offer-columns>span:not(:first-child){text-align:center}
+ #market-board[data-board-tab=open] .market-actions{margin:12px 0 0;padding-top:12px;border-top:1px solid #b89b5344;justify-content:flex-end}
+ #market-board[data-board-tab=open] .market-actions button{min-width:210px;font-size:14px}
+ #market-board .board-want{grid-template-columns:minmax(0,1fr) 120px 160px;gap:12px;margin:8px 0 20px}
+ #market-board .board-want input{min-height:46px;font-size:14px}
+ #market-board[data-board-tab=mine] #board-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));align-content:start;gap:16px}
+ #market-board[data-board-tab=mine] #board-body>.market-note{grid-column:1/-1}
+ #market-board .market-stall{min-width:0;margin:0;padding:16px;border:1px solid #c6aa5c55;border-radius:6px;background:#112b23a8}
+ #market-board .market-stall h3{margin:0 0 12px;line-height:1.5;overflow-wrap:anywhere;font-size:17px}
+ #market-board .market-stall .market-actions{flex-wrap:wrap}
+ #market-board .board-log{font-size:12px;line-height:1.7;max-height:180px;overflow:auto}
+}
+@media(max-width:600px){#market-board>.board-tabs{gap:4px;padding:6px 8px}#market-board #board-body{padding:8px}#market-board .market-list>li{gap:5px;padding:6px}#market-board .shop-count,#market-board .shop-price{box-sizing:border-box;width:52px}}

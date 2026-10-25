@@ -10,7 +10,7 @@ import {createLandscapeGuard} from './mobile-layout.js?v=login158';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=114';
-import {wakeServer} from './multiplayer-config.js?v=28';
+import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
 wakeServer();
 const $=id=>document.getElementById(id);
 createLandscapeGuard({allowPortrait:true});
@@ -29,7 +29,7 @@ function show(next){screen=next;document.body.dataset.screen=next;for(const s of
 function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#delete-character,.character-slot').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
- const messages={'slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่','player-online':'ตัวละครในบัญชีนี้ยังอยู่ในเกม ออกจากเกมแล้วรอสักครู่ค่อยลบ','character-not-found':'ไม่พบตัวละครนี้แล้ว ลองโหลดหน้าใหม่','bad-token':'การล็อกอินหมดอายุ กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
+ const messages={'world-reset':'กำลังรีเซ็ตโลกก่อนเปิด CBT · กรุณารอแล้วลองอีกครั้ง','slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่','player-online':'ตัวละครในบัญชีนี้ยังอยู่ในเกม ออกจากเกมแล้วรอสักครู่ค่อยลบ','character-not-found':'ไม่พบตัวละครนี้แล้ว ลองโหลดหน้าใหม่','bad-token':'การล็อกอินหมดอายุ กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
  say(code==='character-exists'?'มีตัวละครในเซิร์ฟเวอร์นี้แล้ว กดเปลี่ยนเซิร์ฟเวอร์แล้วเลือกอีกครั้ง':code==='auth/popup-blocked'?'กรุณาอนุญาตป๊อปอัป แล้วกด Google อีกครั้ง':code==='auth/popup-closed-by-user'?'ยังไม่ได้ล็อกอิน ลองใหม่ได้ครับ':code==='permission-denied'?'ยังเข้าถึงเซฟไม่ได้ กรุณาลองอีกครั้ง':String(code).startsWith('ชื่อ')||String(code).startsWith('กรุณา')?code:'เชื่อมต่อไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง');
 }
 const catalogReady=fetch('./maps/world.json?v=108.3').then(r=>{if(!r.ok)throw new Error('catalog');return r.json();}).then(v=>catalog=v);
@@ -128,11 +128,11 @@ function displayCharacter(){
 $('hero-name').addEventListener('input',()=>{if(!record)$('stage-name').textContent=$('hero-name').value.trim();});
 document.querySelectorAll('[data-server]').forEach(button=>button.onclick=async()=>{
  if(busy)return;lock(true);selected=button.dataset.server||'server-1';selectedChannel=normalizeChannel(button.dataset.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(selectedChannel));}catch{}say('กำลังโหลดตัวละคร…');
- try{roster=await store.list();record=roster[0]??null;if(record)selected=record.serverId;displayCharacter();}catch(e){record=null;report(e);}finally{lock(false);}
+ try{await checkWorldReady();roster=await store.list();record=roster[0]??null;if(record)selected=record.serverId;displayCharacter();}catch(e){record=null;report(e);}finally{lock(false);}
 });
 $('character-form').onsubmit=async event=>{
  event.preventDefault();if(busy)return;lock(true);say('กำลังสร้างตัวละคร…');
- try{record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:'novice',appearance:validateAppearance(),jobId:''});roster=await store.list();displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}
+ try{await checkWorldReady();record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:'novice',appearance:validateAppearance(),jobId:''});roster=await store.list();displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}
 };
 $('change-class').onclick=async()=>{
  if(!record||busy||selectedClass===record.character.classId)return;lock(true);say('กำลังบันทึกอาชีพ…');
@@ -151,3 +151,12 @@ $('enter-world').onclick=()=>{
 for(let i=0;i<25;i++){const p=document.createElement('i');p.className='ember';p.style.left=((i*37)%100)+'%';p.style.top=(25+(i*23)%75)+'%';p.style.animationDelay=(-i*.71)+'s';p.style.animationDuration=(7+i%8)+'s';$('embers').append(p);}
 
 addEventListener('pageshow',e=>{if(e.persisted)getLoadingScreen().hide();});
+
+// Updated lobbies pause creation during the server reset. Existing save transactions also
+// reject missing characters; the reset removes legacy migration sources before their slots.
+async function checkWorldReady(){
+ if(owner==='guest')return;
+ const url=multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'/game-status');
+ let state;try{const r=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(3500)});if(r.ok)state=await r.json();}catch{}
+ if(state?.maintenance)throw Error('world-reset');
+}

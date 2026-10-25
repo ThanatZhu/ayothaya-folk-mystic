@@ -4050,3 +4050,37 @@ Object.assign(globalThis.I18N_EN,{
  "แล้ว รอหัวหน้าหรือรองหัวหน้าอนุมัติ": "· Wait for the leader or deputy to approve",
  "ไม่รับคำขอเข้าร่วม": "Decline Application"
 });
+
+// Administrative CBT world reset.
+Object.assign(globalThis.I18N_EN, {
+ "รีเซ็ตก่อนเปิด CBT": "Reset for CBT",
+ "เริ่มโลกใหม่ก่อนเปิด CBT": "Start a fresh world for CBT",
+ "ลบตัวละครทุกไอดี ทั้งเซิร์ฟเวอร์ 1 และ 2 เพื่อให้ทุกคนเริ่มสร้างตัวละครใหม่": "Delete every character in realms 1 and 2 so all accounts create new characters",
+ "ข้อมูลที่จะล้าง": "Data to erase",
+ "ตัวละครทุกช่อง เลเวล จุติ ของ เงิน ทองแท่ง สัตว์เลี้ยง เควส การ์ด และจดหมาย": "All character slots, levels, rebirths, items, money, Gold Bars, pets, quests, cards and mail",
+ "รวมกิลด์ ร้านค้า ตลาด อันดับ ประวัติการเล่น และเวลาเกิดบอส": "Also guilds, shops, markets, rankings, gameplay history and boss timers",
+ "ข้อมูลที่เก็บไว้": "Data to keep",
+ "บัญชี Google และสิทธิ์แอดมินยังใช้ได้ตามเดิม": "Google accounts and admin access remain available",
+ "ภาพเกม แผนที่ และค่าสมดุลเกมยังอยู่": "Game artwork, maps and balance settings are retained",
+ "ระบบจะหยุดรับผู้เล่น ตัดการเชื่อมต่อ และสำรองข้อมูลบนเซิร์ฟเวอร์ก่อนลบ": "The server pauses new logins, disconnects players and backs up data before deleting it",
+ "พิมพ์ RESET CBT เพื่อยืนยัน": "Type RESET CBT to confirm",
+ "ยืนยันลบตัวละครทุกไอดี และให้ผู้เล่นเริ่มใหม่ทั้งหมด": "I confirm deleting every character so all players start over",
+ "ตรวจข้อมูลอีกครั้ง": "Check data again",
+ "ลบตัวละครทุกไอดี": "Delete all characters",
+ "ไอดี": "Accounts",
+ "รายการข้อมูล": "Data records",
+ "ทำรายการไม่สำเร็จ กรุณาตรวจสถานะแล้วลองอีกครั้ง ·": "Action failed. Check the status and try again ·",
+ "รหัสสำรองข้อมูล ·": "Backup ID ·",
+ "รีเซ็ตสำเร็จแล้ว ผู้เล่นล็อกอินและสร้างตัวละครใหม่ได้": "Reset complete. Players can sign in and create new characters",
+ "รีเซ็ตหยุดชั่วคราว ระบบยังไม่เปิดรับผู้เล่น · กดตรวจข้อมูลอีกครั้งเพื่อทำต่อจากข้อมูลสำรองเดิม": "Reset paused. Logins remain blocked · Check data again to resume using the original backup",
+ "กำลังสำรองข้อมูลทั้งหมดก่อนลบ…": "Backing up all data before deletion…",
+ "กำลังล้างตัวละครและข้อมูลโลก…": "Erasing characters and world data…",
+ "กำลังหยุดผู้เล่นและรอให้บันทึกข้อมูลเสร็จ…": "Pausing players and waiting for saves to finish…",
+ "กำลังตรวจจำนวนข้อมูล…": "Counting data records…",
+ "ทำการรีเซ็ตต่อ": "Resume reset",
+ "ระบบยังหยุดรับผู้เล่น ยืนยันเพื่อทำการรีเซ็ตต่อจากข้อมูลสำรองเดิม": "Logins are still paused. Confirm to resume using the original backup",
+ "ยังไม่มีการลบข้อมูล · คำยืนยันนี้ใช้ได้ 5 นาที": "Nothing has been deleted · This confirmation expires in 5 minutes",
+ "กำลังตรวจสถานะ…": "Checking status…",
+ "กำลังรีเซ็ตโลกก่อนเปิด CBT · กรุณารอแล้วลองอีกครั้ง": "The world is being reset for CBT · Please wait and try again",
+ "กำลังรีเซ็ตโลกก่อนเปิด CBT · กรุณากลับหน้าเลือกตัวละครหลังระบบพร้อม": "The world is being reset for CBT · Return to character selection when the server is ready"
+});

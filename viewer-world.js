@@ -37,7 +37,7 @@ import {createGame} from './game-controls.js?v=arena166';
 import {atlasPath,className} from './classes.js?v=112.1';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=arena166';
-import {createStoryUI} from './story-ui.js?v=story160';
+import {createStoryUI} from './story-ui.js?v=story163';
 import {createBagUI} from './bag-ui.js?v=arena166';
 import {createStatusUI} from './status-ui.js?v=cards156';
 import {createProfileUI} from './profile-ui.js?v=arena166';
@@ -49,10 +49,11 @@ import {createSocialUI} from './social-ui.js?v=guild162';
 import {createLifeUI} from './life-ui.js?v=boss138';
 import {createPetUI} from './pet-ui.js?v=mail150';
 import {createControlsUI} from './controls-ui.js?v=01';
-import {createQuestsUI} from './quests-ui.js?v=story160';
+import {createQuestsUI} from './quests-ui.js?v=story163';
 import {createLifeNPC} from './life-npc.js?v=arena166';
 import {createFeedback} from './feedback.js?v=compact-notice1';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=podium153';
+import {createCbtEventUI} from './cbt-event-ui.js?v=162.1';
 import {createMarketBoardUI} from './market-board-ui.js?v=shops155';
 import {createHud63} from './hud-63.js?v=combat151';
 import {bindRenderLifecycle} from './render-lifecycle.js';
@@ -180,7 +181,7 @@ try {
  const frontier=map.pvpArena?createArenaStage({scene}):map.procedural&&!map.scene?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
  // Leaving the map reloads the page; free the scene's GPU memory first so the next map starts clean.
  const actorLighting=createActorLighting({scene,camera,renderer,map,profile:lightProfile});
- bindRenderLifecycle({dispose:()=>{actorLighting.dispose();disposeScene(scene);renderer.dispose();},resize});
+ bindRenderLifecycle({dispose:()=>{renderer.setAnimationLoop(null);actorLighting.dispose();disposeScene(scene);renderer.dispose();},resize});
  const motion=sceneMotion??frontier??createAmbientMotion({scene,world:gltf.scene,waterMaterial:cache.get('water'),plants,characters:characters.slice(1),leafSources:map.leafSources});
  const monsterTextures=[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]].map(r=>frame(monsters.image,r));
  const monsterArt=await loadMonsterFrames(map);
@@ -222,6 +223,7 @@ try {
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
  worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
+ createCbtEventUI({game,account,loading,autoOpen:!map.pvpArena});
  const arenaUI=createArenaUI({game,account,map,catalog,worldUI});
  createActionbar({game,bagUI,account});
  document.querySelector('.player-heading small').textContent=(jobFor(account.character.classId,account.character.jobId)?.name??className(account.character.classId,account.character.gender))+' · '+(map.safe?'เขตสงบ':map.name);

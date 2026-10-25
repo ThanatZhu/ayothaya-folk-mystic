@@ -113,11 +113,12 @@ export function findPath(start,goal,nav=DEFAULT_NAV){
  for(let iterations=0;open.length&&iterations<6000;iterations++){
   open.sort((a,b)=>b.f-a.f);const cur=open.pop();
   if(best.get(key(cur.x,cur.z))<cur.g)continue;
-  if(Math.hypot(cur.x*cell-goal.x,cur.z*cell-goal.z)<.7){end=cur;break;}
+  const from=cur.parent?{x:cur.x*cell,z:cur.z*cell}:start;
+  if(Math.hypot(cur.x*cell-goal.x,cur.z*cell-goal.z)<.7&&walkLineClear(from,goal,nav)){end=cur;break;}
   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
    const x=cur.x+dx,z=cur.z+dz;
    if(!walkable(x*cell,z*cell,.32,nav))continue;
-   if(cell===1&&!lineClear({x:cur.x*cell,z:cur.z*cell},{x:x*cell,z:z*cell},nav))continue;
+   if(!walkLineClear(from,{x:x*cell,z:z*cell},nav))continue;
    if(dx&&dz&&(!walkable((cur.x+dx)*cell,cur.z*cell,.32,nav)||!walkable(cur.x*cell,(cur.z+dz)*cell,.32,nav)))continue;
    const g=cur.g+Math.hypot(dx,dz),k=key(x,z);if(g>=(best.get(k)??Infinity))continue;
    best.set(k,g);open.push({x,z,g,f:g+Math.hypot(x-goal.x/cell,z-goal.z/cell),parent:cur});
@@ -128,6 +129,12 @@ export function findPath(start,goal,nav=DEFAULT_NAV){
 export function lineClear(a,b,nav=DEFAULT_NAV){
  const n=Math.max(1,Math.ceil(distance(a,b)/.18));
  for(let i=1;i<n;i++){const f=i/n;if(!walkable(a.x+(b.x-a.x)*f,a.z+(b.z-a.z)*f,.05,nav))return false;}return true;
+}
+// Sight/projectiles can pass a narrow gap, but walking must clear the whole body.
+// Half a movement substep keeps bridge edges in the sweep, including both ends.
+export function walkLineClear(a,b,nav=DEFAULT_NAV){
+ const n=Math.max(1,Math.ceil(distance(a,b)/.06));
+ for(let i=0;i<=n;i++){const f=i/n;if(!walkable(a.x+(b.x-a.x)*f,a.z+(b.z-a.z)*f,.28,nav))return false;}return true;
 }
 // 0.63 packs: on maps with packs:true each mobs entry is a camp of 4-5 of that monster around the point
 // (bosses stay alone). Deterministic, so the realm server and every client build identical ids.
@@ -308,7 +315,7 @@ export class CombatWorld{
     if(reachTo(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      // 0.99.11 open ground (nothing between us): walk straight at it and skip the grid search, which is the costly part
-     if(this.pathTimer<=0){this.path=lineClear(p,m,this.nav)?[{x:m.x,z:m.z}]:findPath(p,m,this.nav);this.pathTimer=.65;}
+     if(this.pathTimer<=0){this.path=walkLineClear(p,m,this.nav)?[{x:m.x,z:m.z}]:findPath(p,m,this.nav);this.pathTimer=.65;}
      while(this.path.length&&distance(p,this.path[0])<.16)this.path.shift();
      const next=this.path[0];if(next){const d=distance(p,next)||1;const step=Math.min(d,speed*dt);p.face={x:(next.x-p.x)/d,z:(next.z-p.z)/d};moveBody(p,p.face.x*step,p.face.z*step,this.nav);}
     }

@@ -1,4 +1,11 @@
 /* A readable journal on desktop; a collapsible chapter list on touch screens. */
+#quests-window .quest-task-copy{min-width:0}
+#quests-window .quest-task-reward{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:6px;min-width:0}
+#quests-window .quest-task-reward small{display:block;flex:0 1 auto;margin:0;white-space:normal;overflow-wrap:anywhere;line-height:1.8}
+#quests-window .social-list .quest-watch{position:static!important;inset:auto!important;transform:none!important;float:none!important;flex:none;align-self:center;min-height:40px;max-width:100%;margin:0!important;white-space:nowrap;line-height:1.5;box-sizing:border-box}
+#quests-window:is([data-quest-tab=bounty],[data-quest-tab=weekly]) .social-list li{min-width:0;flex-wrap:wrap}
+#quests-window:is([data-quest-tab=bounty],[data-quest-tab=weekly]) .quest-task-copy{flex:1 1 220px}
+#quests-window:is([data-quest-tab=bounty],[data-quest-tab=weekly]) .social-list strong{white-space:normal;overflow-wrap:anywhere}
 #quests-window .quest-journal-layout{min-width:0;min-height:0}
 #quests-window .quest-journal-nav{margin:10px;border:1px solid #c7a66166;border-radius:6px;background:#10271fe6;min-width:0;min-height:0}
 #quests-window .quest-journal-toggle{display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;color:#f5d58c;cursor:pointer;font:700 14px Mali,Tahoma,sans-serif;border:0;background:none;text-align:start}
@@ -67,5 +74,10 @@ html body.mobile-play.field-hud.hud63 #quests-window[data-hud-panel][open][data-
 body.mobile-play #quests-window[data-quest-tab=album]>header{flex-shrink:0}
 body.mobile-play #quests-window[data-quest-tab=album]>.social-tabs{flex-shrink:0;flex-wrap:wrap;gap:5px;padding:6px 10px}
 body.mobile-play #quests-window[data-quest-tab=album] #quests-body{min-height:0;min-width:0;flex:1;overflow:auto;padding:10px;overscroll-behavior:contain}
+/* Daily tasks need the same usable safe-area width as the album on short phones. */
+html body.mobile-play.field-hud.hud63 #quests-window[data-hud-panel][open]:is([data-quest-tab=bounty],[data-quest-tab=weekly]){width:min(920px,calc(100vw - var(--window-left) - var(--window-right)))!important;height:min(640px,var(--window-height))!important;display:flex;flex-direction:column;overflow:hidden!important}
+body.mobile-play #quests-window:is([data-quest-tab=bounty],[data-quest-tab=weekly])>header{flex-shrink:0}
+body.mobile-play #quests-window:is([data-quest-tab=bounty],[data-quest-tab=weekly])>.social-tabs{flex-shrink:0;flex-wrap:wrap;gap:5px;padding:6px 10px}
+body.mobile-play #quests-window:is([data-quest-tab=bounty],[data-quest-tab=weekly]) #quests-body{min-height:0;min-width:0;flex:1;overflow:auto;padding:10px;overscroll-behavior:contain}
 #quests-window .album-art{position:relative;display:block}
 #quests-window .album-image{position:absolute;inset:0}

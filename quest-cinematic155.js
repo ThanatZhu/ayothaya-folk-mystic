@@ -1,4 +1,4 @@
-import {storyScene,sceneUnlocked,sceneForNPCTalk,taskScene} from './quest-cinematic-data155.js?v=story160';
+import {storyScene,sceneUnlocked,sceneForNPCTalk,taskScene} from './quest-cinematic-data155.js?v=story163';
 import {sceneImage} from './npc-portrait155.js?v=155';
 import {createPlayback,advancePlayback,acceleratePlayback,playbackFrame} from './story-playback160.js?v=story160';
 
@@ -18,7 +18,10 @@ export function createQuestCinematics({game,account,map,state}){
  function paint(){
   if(!active||!image||!playback)return;const s=playbackFrame(playback,reduced.matches),height=image.height/active.art.panels;
   ctx.fillStyle='#061510';ctx.fillRect(0,0,1280,640);ctx.globalAlpha=s.opacity;
-  ctx.drawImage(image,0,s.shot*height,image.width,height,0,0,1280,640);ctx.globalAlpha=1;
+  // Generated triptychs can have unequal panel boundaries. Use measured crops
+  // when supplied, retaining the original equal-panel contract for story atlases.
+  const crop=active.art.frames?.[s.shot]??[0,s.shot*height,image.width,height];
+  ctx.drawImage(image,...crop,0,0,1280,640);ctx.globalAlpha=1;
   if(s.shot!==lastShot){lastShot=s.shot;accessible.textContent=playback.lines[s.shot].join('');}
   if(text.textContent!==s.text)text.textContent=s.text;if(letter.textContent!==s.next)letter.textContent=s.next;
   letter.style.opacity=reduced.matches?'1':String(s.letterOpacity);caption.parentElement.style.opacity=String(s.opacity);

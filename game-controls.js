@@ -18,9 +18,9 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=combat165';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=74';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=run153';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=bridge164';
 import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=role116';
-import {createRouteWalker} from './route-walk.js?v=run153';
+import {createRouteWalker} from './route-walk.js?v=bridge164';
 
 import {className} from './classes.js?v=112.1';
 import {rebirthRank} from './character-stats.js?v=107';

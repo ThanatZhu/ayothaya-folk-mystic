@@ -1,5 +1,6 @@
 import {STORY} from './story-quests.js?v=refine136';
 import {STORYBOARDS} from './quest-storyboard160.js?v=story160';
+import {bountyScene} from './bounty-storyboards163.js?v=163';
 export function storyScene(questIndex,stepIndex){
  const quest=STORY[questIndex],step=quest?.steps[stepIndex];if(!step)return null;
  const board=STORYBOARDS[quest.id];if(!board)throw Error('Missing storyboard '+quest.id);
@@ -20,7 +21,8 @@ export function sceneForNPCTalk(state,npc,mapId){
  }
  return storyScene(state.quest,state.step);
 }
-export function taskScene({kind='training',title,goal,monster}={}){
+export function taskScene({kind='training',title,goal,monster,leader=false}={}){
+ if(kind==='bounty'||kind==='weekly')return bountyScene({title,goal,monster,leader});
  const id=kind==='training'?'t17':monster==='marsh-ape'?'t21':monster==='bog-lantern'?'t20':monster?.startsWith('marsh')?'t19':monster==='lantern'?'t12':'t5';
  const board=STORYBOARDS[id];return {id:kind+':'+title,title:title??'เรื่องเล่าจากอโยธยา',
   art:{src:`./assets/story160/${id}.webp`,panels:3},captions:[board.lines[0],goal??board.lines[1],board.lines[2]]};

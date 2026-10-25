@@ -1,6 +1,6 @@
 // Click-to-move / auto-walk (Ragnarok style). Turns a destination into the same world-space direction the joystick
 // produces, so one code path drives offline play, client prediction and authoritative destination movement.
-import {findPath,lineClear,walkable} from './combat-core.js?v=role116';
+import {findPath,walkLineClear,walkable} from './combat-core.js?v=bridge164';
 
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const RADIUS=.32; // same body radius findPath plans with
@@ -16,7 +16,7 @@ export function nearestWalkable(p,nav,maxRadius=4){
 }
 
 export function planRoute(from,goal,nav){
- if(lineClear(from,goal,nav))return [{x:goal.x,z:goal.z}];
+ if(walkLineClear(from,goal,nav))return [{x:goal.x,z:goal.z}];
  const path=findPath(from,goal,nav);
  if(!path.length)return null;
  path.push({x:goal.x,z:goal.z});

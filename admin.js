@@ -1,3 +1,4 @@
+import {createAdminResetUI} from './admin-reset-ui.js?v=166';
 import {legacyPetItem} from './mailbox.js';
 import {petGrantHTML,bindPetGrant} from './admin-pet-panel.js?v=127';
 import {paintAdminSkills,paintAdminMonsters} from './admin-art.js?v=127';
@@ -193,6 +194,7 @@ function placeTip(x,y){const w=tip.offsetWidth,h=tip.offsetHeight;tip.style.left
 document.addEventListener('pointerover',e=>{const el=e.target.closest?.('[data-item]');if(!el){tip.hidden=true;tipFor=null;return;}if(el.dataset.item!==tipFor){tipFor=el.dataset.item;tip.innerHTML=tipHTML(tipFor);}tip.hidden=false;placeTip(e.clientX,e.clientY);});
 document.addEventListener('pointermove',e=>{if(!tip.hidden)placeTip(e.clientX,e.clientY);});
 document.addEventListener('scroll',()=>{tip.hidden=true;tipFor=null;},true);
+const resetUI=createAdminResetUI({fetchAdmin:adminFetch,canUse:()=>!!fbConn?.auth.currentUser&&ALLOWED_ADMINS.includes((fbConn.auth.currentUser.email??'').toLowerCase())});
 async function initAdminAuthGate(){
  const gate=$('auth-gate'),app=$('app-shell');
  if(!gate||!app){
@@ -202,6 +204,7 @@ async function initAdminAuthGate(){
  const msg=$('gate-msg'),btnLogin=$('btn-login-google'),btnLogout=$('btn-logout'),badge=$('admin-user-badge');
 
  function lock(msgHtml){
+  resetUI.syncVisibility();
   app.hidden=true;
   app.style.display='none';
   gate.hidden=false;
@@ -216,6 +219,7 @@ async function initAdminAuthGate(){
   app.style.display='grid';
   document.body.style.overflow='';
   if(badge)badge.textContent='👤 '+user.email;
+  resetUI.syncVisibility();
   tabs();
   render();
  }

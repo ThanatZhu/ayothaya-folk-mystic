@@ -49,7 +49,7 @@ export class LocalStore{
  saveGuild(){return this.flushGuilds();}
  // 0.70 market shops and reference prices (one file each, rewritten on change like guilds).
  async loadShops(){try{return JSON.parse(await readFile(path.join(this.directory,'shops.json'),'utf8'));}catch{return [];}}
- saveShop(){return writeFile(path.join(this.directory,'shops.json'),JSON.stringify([...(this.realmShops?.values()??[])]),{mode:0o600});}
+ saveShop(){const data=JSON.stringify([...(this.realmShops?.values()??[])]),file=path.join(this.directory,'shops.json');this.queue=this.queue.catch(()=>{}).then(async()=>{await writeFile(file+'.tmp',data,{mode:0o600});await rename(file+'.tmp',file);});return this.queue;}
  deleteShop(){return this.saveShop();}
  async loadLeaders(){try{return JSON.parse(await readFile(path.join(this.directory,'leaders.json'),'utf8'));}catch{return {};}}
  saveLeaders(serverId,rows){this.allLeaders={...(this.allLeaders??{}),[serverId]:rows};return writeFile(path.join(this.directory,'leaders.json'),JSON.stringify(this.allLeaders),{mode:0o600});}

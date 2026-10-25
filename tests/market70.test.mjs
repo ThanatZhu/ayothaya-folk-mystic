@@ -26,14 +26,14 @@ test('market rules: escrowed sell shop, buying store, tax, collect, close, searc
  assert.equal(s.bag.coins,78);assert.equal(s.bag.items['straw-bundle'],undefined);assert.equal(s.shop.escrow,120);assert.equal(s.shop.pouch.items['straw-bundle'],4);
  assert.equal(collectShop(s.shop,{coins:0,items:{}},{close:true}).bag.coins,120);
  // search: cheapest sell first, buys after; reference prices warn on outliers
- const rows=searchMarket([o.shop,{...w.shop,items:{'rat-tooth':{count:1,price:50}}}],[{owner:'p',name:'ข',title:'แผง',items:{'rat-tooth':{count:1,price:80}},x:1,z:1,mapId:'ayutthaya'}],'ฟันหนู');
+ const rows=searchMarket([o.shop,{...w.shop,items:{'rat-tooth':{count:1,price:50}}}],[{owner:'p',name:'ข',title:'แผง',items:{'rat-tooth':{count:1,price:80}},x:1,z:1,mapId:'ayutthaya'}],'ฟันหนู',1);
  assert.deepEqual(rows.map(r=>[r.kind,r.price]),[['sell',80],['sell',100],['buy',50]]);
  let prices={};for(const v of [100,110,90])prices=recordPrice(prices,'rat-tooth',v,1);
  assert.equal(priceHint(prices,'rat-tooth',1000),'high');assert.equal(priceHint(prices,'rat-tooth',100),null);
  assert.ok(inMarket('ayutthaya',spot.x,spot.z));assert.ok(!inMarket('rice-fields',spot.x,spot.z));
 });
 
-test('server: a consignment shop keeps selling after its owner logs out, and the owner collects on return', () => {
+test('server: a consignment shop keeps selling after its owner logs out, and the owner collects on return', async () => {
  const realm=new RealmServer({catalog});const saved=[];realm.onShop=(s,del)=>saved.push(del?'del':s.id);
  const join=(uid,coins,items)=>{const state=initialSave();state.position={...spot};const p=realm.join({uid,serverId:'server-1',slotId:'slot-1',record:{character:{name:uid,gender:'male',classId:'novice'},state,bag:{coins,items},daily:{day:'2099-01-01',streak:1}},send:()=>{}});Object.assign(p.world.player,spot);return p;};
  const seller=join('seller',0,{'rat-tooth':5});let t=Date.now()+1000;realm.now=()=>t;
@@ -46,7 +46,7 @@ test('server: a consignment shop keeps selling after its owner logs out, and the
  t+=1000;realm.receive(buyer.id,{type:'marketSearch',seq:2,query:'rat'});
  const back=join('seller',0,{});t+=1000;const sellerCoins=back.bag.coins;
  assert.equal(realm.receive(back.id,{type:'shopClose',seq:1,shop:shopId}),true);
- assert.equal(back.bag.coins-sellerCoins,291);assert.equal(back.bag.items['rat-tooth'],2);assert.equal(realm.shops.size,0);assert.ok(saved.includes('del'));
+ assert.equal(back.bag.coins-sellerCoins,291);assert.equal(back.bag.items['rat-tooth'],2);assert.equal(realm.shops.size,0);await realm.flushShops();assert.ok(saved.includes('del'));
  assert.equal(realm.record(back,{state:initialSave()}).trade.xp,300);
 });
 

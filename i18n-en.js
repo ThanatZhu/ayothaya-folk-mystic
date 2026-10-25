@@ -3703,3 +3703,4 @@ Object.assign(globalThis.I18N_EN,{
 });
 Object.assign(globalThis.I18N_EN,{'ประเภทอันดับ':'Ranking category','ภาพตัวละครยังโหลดไม่สำเร็จ':'Character image could not be loaded','{0} แต้ม':'{0} points','ชนะ {0} เสมอ {1} แพ้ {2}':'Wins {0}, draws {1}, losses {2}','ยังไม่มีผู้ครองอันดับ':'Rank unclaimed','อันดับ {1}':'Rank {1}','สามอันดับแรก':'Top three','อันดับ 4 ถึง 10':'Ranks 4 to 10'});
 Object.assign(globalThis.I18N_EN,{'สินค้า':'Item'});
+Object.assign(globalThis.I18N_EN,{'ร้านเปิดได้ 24 ชั่วโมง · ขายหมดหรือรับซื้อครบจะปิดอัตโนมัติ · ต้องตั้งร้านใหม่เพื่อขายต่อ':'Shops last 24 hours and close when sold out or fully filled. Open a new shop to continue.','ปิดอัตโนมัติ · ครบ 24 ชั่วโมง':'Closed automatically: 24 hours elapsed','ปิดอัตโนมัติ · รับซื้อครบแล้ว':'Closed automatically: order filled','ปิดอัตโนมัติ · ขายหมดแล้ว':'Closed automatically: sold out','หมดเวลาร้าน':'Shop expires','รับของคืน/เบี้ย':'Collect returns / cowries'});

@@ -17,7 +17,7 @@ import {CombatWorld,monsterHit,MONSTER_TYPES,moveBody,lineClear,walkable,rallyPa
 import {awardExperience,baseProgress,levelGifts,migrateXp,XP_CURVE} from '../experience.js';
 import {refineGear} from '../refine.js';
 import {STORAGE_SLOTS,STORAGE_NPC,normalizeStorage,normalizeOffer,moveOffer,hasOffer,swapOffers,normalizeStall,buyFromStall} from '../market.js';
-import {MARKET_ZONE,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,searchMarket,publicShop} from '../market-board.js';
+import {MARKET_ZONE,SHOP_DURATION,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,searchMarket,publicShop,shopIsOpen,closeInactiveShop,shopHasClaims,shopHasListings} from '../market-board.js';
 import {REBIRTH_MAX,rebirthStatBonus,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot,CHANNELS,normalizeChannel} from '../realm-state.js';
@@ -499,6 +499,7 @@ export class RealmServer{
   for(const p of this.peers.values())if(p.suspended&&p.resumeUntil&&p.resumeUntil<this.now())this.leave(p.id);
   for(const [id,v] of this.invites)if(v.expires<this.now())this.invites.delete(id);
   for(const party of [...this.parties.values()])for(const [uid,until] of party.pending??[])if(until<this.now()){party.pending.delete(uid);if(party.members.size+party.pending.size<2){for(const id of party.members){const a=this.peers.get(id);a.partyId=null;this.social(a.room);}this.parties.delete(party.id);}}
+  if(this.tickId%20===1){this.expireShops();for(const p of this.peers.values())this.expireStall(p);}
   this.warTick();
   if(this.tickId%20===0)for(const p of this.peers.values())if(!p.suspended)this.storyCheck(p);
   if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
@@ -524,7 +525,7 @@ export class RealmServer{
      target.world.takeMonsterHit(type,type.damage,m);
     }
    }
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock}; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','refineRejected','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album','crafted'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock}; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','refineRejected','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopsClosed','shopMine','marketResults','friends','friendAsk','guild','guildAsk','daily','mvp','dungeonClear','tamed','album','crafted'].includes(e.type))p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){this.broadcasting=true;const events=copy(room.events);for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p,{delta:true}),events});}this.broadcasting=false;room.events=[];}
   }
  }
@@ -541,26 +542,43 @@ export class RealmServer{
    skilled:(p.world.skillLevels??[]).reduce((n,v)=>n+v,0)>2,auto:!!p.world.auto,guild:!!this.guildOf(p)};}
  storyCheck(p){for(let i=0;i<30&&this.storyProgress(p,{type:'check',ctx:this.storyContext(p)});i++);}
  // ---- 0.70 central market: consignment shops (open while the owner is offline), buying stores, search, tax, prices.
- shopList(serverId){return [...this.shops.values()].filter(s=>s.serverId===serverId).map(publicShop);}
- shopsChanged(serverId){const list=this.shopList(serverId);for(const p of this.peers.values())if(p.serverId===serverId&&!p.suspended&&p.room.map.id===MARKET_ZONE.mapId)p.world.emit('shops',{list});}
- saveShop(shop,deleted=false){if(this.onShop)Promise.resolve(this.onShop(shop,deleted)).catch(e=>console.error('shop-save',e.message));}
+ shopList(serverId){return [...this.shops.values()].filter(s=>s.serverId===serverId&&shopIsOpen(s,this.now())).map(publicShop);}
+ shopsChanged(serverId,closedIds=[]){const list=this.shopList(serverId);for(const p of this.peers.values())if(p.serverId===serverId&&!p.suspended){if(p.room.map.id===MARKET_ZONE.mapId)p.world.emit('shops',{list});if(closedIds.length)p.world.emit('shopsClosed',{ids:closedIds});}}
+ saveShop(shop,deleted=false){
+  if(!this.onShop)return Promise.resolve();this.shopWrites??=new Map();const saved=copy(shop),task=(this.shopWrites.get(shop.id)??Promise.resolve()).catch(()=>{}).then(()=>this.onShop(saved,deleted));this.shopWrites.set(shop.id,task);
+  task.catch(e=>console.error('shop-save',e.message)).finally(()=>{if(this.shopWrites.get(shop.id)===task)this.shopWrites.delete(shop.id);});return task;
+ }
+ async flushShops(){await Promise.allSettled([...(this.shopWrites?.values()??[])]);}
+ expireShops(now=this.now()){
+  const servers=new Map(),owners=new Set();
+  for(const [id,s] of this.shops){const next=closeInactiveShop(s,now),remove=next.status==='closed'&&!shopHasClaims(next);if(next===s&&!remove)continue;
+   if(remove)this.shops.delete(id);else this.shops.set(id,next);this.saveShop(next,remove);if(!servers.has(s.serverId))servers.set(s.serverId,[]);servers.get(s.serverId).push(id);owners.add(s.ownerKey);
+  }
+  for(const [serverId,ids] of servers)this.shopsChanged(serverId,ids);
+  for(const p of this.peers.values())if(!p.suspended&&owners.has(p.key))p.world.emit('shopMine',{shops:this.mine(p),perks:tradePerks(p.tradeXp)});
+ }
+ expireStall(p,now=this.now()){
+  if(!p.stall)return;const expired=Number.isFinite(p.stall.expiresAt)&&p.stall.expiresAt<=now;
+  if(expired||!shopHasListings(p.stall)){p.stall=null;if(expired)p.world.notice('แผงครบ 24 ชั่วโมงแล้ว · ตั้งร้านใหม่เพื่อขายต่อ');}
+ }
  traded(serverId,peers,item,coins,count){for(const a of peers)if(a)a.tradeXp=Math.min(1e9,(a.tradeXp??0)+coins);const prices=this.prices.get(serverId)??{};this.prices.set(serverId,recordPrice(prices,item,Math.round(coins/count),this.now()));this.pricesDirty.add(serverId);}
  mine(p){return [...this.shops.values()].filter(s=>s.ownerKey===p.key).map(s=>({...publicShop(s),pouch:s.pouch,escrow:s.escrow,log:s.log}));}
  marketCommand(p,m){
   const w=p.world,perks=tradePerks(p.tradeXp),fail=c=>this.itemFail(p,c),now=this.now();
+  this.expireShops(now);for(const peer of this.peers.values())this.expireStall(peer,now);
   if(m.type==='marketSearch'){const stalls=[...this.peers.values()].filter(o=>o.serverId===p.serverId&&o.stall&&!o.suspended).map(o=>({owner:o.id,name:o.character.name,title:o.stall.title,items:o.stall.items,x:o.stall.x,z:o.stall.z,mapId:o.room.map.id}));
-   w.emit('marketResults',{query:String(m.query??'').slice(0,30),rows:searchMarket([...this.shops.values()].filter(s=>s.serverId===p.serverId),stalls,m.query),prices:this.prices.get(p.serverId)??{}});return true;}
+   w.emit('marketResults',{query:String(m.query??'').slice(0,30),rows:searchMarket([...this.shops.values()].filter(s=>s.serverId===p.serverId),stalls,m.query,now),prices:this.prices.get(p.serverId)??{}});return true;}
   if(m.type==='shopMine'){w.emit('shopMine',{shops:this.mine(p),perks});return true;}
   if(m.type==='shopList'){w.emit('shops',{list:this.shopList(p.serverId)});return true;}
   if(m.type==='shopOpen'){
    let r;try{r=openShop({bag:p.bag,req:m.shop,perks,owner:{key:p.key,name:p.character.name,serverId:p.serverId},x:w.player.x,z:w.player.z,mapId:p.room.map.id,now,id:randomUUID(),existing:[...this.shops.values()].filter(s=>s.serverId===p.serverId)});}catch(e){return fail(e.message);}
    this.setBag(p,r.bag);this.shops.set(r.shop.id,r.shop);p.saveNow=true;this.saveShop(r.shop);this.shopsChanged(p.serverId);
-   w.notice((r.shop.kind==='buy'?'เปิดร้านรับซื้อ ':'เปิดร้านค้าง ')+r.shop.title+' แล้ว · เปิดต่อแม้ออกจากเกม');w.emit('shopMine',{shops:this.mine(p),perks});return true;}
+   w.notice((r.shop.kind==='buy'?'เปิดร้านรับซื้อ ':'เปิดร้านค้าง ')+r.shop.title+' แล้ว · เปิดได้ 24 ชั่วโมงแม้ออกจากเกม');w.emit('shopMine',{shops:this.mine(p),perks});return true;}
   const shop=this.shops.get(m.shop);if(!shop||shop.serverId!==p.serverId)return fail('stall-none');
   if(m.type==='shopCollect'||m.type==='shopClose'){if(shop.ownerKey!==p.key)return fail('stall-none');
    let r;try{r=collectShop(shop,p.bag,{close:m.type==='shopClose'});}catch(e){return fail(e.message);}
    p.tradeXp=Math.min(1e9,(p.tradeXp??0)+(shop.xpOwed??0));if(r.shop)r.shop.xpOwed=0;
-   this.setBag(p,r.bag);p.saveNow=true;if(r.shop){this.shops.set(shop.id,r.shop);this.saveShop(r.shop);}else{this.shops.delete(shop.id);this.saveShop(shop,true);this.shopsChanged(p.serverId);}
+   this.setBag(p,r.bag);p.saveNow=true;if(r.shop){this.shops.set(shop.id,r.shop);this.saveShop(r.shop);}else{this.shops.delete(shop.id);this.saveShop(shop,true);this.shopsChanged(p.serverId,[shop.id]);}
    w.notice((m.type==='shopClose'?'ปิดร้านแล้ว':'รับของจากร้านแล้ว')+(r.coins?' · เบี้ย +'+r.coins:''));w.emit('shopMine',{shops:this.mine(p),perks});return true;}
   if(p.room.map.id!==MARKET_ZONE.mapId||Math.hypot(w.player.x-shop.x,w.player.z-shop.z)>4.5)return fail('shop-far');
   if(shop.ownerKey===p.key)return fail('stall-self');
@@ -570,10 +588,11 @@ export class RealmServer{
   r.shop.xpOwed=(shop.xpOwed??0)+(r.cost??r.pay); // the owner's trade experience is paid out when they collect
   this.setBag(p,r.bag);p.saveNow=true;this.shops.set(shop.id,r.shop);this.saveShop(r.shop);this.traded(p.serverId,[p],m.item,r.cost??r.pay,m.count);
   owner?.world.emit('stallSold',{item:m.item,count:m.count,coins:(r.cost??r.pay)-r.tax,buyer:p.character.name});
+  owner?.world.emit('shopMine',{shops:this.mine(owner),perks:tradePerks(owner.tradeXp)});
   w.notice((m.type==='shopBuy'?'ซื้อจากร้าน ':'ขายให้ร้าน ')+shop.ownerName+' แล้ว'+(r.tax?' · ภาษี '+r.tax+' เบี้ย':''));
-  this.shopsChanged(p.serverId);return true;
+  this.shopsChanged(p.serverId,r.shop.status==='closed'?[shop.id]:[]);return true;
  }
- setBag(p,bag){p.bag=bag;p.bagVersion++;if(p.stall)p.stall={...p.stall,...normalizeStall(p.stall,bag,tradePerks(p.tradeXp).slots)};}
+ setBag(p,bag){p.bag=bag;p.bagVersion++;if(p.stall){p.stall={...p.stall,...normalizeStall(p.stall,bag,tradePerks(p.tradeXp).slots)};this.expireStall(p);}}
  // ---- 0.46 player trade: both lock, both confirm, then one atomic swap and an immediate save of both.
  partner(p){const o=p.trade&&this.peers.get(p.trade.with);return o&&o.trade?.with===p.id?o:null;}
  sendTrade(a,b){for(const [x,y] of [[a,b],[b,a]])x.world.emit('tradeState',{partner:{id:y.id,name:y.character.name},mine:x.trade.offer,theirs:y.trade.offer,myLock:x.trade.locked,theirLock:y.trade.locked,myOk:x.trade.ok,theirOk:y.trade.ok});}
@@ -604,14 +623,15 @@ export class RealmServer{
  // ---- 0.46 vending: a stall lists items from the owner's bag at fixed prices; city only; closes if the owner walks off.
  stallCommand(p,m){
   const w=p.world;
-  if(m.type==='stallOpen'){if(!p.room.map.safe)return this.itemFail(p,'stall-city');if(!inMarket(p.room.map.id,w.player.x,w.player.z))return this.itemFail(p,'shop-zone');p.stall={...normalizeStall(m.stall,p.bag,tradePerks(p.tradeXp).slots),x:w.player.x,z:w.player.z};
+  for(const peer of this.peers.values())this.expireStall(peer);
+  if(m.type==='stallOpen'){if(!p.room.map.safe)return this.itemFail(p,'stall-city');if(!inMarket(p.room.map.id,w.player.x,w.player.z))return this.itemFail(p,'shop-zone');p.stall={...normalizeStall(m.stall,p.bag,tradePerks(p.tradeXp).slots),x:w.player.x,z:w.player.z,createdAt:this.now(),expiresAt:this.now()+SHOP_DURATION};
    if(!Object.keys(p.stall.items).length){p.stall=null;return this.itemFail(p,'no-item');}w.notice('เปิดแผง '+p.stall.title+' แล้ว');return true;}
   if(m.type==='stallClose'){p.stall=null;w.notice('ปิดแผงแล้ว');return true;}
   if(m.type==='stallList'){w.emit('stalls',{list:[...p.room.peers].map(id=>this.peers.get(id)).filter(o=>o.stall&&o!==p).map(o=>({owner:o.id,name:o.character.name,title:o.stall.title,items:o.stall.items,x:o.stall.x,z:o.stall.z}))});return true;}
   if(m.type==='stallBuy'){const o=this.peers.get(m.owner);if(!o?.stall||o.suspended||o.mailMutationBusy||o.room!==p.room)return this.itemFail(p,'stall-none');if(o===p)return this.itemFail(p,'stall-self');
    let r;try{r=buyFromStall(o.bag,o.stall,p.bag,m.item,m.count,tradePerks(o.tradeXp).slots);}catch(e){return this.itemFail(p,e.message);}
    {const tax=taxOf(r.cost,tradePerks(o.tradeXp));r.net=r.cost-tax;r.sellerBag={...r.sellerBag,coins:r.sellerBag.coins-tax};this.traded(p.serverId,[p,o],m.item,r.cost,m.count);}
-   this.setBag(o,r.sellerBag);this.setBag(p,r.buyerBag);o.stall={...o.stall,...r.stall};p.saveNow=o.saveNow=true;
+   const nextStall={...o.stall,...r.stall};this.setBag(o,r.sellerBag);this.setBag(p,r.buyerBag);o.stall=shopHasListings(nextStall)?nextStall:null;p.saveNow=o.saveNow=true;
    logMarket(this.logs,this.now(),p.character.name,o.character.name,m.item,m.count,r.cost);
    o.world.emit('stallSold',{item:m.item,count:m.count,coins:r.net,buyer:p.character.name});w.notice('ซื้อจากแผง '+o.character.name+' แล้ว');
    this.stallCommand(p,{type:'stallList'});return true;}
@@ -799,7 +819,7 @@ export class RealmServer{
  emoteView(p){const emote=activeEmote(p.world.emote,p.world.time);return emote?{name:emote.name,time:this.clock-Math.max(0,p.world.time-emote.time)}:null;}
  snapshot(p,{delta=false}={}){
   this.refreshStats(p);
-  if(p.stall&&Math.hypot(p.world.player.x-p.stall.x,p.world.player.z-p.stall.z)>3){p.stall=null;p.world.notice('เดินออกจากแผง · ปิดแผงแล้ว');}
+  this.expireStall(p);if(p.stall&&Math.hypot(p.world.player.x-p.stall.x,p.world.player.z-p.stall.z)>3){p.stall=null;p.world.notice('เดินออกจากแผง · ปิดแผงแล้ว');}
   const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:this.emoteView(a),partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
   // 0.99.11 during the snapshot broadcast each player's public entry is built and cloned once, then shared by every viewer

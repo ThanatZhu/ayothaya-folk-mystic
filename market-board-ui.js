@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=107';
 import {TRADABLE} from './market.js?v=107';
-import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket} from './market-board.js?v=107';
+import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket,shopHasListings} from './market-board.js?v=shops155';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 const tr=s=>globalThis.I18N?.t(s)??s;
@@ -46,7 +46,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
  }
  function syncSigns(){
   if(map.id!==MARKET_ZONE.mapId)return;
-  for(const [id,v] of signs)if(!shops.some(s=>s.id===id)){scene.remove(v.sp,v.post,v.mat);v.tex.dispose();v.btn.remove();signs.delete(id);}
+  for(const [id,v] of signs)if(!shops.some(s=>s.id===id)){scene.remove(v.sp,v.post,v.mat);v.tex.dispose();v.sp.material.dispose();v.post.geometry.dispose();v.post.material.dispose();v.mat.geometry.dispose();v.mat.material.dispose();v.btn.remove();signs.delete(id);}
   for(const s of shops)if(!signs.has(s.id))signs.set(s.id,sign(s));
  }
  // Walk to a shop, then open its counter.
@@ -56,7 +56,8 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
   game.walkTo({x:s.x,z:s.z},{radius:2.2,kind:'npc',onArrive:()=>visit(id),onFail:()=>world.notice('ไปที่ร้านไม่ได้')});}
 
  game.onEvent(e=>{
-  if(e.type==='shops'){shops=e.list;syncSigns();if(tab!=='open')render(true);} // never wipe a half-filled open-shop form
+  if(e.type==='shops'){shops=e.list.filter(s=>s.status!=='closed'&&shopHasListings(s));syncSigns();if(tab!=='open')render(true);} // never wipe a half-filled open-shop form
+  if(e.type==='shopsClosed'){const ids=new Set(e.ids??[]);shops=shops.filter(s=>!ids.has(s.id));results={...results,rows:results.rows.filter(r=>!ids.has(r.shop))};syncSigns();if(tab!=='open')render(true);}
   if(e.type==='shopMine'){mine={shops:e.shops,perks:e.perks};if(tab!=='open')render(true);}
   if(e.type==='marketResults'){results=e;if(tab!=='open')render(true);}
  });
@@ -79,7 +80,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
   }
   if(tab==='open'){
    const here=inMarket(map.id,world.player.x,world.player.z),list=kind==='sell'?Object.entries(bag.items).filter(([id])=>TRADABLE(id)):[];
-   body.innerHTML=`<p class="market-note">ร้านค้างเปิดต่อแม้ออกจากเกม · ตั้งได้ที่${MARKET_ZONE.name} (${here?'คุณอยู่ในเขตตลาดแล้ว':'ยังไม่อยู่ในเขตตลาด'}) · ภาษีขาย ${Math.round(perks.tax*1000)/10}% · สูงสุด ${perks.slots} ชนิด · ${perks.shops} ร้าน</p>
+   body.innerHTML=`<p class="market-note">${tr('ร้านเปิดได้ 24 ชั่วโมง · ขายหมดหรือรับซื้อครบจะปิดอัตโนมัติ · ต้องตั้งร้านใหม่เพื่อขายต่อ')}</p><p class="market-note">ร้านค้างเปิดต่อแม้ออกจากเกม · ตั้งได้ที่${MARKET_ZONE.name} (${here?'คุณอยู่ในเขตตลาดแล้ว':'ยังไม่อยู่ในเขตตลาด'}) · ภาษีขาย ${Math.round(perks.tax*1000)/10}% · สูงสุด ${perks.slots} ชนิด · ${perks.shops} ร้าน</p>
     <div class="board-kind"><button type="button" data-kind="sell" aria-pressed="${kind==='sell'}">ร้านขายของ</button><button type="button" data-kind="buy" aria-pressed="${kind==='buy'}">ร้านรับซื้อ</button></div>
     <label class="market-coin">ชื่อร้าน <input id="shop-title" maxlength="24" placeholder="${kind==='buy'?'รับซื้อของ':'ร้านค้าง'}"></label>
     ${kind==='sell'?`<div class="board-offer-columns" aria-hidden="true"><span>สินค้า</span><span>จำนวน</span><span>ราคาต่อชิ้น</span></div><ul class="market-list">${list.map(([id,n])=>`<li data-id="${esc(id)}"><input type="checkbox" aria-label="ขาย ${esc(itemDef(id)?.name)}">${icon(id)}<div><strong>${esc(itemDef(id)?.name)}</strong><small>มี ${n}${(()=>{const p=results.prices?.[priceKey(id)];return p?' · ราคากลาง '+money(p.avg):''})()}</small></div><input class="shop-count" type="number" min="1" max="${n}" value="${n}" aria-label="จำนวน"><input class="shop-price" type="number" min="1" value="10" aria-label="ราคาต่อชิ้น"></li>`).join('')||'<li class="empty">ไม่มีของที่ขายได้ในกระเป๋า</li>'}</ul>`
@@ -97,11 +98,11 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
   }
   if(tab==='mine'){
    body.innerHTML=`<p class="market-note">ทักษะการค้า Lv.${perks.level} · ${money(perks.xp)}${perks.next?' / '+money(perks.next):''} · ร้านค้าง ${perks.shops} · ${perks.slots} ชนิด/ร้าน · ภาษี ${Math.round(perks.tax*1000)/10}% · ส่วนลดร้าน NPC ${Math.round(perks.npcDiscount*100)}%</p>`+
-    (mine.shops.length?mine.shops.map(s=>`<section class="market-stall" data-shop="${esc(s.id)}"><h3>${s.kind==='buy'?tr('รับซื้อ · '):''}${esc(s.title)} <small>${s.kind==='buy'?'เบี้ยที่กันไว้ '+money(s.escrow):''}</small></h3>
+    (mine.shops.length?mine.shops.map(s=>`<section class="market-stall" data-shop="${esc(s.id)}" data-shop-status="${s.status==='closed'?'closed':'open'}"><h3>${s.kind==='buy'?tr('รับซื้อ · '):''}${esc(s.title)} <small>${s.kind==='buy'?'เบี้ยที่กันไว้ '+money(s.escrow):''}</small></h3><p class="market-note shop-deadline">${s.status==='closed'?tr(s.closedReason==='expired'?'ปิดอัตโนมัติ · ครบ 24 ชั่วโมง':s.closedReason==='filled'?'ปิดอัตโนมัติ · รับซื้อครบแล้ว':'ปิดอัตโนมัติ · ขายหมดแล้ว'):tr('หมดเวลาร้าน')+' '+when(s.expiresAt)}</p>
      <ul class="market-list">${Object.entries(s.items).map(([id,r])=>listRow(id,r,'')).join('')||'<li class="empty">ขายหมดแล้ว</li>'}</ul>
      <p class="market-note">รอรับ: ${money(s.pouch?.coins)}${Object.entries(s.pouch?.items??{}).map(([id,n])=>' · '+esc(itemDef(id)?.name)+' ×'+n).join('')}</p>
      <details><summary>ประวัติการขาย (${s.log?.length??0})</summary><ul class="board-log">${(s.log??[]).map(l=>`<li>${when(l.t)} · ${esc(l.who)} ${l.kind==='sold'?'ซื้อ':'ขายให้'} ${esc(itemDef(l.item)?.name)} ×${l.count} · ${money(l.coins)}</li>`).join('')||'<li>ยังไม่มี</li>'}</ul></details>
-     <div class="market-actions"><button type="button" data-a="shopCollect">รับของ/เบี้ย</button><button type="button" data-a="shopClose">ปิดร้าน</button></div></section>`).join(''):'<p class="market-note">ยังไม่มีร้านค้าง · ไปที่แท็บ "เปิดร้าน"</p>');
+     <div class="market-actions"><button type="button" data-a="shopCollect">${s.status==='closed'?tr('รับของคืน/เบี้ย'):tr('รับของ/เบี้ย')}</button>${s.status==='closed'?'':'<button type="button" data-a="shopClose">ปิดร้าน</button>'}</div></section>`).join(''):'<p class="market-note">ยังไม่มีร้านค้าง · ไปที่แท็บ "เปิดร้าน"</p>');
    body.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>cmd(b.dataset.a,{shop:b.closest('[data-shop]').dataset.shop}));
   }
   if(tab==='shop'){

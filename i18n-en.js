@@ -3701,3 +3701,4 @@ Object.assign(globalThis.I18N_EN,{
  'สะสมแล้ว':'Collected', 'มีในกระเป๋า':'In bag', 'ใบ':'cards',
  'ยังไม่มีการ์ดในกระเป๋า':'No copy in your bag', 'ฝากแล้ว':'Deposited', 'ฝากการ์ด 1 ใบ':'Deposit 1 card', 'ฝากการ์ดแล้ว ·':'Card deposited ·'
 });
+Object.assign(globalThis.I18N_EN,{'ประเภทอันดับ':'Ranking category','ภาพตัวละครยังโหลดไม่สำเร็จ':'Character image could not be loaded','{0} แต้ม':'{0} points','ชนะ {0} เสมอ {1} แพ้ {2}':'Wins {0}, draws {1}, losses {2}','ยังไม่มีผู้ครองอันดับ':'Rank unclaimed','อันดับ {1}':'Rank {1}','สามอันดับแรก':'Top three','อันดับ 4 ถึง 10':'Ranks 4 to 10'});

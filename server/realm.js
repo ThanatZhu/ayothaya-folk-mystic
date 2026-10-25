@@ -430,7 +430,7 @@ export class RealmServer{
   this.leadersDirty.add('arena:'+w.serverId);
  }
  arenaView(p){const a=this.arena(p.serverId),rows=Object.entries(a.rows).sort(byPoints),mine=rows.findIndex(([k])=>k===p.key);
-  return {rows:rows.slice(0,30).map(([k,v],i)=>({rank:i+1,me:k===p.key,name:v.name,classId:v.classId,points:v.points,wins:v.wins,losses:v.losses,draws:v.draws})),me:mine<0?null:{rank:mine+1,points:rows[mine][1].points},last:a.last,endsAt:arenaEnds(this.now())};}
+  return {rows:rows.slice(0,10).map(([k,v],i)=>{const look=this.leaders.get(p.serverId)?.[k]??v;return {rank:i+1,me:k===p.key,name:v.name,classId:look.classId,gender:look.gender,jobId:look.jobId,appearance:look.appearance,equipment:look.equipment,level:look.level,points:v.points,wins:v.wins,losses:v.losses,draws:v.draws};}),me:mine<0?null:{rank:mine+1,points:rows[mine][1].points},last:a.last,endsAt:arenaEnds(this.now())};}
  warView(p){
   const s=this.wars.get(p.serverId),owner=this.castleOwner(p.serverId),here=p.room.map.id===WAR.map;
   return {active:!!s?.active,next:warLabel(this.now()),owner:owner?.name??null,holder:s?.active&&s.holder?this.guilds.get(s.holder)?.name??null:null,
@@ -621,11 +621,17 @@ export class RealmServer{
  // Status + worn gear → combat numbers; cheap no-op unless level, class, stats or gear changed.
  // 0.72 leaderboard: best combat power per character (offline characters keep their last entry); top 200 kept.
  rank(p){const power=combatPower(p.derived,this.who(p).level),board=this.leaders.get(p.serverId)??{},old=board[p.key];
-  if(old&&old.power===power&&old.level===this.who(p).level&&old.name===p.character.name)return;
-  board[p.key]={name:p.character.name,classId:p.character.classId,gender:p.character.gender,level:this.who(p).level,power,t:this.now()};
+  const look={name:p.character.name,classId:p.character.classId,gender:p.character.gender,jobId:p.character.jobId??'',appearance:copy(p.character.appearance??{}),equipment:normalizeEquipment(p.equipment,p.character.classId)};
+  const next={...look,level:this.who(p).level,power};
+  if(old&&JSON.stringify({...old,t:undefined})===JSON.stringify({...next,t:undefined}))return;
+  board[p.key]={...next,t:this.now()};
   const keep=Object.entries(board).sort((a,b)=>b[1].power-a[1].power).slice(0,200);this.leaders.set(p.serverId,Object.fromEntries(keep));this.leadersDirty.add(p.serverId);}
- leaderboard(p){const rows=Object.entries(this.leaders.get(p.serverId)??{}).sort((a,b)=>b[1].power-a[1].power);
-  const mine=rows.findIndex(([k])=>k===p.key);return {rows:rows.slice(0,50).map(([k,v],i)=>({rank:i+1,me:k===p.key,...v})),me:mine<0?null:{rank:mine+1,...rows[mine][1]},arena:this.arenaView(p)};}
+ leaderboard(p){
+  // Refresh online cosmetics too: changing clothes does not change combat power.
+  for(const peer of this.peers.values())if(peer.serverId===p.serverId)this.rank(peer);
+  const rows=Object.entries(this.leaders.get(p.serverId)??{}).sort((a,b)=>b[1].power-a[1].power);
+  const mine=rows.findIndex(([k])=>k===p.key);return {rows:rows.slice(0,10).map(([k,v],i)=>({rank:i+1,me:k===p.key,...v})),me:mine<0?null:{rank:mine+1,...rows[mine][1]},arena:this.arenaView(p)};}
+
  refreshStats(p){
   const who=this.who(p),pet=activePremiumPet(p.petCollection)?.bonus??{},food=foodBuff(p.world),sig=JSON.stringify([who,p.stats,p.gear,pet,food]);if(sig===p.statSig)return;
   const fit=dropInvalidGear(p.bag,p.gear,who);if(JSON.stringify(fit.gear)!==JSON.stringify(p.gear)){p.gear=fit.gear;this.setBag(p,fit.bag);}
@@ -846,5 +852,5 @@ export class RealmServer{
   this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();p.world.player.running=false;
   return destination;
  }
- record(p,original){return {...copy(original),walkRoute:walkSave(p),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),roleSkillBackup:copy(p.roleSkillBackup??original.roleSkillBackup??null),...(this.roleSkills?{roleCooldowns:{version:1,at:this.now(),values:p.world.cooldowns.map(v=>Math.max(0,v)),down:p.world.player.hp<=0?p.world.player.down:0}}:{}),story:copy(p.story),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),weekly:copy(p.weekly),rebirth:p.rebirth??0,xpCurve:XP_CURVE,album:copy(p.album),albumRewards:copy(p.albumRewards),albumSchema:2,trade:{xp:p.tradeXp??0},pet:null,mailbox:copy(p.mailbox),petCollection:copy(p.petCollection),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
+ record(p,original){this.rank(p);return {...copy(original),walkRoute:walkSave(p),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),roleSkillBackup:copy(p.roleSkillBackup??original.roleSkillBackup??null),...(this.roleSkills?{roleCooldowns:{version:1,at:this.now(),values:p.world.cooldowns.map(v=>Math.max(0,v)),down:p.world.player.hp<=0?p.world.player.down:0}}:{}),story:copy(p.story),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),weekly:copy(p.weekly),rebirth:p.rebirth??0,xpCurve:XP_CURVE,album:copy(p.album),albumRewards:copy(p.albumRewards),albumSchema:2,trade:{xp:p.tradeXp??0},pet:null,mailbox:copy(p.mailbox),petCollection:copy(p.petCollection),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
 }

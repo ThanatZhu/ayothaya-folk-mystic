@@ -97,7 +97,9 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  }
  let markedNpc=null,shown='';
  function render(){
-  const obj=currentObjective(state()),sig=JSON.stringify([state(),game.walking&&walking]);
+  const story=state(),obj=currentObjective(story);
+  // A level-up below the goal changes EXP, not the quest step. Include the displayed level in the cache.
+  const sig=JSON.stringify([story,game.walking&&walking,obj?.step.type==='level'?baseLevel():null]);
   if(sig===shown)return;shown=sig;
   $('quest-chapter').textContent=obj?.quest?.chapter??STORY_TITLE;
   const stepLabel=obj&&obj.steps>1?` (ขั้น ${obj.stepNumber}/${obj.steps})`:'';

@@ -22,7 +22,7 @@ import {createMmoHud} from './mmo-hud.js?v=role116';
 import {createSoftLook} from './soft-look.js?v=light159';
 import {lightingProfile,applyWorldLighting,applyMeadowLighting,createActorLighting,contactShadowTexture} from './world-lighting159.js?v=shadow160';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
-import {createMeadow,MEADOW_MAPS} from './meadow.js?v=108';
+import {createMeadow,MEADOW_MAPS} from './meadow.js?v=maps175';
 import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=99.11';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
 import {createPaintedAvatar} from './painted-avatar.js?v=novice174';
@@ -74,7 +74,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=arena166');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps175');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);
@@ -178,7 +178,7 @@ try {
  const geo=new THREE.BufferGeometry(),positions=new Float32Array(90);let seed=2026;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
  for(let i=0;i<30;i++){positions[i*3]=-16+rnd()*32;positions[i*3+1]=.4+rnd()*4;positions[i*3+2]=-20+rnd()*20;}geo.setAttribute('position',new THREE.BufferAttribute(positions,3));
  const motes=new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffe29a',size:.038,transparent:true,opacity:.7}));scene.add(motes);
- const frontier=map.pvpArena?createArenaStage({scene}):map.procedural&&!map.scene?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
+ const frontier=map.pvpArena&&!map.scene?createArenaStage({scene}):map.procedural&&!map.scene?await createFrontierScene({scene,map,ground:capitalLook.ground,tiles}):null;
  // Leaving the map reloads the page; free the scene's GPU memory first so the next map starts clean.
  const actorLighting=createActorLighting({scene,camera,renderer,map,profile:lightProfile});
  bindRenderLifecycle({dispose:()=>{renderer.setAnimationLoop(null);actorLighting.dispose();disposeScene(scene);renderer.dispose();},resize});

@@ -10,7 +10,10 @@ import {groundHeight} from './combat-core.js?v=novice174';
 // density = clumps per square metre. The lotus marsh is one big water area with walkable islands, so its water box is
 // ignored and the walk grid alone decides where land is. The mill cellar is indoors and gets none.
 const MIX={'rice-fields':{flowers:.3,ferns:.5},'old-orchard':{flowers:.5,ferns:.25},
- ayutthaya:{flowers:.35,ferns:.6,density:2},'moonlit-mill':{flowers:.55,ferns:.3},'lotus-marsh':{flowers:.25,ferns:.35,islands:true}};
+ ayutthaya:{flowers:.35,ferns:.6,density:2},'moonlit-mill':{flowers:.55,ferns:.3},'lotus-marsh':{flowers:.25,ferns:.35,islands:true},
+ // Chapter II realism pass: their plazas are kept as Blender layout rects [x, y, width, depth] (see roadArea below).
+ 'bamboo-grove':{flowers:.62,ferns:.22,layout:true},'ruined-temple':{flowers:.5,ferns:.45,layout:true},
+ lablae:{flowers:.3,ferns:.5,layout:true},'himmapan-edge':{flowers:.22,ferns:.2,layout:true}};
 export const MEADOW_MAPS=new Set(Object.keys(MIX));
 const TILES=['grass','tall','fern','daisy','marigold','orchid','clover'],COLS=4,ROWS=2,CELL=256,CHUNK=20;
 // [tile, width, height] per kind; heights stay under a character's knee so feet remain readable.
@@ -82,10 +85,11 @@ export function createMeadow({scene,map,model,quality='high',reduced=false}){
  // 1.08 bridge rects are corner-based (x,z = min corner, like waterAreas): the old centre test missed half of every
  // bridge and grass grew on the boardwalks. Any raised walk floor (decks, piers, bridges: >= .28 m) is skipped too.
  const deck=(x,z)=>{const g=map.nav.grid;if(!g)return false;const c=g.rows[Math.round((z-g.z0)/g.cell)]?.[Math.round((x-g.x0)/g.cell)];return !!c&&c!=='.'&&(c.charCodeAt(0)-97)*.05>=.28;};
+ const roadArea=mix.islands?{...map,plazas:[]}:mix.layout?{...map,plazas:map.plazas.map(([x,y,pw,pd])=>[x,-y,pw/2+.8,pd/2+.8])}:map;
  for(let cz=Math.ceil(bz)+1;cz<bz+d-1;cz++)for(let cx=Math.ceil(bx)+1;cx<bx+w-1;cx++){
   const per=(mix.density??2.6)*scale,n=Math.floor(per)+(r()<per%1?1:0);
   for(let k=0;k<n;k++){
-   const x=cx+r(),z=cz+r(),edge=roadDistance(x,z,mix.islands?{...map,plazas:[]}:map); // marsh plazas are the islands themselves
+   const x=cx+r(),z=cz+r(),edge=roadDistance(x,z,roadArea); // marsh plazas are the islands themselves
    if(edge<.25||paddy(x,z)||water(x,z,.4)||bridge(x,z))continue;
    if(map.nav.grid&&!walkableCell(map.nav.grid,x,z))continue;
    // Road shoulders keep only short sparse tufts; the open meadow gets the full mix.

@@ -25038,7 +25038,7 @@
       ],
       "bridges": [],
       "decor": [],
-      "scene": "maps/v5/guild-hall.glb"
+      "scene": "maps/v6/guild-hall.glb"
     },
     {
       "id": "bamboo-grove",
@@ -25890,7 +25890,7 @@
       "decor": [],
       "leafSources": [],
       "citizens": [],
-      "scene": "maps/v4/bamboo-grove.glb",
+      "scene": "maps/v6/bamboo-grove.glb",
       "layoutRevision": "chapter2-v2",
       "levelBand": [
         35,
@@ -26464,7 +26464,7 @@
       "decor": [],
       "leafSources": [],
       "citizens": [],
-      "scene": "maps/v4/ruined-temple.glb",
+      "scene": "maps/v6/ruined-temple.glb",
       "layoutRevision": "chapter2-v2",
       "levelBand": [
         45,
@@ -28444,7 +28444,7 @@
           ]
         }
       ],
-      "scene": "maps/v4/lablae.glb",
+      "scene": "maps/v6/lablae.glb",
       "layoutRevision": "chapter2-v2"
     },
     {
@@ -29041,7 +29041,7 @@
       "decor": [],
       "leafSources": [],
       "citizens": [],
-      "scene": "maps/v4/himmapan-edge.glb",
+      "scene": "maps/v6/himmapan-edge.glb",
       "layoutRevision": "chapter2-v2",
       "levelBand": [
         55,
@@ -29578,7 +29578,7 @@
       "decor": [],
       "leafSources": [],
       "citizens": [],
-      "scene": "maps/v4/naga-cave.glb",
+      "scene": "maps/v6/naga-cave.glb",
       "layoutRevision": "chapter2-v2",
       "levelBand": [
         70,
@@ -30129,7 +30129,7 @@
       "decor": [],
       "leafSources": [],
       "citizens": [],
-      "scene": "maps/v4/kailash-peak.glb",
+      "scene": "maps/v6/kailash-peak.glb",
       "layoutRevision": "kailash-v3",
       "levelBand": [
         85,
@@ -30192,7 +30192,8 @@
       "plazas": [],
       "landmarks": [],
       "districts": [],
-      "packs": false
+      "packs": false,
+      "scene": "maps/v6/duel-arena.glb"
     }
   ]
 }

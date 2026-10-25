@@ -3,8 +3,8 @@ import {createRoleWorldDecor} from './role-world-decor.js';
 import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progress.js';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
-import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent} from './combat-animation165.js';
-import {createLiveRoleVfx} from './role-skill-vfx.js?v=combat165';
+import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing} from './combat-animation165.js?v=align169';
+import {createLiveRoleVfx} from './role-skill-vfx.js?v=align169';
 import {createRolePlayUI} from './role-play-ui.js';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
@@ -28,7 +28,7 @@ import {normalizeAuto,pickAutoSkill} from './auto-play.js';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
- const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world),roleUI=createRolePlayUI({world,clear:()=>clearInput(),returnToSpawn:()=>network?network.command('returnToSpawn'):world.player.down=0});let roleClip=null,basicCastId=null;let activeSkill=null,network=null,serverSelf=null;
+ const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world),roleUI=createRolePlayUI({world,clear:()=>clearInput(),returnToSpawn:()=>network?network.command('returnToSpawn'):world.player.down=0});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null;
  // Skill levels: the server owns them online; guests keep them in their local save.
  const progress=()=>({classId:world.profession.id,jobId:world.jobId??'',jobXp:world.jobXp});
  if(world.roleCombat&&!skillState.skills?.[ROLE_MARK])try{localStorage.setItem('ayothaya-role-skill-backup:'+world.profession.id,JSON.stringify(skillState.skills??{}));}catch{}
@@ -173,10 +173,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(Math.hypot(m.x-p.x,m.z-p.z)-bodyRadius(m)<=world.profession.range+1.5&&wall()>=nextBasicAt){nextBasicAt=wall()+attackInterval();cast(null,world.profession.kind,world.profession.color);}
  }
  function playCast(e){
-   if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip=createRoleAnimation(e,world.time);castUntil=roleClip.start+roleClip.duration;actionStart=roleClip.start;strikeAt=world.time;actionMode='cast';activeSkill=null;basicCastId=null;world.clearEmote();roleEffects.spawn(e);return;}
+   const aim=castFacing(e,world.player.face);if(aim)world.player.face={...aim};
+   if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip=createRoleAnimation(e,roleEffects.time);castUntil=world.time-Math.max(0,e.lag??0)+roleClip.duration;actionStart=world.time-Math.max(0,e.lag??0);castFace=aim;strikeAt=world.time;actionMode='cast';activeSkill=null;basicCastId=null;world.clearEmote();roleEffects.spawn(e);return;}
    if(e.timing&&!Number.isInteger(e.skillIndex)){
     const timing=e.timing,lag=Math.max(0,e.lag??0),start=world.time-lag;
-    if(!roleAnimationActive(roleClip,world.time)){roleClip=null;activeSkill=null;basicCastId=e.castId;actionStart=start;castUntil=actionStart+timing.duration;actionMode='attack';swingScale=attackDuration(world.profession.id)/timing.duration;}
+    if(!roleAnimationActive(roleClip,roleEffects.time)){roleClip=null;activeSkill=null;basicCastId=e.castId;castFace=aim;actionStart=start;castUntil=actionStart+timing.duration;actionMode='attack';swingScale=attackDuration(world.profession.id)/timing.duration;}
     strikeAt=start+timing.impacts[0];strikes=timing.impacts.map(at=>({at:start+at,power:.4}));world.clearEmote();
     const track={...skillTrack(world.profession.id,0),duration:timing.duration,strikes:timing.impacts.map(at=>at/timing.duration)},from=e.from??world.player,to=e.to??from;
     const fx=skillEffects.create(track,{...e,skillIndex:null,synced:true,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});fx.age=lag;return;
@@ -196,7 +197,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
     const interval=world.profession.delay*(((network&&world.derivedView)||world.derived)?.delay??1);swingScale=track?1:Math.max(1,attackDuration(world.profession.id)/Math.max(.2,interval*.95),.42*attackDuration(world.profession.id)/.2); // and the blow lands within 0.2 s
     // 1.10.2 online: the swing began e.lag seconds ago on the server; start it that far in so the blow lands on time
     const swingStart=world.time-lag;skillScale=k;
-    activeSkill=track?e.skillIndex:null;castUntil=swingStart+(fast?.duration??attackDuration(world.profession.id)/swingScale);
+    activeSkill=track?e.skillIndex:null;castFace=aim;castUntil=swingStart+(fast?.duration??attackDuration(world.profession.id)/swingScale);
     actionStart=swingStart;world.clearEmote();actionMode=!track?'attack':e.kind==='dash'?'dash':e.kind==='shield'?'guard':['slash','punch','thrust','arrow'].includes(e.kind)?'attack':'cast';
    }
    const beats=fast?fast.strikes.map(b=>world.time-lag+b*fast.duration):[world.time+.12];
@@ -355,18 +356,21 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(!paused||walker.active||arrivalPending)world.update(dt,steering);
   if(arrivalPending&&!document.hidden&&!isPaused()){const done=arrivalPending;arrivalPending=null;done.opts.onArrive?.();}
   if(network&&world.auto&&!paused)predictAuto(dt);
-  roleUI.update();roleDecor.update();const roleShake=roleEffects.update(visualDt);
+  roleUI.update();roleDecor.update();roleEffects.advance(visualDt);
   world.events.splice(0).forEach(e=>{e=ageQueuedCombatEvent(e,wall());effect(e);for(const fn of listeners)fn(e);});
+  const roleShake=roleEffects.update(0);
   if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
-  const chosen=actionChoice({time:t,dead:p.hp<=0,hit:t<hitUntil&&t>=castUntil,cast:t<castUntil?actionMode:false,moving:p.moving,running:p.running,emote:world.emote,guard:p.shield>0});
+  const roleActive=roleAnimationActive(roleClip,roleEffects.time);
+  if(roleClip&&!roleActive){roleClip=null;castUntil=t;}
+  const chosen=actionChoice({time:t,dead:p.hp<=0,hit:t<hitUntil&&t>=castUntil&&!roleActive,cast:roleActive?'cast':t<castUntil?actionMode:false,moving:p.moving,running:p.running,emote:world.emote,guard:p.shield>0});
   const mode=['sit','sleep','run'].includes(chosen)&&!supportsAction(chosen)?(chosen==='run'?'walk':'idle'):chosen;
   const distanceMoved=Math.hypot(p.x-lastX,p.z-lastZ);lastX=p.x;lastZ=p.z;
   if(distanceMoved<1)gait+=gaitStep(distanceMoved,dt,world.profession.id,mode); // No steps while blocked; teleports do not advance the gait.
   const skillActive=t<castUntil&&t>=hitUntil&&activeSkill!==null;
   const locomotion=mode==='walk'||mode==='run',poseTime=locomotion||mode==='idle'?t:mode==='hit'?t-hitStart:world.emote?.name===mode?t-world.emote.time:mode==='attack'?(t-actionStart)*swingScale:t-actionStart;
-  const rolePose=p.hp>0?sampleRolePose(roleClip,t,{reduced}):null;
+  const rolePose=p.hp>0?sampleRolePose(roleClip,roleEffects.time,{reduced}):null;
   const pose=rolePose??(skillActive?skillPose(world.profession.id,activeSkill,(t-actionStart)*skillScale,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)}));
   if(mode==='attack'&&activeSkill===null)pose.actionPhase=Math.max(0,Math.min(1,(t-actionStart)/(attackDuration(world.profession.id)/swingScale)));
   if(visualPose){visualPose.profileFrame=!!pose.profileFrame;visualPose.actionPhase=pose.actionPhase??null;}
@@ -377,11 +381,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const floor=groundHeight(world.nav,p.x,p.z);
   hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
   hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);
-  const azimuth=controls.getAzimuthalAngle();
+  const azimuth=controls.getAzimuthalAngle(),poseFace=rolePose?(roleClip.facing??p.face):t<castUntil?(castFace??p.face):p.face;
   if(hero.frames)hero.sprite.material.map=hero.frames[0];
-  hero.sprite.userData.setFacing?.(p.face,azimuth,{mode,time:poseTime,phase:locomotion?gait:null,reduced});
-  const facing=p.face.x*Math.cos(azimuth)-p.face.z*Math.sin(azimuth);
-  if(Math.abs(facing)/faceLength>.3)heroFlip=facing<0; // hysteresis: keep the last side until clearly turning
+  hero.sprite.userData.setFacing?.(poseFace,azimuth,{mode,time:poseTime,phase:locomotion?gait:null,reduced});
+  const facing=poseFace.x*Math.cos(azimuth)-poseFace.z*Math.sin(azimuth);
+  if((rolePose||t<castUntil?Math.abs(facing)>1e-6:Math.abs(facing)/faceLength>.3))heroFlip=facing<0; // hysteresis: keep the last side until clearly turning
   hero.sprite.userData.pose?.(visualPose,heroFlip);
   if(world.time>=hitTintUntil)hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*4)); // 1.09.4 a faint red that lingers a moment when hithero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   footDust.update(dt);

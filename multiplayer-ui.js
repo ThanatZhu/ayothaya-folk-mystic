@@ -5,7 +5,7 @@ import {createPartyLayout} from './party-layout.js?v=overlay143';
 import {createDesktopChat} from './desktop-chat-ui.js?v=channel144';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
-import {createRoleAnimation,roleAnimationActive,sampleRolePose} from './combat-animation165.js';
+import {createRoleAnimation,roleAnimationActive,sampleRolePose,castFacing} from './combat-animation165.js?v=align169';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {createInspectUI} from './inspect-ui.js?v=108.1';
 import {iconStyle} from './bag-ui.js?v=107';
@@ -202,7 +202,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(e.type==='cast'){
     if(!roleAnimationActive(v.roleAction,clock))v.roleAction=null;
     const id=v.state.character.classId,skill=skillTrack(id,e.skillIndex),current=skillTrack(id,v.action?.index);
-    if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock-(e.lag??0),timing:e.timing,castId:e.castId};
+    if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock-(e.lag??0),timing:e.timing,castId:e.castId,facing:castFacing(e,v.state.player.face)};
     const track=skill&&e.timing?{...skill,duration:e.timing.duration,strikes:e.timing.impacts.map(at=>at/e.timing.duration)}:skill??{...skillTrack(id,0),duration:e.timing?.duration??attackDuration(id),strikes:[.42]},from=e.from??v.state.player,to=e.to??from;
     const effect=fx.create(track,{...e,skillIndex:skill?e.skillIndex:null,synced:!!e.timing,from,to:{...to,y:groundHeight(game.world.nav,to.x,to.z)},direction:v.state.player.face,groundY:groundHeight(game.world.nav,from.x,from.z),reduced:reduced.matches,quality:compact.matches?'low':'high'});effect.age=e.lag??0;
    }
@@ -298,9 +298,9 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    v.label.dataset.animationPending=['sit','sleep','run'].includes(chosen)&&!supported?chosen:'';
    const rolePose=p.hp>0?sampleRolePose(v.roleAction,clock,{reduced:reduced.matches}):null;
    const pose=rolePose??(skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed*(v.action.timing?track.duration/v.action.timing.duration:1),{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:basicActive&&mode==='attack'?elapsed*attackDuration(state.character.classId)/(v.action.timing?.duration??attackDuration(state.character.classId)):poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)}));
-   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'?0:pose.y);const angle=controls.getAzimuthalAngle();{const side=p.face.x*Math.cos(angle)-p.face.z*Math.sin(angle);if(Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
+   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'?0:pose.y);const angle=controls.getAzimuthalAngle(),poseFace=rolePose?(v.roleAction.facing??p.face):skillActive||basicActive?(v.action.facing??p.face):p.face;{const side=poseFace.x*Math.cos(angle)-poseFace.z*Math.sin(angle);if(rolePose||skillActive||basicActive?Math.abs(side)>1e-6:Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
    if(basicActive&&mode==='attack')pose.actionPhase=Math.max(0,Math.min(1,elapsed/(v.action.timing?.duration??attackDuration(state.character.classId))));
-   v.sprite.userData.setFacing?.(p.face,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0||(p.down??0)>0;game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
+   v.sprite.userData.setFacing?.(poseFace,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0||(p.down??0)>0;game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
    if((state.rebirth??0)!==v.rankShown){v.rankShown=state.rebirth??0;const t=v.label.querySelector('.rank-title');if(t){t.hidden=!v.rankShown;t.textContent=v.rankShown?'✦ '+rebirthRank(v.rankShown)+' ✦':'';}}
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';
    if(v.label.querySelector('b').textContent!==state.character.name)v.label.querySelector('b').textContent=state.character.name;

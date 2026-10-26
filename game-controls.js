@@ -3,7 +3,8 @@ import {createRoleWorldDecor} from './role-world-decor.js';
 import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progress.js';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
-import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing} from './combat-animation165.js?v=align169';
+import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
+import {prefetchPoses} from './skill-pose-art.js?v=pose119';
 import {createLiveRoleVfx} from './role-skill-vfx.js?v=vfx119';
 import {createRolePlayUI} from './role-play-ui.js';
 import {itemDef} from './items.js?v=107';
@@ -222,6 +223,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(e.type==='rolePassive'){roleEffects.spawn(e);
   }else if(e.type==='cast'){playCast(e);
   }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(!e.synced&&strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
+  }else if(e.type==='roleRelease'){if(!e.actor||e.actor===network?.id)retimeRoleAnimation(roleClip,e,roleEffects.time);roleEffects.hit(e);
   }else if(e.type==='damage'){roleEffects.hit(e);const v=mobViews[e.id];if(!e.synced&&strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='knock'){kick=Math.max(kick,1.4);if(network)world.knock={vx:e.vx,vz:e.vz,t:e.t};} // 0.111 boss slam: shake and slide back (online: mirror the server's slide)
@@ -380,13 +382,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const rolePose=p.hp>0?sampleRolePose(roleClip,roleEffects.time,{reduced}):null;
   const pose=rolePose??(skillActive?skillPose(world.profession.id,activeSkill,(t-actionStart)*skillScale,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)}));
   if(mode==='attack'&&activeSkill===null)pose.actionPhase=Math.max(0,Math.min(1,(t-actionStart)/(attackDuration(world.profession.id)/swingScale)));
-  if(visualPose){visualPose.profileFrame=!!pose.profileFrame;visualPose.actionPhase=pose.actionPhase??null;}
+  if(visualPose){visualPose.profileFrame=!!pose.profileFrame;visualPose.actionPhase=pose.actionPhase??null;visualPose.skillArt=pose.skillArt??null;}
   if(!visualPose||reduced)visualPose={...pose};
   else for(const key of Object.keys(pose))visualPose[key]=typeof pose[key]!=='number'||['frame','artFrame','stand','time','phase','actionPhase'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   const floor=groundHeight(world.nav,p.x,p.z);
-  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
   hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);
   const azimuth=controls.getAzimuthalAngle(),poseFace=rolePose?(roleClip.facing??p.face):t<castUntil?(castFace??p.face):p.face;
   if(hero.frames)hero.sprite.material.map=hero.frames[0];
@@ -470,7 +472,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
  // Warm the HTTP cache with this character's own skill sheets once the map has settled.
- setTimeout(()=>roleEffects.prefetch(world.skills.map((s,i)=>s.roleSkillId??'novice:'+i)),4000);
+ setTimeout(()=>{const ids=world.skills.map((s,i)=>s.roleSkillId??'novice:'+i);roleEffects.prefetch(ids);prefetchPoses(ids);},4000);
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
  return {roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

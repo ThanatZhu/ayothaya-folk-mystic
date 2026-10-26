@@ -1,5 +1,6 @@
 import {SKILL_PROFILES,sampleSkill} from './assets/skill-polish/library-profiles.js';
 import {characterMotion} from './character-motion.js?v=novice174';
+import {hasPoseSheet,poseFrame} from './skill-pose-art.js?v=pose119';
 
 export function ageQueuedCombatEvent(event,now){
  if(!Number.isFinite(event.presentationQueuedAt))return event;
@@ -25,6 +26,14 @@ export function createRoleAnimation(event,now){
  return {id:profile.id,castId:event.castId,facing:castFacing(event),start:now-Math.max(0,event.lag??0),duration:event.timing?.duration??impacts.at(-1)+.16,impacts:[...impacts]};
 }
 export function roleAnimationActive(action,now){return !!action&&now>=action.start&&now<action.start+action.duration;}
+// 0.119 the authority's release (damage, heal, buff or revive alike) pins the contact pose to when it really
+// happened: once per hit index, so an area blow on eight targets moves the body once. Same rule as the VFX sheet.
+export function retimeRoleAnimation(action,event,now){
+ if(!action||event.castId!==action.castId||!Number.isInteger(event.hitIndex))return;
+ action.hits??=new Set();if(action.hits.has(event.hitIndex))return;action.hits.add(event.hitIndex);
+ const drift=now-Math.max(0,event.lag??0)-(action.start+action.impacts[Math.min(event.hitIndex,action.impacts.length-1)]);
+ if(Math.abs(drift)<.6)action.start+=drift;
+}
 
 export function roleEffectTime(action,elapsed){
  const profile=SKILL_PROFILES[action.id],authored=profile.impacts.length?profile.impacts:[.8],actual=action.impacts;
@@ -43,7 +52,9 @@ export function sampleRolePose(action,now,{reduced=false}={}){
  let frame=sample.frame;
  // Finish the recovery inside the advertised body duration, not the 3–5 second FX tail.
  if(elapsed>release){const recovery=(elapsed-release)/Math.max(.001,action.duration-release);if(recovery>=.9)frame=0;else if(recovery>=.7)frame=10;}
- return {...characterMotion({classId:profile.classId,mode:'cast',time:elapsed,reduced}),profileFrame:true,artFrame:reduced?0:frame,y:sample.heroY??0,x:0};
+ // skillArt: the skill's own pose sheet (frame 0–5 on the same beats); artFrame stays the class-frame fallback.
+ const skillArt=hasPoseSheet(action.id)?{id:action.id,frame:reduced?0:poseFrame(action.impacts,action.duration,elapsed)}:null;
+ return {...characterMotion({classId:profile.classId,mode:'cast',time:elapsed,reduced}),profileFrame:true,artFrame:reduced?0:frame,skillArt,y:sample.heroY??0,x:0};
 }
 
 export function sampleRoleEffect(action,elapsed,options={}){

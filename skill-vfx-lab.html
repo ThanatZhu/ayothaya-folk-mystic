@@ -9,7 +9,7 @@ h1{font-size:16px;margin:0;font-weight:700}small{opacity:.75}
 label{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:8px;font-size:13px}
 select,input[type=range],button{width:100%}select,button{background:#10221c;color:var(--cream);border:1px solid var(--gold);border-radius:8px;padding:6px 8px}
 button{font-weight:700;cursor:pointer}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-#info,#metrics{font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums}#metrics{opacity:.85}
+#info,#metrics,#sizes{font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums}#metrics{opacity:.85}
 .check{grid-template-columns:auto 1fr}
 @media (max-width:600px){.panel{top:auto;bottom:12px;max-height:46%}}
 </style></head><body>
@@ -18,17 +18,22 @@ button{font-weight:700;cursor:pointer}.row{display:grid;grid-template-columns:1f
 <h1>ทดสอบเอฟเฟกต์สกิล <small>ระบบ render เดียวกับเกม</small></h1>
 <label>อาชีพ<select id="profession"></select></label>
 <label>สกิล<select id="skill"></select></label>
+<label>เพศ<select id="gender"><option value="male">ชาย</option><option value="female">หญิง</option></select></label>
 <div id="info"></div>
 <label>ความเร็ว<input id="speed" type="range" min="0.5" max="2" step="0.1" value="1"></label>
 <label>ดีเลย์เน็ต<input id="lag" type="range" min="0" max="0.4" step="0.02" value="0"></label>
 <label>ระยะเป้า<input id="distance" type="range" min="1" max="9" step="0.5" value="4"></label>
 <label>จำนวนเป้า<select id="targets"><option>1</option><option>3</option><option>8</option></select></label>
 <label>คุณภาพ<select id="tier"><option value="">ตามอุปกรณ์</option><option value="hd">คอม (hd)</option><option value="sd">มือถือ (sd)</option></select></label>
+<label class="check"><input id="poses" type="checkbox" checked>ใช้ท่าใหม่รายสกิล (ปิดเพื่อเทียบท่าเดิม)</label>
+<label class="check"><input id="pause" type="checkbox">หยุดภาพ (ดูทีละเฟรม)</label>
 <label class="check"><input id="repeat" type="checkbox">กดซ้ำต่อเนื่อง (สแปม)</label>
 <label class="check"><input id="crowd" type="checkbox">ผู้เล่นอื่น 6 คนร่ายพร้อมกัน</label>
 <div class="row"><button id="cast">▶ ร่ายสกิล</button><button id="next">สกิลถัดไป</button></div>
 <div class="row"><button id="die">ผู้ร่ายตาย (ยกเลิก)</button><button id="travel">เปลี่ยนแผนที่</button></div>
+<button id="measure">เทียบขนาดตัวกับเฟรมเดิม (ทุกสกิล)</button>
+<div id="sizes"></div>
 <div id="metrics"></div>
 </section>
-<script type="module" src="./skill-vfx-lab.js?v=vfx119"></script>
+<script type="module" src="./skill-vfx-lab.js?v=pose119"></script>
 </body></html>

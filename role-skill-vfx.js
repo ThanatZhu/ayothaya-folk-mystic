@@ -1,6 +1,6 @@
 import {createSkillLibraryRenderer} from './assets/skill-polish/library-renderer.js?v=align169';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
-import {createRoleAnimation,roleEffectTime,sampleRoleEffect} from './combat-animation165.js?v=align169';
+import {createRoleAnimation,roleEffectTime,sampleRoleEffect} from './combat-animation165.js?v=pose119';
 import {groundHeight} from './combat-core.js?v=novice174';
 import {createSheetVfx,hasSheet} from './role-sheet-vfx.js?v=vfx119';
 export function roleEffectSpace(from,to,nav,canonicalFrom=-2,canonicalTo=1.55){

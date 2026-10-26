@@ -5,7 +5,7 @@ import {createPartyLayout} from './party-layout.js?v=overlay143';
 import {createDesktopChat} from './desktop-chat-ui.js?v=channel144';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
-import {createRoleAnimation,roleAnimationActive,sampleRolePose,castFacing} from './combat-animation165.js?v=align169';
+import {createRoleAnimation,roleAnimationActive,sampleRolePose,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {createInspectUI} from './inspect-ui.js?v=108.1';
 import {iconStyle} from './bag-ui.js?v=107';
@@ -21,7 +21,7 @@ import {atlasPath,className} from './classes.js?v=novice174';
 import {rebirthRank} from './character-stats.js?v=107';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
-import {createPaintedAvatar} from './painted-avatar.js?v=novice174';
+import {createPaintedAvatar} from './painted-avatar.js?v=pose119';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,actionChoice,supportsCharacterAction} from './character-action-state.js?v=106.0';
 import {skillPose,skillTrack} from './skill-choreography.js?v=novice174';
@@ -200,6 +200,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(e.type==='miss'&&Number.isInteger(e.id))game.world.events.push(e);
    if(e.type==='playerHit')game.popup?.({...e,hurt:true},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2+v.sprite.position.y,z:v.state.player.z})});
    if(e.roleSkillId&&['cast','rolePassive'].includes(e.type)){game.roleEffects?.spawn({...e,lag:e.lag??0});if(e.type==='cast'){v.roleAction=createRoleAnimation(e,clock);v.action=null;v.emote=null;v.state.emote=null;}return;}
+   if(e.type==='roleRelease'){retimeRoleAnimation(v.roleAction,e,clock);game.roleEffects?.hit(e);return;}
    if(e.type==='castCancel'){if(v.roleAction?.castId===e.castId)v.roleAction=null;if(v.action?.castId===e.castId)v.action=null;game.roleEffects?.cancel(e.castId,e.actor);fx.cancel(e.castId,e.actor);return;}
    if(e.type==='cast'){
     if(!roleAnimationActive(v.roleAction,clock))v.roleAction=null;
@@ -302,7 +303,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    v.label.dataset.animationPending=['sit','sleep','run'].includes(chosen)&&!supported?chosen:'';
    const rolePose=p.hp>0?sampleRolePose(v.roleAction,clock,{reduced:reduced.matches}):null;
    const pose=rolePose??(skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed*(v.action.timing?track.duration/v.action.timing.duration:1),{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:basicActive&&mode==='attack'?elapsed*attackDuration(state.character.classId)/(v.action.timing?.duration??attackDuration(state.character.classId)):poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)}));
-   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'?0:pose.y);const angle=controls.getAzimuthalAngle(),poseFace=rolePose?(v.roleAction.facing??p.face):skillActive||basicActive?(v.action.facing??p.face):p.face;{const side=poseFace.x*Math.cos(angle)-poseFace.z*Math.sin(angle);if(rolePose||skillActive||basicActive?Math.abs(side)>1e-6:Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
+   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'||v.sprite.userData.skillArt?0:pose.y);const angle=controls.getAzimuthalAngle(),poseFace=rolePose?(v.roleAction.facing??p.face):skillActive||basicActive?(v.action.facing??p.face):p.face;{const side=poseFace.x*Math.cos(angle)-poseFace.z*Math.sin(angle);if(rolePose||skillActive||basicActive?Math.abs(side)>1e-6:Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
    if(basicActive&&mode==='attack')pose.actionPhase=Math.max(0,Math.min(1,elapsed/(v.action.timing?.duration??attackDuration(state.character.classId))));
    v.sprite.userData.setFacing?.(poseFace,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0||(p.down??0)>0;game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
    if((state.rebirth??0)!==v.rankShown){v.rankShown=state.rebirth??0;const t=v.label.querySelector('.rank-title');if(t){t.hidden=!v.rankShown;t.textContent=v.rankShown?'✦ '+rebirthRank(v.rankShown)+' ✦':'';}}

@@ -11,7 +11,7 @@ import {prepareSceneV2,disposeScene,MOODS} from './scene-v2.js?v=water158';
 import {createMeadow} from './meadow.js?v=108';
 import {applyRiceLight,addMeadowContacts,enableMeadowShadows,enableActorShadows} from './rice-light156.js?v=shadow160';
 import {groundHeight} from './combat-core.js?v=novice174';
-import {createPaintedAvatar} from './painted-avatar.js?v=novice174';
+import {createPaintedAvatar} from './painted-avatar.js?v=pose119';
 import {atlasCell} from './sprite-motion.js';
 import {baselineShader} from './rice-light-baseline156.js?v=156';
 

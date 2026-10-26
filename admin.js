@@ -97,7 +97,7 @@ function evRows(){return ev.rows??[];}
 async function loadEvidence(){
  ev.loading=true;ev.msg='กำลังค้นหา…';evidenceTab();
  try{const p=new URLSearchParams({stream:ev.stream,from:ev.from,to:ev.to,type:ev.type,q:ev.q}),r=await adminFetch('/admin/evidence?'+p);ev.rows=r.events;ev.total=r.total;ev.truncated=r.truncated;ev.msg='';}
- catch(e){ev.msg=({'range-too-long':'ค้นได้ครั้งละไม่เกิน 31 วัน','bad-range':'ช่วงวันที่ไม่ถูกต้อง','evidence-unsupported':'เซิร์ฟเวอร์นี้ยังไม่มีระบบบันทึกหลักฐาน (รอ deploy)','need-login':'ต้องล็อกอิน Google ก่อน'})[e.message]??'ค้นหาไม่สำเร็จ · '+e.message;}
+ catch(e){ev.msg=({'range-too-long':'ค้นได้ครั้งละไม่เกิน 31 วัน','bad-range':'ช่วงวันที่ไม่ถูกต้อง','evidence-unsupported':'เซิร์ฟเวอร์นี้ยังไม่มีระบบบันทึกหลักฐาน (รอ deploy)','not-found':'เซิร์ฟเวอร์นี้ยังไม่มีระบบบันทึกหลักฐาน (รอ deploy)','need-login':'ต้องล็อกอิน Google ก่อน'})[e.message]??'ค้นหาไม่สำเร็จ · '+e.message;}
  finally{ev.loading=false;if(tab==='evidence')evidenceTab();}
 }
 function evDownload(kind){

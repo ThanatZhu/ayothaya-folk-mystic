@@ -106,14 +106,14 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  const dialog=document.createElement('dialog');dialog.id='bag-window';dialog.setAttribute('aria-labelledby','bag-title');dialog.tabIndex=-1;
  // 0.83 owner layout: the dressed character with the worn gear around it on the left, items by category on the right.
  dialog.innerHTML='<header><h2 id="bag-title">กระเป๋า</h2><b class="coins" id="bag-coins"></b><button class="mp-icon" id="bag-close" aria-label="ปิดกระเป๋า">×</button></header>'+
-  '<div class="bag-body"><section class="bag-hero"><div class="bag-stage"><canvas id="bag-hero" width="320" height="320" aria-label="ตัวละครพร้อมชุดที่สวมใส่"></canvas><div id="bag-gear"></div></div><button type="button" id="bag-look">เปลี่ยนรูปลักษณ์</button></section>'+
+  '<div class="bag-body"><section class="bag-hero"><div class="bag-stage"><canvas id="bag-hero" width="320" height="320" aria-label="ตัวละครพร้อมชุดที่สวมใส่"></canvas><div id="bag-gear"></div></div>'+(equipmentUI?.canCustomize===true?'<button type="button" id="bag-look">เปลี่ยนรูปลักษณ์</button>':'')+'</section>'+
   '<section class="bag-items"><div class="bag-tabs" role="tablist" id="bag-tabs"></div><small id="bag-space"></small><div class="bag-grid" id="bag-grid"></div><div class="bag-trash" id="bag-trash">🗑 ลากไอเทมมาวางที่นี่ (หรือนอกกระเป๋า) เพื่อทิ้ง</div><section class="bag-detail" id="bag-detail"></section></section></div>'+
   '<div class="bag-discard" id="bag-discard" role="dialog" aria-labelledby="discard-title" hidden><div><span id="discard-icon"></span><strong id="discard-title"></strong><label>จำนวนที่จะทิ้ง <input type="number" id="discard-count" min="1" step="1" inputmode="numeric"></label><small id="discard-have"></small><div class="bag-actions"><button type="button" id="discard-all">ทั้งหมด</button><button type="button" id="discard-ok" class="danger">ทิ้ง</button><button type="button" id="discard-cancel">ยกเลิก</button></div></div></div>';
  ($('game-shell')??document.body).append(dialog);
  const open=()=>{game.clearInput();openHudPanel(dialog);render(true);dialog.focus({preventScroll:true});};
  menuButton.onclick=()=>dialog.open?dialog.close():open();
  dialog.querySelector('#bag-close').onclick=()=>dialog.close();
- dialog.querySelector('#bag-look').onclick=()=>{dialog.close();$('open-equipment')?.click();};
+ const lookButton=dialog.querySelector('#bag-look');if(lookButton)lookButton.onclick=()=>{dialog.close();equipmentUI.open();};
  let selected=null,category='all',worn=null; // worn = the gear slot picked on the character
  const tabs=dialog.querySelector('#bag-tabs');
  for(const [id,label] of TABS){const b=document.createElement('button');b.type='button';b.role='tab';b.dataset.cat=id;b.textContent=label;b.onclick=()=>{category=id;render(true);};tabs.append(b);}

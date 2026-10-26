@@ -3016,6 +3016,8 @@ Object.assign(globalThis.I18N_EN, {
  'เป้าหมายต้องติดคำสาปก่อน':'The target must be cursed first',
  'การร่ายถูกยกเลิก':'Casting canceled',
  'สกิลไม่สำเร็จ · คืน MP':'Skill fizzled · MP refunded',
+ "แตะพื้นเพื่อวางสกิล · กดสกิลซ้ำเพื่อวางตรงวง":"Tap the ground to place the skill · press the skill again to drop it on the circle",
+ "คลิกพื้นเพื่อวางสกิล · กดสกิลซ้ำเพื่อวางตรงวง · Esc ยกเลิก":"Click the ground to place the skill · press the skill again to drop it on the circle · Esc cancels",
  "ตัวเลขจากสกิลที่ใช้ในเกมตอนนี้ · เทียบที่ขั้น 5 · เขียว/แดง = สูงสุด/ต่ำสุดของแถว":"Numbers from the skills live in the game · compared at rank 5 · green/red = highest/lowest in the row",
  "สกิลกดใช้ 5 ขั้น · พาสซีฟ 3 ขั้น · ปลดตาม Job Level · ดูรายละเอียดเท่านั้น":"Actives have 5 ranks · passives 3 · unlocked by Job Level · read-only",
  "★ ไม้ตาย":"★ Ultimate",

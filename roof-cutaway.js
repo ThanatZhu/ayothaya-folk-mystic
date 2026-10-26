@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // material drops its fragments above the player's head inside a 3.8 m tube from the player toward the camera, so
 // someone standing on a raised floor (the sala deck) is seen under the roof, not drawn over it.
 // 0.103.5 the outer half of the tube fades out through a dither (opaque materials cannot alpha-blend).
-export function createRoofCutaway(model,{minFloor=1}={}){
+export function createRoofCutaway(model,{minFloor=1,radius=3.8}={}){
  const cut={value:new THREE.Vector4(0,0,0,0)},seen=new Set();
  model.traverse(o=>{if(!o.isMesh)return;for(const m of [o.material].flat()){
   if(seen.has(m))continue;seen.add(m);const before=m.onBeforeCompile;
@@ -19,5 +19,5 @@ export function createRoofCutaway(model,{minFloor=1}={}){
   };m.needsUpdate=true;
  }});
  // floor = ground height under the player; the cut is only on while standing on a raised floor.
- return {update(x,floor,z){cut.value.set(x,floor,z,floor>minFloor?3.8:0);}};
+ return {update(x,floor,z){cut.value.set(x,floor,z,floor>minFloor?radius:0);}};
 }

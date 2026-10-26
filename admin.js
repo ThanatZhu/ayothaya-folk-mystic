@@ -69,11 +69,14 @@ function set(r,f,v){
 }
 // 0.101.2 side menu: what each page is for, in one line
 const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP']};
+const NAV=[['ผู้เล่นและชุมชน',['players','mail']],['โลกเกมตอนนี้',['weather','boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
 const announcementDraft={title:'',body:'',serverId:'all',pending:null,busy:false,message:''};
 function tabs(){
  PAGES.mail=['✉','จดหมายและประกาศ','ส่งประกาศเข้าจดหมายผู้เล่น · ของแจกส่งได้ที่หน้าผู้เล่น'];
  PAGES.mapbosses=['🏔️','บอสประจำแมพ','9 แมพ · HP ไล่ตามพื้นที่ · เกิดใหม่ 60 นาทีหลังตาย แยกตามเซิร์ฟ/CH'];
- $('tabs').innerHTML=Object.entries(PAGES).map(([id,[icon,name,help]])=>`<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}"><i>${icon}</i><span><b>${name}</b><small>${help}</small></span></button>`).join('');
+ // 0.115 grouped menu: one line per page; the page's one-line help shows in its header instead.
+ $('tabs').innerHTML=NAV.map(([group,ids])=>`<p class="nav-group">${group}</p>`+ids.filter(id=>PAGES[id]).map(id=>{const [icon,name,help]=PAGES[id];return `<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}" title="${esc(help)}"><i>${icon}</i><b>${name}</b></button>`;}).join('')).join('');
+ $('tabs').querySelector('[aria-pressed=true]')?.scrollIntoView({block:'nearest',inline:'center'}); // phones: the menu is a strip, keep the open page in sight
  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;query='';remember();tabs();render();$('page-title').scrollIntoView({block:'start'});});
 }
 const remember=()=>{try{localStorage.setItem('ayo-admin-view',JSON.stringify({tab,classId}));}catch{}};
@@ -194,7 +197,7 @@ function placeTip(x,y){const w=tip.offsetWidth,h=tip.offsetHeight;tip.style.left
 document.addEventListener('pointerover',e=>{const el=e.target.closest?.('[data-item]');if(!el){tip.hidden=true;tipFor=null;return;}if(el.dataset.item!==tipFor){tipFor=el.dataset.item;tip.innerHTML=tipHTML(tipFor);}tip.hidden=false;placeTip(e.clientX,e.clientY);});
 document.addEventListener('pointermove',e=>{if(!tip.hidden)placeTip(e.clientX,e.clientY);});
 document.addEventListener('scroll',()=>{tip.hidden=true;tipFor=null;},true);
-const resetUI=createAdminResetUI({fetchAdmin:adminFetch,canUse:()=>!!fbConn?.auth.currentUser&&ALLOWED_ADMINS.includes((fbConn.auth.currentUser.email??'').toLowerCase())});
+const resetUI=createAdminResetUI({container:$('account-actions'),fetchAdmin:adminFetch,canUse:()=>!!fbConn?.auth.currentUser&&ALLOWED_ADMINS.includes((fbConn.auth.currentUser.email??'').toLowerCase())});
 async function initAdminAuthGate(){
  const gate=$('auth-gate'),app=$('app-shell');
  if(!gate||!app){
@@ -224,6 +227,8 @@ async function initAdminAuthGate(){
   render();
  }
 
+ // Dev server on this machine: no Google gate (the local API already trusts loopback); the live site always gates.
+ if(LOCAL){unlock({email:'localhost'});warmFirebase();return;}
  lock('กำลังเตรียมระบบความปลอดภัย…');
 
  try{

@@ -17,7 +17,7 @@ import {createEquipmentUI} from './equipment-ui.js?v=appearance-paused';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=talk137';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=chuk175';
 import {createGameMenu} from './game-menu.js?v=34';
-import {createSkillWindow} from './skill-window.js?v=ult1191';
+import {createSkillWindow} from './skill-window.js?v=ult1192';
 import {createAutoSettings} from './auto-settings.js?v=hud143';
 import {createMmoHud} from './mmo-hud.js?v=dot1191';
 import {createSoftLook} from './soft-look.js?v=actor1165';
@@ -75,7 +75,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=maps191');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps192');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);

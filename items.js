@@ -22,6 +22,7 @@ export const expandCost=bag=>bagCap(bag)>=BAG_MAX?null:2000*((bagCap(bag)-BAG_SL
 
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
 export const ITEMS={
+ 'soul-talisman':{image:'assets/revival180/soul-talisman.png',icon:0,name:'ยันต์คืนขวัญ',kind:'revival',sell:0,text:'ใช้ 1 ชิ้นเมื่อเลือกเกิดที่นี่ · ฟื้น HP / MP เต็ม ณ จุดที่หมดแรง · ใช้ผ่านหน้าต่างเกิดใหม่เท่านั้น'},
  'rename-card':{image:'assets/arena166/rename-card.webp',icon:0,name:'บัตรเปลี่ยนชื่อ',kind:'scroll',text:'ใช้เปลี่ยนชื่อตัวละคร 1 ครั้ง · ซื้อด้วยทองแท่ง 1,000 แท่ง · กดปากกาข้างชื่อ'},
  'straw-bundle':{icon:0,name:'ฟางมัดเรืองแสง',kind:'loot',sell:4,text:'ฟางจากหุ่นที่ขยับเอง ยังอุ่นเหมือนมีลมหายใจ'},
  'rat-tooth':{icon:1,name:'ฟันหนูยุ้ง',kind:'loot',sell:3,text:'ฟันคม ๆ ที่แทะเศษสายใยขวัญ'},
@@ -157,7 +158,7 @@ export function itemDef(id){
   sell:Math.round(it.sell*(1+n*.25)*(1+plus*.2))+(card?.sell??0)};
 }
 export const composeId=(base,refine,card,affix=null,grade=0)=>base+(refine>0?'+'+refine:'')+(card?'~'+card:'')+(affix?'!'+affix:'')+(grade>0?'^'+grade:'');
-const BAGGABLE=id=>['loot','potion','gear','card','scroll','wing','lure','petfood','egg'].includes(itemDef(id)?.kind);
+const BAGGABLE=id=>['loot','potion','gear','card','scroll','wing','lure','petfood','egg','revival'].includes(itemDef(id)?.kind);
 
 // Per monster id (MONSTER_TYPES[].id): coins [min,max] and independent item rolls [id, chance, count=1].
 export const DROPS={

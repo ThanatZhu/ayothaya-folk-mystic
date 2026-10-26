@@ -8,7 +8,7 @@ const nav={zones:[{x:-30,z:-30,w:60,d:60}],obstacles:[],props:[]};
 function fixture(roleSkills=false){
  const maps=[{id:'field',safe:false,nav,spawn:{x:-5,z:-5},mobs:[],portals:[]},{id:'ayutthaya',safe:true,nav,spawn:{x:5,z:5},mobs:[],portals:[]}],messages=[];
  const realm=new RealmServer({catalog:{capital:'ayutthaya',maps},roleSkills});
- const record={character:{name:'RespawnTest',gender:'male',classId:'novice'},state:{...initialSave(),mapId:'field'},bag:{coins:0,items:{}}};
+ const record={character:{name:'RespawnTest',gender:'male',classId:'novice'},state:{...initialSave(),mapId:'field'},bag:{coins:0,items:{'soul-talisman':2}}};
  const peer=realm.join({uid:'death-test',serverId:'server-1',slotId:'slot-1',record,send:m=>messages.push(m)});
  return {realm,peer,record,messages};
 }
@@ -23,8 +23,8 @@ test('dead players wait indefinitely, manual motion cannot revive them, and here
 test('online here is authoritative, rejects living users and duplicate requests without healing again',()=>{
  const {realm,peer:p,messages}=fixture();p.world.player.hp=0;p.world.fall();Object.assign(p.world.player,{x:3,z:4});
  assert.equal(realm.receive(p.id,{type:'respawn',id:'r1',seq:1,destination:'here'}),true);
- assert.equal(p.world.player.hp,p.world.player.maxHp);assert.equal(p.world.player.x,3);assert.ok(messages.some(m=>m.type==='respawned'));assert.ok(messages.some(m=>m.type==='snapshot'&&m.self.player.hp>0));
- p.world.player.hp=20;realm.receive(p.id,{type:'respawn',id:'r2',seq:2,destination:'here'});assert.equal(p.world.player.hp,20);assert.ok(messages.some(m=>m.type==='respawnError'));
+ assert.equal(p.bag.items['soul-talisman'],1);assert.equal(p.world.player.hp,p.world.player.maxHp);assert.equal(p.world.player.x,3);assert.ok(messages.some(m=>m.type==='respawned'));assert.ok(messages.some(m=>m.type==='snapshot'&&m.self.player.hp>0));
+ p.world.player.hp=20;realm.receive(p.id,{type:'respawn',id:'r2',seq:2,destination:'here'});assert.equal(p.world.player.hp,20);assert.equal(p.bag.items['soul-talisman'],1);assert.ok(messages.some(m=>m.type==='respawnError'));
 });
 test('death travel is only to the capital, needs death and spends no coins or incense',()=>{
  const {realm,peer:p}=fixture();assert.throws(()=>realm.travelDestination(p,'ayutthaya',{respawn:true}),/respawn-invalid/);
@@ -37,4 +37,15 @@ test('zero HP survives serialization and relog for novice and advanced role worl
   const next=new CombatWorld({nav,mobs:[]});restoreTraveler(next,serializeTraveler(p.world));assert.equal(next.player.hp,0);
   const saved=realm.record(p,record);realm.leave(p.id);const joined=realm.join({uid:'death-test',serverId:'server-1',slotId:'slot-1',record:saved,send(){}});assert.equal(joined.world.player.hp,0);
  }
+});
+
+test('missing revival item blocks both local revival commands without changing inventory or HP',()=>{
+ const {realm,peer:p,messages}=fixture();p.bag.items={};p.world.player.hp=0;
+ realm.receive(p.id,{type:'respawn',id:'empty',seq:1,destination:'here'});assert.equal(p.world.player.hp,0);assert.ok(messages.some(m=>m.type==='respawnError'&&m.code==='no-revival-item'));
+ realm.receive(p.id,{type:'returnToSpawn',seq:2});assert.equal(p.world.player.hp,0);assert.deepEqual(p.bag.items,{});
+ assert.equal(realm.travelDestination(p,'ayutthaya',{respawn:true}).id,'ayutthaya');
+});
+test('last revival talisman is removed and the deduction persists in the saved record',()=>{
+ const {realm,peer:p,record}=fixture();p.bag.items={'soul-talisman':1};p.world.player.hp=0;
+ realm.receive(p.id,{type:'respawn',id:'last',seq:1,destination:'here'});assert.equal(p.bag.items['soul-talisman'],undefined);assert.equal(realm.record(p,record).bag.items['soul-talisman'],undefined);
 });

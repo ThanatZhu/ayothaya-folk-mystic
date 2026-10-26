@@ -35,6 +35,7 @@ import {activeEvent,expRate,surge,surgeOn} from '../events.js';
 // 0.49: the timed MVP returns an hour after it falls (first one 5 min after boot); dungeon clear pays once per Thai day.
 export const MERC_COST=200,MERC_TIME=1200;
 export const MVP_INTERVAL=3600e3,MVP_FIRST=300e3,DUNGEON_REWARD={coins:800,items:[{id:'lek-lai',count:1},{id:'green-herb',count:3},{id:'hp-large',count:3}]};
+import {consumeRevival} from '../revival-item.js';
 import {normalizeBag,expandBag,addLoot,rollLoot,buy,sell,discard,useItem,foodBuff,SHOPS,ITEM_ERRORS,itemDef,RARITY_NAME} from '../items.js';
 import {craft} from '../crafting.js';
 import {WAR,warWindow,warLabel} from '../guild-war.js';
@@ -324,11 +325,12 @@ export class RealmServer{
    // Client capability flags and hand-written input packets cannot unlock it.
    const distance=Math.hypot(m.x,m.z),n=Math.max(1,distance);if(distance>.08)cancelWalk(p);p.input={x:m.x/n,z:m.z/n,attack:m.attack,run:this.runEnabled&&m.run===true&&distance>.08};p.inputAt=now;p.inputSeq=m.seq;if(distance>.08||m.attack)w.clearEmote();return true;
   }
-  if(m.type==='returnToSpawn'){if(w.player.hp<=0){cancelWalk(p);p.input={x:0,z:0,attack:false,run:false};w.respawn(false);p.saveNow=true;}return true;}
+  if(m.type==='returnToSpawn'){if(w.player.hp<=0){let bag;try{bag=consumeRevival(p.bag,w.player);}catch{w.notice('ต้องมียันต์คืนขวัญ 1 ชิ้น');return false;}cancelWalk(p);p.input={x:0,z:0,attack:false,run:false};this.setBag(p,bag);w.respawn(false);p.saveNow=true;}return true;}
   if(m.type==='respawn'){
    if(typeof m.id!=='string'||m.id.length>50)return false;
    if(m.destination!=='here'||w.player.hp>0){p.send({type:'respawnError',id:m.id,code:'respawn-invalid'});return false;}
-   cancelWalk(p);p.input={x:0,z:0,attack:false,run:false};w.respawn(true);p.saveNow=true;
+   let bag;try{bag=consumeRevival(p.bag,w.player);}catch(e){p.send({type:'respawnError',id:m.id,code:e.message});return false;}
+   cancelWalk(p);p.input={x:0,z:0,attack:false,run:false};this.setBag(p,bag);w.respawn(true);p.saveNow=true;
    p.send({type:'snapshot',...this.snapshot(p)});p.send({type:'respawned',id:m.id});return true;
   }
   if(m.type==='selectAlly'){const ally=w.roleAllies?.().find(a=>a.id===m.target);if(!ally)return this.error(p,'invalid-target');w.supportTargetId=ally.id;return true;}

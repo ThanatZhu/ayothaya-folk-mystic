@@ -5,7 +5,8 @@ import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progr
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing} from './combat-animation165.js?v=align169';
 import {createLiveRoleVfx} from './role-skill-vfx.js?v=align169';
-import {createRolePlayUI} from './role-play-ui.js?v=death-theme179';
+import {revivalCount} from './revival-item.js?v=revival180';
+import {createRolePlayUI} from './role-play-ui.js?v=revival180';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
@@ -28,7 +29,7 @@ import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=novice174';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
- const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world),roleUI=createRolePlayUI({world,clear:()=>clearInput(),respawn:async destination=>{clearInput();cancelWalk();if(networkExpected&&!network)throw Error('not-connected');if(destination==='capital')return respawnTravel?.();if(network){await network.request('respawn',crypto.randomUUID(),{destination:'here'});return true;}return world.respawn(true);}});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null,respawnTravel=null;
+ const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world),roleUI=createRolePlayUI({world,itemCount:()=>network?revivalCount(world.bag):respawnInventory?.count()??0,clear:()=>clearInput(),respawn:async destination=>{clearInput();cancelWalk();if(networkExpected&&!network)throw Error('not-connected');if(destination==='capital')return respawnTravel?.();if(network){await network.request('respawn',crypto.randomUUID(),{destination:'here'});return true;}return respawnInventory?.use()??false;}});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null,respawnTravel=null,respawnInventory=null;
  // Skill levels: the server owns them online; guests keep them in their local save.
  const progress=()=>({classId:world.profession.id,jobId:world.jobId??'',jobXp:world.jobXp});
  if(world.roleCombat&&!skillState.skills?.[ROLE_MARK])try{localStorage.setItem('ayothaya-role-skill-backup:'+world.profession.id,JSON.stringify(skillState.skills??{}));}catch{}
@@ -468,5 +469,5 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
- return {set respawnTravel(fn){respawnTravel=fn;},roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
+ return {set respawnInventory(value){respawnInventory=value;},set respawnTravel(fn){respawnTravel=fn;},roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

@@ -2,10 +2,11 @@ import {refineTierBadge} from './refine-tier-ui.js';
 // Bag (กระเป๋า · B), NPC shops, two quick-use slots (Q / E) and loot notices.
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
 import {activeEvent,surgeOn} from './events.js?v=64';
-import {ATLAS_LAYOUTS} from './items.js?v=tier167';
+import {ATLAS_LAYOUTS} from './items.js?v=revival180';
 import {GRADES,gearLook,setLines,bossLines,familyName,BOSS_SETS,SET_SLOTS} from './gear-sets.js';
 import {levelGifts} from './experience.js?v=105.3';
-import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=tier167';
+import {consumeRevival,revivalCount} from './revival-item.js?v=revival180';
+import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=revival180';
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=novice174';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {pickPotion} from './auto-play.js?v=novice174';
@@ -16,7 +17,7 @@ const QUICK_KEY='ayothaya-quick-slots';
 // 0.109.4 four quick slots (Q E Z X); potions, the wind wing and the recall incense can sit in them
 const QUICK_KEYS=['Q','E','Z','X'],QUICK_IDX=[0,1,2,3],quickable=id=>['potion','wing','scroll'].includes(itemDef(id)?.kind);
 // 0.83 bag tabs: item kinds per category ('all' shows everything).
-const TABS=[['all','ทั้งหมด',null],['use','ใช้ได้',['potion','scroll','wing']],['gear','อุปกรณ์',['gear']],['card','การ์ด',['card']],['loot','วัตถุดิบ',['loot']]];
+const TABS=[['all','ทั้งหมด',null],['use','ใช้ได้',['potion','scroll','wing','revival']],['gear','อุปกรณ์',['gear']],['card','การ์ด',['card']],['loot','วัตถุดิบ',['loot']]];
 const GEAR_PLACES=[['head','หมวก'],['weapon','อาวุธ'],['accessory','เครื่องประดับ'],['armor','เสื้อเกราะ'],['garment','ผ้าคลุม'],['shoes','รองเท้า']]; // left column, then right
 
 // 0.57 tier 3/4 gear reuses the tier-2 icon recoloured until painted art lands.
@@ -65,6 +66,12 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  let local=read();
  const bag=()=>game.online?normalizeBag(world.bag):local;
  const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};
+ game.respawnInventory={count:()=>revivalCount(bag()),use:()=>{
+  if(game.online)throw Error('online-authority');
+  const next=consumeRevival(local,world.player);
+  localStorage.setItem(key,JSON.stringify(next));local=next;
+  const revived=world.respawn(true);render();return revived;
+ }};
  const fail=code=>world.notice(ITEM_ERRORS[code]??code);
  function showLoot({coins=0,items=[],lost=[]}){
   const parts=[];if(items.length)parts.push('ได้รับ '+itemLabel(items));if(coins)parts.push('เบี้ย +'+coins);

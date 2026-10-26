@@ -7,7 +7,9 @@ import {roleById} from './assets/skills-next/catalog.js';
 // 0.85 back-office dashboard: every tunable game number in one place (paths, skills, items, monsters).
 // Edits are kept as overrides (balance.js FIELDS); "บันทึกเข้าเกม" posts them to the local dev server, which writes
 // balance-data.js for the next deploy. Player data is not touched here.
-import {ITEMS,DROPS} from './items.js?v=107';
+import {ITEMS,DROPS,itemDef} from './items.js?v=107';
+import {gearLook,GRADES,familyName,BOSS_SETS} from './gear-sets.js';
+import {newGearFilter,gearMatch,gearFilterHTML,bindGearFilter,lookName} from './admin-gear-filter.js';
 import {WORLD_MAP_BOSSES} from './chapter2-monsters.js';
 import {CLASSES,NOVICE,classSkills,className} from './classes.js?v=novice174';
 import {multiplayerURL} from './multiplayer-config.js?v=28';
@@ -43,9 +45,13 @@ let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',map
 let bossMsg='',bossMaps=null,bx={serverId:'server-1',channel:1,mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
 let itemGrantPending=null,itemGrantSending=false,petGrantPending=null,petGrantSending=false,giftPane='pets';const petGrantDrafts=new Map();
-let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',gearClass='all',itemQuery='',pickCount=1;
+let search='',basket=[],giftCoins=0,refreshTimer=0,itemKind='all',itemQuery='',pickCount=1,shownPicks=60;
+const giftGear=newGearFilter('auto'),tabGear=newGearFilter('all'); // 0.117 gear filters: gift picker (follows the picked player) and items tab
 const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp-large',5],['return-incense',5],['lek-lai',1],['break-guard',1]];
-const itemName=id=>ITEMS[id]?.name??id;
+const itemName=id=>itemDef(id)?.name??id;
+const pickedLook=()=>{const x=players?.find(v=>v.id===picked);return x?gearLook(x.classId,x.gender):null;};
+// graded gear is sent with the grade picked in the filter ('^1'..'^4'); everything else as is
+const gradeId=id=>itemKind==='gear'&&ITEMS[id]?.graded&&giftGear.grade?id+'^'+giftGear.grade:id;
 try{const s=JSON.parse(localStorage.getItem('ayo-admin-view'));if(s){tab=s.tab??tab;classId=s.classId??classId;}}catch{}
 
 // Original value (code) and the value in effect for one field.
@@ -54,7 +60,7 @@ const skillBase=(cid,slot)=>classSkills(cid,SKILLS)[slot];
 function rowsFor(){
  if(tab==='classes')return paths.map(c=>({group:'classes',key:c.id,title:c.name,sub:c.role??'',src:c}));
  if(tab==='skills')return skillBase&&classSkills(classId,SKILLS).map((s,i)=>({group:'skills',key:classId+':'+i,title:s.key+' · '+s.name,sub:s.type,src:s,skill:true,artSlot:i}));
- if(tab==='items')return Object.entries(ITEMS).filter(([id,it])=>it.kind!=='ui'&&it.kind!=='reserved'&&(kind==='all'||it.kind===kind)&&(!query||(it.name+id).toLowerCase().includes(query))).map(([id,it])=>({group:'items',key:id,title:it.name,sub:(KIND[it.kind]??it.kind)+' · '+id,src:it}));
+ if(tab==='items')return Object.entries(ITEMS).filter(([id,it])=>it.kind!=='ui'&&it.kind!=='reserved'&&(kind==='all'||it.kind===kind)&&(kind!=='gear'||gearMatch(it,tabGear))&&(!query||(it.name+id).toLowerCase().includes(query))).map(([id,it])=>({group:'items',key:id,title:it.name,sub:(KIND[it.kind]??it.kind)+' · '+id,src:it}));
  return MONSTER_TYPES.map((m,i)=>({group:'monsters',key:monsterKey(m,i),title:m.name,sub:(m.boss?'บอส · ':m.elite?'อีลิท · ':'')+monsterKey(m,i),src:m})).filter(r=>(!query||(r.title+r.key).toLowerCase().includes(query))&&(monsterKind==='all'||monsterKind==='boss'&&r.src.boss||monsterKind==='elite'&&r.src.elite&&!r.src.boss||monsterKind==='normal'&&!r.src.elite&&!r.src.boss));
 }
 const round=v=>typeof v==='number'?Math.round(v*1000)/1000:v;
@@ -91,13 +97,14 @@ function filters(){
  else if(tab==='drops')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อมอนหรือไอเท็ม"></label><small>100% = ดรอปทุกครั้ง · หัวหน้าฝูงและช่วงดรอป ×2 ยังทอยซ้ำตามเดิม</small>`;
  else if(tab==='monsters')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อหรือรหัสมอนสเตอร์"></label><label>ประเภท <select id="monster-kind">${[['all','ทั้งหมด'],['normal','ธรรมดา'],['elite','อีลิท'],['boss','บอส']].map(([k,n])=>`<option value="${k}"${monsterKind===k?' selected':''}>${n}</option>`).join('')}</select></label>`;
  else f.innerHTML='';
+ if(tab==='items'&&kind==='gear'){f.insertAdjacentHTML('beforeend',gearFilterHTML(tabGear));bindGearFilter(f,tabGear,()=>render(false));}
  if(['skills','monsters'].includes(tab)&&!(tab==='skills'&&skillSet==='live'))f.insertAdjacentHTML('beforeend',`<div class="admin-view-switch" aria-label="รูปแบบการแสดงผล"><button type="button" data-view-mode="cards" aria-pressed="${viewMode==='cards'}">รูปภาพและรายละเอียด</button><button type="button" data-view-mode="table" aria-pressed="${viewMode==='table'}">ตารางตัวเลข</button></div>`);
  f.querySelectorAll('[data-view-mode]').forEach(b=>b.onclick=()=>{viewMode=b.dataset.viewMode;render();});
  $('monster-kind')&&($('monster-kind').onchange=e=>{monsterKind=e.target.value;render(false);});
  $('skill-set')&&($('skill-set').onchange=e=>{skillSet=e.target.value;render();});$('master-pick')&&($('master-pick').onchange=e=>{masterId=e.target.value;render();});
  $('class-pick')&&($('class-pick').onchange=e=>{classId=e.target.value;remember();render();});
  $('table-pick')&&($('table-pick').onchange=e=>{tableView=e.target.value;render(false);});
- $('kind-pick')&&($('kind-pick').onchange=e=>{kind=e.target.value;render(false);});
+ $('kind-pick')&&($('kind-pick').onchange=e=>{kind=e.target.value;render();});
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
@@ -152,7 +159,7 @@ const dropBase=(mid,id,now)=>{const k='drops.'+mid+'.'+id;return k in BASELINE?B
 function dropsTab(){
  const list=Object.entries(DROPS).map(([mid,d])=>({mid,name:monName(mid),d})).filter(m=>!query||(m.name+m.mid+m.d.items.map(([id])=>itemName(id)+id).join()).toLowerCase().includes(query));
  $('view').innerHTML=`<div class="scroll"><table class="drops"><thead><tr><th class="l">มอน · ไอเท็ม</th><th>ค่าเดิม</th><th>โอกาสดรอป %</th><th>จำนวน</th><th></th></tr></thead><tbody>${list.map(({mid,name,d})=>{const over=draft.drops[mid];
-  return `<tr class="mon"><td class="l" colspan="4"><b>${esc(name)}</b><small>${esc(mid)} · เบี้ย ${d.coins[0]}–${d.coins[1]}</small></td><td><button type="button" class="undo" data-undo-drop="${esc(mid)}" ${over?'':'hidden'}>คืนค่า</button></td></tr>`+
+  return `<tr class="mon"><td class="l" colspan="4"><b>${esc(name)}</b><small>${esc(mid)} · เบี้ย ${d.coins[0]}–${d.coins[1]}${d.sets?` · อุปกรณ์เซ็ทขั้น ${d.sets.tier}: หมวก/ผ้าคลุม/รองเท้า ${pct(d.sets.piece)}%${d.sets.armor?' · เสื้อ '+pct(d.sets.armor)+'%':''} (แบบตามอาชีพผู้ฆ่า · แก้ในโค้ด)`:''}</small></td><td><button type="button" class="undo" data-undo-drop="${esc(mid)}" ${over?'':'hidden'}>คืนค่า</button></td></tr>`+
   d.items.map(([id,now,n=1])=>{const b=dropBase(mid,id,now),edited=over?.[id]!==undefined,v=edited?over[id]:b;
    return `<tr><td class="l"><span class="name"><i class="ico sm" data-item="${esc(id)}" style="${iconStyle(id)}"></i><span><b>${esc(itemName(id))}</b><small>${esc(id)}</small></span></span></td><td>${pct(b)}%</td><td><input type="number" min="0" max="100" step="any" data-mid="${esc(mid)}" data-id="${esc(id)}" value="${pct(v)}" class="${edited?'edited':''}" aria-label="${esc(name)} ${esc(itemName(id))} %" title="ค่าเดิม ${pct(b)}%"></td><td>×${n}</td><td></td></tr>`;}).join('');}).join('')||'<tr><td class="l" colspan="5">ไม่พบ</td></tr>'}</tbody></table></div>`;
  $('view').querySelectorAll('tr.mon td:first-child').forEach((cell,i)=>{const index=MONSTER_TYPES.findIndex((m,k)=>monsterKey(m,k)===list[i].mid);if(index>=0){const image=document.createElement('img');image.className='admin-monster-art';image.dataset.monsterArt=index;image.alt=list[i].name;cell.prepend(image);}});paintAdminMonsters($('view'));
@@ -186,11 +193,12 @@ $('save').onclick=async()=>{
 const STAT={atk:'ATK',matk:'MATK',def:'DEF',hp:'ฟื้น HP',mp:'ฟื้น MP',level:'ใช้ได้ตั้งแต่ Lv.',buy:'ราคาซื้อ',sell:'ขายได้',tokens:'เหรียญงานวัด',time:'นาน (วิ)'};
 const SLOT={weapon:'อาวุธ',armor:'เสื้อเกราะ',head:'หมวก',garment:'ผ้าคลุม',shoes:'รองเท้า',accessory:'เครื่องประดับ'};
 function tipHTML(id){
- const it=ITEMS[id];if(!it)return '';
+ const it=itemDef(id);if(!it)return '';
+ const grade=it.rainbow?'เซ็ทบอส · กรอบรุ้ง':it.graded?'เกรด'+GRADES[it.grade??0].name:'',setLine=it.set?'ชุด'+familyName(it.set.family)+' ขั้น '+it.set.tier:it.bossSet?'เซ็ทบอส'+BOSS_SETS[it.bossSet].name:'';
  const stats=Object.entries(STAT).filter(([k])=>typeof it[k]==='number').map(([k,n])=>`<li><span>${n}</span><b>${it[k].toLocaleString('th-TH')}</b></li>`).join('');
  const bonus=Object.entries(it.bonus??it.effect?.bonus??{}).map(([k,v])=>`<li><span>${esc(k.toUpperCase())}</span><b>+${v}</b></li>`).join('');
  const sub=[KIND[it.kind]??it.kind,it.slot&&(SLOT[it.slot]??it.slot),it.classes?.map(c=>className(c)).join(', ')].filter(Boolean).map(esc).join(' · ');
- return `<div class="tip-head"><i class="ico" style="${iconStyle(id)}"></i><div><b>${esc(it.name)}</b><small>${sub}</small></div></div>${it.text?`<p>${esc(it.text)}</p>`:''}${stats||bonus?`<ul>${stats}${bonus}</ul>`:''}<small class="tip-id">${esc(id)}</small>`;
+ return `<div class="tip-head"><i class="ico" style="${iconStyle(id)}"></i><div><b>${esc(it.name)}</b><small>${sub}</small></div></div>${grade||setLine?`<p class="tip-grade">${esc([grade,setLine,it.look?'แบบ'+lookName(it.look):''].filter(Boolean).join(' · '))}</p>`:''}${it.text?`<p>${esc(it.text)}</p>`:''}${stats||bonus?`<ul>${stats}${bonus}</ul>`:''}<small class="tip-id">${esc(id)}</small>`;
 }
 const tip=$('tip');let tipFor=null;
 function placeTip(x,y){const w=tip.offsetWidth,h=tip.offsetHeight;tip.style.left=Math.max(8,Math.min(innerWidth-w-8,x+14))+'px';tip.style.top=(y+14+h>innerHeight?Math.max(8,y-h-10):y+14)+'px';}
@@ -418,7 +426,7 @@ function playersTab(){
  const pic=(id,n)=>`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>${n?`<em>${n}</em>`:''}`;
  const KINDS=[['all','ทั้งหมด'],['potion','ยา/อาหาร'],['gear','อุปกรณ์'],['card','การ์ด'],['loot','วัตถุดิบ'],['other','อื่น ๆ']];
  const kindOf=id=>['potion','gear','card','loot'].includes(ITEMS[id].kind)?ITEMS[id].kind:'other';
- const picks=Object.keys(ITEMS).filter(id=>!legacyPetItem(id)&&!['ui','reserved'].includes(ITEMS[id].kind)&&(itemKind==='all'||kindOf(id)===itemKind)&&(itemKind!=='gear'||gearClass==='all'||(ITEMS[id].classes?.includes(gearClass)??gearClass==='any'))&&(!itemQuery||itemName(id).includes(itemQuery))).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
+ const picks=Object.keys(ITEMS).filter(id=>!legacyPetItem(id)&&!['ui','reserved'].includes(ITEMS[id].kind)&&(itemKind==='all'||kindOf(id)===itemKind)&&(itemKind!=='gear'||gearMatch(ITEMS[id],giftGear,pickedLook()))&&(!itemQuery||itemName(id).includes(itemQuery))).sort((a,b)=>itemName(a).localeCompare(itemName(b),'th'));
  // 0.103 offline characters (from the saves) are listed too: filter chips with counts, online first, 50 rows at a time
  const isOn=x=>!x.offline,all=players??[],counts={all:all.length,online:all.filter(isOn).length,offline:all.filter(x=>x.offline).length};
  const list=all.filter(x=>(presence==='all'||(presence==='online')===isOn(x))&&(!search||x.name.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>isOn(b)-isOn(a)),p=players?.find(x=>x.id===picked);
@@ -443,8 +451,10 @@ function playersTab(){
    `<h4>เลือกไอเท็ม <small>แตะรูปเพื่อใส่ในรายการ · จำนวนต่อครั้ง</small> <input id="give-count" type="number" min="1" max="999" value="${pickCount}" aria-label="จำนวนต่อครั้ง"></h4>`+
    `<div class="kinds">${KINDS.map(([k,n])=>`<button type="button" data-kind="${k}" class="${k===itemKind?'on':''}">${n}</button>`).join('')}<input id="item-search" type="search" placeholder="🔍 ชื่อไอเท็ม" value="${esc(itemQuery)}"></div>`+
    // equipment split per class (items.js `classes`); gear without `classes` fits everyone
-   (itemKind==='gear'?`<div class="kinds sub">${[['all','ทุกอาชีพ'],...paths.map(c=>[c.id,c.icon+' '+c.name]),['any','ใช้ได้ทุกอาชีพ']].map(([k,n])=>`<button type="button" data-gear="${k}" class="${k===gearClass?'on':''}">${esc(n)}</button>`).join('')}</div>`:'')+
-   `<div class="grid pick">${picks.map(id=>`<button type="button" class="cell" data-add="${esc(id)}" title="${esc(itemName(id))}">${pic(id)}<small>${esc(itemName(id))}</small></button>`).join('')||'<span class="hint">ไม่พบไอเท็ม</span>'}</div>`+
+   (itemKind==='gear'?gearFilterHTML(giftGear,{autoName:lookName(gearLook(p.classId,p.gender)),grade:true}):'')+
+   `<p class="pick-count">พบ ${picks.length.toLocaleString('th-TH')} ชิ้น${picks.length>shownPicks?' · แสดง '+shownPicks:''}</p>`+
+   `<div class="grid pick">${picks.slice(0,shownPicks).map(id=>{const gid=gradeId(id);return `<button type="button" class="cell" data-add="${esc(gid)}" title="${esc(itemName(gid))}">${pic(gid)}<small>${esc(itemName(gid))}</small></button>`;}).join('')||'<span class="hint">ไม่พบไอเท็ม · ลองเปลี่ยนตัวกรอง</span>'}</div>`+
+   (picks.length>shownPicks?`<button type="button" id="more-picks" class="more">แสดงเพิ่ม (อีก ${(picks.length-shownPicks).toLocaleString('th-TH')} ชิ้น)</button>`:'')+
    `<div class="sendbar"><h4>รายการที่จะส่ง</h4><ul class="basket">${lines||'<li class="empty">ยังว่าง · แตะรูปไอเท็มหรือปุ่มส่งด่วน</li>'}</ul>`+
    `<label class="coins">+ เบี้ย <input id="give-coins" type="number" min="0" max="10000000" value="${giftCoins}"></label>`+
    `<button type="submit" class="primary send"${!basket.length&&!giftCoins?' disabled':''}>🎁 ส่งให้ ${esc(p.name)}</button></div></form>`+
@@ -472,10 +482,11 @@ function playersTab(){
  const addItem=(id,count)=>{const line=basket.find(l=>l.id===id);if(line)line.count=Math.min(999,line.count+count);else if(basket.length<20)basket.push({id,count});};
  form.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{keep();const [id,n]=QUICK[+b.dataset.quick];if(id==='coins')giftCoins=Math.min(1e7,giftCoins+n);else addItem(id,n);playersTab();});
  form.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{keep();addItem(b.dataset.add,pickCount);playersTab();});
- form.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{keep();itemKind=b.dataset.kind;playersTab();});
- form.querySelectorAll('[data-gear]').forEach(b=>b.onclick=()=>{keep();gearClass=b.dataset.gear;playersTab();});
+ form.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{keep();itemKind=b.dataset.kind;shownPicks=60;playersTab();});
+ bindGearFilter(form,giftGear,()=>{keep();shownPicks=60;playersTab();});
+ on('more-picks','onclick',()=>{keep();shownPicks+=120;playersTab();});
  form.querySelectorAll('[data-drop]').forEach(b=>b.onclick=()=>{keep();if(b.dataset.drop==='coins')giftCoins=0;else basket.splice(+b.dataset.drop,1);playersTab();});
- refocus('item-search',v=>{keep();itemQuery=v.trim();});
+ refocus('item-search',v=>{keep();itemQuery=v.trim();shownPicks=60;});
  on('give-coins','onchange',()=>{keep();playersTab();});on('give-count','onchange',keep);
  form.onsubmit=async e=>{e.preventDefault();if(itemGrantSending)return;keep();itemGrantSending=true;const send=form.querySelector('.send');send.disabled=true;send.textContent='กำลังส่ง…';
   try{const payload={peer:p.id,coins:giftCoins,items:basket},signature=JSON.stringify(payload);if(!itemGrantPending||itemGrantPending.signature!==signature)itemGrantPending={signature,id:crypto.randomUUID()};const r=await adminFetch('/admin/mail',{peer:payload.peer,attachments:{coins:payload.coins,items:payload.items},requestId:itemGrantPending.id});adminMsg='✔ ส่งเข้าจดหมายของ '+r.name+' แล้ว';basket=[];giftCoins=0;itemGrantPending=null;}

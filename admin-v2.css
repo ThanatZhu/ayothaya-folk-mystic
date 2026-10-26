@@ -100,3 +100,17 @@
  .luxury-office .main{padding:0 16px 40px}
  .luxury-office .main>.bar{position:static;margin:0 -16px 12px;padding:12px 16px}
 }
+
+/* 0.117 pet & gold-bar grant pane: same card as the item gift form (it touched the panel edges) */
+.gift .admin-pet-grant{margin:0;padding:20px 22px 24px;border:1px solid #f4cf7a55;border-radius:14px;background:#0e1f19}
+.gift .admin-pet-grant .admin-pet-heading{gap:16px;padding-bottom:14px;border-bottom:1px solid #f4cf7a33}
+.gift .admin-pet-grant .admin-pet-picker{gap:12px;padding:4px 0}
+.gift .admin-gift-tabs{margin-bottom:12px}
+/* 0.117 gear filters (gift picker + items tab) */
+.gear-filter{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;padding:10px;border:1px solid #f4cf7a33;border-radius:10px;background:#0b1814}
+.gear-filter .gf{display:grid;gap:4px;font-size:12px;color:#d8c9a3}
+.gear-filter select{width:100%;min-height:34px;padding:0 8px;border-radius:8px;border:1px solid #f4cf7a55;background:#0e1f19;color:#f6edd6;font:inherit}
+.filters .gear-filter{flex:1 1 100%}
+.gift .pick-count{margin:0;font-size:12px;color:#bdb39c;font-variant-numeric:tabular-nums}
+.gift .more{width:100%}
+#tip .tip-grade{margin:4px 0 0;font-weight:700;color:#f4cf7a}

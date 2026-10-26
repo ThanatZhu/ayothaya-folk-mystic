@@ -4500,3 +4500,29 @@ Object.assign(globalThis.I18N_EN,{
  "ไฟล์ใหญ่เกินไป · PDF ได้ไม่เกิน 640 KB (แคปหน้าจอแทนได้)": "File too large · PDFs up to 640 KB (a screenshot works too)",
  "สลิปเก็บในเครื่องนี้ก่อน · จะอัปขึ้นคลาวด์อีกครั้งตอนเชื่อมได้": "Slip kept on this device · it will upload when the cloud is reachable"
 });
+// 0.117 back-office gear filters and set-gear drop notes
+Object.assign(globalThis.I18N_EN,{
+ "เสื้อ": "Armor",
+ "ทุกสาย": "All sets",
+ "เซ็ทบอส (รุ้ง)": "Boss sets (rainbow)",
+ "อาวุธตามขั้น": "Tier weapons",
+ "ชุดเริ่มต้น": "Starter kit",
+ "แบบอาชีพ": "Class look",
+ "ตามผู้เล่น ·": "Player's look ·",
+ "ทุกแบบ": "All looks",
+ "ทุกขั้น": "All tiers",
+ "สาย": "Set",
+ "ทุกช่อง": "All slots",
+ "เกรดที่จะส่ง": "Grade to send",
+ "{1} · เบี้ย {2}–{3}{4}": "{1} · Bia {2}–{3}{4}",
+ "· อุปกรณ์เซ็ทขั้น {0}: หมวก/ผ้าคลุม/รองเท้า {1}%{2} (แบบตามอาชีพผู้ฆ่า · แก้ในโค้ด)": "· Tier {0} set gear: head/garment/shoes {1}%{2} (look follows the killer's class · edit in code)",
+ "· เสื้อ": "· armor",
+ "เซ็ทบอส · กรอบรุ้ง": "Boss set · rainbow frame",
+ "เกรด": "Grade",
+ "เซ็ทบอส": "Boss set",
+ "แบบ": "Look",
+ "พบ {0} ชิ้น{1}": "{0} items found{1}",
+ "· แสดง": "· showing",
+ "ไม่พบไอเท็ม · ลองเปลี่ยนตัวกรอง": "No items · try other filters",
+ "แสดงเพิ่ม (อีก {0} ชิ้น)": "Show more ({0} left)"
+});

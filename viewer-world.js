@@ -43,7 +43,7 @@ import {createBagUI} from './bag-ui.js?v=tier167';
 import {createStatusUI} from './status-ui.js?v=tier167';
 import {createProfileUI} from './profile-ui.js?v=profile171';
 import {createRefineUI} from './refine-ui.js?v=tier167';
-import {createCraftUI} from './craft-ui.js?v=107';
+import {createCraftUI} from './craft-ui.js?v=craft176';
 import {createWeather} from './weather-fx.js?v=announce149';
 import {createMarketUI} from './market-ui.js?v=storage161';
 import {createSocialUI} from './social-ui.js?v=guild162';
@@ -225,7 +225,7 @@ try {
  $('overview').onclick=toggleOverview;
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
- worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
+ worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI,catalog});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
  createCbtEventUI({game,account,loading,autoOpen:!map.pvpArena});
  const arenaUI=createArenaUI({game,account,map,catalog,worldUI});
  createActionbar({game,bagUI,account});

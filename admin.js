@@ -9,7 +9,7 @@ import {roleById} from './assets/skills-next/catalog.js';
 // balance-data.js for the next deploy. Player data is not touched here.
 import {ITEMS,DROPS,itemDef} from './items.js?v=107';
 import {gearLook,GRADES,familyName,BOSS_SETS} from './gear-sets.js';
-import {newGearFilter,gearMatch,gearFilterHTML,bindGearFilter,lookName} from './admin-gear-filter.js';
+import {newGearFilter,gearMatch,gearFilterHTML,bindGearFilter,lookName} from './admin-gear-filter.js?v=1163';
 import {WORLD_MAP_BOSSES} from './chapter2-monsters.js';
 import {CLASSES,NOVICE,classSkills,className} from './classes.js?v=novice174';
 import {multiplayerURL} from './multiplayer-config.js?v=28';
@@ -51,7 +51,7 @@ const QUICK=[['coins',1000],['coins',10000],['hp-small',10],['mp-small',10],['hp
 const itemName=id=>itemDef(id)?.name??id;
 const pickedLook=()=>{const x=players?.find(v=>v.id===picked);return x?gearLook(x.classId,x.gender):null;};
 // graded gear is sent with the grade picked in the filter ('^1'..'^4'); everything else as is
-const gradeId=id=>itemKind==='gear'&&ITEMS[id]?.graded&&giftGear.grade?id+'^'+giftGear.grade:id;
+const gradeId=id=>itemKind==='gear'&&ITEMS[id]?.graded&&Number.isInteger(giftGear.grade)&&giftGear.grade?id+'^'+giftGear.grade:id;
 try{const s=JSON.parse(localStorage.getItem('ayo-admin-view'));if(s){tab=s.tab??tab;classId=s.classId??classId;}}catch{}
 
 // Original value (code) and the value in effect for one field.

@@ -4524,5 +4524,6 @@ Object.assign(globalThis.I18N_EN,{
  "พบ {0} ชิ้น{1}": "{0} items found{1}",
  "· แสดง": "· showing",
  "ไม่พบไอเท็ม · ลองเปลี่ยนตัวกรอง": "No items · try other filters",
- "แสดงเพิ่ม (อีก {0} ชิ้น)": "Show more ({0} left)"
+ "แสดงเพิ่ม (อีก {0} ชิ้น)": "Show more ({0} left)",
+ "รุ้ง · เซ็ทบอส": "Rainbow · boss set"
 });

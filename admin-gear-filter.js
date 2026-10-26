@@ -14,7 +14,9 @@ export function gearMatch(it,f,playerLook=null){
  if(it?.kind!=='gear')return false;
  const lk=f.look==='auto'?playerLook:f.look;
  if(lk&&lk!=='all'){if(it.look){if(it.look!==lk)return false;}else if(it.classes&&!it.classes.includes(lookClass(lk)))return false;}
- if(f.tier&&(it.set?.tier??it.tier)!==f.tier)return false;
+ // rainbow boss sets are their own grade: picking it lists them whatever the tier or line; they are Lv.80, i.e. tier 6
+ if(f.grade==='rainbow')return !!it.rainbow&&(f.slot==='all'||it.slot===f.slot);
+ if(f.tier&&(it.set?.tier??it.tier??(it.rainbow?6:0))!==f.tier)return false;
  if(f.group!=='all'&&groupOf(it)!==f.group)return false;
  return f.slot==='all'||it.slot===f.slot;
 }
@@ -26,9 +28,9 @@ export function gearFilterHTML(f,{autoName=null,grade=false}={}){
   sel('tier','ขั้น',[[0,'ทุกขั้น'],...TIERS.map((l,i)=>[i+1,'ขั้น '+(i+1)+' · Lv.'+l])])+
   sel('group','สาย',GROUPS)+
   sel('slot','ช่อง',[['all','ทุกช่อง'],...Object.entries(SLOT_NAME)])+
-  (grade?sel('grade','เกรดที่จะส่ง',GRADES.map((g,i)=>[i,g.name])):'')+`</div>`;
+  (grade?sel('grade','เกรดที่จะส่ง',[...GRADES.map((g,i)=>[i,g.name]),['rainbow','รุ้ง · เซ็ทบอส']]):'')+`</div>`;
 }
 export function bindGearFilter(root,f,onChange){
- root.querySelectorAll('[data-gf]').forEach(el=>el.onchange=()=>{const k=el.dataset.gf;f[k]=['tier','grade'].includes(k)?+el.value:el.value;onChange();});
+ root.querySelectorAll('[data-gf]').forEach(el=>el.onchange=()=>{const k=el.dataset.gf;f[k]=k==='grade'&&el.value==='rainbow'?'rainbow':['tier','grade'].includes(k)?+el.value:el.value;onChange();});
 }
 export const lookName=l=>LOOK_NAME[l]??'';

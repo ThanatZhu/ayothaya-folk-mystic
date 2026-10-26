@@ -12,6 +12,7 @@ assets/**
 !assets/skills-next/catalog.js
 !assets/skills-next/icon-regions.js
 !assets/skills-next/icon-renderer.js
+!assets/skills-next/rework-icon-map.js
 !assets/skill-polish/
 !assets/skill-polish/library-profiles.js
 !assets/skill-polish/timing.js

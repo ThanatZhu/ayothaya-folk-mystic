@@ -109,19 +109,26 @@ export function monsterHit(world,raw,rand=Math.random,monsterId=null){
 // Grid A* routes auto-chase around houses. Manual movement always overrides it.
 export function findPath(start,goal,nav=DEFAULT_NAV){
  const cell=distance(start,goal)>30?1:.5,key=(x,z)=>`${x},${z}`,startX=Math.round(start.x/cell),startZ=Math.round(start.z/cell);
- const open=[{x:startX,z:startZ,g:0,f:0,parent:null}],best=new Map([[key(startX,startZ),0]]);let end=null;
+ // 0.114.2 binary heap on (f, newest first among ties): pops in exactly the order the old sort+pop did, without
+ // re-sorting the whole open list every step (a far walk used to cost up to ~1.4 s of server time).
+ const open=[],before=(a,b)=>a.f<b.f||(a.f===b.f&&a.n>b.n);let seq=0;
+ const push=node=>{node.n=seq++;let i=open.push(node)-1;while(i){const p=(i-1)>>1;if(!before(open[i],open[p]))break;[open[i],open[p]]=[open[p],open[i]];i=p;}};
+ const pop=()=>{const top=open[0],last=open.pop();if(open.length){open[0]=last;let i=0;for(;;){const l=2*i+1,r=l+1;let m=i;if(l<open.length&&before(open[l],open[m]))m=l;if(r<open.length&&before(open[r],open[m]))m=r;if(m===i)break;[open[i],open[m]]=[open[m],open[i]];i=m;}}return top;};
+ const cells=new Map(),open_=(x,z)=>{const k=x+','+z;let v=cells.get(k);if(v===undefined)cells.set(k,v=walkable(x*cell,z*cell,.32,nav));return v;};
+ push({x:startX,z:startZ,g:0,f:0,parent:null});const best=new Map([[key(startX,startZ),0]]);let end=null;
  for(let iterations=0;open.length&&iterations<6000;iterations++){
-  open.sort((a,b)=>b.f-a.f);const cur=open.pop();
+  const cur=pop();
   if(best.get(key(cur.x,cur.z))<cur.g)continue;
   const from=cur.parent?{x:cur.x*cell,z:cur.z*cell}:start;
   if(Math.hypot(cur.x*cell-goal.x,cur.z*cell-goal.z)<.7&&walkLineClear(from,goal,nav)){end=cur;break;}
   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
    const x=cur.x+dx,z=cur.z+dz;
-   if(!walkable(x*cell,z*cell,.32,nav))continue;
-   if(!walkLineClear(from,{x:x*cell,z:z*cell},nav))continue;
-   if(dx&&dz&&(!walkable((cur.x+dx)*cell,cur.z*cell,.32,nav)||!walkable(cur.x*cell,(cur.z+dz)*cell,.32,nav)))continue;
+   // Cheap pure checks first; the swept body test is the expensive one.
+   if(!open_(x,z))continue;
+   if(dx&&dz&&(!open_(cur.x+dx,cur.z)||!open_(cur.x,cur.z+dz)))continue;
    const g=cur.g+Math.hypot(dx,dz),k=key(x,z);if(g>=(best.get(k)??Infinity))continue;
-   best.set(k,g);open.push({x,z,g,f:g+Math.hypot(x-goal.x/cell,z-goal.z/cell),parent:cur});
+   if(!walkLineClear(from,{x:x*cell,z:z*cell},nav))continue;
+   best.set(k,g);push({x,z,g,f:g+Math.hypot(x-goal.x/cell,z-goal.z/cell),parent:cur});
   }
  }
  const path=[];while(end?.parent){path.push({x:end.x*cell,z:end.z*cell});end=end.parent;}return path.reverse();

@@ -2,12 +2,16 @@ import {held} from '../ailments.js';
 import {createRouteWalker,nearestWalkable,planRoute} from '../route-walk.js';
 const validId=id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{8,80}$/.test(id);
 export function cancelWalk(p,reason='manual'){
- p.routeWalker?.cancel();if(p.walkRoute?.status==='walking')p.walkRoute={...p.walkRoute,status:'cancelled',reason};
+ p.walkQueued=null;p.routeWalker?.cancel();if(p.walkRoute?.status==='walking')p.walkRoute={...p.walkRoute,status:'cancelled',reason};
 }
-export function startWalk(p,m,runEnabled=false){
+// Shape checks only (no path work), so a queued request can be refused on the spot.
+export function checkWalk(p,m){
  if(!validId(m.id)||m.mapId!==p.room.map.id||!Number.isFinite(m.x)||!Number.isFinite(m.z)||Math.abs(m.x)>10000||Math.abs(m.z)>10000||!Number.isFinite(m.radius??.18))throw Error('invalid-walk');
  if(p.world.player.hp<=0)throw Error('defeated');
  if(m.run!==undefined&&typeof m.run!=='boolean')throw Error('invalid-walk');
+}
+export function startWalk(p,m,runEnabled=false){
+ checkWalk(p,m);
  const radius=Math.max(.12,Math.min(3,m.radius??.18)),goal={x:m.x,z:m.z},nav=p.room.map.nav,stand=nearestWalkable(goal,nav);
  if(!stand||!planRoute(p.world.player,stand,nav))throw Error('walk-blocked');
  const target=()=>{if(typeof m.npc==='string')return p.room.map.npcs?.find(n=>n.name===m.npc)??null;if(Number.isInteger(m.mob))return p.room.mobs.find(a=>a.id===m.mob&&a.hp>0)??null;return goal;};

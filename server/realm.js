@@ -1,5 +1,5 @@
 import {ARENA_MAP,arenaReservation,arenaView,arenaCommand,cleanArenaRooms,leaveArena,finishArena} from './arena-rooms166.js';
-import {startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} from './auto-walk.js';
+import {checkWalk,startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} from './auto-walk.js';
 import {normalizeAutoTarget} from '../auto-targets.js';
 import {publicBossDirectory} from './boss-directory.js';
 import {recordBossDamage,finishBossDamage} from '../boss-results.js';
@@ -61,6 +61,7 @@ export function refineAnnouncement(who,r,before,after){
  if(r.result==='broken'&&r.level+1>=REFINE_ANNOUNCE)return `💥 ${who} ตีบวก ${before} → +${r.level+1} ล้มเหลว อุปกรณ์แตก!`;
  return null;
 }
+const WALK_FREE_MS=5;
 const allowed=new Set(['arenaRooms','walkTo','walkPace','walkCancel','bossDirectory','switchChannel','storyCheck','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildSearch','guildApply','guildApplicationAnswer','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','petSkill','bountyClaim','albumDeposit','weeklyClaim','rebirth','hire','selectAlly','returnToSpawn']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
@@ -299,9 +300,12 @@ export class RealmServer{
    try{p.skills=w.roleCombat&&!w.roleCombat.legacy?upgradeRoleSkill(p.skills,p.character.classId,m.index,this.progress(p)):upgradeSkill(p.skills,p.character.classId,m.index,this.progress(p));}catch(e){return this.error(p,e.message);}
    w.skillLevels=[...p.skills[p.character.classId]];this.storyCheck(p);return true;
   }
-  if(m.type==='walkTo'){try{startWalk(p,m,this.runEnabled);return true;}catch(e){p.send({type:'walkError',id:m.id,code:e.message});return false;}}
+  // 0.114.2 route planning is the costliest command: after an expensive plan, further taps wait (newest wins) for ten
+  // times what it cost, so one client can't spend more than ~10% of the server on paths. Cheap plans never wait.
+  if(m.type==='walkTo'){try{checkWalk(p,m);}catch(e){p.send({type:'walkError',id:m.id,code:e.message});return false;}
+   if(this.now()<(p.walkAt??0)){p.walkQueued=m;return true;}return this.walkNow(p,m);}
   if(m.type==='walkPace'){try{return setWalkPace(p,m,this.runEnabled);}catch(e){p.send({type:'walkError',id:m.id,code:e.message});return false;}}
-  if(m.type==='walkCancel'){if(m.id===p.walkRoute?.id)cancelWalk(p);return true;}
+  if(m.type==='walkCancel'){if(m.id===p.walkQueued?.id)p.walkQueued=null;if(m.id===p.walkRoute?.id)cancelWalk(p);return true;}
   if(m.type==='input'){
    if(!Number.isFinite(m.x)||!Number.isFinite(m.z)||Math.abs(m.x)>1||Math.abs(m.z)>1||typeof m.attack!=='boolean'||(m.run!==undefined&&typeof m.run!=='boolean'))return this.error(p,'invalid-input');
    // The host owns the sprint gate; bare realms stay closed by default.
@@ -510,7 +514,7 @@ export class RealmServer{
   this.warTick();
   if(this.tickId%20===0)for(const p of this.peers.values())if(!p.suspended)this.storyCheck(p);
   if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
-  for(const p of this.peers.values()){if(p.suspended)continue;p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);p.world.update(dt,walkInput(p,dt),{monsters:false});p.appliedInputSeq=p.inputSeq??0;if(!p.mailMutationBusy)this.autoPotion(p);if(!p.petMutationBusy&&p.petCollection.auto&&p.world.auto){try{this.petCast(p,true);}catch{}}}
+  for(const p of this.peers.values()){if(p.suspended)continue;p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);if(p.walkQueued&&this.now()>=p.walkAt)this.walkNow(p,p.walkQueued);p.world.update(dt,walkInput(p,dt),{monsters:false});p.appliedInputSeq=p.inputSeq??0;if(!p.mailMutationBusy)this.autoPotion(p);if(!p.petMutationBusy&&p.petCollection.auto&&p.world.auto){try{this.petCast(p,true);}catch{}}}
   for(const room of this.rooms.values()){
    if(this.roleSkills)stepRoleMonsters(room.mobs,dt,id=>this.peers.get(id)?.room===room?this.peers.get(id).world:null);
    // 0.99.11 the living players of the room once per tick; each monster just takes the closest (no per-monster sort)
@@ -643,6 +647,11 @@ export class RealmServer{
    o.world.emit('stallSold',{item:m.item,count:m.count,coins:r.net,buyer:p.character.name});w.notice('ซื้อจากแผง '+o.character.name+' แล้ว');
    this.stallCommand(p,{type:'stallList'});return true;}
   return false;
+ }
+ walkNow(p,m){
+  p.walkQueued=null;const t=performance.now();
+  try{startWalk(p,m,this.runEnabled);return true;}catch(e){p.send({type:'walkError',id:m.id,code:e.message});return false;}
+  finally{const cost=performance.now()-t;p.walkAt=cost>WALK_FREE_MS?this.now()+cost*10:0;}
  }
  who(p){return {classId:p.character.classId,level:baseProgress(p.world).level,reborn:p.rebirth??0};}
  // Status + worn gear → combat numbers; cheap no-op unless level, class, stats or gear changed.
@@ -786,13 +795,15 @@ export class RealmServer{
   if(m.type==='guildApply'){
    const reject=c=>{w.emit('guildApplication',{guild:m.guild,ok:false,pending:false});return fail(c);},target=this.guilds.get(m.guild);
    if(!target||target.serverId!==p.serverId)return reject('guild-missing');
-   if(m.cancel===true){const requests=this.guildApplications(target);if(requests.some(a=>a.key===p.key)){target.applications=requests.filter(a=>a.key!==p.key);this.guildChanged(target);}w.emit('guildApplication',{guild:target.id,ok:true,pending:false});return true;}
+   // 0.114.2 each apply/cancel is a guild write: 10 at once, then one back every 6 s, so toggling can't burn the quota.
+   const now=this.now();p.guildApplyBudget=Math.min(10,(p.guildApplyBudget??10)+(now-(p.guildApplyAt??now))/6000);p.guildApplyAt=now;if(p.guildApplyBudget<1)return reject('rate-limit');
+   if(m.cancel===true){const requests=this.guildApplications(target);if(requests.some(a=>a.key===p.key)){target.applications=requests.filter(a=>a.key!==p.key);this.guildChanged(target);p.guildApplyBudget--;}w.emit('guildApplication',{guild:target.id,ok:true,pending:false});return true;}
    if(g)return reject('guild-already');if(target.members.length>=guildSeats(target))return reject('guild-full');
    const requests=this.guildApplications(target);
    if(!requests.some(a=>a.key===p.key)){
     if(requests.length>=GUILD_APPLICATION_MAX)return reject('guild-applications-full');
     if([...this.guilds.values()].filter(x=>x.serverId===p.serverId&&this.guildApplications(x).some(a=>a.key===p.key)).length>=GUILD_APPLICATION_LIMIT)return reject('guild-application-limit');
-    requests.push({id:randomUUID(),key:p.key,name:p.character.name,level:baseProgress(w).level,classId:p.character.classId,at:this.now()});target.applications=requests;this.guildChanged(target);
+    requests.push({id:randomUUID(),key:p.key,name:p.character.name,level:baseProgress(w).level,classId:p.character.classId,at:this.now()});target.applications=requests;this.guildChanged(target);p.guildApplyBudget--;
    }
    w.emit('guildApplication',{guild:target.id,ok:true,pending:true});w.notice('ส่งคำขอเข้ากิลด์ '+target.name+' แล้ว รอหัวหน้าหรือรองหัวหน้าอนุมัติ');return true;
   }

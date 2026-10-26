@@ -65,8 +65,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const walker=createRouteWalker(()=>world.nav),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),groundHit=new THREE.Vector3();
  const marker=new THREE.Mesh(new THREE.RingGeometry(.2,.3,32),new THREE.MeshBasicMaterial({color:'#f4cf7a',transparent:true,opacity:0,depthWrite:false,depthTest:false,side:THREE.DoubleSide}));
  marker.rotation.x=-Math.PI/2;marker.renderOrder=5;marker.visible=false;scene.add(marker);let markerAge=0;
- let walkJob=null,arrivalPending=null,serverWalkState=null,walkPaceSent=null,walkPredictedArrival=false,networkExpected=false;
- function cancelWalk(){const id=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null);walker.cancel();arrivalPending=null;if(id&&network?.walkSchema===1)network.command('walkCancel',{id});walkJob=null;serverWalkState=null;walkPaceSent=null;walkPredictedArrival=false;marker.visible=false;}
+ let approach=null,walkJob=null,arrivalPending=null,serverWalkState=null,walkPaceSent=null,walkPredictedArrival=false,networkExpected=false;
+ function cancelWalk(){approach=null;const id=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null);walker.cancel();arrivalPending=null;if(id&&network?.walkSchema===1)network.command('walkCancel',{id});walkJob=null;serverWalkState=null;walkPaceSent=null;walkPredictedArrival=false;marker.visible=false;}
  const wantsRun=()=>supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'));
  const listeners=new Set(); // story/quest UI listens to the same events the HUD does (offline and online)
  function walkTo(target,opts={}){
@@ -180,7 +180,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // 0.119 a pressed role skill: a single target out of reach (party friend or monster) is walked to first, then cast;
  // online the body starts on the press and the realm's cast event adopts it, instead of a round trip later.
- let approach=null,predictSerial=0;
+ let predictSerial=0;
  function roleAim(i){
   const s=Number.isInteger(i)?scaledSkill(world.skills[i],world.skillLevels?.[i]??0):null;if(!s?.roleSkillId||s.passive||!SKILL_PROFILES[s.roleSkillId])return null;
   const p=world.player;if(ROLE_SELF_KINDS.has(s.type))return {s,at:p,self:true};
@@ -189,10 +189,12 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(ROLE_FRIEND_KINDS.has(s.type)){const id=world.supportTargetId,a=id&&id!==network?.id?world.supportRoster?.find(a=>a.id===id):null;return {s,at:a??p,self:!a};}
   const m=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null;return m&&m.hp>0?{s,at:m}:null;
  }
+ // A blocked path gives up once (with the usual notice) instead of retrying into the wall.
+ const approachWalk=aim=>({radius:Math.max(.5,(aim.s.range??7)-.8),marker:false,onFail:()=>{approach=null;world.notice('ไปตรงนั้นไม่ได้');}});
  const inReach=(aim,p=world.player)=>Math.hypot(aim.at.x-p.x,aim.at.z-p.z)<=(aim.s.range??7)+.3;
  function useSkill(i){
   if(!Number.isInteger(i))return false;approach=null;const aim=roleAim(i);
-  if(aim&&!aim.self&&!inReach(aim)&&world.player.hp>0&&Math.hypot(aim.at.x-world.player.x,aim.at.z-world.player.z)<40){approach={i,until:world.time+6};walkTo({x:aim.at.x,z:aim.at.z},{radius:Math.max(.5,(aim.s.range??7)-.8),marker:false});return true;}
+  if(aim&&!aim.self&&!inReach(aim)&&world.player.hp>0&&Math.hypot(aim.at.x-world.player.x,aim.at.z-world.player.z)<40){const goal={x:aim.at.x,z:aim.at.z};if(walkTo(goal,approachWalk(aim)))approach={i,until:world.time+6,goal,tries:0};return true;}
   if(network&&aim)predictCast(i,aim);
   return world.skill(i);
  }
@@ -401,7 +403,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
-  if(approach){const aim=roleAim(approach.i);if(!aim||world.time>approach.until||p.hp<=0)approach=null;else if(inReach(aim)){const i=approach.i;cancelWalk();useSkill(i);}else if(!(walkJob||walker.active||serverWalkState?.status==='walking'))approach=null;}
+  if(approach){const aim=roleAim(approach.i);if(!aim||world.time>approach.until||p.hp<=0)approach=null;else if(inReach(aim)){const i=approach.i;cancelWalk();useSkill(i);}else{
+   // The friend or monster moved on: follow them (a few times) instead of stopping where they stood.
+   const a=approach,walking=walkJob||walker.active||serverWalkState?.status==='walking',goal={x:aim.at.x,z:aim.at.z};
+   if(Math.hypot(goal.x-a.goal.x,goal.z-a.goal.z)>1.5||!walking){if(a.tries<8&&walkTo(goal,approachWalk(aim)))approach={...a,goal,tries:a.tries+1};else approach=null;}}}
   // A press the realm refused (no cast came back): drop the predicted body and effect.
   if(roleClip?.predicted&&wall()-roleClip.predicted>Math.min(1.2,.45+netLag*3)){roleEffects.cancel(roleClip.castId);roleClip=null;castUntil=t;}
   const roleActive=roleAnimationActive(roleClip,roleEffects.time);

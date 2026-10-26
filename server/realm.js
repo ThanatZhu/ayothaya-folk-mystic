@@ -26,6 +26,7 @@ import {character,isServer,isSlot,CHANNELS,normalizeChannel} from '../realm-stat
 import {logJoin,logLeave,logChannel,logChat,logMvp,logTrade,logMarket,logGuild,logLevelUp} from './dashboard-log.js';
 import {normalizeSkills,upgradeSkill,availablePoints,SLOTS} from '../skill-progress.js';
 import {normalizeStory,storyEvent,rewardItems} from '../story-quests.js';
+import {gearLook,GRADES} from '../gear-sets.js';
 import {FRIEND_MAX,GUILD_COST,SOCIAL_ERRORS,cleanName,validGuildName,validEmblem,normalizeFriends,GUILD_HALL,DEPUTY_MAX,DONATE_MIN,DONATE_MAX,GUILD_LEVELS,guildLevel,GUILD_UPGRADES,GUILD_RITE,GUILD_GOAL,guildSeats,cleanNotice,GUILD_SEARCH_LIMIT,GUILD_APPLICATION_MAX,GUILD_APPLICATION_LIMIT,GUILD_APPLICATION_TTL} from '../social.js';
 import {claimDaily,thaiDay} from '../daily.js';
 import {normalizeAlbumState,depositAlbumCard,ALBUM_ERRORS} from '../card-album.js';
@@ -183,7 +184,9 @@ export class RealmServer{
   if(m.type==='craft'){
    if(now-(p.craftAt??-Infinity)<300)return this.itemFail(p,'craft-rate');p.craftAt=now;
    let r;try{r=craft(p.bag,m.item,m.times);}catch(e){return this.itemFail(p,e.message);}
-   this.setBag(p,r.bag);w.emit('crafted',{item:m.item,count:r.made});this.storyProgress(p,{type:'do',action:'craft'});return true;
+   this.setBag(p,r.bag);w.emit('crafted',{item:m.item,count:r.made});this.storyProgress(p,{type:'do',action:'craft'});
+   // 0.117 a rainbow boss-set piece is announced to the channel
+   if(itemDef(m.item)?.rainbow)this.announce(p.serverId,`🌈 ${p.character.name} คราฟ ${itemDef(m.item).name} สำเร็จ`);return true;
   }
   if(m.type==='duel'){if(p.room.map.id===ARENA_MAP)return this.error(p,'arena-not-ready');
    const t=this.peers.get(m.target);if(!t||t===p||t.suspended||t.room!==p.room||p.room.map.safe)return this.error(p,'duel-invalid');
@@ -504,7 +507,7 @@ export class RealmServer{
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
   const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort(),rate=expRate(this.now(),p.room.map.id)*mobXp(mob),event=activeEvent(this.now()),rolls=(mob.leader?LEADER.loot:1)*(surgeOn(this.now(),p.room.map.id)?2:1); // 0.50 event/weekend EXP + token drops
-  ids.forEach((id,i)=>{const a=this.peers.get(id),gx=1+this.guildBonus(a).exp;a.world.kills++;this.guildKill(a);if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,Math.round(split(Math.round(reward.baseXp*rate))*gx),Math.round(split(Math.round(reward.jobXp*rate))*gx)));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});a.weekly=weeklyDefeat(a.weekly,this.now(),{leader:!!mob.leader,boss:!!reward.boss});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls);loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)+this.guildBonus(a).coins));this.grantLoot(a,loot,mob);}});
+  ids.forEach((id,i)=>{const a=this.peers.get(id),gx=1+this.guildBonus(a).exp;a.world.kills++;this.guildKill(a);if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,Math.round(split(Math.round(reward.baseXp*rate))*gx),Math.round(split(Math.round(reward.jobXp*rate))*gx)));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});a.weekly=weeklyDefeat(a.weekly,this.now(),{leader:!!mob.leader,boss:!!reward.boss});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls,gearLook(a.character.classId,a.character.gender));loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)+this.guildBonus(a).coins));this.grantLoot(a,loot,mob);}});
   p.room.contributors.delete(mob.id);
   for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id){a.world.targetId=null;a.world.path=[];}}
  }
@@ -552,7 +555,7 @@ export class RealmServer{
  storyProgress(p,event){
   const r=storyEvent(p.story,event);if(!r.changed)return false;p.story=r.state;
   p.world.emit('story',{npc:event.npc??null,say:r.say??null,completed:r.completed?.title??null,story:r.state});
-  if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:rewardItems(r.reward,p.character.classId)});p.saveNow=true;}
+  if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:rewardItems(r.reward,p.character.classId,p.character.gender)});p.saveNow=true;}
   return true;
  }
  // 0.98 tutorial steps that are already true (wearing a weapon, a refined or carded piece, a class, a level, AUTO on,
@@ -876,8 +879,10 @@ export class RealmServer{
   const r=addLoot(p.bag,loot);this.setBag(p,r.bag);
   p.world.emit('loot',{coins:r.coins,items:r.added,lost:r.lost,x:at?.x??null,z:at?.z??null});
   // 0.64 a purple or gold drop from a monster is announced to the whole channel.
-  const best=at?r.added.map(i=>itemDef(i.id)).filter(d=>d?.rarity>=3).sort((a,b)=>b.rarity-a.rarity)[0]:null;
-  if(best)this.announce(p.serverId,`✦ ${p.character.name} ได้ ${best.name} [${RARITY_NAME[best.rarity]}] ที่ ${p.room.map.name}`);
+  // 0.117 graded gear: only orange and red grades (not an affix bump) are announced, with the grade's name.
+  const loud=d=>d?.graded?(d.grade??0)>=3:d?.rarity>=3;
+  const best=at?r.added.map(i=>itemDef(i.id)).filter(loud).sort((a,b)=>b.rarity-a.rarity)[0]:null;
+  if(best)this.announce(p.serverId,`✦ ${p.character.name} ได้ ${best.name} [${best.graded?GRADES[best.grade??0].name:RARITY_NAME[best.rarity]}] ที่ ${p.room.map.name}`);
 
  }
  progress(p){return {classId:p.character.classId,jobId:p.character.jobId??'',jobXp:p.world.jobXp};}

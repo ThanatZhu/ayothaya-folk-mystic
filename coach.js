@@ -45,7 +45,7 @@ export function createCoach({game,account,objective,paused=()=>false}){
  const popover=typeof el.showPopover==='function';
  const show=on=>{if(popover){if(on&&!el.matches(':popover-open'))el.showPopover();if(!on&&el.matches(':popover-open'))el.hidePopover();}el.hidden=!on;};
  tip.querySelector('button').onclick=()=>api.setOff(true);
- tip.onclick=e=>{if(e.target.closest('button'))return;const obj=objective();if(!obj)return;const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'wrap-novice';const steps=guide(obj.step,{world,weapon,walking:game.walking}).map(g=>({...g,node:document.querySelector(g.sel)}));const pick=steps.find(g=>shown(g.node));if(pick?.node)pick.node.click();};
+ tip.onclick=e=>{if(e.target.closest('button'))return;const obj=objective();if(!obj)return;const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'starter-wraps';const steps=guide(obj.step,{world,weapon,walking:game.walking}).map(g=>({...g,node:document.querySelector(g.sel)}));const pick=steps.find(g=>shown(g.node));if(pick?.node)pick.node.click();};
  let lastTop=null,lastText='',lastLayout='';
  const api={
   get off(){return off;},
@@ -53,7 +53,7 @@ export function createCoach({game,account,objective,paused=()=>false}){
   update(){
    const obj=objective();
    if(off||!obj||paused()){show(false);return;}
-   const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'wrap-novice';
+   const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'starter-wraps';
    const steps=guide(obj.step,{world,weapon,walking:game.walking}).map(g=>({...g,node:document.querySelector(g.sel)}));
    // the item's own tab is open but the item is scrolled away: bring it into view instead of pointing elsewhere
    for(const g of steps)if(g.reveal&&g.node&&!shown(g.node)&&document.querySelector(g.reveal))g.node.scrollIntoView({block:'nearest'});

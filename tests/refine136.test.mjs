@@ -8,7 +8,7 @@ import {createRefineSequence,forgePose,FORGE_DURATION,FORGE_TIMEOUT} from '../re
 import {RealmServer} from '../server/realm.js';
 import {levelStart,XP_CURVE} from '../experience.js';
 import {initialSave} from '../realm-state.js';
-const gear={weapon:'sword-iron',head:'hat-headband',armor:'vest-cotton',garment:'cloak-cotton',shoes:'shoes-woven',accessory:'ring-ruby'};
+const gear={weapon:'weapon-swordsman-one',head:'starter-headband',armor:'starter-shirt',garment:'starter-cloth',shoes:'starter-sandals',accessory:'ring-ruby'};
 const bag={coins:50000,items:{'iron-ore':50,laterite:50,'lek-lai':3,'break-guard':3}};
 
 test('every stat equipment item accepts +1 through +20 and persists through a bag/equip round trip',()=>{
@@ -40,7 +40,7 @@ test('all six slots keep per-level gains and gain item-only Tier bonuses from +5
   assert.equal(Math.round((up.def-plain.def)*100),Math.round((after.def-before.def)*100));
   for(const k of Object.keys(plain.total))assert.equal(Math.round((up.total[k]-plain.total[k])*100),Math.round(((after.bonus[k]??0)-(before.bonus[k]??0))*100));
  }
- assert.match(itemDef('ring-ruby+3').text,/DEF \+3/);assert.match(itemDef('hat-headband+3').text,/DEF \+4/);
+ assert.match(itemDef('ring-ruby+3').text,/DEF \+3/);assert.match(itemDef('starter-headband+3').text,/DEF \+4/);
  const all=deriveStats({gear:Object.fromEntries(GEAR_SLOTS.map(s=>[s,gear[s]+'+10']))});
  assert.ok(all.def>50);assert.equal(itemDef('ring-ruby+10').refineTier,2);
 });

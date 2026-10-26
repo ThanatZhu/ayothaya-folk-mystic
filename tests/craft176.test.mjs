@@ -6,15 +6,15 @@ import {RECIPES,craft} from '../crafting.js';
 import {ITEMS,BAG_SLOTS} from '../items.js';
 import {MONSTER_TYPES} from '../combat-core.js';
 const recipe=id=>RECIPES.find(r=>r.out===id);
-const bag={coins:25000,items:{'krut-sword':1,'lek-lai':4,'iron-ore':12,'straw-bundle':9}};
+const bag={coins:25000,items:{'relic-rice':15,'lek-lai':4,'iron-ore':12,'straw-bundle':9}};
 test('recipe browsing respects class, localized search, and ready-only filtering',()=>{
  const rows=craftRecipes(bag,{classId:'swordsman',group:'gear'});
- assert.ok(rows.some(r=>r.out==='krut-sword-fine'));
+ assert.ok(rows.some(r=>r.out==='weapon-swordsman-one'));
  assert.ok(rows.every(r=>!ITEMS[r.out].classes||ITEMS[r.out].classes.includes('swordsman')));
- assert.ok(!craftRecipes(bag,{classId:'mage',group:'gear'}).some(r=>r.out==='krut-sword-fine'));
- assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'ปีกครุฑ',readyOnly:true}).map(r=>r.out),['krut-sword-fine']);
- assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'KRUT-SWORD-FINE'}).map(r=>r.out),['krut-sword-fine']);
- assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'Wingblade',translate:s=>s===ITEMS['krut-sword-fine'].name?'Garuda Wingblade':s}).map(r=>r.out),['krut-sword-fine']);
+ assert.ok(!craftRecipes(bag,{classId:'mage',group:'gear'}).some(r=>r.out==='weapon-swordsman-one'));
+ assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'ทุ่งนา',readyOnly:true}).map(r=>r.out),['weapon-swordsman-one']);
+ assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'WEAPON-SWORDSMAN-ONE'}).map(r=>r.out),['weapon-swordsman-one']);
+ assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'Wingblade',translate:s=>s===ITEMS['weapon-swordsman-one'].name?'Garuda Wingblade':s}).map(r=>r.out),['weapon-swordsman-one']);
  assert.deepEqual(craftRecipes(bag,{group:'food',readyOnly:true}),[]);
 });
 test('quantity preview uses the actual multi-output recipe, costs and shortage',()=>{
@@ -23,9 +23,9 @@ test('quantity preview uses the actual multi-output recipe, costs and shortage',
  assert.deepEqual(q.needs,[{id:'straw-bundle',have:9,need:6,missing:0}]);
  assert.equal(craftQuote(bag,recipe('hp-small'),99).times,3);
  assert.equal(craftQuote(bag,recipe('hp-small'),-3).times,1);
- assert.equal(craftQuote(bag,recipe('krut-sword-fine')).cost,5050);
- const missing=craftQuote({coins:0,items:{}},recipe('krut-sword-fine'));
- assert.equal(missing.canCraft,false);assert.equal(missing.reason,'no-coins');assert.equal(missing.needs[0].missing,1);
+ assert.equal(craftQuote(bag,recipe('weapon-swordsman-one')).cost,250);
+ const missing=craftQuote({coins:0,items:{}},recipe('weapon-swordsman-one'));
+ assert.equal(missing.canCraft,false);assert.equal(missing.reason,'no-coins');assert.equal(missing.needs[0].missing,15);
  assert.deepEqual(bag,before,'preview must not consume anything');
  assert.equal(craftQuote(bag,null),null);
 });

@@ -4,6 +4,7 @@
 import {BAG_SLOTS,bagCap,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=tier167';
 import {dodgeChance,monsterHit} from './combat-formulas.js';
 import {effectiveGearStats,roundGearStat} from './refine-tiers.js';
+import {setBonuses,STAT_CAPS} from './gear-sets.js';
 
 export const STATS=['str','agi','vit','int','dex','luk'];
 export const STAT_LABEL={str:'STR',agi:'AGI',vit:'VIT',int:'INT',dex:'DEX',luk:'LUK'};
@@ -88,36 +89,44 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
  // Existing per-level gains remain. Each item then gains its own milestone multiplier (5/10/15/20%).
  const equipment=worn.map(effectiveGearStats);
  const cards=worn.map(it=>it.card&&ITEMS[it.card]?.effect).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
+ // 0.117 set bonuses and each piece's own % (gear-sets.js); caps in STAT_CAPS
+ const sets=setBonuses(worn),set=k=>sets.total[k]??0;
  const add=k=>equipment.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0)+(food?.[k]??0),S={}; // Cards, pet, food and rebirth are not multiplied by an item's Tier.
  const rebirthBonus=rebirthStatBonus(reborn);for(const k of STATS)S[k]=roundGearStat(s[k]+rebirthBonus+add(k));
  const atkStat=RANGED.has(classId)?S.dex:S.str;
  const weaponAtk=equipment.reduce((n,it)=>n+it.atk,0),weaponMatk=equipment.reduce((n,it)=>n+it.matk,0);
  // 0.103 status ATK: the main stat (STR, or DEX for ranged) plus small help from the other one and from LUK
  const sideStat=RANGED.has(classId)?S.str:S.dex;
- const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+Math.floor(sideStat/5)+Math.floor(S.luk/3)+weaponAtk)*(1+sum(e=>e.atkPct))),matk=Math.round((S.int-1)*1.5+Math.floor(S.int/7)**2+weaponMatk);
+ const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+Math.floor(sideStat/5)+Math.floor(S.luk/3)+weaponAtk)*(1+sum(e=>e.atkPct)+set('atkPct'))),matk=Math.round(((S.int-1)*1.5+Math.floor(S.int/7)**2+weaponMatk)*(1+set('matkPct')));
  const magic=MAGIC.has(classId);
  return {
   total:S,rebirthBonus,magic,atk,matk,
-  maxHp:Math.round((140+(level-1)*12)*(1+(S.vit-1)*.02)*(1+sum(e=>e.hpPct))),
+  maxHp:Math.round((140+(level-1)*12)*(1+(S.vit-1)*.02)*(1+sum(e=>e.hpPct)+set('hpPct'))),
   maxMp:Math.round((100+(level-1)*5)*(1+(S.int-1)*.02)),
-  def:roundGearStat(equipment.reduce((n,it)=>n+it.def,0)+Math.floor((S.vit-1)/2)+sum(e=>e.def)),
+  def:roundGearStat((equipment.reduce((n,it)=>n+it.def,0)+Math.floor((S.vit-1)/2)+sum(e=>e.def))*(1+set('defPct'))),
   weaponElement:worn.find(it=>it.slot==='weapon')?.element??'neutral',
   // 0.102.1 magic classes hit with their full MATK on basic attacks too (owner)
   basicBonus:magic?matk:atk,
   skillPower:1+(magic?matk:atk)/40,
   // 0.103 HIT (DEX) against monster FLEE, FLEE (AGI) against monster HIT, MDEF (INT) against magic blows;
   // flee = the dodge chance against a monster of the same level, for the status window
-  hit:level+S.dex+Math.floor(S.luk/3)+sum(e=>e.hit),fleeStat:level+S.agi+Math.floor(S.luk/5),
+  hit:level+S.dex+Math.floor(S.luk/3)+sum(e=>e.hit)+set('hit'),fleeStat:level+S.agi+Math.floor(S.luk/5),
   mdef:roundGearStat(Math.floor((S.int-1)/2)+equipment.reduce((n,it)=>n+it.mdef,0)+sum(e=>e.mdef)),
   flee:Math.min(.75,dodgeChance(level+S.agi+Math.floor(S.luk/5),monsterHit({level}),S.luk)+sum(e=>e.flee)),
-  crit:Math.min(.4,.01+(S.luk-1)*.004+sum(e=>e.crit)),
-  delay:Math.max(.5,(1-(S.agi-1)*.006-(S.dex-1)*.002)*(1-sum(e=>e.delay))),
+  crit:Math.min(STAT_CAPS.crit,.01+(S.luk-1)*.004+sum(e=>e.crit)+set('crit')),
+  delay:Math.max(.5,(1-(S.agi-1)*.006-(S.dex-1)*.002)*(1-sum(e=>e.delay)-set('aspd'))),
   // card specials: extra damage vs size/element, damage taken from an element, coin bonus
   vsSize:cards.reduce((o,e)=>{for(const k in e.vsSize??{})o[k]=(o[k]??0)+e.vsSize[k];return o;},{}),
   vsElement:cards.reduce((o,e)=>{for(const k in e.vsElement??{})o[k]=(o[k]??0)+e.vsElement[k];return o;},{}),
   resist:cards.reduce((o,e)=>{for(const k in e.resist??{})o[k]=(o[k]??0)+e.resist[k];return o;},{}),
   coinPct:sum(e=>e.coinPct),
   mpRegen:1+(S.int-1)*.02,
+  // 0.117 set stats read by combat-core / role-combat: monster DEF ignored, crit damage, skill cooldown and MP cut,
+  // damage taken cut and walk speed
+  armorPen:roundGearStat(Math.min(STAT_CAPS.armorPen,set('armorPen'))),critMult:roundGearStat(1.5+set('critDmg')),cdr:roundGearStat(Math.min(STAT_CAPS.cdr,set('cdr'))),
+  mpCut:roundGearStat(Math.min(STAT_CAPS.mpCut,set('mpCut'))),dmgReduce:roundGearStat(Math.min(STAT_CAPS.dmgReduce,set('dmgReduce'))),
+  moveSpeed:roundGearStat(Math.min(STAT_CAPS.moveSpeed,set('moveSpeed'))),
+  sets:sets.active,
  };
 }
 // Slot a card into a worn piece (permanent, like Ragnarok). The card leaves the bag.
@@ -127,7 +136,7 @@ export function insertCard(bag,gear,slot,cardId){
  if(card.slot!==slot)throw new Error('card-slot');if(worn.slots===0)throw new Error('no-card-slot');if(worn.card)throw new Error('slot-full');
  if(!b.items[cardId])throw new Error('no-item');
  b.items[cardId]--;if(!b.items[cardId])delete b.items[cardId];
- g[slot]=composeId(worn.base,worn.refine,cardId,worn.affix);return {bag:b,gear:g};
+ g[slot]=composeId(worn.base,worn.refine,cardId,worn.affix,worn.grade);return {bag:b,gear:g};
 }
 // Monster hit after defence: hyperbolic so defence never makes you immune.
 export const incomingDamage=(raw,def)=>Math.max(1,Math.round(raw*100/(100+def*4)));

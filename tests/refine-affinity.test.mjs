@@ -9,27 +9,27 @@ import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 
 test('refined ids resolve, keep their level in the bag, and are worth more', () => {
- assert.equal(itemDef('sword-iron+5').refine,5);assert.equal(itemDef('sword-iron+5').name,'ดาบเหล็กกล้า +5');
- assert.equal(itemDef('ring-ruby+3').refine,3,'accessories can now be refined');assert.equal(itemDef('sword-iron+21'),null);
- assert.deepEqual(normalizeBag({items:{'sword-iron+5':1,'hp-small+2':1}}).items,{'sword-iron+5':1});
- assert.ok(itemDef('sword-iron+5').sell>itemDef('sword-iron').sell);
- const r=unequipGear({items:{}},{weapon:'sword-iron+5'},'weapon');assert.equal(r.bag.items['sword-iron+5'],1,'unequip keeps the refine');
- assert.equal(equipGear(r.bag,r.gear,'sword-iron+5',{classId:'swordsman',level:1}).gear.weapon,'sword-iron+5');
- assert.equal(sell({items:{'sword-iron+5':1}},'sword-iron+5').coins,itemDef('sword-iron+5').sell);
+ assert.equal(itemDef('weapon-swordsman-one+5').refine,5);assert.equal(itemDef('weapon-swordsman-one+5').name,'ดาบทุ่งนา +5');
+ assert.equal(itemDef('ring-ruby+3').refine,3,'accessories can now be refined');assert.equal(itemDef('weapon-swordsman-one+21'),null);
+ assert.deepEqual(normalizeBag({items:{'weapon-swordsman-one+5':1,'hp-small+2':1}}).items,{'weapon-swordsman-one+5':1});
+ assert.ok(itemDef('weapon-swordsman-one+5').sell>itemDef('weapon-swordsman-one').sell);
+ const r=unequipGear({items:{}},{weapon:'weapon-swordsman-one+5'},'weapon');assert.equal(r.bag.items['weapon-swordsman-one+5'],1,'unequip keeps the refine');
+ assert.equal(equipGear(r.bag,r.gear,'weapon-swordsman-one+5',{classId:'swordsman',level:10}).gear.weapon,'weapon-swordsman-one+5');
+ assert.equal(sell({items:{'weapon-swordsman-one+5':1}},'weapon-swordsman-one+5').coins,itemDef('weapon-swordsman-one+5').sell);
 });
 
 test('refining spends coins + ore, +1..+4 never break, a failure from +5 destroys the piece', () => {
  const bag={coins:10000,items:{'iron-ore':20,'laterite':5,'lek-lai':1}};
- let r=refineGear(bag,{weapon:'sword-iron'},'weapon',{rand:()=>.999});
- assert.equal(r.result,'success');assert.equal(r.gear.weapon,'sword-iron+1');assert.equal(r.bag.coins,10000-refineCost(1));assert.equal(r.bag.items['iron-ore'],19);
- r=refineGear(r.bag,{weapon:'sword-iron+4'},'weapon',{rand:()=>.95});assert.equal(r.result,'broken');assert.equal(r.gear.weapon,null);
- r=refineGear(bag,{weapon:'sword-iron+4'},'weapon',{lekLai:true,rand:()=>.95});assert.equal(r.result,'success','lek-lai lifts 90% to 100%');assert.equal(r.bag.items['lek-lai'],undefined);
+ let r=refineGear(bag,{weapon:'weapon-swordsman-one'},'weapon',{rand:()=>.999});
+ assert.equal(r.result,'success');assert.equal(r.gear.weapon,'weapon-swordsman-one+1');assert.equal(r.bag.coins,10000-refineCost(1));assert.equal(r.bag.items['iron-ore'],19);
+ r=refineGear(r.bag,{weapon:'weapon-swordsman-one+4'},'weapon',{rand:()=>.95});assert.equal(r.result,'broken');assert.equal(r.gear.weapon,null);
+ r=refineGear(bag,{weapon:'weapon-swordsman-one+4'},'weapon',{lekLai:true,rand:()=>.95});assert.equal(r.result,'success','lek-lai lifts 90% to 100%');assert.equal(r.bag.items['lek-lai'],undefined);
  assert.equal(refineGear(bag,{accessory:'ring-ruby'},'accessory',{rand:()=>0}).gear.accessory,'ring-ruby+1');
- assert.throws(()=>refineGear(bag,{weapon:'sword-iron+20'},'weapon'),/refine-max/);
- assert.throws(()=>refineGear({coins:10,items:{'iron-ore':1}},{weapon:'sword-iron'},'weapon'),/no-coins/);
- assert.throws(()=>refineGear({coins:9999,items:{}},{armor:'vest-cotton'},'armor'),/no-ore/);
+ assert.throws(()=>refineGear(bag,{weapon:'weapon-swordsman-one+20'},'weapon'),/refine-max/);
+ assert.throws(()=>refineGear({coins:10,items:{'iron-ore':1}},{weapon:'weapon-swordsman-one'},'weapon'),/no-coins/);
+ assert.throws(()=>refineGear({coins:9999,items:{}},{armor:'starter-shirt'},'armor'),/no-ore/);
  assert.deepEqual(REFINE_RATE.slice(0,4),[1,1,1,1]);
- const plain=deriveStats({level:10,classId:'swordsman',gear:{weapon:'sword-iron',armor:'vest-cotton'}}),up=deriveStats({level:10,classId:'swordsman',gear:{weapon:'sword-iron+7',armor:'vest-cotton+3'}});
+ const plain=deriveStats({level:10,classId:'swordsman',gear:{weapon:'weapon-swordsman-one',armor:'starter-shirt'}}),up=deriveStats({level:10,classId:'swordsman',gear:{weapon:'weapon-swordsman-one+7',armor:'starter-shirt+3'}});
  assert.ok(up.atk>=plain.atk+14&&up.def===plain.def+3);
 });
 
@@ -49,14 +49,14 @@ test('server: refining only at the forge, rolls, saves the refined id', () => {
  const nav={zones:[{x:-40,z:-40,w:80,d:80}],obstacles:[],props:[]};
  const map={id:'ayutthaya',safe:true,nav,spawn:{x:0,z:0},mobs:[],portals:[],npcs:[{name:'ครูแสนดาบ',x:5,z:0,text:'-'},{name:'แม่บัว',x:-5,z:0,text:'-'}]};
  let time=1e4;const realm=new RealmServer({catalog:{capital:'ayutthaya',maps:[map]},now:()=>time});
- const record={character:{name:'tester',gender:'male',classId:'swordsman'},state:initialSave(),bag:{coins:5000,items:{'iron-ore':3}},gear:{weapon:'sword-iron'}};
+ const record={character:{name:'tester',gender:'male',classId:'swordsman'},state:initialSave(),bag:{coins:5000,items:{laterite:3}},gear:{armor:'starter-shirt'}};
  const peer=realm.join({uid:'u',serverId:'server-1',slotId:'slot-1',record,send:()=>{}});
  const send=(type,data)=>{time+=1000;return realm.receive(peer.id,{type,seq:peer.seq+1,...data});};
  Object.assign(peer.world.player,{x:-4,z:0});
- assert.equal(send('refine',{slot:'weapon',npc:'แม่บัว'}),false,'not a forge');
+ assert.equal(send('refine',{slot:'armor',npc:'แม่บัว'}),false,'not a forge');
  Object.assign(peer.world.player,{x:4,z:0});
- assert.equal(send('refine',{slot:'weapon',npc:'ครูแสนดาบ'}),true);
- assert.equal(realm.record(peer,record).gear.weapon,'sword-iron+1','+1 is always safe');
- assert.equal(realm.record(peer,record).bag.items['iron-ore'],2);
+ assert.equal(send('refine',{slot:'armor',npc:'ครูแสนดาบ'}),true);
+ assert.equal(realm.record(peer,record).gear.armor,'starter-shirt+1','+1 is always safe');
+ assert.equal(realm.record(peer,record).bag.items.laterite,2);
  assert.ok(peer.world.events.some(e=>e.type==='refined'&&e.result==='success'));
 });

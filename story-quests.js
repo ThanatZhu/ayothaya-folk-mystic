@@ -3,6 +3,7 @@
 // Shared by the client (offline guests + UI) and the realm server (authoritative online progress and rewards).
 // Progress state: {v, quest: index of the current quest, step: index inside it, count: kills toward a defeat step, done}.
 
+import {WEAPON_CLASSES,weaponId,pieceId,gearLook} from './gear-sets.js';
 export const STORY_TITLE='บทที่ 1 · ประทีปที่ดับพร้อมกัน';
 export const STORY_VERSION=3; // v3 removes t13; v2 progress is mapped below instead of restarting the story.
 
@@ -17,7 +18,7 @@ export const STORY=[
   {type:'talk',npc:'ลุงเรือง',mapId:'ayutthaya',hint:'คุยกับลุงเรืองที่ท่าน้ำ',how:'แตะชื่อ NPC ที่มีเครื่องหมาย ! หรือกด ▶ เดินไป ให้เดินไปเอง',say:'เจ้ามาถึงในคืนแปลกเสียด้วย ประทีปทั้งเมืองดับพร้อมกัน ทั้งที่ลมยังนิ่ง ก่อนออกไปไหน ไปรับอาวุธจากครูแสนดาบก่อนเถิด'},
   {type:'talk',npc:'ครูแสนดาบ',mapId:'ayutthaya',hint:'รับอาวุธจากครูแสนดาบ',how:'ครูแสนดาบอยู่ที่โรงตีอาวุธในเมือง',say:'ผู้ฝึกตนหน้าใหม่สินะ รับอาวุธติดมือไปก่อน ถือให้มั่นแล้วค่อยไปพบขุนอินทร์'},
  ]},
- {id:'t2',title:'ถืออาวุธให้มั่น',reward:{baseXp:20,jobXp:10,coins:50,items:[{id:'vest-cotton',count:1}]},steps:[
+ {id:'t2',title:'ถืออาวุธให้มั่น',reward:{baseXp:20,jobXp:10,coins:50,items:[{id:'starter-shirt',count:1}]},steps:[
   {type:'do',action:'equip',hint:'สวมอาวุธที่ได้จากครูแสนดาบ',how:'กด กระเป๋า → แตะอาวุธ → กด สวมใส่ (รางวัลถัดไปเป็นเสื้อเกราะ ใส่แบบเดียวกันได้เลย)'},
  ]},
  {id:'t3',title:'สายใยขวัญเส้นแรก',reward:{baseXp:34,jobXp:19,coins:60,items:[{id:'mp-small',count:3}]},steps:[
@@ -90,7 +91,7 @@ export const STORY=[
   {type:'defeat',monster:'bog-lantern',count:4,mapId:'lotus-marsh',hint:'ดับโคมผีบึง',how:'ถอยออกจากวงแดงก่อนมันระเบิด'},
   {type:'talk',npc:'ยายบัวผัน',mapId:'lotus-marsh',hint:'บอกยายบัวผัน',say:'โคมดับแล้ว แต่ต้นเหตุยังอยู่ พญาวานรตัวนั้นขโมยประทีปไปซ่อนไว้กลางบึง'},
  ]},
- {id:'t21',chapter:C2,title:'พญาวานรบึง',reward:{baseXp:290,jobXp:160,coins:2500,items:[{id:'vest-chain',count:1}]},steps:[
+ {id:'t21',chapter:C2,title:'พญาวานรบึง',reward:{baseXp:290,jobXp:160,coins:2500,items:[{id:'@armor',count:1}]},steps:[
   {type:'defeat',monster:'marsh-ape',count:1,mapId:'lotus-marsh',hint:'ล้มพญาวานรบึง'},
   {type:'talk',npc:'ขุนอินทร์',mapId:'ayutthaya',hint:'นำประทีปกลับไปให้ขุนอินทร์',say:'ประทีปดวงสุดท้ายกลับมาแล้ว อยุธยาติดค้างบุญคุณเจ้าอีกครั้ง คนเก่งอย่างเจ้าควรมีพวกพ้องนะ'},
  ]},
@@ -102,9 +103,10 @@ export const STORY=[
  ]},
 ];
 
-// Starter weapon per class for '@weapon' rewards (novice gets the hand wraps; a new class gets its own weapon).
-export const STARTER_WEAPON={novice:'wrap-novice',swordsman:'sword-iron',lancer:'spear-bamboo',hunter:'bow-bamboo',boxer:'gloves-hemp',rogue:'daggers-twin',shaman:'staff-wan',acolyte:'beads-wood'};
-export const rewardItems=(reward,classId)=>(reward?.items??[]).map(i=>i.id==='@weapon'?{...i,id:STARTER_WEAPON[classId]??'wrap-novice'}:i);
+// Starter weapon per class for '@weapon' rewards (novice gets the hand wraps; a new class gets its tier-1 weapon).
+// 0.117 '@armor' is the tier-2 Diamond Wall armor drawn for the player's look (acolyte: monk or nun by gender).
+export const STARTER_WEAPON={novice:'starter-wraps',...Object.fromEntries(WEAPON_CLASSES.map(([c])=>[c,weaponId(c,1)]))};
+export const rewardItems=(reward,classId,gender)=>(reward?.items??[]).map(i=>i.id==='@weapon'?{...i,id:STARTER_WEAPON[classId]??'starter-wraps'}:i.id==='@armor'?{...i,id:pieceId('wall','armor',gearLook(classId,gender)??'swordsman',2)}:i);
 
 export function normalizeStory(state){
  const s=state&&typeof state==='object'&&[2,STORY_VERSION].includes(state.v)?state:{};

@@ -31,13 +31,13 @@ test('story talk only counts next to the right NPC, then pays the quest reward a
  Object.assign(peer.world.player,{x:-9,z:0});
  assert.equal(send('questTalk',{npc:'ครูแสนดาบ'}),true);
  assert.ok(peer.world.baseXp>xp,'quest reward paid');
- assert.equal(peer.bag.items['wrap-novice'],1,'the starter weapon for this class');
+ assert.equal(peer.bag.items['starter-wraps'],1,'the starter weapon for this class');
  assert.equal(realm.snapshot(peer).self.story.quest,1);
  assert.deepEqual(realm.record(peer,record).story,{v:3,quest:1,step:0,count:0,done:false});
  assert.ok(peer.world.events.some(e=>e.type==='story'&&e.completed==='คืนที่ประทีปดับ'));
  // the next quest teaches equipping: wearing the weapon finishes it on the next check and pays the armor
- assert.equal(send('equip',{item:'wrap-novice'}),true);for(let i=0;i<20;i++)realm.step(.05);
- assert.equal(realm.snapshot(peer).self.story.quest,2);assert.equal(peer.bag.items['vest-cotton'],1);
+ assert.equal(send('equip',{item:'starter-wraps'}),true);for(let i=0;i<20;i++)realm.step(.05);
+ assert.equal(realm.snapshot(peer).self.story.quest,2);assert.equal(peer.bag.items['starter-shirt'],1);
 });
 
 test('entering a map completes an "enter" step; kills count toward a defeat step on the server', () => {

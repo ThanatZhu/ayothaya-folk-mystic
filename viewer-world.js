@@ -60,7 +60,7 @@ import {createHud63} from './hud-63.js?v=combat151';
 import {bindRenderLifecycle} from './render-lifecycle.js';
 import {resolveMap} from './world-state.js?v=quest173';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=light159';
-import {createRoofCutaway} from './roof-cutaway.js?v=106.1-lablae';
+import {createRoofCutaway} from './roof-cutaway.js?v=maps179';
 import {createLandscapeGuard} from './mobile-layout.js?v=mobile2';
 import {prepareCloud} from './cloud-save.js?v=arena166';
 import {captureSave,applySave} from './save-state.js?v=101.5';
@@ -75,7 +75,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=maps178');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps179');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);
@@ -118,7 +118,7 @@ try {
  const capitalLook=createCapitalLook({map,atlas:capitalAtlas,frame});tiles.roof=capitalLook.roof;
  // Painted look: smooth the tiled building textures instead of hard pixel edges.
  for(const t of Object.values(tiles)){t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.anisotropy=4;t.needsUpdate=true;}
- const sceneMotion=map.scene?prepareSceneV2({scene,model:gltf.scene,map}):null,roofCut=createRoofCutaway(gltf.scene,{minFloor:map.id==='lablae'?.3:1});
+ const sceneMotion=map.scene?prepareSceneV2({scene,model:gltf.scene,map}):null,roofCut=createRoofCutaway(gltf.scene,{minFloor:['lablae','bamboo-grove'].includes(map.id)?.3:1,radius:map.id==='bamboo-grove'?5.2:3.8});
  if(!map.scene)gltf.scene.traverse(o=>{if(o.isMesh){if(o.name.startsWith('Living_canopy')||o.name.startsWith('Living canopy')||o.name.startsWith('Market_pottery')||o.name.startsWith('Market pottery'))o.visible=false;o.castShadow=!/Water|River$|River_|Terrain|terrain|ground19|soil|fragment|Garden_canal/.test(o.name);o.receiveShadow=true;const name=o.material.name.replace(/\.\d+$/,''),colors=o.geometry.attributes.color,cacheKey=name+(colors?'|ao':'');
   // Blender-baked ambient occlusion (bake_building_ao.py) arrives as vertex colours; ease it so under-floor areas stay readable.
   if(colors&&!o.geometry.userData.aoEased){for(let i=0;i<colors.count;i++)for(let c=0;c<3;c++)colors.setComponent(i,c,1-(1-colors.getComponent(i,c))*.78);colors.needsUpdate=true;o.geometry.userData.aoEased=true;}

@@ -22427,7 +22427,7 @@
           ]
         }
       ],
-      "scene": "maps/v3/ayutthaya.glb",
+      "scene": "maps/v7/ayutthaya.glb",
       "decor": [],
       "layoutRevision": "capital-v3-0.101"
     },
@@ -22583,31 +22583,31 @@
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafiiiiifaaaaaaaaaaaaaaaaaaaafii.iifaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafiiiiifaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafii.iifaaaaaaaaaaaaaaaaaaaaaa.fffffffffffffffffffffffffffffffffffeaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaallaaaaaa.faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafeaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaa...........................................aaa...aaaaaaaaaaaaaaaaaaaaaaaa.faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafdaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafdaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafeaaaaaaaa.aaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.eaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaefaaaaaaaf..aaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.eaaaaaaaaaaafadaaaaffeaaaaaaaaaaaafeaaaaaaaaeaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...................................faaaaa...aaaa..aaaaaaaaaaaaaaaaaa.eaaaaaaaaaaaffffffffaffffffffffffffaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaia.eaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaa.aaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faa.la...aaaaaaaaaaaaaaaaaaaaaaaa.eaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaffaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaa.a.aaaaaaf...........ffff..ffffffff.ff.ffff.ffal.aa...aaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaa.aaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaffaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa.aaa",
-            "aaaaaaaaaaaaaaf...................................faaaaa...aa..aaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafeaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aa...aaaaaaaaaaaaaaaaaaa.daaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aa..aaaaaaaaaaaaaaaaaaaa.daaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.daaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.eaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaa.aaaaaa",
-            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaa.aaaaaaa",
-            "aaaaaaaaahaaaaf...................................faa.aa...aaaaaaaaaaaaaaaaaaaa.....faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaf.gaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaa.....eaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaa.aaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaa.....eaaaaaaaaaaaefaaaaaaaaaaaaaaaaaaaadfaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaa.....faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaa.....faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaa.aaaaa",
-            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.faaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaallaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafeaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaa...........................................aaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafdaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafdaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafeaaaaaaaa.aaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaefaaaaaaaf..aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafadaaaaffeaaaaaaaaaaaafeaaaaaaaaeaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...................................faaaaa...aaaa..aaaaaaaaaaaaaaaaaa...aaaaaaaaaaffffffffaffffffffffffffaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaia...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaa.aaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faa.la...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaffaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaa.a.aaaaaaf...........ffff..ffffffff.ff.ffff.ffal.aa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaa.aaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaffaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaa.aaa",
+            "aaaaaaaaaaaaaaf...................................faaaaa...aa..aaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafeaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aa...aaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aa..aaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaa.aaaaaaa",
+            "aaaaaaaaahaaaaf...................................faa.aa...aaaaaaaaaaaaaaaaaaaa.......aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaf.gaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaa.......aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaa.aaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaa.......aaaaaaaaaaefaaaaaaaaaaaaaaaaaaaadfaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...................................faaaaa...aaaaaaaaaaaaaaaaaaaa.......aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaa.......aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaa.aaaaa",
+            "aaaaaaaaaaaaaaf...........f.......................faaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaeeaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaafffffffffffffffffffffffffffffffffffffaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa.fffffffffffffffffffffffffffffffffffeaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -22959,7 +22959,7 @@
           "z": -30
         }
       ],
-      "scene": "maps/v5/rice-fields.glb",
+      "scene": "maps/v7/rice-fields.glb",
       "packs": true,
       "levelBand": [
         1,
@@ -23527,7 +23527,7 @@
           "z": -34
         }
       ],
-      "scene": "maps/v5/old-orchard.glb",
+      "scene": "maps/v7/old-orchard.glb",
       "packs": true,
       "levelBand": [
         10,
@@ -23962,7 +23962,7 @@
           "z": -26
         }
       ],
-      "scene": "maps/v5/moonlit-mill.glb",
+      "scene": "maps/v7/moonlit-mill.glb",
       "packs": true,
       "levelBand": [
         20,
@@ -24303,7 +24303,7 @@
         }
       ],
       "instance": true,
-      "scene": "maps/v5/mill-cellar.glb"
+      "scene": "maps/v7/mill-cellar.glb"
     },
     {
       "id": "lotus-marsh",

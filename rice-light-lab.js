@@ -71,7 +71,7 @@ function draw(dt){controls.update();if(!paused)time+=dt;
 try{
  const [catalog,gltf,art]=await Promise.all([
   fetch('./maps/world.json?v=world125').then(r=>{if(!r.ok)throw Error('map '+r.status);return r.json();}),
-  new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./maps/v5/rice-fields.glb?v=62'),
+  new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./maps/v7/rice-fields.glb?v=maps178'),
   new THREE.TextureLoader().loadAsync('./assets/classes/novice-18.png')
  ]);
  const map=catalog.maps.find(m=>m.id==='rice-fields');

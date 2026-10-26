@@ -56,8 +56,8 @@
       "id": "kailash-peak",
       "name": "ยอดเขาไกรลาส",
       "scene": "maps/v7/kailash-peak.glb",
-      "bytes": 1363800,
-      "sha256": "2f1b2331b3a8e4c0385a6593133ee4a5e3e0e79b5fa0bd4afaef696c24a09bac",
+      "bytes": 1365860,
+      "sha256": "cec824fc9edb50a0aaf52b923d1a068b9f351518b42ebda5ade2712ae00bf2ea",
       "source": "kailash-v3",
       "triangles": 60540,
       "realism": "maps-v7"

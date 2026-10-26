@@ -26,4 +26,5 @@ for(const directory of ['assets','maps','vendor']){
 for(const name of ['index.html','game.html','lobby.js','viewer-world.js','firebase-config.js','maps/world.json','vendor/build/three.module.js']){
  if(!(await stat(path.join(output,name))).isFile())throw new Error('Missing runtime file: '+name);
 }
+await import('./scripts/build-asset-index180.mjs');
 console.log('Vercel static game ready in dist/');

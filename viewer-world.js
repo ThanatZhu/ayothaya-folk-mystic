@@ -52,7 +52,7 @@ import {createPetUI} from './pet-ui.js?v=mail150';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=quest173';
 import {createLifeNPC} from './life-npc.js?v=arena166';
-import {createFeedback} from './feedback.js?v=compact-notice1';
+import {createFeedback} from './feedback.js?v=audio180';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=podium153';
 import {createCbtEventUI} from './cbt-event-ui.js?v=cbt172';
 import {createMarketBoardUI} from './market-board-ui.js?v=shops155';
@@ -60,7 +60,7 @@ import {createHud63} from './hud-63.js?v=combat151';
 import {bindRenderLifecycle} from './render-lifecycle.js';
 import {resolveMap} from './world-state.js?v=quest173';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=light159';
-import {createRoofCutaway} from './roof-cutaway.js?v=maps179';
+import {createRoofCutaway} from './roof-cutaway.js?v=maps180';
 import {createLandscapeGuard} from './mobile-layout.js?v=mobile2';
 import {prepareCloud} from './cloud-save.js?v=arena166';
 import {captureSave,applySave} from './save-state.js?v=101.5';
@@ -75,7 +75,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=maps179');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps180');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);

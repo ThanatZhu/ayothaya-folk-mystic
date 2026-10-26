@@ -12,3 +12,11 @@ test('a disconnected background route keeps its lease, resumes, and saves the ar
  try{let {ws,welcome}=await join();ws.send(JSON.stringify({type:'walkTo',id:'background-route-149',mapId:map.id,x:10,z:15,radius:.3,seq:1}));await message(ws,m=>m.type==='snapshot'&&m.self.walkRoute?.status==='walking');const p=host.realm.peers.get(welcome.id),before=p.world.player.x;const closed=new Promise(r=>ws.once('close',r));ws.close();await closed;await new Promise(r=>setTimeout(r,450));assert.equal(!!p.suspended,false);assert.ok(p.world.player.x>before);({ws,welcome}=await join());assert.equal(welcome.snapshot.self.walkRoute.id,'background-route-149');assert.equal(welcome.snapshot.self.walkRoute.status,'walking');const closedAgain=new Promise(r=>ws.once('close',r));ws.close();await closedAgain;for(let i=0;i<80&&(!p.suspended||store.rows.get(c.uid).walkRoute);i++)await new Promise(r=>setTimeout(r,100));assert.equal(p.walkRoute.status,'arrived');assert.ok(Math.hypot(store.rows.get(c.uid).state.position.x-10,store.rows.get(c.uid).state.position.z-15)<.5);assert.equal(store.rows.get(c.uid).walkRoute,null);
  }finally{for(const ws of sockets)ws.terminate();await host.close();}
 });
+test('0.114.2 taps after an expensive plan queue newest-first; steering or cancel drops the queue',()=>{
+ const t=setup();t.p.walkAt=1000+500;
+ assert.equal(t.send('walkTo',{id:'queued-route-one',mapId:map.id,x:16,z:3}),true);assert.equal(t.send('walkTo',{id:'queued-route-two',mapId:map.id,x:16,z:-3}),true);
+ assert.equal(t.p.walkRoute,undefined);assert.equal(t.send('walkTo',{id:'bad',mapId:map.id,x:1,z:1}),false);
+ t.step(12);assert.equal(t.p.walkRoute.id,'queued-route-two');assert.equal(t.p.walkQueued,null);
+ t.p.walkAt=Infinity;t.send('walkTo',{id:'queued-route-three',mapId:map.id,x:4,z:4});t.send('input',{x:-1,z:0,attack:false});assert.equal(t.p.walkQueued,null);
+ t.send('walkTo',{id:'queued-route-four',mapId:map.id,x:4,z:4});t.send('walkCancel',{id:'queued-route-four'});assert.equal(t.p.walkQueued,null);
+});

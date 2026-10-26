@@ -46,3 +46,9 @@ test('offline applications survive a realm reload; approval cannot create member
  const p2=add('อีกคน');send(p2,'guildApply',{guild:other.id});const stale=structuredClone(other.applications[0]);send(p2,'guildCreate',{name:'สร้างเอง',emblem:2});assert.equal(other.applications.length,0);
  other.applications=[stale];const leader2=[...r.peers.values()].find(x=>x.key===other.leader);assert.equal(send(leader2,'guildApplicationAnswer',{application:stale.id,accept:true}),false);assert.ok(!other.members.some(x=>x.key===p2.key));
 });
+test('0.114.2 apply/cancel toggling is capped at 10 guild writes, then one every 6 s',()=>{
+ const {add,send,create,writes,advance}=setup(),[,g]=create('ช้างศึก'),p=add('คนกดรัว');const before=writes.length;
+ for(let i=0;i<10;i++)assert.equal(send(p,'guildApply',{guild:g.id,cancel:i%2===1}),true);
+ assert.equal(send(p,'guildApply',{guild:g.id}),false);assert.equal(writes.length-before,10);
+ advance(6000);assert.equal(send(p,'guildApply',{guild:g.id}),true);
+});

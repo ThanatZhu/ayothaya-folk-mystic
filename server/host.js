@@ -238,18 +238,30 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   }finally{mutationDone?.();}
  });
  const wss=new WebSocketServer({noServer:true,maxPayload:4096,perMessageDeflate:true});
+ // 0.114.2 per-address socket caps, so one machine can't hold the whole server's slots. DigitalOcean's edge sets
+ // do-connecting-ip (clients can't forge it through the proxy); without it we're local and the socket address is real.
+ const IP_PENDING=10,IP_ALL=60,perIp=new Map(),clientIp=req=>String(req.headers['do-connecting-ip']||req.socket.remoteAddress||'?');
  server.on('upgrade',(req,socket,head)=>{
-  if(closing||req.url!=='/realtime'||!allowedOrigin(req.headers.origin)||wss.clients.size>=capacity*4+20){socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');socket.destroy();return;}
+  const ip=clientIp(req),ipUse=perIp.get(ip);
+  if(closing||req.url!=='/realtime'||!allowedOrigin(req.headers.origin)||wss.clients.size>=capacity*4+20||ipUse?.pending>=IP_PENDING||ipUse?.all>=IP_ALL){socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');socket.destroy();return;}
   if(!authoritative()||reset?.maintenance){socket.write('HTTP/1.1 503 Service Unavailable\r\nRetry-After: 5\r\n\r\n');socket.destroy();return;}
+  // Counted here, not on 'connection', so a burst of simultaneous upgrades can't all slip past the check.
+  const use=ipUse??{all:0,pending:0};use.all++;use.pending++;perIp.set(ip,use);let pending=true;
+  req.settled=()=>{if(pending){pending=false;use.pending--;}};socket.once('close',()=>{req.settled();if(!--use.all&&perIp.get(ip)===use)perIp.delete(ip);});
   wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req));
  });
  // 0.97.2 a save that hangs fails after 15 s, so a session can never stay busy (and drop commands) forever.
  const checkpoint=(s,release=false)=>{s.queue=s.queue.catch(()=>{}).then(async()=>{if(s.released)return;const record=s.travelRecord??realm.record(s.peer,s.lease.record);let timer;await Promise.race([store.checkpoint(s.lease,record,{release}),new Promise((_,no)=>{timer=setTimeout(()=>no(new Error('save-timeout')),15000);})]).finally(()=>clearTimeout(timer));s.autoSavedAt=Date.now();s.savedJson=JSON.stringify(record);if(release)s.released=true;});return s.queue;};
  // A background destination remains an authoritative, leased simulation until arrival.
  const finishBackground=s=>{if(s.finishingBackground)return s.finishingBackground;s.closing=true;realm.suspend(s.peer.id);s.finishingBackground=checkpoint(s,true).catch(e=>console.error('background-walk-save',e.message)).finally(()=>{if(sessions.get(s.peer.id)===s)sessions.delete(s.peer.id);s.onClosed?.();});return s.finishingBackground;};
+ // 0.114.2 durable-write budget per session (the Spark plan allows ~20k writes a day for everyone): 30 at once, then
+ // one back every 6 s. Player-triggered immediate saves spend it; the regular autosave does not.
+ const WRITE_BURST=30,WRITE_REFILL=6000;
+ const spendWrite=s=>{const now=Date.now();s.writeBudget=Math.min(WRITE_BURST,(s.writeBudget??WRITE_BURST)+(now-(s.writeBudgetAt??now))/WRITE_REFILL);s.writeBudgetAt=now;if(s.writeBudget<1)return false;s.writeBudget--;return true;};
  async function persistPets(s,action){
   if(s.trainingBusy||s.closing)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;
   const job=s.queue.catch(()=>{}).then(async()=>{
+   if(!spendWrite(s))throw Error('rate-limit');
    const result=petAccountAction(s.peer.petCollection,action,()=>randomInt(1000000000)/1000000000);if(result.replayed)return result;
    const record=realm.record(s.peer,s.lease.record);record.petCollection=result.state;
    let timer;try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('save-timeout')),15000);})]);}
@@ -259,14 +271,17 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  }
  async function persistMail(s,apply){
   if(s.trainingBusy||s.closing||s.peer.trade)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;s.peer.mailMutationBusy=true;
-  const job=s.queue.catch(()=>{}).then(async()=>{const record=apply(realm.record(s.peer,s.lease.record));let timer;
+  const job=s.queue.catch(()=>{}).then(async()=>{const before=realm.record(s.peer,s.lease.record),same=JSON.stringify(before),record=apply(before);let timer;
+   if(JSON.stringify(record)===same)return record; // re-reading a read mail, deleting nothing: no write
+   if(!spendWrite(s))throw Error('rate-limit');
    try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,no)=>{timer=setTimeout(()=>no(Error('save-timeout')),15000);})]);}
    catch(error){s.closing=true;s.released=true;realm.leave(s.peer.id);s.ws.close(4010,'save-failed');throw error;}finally{clearTimeout(timer);}
    Object.assign(s.peer.character,record.character);s.peer.identityReceipts=record.identityReceipts??s.peer.identityReceipts;s.peer.mailbox=record.mailbox;realm.setBag(s.peer,record.bag);s.peer.petCollection=record.petCollection??s.peer.petCollection;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return record;
   });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;s.peer.mailMutationBusy=false;if(!s.closing){for(const gift of s.peer.mailLootQueue??[])realm.grantLoot(s.peer,gift.loot,gift.at);}s.peer.mailLootQueue=[];}
  }
- wss.on('connection',ws=>{
+ wss.on('connection',(ws,req)=>{
   let session=null,authenticating=false;ws.alive=true;
+  const settled=req.settled;
   const send=data=>{if(ws.readyState===WebSocket.OPEN){if(ws.bufferedAmount>256000){ws.close(4009,'slow-client');return;}const raw=JSON.stringify(data);metrics.bytesSent+=Buffer.byteLength(raw);metrics.messagesSent++;ws.send(raw);}};
   const timer=setTimeout(()=>{if(!session)ws.close(4001,'authentication-required');},8000);
   ws.on('pong',()=>{ws.alive=true;});
@@ -297,7 +312,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     // 0.97 outfit changes carry a request id; stat gear from the bag (equip without id) goes on to the realm.
     if(message.type==='equip'&&typeof message.id==='string'){
      if(message.id.length>50)return;
-     if(Date.now()-(session.equippedAt??0)<350){send({type:'equipment-error',id:message.id,code:'action-rate'});return;}
+     if(Date.now()-(session.equippedAt??0)<350||!spendWrite(session)){send({type:'equipment-error',id:message.id,code:'action-rate'});return;}
      let equipment;try{equipment=equipItem(session.peer.equipment,session.peer.character.classId,message.item);}catch(e){send({type:'equipment-error',id:message.id,code:e.message});return;}
      session.equippedAt=Date.now();session.trainingBusy=true;
      const previous=session.peer.equipment;session.peer.equipment=equipment;
@@ -316,7 +331,10 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     }
     if(message.type==='save'){if(typeof message.id!=='string'||message.id.length>50)return;
      const settings=message.settings;if(settings&&Number.isFinite(settings.zoom)&&Number.isFinite(settings.azimuth)&&typeof settings.motion==='boolean')session.peer.settings={zoom:Math.max(.65,Math.min(2.7,settings.zoom)),azimuth:settings.azimuth%(Math.PI*2),motion:settings.motion};
-     const recent=Date.now()-(session.savedAt??0)<2500;session.savedAt=Date.now();try{if(recent)await session.queue;else await checkpoint(session);send({type:'saved',id:message.id});}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
+     const recent=Date.now()-(session.savedAt??0)<2500;session.savedAt=Date.now();
+     // Out of budget: the next autosave tick (10 s) writes it instead.
+     const deferred=!recent&&!spendWrite(session);if(deferred)session.peer.saveNow=true;
+     try{if(recent||deferred)await session.queue;else await checkpoint(session);send({type:'saved',id:message.id});}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
     if(message.type==='travel'){
      if(typeof message.id!=='string'||message.id.length>50||typeof message.destination!=='string')return;
      let destination;try{destination=realm.travelDestination(session.peer,message.destination,{warp:message.warp===true});}catch(e){send({type:'travel-error',id:message.id,code:e.message});return;}
@@ -345,19 +363,20 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(lease.record.state.mapId==='duel-arena'&&!arenaReservation(realm,identity.uid+':'+identity.slotId)){lease.record.state.mapId=catalog.capital;lease.record.state.position={...catalog.maps.find(m=>m.id===catalog.capital).spawn};await store.checkpoint(lease,lease.record);}
     if(reset?.maintenance)throw Error('world-reset');
     const queued=[],peer=realm.join({...identity,...(message.channel!==undefined?{channel:message.channel}:{}),record:lease.record,send:data=>queued.push(data)});
-    session={peer,lease,ws,queue:Promise.resolve(),autoSavedAt:Date.now(),savedJson:null,expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);queued.forEach(send);
+    session={peer,lease,ws,queue:Promise.resolve(),autoSavedAt:Date.now(),savedJson:null,expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);settled();queued.forEach(send);
    }catch(e){if(lease)await store.checkpoint(lease,lease.record,{release:true}).catch(()=>{});send({type:'error',code:['world-reset','already-online','room-full','character-not-found','character-server'].includes(e.message)?e.message:'authentication-failed'});ws.close(4003,'join-rejected');}
    finally{if(claimed)joinPending.delete(identity.uid);}
   });
-  ws.on('close',()=>{clearTimeout(timer);if(session&&!session.explicitLeave&&!session.closing&&session.peer.routeWalker?.active){session.background=true;session.backgroundUntil=Math.min(session.expires,Date.now()+600000);session.peer.input={x:0,z:0,attack:false,run:false};checkpoint(session).catch(()=>finishBackground(session));return;}if(session){session.closing=true;realm.suspend(session.peer.id);checkpoint(session,true).catch(()=>{}).finally(()=>{if(sessions.get(session.peer.id)===session){if(session.explicitLeave)realm.leave(session.peer.id);sessions.delete(session.peer.id);}session.onClosed?.();});}});
+  ws.on('close',()=>{clearTimeout(timer);settled();if(session&&!session.explicitLeave&&!session.closing&&session.peer.routeWalker?.active){session.background=true;session.backgroundUntil=Math.min(session.expires,Date.now()+600000);session.peer.input={x:0,z:0,attack:false,run:false};checkpoint(session).catch(()=>finishBackground(session));return;}if(session){session.closing=true;realm.suspend(session.peer.id);checkpoint(session,true).catch(()=>{}).finally(()=>{if(sessions.get(session.peer.id)===session){if(session.explicitLeave)realm.leave(session.peer.id);sessions.delete(session.peer.id);}session.onClosed?.();});}});
   ws.on('error',()=>{});
  });
  // Step by real elapsed time in fixed 50 ms slices: timers fire late (especially on Windows), and a fixed
  // step per callback ran the world ~20% slow, so predicted clients were pulled back when they stopped.
  let lastTick=performance.now(),carry=0;
  const tick=setInterval(()=>{const now=performance.now();carry=Math.min(.25,carry+(now-lastTick)/1000);lastTick=now;if(reset?.maintenance){carry=0;return;}if(!authoritative()){carry=0;for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}while(carry>=.05){carry-=.05;realm.step(.05);}},50);
- // Waiting for authority: retry every 5 s (a read while another host holds it). Holding it: renew every 40 s.
- let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();
+ // Waiting for authority: retry every 5 s (a read while another host holds it). Holding it: renew every 40 s, but
+ // after a failed renewal retry in 5 s (0.114.2) - two 40 s misses used to outlive the lease and kick everyone.
+ let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()&&!authorityError?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();
  // Save only what changed, at most once a minute; an idle player just keeps the lease alive (see storage.js budget).
  const dueForSave=s=>{if(s.peer.saveNow){s.peer.saveNow=false;return true;} // trades / stall sales save at once
   const age=Date.now()-(s.autoSavedAt??0);if(age<SAVE_MIN_GAP)return false;return age>=SAVE_MAX_GAP||JSON.stringify(realm.record(s.peer,s.lease.record))!==s.savedJson;};
@@ -366,7 +385,15 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
   lastLogSaveCount=realm.logs.length;
   const logSaver=setInterval(()=>{if(reset?.maintenance)return;if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
- return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){await realm.flushShops();await realm.mapBosses.flush().catch(e=>console.error('map-boss-save',e.message));await store?.saveDashboardLogs?.(realm.logs).catch(()=>{});await Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);}));}for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
+ return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
+  // 0.114.2 a redeploy gives us ~9 s: players' progress first (all at once, 6 s cap), then shops, bosses, guild/leader/
+  // price changes and logs together, and the authority release last so the next host can start at once.
+  const capped=(p,ms)=>{let t;return Promise.race([Promise.resolve(p).catch(()=>{}),new Promise(r=>{t=setTimeout(r,ms);})]).finally(()=>clearTimeout(t));};
+  await capped(Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);})),6000);
+  const later=f=>Promise.resolve().then(f); // one failing save (even a synchronous throw) never stops the shutdown
+  const dirty=[...[...realm.guildsDirty].filter(g=>realm.guilds.get(g.id)===g&&store?.saveGuild).map(g=>later(()=>store.saveGuild(g))),...[...realm.leadersDirty].filter(()=>store?.saveLeaders).map(id=>later(()=>store.saveLeaders(id,realm.leaders.get(id)))),...[...realm.pricesDirty].filter(()=>store?.savePrices).map(id=>later(()=>store.savePrices(id,realm.prices.get(id))))];
+  await capped(Promise.allSettled([later(()=>realm.flushShops()),later(()=>realm.mapBosses.flush()).catch(e=>console.error('map-boss-save',e.message)),later(()=>store?.saveDashboardLogs?.(realm.logs)),...dirty]),1500);
+ }for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
 }
 export async function start(){
  const mode=process.env.AUTH_MODE??'firebase',port=Number(process.env.PORT??8787),host=mode==='local'?'127.0.0.1':(process.env.HOST??'0.0.0.0');

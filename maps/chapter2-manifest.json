@@ -16,8 +16,8 @@
       "id": "ruined-temple",
       "name": "วัดร้างริมกรุงเก่า",
       "scene": "maps/v7/ruined-temple.glb",
-      "bytes": 3341732,
-      "sha256": "e6f2e1f4a9a3d48204bb250806f5211a0471a7b4c028431b0d3066f7b75814a4",
+      "bytes": 3753664,
+      "sha256": "c1b55223c5aeb758a21251387fe0fd4efca75d76163953f2a7cc9d158639d727",
       "source": "chapter2-v2",
       "triangles": 237785,
       "realism": "maps-v7"
@@ -26,8 +26,8 @@
       "id": "lablae",
       "name": "เมืองลับแล",
       "scene": "maps/v7/lablae.glb",
-      "bytes": 3814076,
-      "sha256": "a0268f2fd56902e9a163b0dafec2f87acdb712e227882fdc9451dd7717d03ba7",
+      "bytes": 3759456,
+      "sha256": "5e9cd319115be13e45c96beb08812e7db3e83b272965edf48cccb48445f3312b",
       "source": "chapter2-v2",
       "triangles": 229255,
       "realism": "maps-v7"

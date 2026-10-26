@@ -53,6 +53,6 @@ for img in bpy.data.images:
 bpy.ops.export_scene.gltf(filepath=out, export_format='GLB', export_cameras=False, export_lights=False,
     export_apply=True, export_image_format='WEBP', export_image_quality=80,
     export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=7,
-    export_draco_position_quantization=14, export_draco_normal_quantization=8, export_draco_texcoord_quantization=11)
+    export_draco_position_quantization=14, export_draco_normal_quantization=8, export_draco_texcoord_quantization=11, export_draco_color_quantization=8)
 total = [sum(v[0] for v in report.values()), sum(v[1] for v in report.values())]
 print('OPTIMIZE', json.dumps({'out': out, 'vertices_before': total[0], 'vertices_after': total[1]}))

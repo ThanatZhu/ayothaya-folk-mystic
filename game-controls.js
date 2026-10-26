@@ -119,7 +119,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function toast(text){placeNotice();$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  // 0.103.3 on the sala stairs a character's camera-facing quad leans into the higher treads, so it draws on top
  // there; on the deck itself roof-cutaway.js opens the roof instead.
- function xray(sprite,floor){const raised=floor>.2&&floor<2.5;if(sprite.userData.raised===raised)return;sprite.userData.raised=raised;sprite.traverse(o=>{o.renderOrder=raised?6:0;if(o.material)o.material.depthTest=!raised;});}
+ // 0.116.4 characters and monsters always draw over the scenery (tree crowns, roofs and rocks in front of the camera
+ // hid them on 5-59 % of the walkable ground); among themselves the nearer one draws last, so overlaps stay right.
+ function xray(sprite){const order=10+Math.max(0,Math.min(4.99,(500-sprite.position.distanceTo(camera.position))/100));
+  if(!sprite.userData.xray){sprite.userData.xray=true;sprite.traverse(o=>{if(o.material)o.material.depthTest=false;});}
+  if(sprite.userData.order!==order){sprite.userData.order=order;sprite.traverse(o=>{o.renderOrder=order;});}}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  // 0.99.3 numbers rise from the head of whoever was hit and stack: each new one pushes the older ones of that
  // target up a line, they drift upward together and fade out. Anchors follow the target while it moves.
@@ -412,7 +416,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    const f=monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
    const recoil=reduced?0:Math.sin(Math.PI*Math.min(1,m.hit/.34))*.18;
    const mobFloor=groundHeight(world.nav,m.x,m.z);v.sprite.position.set(m.x+(m.recoil?.x??0)*recoil,mobFloor+.06,m.z+(m.recoil?.z??0)*recoil);v.shadow.position.set(m.x,mobFloor+.073,m.z);
-   v.sprite.scale.set(v.width,v.height,1);v.sprite.material.rotation=0;
+   v.sprite.scale.set(v.width,v.height,1);v.sprite.material.rotation=0;xray(v.sprite);
    v.sprite.material.transparent=m.hp<=0;v.sprite.material.opacity=m.hp<=0?Math.max(0,1-(deadAge-.5)/.75):1;
    // 0.74 hit flash: overbright tint (>1) burns the sprite near-white for ~0.12 s, then fades back.
    const burn=reduced?0:Math.max(0,1-(t-v.flashAt)/.14);v.sprite.material.color.set(m.root>0?'#9ddacc':'#fff1da');if(burn>0)v.sprite.material.color.multiplyScalar(1+2.6*burn);

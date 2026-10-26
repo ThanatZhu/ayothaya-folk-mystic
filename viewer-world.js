@@ -34,7 +34,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=hire177';
+import {createGame} from './game-controls.js?v=hire177x1164';
 import {atlasPath,className} from './classes.js?v=novice174';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=hire177';
@@ -75,7 +75,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=maps183');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps184');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);

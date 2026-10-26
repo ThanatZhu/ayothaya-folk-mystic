@@ -5,14 +5,15 @@ import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progr
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
 import {prefetchPoses} from './skill-pose-art.js?v=pose119';
-import {createLiveRoleVfx} from './role-skill-vfx.js?v=vfx119';
+import {createLiveRoleVfx} from './role-skill-vfx.js?v=pose119';
 import {createRolePlayUI} from './role-play-ui.js';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=icons117';
-import {presentationDelta} from './combat-timing.js';
+import {presentationDelta,roleTiming} from './combat-timing.js';
+import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS,ROLE_GROUND_KINDS} from './role-combat.js';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=106.0';
 import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
@@ -177,8 +178,37 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }
   if(Math.hypot(m.x-p.x,m.z-p.z)-bodyRadius(m)<=world.profession.range+1.5&&wall()>=nextBasicAt){nextBasicAt=wall()+attackInterval();cast(null,world.profession.kind,world.profession.color);}
  }
+ // 0.119 a pressed role skill: a single target out of reach (party friend or monster) is walked to first, then cast;
+ // online the body starts on the press and the realm's cast event adopts it, instead of a round trip later.
+ let approach=null,predictSerial=0;
+ function roleAim(i){
+  const s=Number.isInteger(i)?scaledSkill(world.skills[i],world.skillLevels?.[i]??0):null;if(!s?.roleSkillId||s.passive||!SKILL_PROFILES[s.roleSkillId])return null;
+  const p=world.player;if(ROLE_SELF_KINDS.has(s.type))return {s,at:p,self:true};
+  if(ROLE_GROUND_KINDS.has(s.type)&&world.roleGround)return {s,at:world.roleGround};
+  // The locked party friend (or yourself when none is locked or they left), as the realm resolves it.
+  if(ROLE_FRIEND_KINDS.has(s.type)){const id=world.supportTargetId,a=id&&id!==network?.id?world.supportRoster?.find(a=>a.id===id):null;return {s,at:a??p,self:!a};}
+  const m=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null;return m&&m.hp>0?{s,at:m}:null;
+ }
+ const inReach=(aim,p=world.player)=>Math.hypot(aim.at.x-p.x,aim.at.z-p.z)<=(aim.s.range??7)+.3;
+ function useSkill(i){
+  if(!Number.isInteger(i))return false;approach=null;const aim=roleAim(i);
+  if(aim&&!aim.self&&!inReach(aim)&&world.player.hp>0&&Math.hypot(aim.at.x-world.player.x,aim.at.z-world.player.z)<40){approach={i,until:world.time+6};walkTo({x:aim.at.x,z:aim.at.z},{radius:Math.max(.5,(aim.s.range??7)-.8),marker:false});return true;}
+  if(network&&aim)predictCast(i,aim);
+  return world.skill(i);
+ }
+ function predictCast(i,aim){
+  const s=aim.s,p=world.player,friend=ROLE_FRIEND_KINDS.has(s.type),st=world.status??{};
+  // Only what the realm will accept: anything it may refuse waits for its answer as before.
+  if(p.hp<=0||(world.cooldowns?.[i]??0)-(wall()-cooldownsAt)>.08||p.mp<s.cost*(1-((world.derivedView??world.derived)?.mpCut??0))||st.stun||st.sleep||st.silence||(world.safe&&!aim.self&&!friend))return;
+  if(roleClip&&roleEffects.time<roleClip.start+roleClip.impacts.at(-1))return; // the realm still holds the last cast
+  const foe=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null,to=aim.self&&!friend&&foe?foe:aim.at;
+  playCast({type:'cast',predicted:true,roleSkillId:s.roleSkillId,castId:'p'+(++predictSerial),timing:roleTiming(s,SKILL_PROFILES[s.roleSkillId]),from:{x:p.x,z:p.z},to:{x:to.x,z:to.z},kind:s.type,lag:0});
+  roleClip.predicted=wall();
+ }
  function playCast(e){
    const aim=castFacing(e,world.player.face);if(aim)world.player.face={...aim};
+   // The realm's cast of a predicted press: keep the running body and VFX, take its id and timing.
+   if(e.roleSkillId&&!e.predicted&&roleClip?.predicted){const old=roleClip.castId;if(roleClip.id===e.roleSkillId){roleClip.castId=e.castId;roleClip.predicted=null;if(e.timing?.impacts?.length){roleClip.impacts=[...e.timing.impacts];roleClip.duration=e.timing.duration;castUntil=roleClip.start+roleClip.duration;}roleEffects.rekey(old,e.castId);return;}roleEffects.cancel(old);}
    if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip=createRoleAnimation(e,roleEffects.time);castUntil=world.time-Math.max(0,e.lag??0)+roleClip.duration;actionStart=world.time-Math.max(0,e.lag??0);castFace=aim;strikeAt=world.time;actionMode='cast';activeSkill=null;basicCastId=null;world.clearEmote();roleEffects.spawn(e);return;}
    if(e.timing&&!Number.isInteger(e.skillIndex)){
     const timing=e.timing,lag=Math.max(0,e.lag??0),start=world.time-lag;
@@ -244,7 +274,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  let autoSent='';
  const skillButtons=world.skills.map((s,i)=>{
   const b=document.createElement('button');b.type='button';b.className='skill'+(isMaster(i)?' master-slot':'');b.hidden=isMaster(i);
-  b.innerHTML=`<kbd>${HOTBAR_KEYS[i]}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.addEventListener('click',()=>{if(!isPaused())world.skill(hotbar[i]);});$('skills').append(b);return b;
+  b.innerHTML=`<kbd>${HOTBAR_KEYS[i]}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.addEventListener('click',()=>{if(!isPaused())useSkill(hotbar[i]);});$('skills').append(b);return b;
  });
  function paintHotbar(){skillButtons.forEach((b,i)=>{const s=world.skills[hotbar[i]];if(!s)return;b.querySelector('strong').textContent=s.icon;b.querySelector('span').textContent=s.short??s.name;b.setAttribute('aria-label',`สกิล ${HOTBAR_KEYS[i]} ${s.name}`);b.title=`${HOTBAR_KEYS[i]} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;b.style.setProperty('--skill-color',s.color);});applySkillArt(skillButtons,world.profession.id,hotbar,world.skills);}
  paintHotbar();
@@ -262,7 +292,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  let spaceTalkHeld=false;
  addEventListener('keydown',e=>{
   if(e.code==='Space'&&spaceTalkHeld){e.preventDefault();return;}
-  if(e.altKey&&/^Digit[1-5]$/.test(e.code)&&!isPaused()&&!editable(e)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(!e.repeat)world.skill(hotbar[BASE_SLOTS+Number(e.code.slice(-1))-1]);return;}
+  if(e.altKey&&/^Digit[1-5]$/.test(e.code)&&!isPaused()&&!editable(e)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(!e.repeat)useSkill(hotbar[BASE_SLOTS+Number(e.code.slice(-1))-1]);return;}
   if(isPaused()||editable(e)||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.code==='Space'){
    const button=e.target.closest?.('button,a,[role=button]');
@@ -276,7 +306,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(e.repeat)return;
   if(e.code==='KeyF')world.toggleAuto();
   if(e.code==='Space')world.basicAttack();
-  if(/^Digit[0-9]$/.test(e.code)){const n=Number(e.code.slice(-1));world.skill(hotbar[n===0?9:n-1]);}
+  if(/^Digit[0-9]$/.test(e.code)){const n=Number(e.code.slice(-1));useSkill(hotbar[n===0?9:n-1]);}
  });
  addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='Space')spaceTalkHeld=false;});
  const joystick=$('joystick'),knob=$('stick');
@@ -371,6 +401,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
+  if(approach){const aim=roleAim(approach.i);if(!aim||world.time>approach.until||p.hp<=0)approach=null;else if(inReach(aim)){const i=approach.i;cancelWalk();useSkill(i);}else if(!(walkJob||walker.active||serverWalkState?.status==='walking'))approach=null;}
+  // A press the realm refused (no cast came back): drop the predicted body and effect.
+  if(roleClip?.predicted&&wall()-roleClip.predicted>Math.min(1.2,.45+netLag*3)){roleEffects.cancel(roleClip.castId);roleClip=null;castUntil=t;}
   const roleActive=roleAnimationActive(roleClip,roleEffects.time);
   if(roleClip&&!roleActive){roleClip=null;castUntil=t;}
   const chosen=actionChoice({time:t,dead:p.hp<=0,hit:t<hitUntil&&t>=castUntil&&!roleActive,cast:roleActive?'cast':t<castUntil?actionMode:false,moving:p.moving,running:p.running,emote:world.emote,guard:p.shield>0});

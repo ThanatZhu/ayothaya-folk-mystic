@@ -106,6 +106,7 @@ export function createSheetVfx(scene,world,{tier:forced=null}={}){
  }
  return {spawn,hit,update,
   cancel(castId,actor=self()){for(const c of clips.filter(c=>c.key===actor+'|'+castId))release(c);},
+  rekey(from,to,actor=self()){for(const c of clips)if(c.key===actor+'|'+from)c.key=actor+'|'+to;},
   // Warm the HTTP cache for the player's own skills; nothing reaches the GPU until a cast needs it.
   prefetch(ids){for(const id of ids){const e=VFX_SHEETS[id];for(const key of [e?.effect,e?.ground])if(key&&!fetched.has(key)){fetched.add(key);fetch(BASE+tier()+'/'+key+'.webp',{priority:'low'}).catch(()=>{});}}},
   set locate(fn){locate=fn;},

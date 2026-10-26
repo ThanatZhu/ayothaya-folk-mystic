@@ -3015,6 +3015,7 @@ Object.assign(globalThis.I18N_EN, {
  'เป้าหมายต้องติดพิษก่อน':'The target must be poisoned first',
  'เป้าหมายต้องติดคำสาปก่อน':'The target must be cursed first',
  'การร่ายถูกยกเลิก':'Casting canceled',
+ 'สกิลไม่สำเร็จ · คืน MP':'Skill fizzled · MP refunded',
  'รอคืนขวัญ':'Awaiting revival',
  'หมดแรง · รอเพื่อนคืนขวัญ':'Defeated · waiting for a party revival',
  'กลับจุดเกิด':'Return to spawn',

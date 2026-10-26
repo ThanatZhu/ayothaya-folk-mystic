@@ -44,7 +44,7 @@ import {createStatusUI} from './status-ui.js?v=tier167';
 import {createProfileUI} from './profile-ui.js?v=profile171';
 import {createRefineUI} from './refine-ui.js?v=tier167';
 import {createCraftUI} from './craft-ui.js?v=craft176';
-import {createWeather} from './weather-fx.js?v=announce149';
+import {createWeather} from './weather-fx.js?v=181';
 import {createMarketUI} from './market-ui.js?v=storage161';
 import {createSocialUI} from './social-ui.js?v=guild162';
 import {createLifeUI} from './life-ui.js?v=profile171';
@@ -75,7 +75,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=maps180');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps181');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);

@@ -1,5 +1,5 @@
 // 0.97 weather: every 15 minutes each outdoor map rolls its weather from the clock alone, so every player (and the
-// server) agrees without sending anything. Dungeons (instance maps) stay dry.
+// server) agrees without sending anything. Dungeons (instance maps) and caves (map.indoor) stay dry.
 export const WEATHER_SLOT=15*60e3;
 export const WEATHERS={
  clear:{name:'แจ่มใส',icon:'☀️',text:'ท้องฟ้าโปร่ง',rain:0,dim:1,fog:1,weight:50},
@@ -12,7 +12,7 @@ const IDS=Object.keys(WEATHERS),TOTAL=IDS.reduce((n,k)=>n+WEATHERS[k].weight,0);
 function roll(slot,mapId){let h=2166136261;for(const c of slot+':'+mapId){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return (h>>>0)%TOTAL;}
 export function weatherAt(now,map){
  const slot=Math.floor(now/WEATHER_SLOT),endsAt=(slot+1)*WEATHER_SLOT;
- if(!map||map.instance)return {id:'clear',...WEATHERS.clear,endsAt};
+ if(!map||map.instance||map.indoor)return {id:'clear',...WEATHERS.clear,endsAt};
  let r=roll(slot,map.id);for(const id of IDS){r-=WEATHERS[id].weight;if(r<0)return {id,...WEATHERS[id],endsAt};}
  return {id:'clear',...WEATHERS.clear,endsAt};
 }

@@ -14,7 +14,7 @@ const PLACE={0:[0,1],1:[1,0],2:[1,2],3:[2,0],4:[2,2],5:[3,1],6:[2,1],7:[3,0],8:[
 const LINKS=[[0,1],[0,2],[1,3],[2,4],[3,5],[4,5],[0,6,1],[3,7,1],[4,8,1],[10,11],[11,12],[12,13],[10,14,1],[14,15,1],[15,16,1]];
 const pct=n=>Math.round(n*1000)/10;
 export function createSkillWindow({game,classId}){
- if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=tree119';css.dataset.skillTree='';document.head.append(css);}
+ if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=ult119';css.dataset.skillTree='';document.head.append(css);}
  const dialog=document.createElement('dialog');dialog.id='skill-window';dialog.dataset.profession=classId||'shaman';dialog.setAttribute('aria-labelledby','skill-window-title');
  dialog.innerHTML='<header><div><small>SKILL TREE</small><h2 id="skill-window-title">สกิล</h2></div><b id="skill-points"></b><button class="mp-icon" id="skill-close" aria-label="ปิดหน้าสกิล">×</button></header><p class="skill-hint"></p><div class="skill-tabs" role="tablist"><button type="button" role="tab" data-tab="base" aria-selected="true">สกิลอาชีพ</button><button type="button" role="tab" data-tab="master" aria-selected="false">Master <small id="master-count"></small></button></div><div class="skill-tree role-tree" id="skill-tree"></div><section id="skill-detail" aria-live="polite"></section><p id="skill-note" role="status"></p>';
  document.getElementById('game-shell').append(dialog);
@@ -40,7 +40,9 @@ export function createSkillWindow({game,classId}){
   select.type='button';select.className='skill-select';select.setAttribute('aria-describedby','skill-detail');select.append(icon);
   node.onclick=e=>{if(e.target!==button){picked=i;draw();}};
   button.onclick=()=>{picked=i;const r=game.upgradeSkill(i);$('skill-note').textContent=r===true?(levels()[i]?'อัปสกิล ':'เรียนสกิล ')+s.name+' แล้ว':(reasons[r]??'อัปสกิลไม่ได้');setTimeout(draw,250);};
-  node.append(select,name,level,button);tree.append(node);return {node,level,button,select};
+  node.append(select,name,level,button);
+  if(s.ultimate){const badge=document.createElement('em');badge.className='skill-ult-badge';badge.textContent='★ ไม้ตาย';node.append(badge);}
+  tree.append(node);return {node,level,button,select};
  });
  if(classId)applySkillArt(nodes.map(n=>n.node),classId,null,world.skills);
  // Branch lines behind the icons, measured in the tree's own (unscaled) layout; gold once the far end is learned.

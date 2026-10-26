@@ -164,7 +164,15 @@ html body #skill-window .skill-node{background:transparent!important;box-shadow:
 #skill-window .skill-links path.next{stroke:#e8c77aa8}
 #skill-window .skill-links path.lit{stroke:#f4cf7a;filter:drop-shadow(0 0 4px #f4cf7a99)}
 #skill-window .skill-node.passive .skill-icon,#skill-window .skill-node.passive .skill-select{border-radius:50%}
-#skill-window .skill-node.passive{border-style:dashed}
-#skill-window .skill-node.ultimate{border-color:#f4cf7a;box-shadow:0 0 0 1px #f4cf7a55,0 0 14px #f4cf7a33}
+/* Ultimates: a glowing gold frame and a ★ badge; passives: the round icon alone, without the square frame */
+html body #skill-window .skill-node.ultimate>.skill-select{border-radius:7px;box-shadow:0 0 0 2px #f4cf7a,0 0 14px 3px #f4cf7aaa;animation:skill-ult-glow 2.6s ease-in-out infinite}
+@keyframes skill-ult-glow{50%{box-shadow:0 0 0 2px #ffe9a8,0 0 24px 8px #f4cf7add}}
+#skill-window .skill-node>.skill-ult-badge{position:absolute;z-index:4;left:50%;top:-11px;transform:translateX(-50%);padding:1px 8px;border:1px solid #f2d99a;border-radius:999px;background:linear-gradient(#e6c784,#b98c45);color:#2a1d08;font:700 11px/1.5 var(--font-game);font-style:normal;white-space:nowrap;box-shadow:0 2px 6px #0008;pointer-events:none}
+html body #skill-window .skill-node.passive::before,html body #skill-window .skill-node.passive::after{display:none}
+html body #skill-window .skill-node.passive{border:0}
+#skill-window .skill-node.passive>.skill-select{box-shadow:0 0 0 2px #c6a16499}
+#skill-window .skill-node.passive.learned>.skill-select{box-shadow:0 0 0 2px #f4cf7a,0 0 10px #f4cf7a66}
+@media(prefers-reduced-motion:reduce){html body #skill-window .skill-node.ultimate>.skill-select{animation:none}}
+@media(max-width:640px),(orientation:landscape) and (max-height:560px){#skill-window .skill-node>.skill-ult-badge{top:-8px;font-size:9px;padding:0 6px}}
 #skill-window .skill-node>.skill-upgrade[hidden]{display:none}
 @media(max-width:640px),(orientation:landscape) and (max-height:560px){#skill-window .skill-tree.role-tree{grid-template-columns:repeat(4,minmax(0,56px));gap:6px 26px;padding-top:8px;padding-bottom:8px}}

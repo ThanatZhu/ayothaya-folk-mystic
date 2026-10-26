@@ -9,8 +9,8 @@ html body #skill-window[data-hud-panel],html body #skill-window{position:fixed!i
 .skill-node .skill-icon{grid-row:1/3;width:40px;height:40px}
 .skill-node>span{font-size:11px;font-weight:700;color:#fff0ce;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .skill-node>b{font-size:10px;color:#ffd98f}
-.skill-node>button{position:absolute;right:-8px;top:-10px;min-width:30px;height:28px;padding:0 7px;border:1px solid #f2d99a;border-radius:999px;background:linear-gradient(#e6c784,#b98c45);color:#2d2114;font:800 13px Mali,Tahoma,sans-serif;cursor:pointer;box-shadow:0 2px 4px #0007}
-.skill-node>button:disabled{display:none}
+.skill-node>.skill-upgrade{position:absolute;right:-8px;top:-10px;min-width:30px;height:28px;padding:0 7px;border:1px solid #f2d99a;border-radius:999px;background:linear-gradient(#e6c784,#b98c45);color:#2d2114;font:800 13px Mali,Tahoma,sans-serif;cursor:pointer;box-shadow:0 2px 4px #0007}
+.skill-node>.skill-upgrade:disabled{display:none}
 .skill-node.closed{opacity:.5;filter:grayscale(.7)}.skill-node.closed>b{color:#a99a7d}
 .skill-node.open{border-color:#95efe2;box-shadow:0 0 0 1px #95efe244,0 0 10px #95efe233}.skill-node.open>b{color:#95efe2}
 .skill-node.picked{border-color:#f4cf7a;box-shadow:0 0 0 2px #f4cf7a66}
@@ -32,22 +32,28 @@ html body #skill-window[data-hud-panel],html body #skill-window{position:fixed!i
 .skill-node.master{border-color:#c9a35a}.skill-node.master.learned{background:linear-gradient(135deg,#2a2412ee,#11231cee)}
 .skill-art.master-art{box-shadow:0 0 0 2px #ffd77a,0 0 8px #ffcf6a99;border-radius:8px}
 
-/* Generated gold/jade frames are shared by novice, all professions and Master.
-   Nine-slicing keeps the painted corners intact as the live content reflows. */
+/* Generated gold/jade artwork shared by every profession and Master.
+   Ornaments retain their source aspect ratio; only the plain rails grow. */
 html body #skill-window[data-hud-panel],html body #skill-window{
  width:min(1000px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important;
- max-height:calc(100dvh - 24px)!important;box-sizing:border-box;padding:48px 30px 24px!important;
+ max-height:calc(100dvh - 24px)!important;box-sizing:border-box;padding:58px 30px 30px!important;
  border:0!important;border-radius:18px;isolation:isolate;overflow:hidden!important;
  background:transparent!important;box-shadow:none!important;
  color:#fff0ce;
 }
-#skill-window::before{content:'';position:absolute;inset:0;z-index:4;pointer-events:none;
- border-style:solid;border-color:transparent;border-width:72px 68px 54px;
- border-image:url('./assets/ui-skill150/window.webp') 250 350 220 350 / 72px 68px 54px / 0 stretch;
+#skill-window::before{content:'';position:absolute;inset:30px 13px 19px;z-index:4;pointer-events:none;
+ border:3px ridge #d7ad53;border-radius:3px;box-shadow:inset 0 0 0 1px #193e32,0 1px 3px #0008;
 }
+#skill-window .skill-frame-art{position:absolute;inset:0;z-index:4;pointer-events:none;--frame-scale:.22}
+#skill-window .skill-frame-art svg{position:absolute;display:block;overflow:hidden;max-width:none;height:auto;filter:drop-shadow(0 2px 2px #0006)}
+#skill-window .skill-frame-tl,#skill-window .skill-frame-tr,#skill-window .skill-frame-bl,#skill-window .skill-frame-br{width:calc(350px * var(--frame-scale))}
+#skill-window .skill-frame-tl{top:0;left:0}#skill-window .skill-frame-tr{top:0;right:0}
+#skill-window .skill-frame-bl{bottom:0;left:0}#skill-window .skill-frame-br{bottom:0;right:0}
+#skill-window .skill-frame-crown{top:0;left:50%;transform:translateX(-50%);width:calc(616px * var(--frame-scale))}
+#skill-window .skill-frame-foot{bottom:calc(24px * var(--frame-scale));left:50%;transform:translateX(-50%);width:calc(536px * var(--frame-scale))}
 /* The generated image has transparent margins. Fill only inside its painted
    rails, never the full dialog rectangle outside the gold silhouette. */
-#skill-window::after{content:'';position:absolute;inset:40px 12px 22px;z-index:-1;pointer-events:none;background:linear-gradient(145deg,#203e33fa,#0b231efa);box-shadow:0 12px 32px #0007}
+#skill-window::after{content:'';position:absolute;inset:33px 16px 22px;z-index:-1;pointer-events:none;background:linear-gradient(145deg,#203e33fa,#0b231efa);box-shadow:0 12px 32px #0007}
 #skill-window>header{position:relative!important;flex:none;min-width:0;padding:0 8px 12px!important;border-color:#d3b66e55;gap:12px;background:none!important}
 #skill-window header small{display:block!important;font-size:10px;letter-spacing:.12em;color:#dbbd76}
 #skill-window h2{font-size:22px!important;color:#ffe7ad;text-shadow:0 2px 3px #000b}
@@ -60,10 +66,10 @@ html body #skill-window[data-hud-panel],html body #skill-window{
 #skill-window .skill-workspace{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#bda567 #122d24}
 #skill-window .skill-tree{gap:24px 12px;padding:16px 8px 12px;grid-template-rows:none}
 #skill-window .skill-node{grid-template-columns:42px minmax(0,1fr);padding:14px 15px;gap:2px 8px;min-height:72px;box-sizing:border-box;
- border:0;border-radius:9px;background:#102b23;box-shadow:none;
+ width:100%;max-width:180px;justify-self:center;border:0;border-radius:9px;background:#102b23;box-shadow:none;
 }
 #skill-window .skill-node::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;border:20px solid transparent;
- border-image:url('./assets/ui-skill150/node.webp') 105 160 / 20px 24px / 0 stretch;
+ border-image:url('./assets/ui-skill150/node.webp') 150 160 / 22.5px 24px / 0 stretch;
 }
 #skill-window .skill-node .skill-icon{width:40px;height:40px;min-width:0;box-sizing:border-box;border-radius:7px}
 #skill-window .skill-node>span{font-size:12px;line-height:1.45}
@@ -71,33 +77,35 @@ html body #skill-window[data-hud-panel],html body #skill-window{
 #skill-window .skill-node.closed{opacity:.62;filter:saturate(.35)}
 #skill-window .skill-node.picked{background:#234839;box-shadow:0 0 0 2px #f4d082,0 0 14px #eec56c33}
 #skill-window .skill-node.open{background:#183f34;box-shadow:0 0 0 1px #99ebca}
-#skill-window .skill-node>button{z-index:3;top:-12px;right:-4px;min-width:36px;min-height:36px;line-height:1}
-#skill-window .skill-node>button:focus-visible,#skill-window button:focus-visible{outline:3px solid #b7ffe4;outline-offset:3px}
+#skill-window .skill-node>.skill-upgrade{z-index:3;top:-12px;right:-4px;min-width:36px;min-height:36px;line-height:1}
+#skill-window .skill-node>.skill-upgrade:focus-visible,#skill-window button:focus-visible{outline:3px solid #b7ffe4;outline-offset:3px}
 #skill-window #skill-detail{margin:8px;padding:12px 14px;background:#0b201bea;border:1px solid #b3985c77;line-height:1.55}
 #skill-window #skill-note{flex:none;margin:6px 8px 0;min-height:0;line-height:1.4}
 #skill-window #skill-note:empty{display:none}
 #skill-window #skill-links path{stroke-width:2;filter:drop-shadow(0 1px 1px #0009)}
 
 @media(max-width:640px){
- html body #skill-window[data-hud-panel],html body #skill-window{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;max-height:calc(100dvh - 12px)!important;padding:38px 14px 20px!important}
- #skill-window::before{border-image-width:56px 42px 40px}
- #skill-window::after{inset:32px 8px 16px}
+ html body #skill-window[data-hud-panel],html body #skill-window{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;max-height:calc(100dvh - 12px)!important;padding:42px 18px 22px!important}
+ #skill-window .skill-frame-art{--frame-scale:.16}
+ #skill-window::before{inset:21px 9px 13px}
+ #skill-window::after{inset:24px 12px 16px}
  #skill-window>header{gap:6px;padding:0 4px 6px!important}#skill-window h2{font-size:17px!important}#skill-window header small{font-size:9px;letter-spacing:0}
  #skill-window #skill-points{font-size:10px;padding:5px 8px}#skill-window #skill-close{width:40px;min-height:40px}
  #skill-window .skill-tabs{margin:6px 4px 2px}#skill-window .skill-tabs button{min-height:36px;padding:5px 12px;font-size:11px}
  #skill-window .skill-tree{gap:20px 6px;padding:14px 4px 6px}
  #skill-window .skill-node{grid-template-columns:minmax(0,1fr);padding:10px 7px;gap:3px;justify-items:center;align-content:start;min-height:98px}
- #skill-window .skill-node::after{border-image-width:14px 12px}
+ #skill-window .skill-node::after{border-image-width:15px 16px}
  #skill-window .skill-node .skill-icon{grid-row:auto;width:32px;height:32px}
  #skill-window .skill-node>span{font-size:10px;text-align:center;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35;overflow:hidden;overflow-wrap:anywhere}
  #skill-window .skill-node>b{font-size:9px;text-align:center;white-space:normal}
- #skill-window .skill-node>button{min-width:32px;min-height:32px;right:-2px;top:-12px;font-size:11px}
+ #skill-window .skill-node>.skill-upgrade{min-width:32px;min-height:32px;right:-2px;top:-12px;font-size:11px}
  #skill-window #skill-detail{font-size:11px;margin:8px 4px 2px;padding:9px 10px}
 }
 @media(orientation:landscape) and (max-height:560px){
- html body #skill-window[data-hud-panel],html body #skill-window{max-height:calc(100dvh - 12px)!important;padding:34px 24px 20px!important}
- #skill-window::before{border-image-width:50px 52px 38px}
- #skill-window::after{inset:28px 10px 16px}
+ html body #skill-window[data-hud-panel],html body #skill-window{max-height:calc(100dvh - 12px)!important;padding:42px 24px 22px!important}
+ #skill-window .skill-frame-art{--frame-scale:.16}
+ #skill-window::before{inset:21px 9px 13px}
+ #skill-window::after{inset:24px 12px 16px}
  #skill-window>header{padding:0 4px 5px!important;min-height:34px}#skill-window h2{font-size:16px!important}#skill-window header small{font-size:9px}
  #skill-window #skill-close{width:36px;min-height:36px}#skill-window #skill-points{font-size:10px}
  #skill-window .skill-hint{display:none}#skill-window .skill-tabs{margin:3px 4px 0}
@@ -105,10 +113,10 @@ html body #skill-window[data-hud-panel],html body #skill-window{
  #skill-window .skill-workspace{display:grid;grid-template-columns:minmax(0,3fr) minmax(160px,1.2fr);align-items:start;gap:8px}
  #skill-window .skill-tree{gap:18px 6px;padding:14px 4px 6px}
  #skill-window .skill-node{grid-template-columns:28px minmax(0,1fr);padding:10px 9px;column-gap:5px;min-height:54px}
- #skill-window .skill-node::after{border-image-width:14px 15px}
+ #skill-window .skill-node::after{border-image-width:15px 16px}
  #skill-window .skill-node .skill-icon{width:28px;height:28px}
  #skill-window .skill-node>span{font-size:10px}#skill-window .skill-node>b{font-size:9px}
- #skill-window .skill-node>button{min-width:30px;min-height:30px;top:-10px;right:-2px;font-size:11px}
+ #skill-window .skill-node>.skill-upgrade{min-width:30px;min-height:30px;top:-10px;right:-2px;font-size:11px}
  #skill-window #skill-detail{margin:12px 4px 4px;padding:8px;font-size:11px;line-height:1.5}
  #skill-window #skill-detail em{display:block;margin:1px 0;font-size:10px}
 }
@@ -124,6 +132,26 @@ html body #skill-window .skill-node{background:transparent!important;box-shadow:
 
 /* Novice is a short introduction, without empty branches or a Master tab. */
 #skill-window[data-profession=novice] .skill-tabs[hidden]{display:none}
-#skill-window[data-profession=novice] .skill-tree{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-content:start}
+#skill-window[data-profession=novice] .skill-tree{grid-template-columns:repeat(3,minmax(0,160px));justify-content:center;gap:14px;align-content:start}
 #skill-window[data-profession=novice] .skill-node>span{white-space:normal;line-height:1.5}
-@media(max-width:600px){#skill-window[data-profession=novice] .skill-tree{grid-template-columns:1fr}#skill-window[data-profession=novice] .skill-node{grid-column:1!important;grid-row:auto!important}}
+
+
+/* Icon-only skill choices; the selected name, level and effects live below. */
+#skill-window .skill-tree{grid-template-columns:repeat(4,minmax(0,80px));justify-content:center;gap:32px 26px;padding:18px 10px}
+#skill-window[data-profession=novice] .skill-tree{grid-template-columns:repeat(3,minmax(0,80px));gap:24px}
+#skill-window .skill-node{display:block;width:72px;max-width:100%;height:72px;min-height:0;padding:7px;--skill-node-inset:6px}
+#skill-window .skill-node[hidden]{display:none}
+#skill-window .skill-node>span,#skill-window .skill-node>b{display:none}
+#skill-window .skill-node>.skill-select{display:block;position:relative;width:100%;height:100%;padding:0;border:0;border-radius:7px;background:transparent;box-shadow:none;cursor:pointer}
+#skill-window .skill-node .skill-icon{display:block;width:100%;height:100%;border-radius:6px}
+#skill-window .skill-node::after{border-image-width:15px 16px}
+#skill-window .skill-node.picked .skill-select{outline:2px solid #ffe5a0;outline-offset:1px;box-shadow:0 0 12px #edc76a70}
+#skill-window .skill-node>.skill-upgrade{display:block;top:auto;right:-6px;bottom:-8px;width:32px;min-width:32px;height:32px;min-height:32px;padding:0;font-size:24px;line-height:1;border-radius:9px;z-index:3}
+#skill-window .skill-node>.skill-upgrade:disabled{display:block;opacity:.45;cursor:default;filter:saturate(.3)}
+@media(max-width:640px),(orientation:landscape) and (max-height:560px){
+ #skill-window .skill-tree{grid-template-columns:repeat(4,minmax(0,64px));gap:30px 8px;padding:16px 6px}
+ #skill-window[data-profession=novice] .skill-tree{grid-template-columns:repeat(3,minmax(0,64px));gap:18px}
+ #skill-window .skill-node{width:56px;height:56px;min-height:0;padding:6px}
+ #skill-window .skill-node .skill-icon{width:100%;height:100%}
+ #skill-window .skill-node>.skill-upgrade{width:30px;min-width:30px;height:30px;min-height:30px;font-size:22px;right:-4px}
+}

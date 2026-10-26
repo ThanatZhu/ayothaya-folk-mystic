@@ -10,22 +10,28 @@ const reasons={'no-skill-points':'แต้มสกิลไม่พอ · ไ
 // 0.101 the Master tab reuses the grid: each Master skill sits in its parent's column.
 const PLACE={0:[1,0],4:[3,0],1:[0,1],2:[1,1],5:[3,1],3:[0,2],6:[1,2],8:[3,2],7:[0,3],9:[2,3],10:[1,0],11:[0,0],12:[3,0],13:[1,1],14:[2,1]};
 export function createSkillWindow({game,classId}){
- if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=novice174';css.dataset.skillTree='';document.head.append(css);}
+ if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=icons176';css.dataset.skillTree='';document.head.append(css);}
  const dialog=document.createElement('dialog');dialog.id='skill-window';dialog.dataset.profession=classId||'shaman';dialog.setAttribute('aria-labelledby','skill-window-title');
  dialog.innerHTML='<header><div><small>SKILL TREE</small><h2 id="skill-window-title">ต้นไม้สกิล</h2></div><b id="skill-points"></b><button class="mp-icon" id="skill-close" aria-label="ปิดหน้าสกิล">×</button></header><p class="skill-hint">เริ่มจากสกิลแถวบน · อัปให้ถึงขั้นที่กำหนดเพื่อปลดล็อกสกิลถัดไป (เรียนฟรี) · ขั้น 2–10 ใช้ขั้นละ 1 แต้ม · สกิลถึง Lv 10 ปลดล็อกสกิล Master</p><div class="skill-tabs" role="tablist"><button type="button" role="tab" data-tab="base" aria-selected="true">สกิลหลัก</button><button type="button" role="tab" data-tab="master" aria-selected="false">Master <small id="master-count"></small></button></div><div class="skill-tree" id="skill-tree"><svg id="skill-links" aria-hidden="true"></svg></div><section id="skill-detail" aria-live="polite"></section><p id="skill-note" role="status"></p>';
  document.getElementById('game-shell').append(dialog);
+ // Crop the existing painting in fixed-aspect SVG viewports. Only the plain
+ // rails stretch; the crown and corner ornaments must never be nine-sliced.
+ const frame=document.createElement('div');frame.className='skill-frame-art';frame.setAttribute('aria-hidden','true');
+ const ornaments=[['tl',0,0,350,380],['tr',1186,0,350,380],['bl',0,704,350,320],['br',1186,704,350,320],['crown',460,0,616,240],['foot',500,840,536,160]];
+ frame.innerHTML=ornaments.map(([part,x,y,w,h])=>`<svg class="skill-frame-${part}" viewBox="${x} ${y} ${w} ${h}" width="${w}" height="${h}" focusable="false"><image href="./assets/ui-skill150/window.webp" width="1536" height="1024"/></svg>`).join('');dialog.append(frame);
  dialog.querySelector('header small').textContent=getClass(classId||'shaman').name+' · SKILL TREE';
  const workspace=document.createElement('div');workspace.className='skill-workspace';
  dialog.querySelector('.skill-tree').before(workspace);workspace.append(dialog.querySelector('.skill-tree'),dialog.querySelector('#skill-detail'));
  const $=id=>dialog.querySelector('#'+id),world=game.world,tree=$('skill-tree'),roleMode=world.roleCombat&&!world.roleCombat.legacy,novice=classId==='novice',max=skillMax(classId),req=i=>roleMode?roleRequirements(i):requirements(i,classId),canOpen=(levels,i)=>roleMode?roleSkillOpen(levels,i,world.jobId):skillOpen(levels,i,classId);let picked=0;
  const nodes=world.skills.map((s,i)=>{
-  const node=document.createElement('div'),icon=document.createElement('strong'),name=document.createElement('span'),level=document.createElement('b'),button=document.createElement('button');
+  const node=document.createElement('div'),icon=document.createElement('strong'),name=document.createElement('span'),level=document.createElement('b'),button=document.createElement('button'),select=document.createElement('button');
   node.className='skill-node'+(isMaster(i)?' master':'');node.dataset.slot=i;const [c,r]=novice&&NOVICE_SLOTS.includes(i)?[NOVICE_SLOTS.indexOf(i),0]:PLACE[i];node.style.gridColumn=String(c+1);node.style.gridRow=String(r+1);
   icon.className='skill-icon';icon.textContent=s.icon;icon.style.setProperty('--skill-color',s.color);
-  name.textContent=s.key+' · '+s.name;button.type='button';button.setAttribute('aria-label','อัปสกิล '+s.name);
+  name.textContent=s.key+' · '+s.name;button.type='button';button.className='skill-upgrade';button.setAttribute('aria-label','อัปสกิล '+s.name);
+  select.type='button';select.className='skill-select';select.setAttribute('aria-describedby','skill-detail');select.append(icon);
   node.onclick=e=>{if(e.target!==button){picked=i;draw();}};
   button.onclick=()=>{picked=i;const r=game.upgradeSkill(i);$('skill-note').textContent=r===true?(levels()[i]?'อัปสกิล ':'เรียนสกิล ')+s.name+' แล้ว':(reasons[r]??'อัปสกิลไม่ได้');setTimeout(draw,250);};
-  node.append(icon,name,level,button);tree.append(node);return {node,level,button};
+  node.append(select,name,level,button);tree.append(node);return {node,level,button,select};
  });
  if(classId)applySkillArt(nodes.map(n=>n.node),classId,null,world.skills);
  const levels=()=>world.skillLevels??[];
@@ -54,7 +60,9 @@ export function createSkillWindow({game,classId}){
    n.node.hidden=!!s.reserved||!skillAllowed(classId,i)||isMaster(i)!==master;
    n.node.classList.toggle('learned',l>0);n.node.classList.toggle('open',!l&&open);n.node.classList.toggle('closed',!l&&!open);n.node.classList.toggle('picked',i===picked);
    n.level.textContent=s.passive?(l?'พาสซีฟ · ทำงานแล้ว':'พาสซีฟ · ยังไม่เรียน'):l?'Lv '+l+'/'+max:open?'เรียนได้':isMaster(i)?(roleMode&&!world.jobId?'เลือกสาย Master ก่อน':'ต้อง '+world.skills[roleMode?(req(i)[0]?.[0]??0):MASTER_FROM[i-BASE_SLOTS]].short+' Lv'+SKILL_MAX):'ล็อก';
-   n.button.textContent=l?'+':'เรียน';n.button.disabled=l?(s.passive||l>=max||points<1):!open;
+   n.select.setAttribute('aria-label',s.name+' · '+n.level.textContent);n.select.title=s.name+' · '+n.level.textContent;n.select.setAttribute('aria-pressed',String(i===picked));
+   n.button.textContent='+';n.button.disabled=l?(s.passive||l>=max||points<1):!open;
+   n.button.title=n.button.disabled?(l&&(s.passive||l>=max)?reasons['skill-max']:!l&&!open?reasons['skill-locked']:reasons['no-skill-points']):'อัปสกิล '+s.name;
   });
   const s=world.skills[picked],l=lv[picked]??(isMaster(picked)?0:1),now=scaledSkill(s,Math.max(1,l)),next=!s.passive&&l>=1&&l<max?scaledSkill(s,l+1):null;
   const need=req(picked).map(([r,rl])=>`<li class="${(lv[r]??0)>=rl?'met':''}">${(lv[r]??0)>=rl?'✓':'✗'} ${world.skills[r].name} ขั้น ${rl} <small>(ตอนนี้ ${lv[r]??0})</small></li>`).join('');

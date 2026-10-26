@@ -5,7 +5,7 @@ import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progr
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing} from './combat-animation165.js?v=align169';
 import {createLiveRoleVfx} from './role-skill-vfx.js?v=align169';
-import {createRolePlayUI} from './role-play-ui.js?v=death178';
+import {createRolePlayUI} from './role-play-ui.js?v=death-theme179';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';

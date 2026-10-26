@@ -18,3 +18,5 @@ Validation:
 - Screenshots and result JSON: outputs/death178/.
 
 No production accounts were used or modified. This change has not been pushed.
+
+Theme follow-up (death-theme179): uses the game's existing ui63 gold-lotus window and button artwork, ui-kit jade pattern, and Ayothaya emblem. Nine-slice borders keep corners undistorted. Static build and all 8 real-browser checks passed again across 7 viewport sizes; desktop and landscape screenshots visually reviewed.

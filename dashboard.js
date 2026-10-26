@@ -2,6 +2,7 @@ import {multiplayerURL} from './multiplayer-config.js?v=28';
 import {CHANNELS} from './realm-state.js?v=21';
 import {connectFirebase, deadline} from './firebase-client.js';
 import {costExpenseDraft,monthlyBillableCosts,financeDay} from './dashboard-finance172.js';
+import {saveSlip,getSlip,deleteSlip,exportSlips,importSlips,uploadSlip,setSlipCloud} from './dashboard-slips.js?v=2';
 
 export const ALLOWED_ADMINS = ['chokkungfn@gmail.com'];
 export const DO_SERVER_URL = 'https://hammerhead-app-nhswh.ondigitalocean.app';
@@ -281,7 +282,7 @@ function loadCosts(){
  return structuredClone(DEFAULT_COSTS);
 }
 function saveCosts(list){
- localStorage.setItem(COSTS_KEY,JSON.stringify(list));
+ localStorage.setItem(COSTS_KEY,JSON.stringify(list));queueCloud();
 }
 let costs=loadCosts();
 
@@ -428,7 +429,7 @@ function loadLedger(){
  return structuredClone(DEFAULT_LEDGER);
 }
 function saveLedger(list){
- localStorage.setItem(LEDGER_KEY,JSON.stringify(list));
+ localStorage.setItem(LEDGER_KEY,JSON.stringify(list));queueCloud();
 }
 let ledger=loadLedger();
 function ensureLedgerTypeVisible(type){
@@ -500,7 +501,7 @@ function renderLedger(){
  const visible=ledger.filter(tx=>currentTxFilter==='all'||tx.type===currentTxFilter);
  if(!visible.length){
   const tr=document.createElement('tr');
-  tr.innerHTML='<td colspan="8" style="text-align:center;color:var(--muted);padding:18px">ยังไม่มีรายการในหมวดนี้</td>';
+  tr.innerHTML='<td colspan="9" style="text-align:center;color:var(--muted);padding:18px">ยังไม่มีรายการในหมวดนี้</td>';
   tbody.append(tr);
   return;
  }
@@ -518,16 +519,18 @@ function renderLedger(){
    <td><span class="money-cell"><span class="money-unit ${isInc?'txt-jade':'txt-danger'}">${isInc?'+':'-'}</span><input type="number" step="0.01" min="0" class="inline-num inp-tx-amount" value="${Number(tx.amount||0)}"><span class="money-unit">฿</span></span></td>
 
 
-
+   <td class="slip-cell"></td>
    <td><button type="button" class="btn-del">ลบ</button></td>
   `;
   tr.querySelector('.tx-cat-cell').textContent=tx.category||'';
+  tr.querySelector('.slip-cell').append(slipButton(tx));
   const pInp=tr.querySelector('.inp-tx-payer');pInp.value=tx.payer||'';pInp.oninput=e=>{tx.payer=e.target.value;saveLedger(ledger);updateLedgerSummary();};
   const tInp=tr.querySelector('.inp-tx-title');tInp.value=trText(tx.title||'');tInp.onchange=e=>{tx.title=e.target.value.trim();saveLedger(ledger);};
   const nInp=tr.querySelector('.inp-tx-note');nInp.value=trText(tx.note||'');nInp.onchange=e=>{tx.note=e.target.value.trim();saveLedger(ledger);};
   const aInp=tr.querySelector('.inp-tx-amount');aInp.oninput=e=>{tx.amount=Math.max(0,Number(e.target.value||0));saveLedger(ledger);updateLedgerSummary();};
 
   tr.querySelector('.btn-del').onclick=()=>{
+   if(tx.slip)deleteSlip(tx.id).catch(()=>{});
    ledger=ledger.filter(x=>x.id!==tx.id);
    saveLedger(ledger);
    renderLedger();
@@ -536,10 +539,12 @@ function renderLedger(){
  }
 }
 
-$('tx-form').onsubmit=e=>{
+$('tx-form').onsubmit=async e=>{
  e.preventDefault();
+ const id='tx-'+Date.now(),file=$('tx-slip').files?.[0];let slip=null;
+ if(file){try{$('tx-status').textContent='กำลังบันทึกสลิป…';slip=await saveSlip(id,file);}catch(err){$('tx-status').textContent=SLIP_ERRORS[err.message]??'บันทึกสลิปไม่สำเร็จ · '+err.message;return;}}
  ledger.unshift({
-  id:'tx-'+Date.now(),
+  id,...(slip?{slip}:{}),
   type:$('tx-type').value,
   date:$('tx-date').value||financeDay(),
   category:$('tx-category').value,
@@ -555,7 +560,8 @@ $('tx-form').onsubmit=e=>{
  if($('tx-payer'))$('tx-payer').value='';
  $('tx-amount').value='';
  $('tx-note').value='';
- $('tx-status').textContent='บันทึกรายการเรียบร้อยแล้ว';
+ $('tx-slip').value='';$('tx-slip-preview').hidden=true;$('tx-slip-preview').replaceChildren();
+ $('tx-status').textContent=slip?'บันทึกรายการพร้อมสลิปแล้ว':'บันทึกรายการเรียบร้อยแล้ว';
 };
 
 $('btn-record-monthly-cost').onclick=()=>{
@@ -584,8 +590,9 @@ document.querySelectorAll('[data-tx-filter]').forEach(btn=>{
  };
 });
 
-$('btn-export-tx').onclick=()=>{
- const payload=JSON.stringify({costs,ledger,exportedAt:new Date().toISOString()},null,2);
+$('btn-export-tx').onclick=async()=>{
+ const slips=await exportSlips(ledger.filter(tx=>tx.slip).map(tx=>tx.id)).catch(()=>({}));
+ const payload=JSON.stringify({costs,ledger,slips,exportedAt:new Date().toISOString()},null,2);
  const blob=new Blob([payload],{type:'application/json'});
  const a=document.createElement('a');
  a.href=URL.createObjectURL(blob);
@@ -600,10 +607,104 @@ $('input-import-tx').onchange=async e=>{
  try{
   const parsed=JSON.parse(await file.text());
   if(Array.isArray(parsed.costs)){costs=parsed.costs;saveCosts(costs);renderCosts();}
+  if(parsed.slips)await importSlips(parsed.slips).catch(()=>0);
   if(Array.isArray(parsed.ledger)){ledger=parsed.ledger;saveLedger(ledger);renderLedger();}
  }catch{}
  e.target.value='';
 };
+
+// 0.116 shared books: the game server keeps one copy of the costs, the ledger and the slips for every admin browser.
+// localStorage stays as this browser's cache (the page still works if the server is down) and edits sync ~1 s later.
+const CLOUD_API=['127.0.0.1','localhost'].includes(location.hostname)?'':multiplayerURL().replace(/^ws/,'http').replace(/\/realtime$/,'');
+const JOIN_KEY='ayothaya-dashboard-cloud-joined-v1';
+let cloudRev=null,pushTimer=0,pushing=false,dirty=false;
+async function financeFetch(p,body){
+ const headers={'Content-Type':'application/json'};
+ if(CLOUD_API){const u=fbConn?.auth.currentUser;if(!u)throw Error('need-login');headers.Authorization='Bearer '+await u.getIdToken();}
+ const r=await fetch(CLOUD_API+p,{method:body?'POST':'GET',headers,body:body&&JSON.stringify(body)}),j=await r.json().catch(()=>({}));
+ if(!r.ok)throw Object.assign(Error(j.error??String(r.status)),{data:j});return j;
+}
+setSlipCloud({put:(id,type,data)=>financeFetch('/admin/finance/slip',{id,type,data}),get:async id=>{try{return await financeFetch('/admin/finance/slip?id='+encodeURIComponent(id));}catch(e){if(e.message==='slip-missing')return null;throw e;}},del:id=>financeFetch('/admin/finance/slip-delete',{id})});
+const clock=t=>new Date(t).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+function setSync(text,kind='ok'){
+ for(const host of ['sec-costs-title','sec-ledger-title']){const h=$(host);if(!h)continue;let el=h.parentElement.querySelector('.finance-sync');if(!el){el=document.createElement('p');el.className='finance-sync';el.setAttribute('role','status');h.after(el);}el.textContent=text;el.dataset.kind=kind;}
+}
+function adopt(books){
+ costs=Array.isArray(books.costs)?books.costs:[];ledger=Array.isArray(books.ledger)?books.ledger:[];cloudRev=books.rev??0;
+ localStorage.setItem(COSTS_KEY,JSON.stringify(costs));localStorage.setItem(LEDGER_KEY,JSON.stringify(ledger));
+ renderCosts();renderLedger();
+}
+function queueCloud(){if(cloudRev===null)return;dirty=true;clearTimeout(pushTimer);pushTimer=setTimeout(pushCloud,800);setSync('กำลังบันทึกขึ้นคลาวด์…','wait');}
+async function pushCloud(){
+ if(cloudRev===null)return;
+ if(pushing){clearTimeout(pushTimer);pushTimer=setTimeout(pushCloud,800);return;} // an edit landed mid-save: go again after it
+ pushing=true;dirty=false;let retry=false;
+ try{const {books}=await financeFetch('/admin/finance',{baseRev:cloudRev,costs,ledger});cloudRev=books.rev;if(!dirty)setSync('☁ บันทึกบนคลาวด์แล้ว · ทุกเครื่องเห็นตรงกัน · '+clock(books.updatedAt));}
+ catch(e){
+  if(e.message==='finance-stale'&&e.data?.books){adopt(e.data.books);setSync('มีการแก้จากอีกเครื่องก่อนหน้า · โหลดฉบับล่าสุดแล้ว กรุณาตรวจรายการที่เพิ่งแก้อีกครั้ง','bad');}
+  else{retry=true;setSync('บันทึกขึ้นคลาวด์ไม่สำเร็จ ('+e.message+') · เก็บในเครื่องไว้ก่อน จะลองใหม่','bad');}
+ }finally{pushing=false;if(retry){dirty=true;clearTimeout(pushTimer);pushTimer=setTimeout(pushCloud,10000);}}
+}
+// Slips attached while offline (or before 0.116) go up now; rows remember which ones made it.
+async function uploadPendingSlips(){
+ let changed=false;for(const tx of ledger)if(tx.slip&&!tx.slip.cloud&&await uploadSlip(tx.id)){tx.slip.cloud=true;changed=true;}
+ if(changed)saveLedger(ledger);
+}
+async function connectCloud(){
+ setSync('กำลังเชื่อมคลาวด์…','wait');
+ try{
+  const {books}=await financeFetch('/admin/finance'),joined=localStorage.getItem(JOIN_KEY)==='1';
+  // This browser's own rows that the cloud lacks join once (first connection); after that the cloud is the truth.
+  const mine=key=>localStorage.getItem(key)?JSON.parse(localStorage.getItem(key)):[];
+  const merge=(base,extra)=>{const have=new Set(base.map(r=>r.id));return [...base,...extra.filter(r=>r?.id&&!have.has(r.id))];};
+  if(!books){cloudRev=0;costs=merge([],costs);}
+  else if(!joined){adopt({...books,costs:merge(books.costs,mine(COSTS_KEY)),ledger:merge(books.ledger,mine(LEDGER_KEY))});}
+  else adopt(books);
+  localStorage.setItem(JOIN_KEY,'1');
+  await uploadPendingSlips();
+  if(!books||!joined)await pushCloud();else setSync('☁ ข้อมูลจากคลาวด์ · ทุกเครื่องเห็นตรงกัน · '+clock(books.updatedAt));
+ }catch(e){cloudRev=null;setSync('เชื่อมคลาวด์ไม่ได้ ('+e.message+') · ตอนนี้ใช้ข้อมูลในเครื่องนี้','bad');}
+}
+// Pick up edits made on another machine while this page sits open.
+setInterval(async()=>{
+ if(document.hidden||cloudRev===null||dirty||pushing)return;
+ try{const {books}=await financeFetch('/admin/finance');if(books&&books.rev>cloudRev&&!dirty&&!pushing){adopt(books);setSync('☁ อัปเดตจากอีกเครื่อง · '+clock(books.updatedAt));}}catch{}
+},45000);
+
+// 0.115.2 transfer slips: attach in the form or later from the row; click the thumbnail to view, replace or remove.
+const SLIP_ERRORS={'slip-type':'แนบได้เฉพาะรูปภาพหรือ PDF','slip-too-big':'ไฟล์ใหญ่เกินไป · PDF ได้ไม่เกิน 640 KB (แคปหน้าจอแทนได้)','slip-encode':'อ่านรูปนี้ไม่ได้ · ลองแคปหน้าจอใหม่'};
+const slipURLs=new Map();
+async function slipURL(id){if(!slipURLs.has(id)){const b=await getSlip(id);slipURLs.set(id,b?URL.createObjectURL(b):null);}return slipURLs.get(id);}
+function forgetSlipURL(id){const u=slipURLs.get(id);if(u)URL.revokeObjectURL(u);slipURLs.delete(id);}
+function pickFile(){return new Promise(ok=>{const i=document.createElement('input');i.type='file';i.accept='image/*,application/pdf';i.onchange=()=>ok(i.files?.[0]??null);i.click();});}
+async function attachSlip(tx,file){
+ try{tx.slip=await saveSlip(tx.id,file);if(!tx.slip.cloud&&cloudRev!==null)setSync('สลิปเก็บในเครื่องนี้ก่อน · จะอัปขึ้นคลาวด์อีกครั้งตอนเชื่อมได้','bad');forgetSlipURL(tx.id);saveLedger(ledger);renderLedger();$('tx-status').textContent='แนบสลิปแล้ว · '+(tx.title||'');}
+ catch(err){$('tx-status').textContent=SLIP_ERRORS[err.message]??'แนบสลิปไม่สำเร็จ · '+err.message;}
+}
+function slipButton(tx){
+ const b=document.createElement('button');b.type='button';
+ if(!tx.slip){b.className='slip-add';b.textContent='+ แนบ';b.title='แนบสลิปโอนให้รายการนี้';b.onclick=async()=>{const f=await pickFile();if(f)attachSlip(tx,f);};return b;}
+ b.className='slip-thumb';b.title='ดูสลิป';b.textContent=tx.slip.type==='application/pdf'?'PDF':'🧾';
+ if(tx.slip.type!=='application/pdf')slipURL(tx.id).then(u=>{if(u){b.textContent='';b.style.backgroundImage='url("'+u+'")';}else b.textContent='?';});
+ b.onclick=()=>openSlip(tx);return b;
+}
+let slipDialog=null;
+async function openSlip(tx){
+ if(!slipDialog){slipDialog=document.createElement('dialog');slipDialog.className='slip-dialog';document.body.append(slipDialog);slipDialog.onclick=e=>{if(e.target===slipDialog)slipDialog.close();};}
+ const url=await slipURL(tx.id),pdf=tx.slip.type==='application/pdf';
+ const body=!url?'<p>ไม่พบไฟล์สลิปในเบราว์เซอร์นี้ · แนบใหม่ได้</p>':pdf?`<iframe title="สลิป PDF" src="${url}"></iframe>`:`<img alt="สลิปโอน" src="${url}">`;
+ const download=url?`<a class="btn-secondary" href="${url}" download="slip-${tx.date||''}-${tx.id}${pdf?'.pdf':'.jpg'}">ดาวน์โหลด</a>`:'';
+ slipDialog.innerHTML=`<header><div><b></b><small></small></div><button type="button" data-x aria-label="ปิด">×</button></header><div class="slip-body">${body}</div><footer>${download}<button type="button" class="btn-secondary" data-replace>เปลี่ยนสลิป</button><button type="button" class="btn-del" data-remove>ลบสลิป</button></footer>`;
+ slipDialog.querySelector('b').textContent=(tx.title||'สลิปโอน')+' · '+formatMoney(Number(tx.amount||0));
+ slipDialog.querySelector('small').textContent=[tx.date,tx.payer,tx.slip.name].filter(Boolean).join(' · ');
+ slipDialog.querySelector('[data-x]').onclick=()=>slipDialog.close();
+ slipDialog.querySelector('[data-replace]').onclick=async()=>{const f=await pickFile();if(f){slipDialog.close();attachSlip(tx,f);}};
+ slipDialog.querySelector('[data-remove]').onclick=async()=>{if(!confirm('ลบสลิปของรายการนี้?'))return;await deleteSlip(tx.id).catch(()=>{});forgetSlipURL(tx.id);delete tx.slip;saveLedger(ledger);slipDialog.close();renderLedger();};
+ slipDialog.showModal();
+}
+$('tx-slip').onchange=()=>{const f=$('tx-slip').files?.[0],box=$('tx-slip-preview');box.replaceChildren();box.hidden=!f;if(!f)return;
+ if(f.type.startsWith('image/')){const img=document.createElement('img');img.alt='';img.src=URL.createObjectURL(f);img.onload=()=>URL.revokeObjectURL(img.src);box.append(img);}
+ const name=document.createElement('span');name.textContent=f.name;const x=document.createElement('button');x.type='button';x.textContent='เอาออก';x.onclick=()=>{$('tx-slip').value='';box.hidden=true;box.replaceChildren();};box.append(name,x);};
 
 let fbConn=null;
 let pollTimer=null;
@@ -616,6 +717,7 @@ function startDashboard(user){
  if(badge)badge.textContent='👤 '+user.email;
  renderCosts();
  renderLedger();
+ connectCloud();
  renderServerPanel({totalPlayers:0,rooms:[],uptimeSeconds:0,bandwidth:{bytesSent:0},logs:[]});
  pollServer();
  if(!pollTimer)pollTimer=setInterval(pollServer,5000);

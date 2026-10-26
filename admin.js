@@ -15,7 +15,7 @@ import {iconStyle} from './bag-ui.js?v=107';
 import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
 import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=novice174';
-import {WEATHERS} from './weather.js?v=97';
+import {WEATHERS} from './weather.js?v=181';
 import {deriveStats} from './character-stats.js';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 

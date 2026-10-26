@@ -2,7 +2,7 @@
 // a few seconds when the weather turns. One LineSegments draw for all the rain; the drop count follows graphics quality.
 import {announce} from './announcement-ui.js?v=149';
 import * as THREE from 'three';
-import {weatherAt,WEATHERS} from './weather.js?v=97';
+import {weatherAt,WEATHERS} from './weather.js?v=181';
 // ?weather=storm (or drizzle / mist / clear) previews one weather on this page only.
 const forced=WEATHERS[new URLSearchParams(location.search).get('weather')]?new URLSearchParams(location.search).get('weather'):null;
 // 0.109.7 a back-office override (sent with every snapshot) wins over the clock roll on outdoor maps until it ends

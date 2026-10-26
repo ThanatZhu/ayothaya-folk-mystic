@@ -9,7 +9,7 @@ export function skillPage(slots,page=0,size=4){
 }
 export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  const body=document.body,$=id=>document.getElementById(id),query=matchMedia('(any-pointer:coarse),(max-width:900px)');
- const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=channel144';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=rail1161d';document.head.append(css);
  const skills=$('skills'),bank=$('skill-bank'),nav=$('game-menu'),toggle=$('menu-toggle'),quest=$('quest-tracker');
  const oldBank=bank?.onclick;let page=0,refreshing=false,skillSignature='',combatLayout=null;
  const online=$('online-button'),onlineHome=document.createComment('online chip home');if(online)online.before(onlineHome);
@@ -29,7 +29,10 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  const minimap=document.querySelector('.mini-panel');
  const railSize=()=>{
   const bottom=query.matches?Math.max(profile?.getBoundingClientRect().bottom??0,rail.getBoundingClientRect().bottom):0;
-  body.style.setProperty('--mobile-profile-bottom',bottom+'px');if(!minimap)return;
+  body.style.setProperty('--mobile-profile-bottom',bottom+'px');
+  // 0.116.1 the event icons can wrap to a second row: the target bar, quest panel and notices start below them
+  const iconsBottom=query.matches?Math.max(0,...[rail,events].filter(n=>!n.hidden).map(n=>n.getBoundingClientRect()).filter(r=>r.height).map(r=>r.bottom)):0;
+  body.style.setProperty('--mobile-rail-bottom',iconsBottom+'px');if(!minimap)return;
   const r=minimap.getBoundingClientRect();body.style.setProperty('--events-top',(r.bottom+8)+'px');
   const channelBounds=channel?.getBoundingClientRect(),profileEnd=Math.max(profile?.getBoundingClientRect().right??0,channelBounds?.right??0),discordLeft=r.left-52;
   for(const [name,value] of Object.entries({'--mobile-map-bottom':r.bottom,'--mobile-map-left':r.left,'--mobile-map-right':innerWidth-r.right,'--mobile-map-width':r.width,'--mobile-discord-left':discordLeft,'--mobile-event-width':Math.max(44,discordLeft-profileEnd-12)}))body.style.setProperty(name,value+'px');
@@ -40,7 +43,7 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
   body.style.setProperty('--channel-map-left',(r.left+4)+'px');
   body.style.setProperty('--channel-map-width',Math.min(144,Math.max(44,end-r.left-4))+'px');
  };
- new ResizeObserver(railSize).observe(rail);
+ new ResizeObserver(railSize).observe(rail);new ResizeObserver(railSize).observe(events);
  if(minimap)new ResizeObserver(railSize).observe(minimap);
  const arrows='<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M26 12a11 11 0 0 0-19-4L4 12m0-7v7h7M6 20a11 11 0 0 0 19 4l3-4m0 7v-7h-7"/></svg>';
  if(dockToggle){const image=document.createElement('img');image.className='chat-drawer-art';image.src='./assets/ui-mobile/chat-drawer-v1.png';image.alt='';image.width=64;image.height=64;dockToggle.append(image);}

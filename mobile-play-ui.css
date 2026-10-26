@@ -72,23 +72,26 @@ body.mobile-play #mobile-menu-backdrop:not([hidden]){display:block;position:fixe
 #mobile-panel-backdrop{display:none}body.mobile-play #mobile-panel-backdrop:not([hidden]){display:block;position:fixed;inset:0;z-index:44;background:#06140d99}
 body.mobile-play #npc-dialog:not([hidden]),body.mobile-play #account-panel:not([hidden]),body.mobile-play dialog[open]{z-index:46!important}
 body.mobile-play.field-hud.hud63:is(.mobile-menu-open,.mobile-panel-open,.mobile-chat-open,.chat-typing) :is(.combat-controls,#joystick,#quick-slots,#interact){visibility:hidden!important;pointer-events:none!important}
-body.mobile-play.field-hud.hud63 .target-panel{left:calc(var(--edge) + 198px)!important;right:calc(var(--edge-r) + 144px)!important;top:var(--edge-t)!important;width:auto!important;transform:none!important}
+body.mobile-play.field-hud.hud63 .target-panel{left:calc(var(--edge) + 198px)!important;right:calc(var(--edge-r) + 144px)!important;top:max(var(--edge-t),calc(var(--mobile-rail-bottom,0px) + 6px))!important;width:auto!important;transform:none!important}
 body.mobile-play.field-hud .mob-label:not(.selected) span{display:none!important}
 body.mobile-play.field-hud .mob-label{width:48px!important}
 body.mobile-play.field-hud .mob-label[data-full-health]:not(.selected,.boss,.leader){visibility:hidden!important;pointer-events:none}
 body.mobile-play.field-hud.hud63 .experience-bars{height:4px!important;bottom:0!important;left:0!important;right:0!important;pointer-events:none}
 body.mobile-play.field-hud.hud63 .experience-bars span{display:none!important}
-body.mobile-play.field-hud.hud63 #notice{top:calc(var(--edge-t) + 154px)!important;max-width:70vw!important;pointer-events:none}
+body.mobile-play.field-hud.hud63 #notice{top:max(calc(var(--edge-t) + 154px),calc(var(--mobile-rail-bottom,0px) + 70px))!important;max-width:70vw!important;pointer-events:none}
 body.mobile-play dialog::backdrop{background:#06140dbb}
+/* 0.116.1 the server news ribbon stays clear of the target bar under the event icons */
+html body.mobile-play.field-hud.hud63 #realm-announcement{top:max(clamp(112px,22vh,238px),calc(var(--mobile-rail-bottom,0px) + 70px));width:max(180px,min(52vw,calc(100vw - 440px)))}
 @media(orientation:portrait){
  body.mobile-play.field-hud.hud63{--touch-map:72px;--touch-pad:172px;--touch-slot:48px}
  body.mobile-play.field-hud.hud63 .player-panel{width:calc(100vw - var(--edge) - var(--edge-r) - 136px)!important;max-width:210px}
  body.mobile-play.field-hud.hud63 #menu-toggle{right:var(--edge-r)!important;top:calc(var(--edge-t) + var(--touch-map) + 10px)!important}
- body.mobile-play.field-hud.hud63 .target-panel{left:var(--edge)!important;right:var(--edge-r)!important;top:calc(var(--edge-t) + 150px)!important;width:auto!important;max-width:230px;max-height:58px}
+ body.mobile-play.field-hud.hud63 .target-panel{left:var(--edge)!important;right:var(--edge-r)!important;top:max(calc(var(--edge-t) + 150px),calc(var(--mobile-rail-bottom,0px) + 6px))!important;width:auto!important;max-width:230px;max-height:58px}
+ html body.mobile-play.field-hud.hud63 #activity-dock:not(#_){top:max(clamp(98px,28vh,210px),calc(var(--mobile-rail-bottom,0px) + 70px),calc(var(--edge-t) + 214px))!important}
  body.mobile-play.field-hud.hud63 #online-dock.collapsed{left:var(--edge)!important;right:var(--edge-r)!important;bottom:calc(var(--touch-bottom) + 236px)!important}
  body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed){left:var(--edge)!important;right:var(--edge-r)!important;bottom:calc(var(--touch-bottom) + 12px)!important;max-height:calc(var(--visible-height,100dvh) - var(--edge-t) - var(--touch-bottom) - 132px)!important}
  body.mobile-play.field-hud.hud63 #interact{bottom:calc(var(--touch-bottom) + 220px)!important}
- body.mobile-play.field-hud.hud63 #notice{top:calc(var(--edge-t) + 210px)!important}
+ body.mobile-play.field-hud.hud63 #notice{top:max(calc(var(--edge-t) + 210px),calc(var(--mobile-rail-bottom,0px) + 70px))!important}
 }
 @media(orientation:landscape) and (max-height:360px){
  body.mobile-play.field-hud.hud63{--touch-bottom:max(10px,env(safe-area-inset-bottom))}

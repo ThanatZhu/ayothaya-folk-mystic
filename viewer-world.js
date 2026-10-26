@@ -56,7 +56,7 @@ import {createFeedback} from './feedback.js?v=audio180';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=podium153';
 import {createCbtEventUI} from './cbt-event-ui.js?v=cbt172';
 import {createMarketBoardUI} from './market-board-ui.js?v=shops155';
-import {createHud63} from './hud-63.js?v=combat151';
+import {createHud63} from './hud-63.js?v=1161d';
 import {bindRenderLifecycle} from './render-lifecycle.js';
 import {resolveMap} from './world-state.js?v=quest173';
 import {prepareSceneV2,disposeScene,MOODS,moodOf} from './scene-v2.js?v=light159';
@@ -75,7 +75,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=maps182');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps183');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);

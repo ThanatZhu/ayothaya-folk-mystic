@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="th"><head><script src="./i18n-en.js?v=admin166"></script><script src="./i18n.js?v=103"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<html lang="th"><head><script src="./i18n-en.js?v=admin167"></script><script src="./i18n.js?v=103"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>หลังบ้านอโยธยา (Admin)</title>
 <link rel="stylesheet" href="./typography.css?v=10">
 <link rel="stylesheet" href="./admin.css?v=110.1">
-<link rel="stylesheet" href="backoffice-luxury.css?v=126"><link rel="stylesheet" href="admin-usability.css?v=128"></head><body class="luxury-office">
+<link rel="stylesheet" href="backoffice-luxury.css?v=126"><link rel="stylesheet" href="admin-usability.css?v=128"><link rel="stylesheet" href="admin-v2.css?v=4"></head><body class="luxury-office">
 <!-- Security Gate (Visible before login) -->
 <div id="auth-gate" class="auth-gate">
  <div class="gate-visual"><a class="bo-mark" href="./"><img src="assets/brand69/ayothaya-emblem.png" alt="">AYOTHAYA <span>FOLK MYSTIC</span></a><p class="eyebrow">THE KEEPERS OF AYOTHAYA</p><h1>เบื้องหลัง<br>ทุกการผจญภัย<span>ดูแลโลกแห่งอโยธยา</span></h1><p>ดูแลผู้เล่น เรื่องราว และทุกความเป็นไป<br>ในโลกที่เราร่วมกันสร้าง</p></div><div class="gate-card">
@@ -21,20 +21,21 @@
 
 <div class="app" id="app-shell" hidden style="display:none !important">
  <aside class="side">
-  <a class="bo-mark side-brand" href="./"><img src="assets/brand69/ayothaya-emblem.png" alt=""><span>AYOTHAYA<small>FOLK MYSTIC · BACK OFFICE</small></span></a>
-  <nav class="tabs" id="tabs" aria-label="หมวดข้อมูล"></nav>
-  <p class="side-note">💡 ชี้เมาส์ที่รูปไอเท็มเพื่อดูค่าสเตตัส</p>
+  <a class="bo-mark side-brand" href="./"><img src="assets/brand69/ayothaya-emblem.png" alt=""><span>AYOTHAYA<small>BACK OFFICE</small></span></a>
+  <nav class="tabs" id="tabs" aria-label="เมนูหลังบ้าน"></nav>
+  <div class="side-foot">
+   <span id="admin-user-badge" class="admin-badge"></span>
+   <div class="actions" id="account-actions">
+    <a class="side-link" href="ayothaya-vault-9x7k.html" target="_blank" rel="noopener">📈 แดชบอร์ด</a>
+    <button type="button" data-lang-toggle>🌐 เปลี่ยนเป็น English (EN)</button>
+    <button type="button" id="btn-logout" class="btn-logout">ออกจากระบบ</button>
+   </div>
+  </div>
  </aside>
- <div class="main"><section class="bo-hero"><div><p class="eyebrow">01 / REALM MANAGEMENT</p><h2>ประตูหลัง<br><em>แห่งอโยธยา</em></h2><p>ดูแลผู้เล่น · ปรับสมดุล · สร้างการผจญภัย</p></div><span class="bo-seal">AYOTHAYA<br>FOLK MYSTIC</span></section>
+ <div class="main">
   <header class="bar">
    <div class="page"><h1 id="page-title">หลังบ้านอโยธยา</h1><p id="page-help"></p></div>
-   <div class="actions">
-    <span id="admin-user-badge" class="admin-badge"></span>
-    <button type="button" id="btn-logout" class="btn-logout">ออกจากระบบ</button>
-    <a class="gate-back" href="ayothaya-vault-9x7k.html" target="_blank" rel="noopener">แดชบอร์ด</a>
-    <div class="actions" id="save-actions"><span id="changes" aria-live="polite"></span><button type="button" id="reset-all">ยกเลิกที่แก้</button><details class="admin-advanced"><summary>เครื่องมือเพิ่มเติม</summary><button type="button" id="copy-json" title="คัดลอกค่าที่แก้เป็นข้อความ">คัดลอก JSON</button></details><button type="button" id="save" class="primary">💾 บันทึกเข้าเกม</button></div>
-    <button type="button" data-lang-toggle>🌐 เปลี่ยนเป็น English (EN)</button>
-   </div>
+   <div class="actions" id="save-actions"><span id="changes" aria-live="polite"></span><button type="button" id="reset-all">ยกเลิกที่แก้</button><details class="admin-advanced"><summary>เครื่องมือเพิ่มเติม</summary><button type="button" id="copy-json" title="คัดลอกค่าที่แก้เป็นข้อความ">คัดลอก JSON</button></details><button type="button" id="save" class="primary">💾 บันทึกเข้าเกม</button></div>
   </header>
   <p id="status" class="status" role="status"></p>
   <section class="filters" id="filters"></section>
@@ -42,5 +43,5 @@
  </div>
 </div>
 <div id="tip" role="tooltip" hidden></div>
-<script type="module" src="./admin.js?v=admin166"></script>
+<script type="module" src="./admin.js?v=admin168"></script>
 </body></html>

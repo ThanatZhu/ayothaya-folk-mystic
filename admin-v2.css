@@ -1,0 +1,76 @@
+/* 0.115 back office shell: one compact grouped menu, account tools at its foot, one sticky page header with the
+   save tools, and one look for every input. Loaded last; page contents keep their own styles. Palette = landing. */
+.luxury-office{--side-w:236px;--field:#0b1c16;--hover:#dfbd760d}
+.luxury-office .app{grid-template-columns:var(--side-w) minmax(0,1fr)}
+
+/* Side menu */
+.luxury-office .side{position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;gap:0;padding:18px 12px 14px;overflow:hidden}
+.luxury-office .side-brand{padding:0 6px 16px;margin-bottom:6px;font-size:13px;flex:none}
+.luxury-office .side-brand img{width:30px;height:36px}
+.luxury-office .side .tabs{display:block;flex:1;min-height:0;overflow-y:auto;margin:0 -4px;padding:0 4px;scrollbar-width:thin}
+.luxury-office .nav-group{margin:16px 8px 6px;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--gold);opacity:.85}
+.luxury-office .nav-group:first-child{margin-top:4px}
+.luxury-office .side .tabs button{display:flex;align-items:center;gap:10px;width:100%;min-height:40px;padding:6px 10px;margin:1px 0;border:0;border-left:2px solid transparent;border-radius:6px;background:transparent;color:var(--muted);text-align:left;font-size:13px}
+.luxury-office .side .tabs button i{font-style:normal;font-size:16px;width:22px;text-align:center;opacity:.9}
+.luxury-office .side .tabs button b{font-weight:500;color:inherit;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.luxury-office .side .tabs button:hover{background:var(--hover);color:var(--ink)}
+.luxury-office .side .tabs button[aria-pressed=true]{background:#dfbd7617;border-left-color:var(--gold);color:var(--ink)}
+.luxury-office .side .tabs button[aria-pressed=true] b{font-weight:700;color:var(--gold-bright)}
+
+.luxury-office .side-foot{flex:none;display:grid;gap:8px;padding-top:12px;margin-top:8px;border-top:1px solid var(--rule)}
+.luxury-office .side-foot .admin-badge{display:block;font-size:11px;color:var(--muted);padding:6px 8px;border:0;background:transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.luxury-office .side-foot .actions{display:grid;gap:6px;margin:0}
+.luxury-office .side-foot .actions>*{width:100%;min-height:36px;padding:6px 10px;font-size:12px;border-radius:6px;justify-content:flex-start;text-align:left}
+.luxury-office .side-link{display:flex;align-items:center;color:var(--muted);border:1px solid var(--rule);text-decoration:none}
+.luxury-office .side-link:hover,.luxury-office .side-foot button:hover{color:var(--ink);background:var(--hover)}
+.luxury-office .side-foot .btn-logout{color:#e7a39a;border-color:#e7a39a44;background:transparent}
+
+/* Page header: title + one-line help on the left, save tools on the right, stays on top while scrolling */
+.luxury-office .main{padding:0 32px 56px}
+.luxury-office .main>.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0 -32px 16px;padding:18px 32px 14px;background:#0b1a17f2;backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+.luxury-office .bar .page h1{font-size:22px;line-height:1.4;color:var(--ink);margin:0}
+.luxury-office .bar .page p{margin:2px 0 0;max-width:620px;font-size:12px;line-height:1.7;color:var(--muted)}
+.luxury-office #save-actions{display:flex;align-items:center;gap:8px;margin:0}
+.luxury-office #save-actions>button,.luxury-office #save-actions summary{min-height:38px;font-size:12px;padding:6px 14px;border-radius:6px}
+.luxury-office #changes{font-size:12px;color:var(--muted);padding:6px 10px;border-radius:6px}
+.luxury-office #changes.dirty{color:var(--gold-bright);background:#dfbd7614;border:1px solid #dfbd7655}
+.luxury-office .status{margin:0 0 12px;padding:10px 14px;border-radius:6px;font-size:13px;background:#b2d6bf10}
+.luxury-office .status.bad{background:#e7a39a14}
+
+/* Filters row */
+.luxury-office .filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:0 0 14px;margin:0 0 16px;font-size:12px}
+.luxury-office .filters:empty{display:none}
+.luxury-office .filters small{color:var(--muted);font-size:11px}
+
+/* One look for every field and button inside the pages */
+.luxury-office .main input:not([type=checkbox]):not([type=radio]):not([type=range]),.luxury-office .main select,.luxury-office .main textarea{min-height:38px;padding:6px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--field);color:var(--ink);font:inherit;font-size:13px}
+.luxury-office .main input:focus,.luxury-office .main select:focus,.luxury-office .main textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px #dfbd7633}
+.luxury-office .main input::placeholder{color:#8f9a8c}
+.luxury-office .main input[type=number]{font-variant-numeric:tabular-nums}
+.luxury-office .main input.edited{border-color:var(--gold);background:#dfbd7614;color:var(--gold-bright)}
+.luxury-office .main button{min-height:38px;border-radius:6px;font-size:12px}
+
+/* Cards: a little denser; pictures are painted a moment after the card, so never flash their alt text */
+.luxury-office .admin-monster-art{color:transparent;font-size:0}
+.luxury-office .admin-entity-grid{gap:12px}
+.luxury-office .admin-entity-card{padding:14px;border-radius:8px}
+.luxury-office .admin-entity-card>header{min-height:84px;padding-bottom:10px;margin-bottom:12px}
+.luxury-office .admin-entity-grid .admin-monster-art{width:84px;height:88px}
+
+/* Phones and narrow windows: the menu becomes a scrolling strip above the page */
+@media (max-width:900px){
+ .luxury-office .app{grid-template-columns:1fr}
+ .luxury-office .side{position:static;height:auto;padding:12px 12px 8px;border-right:0;border-bottom:1px solid var(--rule)}
+ .luxury-office .side-brand{padding-bottom:10px}
+ .luxury-office .side .tabs{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;margin:0;padding:0 0 6px}
+ .luxury-office .nav-group{display:none}
+ .luxury-office .side .tabs button{flex:none;flex-direction:row;width:auto;gap:6px;border-left:0;border:1px solid var(--rule);border-radius:999px;min-height:36px;padding:4px 12px}
+ .luxury-office .side .tabs button i{width:auto;font-size:14px}
+ .luxury-office .side .tabs button[aria-pressed=true]{border-color:var(--gold)}
+ .luxury-office .side-foot{grid-template-columns:1fr;padding-top:8px}
+ .luxury-office .side-foot .admin-badge{display:none}
+ .luxury-office .side-foot .actions{display:flex;flex-wrap:wrap}
+ .luxury-office .side-foot .actions>*{width:auto;flex:1 1 auto;min-height:32px;font-size:11px;justify-content:center;text-align:center}
+ .luxury-office .main{padding:0 16px 40px}
+ .luxury-office .main>.bar{position:static;margin:0 -16px 12px;padding:12px 16px}
+}

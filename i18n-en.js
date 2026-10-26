@@ -4404,5 +4404,10 @@ Object.assign(globalThis.I18N_EN,{
  "เตรียมรายการในแบบฟอร์มรายจ่ายแล้ว": "The expense form is ready for review",
  "บันทึกรายการเรียบร้อยแล้ว": "Entry saved",
  "ไม่มีต้นทุนรายเดือนที่ใช้อยู่ · รายปีหรือจ่ายครั้งเดียวให้เลือกลงบัญชีที่แถวนั้น": "No active monthly costs. Use the row action for annual or one-time payments.",
- "บันทึกต้นทุนรายเดือนแล้ว {0} รายการ": "Recorded {0} monthly cost entries"
+ "บันทึกต้นทุนรายเดือนแล้ว {0} รายการ": "Recorded {0} monthly cost entries",
+ "ผู้เล่นและชุมชน": "Players & community",
+ "โลกเกมตอนนี้": "Live world",
+ "ปรับสมดุลเกม": "Game balance",
+ "📈 แดชบอร์ด": "📈 Dashboard",
+ "เมนูหลังบ้าน": "Back office menu"
 });

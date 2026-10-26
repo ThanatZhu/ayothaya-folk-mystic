@@ -1,5 +1,5 @@
 // Private, server-owned inbox. Clients send a mail ID, never attachment amounts.
-import {ITEMS,addLoot,MAX_COINS} from './items.js';
+import {itemDef,addLoot,MAX_COINS} from './items.js';
 import {normalizePetAccount,petAccountAction} from './pet-account.js';
 import {premiumPet} from './premium-pets.js';
 export const MAIL_ACTIONS=['mailList','mailRead','mailClaim','mailClaimAll','mailDeleteAll'];
@@ -12,7 +12,8 @@ export function mailAttachments(raw={}){
  const {coins=0,goldBars=0,items=[],pets=[]}=raw;
  if(!Number.isSafeInteger(coins)||coins<0||coins>MAX_COINS||!Number.isSafeInteger(goldBars)||goldBars<0||goldBars>1000000)throw Error('bad-mail-currency');
  if(!Array.isArray(items)||items.length>20||!Array.isArray(pets)||pets.length>10)throw Error('bad-mail-items');
- const seen=new Set(),clean=items.map(x=>{if(!ITEMS[x?.id]||!['loot','potion','gear','card','scroll','wing'].includes(ITEMS[x.id].kind)||legacyPetItem(x.id)||seen.has(x.id))throw Error('bad-item');seen.add(x.id);if(!Number.isSafeInteger(x.count)||x.count<1||x.count>999)throw Error('bad-count');return {id:x.id,count:x.count};});
+ // 0.116.2 graded / refined gear ('id^4', 'id+7') resolves through itemDef like the rest of the game
+ const seen=new Set(),clean=items.map(x=>{const def=itemDef(x?.id);if(!def||!['loot','potion','gear','card','scroll','wing'].includes(def.kind)||legacyPetItem(x.id)||seen.has(x.id))throw Error('bad-item');seen.add(x.id);if(!Number.isSafeInteger(x.count)||x.count<1||x.count>999)throw Error('bad-count');return {id:x.id,count:x.count};});
  for(const id of pets)premiumPet(id);
  return {coins,goldBars,items:clean,pets:[...pets]};
 }

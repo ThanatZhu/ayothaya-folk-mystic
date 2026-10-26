@@ -1,3 +1,4 @@
+import {storyNPCIdentity} from './npc-identity175.js';
 // Dialogue is presentation only. Quest indexes, rewards and persisted v2 progress stay in story-quests.js.
 export const STORY_DIALOGUE={
  't1:0':{pages:['ลมเย็นพาเจ้ามาถึงท่าน้ำ แต่เรือทุกลำกลับจอดเงียบ ลุงเรืองยกตะเกียงที่ไม่มีเปลวขึ้นให้ดู','ข้าเฝ้าท่านี้มาสามสิบปี ไม่เคยเห็นไฟทั้งเมืองดับในคราวเดียว เมื่อครู่ยังได้ยินคนร้องเรียกลูกจากเรือที่ไม่มีใครอยู่'],question:'มีใครได้รับอันตรายไหม?',answer:'ยังไม่พบคนเจ็บ แต่แม่ค้าบางคนเริ่มจำทางกลับบ้านไม่ได้ ข้าเลยขอให้ทุกคนรออยู่ด้วยกัน เจ้าอย่าออกนอกเมืองมือเปล่าเลย',accept:'ข้าจะไปหาครูแสนดาบ'},
@@ -68,6 +69,7 @@ export const sameObjective=(state,index)=>!!state&&!state.done&&state.quest===in
 
 // Portraits use the same standing artwork as the NPCs in the world, rather than inventing different faces.
 export function storyPortrait(npc){
+ const identity=storyNPCIdentity(npc);if(identity)return {src:identity.portrait,alt:npc.name};
  const known={'ลุงเรือง':3,'ขุนอินทร์':0,'ครูแสนดาบ':0,'พระปัญญา':1,'เจ้าจุก':2,'ป้าละไม':1,'ยายสาย':0,'จ้อย':2,'ยายบัวผัน':1};
  const texture=npc?.texture??known[npc?.name]??0,index=Number.isInteger(texture)&&texture>=0&&texture<4?texture:0;
  return {src:'./assets/story124/npc-'+index+'.webp',alt:npc?.name??''};

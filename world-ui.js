@@ -1,4 +1,4 @@
-import {createNPCConversation} from './npc-conversation155.js?v=npc159';
+import {createNPCConversation} from './npc-conversation155.js?v=chuk175';
 import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=arena166';

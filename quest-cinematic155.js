@@ -1,5 +1,5 @@
 import {storyScene,sceneUnlocked,sceneForNPCTalk,taskScene} from './quest-cinematic-data155.js?v=story163';
-import {sceneImage} from './npc-portrait155.js?v=155';
+import {sceneImage} from './npc-portrait155.js?v=chuk175';
 import {createPlayback,advancePlayback,acceleratePlayback,playbackFrame} from './story-playback160.js?v=story160';
 
 export function createQuestCinematics({game,account,map,state}){

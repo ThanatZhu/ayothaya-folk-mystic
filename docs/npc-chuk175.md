@@ -1,0 +1,11 @@
+# Chao Chuk: dedicated child artwork
+
+The capital assigned เจ้าจุก to shared people texture 2, the flower-basket merchant also used by other NPCs. He now has a named identity in `npc-identity175.js` with separate art, life clips, portrait cache key and world scale (0.78 of an adult). All fallback art is the same boy, rather than the shared merchant. The existing NPC name, coordinates, dialogue, quest steps and event-token shop remain unchanged. Other NPCs keep their original shared textures.
+
+Generated source: `assets/npc175/chao-chuk-source.png` using the built-in image_gen tool in the imagegen skill. Style reference: `assets/people.png`. `scripts/prepare-npc175.py` only slices and fits the generated sprites into transparent 320px cells with foot baseline 276, then exports the atlas, standing fallback and dialogue portrait. No source artwork is overwritten. The dedicated clips are idle/blink, talking/pointing and seated rest. Reuse the same scale for world fallback and life playback; label placement uses the child's height.
+
+## Final generation prompt
+
+Use case: stylized-concept. Production transparent sprite sheet for the existing Thai fantasy MMORPG. Use `assets/people.png` as a STYLE reference only. Create Chao Chuk, a cheerful mischievous Thai village boy about eight years old with a small traditional topknot tied with red cord, closely cropped sides, tan skin, expressive brown eyes, plain ivory wrap shirt, indigo jong kraben, muted red sash and bare feet. Match the reference's hand-painted 2D chibi proportions, crisp outlines and warm shading. Four full-body drawings of the same child in an equally divided 2×2 grid: standing eyes open, identical standing with blink, talking and pointing right, and seated resting. Maintain identity, clothing, body scale and three-quarter right-facing view. Leave transparent padding around every cell. No flowers, basket, jewelry, weapons, crowns, adult female bun, text, frames, scenery or shadows. Preserve actual alpha transparency.
+
+Validation: all 680 tests pass. The actual game was checked with an isolated local character: the world sprite uses chao-chuk175 at the unchanged quest position, idle/talk/sit all retain the new boy, and the NPC conversation portrait renders correctly at desktop and phone sizes with no browser errors.

@@ -1,3 +1,4 @@
+import {loadStoryNPCLife} from './npc-identity175.js';
 import * as THREE from 'three';
 import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=106.0';
 import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE,CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
@@ -6,7 +7,7 @@ import {createPosturePlayback} from './character-action-state.js?v=106.0';
 const cache=new Map(),flipped=new WeakMap(),owned=new Set(),postures=new WeakMap();
 if(typeof addEventListener==='function')addEventListener('pagehide',()=>{owned.forEach(t=>t.dispose());owned.clear();cache.clear();});
 export function loadNPCLife(id){
- if(!cache.has(id))cache.set(id,loadLifeArt(id).then(art=>{
+ if(!cache.has(id))cache.set(id,(loadStoryNPCLife(id)??loadLifeArt(id)).then(art=>{
   if(!art)return null;
   const textures=new Map(),texture=canvas=>{
    if(!textures.has(canvas)){
@@ -46,7 +47,7 @@ export function applyNPCLife(sprite,art,requested,time,{flip=false,reduced=false
   texture=flipped.get(texture);
  }
  sprite.material.map=texture;
- const size=FRAME_SIZE/LOGICAL_SIZE*CHARACTER_WORLD_SCALE;
+ const size=FRAME_SIZE/LOGICAL_SIZE*CHARACTER_WORLD_SCALE*(art.worldScale??1);
  const breath=reduced?1:['idle','sit','sleep'].includes(action)?1+Math.sin(time*Math.PI*2/(action==='sleep'?4.8:4.1))*.0025:1;
  sprite.scale.set(size,size*breath,1);
  sprite.center.set(.5,(FRAME_SIZE-FRAME_FOOT)/FRAME_SIZE);

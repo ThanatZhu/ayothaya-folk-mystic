@@ -1,7 +1,7 @@
 import {storyScene} from './quest-cinematic-data155.js?v=story163';
 import {normalizeAlbumState,depositAlbumCard,ALBUM_ERRORS} from './card-album.js?v=152';
 import {STORY,currentObjective,normalizeStory} from './story-quests.js?v=pets125';
-import {STORY_RECAP,storyArt} from './story-dialogue.js?v=pets125';
+import {STORY_RECAP,storyArt} from './story-dialogue.js?v=chuk175';
 // 0.60 "ภารกิจ" window: daily bounty board (claim in a town) and the card album. Online the realm server owns both;
 // offline guests keep them in localStorage and pay out through the same 'reward' / experience events.
 import {itemDef} from './items.js?v=107';

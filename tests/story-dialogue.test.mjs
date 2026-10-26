@@ -23,5 +23,5 @@ test('every existing talk objective has three pages, an optional question and an
 
  test('speaker portraits use the same actor artwork as every quest NPC in the world',async()=>{
  const {storyPortrait}=await import('../story-dialogue.js'),{readFile,stat}=await import('node:fs/promises'),catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8'));
- for(const q of STORY)for(const step of q.steps){if(step.type!=='talk')continue;const npc=catalog.maps.find(m=>m.id===step.mapId).npcs.find(n=>n.name===step.npc),art=storyPortrait(npc);assert.equal(art.alt,npc.name);assert.ok(art.src.endsWith('npc-'+npc.texture+'.webp'));assert.ok((await stat(new URL('../'+art.src,import.meta.url))).size>1000);}
+ for(const q of STORY)for(const step of q.steps){if(step.type!=='talk')continue;const npc=catalog.maps.find(m=>m.id===step.mapId).npcs.find(n=>n.name===step.npc),art=storyPortrait(npc);assert.equal(art.alt,npc.name);assert.ok(art.src.endsWith(npc.name==='เจ้าจุก'?'chao-chuk-portrait.webp':'npc-'+npc.texture+'.webp'));assert.ok((await stat(new URL('../'+art.src,import.meta.url))).size>1000);}
  });

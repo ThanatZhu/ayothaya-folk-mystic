@@ -1,4 +1,4 @@
-import {paintNPCPortrait} from './npc-portrait155.js?v=155';
+import {paintNPCPortrait} from './npc-portrait155.js?v=chuk175';
 import {skinNPCChoices} from './npc-choice-ui.js?v=npc159';
 export function loadConversationStyle(){if(document.querySelector('link[data-conversation155]'))return;const css=document.createElement('link');css.rel='stylesheet';css.href='./npc-conversation155.css?v=npc159';css.dataset.conversation155='';document.head.append(css);}
 // Existing service hooks insert before #close-npc; keep that button inside the actions column.

@@ -4,7 +4,7 @@ import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1'
 import {groundHeight} from './combat-core.js?v=novice174';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {citizenBodyHeight} from './npc-size.js?v=size1';
-import {loadNPCLife,applyNPCLife,stationaryNPCAction,resetNPCLife,npcLifeFlip,npcLifePreservesGesture} from './npc-life-animation.js?v=106.0';
+import {loadNPCLife,applyNPCLife,stationaryNPCAction,resetNPCLife,npcLifeFlip,npcLifePreservesGesture} from './npc-life-animation.js?v=chuk175';
 const tr=s=>globalThis.I18N?.t(s)??s;
 
 // Whole painted poses, aligned at their feet. No skeletal cutouts or squash/stretch.

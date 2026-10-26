@@ -1,3 +1,4 @@
+import {storyNPCIdentity,storyNPCPlacement} from './npc-identity175.js';
 import {createArenaStage} from './arena-stage166.js';
 import {createArenaUI} from './arena-ui166.js?v=profile171';
 import {createAnnouncementUI} from './announcement-ui.js?v=149';
@@ -14,7 +15,7 @@ import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {createMultiplayer} from './multiplayer-ui.js?v=novice174';
 import {createEquipmentUI} from './equipment-ui.js?v=size1';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=talk137';
-import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=106.0';
+import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=chuk175';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=novice174';
 import {createAutoSettings} from './auto-settings.js?v=hud143';
@@ -36,8 +37,8 @@ import {createAmbientMotion} from './ambient-motion.js?v=size1';
 import {createGame} from './game-controls.js?v=novice174';
 import {atlasPath,className} from './classes.js?v=novice174';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=quest173';
-import {createStoryUI} from './story-ui.js?v=quest-level-nav173';
+import {createWorldUI} from './world-ui.js?v=chuk175';
+import {createStoryUI} from './story-ui.js?v=chuk175';
 import {createBagUI} from './bag-ui.js?v=tier167';
 import {createStatusUI} from './status-ui.js?v=tier167';
 import {createProfileUI} from './profile-ui.js?v=profile171';
@@ -167,11 +168,13 @@ try {
  };
 
  for(const n of map.npcs.filter(n=>!n.mentorId)){
-  const tex=personTextures[n.texture],p=peoplePlacement(n.texture,tex.image.width,tex.image.height);
+  const identity=storyNPCIdentity(n),life=await loadNPCLife(identity?.id??`people-${n.texture}`);
+  const tex=identity?(life?.clips.idle.frames[0]??await loader.loadAsync(identity.standing)):personTextures[n.texture];if(identity){tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;}
+  const p=storyNPCPlacement(n)??peoplePlacement(n.texture,tex.image.width,tex.image.height);
   const ground=groundHeight(map.nav,n.x,n.z),actor=sprite(tex,n.x,-n.z,p.width,p.height,ground+.06);actor.center.set(p.centerX,p.centerY);
-  n.visualHeight=WORLD_BODY_HEIGHT;actor.userData.npc=n;
+  n.visualHeight=WORLD_BODY_HEIGHT*(identity?.worldScale??1);actor.userData.npc=n;
   const shade=shadow(n.x,-n.z,.4);shade.position.y=ground+.072;
-  characters.push({sprite:actor,shadow:shade,height:p.height,ground,npc:n,basePlacement:p,baseTexture:tex,life:await loadNPCLife(`people-${n.texture}`)});
+  characters.push({sprite:actor,shadow:shade,height:p.height,ground,npc:n,basePlacement:p,baseTexture:tex,life});
  }
  const cityLife=await createCityLife({scene,map,shadow,paving:tiles.paving});
  const flames=[];for(const [x,z] of []){const l=new THREE.PointLight('#ffb53f',6,3.3,1.6);l.position.set(x,1.6,z);scene.add(l);flames.push(l);}
@@ -240,7 +243,7 @@ try {
   const dt=lastMs===null?0:(ms-lastMs)/1000;lastMs=ms;const t=motion.update(document.hidden||landscape.blocked?0:dt);capitalLook.update(t);cityTrees.update(t);landscapeDetails.update(t);meadow.update(t);game.update(dt);{const p=game.world.player;roofCut.update(p.x,groundHeight(map.nav,p.x,p.z),p.z);}arenaUI.update();storyUI.update();bagUI.update();statusUI.update();profileUI.update();refineUI.update();craftUI.update();marketUI.update();boardUI.update();socialUI.update();lifeUI.update();petUI.update(dt);questsUI.update();lifeNPC.update(dt);cityLife.update(document.hidden||landscape.blocked?0:dt,game.world.player,camera);worldUI.update(t);multiplayer.update(document.hidden?0:dt);
   const reducedCharacters=matchMedia('(prefers-reduced-motion:reduce)').matches;
   characters.slice(1).forEach((a,i)=>{
-   const action=stationaryNPCAction(game.world.time,i,a.npc.talking);
+   const action=a.npc.talking&&a.life?.clips.talk?'talk':stationaryNPCAction(game.world.time,i,a.npc.talking);
    if(!applyNPCLife(a.sprite,a.life,action,game.world.time+i*1.7,{reduced:reducedCharacters})){
     delete a.sprite.userData.lifeAction;delete a.sprite.userData.lifeFrame;
     const p=a.basePlacement;a.sprite.material.map=a.baseTexture;a.sprite.center.set(p.centerX,p.centerY);

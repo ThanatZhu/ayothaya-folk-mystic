@@ -1,4 +1,4 @@
-import {dialogueFor} from './story-dialogue.js?v=pets125';
+import {dialogueFor} from './story-dialogue.js?v=chuk175';
 import {createQuestCinematics} from './quest-cinematic155.js?v=story163';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.

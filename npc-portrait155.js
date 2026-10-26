@@ -1,10 +1,11 @@
+import {storyNPCIdentity} from './npc-identity175.js';
 // The exact authored NPC silhouettes already used by the game, including citizens and mentors.
-import {storyPortrait} from './story-dialogue.js?v=pets125';
+import {storyPortrait} from './story-dialogue.js?v=chuk175';
 const images=new Map(),portraits=new Map();let metadata;
 export function sceneImage(src){
  if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>{images.delete(src);reject(Error('image-unavailable'));};img.src=src;}));return images.get(src);
 }
-export function npcActorId(n){return n?.sheet?`${n.sheet}-${n.row??0}`:`people-${Number.isInteger(n?.texture)?n.texture:0}`;}
+export function npcActorId(n){return storyNPCIdentity(n)?.id??(n?.sheet?`${n.sheet}-${n.row??0}`:`people-${Number.isInteger(n?.texture)?n.texture:0}`);}
 export function loadNPCPortrait(n){
  const key=npcActorId(n);if(portraits.has(key))return portraits.get(key);
  const pending=(async()=>{

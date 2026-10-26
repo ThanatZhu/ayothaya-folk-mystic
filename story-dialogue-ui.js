@@ -1,4 +1,4 @@
-import {dialogueFor,sameObjective,storyPortrait} from './story-dialogue.js?v=pets125';
+import {dialogueFor,sameObjective,storyPortrait} from './story-dialogue.js?v=chuk175';
 
 // Reading/asking never mutates progress; only the explicit final response calls complete.
 export function createStoryDialogue({game,worldUI,objective,state,complete}){

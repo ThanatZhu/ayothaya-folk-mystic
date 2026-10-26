@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="th">
 <head>
- <script src="i18n-en.js?v=finance173"></script>
+ <script src="i18n-en.js?v=finance174"></script>
  <script src="i18n.js?v=102"></script>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -13,7 +13,7 @@
  <link rel="preload" href="assets/fonts/Mali-Bold.ttf" as="font" type="font/ttf" crossorigin>
  <link rel="stylesheet" href="typography.css?v=10">
  <link rel="stylesheet" href="dashboard.css?v=finance172">
-<link rel="stylesheet" href="backoffice-luxury.css?v=126"><link rel="stylesheet" href="dashboard-v2.css?v=1"></head>
+<link rel="stylesheet" href="backoffice-luxury.css?v=126"><link rel="stylesheet" href="dashboard-v2.css?v=2"></head>
 <body class="luxury-office">
   <!-- Security Gate (Visible before login) -->
   <div id="auth-gate" class="auth-gate">
@@ -255,6 +255,11 @@
      <label>หมายเหตุเพิ่มเติม
       <input id="tx-note" type="text" placeholder="เช่น ตัดบัตรเดบิต $5 (ได้ Bandwidth 50 GB)">
      </label>
+     <label class="slip-field">แนบสลิปโอน (ไม่บังคับ)
+      <input id="tx-slip" type="file" accept="image/*,application/pdf">
+      <small>รูปถ่าย/แคปหน้าจอ หรือ PDF · รูปย่อให้อัตโนมัติ</small>
+     </label>
+     <div id="tx-slip-preview" class="slip-preview" hidden></div>
      <button type="submit" class="btn-gold">บันทึกรายการ</button><p id="tx-status" class="finance-status" role="status"></p>
     </form>
 
@@ -286,6 +291,7 @@
          <th>ชื่อรายการ</th>
          <th>หมายเหตุ</th>
          <th>จำนวนเงิน (฿)</th>
+         <th>สลิป</th>
          <th>ลบ</th>
         </tr>
        </thead>
@@ -296,6 +302,6 @@
    </div>
   </section>
  </div>
- <script type="module" src="dashboard.js?v=finance173"></script>
+ <script type="module" src="dashboard.js?v=finance174"></script>
 </body>
 </html>

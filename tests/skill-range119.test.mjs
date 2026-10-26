@@ -29,3 +29,9 @@ test('when the locked friend leaves the party the heal falls back to the caster'
  const {me,ally,heal}=party();me.roleAllies=()=>[{id:'hero',world:me,player:me.player}];me.player.hp=1000;
  assert.equal(me.skill(heal),true);step(me,1.2);assert.ok(me.player.hp>1000);assert.equal(ally.player.hp,1000);
 });
+test('one second between skills: after a release every active waits 1 s, then the next skill goes', ()=>{
+ const {me,ally,heal}=party(),light=me.skills.findIndex(s=>s.roleSkillId==='aco-cleanse');ally.player.hp=1000;
+ assert.equal(me.skill(heal),true);step(me,1.2);
+ assert.ok(me.cooldowns[light]>0&&me.cooldowns[light]<=1,'global cooldown on the other skills');assert.equal(me.skill(light),false);
+ step(me,1.05);assert.equal(me.cooldowns[light],0);assert.equal(me.skill(light),true);
+});

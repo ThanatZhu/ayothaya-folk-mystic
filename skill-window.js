@@ -7,11 +7,14 @@ import {jobProgress} from './experience.js?v=105.3';
 // actives level 1-5 and passives 1-3, one point per level (the first too). The Novice keeps its small tree.
 import {skillMax,skillAllowed,NOVICE_SLOTS,requirements,skillOpen,nextLevelText,scaledSkill,isMaster,BASE_SLOTS} from './skill-progress.js?v=skills119';
 const reasons={'no-skill-points':'แต้มสกิลไม่พอ · ได้ 1 แต้มทุกครั้งที่ Job Level ขึ้น','skill-max':'ขั้นสูงสุดแล้ว','skill-locked':'ยังไม่ปลดล็อก · รอ Job Level ถึงก่อน','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','online-required':'ต้องเชื่อมต่อออนไลน์เพื่ออัปสกิล','not-connected':'กำลังเชื่อมต่อ · ลองอีกครั้ง'};
-// Grid place [column, row]: actives in two rows of three (the ultimate last), passives on the third row.
-const PLACE={0:[0,0],1:[1,0],2:[2,0],3:[0,1],4:[1,1],5:[2,1],6:[0,2],7:[1,2],8:[2,2],10:[0,0],11:[1,0],12:[2,0],13:[1,1],14:[0,2],15:[1,2],16:[2,2]};
+// Grid place [column, row]: a left-to-right tree in Job-unlock order (every class shares the levels). The first skill
+// branches into two lanes that meet at the ultimate; passives hang off the lane they open beside.
+const PLACE={0:[0,1],1:[1,0],2:[1,2],3:[2,0],4:[2,2],5:[3,1],6:[2,1],7:[3,0],8:[3,2],10:[0,1],11:[1,0],12:[2,0],13:[3,1],14:[1,2],15:[2,2],16:[3,2]};
+// [from, to, side]: side links (to passives) are dashed.
+const LINKS=[[0,1],[0,2],[1,3],[2,4],[3,5],[4,5],[0,6,1],[3,7,1],[4,8,1],[10,11],[11,12],[12,13],[10,14,1],[14,15,1],[15,16,1]];
 const pct=n=>Math.round(n*1000)/10;
 export function createSkillWindow({game,classId}){
- if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=skills119b';css.dataset.skillTree='';document.head.append(css);}
+ if(!document.querySelector('link[data-skill-tree]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./skill-tree.css?v=tree119';css.dataset.skillTree='';document.head.append(css);}
  const dialog=document.createElement('dialog');dialog.id='skill-window';dialog.dataset.profession=classId||'shaman';dialog.setAttribute('aria-labelledby','skill-window-title');
  dialog.innerHTML='<header><div><small>SKILL TREE</small><h2 id="skill-window-title">สกิล</h2></div><b id="skill-points"></b><button class="mp-icon" id="skill-close" aria-label="ปิดหน้าสกิล">×</button></header><p class="skill-hint"></p><div class="skill-tabs" role="tablist"><button type="button" role="tab" data-tab="base" aria-selected="true">สกิลอาชีพ</button><button type="button" role="tab" data-tab="master" aria-selected="false">Master <small id="master-count"></small></button></div><div class="skill-tree role-tree" id="skill-tree"></div><section id="skill-detail" aria-live="polite"></section><p id="skill-note" role="status"></p>';
  document.getElementById('game-shell').append(dialog);
@@ -40,6 +43,14 @@ export function createSkillWindow({game,classId}){
   node.append(select,name,level,button);tree.append(node);return {node,level,button,select};
  });
  if(classId)applySkillArt(nodes.map(n=>n.node),classId,null,world.skills);
+ // Branch lines behind the icons, measured in the tree's own (unscaled) layout; gold once the far end is learned.
+ const links=document.createElementNS('http://www.w3.org/2000/svg','svg');links.classList.add('skill-links');links.setAttribute('aria-hidden','true');if(roleMode&&!novice)tree.prepend(links);
+ function drawLinks(lv){
+  if(!links.isConnected)return;const mid=({node:n})=>[n.offsetLeft+n.offsetWidth/2,n.offsetTop+n.offsetHeight/2];
+  links.setAttribute('viewBox',`0 0 ${tree.clientWidth} ${tree.clientHeight}`);
+  links.innerHTML=LINKS.filter(([a,b])=>!nodes[a].node.hidden&&!nodes[b].node.hidden).map(([a,b,side])=>{const [x1,y1]=mid(nodes[a]),[x2,y2]=mid(nodes[b]),mx=(x1+x2)/2;
+   return `<path d="M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}" class="${side?'side ':''}${(lv[b]??0)>0?'lit':(lv[a]??0)>0?'next':''}"/>`;}).join('');
+ }
  const levels=()=>world.skillLevels??[];
  if(novice){dialog.querySelector('.skill-tabs').hidden=true;dialog.querySelector('h2').textContent='วิชาพื้นฐาน';}
  let master=false; // which tab shows: class skills or the chosen Master branch
@@ -61,9 +72,12 @@ export function createSkillWindow({game,classId}){
    n.node.classList.toggle('learned',l>0);n.node.classList.toggle('open',!l&&open);n.node.classList.toggle('closed',!l&&!open);n.node.classList.toggle('picked',i===picked);
    n.level.textContent=l?'Lv '+l+'/'+max:open?'เรียนได้ · 1 แต้ม':roleMode?(isMaster(i)&&!world.jobId?'เลือกสาย Master ก่อน':'ปลดที่ Job '+s.job):'ล็อก';
    n.select.setAttribute('aria-label',s.name+' · '+n.level.textContent);n.select.title=s.name+' · '+n.level.textContent;n.select.setAttribute('aria-pressed',String(i===picked));
+   // A skill at its top rank has nothing left to buy: the + goes away instead of greying out.
+   n.button.hidden=!!l&&(l>=max||!roleMode&&!!s.passive);
    n.button.textContent='+';n.button.disabled=roleMode?(!open||l>=max||points<1):(l?(s.passive||l>=max||points<1):!open);
    n.button.title=n.button.disabled?(l&&(l>=max||s.passive&&!roleMode)?reasons['skill-max']:!l&&!open?reasons['skill-locked']:reasons['no-skill-points']):(l?'อัปสกิล ':'เรียนสกิล ')+s.name;
   });
+  drawLinks(lv);
   const s=world.skills[picked],l=lv[picked]??0,max=maxAt(picked);
   const status=l?'ขั้น '+l+'/'+max:'ยังไม่ได้เรียน';
   const foot=roleMode?(l>=max?'ขั้นสูงสุดแล้ว':!canOpen(lv,picked)?(isMaster(picked)&&!world.jobId?'เลือกสาย Master ก่อน':'ปลดล็อกที่ Job Level '+s.job+' (ตอนนี้ '+job+')'):isPassiveSlot(picked)?'พาสซีฟทำงานอัตโนมัติ · ขั้นถัดไปใช้ 1 แต้ม':nextLevelText(l,picked,classId)):(l?(s.passive?'พาสซีฟทำงานอัตโนมัติ':nextLevelText(l,picked,classId)):canOpen(lv,picked)?'เงื่อนไขครบแล้ว · กด เรียน ได้ทันทีไม่ใช้แต้ม':'ต้องการ: '+requirements(picked,classId).map(([r,rl])=>world.skills[r].name+' ขั้น '+rl).join(', '));

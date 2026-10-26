@@ -156,9 +156,15 @@ html body #skill-window .skill-node{background:transparent!important;box-shadow:
  #skill-window .skill-node>.skill-upgrade{width:30px;min-width:30px;height:30px;min-height:30px;font-size:22px;right:-4px}
 }
 
-/* 0.119 class skill window: actives in two rows of three (ultimate last), passives on the third row; no link lines */
-#skill-window .skill-tree.role-tree{grid-template-columns:repeat(3,minmax(0,80px))}
+/* 0.119 class skill window: a left-to-right tree in Job-unlock order; lanes meet at the ultimate, passives on dashed side links */
+#skill-window .skill-tree.role-tree{grid-template-columns:repeat(4,minmax(0,80px));gap:22px 48px}
+#skill-window .skill-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0}
+#skill-window .skill-links path{fill:none;stroke:#c6a16455;stroke-width:3;stroke-linecap:round}
+#skill-window .skill-links path.side{stroke-width:2;stroke-dasharray:1 7}
+#skill-window .skill-links path.next{stroke:#e8c77aa8}
+#skill-window .skill-links path.lit{stroke:#f4cf7a;filter:drop-shadow(0 0 4px #f4cf7a99)}
 #skill-window .skill-node.passive .skill-icon,#skill-window .skill-node.passive .skill-select{border-radius:50%}
 #skill-window .skill-node.passive{border-style:dashed}
 #skill-window .skill-node.ultimate{border-color:#f4cf7a;box-shadow:0 0 0 1px #f4cf7a55,0 0 14px #f4cf7a33}
-@media(max-width:640px),(orientation:landscape) and (max-height:560px){#skill-window .skill-tree.role-tree{grid-template-columns:repeat(3,minmax(0,64px))}}
+#skill-window .skill-node>.skill-upgrade[hidden]{display:none}
+@media(max-width:640px),(orientation:landscape) and (max-height:560px){#skill-window .skill-tree.role-tree{grid-template-columns:repeat(4,minmax(0,56px));gap:6px 26px;padding-top:8px;padding-bottom:8px}}

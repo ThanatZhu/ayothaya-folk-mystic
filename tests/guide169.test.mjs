@@ -44,7 +44,7 @@ test('guide is linked from home and game without loading the game or auth runtim
 test('illustrated walkthroughs have real optimized images, valid chapter links and readable callout text',()=>{
  const {pictures}=JSON.parse(read('assets/guide169/visuals.json'));
  const ids=new Set(book.trim().split(/\n@/).map(s=>s.replace(/^@/,'').split('|')[0]));
- assert.equal(pictures.length,17);assert.equal(new Set(pictures.map(p=>p.id)).size,pictures.length);
+ assert.equal(pictures.length,20);assert.equal(new Set(pictures.map(p=>p.id)).size,pictures.length);
  let bytes=0;
  for(const p of pictures){
   assert.ok(p.title&&p.alt&&p.description,p.id);assert.ok(p.width>300&&p.height>250,p.id);

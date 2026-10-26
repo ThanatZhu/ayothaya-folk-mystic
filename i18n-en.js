@@ -4484,5 +4484,17 @@ Object.assign(globalThis.I18N_EN,{
  "กดปุ่ม": "Button",
  "กดปุ่มในหน้าจอ": "Pressing an on-screen button",
  "🎵 คลัง Asset เกม": "🎵 Game assets",
- "คลัง Asset เกม": "Game assets"
+ "คลัง Asset เกม": "Game assets",
+ "กำลังบันทึกขึ้นคลาวด์…": "Saving to the cloud…",
+ "☁ บันทึกบนคลาวด์แล้ว · ทุกเครื่องเห็นตรงกัน ·": "☁ Saved to the cloud · same on every device ·",
+ "มีการแก้จากอีกเครื่องก่อนหน้า · โหลดฉบับล่าสุดแล้ว กรุณาตรวจรายการที่เพิ่งแก้อีกครั้ง": "Another device saved first · the latest version is loaded; please check your last edit",
+ "บันทึกขึ้นคลาวด์ไม่สำเร็จ (": "Could not save to the cloud (",
+ ") · เก็บในเครื่องไว้ก่อน จะลองใหม่": ") · kept on this device, retrying",
+ "กำลังเชื่อมคลาวด์…": "Connecting to the cloud…",
+ "☁ ข้อมูลจากคลาวด์ · ทุกเครื่องเห็นตรงกัน ·": "☁ From the cloud · same on every device ·",
+ "เชื่อมคลาวด์ไม่ได้ (": "Cannot reach the cloud (",
+ ") · ตอนนี้ใช้ข้อมูลในเครื่องนี้": ") · using this device's data for now",
+ "☁ อัปเดตจากอีกเครื่อง ·": "☁ Updated from another device ·",
+ "ไฟล์ใหญ่เกินไป · PDF ได้ไม่เกิน 640 KB (แคปหน้าจอแทนได้)": "File too large · PDFs up to 640 KB (a screenshot works too)",
+ "สลิปเก็บในเครื่องนี้ก่อน · จะอัปขึ้นคลาวด์อีกครั้งตอนเชื่อมได้": "Slip kept on this device · it will upload when the cloud is reachable"
 });

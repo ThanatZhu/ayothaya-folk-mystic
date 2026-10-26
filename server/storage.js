@@ -1,5 +1,5 @@
 import {deliverMail} from '../mailbox.js';
-import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,rename,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {character,initialSave} from '../realm-state.js';
@@ -9,6 +9,8 @@ export const MIRROR_CUTOFF=Date.parse('2026-10-26T00:00:00+07:00');
 // player saves only when changed, at most once a minute (lease kept alive at least every 100 s).
 export const AUTHORITY_TTL=120000,AUTHORITY_RENEW=40000,SAVE_MIN_GAP=60000,SAVE_MAX_GAP=100000;
 const copy=v=>structuredClone(v),ttl=150000;
+// 0.116 back-office finance: one revisioned document (a save names the revision it started from) plus one row per slip.
+const staleFinance=current=>Object.assign(new Error('finance-stale'),{current});
 // Local mode never accepts Firebase users and is bound to loopback by the host.
 export class LocalStore{
  constructor(directory){this.directory=directory;this.rows=new Map();this.leases=new Map();this.queue=Promise.resolve();}
@@ -54,6 +56,12 @@ export class LocalStore{
  deleteShop(){return this.saveShop();}
  async loadLeaders(){try{return JSON.parse(await readFile(path.join(this.directory,'leaders.json'),'utf8'));}catch{return {};}}
  saveLeaders(serverId,rows){this.allLeaders={...(this.allLeaders??{}),[serverId]:rows};return writeFile(path.join(this.directory,'leaders.json'),JSON.stringify(this.allLeaders),{mode:0o600});}
+ async loadFinance(){try{return JSON.parse(await readFile(path.join(this.directory,'finance.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}}
+ saveFinance(doc,baseRev,by){const job=(this.financeQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const cur=await this.loadFinance();if((cur?.rev??0)!==baseRev)throw staleFinance(cur);const next={...doc,rev:(cur?.rev??0)+1,updatedAt:Date.now(),by};await writeFile(path.join(this.directory,'finance.json'),JSON.stringify(next));return next;});this.financeQueue=job;return job;}
+ slipPath(id){return path.join(this.directory,'finance-slips',id+'.json');}
+ async loadSlip(id){try{return JSON.parse(await readFile(this.slipPath(id),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}}
+ async saveSlip(s){await mkdir(path.join(this.directory,'finance-slips'),{recursive:true});await writeFile(this.slipPath(s.id),JSON.stringify({type:s.type,data:s.data,at:Date.now()}));}
+ deleteSlip(id){return rm(this.slipPath(id),{force:true});}
  async loadPrices(){try{return JSON.parse(await readFile(path.join(this.directory,'prices.json'),'utf8'));}catch{return {};}}
  savePrices(serverId,prices){this.allPrices={...(this.allPrices??{}),[serverId]:prices};return writeFile(path.join(this.directory,'prices.json'),JSON.stringify(this.allPrices),{mode:0o600});}
  deleteGuild(){return this.flushGuilds();}
@@ -81,6 +89,11 @@ export class FirebaseStore{
  deleteShop(s){return this.db.collection('multiplayerShops').doc(s.id).delete();}
  async loadLeaders(){const out={};for(const d of (await this.db.collection('multiplayerLeaders').get()).docs)out[d.id]=d.data().rows??{};return out;}
  saveLeaders(serverId,rows){return this.db.collection('multiplayerLeaders').doc(serverId).set({rows});}
+ async loadFinance(){const s=await this.db.collection('backofficeFinance').doc('books').get();return s.exists?s.data():null;}
+ saveFinance(doc,baseRev,by){const ref=this.db.collection('backofficeFinance').doc('books');return this.db.runTransaction(async tx=>{const s=await tx.get(ref),cur=s.exists?s.data():null;if((cur?.rev??0)!==baseRev)throw staleFinance(cur);const next={...doc,rev:(cur?.rev??0)+1,updatedAt:Date.now(),by};tx.set(ref,next);return next;});}
+ async loadSlip(id){const s=await this.db.collection('backofficeFinanceSlips').doc(id).get();return s.exists?s.data():null;}
+ saveSlip(s){return this.db.collection('backofficeFinanceSlips').doc(s.id).set({type:s.type,data:s.data,at:Date.now()});}
+ deleteSlip(id){return this.db.collection('backofficeFinanceSlips').doc(id).delete();}
  async loadPrices(){const out={};for(const d of (await this.db.collection('multiplayerPrices').get()).docs)out[d.id]=d.data().prices??{};return out;}
  savePrices(serverId,prices){return this.db.collection('multiplayerPrices').doc(serverId).set({prices});}
  deleteGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).delete();}

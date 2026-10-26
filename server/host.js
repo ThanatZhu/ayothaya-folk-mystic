@@ -22,6 +22,7 @@ import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
 import {isAdmin,adminEmails,OWNER_EMAILS,configKeys,adminPlayers,adminGive,adminGiveOffline} from './admin.js';
+import {cleanFinance,cleanSlip,slipId,FINANCE_MAX_BYTES,SLIP_MAX_BYTES} from './finance.js';
 import {WorldReset} from './world-reset.js';
 import {createResetStore} from './world-reset-store.js';
 import {balanceText,commitBalance} from './github-balance.js';
@@ -115,7 +116,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let done;const pending=new Promise(r=>{done=r;});mutations.add(pending);
    mutationDone=()=>{mutations.delete(pending);done();};
   }
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,financeBooks:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.99.16 back-office (admin.html): online players and gifts. Production needs a Google ID token whose verified
   // email is in ADMIN_EMAILS; the local server trusts its own origin. Every gift is logged.
@@ -169,6 +170,25 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      else{const session=[...sessions.values()].find(s=>s.peer.id===b.peer&&!s.closing);if(!session)throw Error('player-offline');record=await persistMail(session,r=>{const x=deliverMail(r.mailbox,mail);replayed=x.replayed;return {...r,mailbox:x.mailbox};});}
      savedList.at=0;console.log('admin-mail',who,b.peer,mail.id);reply(200,{ok:true,name:record.character.name,mail,replayed});
     }catch(e){reply(400,{error:e.message});}return;
+   }
+   // 0.116 dashboard books: GET the shared costs + ledger; POST saves them if nobody saved in between (409 = reload)
+   if(url.pathname.startsWith('/admin/finance')){
+    if(!store?.loadFinance){reply(503,{error:'finance-unsupported'});return;}
+    const body=async limit=>{let data='';for await(const chunk of req){data+=chunk;if(data.length>limit)throw Error('too-large');}return JSON.parse(data||'{}');};
+    try{
+     if(url.pathname==='/admin/finance'&&req.method==='GET'){reply(200,{books:await store.loadFinance()});return;}
+     if(url.pathname==='/admin/finance'&&req.method==='POST'){
+      const b=await body(FINANCE_MAX_BYTES+20000),doc=cleanFinance(b),baseRev=Number.isInteger(b.baseRev)?b.baseRev:-1;
+      try{const books=await store.saveFinance(doc,baseRev,who);console.log('admin-finance',who,books.rev,doc.ledger.length);reply(200,{books});}
+      catch(e){if(e.message!=='finance-stale')throw e;reply(409,{error:'finance-stale',books:e.current});}
+      return;
+     }
+     if(url.pathname==='/admin/finance/slip'&&req.method==='GET'){const s=await store.loadSlip(slipId(url.searchParams.get('id')));if(!s){reply(404,{error:'slip-missing'});return;}reply(200,{type:s.type,data:s.data});return;}
+     if(url.pathname==='/admin/finance/slip'&&req.method==='POST'){const s=cleanSlip(await body(SLIP_MAX_BYTES+500));await store.saveSlip(s);console.log('admin-finance-slip',who,s.id,s.data.length);reply(200,{ok:true});return;}
+     if(url.pathname==='/admin/finance/slip-delete'&&req.method==='POST'){const id=slipId((await body(500)).id);await store.deleteSlip(id);reply(200,{ok:true});return;}
+     reply(404,{error:'not-found'});
+    }catch(e){const known=['too-large','finance-invalid','finance-too-large','slip-invalid','slip-type','slip-too-big'];if(!known.includes(e.message)&&!(e instanceof SyntaxError))console.error('admin-finance',e.message);reply(e.message==='too-large'?413:known.includes(e.message)||e instanceof SyntaxError?400:502,{error:e instanceof SyntaxError?'invalid':e.message});}
+    return;
    }
    // 0.100.6 balance edits: production commits balance-data.js to GitHub (redeploys game and server); local writes the file
    if(url.pathname==='/admin/balance'&&req.method==='POST'){

@@ -1,5 +1,5 @@
-import {normalizeBag} from './items.js?v=revival180';
-export const REVIVAL_ITEM='soul-talisman';
+import {normalizeBag} from './items.js?v=revival-shop181';
+export const REVIVAL_ITEM='soul-talisman',REVIVAL_PRICE=200;
 export const revivalCount=bag=>normalizeBag(bag).items[REVIVAL_ITEM]??0;
 // Pure transaction shared by offline inventory and the authoritative server.
 export function consumeRevival(bag,player){

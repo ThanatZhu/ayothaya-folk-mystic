@@ -6,7 +6,7 @@ import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing} from './combat-animation165.js?v=align169';
 import {createLiveRoleVfx} from './role-skill-vfx.js?v=align169';
 import {revivalCount} from './revival-item.js?v=revival180';
-import {createRolePlayUI} from './role-play-ui.js?v=revival180';
+import {createRolePlayUI} from './role-play-ui.js?v=revival-shop181';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
@@ -29,7 +29,7 @@ import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=novice174';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
- const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world),roleUI=createRolePlayUI({world,itemCount:()=>network?revivalCount(world.bag):respawnInventory?.count()??0,clear:()=>clearInput(),respawn:async destination=>{clearInput();cancelWalk();if(networkExpected&&!network)throw Error('not-connected');if(destination==='capital')return respawnTravel?.();if(network){await network.request('respawn',crypto.randomUUID(),{destination:'here'});return true;}return respawnInventory?.use()??false;}});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null,respawnTravel=null,respawnInventory=null;
+ const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world),roleUI=createRolePlayUI({world,buyItem:async id=>{if(!network)throw Error('not-connected');const r=await network.request('revivalBuy',id);world.bag=r.bag;world.petCollection=r.petCollection;return r;},canBuy:()=>network?.status==='online',itemCount:()=>network?revivalCount(world.bag):respawnInventory?.count()??0,clear:()=>clearInput(),respawn:async destination=>{clearInput();cancelWalk();if(networkExpected&&!network)throw Error('not-connected');if(destination==='capital')return respawnTravel?.();if(network){await network.request('respawn',crypto.randomUUID(),{destination:'here'});return true;}return respawnInventory?.use()??false;}});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null,respawnTravel=null,respawnInventory=null;
  // Skill levels: the server owns them online; guests keep them in their local save.
  const progress=()=>({classId:world.profession.id,jobId:world.jobId??'',jobXp:world.jobXp});
  if(world.roleCombat&&!skillState.skills?.[ROLE_MARK])try{localStorage.setItem('ayothaya-role-skill-backup:'+world.profession.id,JSON.stringify(skillState.skills??{}));}catch{}

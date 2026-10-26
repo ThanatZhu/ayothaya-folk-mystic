@@ -310,12 +310,12 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
    if(reset?.maintenance){send({type:'error',code:'world-reset'});ws.close(4012,'world-reset');return;}
    if(session){if(session.closing||session.trainingBusy){if(message.type==='save'&&typeof message.id==='string'){const id=message.id.slice(0,50);session.queue.then(()=>send({type:'saved',id}),()=>{});return;} // the busy job checkpoints; answer once it lands
-    if(!['input','ping'].includes(message.type)){const reply=['renameBuy','renameUse'].includes(message.type)?'identityError':MAIL_ACTIONS.includes(message.type)?'mailError':PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error',walkTo:'walkError',walkPace:'walkError'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
-    if(['renameBuy','renameUse'].includes(message.type)){
+    if(!['input','ping'].includes(message.type)){const reply=['renameBuy','renameUse','revivalBuy'].includes(message.type)?'identityError':MAIL_ACTIONS.includes(message.type)?'mailError':PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error',walkTo:'walkError',walkPace:'walkError'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(['renameBuy','renameUse','revivalBuy'].includes(message.type)){
      const p=session.peer,id=message.id;
      if(typeof id!=='string'||id.length>80||!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'identityError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
      if(p.duel||p.room.map.id==='duel-arena'){send({type:'identityError',id,code:'arena-busy'});return;}
-     try{await persistMail(session,r=>identityAction(r,message));realm.renamed(p);send({type:'identityChanged',id,character:p.character,bag:p.bag,petCollection:publicPetAccount(p.petCollection)});}
+     try{await persistMail(session,r=>identityAction(r,message));if(message.type!=='revivalBuy')realm.renamed(p);send({type:'identityChanged',id,character:p.character,bag:p.bag,petCollection:publicPetAccount(p.petCollection)});}
      catch(e){send({type:'identityError',id,code:e.message});}return;
     }
     if(MAIL_ACTIONS.includes(message.type)){

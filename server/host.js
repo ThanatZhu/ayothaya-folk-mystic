@@ -23,6 +23,7 @@ import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
 import {isAdmin,adminEmails,OWNER_EMAILS,configKeys,adminPlayers,adminGive,adminGiveOffline} from './admin.js';
 import {cleanFinance,cleanSlip,slipId,FINANCE_MAX_BYTES,SLIP_MAX_BYTES} from './finance.js';
+import {EvidenceLog,playerEvent} from './evidence.js';
 import {WorldReset} from './world-reset.js';
 import {createResetStore} from './world-reset-store.js';
 import {balanceText,commitBalance} from './github-balance.js';
@@ -102,6 +103,11 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   realm.mailAnnouncements=[];realm.logs=[];realm.mapBosses.restore([]);realm.mapBosses.dirty=false;
   store.allPrices={};store.allLeaders={};store.leases?.clear();savedList={at:0,rows:[]};lastLogSaveCount=0;
  }
+ // 0.118 evidence log (see evidence.js): players' sign-ins, chat, trades and mail; every admin action, kept for disputes
+ const evidence=store?.appendEvidence?new EvidenceLog(store).start():null;
+ const audit=(type,admin,detail={})=>evidence?.add('admin',{type,admin,...detail});
+ realm.evidence=(p,type,detail)=>evidence?.add('players',playerEvent(p,type,detail));
+ const requestIp=req=>String(req.headers['do-connecting-ip']||req.socket?.remoteAddress||'?');
  const allowedOrigin=origin=>origins.includes(origin);
  const server=http.createServer(async(req,res)=>{
   let mutationDone;try{
@@ -116,7 +122,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let done;const pending=new Promise(r=>{done=r;});mutations.add(pending);
    mutationDone=()=>{mutations.delete(pending);done();};
   }
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.117 terms/privacy acceptance after sign-in: GET the version this account accepted, POST {version} to record it.
   // Firebase mode trusts only the verified ID token's uid; the loopback dev server uses the uid it is given.
@@ -130,7 +136,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(req.method==='GET'){const c=await store.loadConsent(uid);reply(200,{version:c?.version??null,at:c?.at??null});return;}
     let data='';for await(const chunk of req){data+=chunk;if(data.length>500){reply(413,{error:'too-large'});return;}}
     const version=String(JSON.parse(data||'{}').version??'');if(!/^\d{4}-\d{2}-\d{2}$/.test(version)){reply(400,{error:'bad-version'});return;}
-    await store.saveConsent(uid,{version,at:Date.now(),email,agent:String(req.headers['user-agent']??'').slice(0,200)});console.log('consent',uid,version);reply(200,{version});
+    await store.saveConsent(uid,{version,at:Date.now(),email,agent:String(req.headers['user-agent']??'').slice(0,200)});console.log('consent',uid,version);evidence?.add('players',{type:'consent',uid,email,version,ip:requestIp(req)});reply(200,{version});
    }catch(e){console.error('consent',e.message);reply(e instanceof SyntaxError?400:502,{error:e instanceof SyntaxError?'invalid':'consent-failed'});}
    return;
   }
@@ -152,16 +158,22 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(url.pathname==='/admin/world-reset'&&req.method==='GET'){reply(200,reset.status());return;}
     if(!authoritative()){reply(503,{error:'authority-unavailable'});return;}
     if(url.pathname==='/admin/world-reset/preview'&&req.method==='POST'){
-     try{reply(200,await reset.preview(who));}catch(e){reply(409,{error:e.message});}return;
+     audit('admin-world-reset-preview',who);try{reply(200,await reset.preview(who));}catch(e){reply(409,{error:e.message});}return;
     }
     if(url.pathname==='/admin/world-reset/execute'&&req.method==='POST'){
      let data='';for await(const chunk of req){data+=chunk;if(data.length>4096){reply(413,{error:'too-large'});return;}}
-     try{reply(202,reset.execute(who,JSON.parse(data)));}catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
+     audit('admin-world-reset-execute',who);try{reply(202,reset.execute(who,JSON.parse(data)));}catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
     }
     reply(404,{error:'not-found'});return;
    }
    // 0.103 saved characters come from the store at most every 2 minutes (Firestore bills a read per character);
    // ?fresh=1 (the refresh button) reads again at once.
+   if(url.pathname==='/admin/evidence'&&req.method==='GET'){
+    if(!evidence){reply(503,{error:'evidence-unsupported'});return;}
+    const q={stream:url.searchParams.get('stream')??'players',from:url.searchParams.get('from')??'',to:url.searchParams.get('to')??'',type:String(url.searchParams.get('type')??'').slice(0,40),q:String(url.searchParams.get('q')??'').slice(0,120)};
+    try{const r=await evidence.search(q);audit('admin-evidence-search',who,{query:q,results:r.total});reply(200,r);}catch(e){reply(400,{error:e.message});}
+    return;
+   }
    if(url.pathname==='/admin/map-bosses'&&req.method==='GET'){
     const serverId=url.searchParams.get('serverId')??'server-1',channel=Number(url.searchParams.get('channel')??1);
     if(!['server-1','server-2'].includes(serverId)||!Number.isInteger(channel)||channel<1||channel>5){reply(400,{error:'bad-scope'});return;}
@@ -179,12 +191,12 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      const mail=composeMail({id:b.requestId??randomUUID(),title:b.title??'ของขวัญจากทีมงาน',body:b.body??'ขอบคุณที่ร่วมผจญภัยในอโยธยา กดรับของแนบจากจดหมายฉบับนี้ได้เลยครับ',sender:'ทีมงานอโยธยา',attachments,serverId:b.serverId??'all'});
      if(b.peer==='all'){
       if(hasMailGift(mail.attachments))throw Error('broadcast-gifts-disabled');
-      const r=await store.saveMailAnnouncement(mail);realm.mailAnnouncements=r.mailbox.messages;console.log('admin-announcement-mail',who,mail.id);reply(200,{ok:true,mail:r.mail,replayed:r.replayed});return;
+      const r=await store.saveMailAnnouncement(mail);realm.mailAnnouncements=r.mailbox.messages;console.log('admin-announcement-mail',who,mail.id);audit('admin-mail-all',who,{mail:mail.id,title:mail.title,serverId:b.serverId??'all',attachments:mail.attachments});reply(200,{ok:true,mail:r.mail,replayed:r.replayed});return;
      }
      let record,replayed=false;
      if(String(b.peer??'').startsWith('off:')){const m=/^off:([^:]{1,128}):(slot-[1-5])$/.exec(b.peer);if(!m)throw Error('player-offline');if([...sessions.values()].some(s=>s.peer.uid===m[1]))throw Error('player-online');record=await store.giveOffline({uid:m[1],slotId:m[2]},r=>{const x=deliverMail(r.mailbox,mail);replayed=x.replayed;return {...r,mailbox:x.mailbox};});}
      else{const session=[...sessions.values()].find(s=>s.peer.id===b.peer&&!s.closing);if(!session)throw Error('player-offline');record=await persistMail(session,r=>{const x=deliverMail(r.mailbox,mail);replayed=x.replayed;return {...r,mailbox:x.mailbox};});}
-     savedList.at=0;console.log('admin-mail',who,b.peer,mail.id);reply(200,{ok:true,name:record.character.name,mail,replayed});
+     savedList.at=0;console.log('admin-mail',who,b.peer,mail.id);audit('admin-mail',who,{to:{peer:b.peer,name:record.character.name},route:url.pathname,mail:mail.id,title:mail.title,attachments:mail.attachments});reply(200,{ok:true,name:record.character.name,mail,replayed});
     }catch(e){reply(400,{error:e.message});}return;
    }
    // 0.116 dashboard books: GET the shared costs + ledger; POST saves them if nobody saved in between (409 = reload)
@@ -195,7 +207,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      if(url.pathname==='/admin/finance'&&req.method==='GET'){reply(200,{books:await store.loadFinance()});return;}
      if(url.pathname==='/admin/finance'&&req.method==='POST'){
       const b=await body(FINANCE_MAX_BYTES+20000),doc=cleanFinance(b),baseRev=Number.isInteger(b.baseRev)?b.baseRev:-1;
-      try{const books=await store.saveFinance(doc,baseRev,who);console.log('admin-finance',who,books.rev,doc.ledger.length);reply(200,{books});}
+      try{const books=await store.saveFinance(doc,baseRev,who);console.log('admin-finance',who,books.rev,doc.ledger.length);audit('admin-finance',who,{rev:books.rev,rows:doc.ledger.length,costs:doc.costs.length});reply(200,{books});}
       catch(e){if(e.message!=='finance-stale')throw e;reply(409,{error:'finance-stale',books:e.current});}
       return;
      }
@@ -213,7 +225,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     const text=balanceText(clean),changes=Object.values(clean).reduce((n,g)=>n+Object.values(g).reduce((m,f)=>m+Object.keys(f).length,0),0);
     try{
      if(mode==='local'){await writeFile(path.join(root,'balance-data.js'),text);await writeFile(path.join(root,'dist','balance-data.js'),text).catch(()=>{});reply(200,{ok:true,changes,local:true});}
-     else{const r=await commitBalance(text);console.log('admin-balance',who,changes,r.commit??'unchanged');reply(200,{ok:true,changes,...r});}
+     else{const r=await commitBalance(text);console.log('admin-balance',who,changes,r.commit??'unchanged');audit('admin-balance',who,{changes,commit:r.commit??null});reply(200,{ok:true,changes,...r});}
     }catch(e){console.error('admin-balance',e.message);reply(502,{error:e.message});}
     return;
    }
@@ -223,7 +235,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     let data='';for await(const chunk of req){data+=chunk;if(data.length>1024){reply(413,{error:'too-large'});return;}}
     try{const b=JSON.parse(data),serverId=['server-1','server-2'].includes(b?.serverId)?b.serverId:'server-1';
      const state=realm.setWeather({serverId,weather:b?.weather,minutes:b?.minutes,mapId:typeof b?.mapId==='string'&&b.mapId?b.mapId:null});
-     console.log('admin-weather',who,serverId,b?.weather,b?.minutes??'',b?.mapId??'all');reply(200,{serverId,weather:state});}catch(e){reply(400,{error:e.message});}
+     console.log('admin-weather',who,serverId,b?.weather,b?.minutes??'',b?.mapId??'all');audit('admin-weather',who,{serverId,weather:b?.weather,minutes:b?.minutes??null,mapId:b?.mapId??'all'});reply(200,{serverId,weather:state});}catch(e){reply(400,{error:e.message});}
     return;
    }
    // 0.109.8 world boss from the back office: POST {serverId, mapId, typeId?}
@@ -231,7 +243,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     let data='';for await(const chunk of req){data+=chunk;if(data.length>1024){reply(413,{error:'too-large'});return;}}
     try{const b=JSON.parse(data),serverId=['server-1','server-2'].includes(b?.serverId)?b.serverId:'server-1';
      const num=v=>v===null||v===undefined||v===''?null:Number(v); // the page sends in-game X / Y (Y = -z)
-     const r=realm.summonBoss({serverId,mapId:String(b?.mapId??''),channel:b?.channel??null,typeId:b?.typeId??null,count:b?.count??1,x:num(b?.x),z:num(b?.y)===null?null:-num(b?.y)});console.log('admin-boss',who,serverId,b?.mapId,r.name);reply(200,{serverId,...r});}catch(e){reply(400,{error:e.message});}
+     const r=realm.summonBoss({serverId,mapId:String(b?.mapId??''),channel:b?.channel??null,typeId:b?.typeId??null,count:b?.count??1,x:num(b?.x),z:num(b?.y)===null?null:-num(b?.y)});console.log('admin-boss',who,serverId,b?.mapId,r.name);audit('admin-boss',who,{serverId,mapId:b?.mapId,boss:r.name,count:b?.count??1});reply(200,{serverId,...r});}catch(e){reply(400,{error:e.message});}
     return;
    }
    reply(404,{error:'not-found'});return;
@@ -331,17 +343,19 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      const p=session.peer,id=message.id;
      if(typeof id!=='string'||id.length>80||!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'identityError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
      if(p.duel||p.room.map.id==='duel-arena'){send({type:'identityError',id,code:'arena-busy'});return;}
-     try{await persistMail(session,r=>identityAction(r,message));realm.renamed(p);send({type:'identityChanged',id,character:p.character,bag:p.bag,petCollection:publicPetAccount(p.petCollection)});}
+     try{await persistMail(session,r=>identityAction(r,message));realm.renamed(p);realm.evidence(p,'rename',{action:message.type});send({type:'identityChanged',id,character:p.character,bag:p.bag,petCollection:publicPetAccount(p.petCollection)});}
      catch(e){send({type:'identityError',id,code:e.message});}return;
     }
     if(MAIL_ACTIONS.includes(message.type)){
      const p=session.peer,id=message.id;if(typeof id!=='string'||id.length>80||!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'mailError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
+     if(message.type!=='mailList')realm.evidence(p,'mail',{action:message.type,mail:typeof message.mailId==='string'?message.mailId.slice(0,80):null});
      try{let bulk;if(message.type!=='mailList')await persistMail(session,r=>{if(['mailClaimAll','mailDeleteAll'].includes(message.type)){const result=mailboxBulkAction(r,message,realm.mailAnnouncements??[]);bulk=result.summary;return result.record;}return mailboxAction(r,message,realm.mailAnnouncements??[]);});send({type:'mailChanged',id,mails:publicInbox(p.mailbox,realm.mailAnnouncements??[],p.serverId),summary:inboxSummary(p.mailbox,realm.mailAnnouncements??[],p.serverId),petCollection:publicPetAccount(p.petCollection),bag:p.bag,...(bulk?{bulk}:{})});}
      catch(e){send({type:'mailError',id,code:e.message});}return;
     }
     if(PET_MUTATIONS.includes(message.type)){
      const p=session.peer,id=message.id;
      if(!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'petError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
+     realm.evidence(p,'pet',{action:message.type,request:typeof id==='string'?id.slice(0,80):null});
      try{const r=await persistPets(session,{...message,requestId:id});send({type:'petChanged',id,petCollection:publicPetAccount(r.state),results:r.result.results??[],replayed:r.replayed});}
      catch(e){send({type:'petError',id,code:e.message});}return;
     }
@@ -376,6 +390,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      let destination;try{destination=realm.travelDestination(session.peer,message.destination,{warp:message.warp===true});}catch(e){send({type:'travel-error',id:message.id,code:e.message});return;}
      session.closing=true;session.explicitLeave=true;session.peer.suspended=true;
      const record=realm.record(session.peer,session.lease.record);record.state.mapId=destination.id;record.state.position={...destination.spawn};session.travelRecord=record;
+     realm.evidence(session.peer,'travel',{to:destination.id,warp:message.warp===true});
      logTravel(realm.logs,realm.now(),session.peer.character.name,session.peer.channel??1,session.peer.room?.map?.id,destination.id,message.warp===true);
      try{await checkpoint(session,true);realm.leave(session.peer.id,{travel:true});send({type:'traveled',id:message.id});ws.close(1000,'traveled');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;
     }
@@ -399,11 +414,12 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(lease.record.state.mapId==='duel-arena'&&!arenaReservation(realm,identity.uid+':'+identity.slotId)){lease.record.state.mapId=catalog.capital;lease.record.state.position={...catalog.maps.find(m=>m.id===catalog.capital).spawn};await store.checkpoint(lease,lease.record);}
     if(reset?.maintenance)throw Error('world-reset');
     const queued=[],peer=realm.join({...identity,...(message.channel!==undefined?{channel:message.channel}:{}),record:lease.record,send:data=>queued.push(data)});
+    peer.ip=requestIp(req);realm.evidence(peer,'login',{agent:String(req.headers['user-agent']??'').slice(0,200)});
     session={peer,lease,ws,queue:Promise.resolve(),autoSavedAt:Date.now(),savedJson:null,expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);settled();queued.forEach(send);
    }catch(e){if(lease)await store.checkpoint(lease,lease.record,{release:true}).catch(()=>{});send({type:'error',code:['world-reset','already-online','room-full','character-not-found','character-server'].includes(e.message)?e.message:'authentication-failed'});ws.close(4003,'join-rejected');}
    finally{if(claimed)joinPending.delete(identity.uid);}
   });
-  ws.on('close',()=>{clearTimeout(timer);settled();if(session&&!session.explicitLeave&&!session.closing&&session.peer.routeWalker?.active){session.background=true;session.backgroundUntil=Math.min(session.expires,Date.now()+600000);session.peer.input={x:0,z:0,attack:false,run:false};checkpoint(session).catch(()=>finishBackground(session));return;}if(session){session.closing=true;realm.suspend(session.peer.id);checkpoint(session,true).catch(()=>{}).finally(()=>{if(sessions.get(session.peer.id)===session){if(session.explicitLeave)realm.leave(session.peer.id);sessions.delete(session.peer.id);}session.onClosed?.();});}});
+  ws.on('close',()=>{clearTimeout(timer);settled();if(session)realm.evidence(session.peer,'logout',{explicit:!!session.explicitLeave});if(session&&!session.explicitLeave&&!session.closing&&session.peer.routeWalker?.active){session.background=true;session.backgroundUntil=Math.min(session.expires,Date.now()+600000);session.peer.input={x:0,z:0,attack:false,run:false};checkpoint(session).catch(()=>finishBackground(session));return;}if(session){session.closing=true;realm.suspend(session.peer.id);checkpoint(session,true).catch(()=>{}).finally(()=>{if(sessions.get(session.peer.id)===session){if(session.explicitLeave)realm.leave(session.peer.id);sessions.delete(session.peer.id);}session.onClosed?.();});}});
   ws.on('error',()=>{});
  });
  // Step by real elapsed time in fixed 50 ms slices: timers fire late (especially on Windows), and a fixed
@@ -421,7 +437,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
   lastLogSaveCount=realm.logs.length;
   const logSaver=setInterval(()=>{if(reset?.maintenance)return;if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
- return {server,realm,wss,async close(){closing=true;clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
+ return {server,realm,wss,evidence,async close(){closing=true;await evidence?.stop();clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
   // 0.114.2 a redeploy gives us ~9 s: players' progress first (all at once, 6 s cap), then shops, bosses, guild/leader/
   // price changes and logs together, and the authority release last so the next host can start at once.
   const capped=(p,ms)=>{let t;return Promise.race([Promise.resolve(p).catch(()=>{}),new Promise(r=>{t=setTimeout(r,ms);})]).finally(()=>clearTimeout(t));};

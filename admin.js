@@ -75,10 +75,57 @@ function set(r,f,v){
 }
 // 0.101.2 side menu: what each page is for, in one line
 const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP']};
-const NAV=[['ผู้เล่นและชุมชน',['players','mail']],['โลกเกมตอนนี้',['weather','boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
+const NAV=[['ผู้เล่นและชุมชน',['players','mail','evidence']],['โลกเกมตอนนี้',['weather','boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
+// 0.118 evidence log (player names and details are shown exactly as recorded: data-i18n-skip): search what players and admins did (server keeps players 90 days, admins 3 years) and export it.
+const bkkDay=(t=Date.now())=>new Date(t+7*3600e3).toISOString().slice(0,10);
+const ev={stream:'players',from:bkkDay(),to:bkkDay(),type:'',q:'',rows:null,total:0,truncated:false,loading:false,msg:''};
+const EV_TYPES={players:[['','ทุกประเภท'],['login','เข้าเกม'],['logout','ออกจากเกม'],['chat','แชต'],['trade','แลกของ'],['market','ตลาด / แผง / ร้าน'],['mail','จดหมาย / รับของ'],['pet','สัตว์เลี้ยง'],['rename','เปลี่ยนชื่อ'],['travel','ย้ายแมพ'],['consent','ยอมรับนโยบาย']],admin:[['','ทุกการกระทำ'],['admin-mail','ส่งของ / จดหมาย'],['admin-balance','ปรับค่าสมดุล'],['admin-weather','สภาพอากาศ'],['admin-boss','เสกบอส'],['admin-finance','บัญชีการเงิน'],['admin-world-reset','รีเซ็ตโลก'],['admin-evidence-search','ค้นบันทึกนี้']]};
+const EV_LABEL=Object.fromEntries([...EV_TYPES.players,...EV_TYPES.admin].filter(([k])=>k));
+Object.assign(EV_LABEL,{'market-stall':'ซื้อจากแผง','market-shop-buy':'ซื้อจากร้าน','market-shop-sell':'ขายให้ร้าน','admin-mail-all':'ประกาศทุกคน','admin-world-reset-preview':'ดูตัวอย่างรีเซ็ต','admin-world-reset-execute':'สั่งรีเซ็ตโลก'});
+const evTime=t=>new Date(t).toLocaleString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const evBag=o=>!o?'—':[o.coins?num(o.coins)+' เบี้ย':'',...Object.entries(o.items??{}).map(([id,n])=>itemName(id)+' ×'+n)].filter(Boolean).join(', ')||'—';
+function evDetail(e){
+ if(e.type==='chat')return '['+e.channel+(e.to?' → '+e.to.name:'')+'] '+e.text;
+ if(e.type==='trade')return 'แลกกับ '+(e.with?.name??'?')+' · ให้: '+evBag(e.gave)+' · ได้: '+evBag(e.got);
+ if(e.type?.startsWith('market'))return itemName(e.item)+' ×'+e.count+' · '+num(e.coins)+' เบี้ย'+(e.seller?' · ผู้ขาย '+e.seller.name:e.shop?' · ร้าน '+e.shop.owner:'');
+ if(e.type==='login')return e.agent??'';
+ if(e.type==='travel')return '→ '+e.to+(e.warp?' (วาร์ป)':'');
+ if(e.type==='consent')return 'ฉบับ '+e.version+(e.email?' · '+e.email:'');
+ const {t,type,uid,slot,server,name,ip,ch,map,admin,...rest}=e;return Object.keys(rest).length?JSON.stringify(rest):'';
+}
+function evRows(){return ev.rows??[];}
+async function loadEvidence(){
+ ev.loading=true;ev.msg='กำลังค้นหา…';evidenceTab();
+ try{const p=new URLSearchParams({stream:ev.stream,from:ev.from,to:ev.to,type:ev.type,q:ev.q}),r=await adminFetch('/admin/evidence?'+p);ev.rows=r.events;ev.total=r.total;ev.truncated=r.truncated;ev.msg='';}
+ catch(e){ev.msg=({'range-too-long':'ค้นได้ครั้งละไม่เกิน 31 วัน','bad-range':'ช่วงวันที่ไม่ถูกต้อง','evidence-unsupported':'เซิร์ฟเวอร์นี้ยังไม่มีระบบบันทึกหลักฐาน (รอ deploy)','need-login':'ต้องล็อกอิน Google ก่อน'})[e.message]??'ค้นหาไม่สำเร็จ · '+e.message;}
+ finally{ev.loading=false;if(tab==='evidence')evidenceTab();}
+}
+function evDownload(kind){
+ const rows=evRows();if(!rows.length)return;
+ const stamp=ev.stream+'-'+ev.from+'_'+ev.to,cell=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const text=kind==='json'?JSON.stringify({query:{stream:ev.stream,from:ev.from,to:ev.to,type:ev.type,q:ev.q},exportedAt:new Date().toISOString(),events:rows},null,1)
+  :'﻿'+[['เวลา (กรุงเทพ)','ประเภท','ผู้ทำ','UID','IP','เซิร์ฟ','CH','แมพ','รายละเอียด'].map(cell).join(','),...rows.map(e=>[evTime(e.t),EV_LABEL[e.type]??e.type,e.admin??e.name,e.uid,e.ip,e.server,e.ch,e.map,evDetail(e)].map(cell).join(','))].join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:kind==='json'?'application/json':'text/csv;charset=utf-8'}));a.download='ayothaya-evidence-'+stamp+'.'+kind;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function evidenceTab(){
+ const rows=evRows(),types=EV_TYPES[ev.stream];
+ $('view').innerHTML=`<div class="ev-admin"><form class="ev-filters" id="ev-form">
+<label>บันทึกของ <select id="ev-stream"><option value="players"${ev.stream==='players'?' selected':''}>ผู้เล่น (เก็บ 90 วัน)</option><option value="admin"${ev.stream==='admin'?' selected':''}>แอดมิน (เก็บ 3 ปี)</option></select></label>
+<label>ตั้งแต่ <input id="ev-from" type="date" value="${ev.from}"></label><label>ถึง <input id="ev-to" type="date" value="${ev.to}"></label>
+<label>ประเภท <select id="ev-type">${types.map(([k,n])=>`<option value="${k}"${k===ev.type?' selected':''}>${n}</option>`).join('')}</select></label>
+<label class="ev-q">ค้นหา <input id="ev-q" type="search" value="${esc(ev.q)}" placeholder="ชื่อตัวละคร · UID · IP · ข้อความ"></label>
+<button type="submit" class="primary"${ev.loading?' disabled':''}>ค้นหา</button></form>
+<div class="ev-bar"><span>${ev.msg?esc(ev.msg):ev.rows?`พบ ${num(ev.total)} รายการ`+(ev.truncated?' · แสดง 2,000 รายการล่าสุด ให้แคบช่วงลง':''):'เลือกช่วงวันแล้วกดค้นหา · ค้นได้ครั้งละไม่เกิน 31 วัน'}</span><span class="ev-export"><button type="button" id="ev-csv"${rows.length?'':' disabled'}>⬇ CSV (Excel)</button><button type="button" id="ev-json"${rows.length?'':' disabled'}>⬇ JSON</button></span></div>
+${rows.length?`<div class="scroll ev-scroll"><table class="ev-table"><thead><tr><th>เวลา</th><th>ประเภท</th><th>${ev.stream==='admin'?'แอดมิน':'ผู้เล่น'}</th><th>IP</th><th>CH · แมพ</th><th>รายละเอียด</th></tr></thead><tbody>${rows.map(e=>`<tr><td class="ev-time">${evTime(e.t)}</td><td><span class="ev-type ev-${esc(String(e.type).split('-')[0])}">${esc(EV_LABEL[e.type]??e.type)}</span></td><td data-i18n-skip><b>${esc(e.admin??e.name??'—')}</b>${e.uid?`<small title="${esc(e.uid)}">${esc(e.uid.slice(0,10))}…</small>`:''}</td><td class="ev-ip">${esc(e.ip??'—')}</td><td>${e.ch?'CH '+esc(e.ch):''}${e.map?`<small>${esc(e.map)}</small>`:''}</td><td class="ev-detail" data-i18n-skip>${esc(evDetail(e))}</td></tr>`).join('')}</tbody></table></div>`:''}
+<p class="ev-note">ใช้เป็นหลักฐานเมื่อมีข้อร้องเรียน เช่น โดนโกงของ คำพูดผิดกฎหมาย หรือเจ้าหน้าที่ขอข้อมูล · ทุกครั้งที่ค้นจะถูกบันทึกไว้ในบันทึกของแอดมินด้วย · ส่งออกแล้วเก็บไฟล์ไว้ในที่ปลอดภัย เพราะมีข้อมูลส่วนบุคคล</p></div>`;
+ $('ev-stream').onchange=e=>{ev.stream=e.target.value;ev.type='';ev.rows=null;evidenceTab();};
+ $('ev-form').onsubmit=e=>{e.preventDefault();ev.from=$('ev-from').value||bkkDay();ev.to=$('ev-to').value||ev.from;ev.type=$('ev-type').value;ev.q=$('ev-q').value.trim();loadEvidence();};
+ $('ev-csv').onclick=()=>evDownload('csv');$('ev-json').onclick=()=>evDownload('json');
+}
 const announcementDraft={title:'',body:'',serverId:'all',pending:null,busy:false,message:''};
 function tabs(){
  PAGES.mail=['✉','จดหมายและประกาศ','ส่งประกาศเข้าจดหมายผู้เล่น · ของแจกส่งได้ที่หน้าผู้เล่น'];
+ PAGES.evidence=['🧾','บันทึกหลักฐาน','ประวัติเข้าเกม แชต การแลกของ ตลาด และการกระทำของแอดมิน · ค้นหาและส่งออกเป็นไฟล์'];
  PAGES.mapbosses=['🏔️','บอสประจำแมพ','9 แมพ · HP ไล่ตามพื้นที่ · เกิดใหม่ 60 นาทีหลังตาย แยกตามเซิร์ฟ/CH'];
  // 0.115 grouped menu: one line per page; the page's one-line help shows in its header instead.
  $('tabs').innerHTML=NAV.map(([group,ids])=>`<p class="nav-group">${group}</p>`+ids.filter(id=>PAGES[id]).map(id=>{const [icon,name,help]=PAGES[id];return `<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}" title="${esc(help)}"><i>${icon}</i><b>${name}</b></button>`;}).join('')).join('');
@@ -108,7 +155,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses','mail'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses','mail','evidence'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
  $('page-title').textContent=name;$('page-help').textContent=(tab==='skills'&&skillSet==='live'?'ชุดสกิลที่ใช้ในเกมปัจจุบัน · ดูรูป บทบาท และสาย Master':help)+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -129,7 +176,7 @@ function render(withFilters=true){
  if(withFilters)filters();pageHead();
  if(tab==='skills'&&skillSet==='live'){currentSkills();return;}
  if(tab==='table'){$('view').innerHTML=skillTable();paintAdminSkills($('view'),tableView==='compare'?classId:tableView);return;}
- if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
+ if(tab==='evidence'){evidenceTab();return;}if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
  const rows=rowsFor(),cols=columns(rows),cards=['skills','monsters'].includes(tab)&&viewMode==='cards';
  const undo=(r,i)=>`<button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button>`;
  const note=tab==='skills'?'<p class="admin-legacy-note">ชุดสกิลเดิมก่อนปรับระบบอาชีพ · ไม่ใช่ชุดสกิลปัจจุบันที่แสดงในเกม</p>':'';

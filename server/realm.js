@@ -344,13 +344,14 @@ export class RealmServer{
    const text=m.text.normalize('NFC').replace(/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/g,'').trim();
    if(!text||text.length>240)return this.error(p,'invalid-chat');
    // 0.47 whisper: one named player on this server, wherever they are; guild: every online member.
-   if(m.channel==='whisper'){const o=this.byName(p,cleanName(m.to));if(!o)return this.itemFail(p,'whisper-offline');p.chatAt=now;const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,to:o.character.name,text,channel:'whisper',time:now};p.send(message);o.send(message);return true;}
+   if(m.channel==='whisper'){const o=this.byName(p,cleanName(m.to));if(!o)return this.itemFail(p,'whisper-offline');p.chatAt=now;const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,to:o.character.name,text,channel:'whisper',time:now};p.send(message);o.send(message);this.evidence?.(p,'chat',{channel:'whisper',text,to:{uid:o.uid,name:o.character.name}});return true;}
    // World: everyone online on this server, any map; its own slower cooldown so one player cannot flood it.
-   if(m.channel==='world'){if(now-(p.worldAt??-Infinity)<WORLD_CHAT_COOLDOWN)return this.error(p,'world-rate');p.chatAt=p.worldAt=now;this.worldSay(p.serverId,{actor:p.id,name:p.character.name,text});return true;}
-   if(m.channel==='guild'){const g=this.guildOf(p);if(!g)return this.itemFail(p,'guild-none');p.chatAt=now;const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,text,channel:'guild',time:now};for(const x of g.members)this.online(x.key,g.serverId)?.send(message);return true;}
+   if(m.channel==='world'){if(now-(p.worldAt??-Infinity)<WORLD_CHAT_COOLDOWN)return this.error(p,'world-rate');p.chatAt=p.worldAt=now;this.worldSay(p.serverId,{actor:p.id,name:p.character.name,text});this.evidence?.(p,'chat',{channel:'world',text});return true;}
+   if(m.channel==='guild'){const g=this.guildOf(p);if(!g)return this.itemFail(p,'guild-none');p.chatAt=now;const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,text,channel:'guild',time:now};for(const x of g.members)this.online(x.key,g.serverId)?.send(message);this.evidence?.(p,'chat',{channel:'guild',text,guild:g.name??g.id});return true;}
    const party=this.parties.get(p.partyId);if(m.channel==='party'&&!party)return this.error(p,'no-party');p.chatAt=now;
    const message={type:'chat',id:randomUUID(),actor:p.id,name:p.character.name,text,channel:m.channel,time:now};
    for(const pid of party&&m.channel==='party'?party.members:p.room.peers)this.peers.get(pid)?.send(message);
+   this.evidence?.(p,'chat',{channel:m.channel,text});
    if(m.channel==='room'){p.room.history.push(message);if(p.room.history.length>40)p.room.history.shift();logChat(this.logs,now,p.channel??1,p.room.map.id,p.character.name,text);}return true;
   }
   if(m.type==='invite'){
@@ -610,6 +611,7 @@ export class RealmServer{
   if(!r)return false;
   r.shop.xpOwed=(shop.xpOwed??0)+(r.cost??r.pay); // the owner's trade experience is paid out when they collect
   this.setBag(p,r.bag);p.saveNow=true;this.shops.set(shop.id,r.shop);this.saveShop(r.shop);this.traded(p.serverId,[p],m.item,r.cost??r.pay,m.count);
+  this.evidence?.(p,m.type==='shopBuy'?'market-shop-buy':'market-shop-sell',{shop:{id:shop.id,owner:shop.ownerName},item:m.item,count:m.count,coins:r.cost??r.pay,tax:r.tax??0});
   owner?.world.emit('stallSold',{item:m.item,count:m.count,coins:(r.cost??r.pay)-r.tax,buyer:p.character.name});
   owner?.world.emit('shopMine',{shops:this.mine(owner),perks:tradePerks(owner.tradeXp)});
   w.notice((m.type==='shopBuy'?'ซื้อจากร้าน ':'ขายให้ร้าน ')+shop.ownerName+' แล้ว'+(r.tax?' · ภาษี '+r.tax+' เบี้ย':''));
@@ -639,6 +641,7 @@ export class RealmServer{
    if(!o.trade.ok){this.sendTrade(p,o);return true;}
    let r;try{r=swapOffers(p.bag,p.trade.offer,o.bag,o.trade.offer);}catch(e){this.endTrade(p,'แลกไม่สำเร็จ · '+e.message);return false;}
    this.setBag(p,r[0]);this.setBag(o,r[1]);p.saveNow=o.saveNow=true;
+   this.evidence?.(p,'trade',{with:{uid:o.uid,name:o.character.name,ip:o.ip??null},gave:p.trade.offer,got:o.trade.offer});
    logTrade(this.logs,this.now(),p.character.name,o.character.name,p.channel??1);
    for(const x of [p,o]){x.trade=null;x.world.emit('tradeEnd',{reason:'แลกของสำเร็จ',done:true});}return true;}
   return false;
@@ -656,6 +659,7 @@ export class RealmServer{
    {const tax=taxOf(r.cost,tradePerks(o.tradeXp));r.net=r.cost-tax;r.sellerBag={...r.sellerBag,coins:r.sellerBag.coins-tax};this.traded(p.serverId,[p,o],m.item,r.cost,m.count);}
    const nextStall={...o.stall,...r.stall};this.setBag(o,r.sellerBag);this.setBag(p,r.buyerBag);o.stall=shopHasListings(nextStall)?nextStall:null;p.saveNow=o.saveNow=true;
    logMarket(this.logs,this.now(),p.character.name,o.character.name,m.item,m.count,r.cost);
+   this.evidence?.(p,'market-stall',{seller:{uid:o.uid,name:o.character.name},item:m.item,count:m.count,coins:r.cost,tax:r.cost-r.net});
    o.world.emit('stallSold',{item:m.item,count:m.count,coins:r.net,buyer:p.character.name});w.notice('ซื้อจากแผง '+o.character.name+' แล้ว');
    this.stallCommand(p,{type:'stallList'});return true;}
   return false;

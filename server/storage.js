@@ -1,5 +1,5 @@
 import {deliverMail} from '../mailbox.js';
-import {readFile,writeFile,mkdir,rename,rm} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,rename,rm,appendFile,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {character,initialSave} from '../realm-state.js';
@@ -63,6 +63,12 @@ export class LocalStore{
  async saveSlip(s){await mkdir(path.join(this.directory,'finance-slips'),{recursive:true});await writeFile(this.slipPath(s.id),JSON.stringify({type:s.type,data:s.data,at:Date.now()}));}
  deleteSlip(id){return rm(this.slipPath(id),{force:true});}
  // 0.117 terms/privacy acceptance per account (PDPA record: which version, when, which address)
+ // 0.118 evidence log: one JSON line per batch in evidence/<stream>/<day>.jsonl
+ evidenceDir(stream){return path.join(this.directory,'evidence',stream);}
+ async appendEvidence(stream,doc){await mkdir(this.evidenceDir(stream),{recursive:true});await appendFile(path.join(this.evidenceDir(stream),doc.day+'.jsonl'),JSON.stringify(doc)+'\n');}
+ async loadEvidence(stream,from,to){let files=[];try{files=await readdir(this.evidenceDir(stream));}catch{return [];}
+  const out=[];for(const f of files.filter(f=>f.endsWith('.jsonl')&&f.slice(0,10)>=from&&f.slice(0,10)<=to)){for(const line of (await readFile(path.join(this.evidenceDir(stream),f),'utf8')).split('\n'))if(line.trim())out.push(JSON.parse(line));}return out;}
+ async purgeEvidence(stream,before){let files=[];try{files=await readdir(this.evidenceDir(stream));}catch{return;}for(const f of files)if(f.endsWith('.jsonl')&&f.slice(0,10)<before)await rm(path.join(this.evidenceDir(stream),f),{force:true});}
  async loadConsent(uid){try{return JSON.parse(await readFile(path.join(this.directory,'consents.json'),'utf8'))[uid]??null;}catch(e){if(e.code==='ENOENT')return null;throw e;}}
  saveConsent(uid,doc){const job=(this.consentQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'consents.json');let all={};try{all=JSON.parse(await readFile(file,'utf8'));}catch{}all[uid]=doc;await writeFile(file,JSON.stringify(all));});this.consentQueue=job;return job;}
  async loadPrices(){try{return JSON.parse(await readFile(path.join(this.directory,'prices.json'),'utf8'));}catch{return {};}}
@@ -97,6 +103,11 @@ export class FirebaseStore{
  async loadSlip(id){const s=await this.db.collection('backofficeFinanceSlips').doc(id).get();return s.exists?s.data():null;}
  saveSlip(s){return this.db.collection('backofficeFinanceSlips').doc(s.id).set({type:s.type,data:s.data,at:Date.now()});}
  deleteSlip(id){return this.db.collection('backofficeFinanceSlips').doc(id).delete();}
+ // 0.118 evidence log: batch documents {day, at, events}; range reads and purges use the single field 'day' (no composite index)
+ evidenceRef(stream){return this.db.collection(stream==='admin'?'evidenceAdminLogs':'evidenceLogs');}
+ appendEvidence(stream,doc){return this.evidenceRef(stream).add(doc);}
+ async loadEvidence(stream,from,to){return (await this.evidenceRef(stream).where('day','>=',from).where('day','<=',to).get()).docs.map(d=>d.data());}
+ async purgeEvidence(stream,before){for(let round=0;round<20;round++){const snap=await this.evidenceRef(stream).where('day','<',before).limit(300).get();if(snap.empty)return;const batch=this.db.batch();snap.docs.forEach(d=>batch.delete(d.ref));await batch.commit();}}
  async loadConsent(uid){const s=await this.db.collection('playerConsents').doc(uid).get();return s.exists?s.data():null;}
  saveConsent(uid,doc){return this.db.collection('playerConsents').doc(uid).set(doc);}
  async loadPrices(){const out={};for(const d of (await this.db.collection('multiplayerPrices').get()).docs)out[d.id]=d.data().prices??{};return out;}

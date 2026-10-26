@@ -1,3 +1,4 @@
+import {loadPaintedStanding} from './painted-character.js?v=size1';
 import {storyNPCIdentity} from './npc-identity175.js';
 // The exact authored NPC silhouettes already used by the game, including citizens and mentors.
 import {storyPortrait} from './story-dialogue.js?v=chuk175';
@@ -5,10 +6,11 @@ const images=new Map(),portraits=new Map();let metadata;
 export function sceneImage(src){
  if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>{images.delete(src);reject(Error('image-unavailable'));};img.src=src;}));return images.get(src);
 }
-export function npcActorId(n){return storyNPCIdentity(n)?.id??(n?.sheet?`${n.sheet}-${n.row??0}`:`people-${Number.isInteger(n?.texture)?n.texture:0}`);}
+export function npcActorId(n){if(n?.adventurer)return 'adventurer:'+n.classId+':'+n.gender;return storyNPCIdentity(n)?.id??(n?.sheet?`${n.sheet}-${n.row??0}`:`people-${Number.isInteger(n?.texture)?n.texture:0}`);}
 export function loadNPCPortrait(n){
  const key=npcActorId(n);if(portraits.has(key))return portraits.get(key);
  const pending=(async()=>{
+  if(n?.adventurer)return loadPaintedStanding(n.classId,n.gender);
   if(!n?.sheet)return sceneImage(storyPortrait(n).src);
   metadata??=fetch('./assets/citizens40/frames.json?v=42.1').then(r=>{if(!r.ok)throw Error('npc-metadata');return r.json();});
   const meta=(await metadata)[n.sheet];if(!meta)throw Error('npc-metadata');

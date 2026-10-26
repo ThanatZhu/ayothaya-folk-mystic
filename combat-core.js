@@ -169,13 +169,16 @@ export class CombatWorld{
   this.autoConfig=normalizeAuto(null);this.autoCast=0;this.autoIdle=0;this.foe=null;this.rivals=[];this.food=null;this.targetId=null;this.auto=false;this.anchor={x:0,z:0};this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.reserved||s.master?0:1);this.events=[];this.path=[];this.pathTimer=0;this.manualGrace=0;this.kills=0;this.baseXp=0;this.jobXp=0;this.jobId=config.jobId??'';this.time=0;this.status={};this.poisonTick=0;this.merc=null;this.roleCombat=config.roleSkills===true?createRoleCombat(this,{moveBody,lineClear,types:MONSTER_TYPES}):null;if(this.roleCombat){this.skills=this.roleCombat.skills;this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.reserved||s.master?0:1);}
  }
  // 0.61 hired mercenary: attacks your target (or, on AUTO, the nearest monster) within 6, every 1.4 s, 10 + 2·level damage.
- hire(seconds){this.merc={left:seconds,cd:0};}
+ hire(seconds,contract=null){this.merc={...contract,left:seconds,cd:0};}
  mercStep(dt){
   const c=this.merc,p=this.player;if(!c)return;c.left-=dt;c.cd=Math.max(0,c.cd-dt);
   if(c.left<=0){this.merc=null;this.notice('ทหารรับจ้างหมดสัญญาแล้ว');return;}
-  if(c.cd>0||p.hp<=0||this.safe)return;
-  const m=this.target??(this.auto?this.nearest(6):null);if(!m||distance(m,p)>6)return;
-  c.cd=1.4;this.emit('merc',{x:m.x,z:m.z});this.hurt(m,10+2*baseProgress(this).level,'#cfe8ff');
+  if(p.hp<=0||this.safe||this.foe||this.rivals.length){c.pending=null;return;}
+  if(c.pending){const hit=c.pending;hit.left-=dt;if(hit.left<=0){c.pending=null;const m=this.mobs.find(m=>m.id===hit.id&&m.hp>0);if(m&&distance(m,p)<=6&&lineClear(p.x,p.z,m.x,m.z,this.nav)){this.emit('mercHit',{id:m.id,x:m.x,z:m.z});this.hurt(m,c.power,'#cfe8ff');}}return;}
+  if(c.cd>0)return;
+  const chosen=this.target,m=chosen&&this.mobs.includes(chosen)?chosen:(this.auto?this.nearest(6):null);if(!m||!this.mobs.includes(m)||distance(m,p)>6||!lineClear(p.x,p.z,m.x,m.z,this.nav))return;
+  c.cd=c.interval??1.4;this.emit('merc',{x:m.x,z:m.z});
+  if(c.id)c.pending={id:m.id,left:.25};else this.hurt(m,10+2*baseProgress(this).level,'#cfe8ff');
  }
  // 0.93 duel: the opponent stands in as one more target (the server keeps its position and HP in step with the real player).
  // 0.95 guild war: rivals are enemy-guild players and the guardian stone, kept in step by the server the same way.

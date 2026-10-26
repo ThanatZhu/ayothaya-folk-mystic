@@ -1,4 +1,4 @@
-import {createNPCConversation} from './npc-conversation155.js?v=chuk175';
+import {createNPCConversation} from './npc-conversation155.js?v=hire177';
 import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=arena166';
@@ -90,7 +90,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  });
  function talk(n){
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
-  if(world.player.hp<=0||traveling)return;
+  if(world.player.hp<=0||traveling||n.unavailable)return;
   if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',npc:n.name,onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
   endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);api.onConversationOpened?.(n);return;}conversation=n;n.talking=true;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);api.onConversationOpened?.(n);
  }
@@ -100,8 +100,8 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  const pickNPC=(x,y)=>{if(talkBlocked())return null;npcPointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);npcRay.setFromCamera(npcPointer,camera);
   for(const hit of npcRay.intersectObjects(npcSprites.filter(s=>s.visible)))if(opaqueNPCHit(hit))return hit.object.userData.npc;return null;
  };
- const activateNPC=npc=>{if(!npc||talkBlocked())return false;talk(npc);return true;};
- game.npcInteraction={pick:pickNPC,activate:activateNPC,talkNearest(){return activateNPC(nearestTalkNPC(npcViews.map(v=>v.n),world.player));},tap(x,y){return activateNPC(pickNPC(x,y));}};
+ const activateNPC=npc=>{if(!npc||npc.unavailable||talkBlocked())return false;talk(npc);return true;};
+ game.npcInteraction={pick:pickNPC,activate:activateNPC,talkNearest(){return activateNPC(nearestTalkNPC(npcViews.filter(v=>!v.n.unavailable).map(v=>v.n),world.player));},tap(x,y){return activateNPC(pickNPC(x,y));}};
  $('close-npc').onclick=endTalk;
  $('interact').onclick=()=>{if(nearNPC)talk(nearNPC);else if(nearest)travel(nearest.to);};
  addEventListener('keydown',e=>{
@@ -132,7 +132,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   const area=(map.districts??[]).find(d=>Math.hypot(p.x-d.x,p.z-d.z)<14);$('district-description').textContent=area?area.name+' · '+(map.safe?'เขตปลอดภัย':'นอกเมือง'):map.subtitle;
   $('mini-area').textContent=(area?.name??'ระหว่างทาง')+' · '+(map.safe?'ปลอดภัย':'นอกเมือง');
   for(const v of views){const d=Math.hypot(p.x-v.p.x,p.z-v.p.z);if(d<best){best=d;nearest=v.p;}v.ring.material.opacity=.52+Math.sin(t*2)*.2;position(v.label,v.p.x,v.p.z,.36);v.label.classList.toggle('near',d<2);}
-  let npcDistance=2.3;for(const v of npcViews){const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(document.body.classList.contains('mobile-play')?6:v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
+  let npcDistance=2.3;for(const v of npcViews){if(v.n.unavailable){v.label.hidden=true;continue;}v.label.hidden=false;const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(document.body.classList.contains('mobile-play')?6:v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
   mentors.update();conversationUI.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!atlas.open&&!mentors.paused;
   $('interact').hidden=!canInteract;
   if(canInteract){const button=$('interact'),mobile=document.body.classList.contains('mobile-play');button.dataset.kind=nearNPC?'npc':'portal';const text=nearNPC?(mobile?'พูดคุย':'กด Space เพื่อพูดคุย · หรือคลิก NPC'):'เดินทางไป '+lookup(nearest.to).name;if(button.textContent!==text)button.textContent=text;button.title=nearNPC?'คุยกับ '+nearNPC.name:text;button.setAttribute('aria-label',button.title);}
@@ -142,7 +142,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   if(dialog.open&&now-lastBig>250){lastBig=now;drawCityMap();} // 0.64.1 the open map follows you live
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
- const api={update,endTalk,get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,onConversationOpened:null,travelTo:id=>travel(id),
+ const api={update,endTalk,registerNPC(n,sprite,label){npcViews.push({n,label});sprite.traverse(o=>{o.userData.npc=n;});npcSprites.push(sprite);label.onclick=()=>talk(n);return ()=>talk(n);},get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,onConversationOpened:null,travelTo:id=>travel(id),
   // Directory destinations can be several maps away. Preserve free gate travel when
   // permitted; otherwise let the existing atlas show the fare and confirm the warp.
   travelToMap(id){

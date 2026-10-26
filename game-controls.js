@@ -6,14 +6,14 @@ import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
 import {prefetchPoses} from './skill-pose-art.js?v=pose119';
 import {createLiveRoleVfx} from './role-skill-vfx.js?v=pose119';
-import {createRolePlayUI} from './role-play-ui.js';
+import {createRolePlayUI} from './role-play-ui.js?v=cast119';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=icons117';
 import {presentationDelta,roleTiming} from './combat-timing.js';
-import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS,ROLE_GROUND_KINDS} from './role-combat.js';
+import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS,ROLE_GROUND_KINDS,ROLE_GLOBAL_CD} from './role-combat.js';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=106.0';
 import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
@@ -204,7 +204,17 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // 0.119 ground AOE: the circle shows the real area at the cursor (or the target, on touch) and a ring the reach;
  // click/tap the ground or press the skill again to put it there. Out of reach it turns orange, and placing it walks in first.
- let groundAim=null,mouseAim=null;
+ let groundAim=null,mouseAim=null,gcdUntil=0;
+ // 0.119 cast bar under the hero while a skill winds up to its first release (the realm's own beats).
+ const castBar=document.createElement('div');castBar.id='role-cast-bar';castBar.hidden=true;castBar.setAttribute('role','progressbar');castBar.setAttribute('aria-valuemin','0');castBar.setAttribute('aria-valuemax','100');castBar.innerHTML='<span></span><i><b></b></i>';$('game-shell').append(castBar);
+ const castAt=new THREE.Vector3();let castBarId=null;
+ function drawCastBar(p,floor){
+  const end=roleClip?roleClip.start+roleClip.impacts[0]:0,show=!!roleClip&&p.hp>0&&roleEffects.time<end&&end-roleClip.start>.2;
+  castBar.hidden=!show;if(!show){castBarId=null;return;}
+  if(castBarId!==roleClip.castId){castBarId=roleClip.castId;castBar.querySelector('span').textContent=world.skills.find(s=>s?.roleSkillId===roleClip.id)?.name??'';}
+  const q=Math.max(0,Math.min(1,(roleEffects.time-roleClip.start)/(end-roleClip.start)));castBar.querySelector('b').style.width=(q*100).toFixed(1)+'%';castBar.setAttribute('aria-valuenow',String(Math.round(q*100)));
+  castAt.set(p.x,floor,p.z).project(camera);const r=canvas.getBoundingClientRect();castBar.style.left=(r.left+(castAt.x+1)/2*r.width)+'px';castBar.style.top=(r.top+(1-castAt.y)/2*r.height+10)+'px';
+ }
  const aimMat=(color,opacity)=>new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide});
  const aimArea=new THREE.Mesh(new THREE.CircleGeometry(1,48),aimMat('#f4cf7a',.3)),aimEdge=new THREE.Mesh(new THREE.RingGeometry(.93,1,64),aimMat('#ffe7a6',.9)),aimReach=new THREE.Mesh(new THREE.RingGeometry(.985,1,96),aimMat('#fff0ce',.4));
  for(const m of [aimArea,aimEdge,aimReach]){m.rotation.x=-Math.PI/2;m.renderOrder=6;m.visible=false;scene.add(m);}
@@ -227,6 +237,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   // Only what the realm will accept: anything it may refuse waits for its answer as before.
   if(p.hp<=0||(world.cooldowns?.[i]??0)-(wall()-cooldownsAt)>.08||p.mp<s.cost*(1-((world.derivedView??world.derived)?.mpCut??0))||st.stun||st.sleep||st.silence||(world.safe&&!aim.self&&!friend))return;
   if(roleClip&&roleEffects.time<roleClip.start+roleClip.impacts.at(-1))return; // the realm still holds the last cast
+  if(roleEffects.time<gcdUntil)return; // and its one-second gap between skills
   const foe=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null,to=aim.self&&!friend&&foe?foe:aim.at;
   playCast({type:'cast',predicted:true,roleSkillId:s.roleSkillId,castId:'p'+(++predictSerial),timing:roleTiming(s,SKILL_PROFILES[s.roleSkillId]),from:{x:p.x,z:p.z},to:{x:to.x,z:to.z},kind:s.type,lag:0});
   roleClip.predicted=wall();
@@ -234,8 +245,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function playCast(e){
    const aim=castFacing(e,world.player.face);if(aim)world.player.face={...aim};
    // The realm's cast of a predicted press: keep the running body and VFX, take its id and timing.
-   if(e.roleSkillId&&!e.predicted&&roleClip?.predicted){const old=roleClip.castId;if(roleClip.id===e.roleSkillId){roleClip.castId=e.castId;roleClip.predicted=null;if(e.timing?.impacts?.length){roleClip.impacts=[...e.timing.impacts];roleClip.duration=e.timing.duration;castUntil=roleClip.start+roleClip.duration;}roleEffects.rekey(old,e.castId);return;}roleEffects.cancel(old);}
-   if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip=createRoleAnimation(e,roleEffects.time);castUntil=world.time-Math.max(0,e.lag??0)+roleClip.duration;actionStart=world.time-Math.max(0,e.lag??0);castFace=aim;strikeAt=world.time;actionMode='cast';activeSkill=null;basicCastId=null;world.clearEmote();roleEffects.spawn(e);return;}
+   if(e.roleSkillId&&!e.predicted&&roleClip?.predicted){const old=roleClip.castId;if(roleClip.id===e.roleSkillId){roleClip.castId=e.castId;roleClip.predicted=null;if(e.timing?.impacts?.length){roleClip.impacts=[...e.timing.impacts];roleClip.duration=e.timing.duration;castUntil=roleClip.start+roleClip.duration;}gcdUntil=roleClip.start+roleClip.impacts.at(-1)+ROLE_GLOBAL_CD;roleEffects.rekey(old,e.castId);return;}roleEffects.cancel(old);}
+   if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip=createRoleAnimation(e,roleEffects.time);castUntil=world.time-Math.max(0,e.lag??0)+roleClip.duration;actionStart=world.time-Math.max(0,e.lag??0);castFace=aim;strikeAt=world.time;actionMode='cast';activeSkill=null;basicCastId=null;world.clearEmote();roleEffects.spawn(e);gcdUntil=roleClip.start+roleClip.impacts.at(-1)+ROLE_GLOBAL_CD;return;}
    if(e.timing&&!Number.isInteger(e.skillIndex)){
     const timing=e.timing,lag=Math.max(0,e.lag??0),start=world.time-lag;
     if(!roleAnimationActive(roleClip,roleEffects.time)){roleClip=null;activeSkill=null;basicCastId=e.castId;castFace=aim;actionStart=start;castUntil=actionStart+timing.duration;actionMode='attack';swingScale=attackDuration(world.profession.id)/timing.duration;}
@@ -457,7 +468,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   const floor=groundHeight(world.nav,p.x,p.z);
-  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);drawCastBar(p,floor);
   hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);
   const azimuth=controls.getAzimuthalAngle(),poseFace=rolePose?(roleClip.facing??p.face):t<castUntil?(castFace??p.face):p.face;
   if(hero.frames)hero.sprite.material.map=hero.frames[0];

@@ -16,8 +16,8 @@
       "id": "ruined-temple",
       "name": "วัดร้างริมกรุงเก่า",
       "scene": "maps/v7/ruined-temple.glb",
-      "bytes": 3753664,
-      "sha256": "c1b55223c5aeb758a21251387fe0fd4efca75d76163953f2a7cc9d158639d727",
+      "bytes": 3943948,
+      "sha256": "5277ba8394e7a1ecdd32a4b87aa720a57360a8571524040a51c40dd72e0be1c7",
       "source": "chapter2-v2",
       "triangles": 237785,
       "realism": "maps-v7"

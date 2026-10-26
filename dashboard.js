@@ -642,6 +642,8 @@ async function initAuthGate(){
   return;
  }
  const msg=$('gate-msg'),btnLogin=$('btn-login-google'),btnLogout=$('btn-logout');
+ // Dev server on this machine: no Google gate (local preview only); the live site always gates.
+ if(['127.0.0.1','localhost'].includes(location.hostname)){startDashboard({email:'localhost'});return;}
  lockDashboard();
  if(msg)msg.textContent='กำลังเตรียมระบบความปลอดภัย…';
  try{

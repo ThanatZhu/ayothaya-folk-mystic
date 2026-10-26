@@ -1,0 +1,48 @@
+/* 0.115.1 dashboard: a short header, a sticky section menu, the server address tucked away, and tables that fit:
+   text cells read as plain text until pointed at, money columns stay narrow, the row actions stay in view. */
+.luxury-office .dash-shell{max-width:1480px;padding:0 32px 60px;gap:18px}
+.luxury-office .dash-header{min-height:0;margin:0 -32px;padding:26px 32px 20px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px 24px;flex-wrap:wrap}
+.luxury-office .dash-header h1{font-size:clamp(24px,2.4vw,32px);margin:6px 0 4px}
+.luxury-office .dash-header .sub{font-size:12px;max-width:620px}
+.luxury-office .dash-nav{margin:0;gap:6px;align-items:center}
+.luxury-office .dash-nav>*{min-height:34px;padding:5px 12px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center}
+.luxury-office .bo-section-nav{position:sticky;top:0;z-index:20;display:flex;gap:6px;flex-wrap:wrap;margin:0 -32px;padding:10px 32px;background:#0b1a17f2;backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+.luxury-office .bo-section-nav a{min-height:32px;display:inline-flex;align-items:center;padding:4px 14px;border:1px solid var(--rule);border-radius:999px;color:var(--muted);font-size:12px;text-decoration:none}
+.luxury-office .bo-section-nav a:hover{color:var(--gold-bright);border-color:var(--gold)}
+.luxury-office .dash-panel{scroll-margin-top:64px}
+.luxury-office .dash-panel h2{scroll-margin-top:72px}
+
+/* Server status: one line; the address form opens only when needed */
+.luxury-office .conn-bar{padding:12px 18px;border-radius:8px}
+.luxury-office .conn-more{position:relative;margin-left:auto}
+.luxury-office .conn-more>summary{list-style:none;cursor:pointer;min-height:34px;display:inline-flex;align-items:center;padding:5px 12px;border:1px solid var(--rule);border-radius:6px;font-size:12px;color:var(--muted)}
+.luxury-office .conn-more>summary::-webkit-details-marker{display:none}
+.luxury-office .conn-more[open]>summary{color:var(--gold-bright);border-color:var(--gold)}
+.luxury-office .conn-more .conn-controls{position:absolute;right:0;top:calc(100% + 6px);z-index:10;width:min(560px,90vw);padding:12px;border:1px solid var(--rim);border-radius:8px;background:#10241f;box-shadow:0 12px 30px #0008;justify-content:flex-start}
+.luxury-office .conn-more .conn-controls input{max-width:none;min-width:0}
+
+/* Tables */
+.luxury-office .table-wrap{border-radius:8px}
+.luxury-office .dash-table th{position:sticky;top:0;z-index:1}
+.luxury-office .dash-table th,.luxury-office .dash-table td{padding:8px 10px}
+.luxury-office .dash-table input.inline-text,.luxury-office .dash-table input.inline-num,.luxury-office .dash-table select.sel-status{border-color:transparent!important;background:transparent!important;min-height:32px}
+.luxury-office .dash-table tr:hover input.inline-text,.luxury-office .dash-table tr:hover input.inline-num,.luxury-office .dash-table tr:hover select.sel-status{border-color:#dfbd7633!important}
+.luxury-office .dash-table input:focus,.luxury-office .dash-table select:focus{border-color:var(--gold)!important;background:#0b1c16!important}
+.luxury-office .dash-table input.inp-name,.luxury-office .dash-table input.inp-tx-title{min-width:170px}
+.luxury-office .dash-table input.inp-payer,.luxury-office .dash-table input.inp-tx-payer{min-width:110px;border-color:transparent}
+.luxury-office .dash-table input.inp-role,.luxury-office .dash-table input.inp-tx-note{min-width:190px}
+.luxury-office .dash-table input.inline-num{width:76px}
+.luxury-office .dash-table select.sel-status{min-width:130px}
+.luxury-office .dash-table td:last-child,.luxury-office .dash-table th:last-child{position:sticky;right:0;background:#0f2019;box-shadow:-8px 0 12px -10px #000}
+.luxury-office .dash-table th:last-child{z-index:2;background:#162c24}
+.luxury-office .cost-row-actions{gap:6px}
+.luxury-office .cost-row-actions button{min-height:30px;font-size:11px;border-radius:6px}
+
+@media (max-width:760px){
+ .luxury-office .dash-shell{padding:0 16px 40px}
+ .luxury-office .dash-header{margin:0 -16px;padding:18px 16px 14px}
+ .luxury-office .bo-section-nav{margin:0 -16px;padding:8px 16px;flex-wrap:nowrap;overflow-x:auto}
+ .luxury-office .bo-section-nav a{flex:none}
+ .luxury-office .conn-more{margin-left:0}
+ .luxury-office .conn-more .conn-controls{left:0;right:auto}
+}

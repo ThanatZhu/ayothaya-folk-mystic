@@ -355,16 +355,24 @@ async function loadMapBosses(){
  }catch(e){if(request===mapBossView.request)mapBossView.message=ADMIN_ERRORS[e.message]??'อ่านสถานะไม่ได้: '+e.message;}
  finally{if(request===mapBossView.request){mapBossView.loading=false;if(tab==='mapbosses')mapBossesTab();}}
 }
+// 0.115.1 map bosses: one row per boss (picture, name and map together), numbers right-aligned, a coloured status
+// badge, and three equal actions. The live status loads by itself the first time the page opens.
 function mapBossesTab(){
+ if(!mapBossView.rows&&!mapBossView.loading&&!mapBossView.tried){mapBossView.tried=true;loadMapBosses();return;}
  const rows=mapBossView.rows??WORLD_MAP_BOSSES.map(b=>({...b,drops:DROPS[b.id]?.items??[]}));
  const clock=Date.now()+mapBossView.offset;
- $('view').innerHTML='<div class="wx"><div class="wx-pick"><label>เซิร์ฟ <select id="mb-server">'+['server-1','server-2'].map((id,i)=>'<option value="'+id+'"'+(mapBossView.serverId===id?' selected':'')+'>เซิร์ฟ '+(i+1)+'</option>').join('')+'</select></label><label>CH <select id="mb-channel">'+[1,2,3,4,5].map(c=>'<option'+(mapBossView.channel===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label><button id="mb-refresh" type="button"'+(mapBossView.loading?' disabled':'')+'>รีเฟรชสถานะ</button></div><p role="status">'+esc(mapBossView.message||'ตารางบอสประจำแมพ · กดรีเฟรชเพื่อดูเวลาเกิด')+'</p><div class="scroll"><table><thead><tr><th>แมพ / เลเวล</th><th>บอส</th><th>HP / พลังโจมตี</th><th>สถานะ / เกิดใหม่</th><th>ของประจำแมพ</th><th>จัดการ</th></tr></thead><tbody>'+rows.map(b=>{
-  const t=MONSTER_TYPES.find(t=>t.id===b.id),left=b.nextAt?Math.max(0,Math.ceil((b.nextAt-clock)/1000)):0;
-  const status=b.alive===undefined?'ยังไม่โหลดสถานะ':b.alive?'พร้อมต่อสู้':left?Math.floor(left/60)+' นาที '+left%60+' วินาที':'กำลังเกิด';
-  return '<tr><td class="l">'+esc(b.mapName)+'<small>Lv.'+b.minLevel+'–'+b.level+'</small></td><td class="l">'+esc(b.name)+'<small>'+esc(b.id)+'</small></td><td>'+num(t?.hp??b.hp)+'<small>ATK '+num(t?.damage)+' · Lv.'+num(t?.level??b.level)+'</small></td><td>'+status+'<small>60 นาทีหลังตาย · CH '+mapBossView.channel+'</small></td><td class="l"><span class="name"><i class="ico sm" style="'+iconStyle(b.accessory)+'"></i>'+esc(itemName(b.accessory))+'</span><small>'+esc(itemName(b.material))+' ×5 · ตราบอส 8% (ค่าเริ่มต้น)</small></td><td><button type="button" data-mb-edit="'+b.id+'">ค่าบอส</button><button type="button" data-mb-drops="'+b.id+'">ดรอป</button><a href="assets/monsters-chapter2/animations/'+b.id+'-poses-v1.png" target="_blank" rel="noopener">ภาพท่า</a></td></tr>';
- }).join('')+'</tbody></table></div><p>มอนทั่วไป ตัวพิเศษ และบอสเควสเดิมแยกจากบอสประจำแมพนี้ · เมืองปลอดภัยและดันเจี้ยนส่วนตัวไม่มีบอสประจำแมพเกิดอัตโนมัติ</p></div>';
- $('view').firstElementChild.classList.add('map-boss-admin');
- $('view').querySelectorAll('tbody tr').forEach((tr,i)=>{const index=MONSTER_TYPES.findIndex(m=>m.id===rows[i].id);if(index>=0){const image=document.createElement('img');image.className='admin-monster-art';image.dataset.monsterArt=index;image.alt=rows[i].name;tr.children[1].prepend(image);}});paintAdminMonsters($('view'));
+ const status=b=>{const left=b.nextAt?Math.max(0,Math.ceil((b.nextAt-clock)/1000)):0;
+  return b.alive===undefined?['idle',mapBossView.loading?'กำลังอ่าน…':'ยังไม่ทราบ']:b.alive?['ok','พร้อมต่อสู้']:left?['wait','เกิดใน '+Math.floor(left/60)+':'+String(left%60).padStart(2,'0')]:['wait','กำลังเกิด'];};
+ const row=b=>{const t=MONSTER_TYPES.find(t=>t.id===b.id),art=MONSTER_TYPES.indexOf(t),[kind,text]=status(b);
+  return `<tr><td><div class="mb-boss">${art>=0?`<img class="admin-monster-art" data-monster-art="${art}" alt="" width="64" height="64">`:''}<div><b>${esc(b.name)}</b><small>${esc(b.mapName)} · Lv.${b.minLevel}–${b.level}</small></div></div></td>
+<td class="num"><b>${num(t?.hp??b.hp)}</b><small>ATK ${num(t?.damage)} · Lv.${num(t?.level??b.level)}</small></td>
+<td><span class="mb-status ${kind}">${text}</span><small>เกิดใหม่ 60 นาทีหลังตาย</small></td>
+<td><div class="mb-loot"><i class="ico sm" data-item="${esc(b.accessory)}" style="${iconStyle(b.accessory)}"></i><div><b>${esc(itemName(b.accessory))}</b><small>${esc(itemName(b.material))} ×5 · ตราบอส 8%</small></div></div></td>
+<td><div class="mb-actions"><button type="button" data-mb-edit="${esc(b.id)}">ค่าบอส</button><button type="button" data-mb-drops="${esc(b.id)}">ดรอป</button><a href="assets/monsters-chapter2/animations/${esc(b.id)}-poses-v1.png" target="_blank" rel="noopener">ภาพท่า ↗</a></div></td></tr>`;};
+ $('view').innerHTML=`<div class="map-boss-admin"><div class="mb-toolbar"><label>เซิร์ฟ <select id="mb-server">${['server-1','server-2'].map((id,i)=>`<option value="${id}"${mapBossView.serverId===id?' selected':''}>เซิร์ฟ ${i+1}</option>`).join('')}</select></label><label>CH <select id="mb-channel">${[1,2,3,4,5].map(c=>`<option${mapBossView.channel===c?' selected':''}>${c}</option>`).join('')}</select></label><button id="mb-refresh" type="button"${mapBossView.loading?' disabled':''}>↻ รีเฟรชสถานะ</button><p role="status">${esc(mapBossView.message||'')}</p></div>
+<div class="scroll mb-scroll"><table class="mb-table"><thead><tr><th>บอส · แมพ</th><th class="num">HP · พลังโจมตี</th><th>สถานะ</th><th>ของประจำแมพ</th><th>จัดการ</th></tr></thead><tbody>${rows.map(row).join('')}</tbody></table></div>
+<p class="mb-note">มอนทั่วไป ตัวพิเศษ และบอสเควสเดิมแยกจากบอสประจำแมพนี้ · เมืองปลอดภัยและดันเจี้ยนส่วนตัวไม่มีบอสประจำแมพเกิดอัตโนมัติ</p></div>`;
+ paintAdminMonsters($('view'));
  const scope=()=>{mapBossView.serverId=$('mb-server').value;mapBossView.channel=+$('mb-channel').value;mapBossView.rows=null;loadMapBosses();};
  $('mb-server').onchange=scope;$('mb-channel').onchange=scope;$('mb-refresh').onclick=loadMapBosses;
  $('view').querySelectorAll('[data-mb-edit],[data-mb-drops]').forEach(b=>b.onclick=()=>{tab=b.dataset.mbEdit?'monsters':'drops';query=b.dataset.mbEdit??b.dataset.mbDrops;monsterKind='all';remember();tabs();render();});

@@ -4409,5 +4409,15 @@ Object.assign(globalThis.I18N_EN,{
  "โลกเกมตอนนี้": "Live world",
  "ปรับสมดุลเกม": "Game balance",
  "📈 แดชบอร์ด": "📈 Dashboard",
- "เมนูหลังบ้าน": "Back office menu"
+ "เมนูหลังบ้าน": "Back office menu",
+ "กำลังอ่าน…": "Loading…",
+ "ยังไม่ทราบ": "Unknown",
+ "เกิดใหม่ 60 นาทีหลังตาย": "Respawns 60 min after death",
+ "บอส · แมพ": "Boss · Map",
+ "HP · พลังโจมตี": "HP · Attack",
+ "↻ รีเฟรชสถานะ": "↻ Refresh status",
+ "⚙ ตั้งค่าเซิร์ฟเวอร์": "⚙ Server settings",
+ "เกิดใน": "Respawns in",
+ "{13} ×5 · ตราบอส 8%": "{13} ×5 · Boss seal 8%",
+ "เซิร์ฟ {2}": "Realm {2}"
 });

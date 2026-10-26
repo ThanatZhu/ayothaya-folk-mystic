@@ -119,11 +119,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function toast(text){placeNotice();$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
  // 0.103.3 on the sala stairs a character's camera-facing quad leans into the higher treads, so it draws on top
  // there; on the deck itself roof-cutaway.js opens the roof instead.
- // 0.116.4 characters and monsters always draw over the scenery (tree crowns, roofs and rocks in front of the camera
- // hid them on 5-59 % of the walkable ground); among themselves the nearer one draws last, so overlaps stay right.
- function xray(sprite){const order=10+Math.max(0,Math.min(4.99,(500-sprite.position.distanceTo(camera.position))/100));
-  if(!sprite.userData.xray){sprite.userData.xray=true;sprite.traverse(o=>{if(o.material)o.material.depthTest=false;});}
-  if(sprite.userData.order!==order){sprite.userData.order=order;sprite.traverse(o=>{o.renderOrder=order;});}}
+ // 0.116.5 tree crowns, roofs and rocks in front of the camera hid characters on 5-59 % of the walkable ground.
+ // Characters and monsters also join the actor layer, which soft-look.js draws again over the scenery with the depth
+ // cleared, so every part of the sprite keeps its depth (0.116.4 switched depth off and parts of the body vanished).
+ function xray(sprite){sprite.traverse(o=>o.layers.enable(1));}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  // 0.99.3 numbers rise from the head of whoever was hit and stack: each new one pushes the older ones of that
  // target up a line, they drift upward together and fade out. Anchors follow the target while it moves.

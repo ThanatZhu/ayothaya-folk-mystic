@@ -31,9 +31,23 @@ const SoftLookShader={
 const KEY='ayothaya-graphics';
 function preferred(){try{const v=localStorage.getItem(KEY);if(v==='high'||v==='low')return v==='high';}catch{}return !matchMedia('(pointer:coarse)').matches;}
 
+// 0.116.5 characters and monsters (layer 1, game-controls.js xray) are drawn a second time after the scenery with the
+// depth buffer cleared: tree crowns, roofs and rocks in front of the camera no longer hide them, while each
+// character's own parts, and characters among themselves, still sort by depth.
+export const ACTOR_LAYER=1;
 export function createSoftLook({renderer,scene,camera,finish=null,mobile=false}){
+ let lightsAt=-1e9;
+ function actorsOnly(draw){
+  const mask=camera.layers.mask,bg=scene.background;
+  if(performance.now()-lightsAt>2000){lightsAt=performance.now();scene.traverse(o=>{if(o.isLight)o.layers.enable(ACTOR_LAYER);});}   // lights must reach the actor pass
+  camera.layers.set(ACTOR_LAYER);scene.background=null;try{draw();}finally{camera.layers.mask=mask;scene.background=bg;}
+ }
+ class ActorPass extends RenderPass{
+  constructor(){super(scene,camera);this.clear=false;this.clearDepth=true;}
+  render(...a){actorsOnly(()=>super.render(...a));}
+ }
  const composer=new EffectComposer(renderer);
- composer.addPass(new RenderPass(scene,camera));
+ composer.addPass(new RenderPass(scene,camera));composer.addPass(new ActorPass());
  // Only genuinely bright pixels (lanterns, flames, skill effects) glow.
  const bloom=new UnrealBloomPass(new THREE.Vector2(256,256),finish?.bloom??.28,.5,finish?.threshold??.9);bloom.enabled=!mobile;composer.addPass(bloom);
  composer.addPass(new OutputPass());
@@ -45,6 +59,6 @@ export function createSoftLook({renderer,scene,camera,finish=null,mobile=false})
   get enabled(){return enabled;},
   setEnabled(value){enabled=!!value;try{localStorage.setItem(KEY,enabled?'high':'low');}catch{}},
   setSize,
-  render(){if(enabled)composer.render();else renderer.render(scene,camera);}
+  render(){if(enabled)return composer.render();renderer.render(scene,camera);const auto=renderer.autoClear;renderer.autoClear=false;renderer.clearDepth();actorsOnly(()=>renderer.render(scene,camera));renderer.autoClear=auto;}
  };
 }

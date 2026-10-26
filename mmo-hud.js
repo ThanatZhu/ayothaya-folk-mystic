@@ -50,7 +50,7 @@ export function createMmoHud({game,account}){
   meta.textContent=[Number.isFinite(ping)&&ping>0?ping+' ms':null,'FPS '+fps,time,realm].filter(Boolean).join(' · ');
   const p=game.world.player;coords.textContent=`X ${Math.round(p.x)} · Y ${Math.round(-p.z)} · ${realm}`;
   const skills=dot('menu-skills'),players=dot('menu-players'),chat=dot('menu-chat');
-  if(skills)skills.hidden=!(game.world.skillPoints>0);
+  if(skills)skills.hidden=!(game.world.skillPoints>0&&(game.world.canSpendSkill?.()??true));
   if(players)players.hidden=!document.querySelector('#online-invites .mp-invite');
   if(chat)chat.hidden=$('dock-unread')?.hidden!==false;
  }

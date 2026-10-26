@@ -54,6 +54,9 @@ export function createSkillWindow({game,classId}){
    return `<path d="M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}" class="${side?'side ':''}${(lv[b]??0)>0?'lit':(lv[a]??0)>0?'next':''}"/>`;}).join('');
  }
  const levels=()=>world.skillLevels??[];
+ // 0.119.1 the menu's red dot: only while a point can actually go somewhere (every skill maxed = no dot, points or not)
+ world.canSpendSkill=()=>{const lv=levels();return world.skills.some((s,i)=>{const l=lv[i]??0;
+  if(s.reserved||!skillAllowed(classId,i)||l>=maxAt(i)||!canOpen(lv,i))return false;return roleMode||!l||!s.passive;});};
  if(novice){dialog.querySelector('.skill-tabs').hidden=true;dialog.querySelector('h2').textContent='วิชาพื้นฐาน';}
  let master=false; // which tab shows: class skills or the chosen Master branch
  dialog.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{master=b.dataset.tab==='master';picked=master?BASE_SLOTS:0;draw();});

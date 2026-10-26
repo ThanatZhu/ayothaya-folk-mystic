@@ -56,6 +56,6 @@ test('0.64 server: crossing level 3 pays its gift once; a purple drop is announc
  p.world.emit('experience',awardExperience(p.world,150,0));realm.step(.05);
  assert.equal((p.bag.items['hp-small']??0)-before,5);
  p.world.emit('experience',awardExperience(p.world,1,0));realm.step(.05);assert.equal((p.bag.items['hp-small']??0)-before,5);
- realm.grantLoot(p,{coins:0,items:[{id:'vest-buffalo!s2',count:1}]},{x:0,z:0});
- const rare=itemDef('vest-buffalo!s2');assert.ok(rare.rarity>=3);assert.ok(sent.some(m=>m.type==='chat'&&m.text.includes(rare.name)));
+ realm.grantLoot(p,{coins:0,items:[{id:'wall-armor-swordsman-one!s2^3',count:1}]},{x:0,z:0});
+ const rare=itemDef('wall-armor-swordsman-one!s2^3');assert.ok(rare.rarity>=3);assert.ok(sent.some(m=>m.type==='chat'&&m.text.includes(rare.name)));
 });

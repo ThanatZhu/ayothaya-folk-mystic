@@ -100,6 +100,13 @@
 /* 0.57 rarity: grey · green · blue · purple · gold */
 .slot.r1{border-color:#7ddc6f88}.slot.r2{border-color:#5fb2ffaa;box-shadow:inset 0 0 8px #5fb2ff44}.slot.r3{border-color:#c27bffcc;box-shadow:inset 0 0 10px #c27bff55}.slot.r4{border-color:#ffc23d;box-shadow:inset 0 0 12px #ffc23d66,0 0 6px #ffc23d55}
 strong.r0{color:#e6e0d0}strong.r1{color:#9be88f}strong.r2{color:#7cc4ff}strong.r3{color:#d39bff}strong.r4{color:#ffd36a}
+/* 0.117 gear grades: name colour matches the code-drawn icon frame (gear-sets.js GRADES); boss sets are rainbow */
+strong.gr0{color:#7cc8ff}strong.gr1{color:#7fe08f}strong.gr2{color:#c99bff}strong.gr3{color:#ffab5c}strong.gr4{color:#ff6b6b}
+strong.grb{background:linear-gradient(90deg,#ff6b6b,#ffd25a,#7fe08f,#7cc8ff,#c99bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* graded gear shows its grade as a glow on the icon (bag-ui.js gradeFrame), so the slot keeps its plain border */
+.slot.gr0,.slot.gr1,.slot.gr2,.slot.gr3,.slot.gr4,.slot.grb{border-color:#af884f66;box-shadow:none}.gear-slot.gr0,.gear-slot.gr1,.gear-slot.gr2,.gear-slot.gr3,.gear-slot.gr4,.gear-slot.grb{border-color:#af884f88;box-shadow:none}
+#bag-sets{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0}#bag-sets:empty{display:none}#bag-sets span{font-size:12px;font-weight:700;padding:2px 7px;border-radius:999px;border:1px solid #c6a16466;color:#bdb39c;font-variant-numeric:tabular-nums}#bag-sets span.on{color:#9be88f;border-color:#9be88f88}
+.set-lines{list-style:none;margin:6px 0 0;padding:0;font-size:12px;color:#8f887a}.set-lines li.on{color:#9be88f}.set-lines b{color:#f6edd6}
 /* 0.83 bag layout: dressed character + worn gear on the left, categorized items on the right */
 html body.field-hud #bag-window[data-hud-panel]{width:min(760px,96vw);max-width:96vw;z-index:45}
 .bag-body{display:grid;grid-template-columns:250px minmax(0,1fr)}

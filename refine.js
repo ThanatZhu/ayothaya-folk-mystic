@@ -11,7 +11,7 @@ export const REFINE_ORE={weapon:'iron-ore',head:'laterite',armor:'laterite',garm
 export const refineCost=next=>next*100; // coins
 export const LEK_LAI_BONUS=.2;
 
-export const withRefine=(base,level,card=null,affix=null)=>composeId(base,level,card,affix);
+export const withRefine=(base,level,card=null,affix=null,grade=0)=>composeId(base,level,card,affix,grade);
 
 // All six worn equipment slots refine. Weapons use iron ore; other slots use laterite.
 // lekLai: spend one เหล็กไหล for +20% success.
@@ -28,7 +28,7 @@ export function refineGear(bag,gear,slot,{lekLai=false,guard=false,rand=Math.ran
  b.coins-=cost;b.items[ore]--;if(!b.items[ore])delete b.items[ore];
  if(lekLai){b.items['lek-lai']--;if(!b.items['lek-lai'])delete b.items['lek-lai'];}
  const chance=Math.min(1,REFINE_RATE[next-1]+(lekLai?LEK_LAI_BONUS:0));
- if(rand()<chance){g[slot]=withRefine(def.base,next,def.card,def.affix);return {bag:b,gear:g,result:'success',level:next,chance};}
+ if(rand()<chance){g[slot]=withRefine(def.base,next,def.card,def.affix,def.grade);return {bag:b,gear:g,result:'success',level:next,chance};}
  if(next<5)return {bag:b,gear:g,result:'failed',level:def.refine,chance};
  if(guarded){b.items['break-guard']--;if(!b.items['break-guard'])delete b.items['break-guard'];return {bag:b,gear:g,result:'guarded',level:def.refine,chance};}
  g[slot]=null;return {bag:b,gear:g,result:'broken',level:def.refine,chance};

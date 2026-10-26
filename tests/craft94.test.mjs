@@ -27,8 +27,8 @@ test('food heals, grants a stat buff that runs out, and survives map travel',()=
  w.food.left=.03;w.update(.05,{x:0,z:0,attack:false});assert.equal(w.food,null);assert.equal(foodBuff(w),null);
 });
 test('the break guard keeps +5 and above gear on a failed refine and is only spent then',()=>{
- const gear={weapon:'sword-iron+5'},bag={coins:5000,items:{'iron-ore':3,'break-guard':1}};
- const kept=refineGear(bag,gear,'weapon',{guard:true,rand:()=>.99});assert.equal(kept.result,'guarded');assert.equal(kept.gear.weapon,'sword-iron+5');assert.equal(kept.bag.items['break-guard'],undefined);
+ const gear={weapon:'weapon-swordsman-one+5'},bag={coins:5000,items:{'iron-ore':3,'break-guard':1}};
+ const kept=refineGear(bag,gear,'weapon',{guard:true,rand:()=>.99});assert.equal(kept.result,'guarded');assert.equal(kept.gear.weapon,'weapon-swordsman-one+5');assert.equal(kept.bag.items['break-guard'],undefined);
  assert.equal(refineGear(bag,gear,'weapon',{rand:()=>.99}).gear.weapon,null,'no guard: breaks');
  const win=refineGear(bag,gear,'weapon',{guard:true,rand:()=>0});assert.equal(win.bag.items['break-guard'],1,'kept on success');
  assert.throws(()=>refineGear({coins:5000,items:{'iron-ore':1}},gear,'weapon',{guard:true}),/no-break-guard/);

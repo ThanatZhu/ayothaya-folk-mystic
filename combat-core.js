@@ -101,11 +101,13 @@ export function monsterHit(world,raw,rand=Math.random,monsterId=null){
  // 0.112.2 percent bosses (Straw King): a tank takes pctHit.tank of its max HP minus its DEF; anyone else a random
  // min..max share of max HP that DEF and element resist do not touch. A guard shield still cuts it like any hit.
  if(t?.pctHit&&d){const h=t.pctHit,cut=p.shield>0?.35:1,tank=TANK_CLASSES.has(world.profession?.id);
-  return Math.max(1,Math.round((tank?p.maxHp*h.tank-(d.def??0):p.maxHp*(h.min+rand()*(h.max-h.min)))*cut));}
+  return Math.max(1,Math.round((tank?p.maxHp*h.tank-(d.def??0):p.maxHp*(h.min+rand()*(h.max-h.min)))*cut*(1-(d.dmgReduce??0))));}
  const base=p.shield>0?Math.ceil(raw*.35):raw,resist=d&&monsterId?1-Math.min(.8,d.resist?.[affinityOf(monsterId).element]??0):1;
  const guard=d?(magicMonster(t)?(d.mdef??0):(d.def??0)):0;
- return d?Math.max(1,Math.round(base*resist*100/(100+guard*4))):base;
+ return d?Math.max(1,Math.round(base*resist*100/(100+guard*4)*(1-(d.dmgReduce??0)))):base;
 }
+// 0.117 mantra set: skills cost less MP
+export const skillCost=(world,s)=>Math.round((s?.cost??0)*(1-(world.derived?.mpCut??0)));
 // Grid A* routes auto-chase around houses. Manual movement always overrides it.
 export function findPath(start,goal,nav=DEFAULT_NAV){
  const cell=distance(start,goal)>30?1:.5,key=(x,z)=>`${x},${z}`,startX=Math.round(start.x/cell),startZ=Math.round(start.z/cell);
@@ -190,7 +192,7 @@ export class CombatWorld{
  }
  // 0.48 ailments: blind and curse weaken every hit; stun/sleep stop acting; silence stops skills.
  // One movement rule for authority and prediction; sprint is an explicit modifier and never changes default pace.
- walkSpeed(run=false){return movementSpeed(this.profession.speed*(this.status?.curse?.6:1)*(this.status?.slow?.5:1)*(this.safe?TOWN_PACE:1),run);}
+ walkSpeed(run=false){return movementSpeed(this.profession.speed*(1+(this.derived?.moveSpeed??0))*(this.status?.curse?.6:1)*(this.status?.slow?.5:1)*(this.safe?TOWN_PACE:1),run);}
  weakness(){return (this.status.blind?.7:1)*(this.status.curse?.75:1);}
  inflict(name){if(!name||!AILMENTS[name])return;const fresh=!this.status[name];this.status[name]=AILMENTS[name].time;if(fresh)this.notice(AILMENTS[name].name+'! · '+AILMENTS[name].text);}
  // One monster blow, shared by the offline world and the realm server: damage, ailment roll, or going down (+ death penalty).
@@ -212,7 +214,7 @@ export class CombatWorld{
   const lost=deathPenalty(this);this.notice((this.roleCombat?'หมดแรง · รอเพื่อนชุบหรือกลับลานใน 20 วินาที':'หมดแรง · กลับลานใน 3 วินาที')+(lost?' · Base EXP -'+lost:''));}
  // 0.58 combo: a skill on a rooted monster hits 30% harder.
  // 0.103 skill damage also passes the monster's DEF (MDEF for magic classes); duels and war targets are handled elsewhere
- guardOf(mob,magic){if(!mob||mob.pvp)return 1;const t=MONSTER_TYPES[mob.type];return defFactor((magic?monsterMdef(t):monsterDef(t))*(mob.petArmor?.left>0?1-mob.petArmor.power:1));}
+ guardOf(mob,magic){if(!mob||mob.pvp)return 1;const t=MONSTER_TYPES[mob.type];return defFactor((magic?monsterMdef(t):monsterDef(t))*(mob.petArmor?.left>0?1-mob.petArmor.power:1)*(1-(this.derived?.armorPen??0)));}
  power(n,mob=null){const combo=mob?.root>0&&mob.hp>0;if(combo)this.emit('combo',{x:mob.x,z:mob.z});return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false)*this.guardOf(mob,!!this.derived?.magic):1)*(combo?1.3:1));}
  // 0.44 element + size (affinity.js). Basic attacks: weapon element, physical. Skills: class element; magic classes ignore size.
  affinity(mob,basic){if(mob.pvp)return this.weakness();const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
@@ -253,7 +255,7 @@ export class CombatWorld{
   const d=this.derived,crit=!!d&&Math.random()<d.crit,magic=!!d?.magic,t=MONSTER_TYPES[m.type];
   this.damageContext={castId,hitIndex:0,source:'basic'};
   try{if(d&&!magic&&!m.pvp&&d.hit!=null&&Math.random()>=hitChance(d.hit,monsterFlee(t))){this.emit('miss',{id:m.id,x:m.x,z:m.z});return;}
-   this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),crit?'#ffd27a':magic?'#c9a8ff':undefined);
+   this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?d.critMult??CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),crit?'#ffd27a':magic?'#c9a8ff':undefined);
   }finally{this.damageContext=null;}
  }
  skill(index){
@@ -265,7 +267,7 @@ export class CombatWorld{
   const s=scaledSkill(this.skills[index],level),p=this.player;if(!s||s.reserved||p.hp<=0||held(this.status))return false;
   if(this.status.silence){this.notice('ใบ้ · ใช้สกิลไม่ได้');return false;}
   if(this.cooldowns[index]>0){this.notice('สกิลยังไม่พร้อม');return false;}
-  if(p.mp<s.cost){this.notice('มานาไม่พอ');return false;}
+  const cost=skillCost(this,s);if(p.mp<cost){this.notice('มานาไม่พอ');return false;}
   let m=this.target;
   let air=null;
   if(s.range&&this.safe){this.notice('เขตปลอดภัย · ออกนอกเมืองเพื่อใช้สกิลโจมตี');return false;}
@@ -273,7 +275,7 @@ export class CombatWorld{
    // 0.68 no target in range: the skill is cast at the air in front of you (area skills still hit what is there).
    if(hit&&lineClear(p,hit,this.nav)){m=hit;this.select(m.id);p.face={x:m.x-p.x,z:m.z-p.z};}else{air=this.airPoint(Math.min(s.range,4),m);m=null;}}
   const from={x:p.x,z:p.z};
-  p.mp-=s.cost;this.cooldowns[index]=s.cd;
+  p.mp-=cost;this.cooldowns[index]=s.cd*(1-(this.derived?.cdr??0));
   const release=()=>{
   if(s.type==='heal'){p.hp=Math.min(p.maxHp,p.hp+(s.heal??48));this.emit('heal',{x:p.x,z:p.z,amount:s.heal??48,color:s.color});}
   else if(s.type==='shield'){p.shield=s.duration??8;this.notice(s.name+' · ลดความเสียหาย '+p.shield+' วินาที');}

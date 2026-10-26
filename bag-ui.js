@@ -3,6 +3,7 @@ import {refineTierBadge} from './refine-tier-ui.js';
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
 import {activeEvent,surgeOn} from './events.js?v=64';
 import {ATLAS_LAYOUTS} from './items.js?v=tier167';
+import {GRADES,gearLook,setLines,bossLines,familyName,BOSS_SETS,SET_SLOTS} from './gear-sets.js';
 import {levelGifts} from './experience.js?v=105.3';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=tier167';
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=novice174';
@@ -24,9 +25,33 @@ const TINTS={wind:'hue-rotate(95deg) saturate(1.5) brightness(1.15) drop-shadow(
 // icons already on screen swap to the painted cell once it arrives.
 const loaded={};if(typeof Image==='function')for(const k of new Set(Object.values(ITEMS).filter(it=>it.ph).map(it=>it.atlas))){const im=new Image();im.onload=()=>{loaded[k]=true;
  for(const el of document.querySelectorAll('[style*="--ph:"]'))el.style.cssText=iconStyle(el.style.getPropertyValue('--ph').trim().slice(1,-1));};im.src=ATLASES[k];}
+// 0.117 grade glow drawn in code (one icon per piece, every grade): a coloured shadow hugging the item's own shape
+// (owner's pick "B1"). Boss sets cycle that glow through the rainbow (owner's pick "R3"), one colour at a time so the
+// piece itself stays readable; the keyframes are added once here because iconStyle is used on many pages.
+const glow=c=>'drop-shadow(0 0 3px '+c+') drop-shadow(0 0 6px '+c+')';
+if(typeof document!=='undefined'&&!document.getElementById('gear-rainbow-css')){const css=document.createElement('style');css.id='gear-rainbow-css';
+ const stops=['#ff6b6b','#ffd25a','#7fe08f','#7cc8ff','#c99bff','#ff6b6b'];
+ css.textContent='@keyframes gear-rainbow{'+stops.map((c,i)=>i*20+'%{filter:'+glow(c)+'}').join('')+'}'
+  +'@media (prefers-reduced-motion:reduce){[style*="gear-rainbow"]{animation:none!important;filter:'+glow('#ffd25a')+'}}';document.head.append(css);}
+export function gradeFrame(def){
+ if(def?.rainbow)return ';filter:'+glow('#ff6b6b')+';animation:gear-rainbow 3s linear infinite';
+ if(!def?.graded)return '';const c=GRADES[def.grade??0].color;
+ return ';filter:'+glow(c);
+}
+// Name colour class matching the frame ('' for items without a grade).
+export const gradeTone=it=>it?.rainbow?' grb':it?.graded?' gr'+(it.grade??0):'';
+// Set progress lines for a piece, counted on what is worn now.
+function setInfo(it,gear){
+ const worn=Object.values(gear??{}).filter(Boolean).map(itemDef).filter(Boolean);
+ if(it?.set){const same=worn.filter(w=>w.set?.family===it.set.family),tier=Math.min(it.set.tier,...same.map(w=>w.set.tier));
+  return `<ul class="set-lines"><li><b>ชุด${familyName(it.set.family)} ${same.length}/4</b></li>${setLines(it.set.family,tier,same.length).map(([t,on])=>`<li class="${on?'on':''}">${t}</li>`).join('')}</ul>`;}
+ if(it?.bossSet){const n=worn.filter(w=>w.bossSet===it.bossSet).length;
+  return `<ul class="set-lines"><li><b>เซ็ทบอส${BOSS_SETS[it.bossSet].name} ${n}/5</b></li>${bossLines(it.bossSet,n).map(([t,on])=>`<li class="${on?'on':''}">${t}</li>`).join('')}</ul>`;}
+ return '';
+}
 export function iconStyle(id){
  const def=itemDef(id);if(!def)return '';
- if(def.image)return `background-image:url(${def.image});background-size:contain;background-position:center;background-repeat:no-repeat`;
+ if(def.image)return `background-image:url(${def.image});background-size:contain;background-position:center;background-repeat:no-repeat`+gradeFrame(def);
  if(def.monsterCard)return 'background-image:url(assets/cards147/'+id.slice(5)+'.webp);background-size:contain;background-position:center;background-color:transparent;border-radius:3px';
  const ph=def.ph&&!loaded[def.atlas],item=ph?{...def,...def.ph}:def;
  return `background-image:url(${ATLASES[item.atlas]??ITEM_ATLAS});background-size:600% 400%;background-position:${item.icon%6*20}% ${Math.floor(item.icon/6)/3*100}%`+(TINTS[item.tint]?';filter:'+TINTS[item.tint]:'')+(ph?`;--ph:'${id}'`:'');
@@ -53,7 +78,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    if(e.type==='trade')world.notice((e.kind==='buy'?'ซื้อ ':'ขาย ')+itemLabel([{id:e.item,count:e.count}])+' · เหลือเบี้ย '+e.coins);
    return;
   }
-  if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const loot=rollLoot(id,Math.random,activeEvent(Date.now()),(mob.leader?LEADER.loot:1)*(surgeOn(Date.now(),map.id)?2:1));loot.coins=Math.round(loot.coins*(1+(world.derived?.coinPct??0)));grantLocal(loot,{x:e.x??mob.x,z:e.z??mob.z});}}
+  if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const loot=rollLoot(id,Math.random,activeEvent(Date.now()),(mob.leader?LEADER.loot:1)*(surgeOn(Date.now(),map.id)?2:1),gearLook(account?.character?.classId??world.profession.id,account?.character?.gender));loot.coins=Math.round(loot.coins*(1+(world.derived?.coinPct??0)));grantLocal(loot,{x:e.x??mob.x,z:e.z??mob.z});}}
   if(e.type==='reward')grantLocal(e);
   if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);grantLocal({coins:g.coins,items:g.items.map(i=>({...i}))});} // 0.64 offline level gifts
  });
@@ -183,17 +208,21 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    tabs.querySelectorAll('[data-cat]').forEach(t=>{const k=TABS.find(x=>x[0]===t.dataset.cat)[2],n=k?all.filter(id=>k.includes(itemDef(id)?.kind)).length:all.length;t.setAttribute('aria-selected',String(t.dataset.cat===category));t.dataset.count=n;});
    $('bag-space').textContent=`ช่องที่ใช้ ${all.length} / ${bagCap(b)}`;
    const gearSig=JSON.stringify(gear);if(gearSig!==shownGear){shownGear=gearSig;
-   $('bag-gear').innerHTML=GEAR_PLACES.map(([slot,label])=>{const id=gear[slot],it=id&&itemDef(id);return `<button type="button" class="gear-slot g-${slot}${worn===slot?' on':''}${it?' r'+(it.rarity??0):''}" data-gear="${slot}" title="${label}${it?' · '+it.name:''}">${it?icon(id):''}<small>${label}</small>${refineTierBadge(it)}</button>`;}).join('');
+   $('bag-gear').innerHTML=GEAR_PLACES.map(([slot,label])=>{const id=gear[slot],it=id&&itemDef(id);return `<button type="button" class="gear-slot g-${slot}${worn===slot?' on':''}${it?' r'+(it.rarity??0)+gradeTone(it):''}" data-gear="${slot}" title="${label}${it?' · '+it.name:''}">${it?icon(id):''}<small>${label}</small>${refineTierBadge(it)}</button>`;}).join('');
    $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.onclick=()=>{worn=el.dataset.gear;selected=null;render(true);});
+   // 0.117 set progress under the worn slots: "ชุดทะลวง 3/4", reached bonuses green
+   let sets=$('bag-sets');if(!sets){sets=document.createElement('div');sets.id='bag-sets';($('bag-gear').closest('.bag-stage')??$('bag-gear')).after(sets);}
+   const wornDefs=Object.values(gear).filter(Boolean).map(itemDef).filter(Boolean),fams=[...new Set(wornDefs.filter(w=>w.set).map(w=>w.set.family))],bosses=[...new Set(wornDefs.filter(w=>w.bossSet).map(w=>w.bossSet))];
+   sets.innerHTML=[...fams.map(f=>{const p=wornDefs.filter(w=>w.set?.family===f);return `<span class="${p.length>=2?'on':''}">ชุด${familyName(f)} ${p.length}/${SET_SLOTS.length}</span>`;}),...bosses.map(c=>{const n=wornDefs.filter(w=>w.bossSet===c).length;return `<span class="boss${n>=2?' on':''}">${BOSS_SETS[c].name} ${n}/5</span>`;})].join('');
    }
    $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.classList.toggle('on',el.dataset.gear===worn));
-   $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:bagCap(b),Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
+   $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:bagCap(b),Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${gradeTone(itemDef(id))}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
    $('bag-grid').querySelectorAll('[data-id]').forEach(el=>{el.onclick=()=>{if(dragged)return;selected=el.dataset.id;worn=null;render(true);};el.onpointerdown=e=>dragStart(e,el.dataset.id);});
    const wornId=worn&&gear[worn],wornIt=wornId&&itemDef(wornId);
-   if(worn){$('bag-detail').innerHTML=wornIt?`${icon(wornId,'item-icon big')}<div><strong class="r${wornIt.rarity??0}">${wornIt.name}</strong>${refineTierBadge(wornIt)}<p>${wornIt.text??''}</p>${wornIt.card?`<small>การ์ด: ${itemDef(wornIt.card)?.text??''}</small>`:''}<div class="bag-actions"><button type="button" data-act="off">ถอด</button><button type="button" data-act="status">ใส่การ์ด · หน้าสถานะ</button></div></div>`:`<p class="bag-hint">ช่อง${GEAR_PLACES.find(g=>g[0]===worn)[1]}ว่าง · แตะอุปกรณ์ในแท็บ อุปกรณ์ แล้วกด สวมใส่</p>`;
+   if(worn){$('bag-detail').innerHTML=wornIt?`${icon(wornId,'item-icon big')}<div><strong class="r${wornIt.rarity??0}${gradeTone(wornIt)}">${wornIt.name}</strong>${refineTierBadge(wornIt)}<p>${wornIt.text??''}</p>${setInfo(wornIt,gear)}${wornIt.card?`<small>การ์ด: ${itemDef(wornIt.card)?.text??''}</small>`:''}<div class="bag-actions"><button type="button" data-act="off">ถอด</button><button type="button" data-act="status">ใส่การ์ด · หน้าสถานะ</button></div></div>`:`<p class="bag-hint">ช่อง${GEAR_PLACES.find(g=>g[0]===worn)[1]}ว่าง · แตะอุปกรณ์ในแท็บ อุปกรณ์ แล้วกด สวมใส่</p>`;
     $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{if(el.dataset.act==='off'){api.onTakeOff?.(worn);}else{dialog.close();$('menu-status')?.click();}});}
    const it=!worn&&selected&&itemDef(selected);
-   if(!worn)$('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong class="r${it.rarity??0}">${it.name} ×${b.items[selected]}</strong>${refineTierBadge(it)}<p>${it.text??''}</p><small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'||it.kind==='wing'?'<button type="button" data-act="use">'+(it.kind==='wing'?'ใช้ · วาร์ปสุ่ม':'ใช้')+'</button>':''}${game.actionBar?.desktop?'<small>ลากไอเท็มไปวางในตารางปุ่มลัดด้านล่าง</small>':quickable(selected)?QUICK_KEYS.map((k,i)=>'<button type="button" data-act="q'+i+'">'+'ปุ่มลัด '+k+'</button>').join(''):''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${selected==='rename-card'?'<button type="button" data-act="rename">เปลี่ยนชื่อ</button>':it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}<button type="button" data-act="discard" class="danger">ทิ้ง</button></div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
+   if(!worn)$('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong class="r${it.rarity??0}${gradeTone(it)}">${it.name} ×${b.items[selected]}</strong>${refineTierBadge(it)}<p>${it.text??''}</p>${setInfo(it,gear)}<small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'||it.kind==='wing'?'<button type="button" data-act="use">'+(it.kind==='wing'?'ใช้ · วาร์ปสุ่ม':'ใช้')+'</button>':''}${game.actionBar?.desktop?'<small>ลากไอเท็มไปวางในตารางปุ่มลัดด้านล่าง</small>':quickable(selected)?QUICK_KEYS.map((k,i)=>'<button type="button" data-act="q'+i+'">'+'ปุ่มลัด '+k+'</button>').join(''):''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${selected==='rename-card'?'<button type="button" data-act="rename">เปลี่ยนชื่อ</button>':it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}<button type="button" data-act="discard" class="danger">ทิ้ง</button></div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
    if(!worn)$('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='rename')document.getElementById('rename-pen')?.click();else if(a==='use')use(selected);else if(a==='discard')askDiscard(selected);else if(a==='wear')api.onWear?.(selected);else if(a==='recall'){if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[selected]--;if(!b.items[selected])delete b.items[selected];local=b;save();}}else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
   }
   if(shopDialog.open&&shopNpc){

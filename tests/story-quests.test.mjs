@@ -70,8 +70,8 @@ test('tutorial steps finish from the player state or their own action, and rewar
  assert.ok(storyEvent(at('t11'),{type:'do',action:'craft'}).completed);
  assert.equal(storyEvent(at('t11'),{type:'do',action:'pet'}).changed,false);
  assert.ok(storySatisfied({type:'level',level:6},{level:6}));assert.ok(!storySatisfied({type:'level',level:6},{level:5}));
- assert.equal(rewardItems(STORY[0].reward,'novice')[0].id,'wrap-novice');
- assert.equal(rewardItems(STORY.find(q=>q.id==='t17').reward,'hunter')[0].id,'bow-bamboo');
+ assert.equal(rewardItems(STORY[0].reward,'novice')[0].id,'starter-wraps');
+ assert.equal(rewardItems(STORY.find(q=>q.id==='t17').reward,'hunter')[0].id,'weapon-hunter-one');
 });
 
 test('removing the capture quest preserves old v2 progress before, during, after and beyond the removed quest',()=>{

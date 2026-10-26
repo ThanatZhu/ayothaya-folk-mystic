@@ -25,7 +25,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(game.online||game.networkExpected||account?.cloud)return null;
   const r=storyEvent(local,event);if(!r.changed)return r;
   local=r.state;save();
-  if(r.reward){world.emit('experience',awardExperience(world,r.reward.baseXp,r.reward.jobXp));world.emit('reward',{coins:r.reward.coins??0,items:rewardItems(r.reward,account?.character?.classId??world.profession.id)});}
+  if(r.reward){world.emit('experience',awardExperience(world,r.reward.baseXp,r.reward.jobXp));world.emit('reward',{coins:r.reward.coins??0,items:rewardItems(r.reward,account?.character?.classId??world.profession.id,account?.character?.gender)});}
   if(r.completed)world.notice('เควสสำเร็จ · '+r.completed.title);
   render();return r;
  }
@@ -135,7 +135,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
    switch(s.action){
     case 'equip':{
      const bagWin=document.getElementById('bag-window');
-     const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'wrap-novice';
+     const weapon=STARTER_WEAPON[account?.character?.classId??world.profession?.id]??'starter-wraps';
      if(bagWin?.open){
       const wearBtn=document.querySelector('#bag-detail [data-act="wear"]');
       if(wearBtn){wearBtn.click();world.storyCheck?.();return;}

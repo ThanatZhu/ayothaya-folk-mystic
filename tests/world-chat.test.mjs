@@ -37,9 +37,9 @@ test('refine announcement threshold: +7 and up succeed, +7 and up break', () => 
 });
 
 test('a real +7 refine on the server is announced to a player on another map', t => {
- const {add,send}=setup(),a=add('ThanatZhu','ayutthaya','server-1',{bag:{coins:5000,items:{'iron-ore':2}},gear:{weapon:'sword-iron+6'}}),b=add('บี','rice-fields');
+ const {add,send}=setup(),a=add('ThanatZhu','ayutthaya','server-1',{bag:{coins:5000,items:{laterite:2}},gear:{armor:'starter-shirt+6'}}),b=add('บี','rice-fields');
  Object.assign(a.world.player,{x:4,z:0});t.mock.method(Math,'random',()=>0);
- assert.equal(send(a,'refine',{slot:'weapon',npc:'ครูแสนดาบ'}),true);
+ assert.equal(send(a,'refine',{slot:'armor',npc:'ครูแสนดาบ'}),true);
  assert.match(world(b).at(-1).text,/^📣 ThanatZhu ตีบวก .*\+7 สำเร็จ!$/);
  assert.equal(world(b).at(-1).actor,null,'server-authored, not a player line');
  assert.equal(send(a,'chat',{channel:'world',text:'เย้'}),true,'announcement does not use up the player cooldown');

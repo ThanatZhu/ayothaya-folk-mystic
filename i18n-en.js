@@ -4525,5 +4525,18 @@ Object.assign(globalThis.I18N_EN,{
  "· แสดง": "· showing",
  "ไม่พบไอเท็ม · ลองเปลี่ยนตัวกรอง": "No items · try other filters",
  "แสดงเพิ่ม (อีก {0} ชิ้น)": "Show more ({0} left)",
- "รุ้ง · เซ็ทบอส": "Rainbow · boss set"
+ "รุ้ง · เซ็ทบอส": "Rainbow · boss set",
+ "ก่อนเริ่มการผจญภัย": "Before your adventure begins",
+ "กรุณาอ่านและยอมรับข้อกำหนดก่อนเล่นออนไลน์ สรุปสั้น ๆ:": "Please read and accept the terms before playing online. In short:",
+ "เราเก็บข้อมูลบัญชี Google (อีเมล ชื่อ) ข้อมูลตัวละคร และข้อความแชต เพื่อให้บริการเกมและดูแลความปลอดภัย": "We keep your Google account details (email, name), your characters and chat messages to run the game and keep it safe",
+ "ไอเท็มและเงินในเกมใช้ได้ในเกมเท่านั้น แลกเป็นเงินจริงไม่ได้ · ห้ามโกง ห้ามบอท ห้ามซื้อขายด้วยเงินจริง": "Items and in-game money work only inside the game and cannot be exchanged for real money · no cheating, bots or real-money trading",
+ "ช่วงทดสอบอาจมีการรีเซ็ตโลกเกม (ประกาศล่วงหน้า) · ขอดูหรือลบข้อมูลได้ทาง Discord ของเกม": "The test period may include a world reset (announced in advance) · ask to see or delete your data on the game Discord",
+ "ฉันได้อ่านและยอมรับ": "I have read and accept the",
+ "ข้อกำหนดการใช้บริการ": "Terms of Service",
+ "นโยบายความเป็นส่วนตัว": "Privacy Policy",
+ "ฉันอายุ 20 ปีขึ้นไป หรือผู้ปกครองของฉันรับทราบและยินยอมให้เล่นแล้ว": "I am 20 or older, or my parent/guardian knows and agrees that I play",
+ "ยังไม่ยอมรับ": "Not now",
+ "ยอมรับและเริ่มเล่น": "Accept and play",
+ "ต้องยอมรับข้อกำหนดและนโยบายความเป็นส่วนตัวก่อนเล่นออนไลน์ · หรือเลือกเล่นออฟไลน์บนเครื่องนี้": "You need to accept the terms and privacy policy to play online · or choose offline play on this device",
+ "การเล่นออนไลน์ต้องยอมรับ": "Playing online requires accepting the"
 });

@@ -116,8 +116,24 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let done;const pending=new Promise(r=>{done=r;});mutations.add(pending);
    mutationDone=()=>{mutations.delete(pending);done();};
   }
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
+  // 0.117 terms/privacy acceptance after sign-in: GET the version this account accepted, POST {version} to record it.
+  // Firebase mode trusts only the verified ID token's uid; the loopback dev server uses the uid it is given.
+  if(url.pathname==='/consent'&&(req.method==='GET'||req.method==='POST')){
+   if(origin&&!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
+   if(!store?.loadConsent){reply(503,{error:'consent-unsupported'});return;}
+   try{
+    let uid,email=null;
+    if(mode==='firebase'){let d;try{d=await authenticate(String(req.headers.authorization??'').replace(/^Bearer /,''));}catch{reply(401,{error:'bad-token'});return;}uid=d.uid;email=d.email??null;}
+    else uid=String(url.searchParams.get('uid')??'local').slice(0,128);
+    if(req.method==='GET'){const c=await store.loadConsent(uid);reply(200,{version:c?.version??null,at:c?.at??null});return;}
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>500){reply(413,{error:'too-large'});return;}}
+    const version=String(JSON.parse(data||'{}').version??'');if(!/^\d{4}-\d{2}-\d{2}$/.test(version)){reply(400,{error:'bad-version'});return;}
+    await store.saveConsent(uid,{version,at:Date.now(),email,agent:String(req.headers['user-agent']??'').slice(0,200)});console.log('consent',uid,version);reply(200,{version});
+   }catch(e){console.error('consent',e.message);reply(e instanceof SyntaxError?400:502,{error:e instanceof SyntaxError?'invalid':'consent-failed'});}
+   return;
+  }
   // 0.99.16 back-office (admin.html): online players and gifts. Production needs a Google ID token whose verified
   // email is in ADMIN_EMAILS; the local server trusts its own origin. Every gift is logged.
   if(url.pathname.startsWith('/admin/')){

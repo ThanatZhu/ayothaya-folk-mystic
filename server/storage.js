@@ -62,6 +62,9 @@ export class LocalStore{
  async loadSlip(id){try{return JSON.parse(await readFile(this.slipPath(id),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}}
  async saveSlip(s){await mkdir(path.join(this.directory,'finance-slips'),{recursive:true});await writeFile(this.slipPath(s.id),JSON.stringify({type:s.type,data:s.data,at:Date.now()}));}
  deleteSlip(id){return rm(this.slipPath(id),{force:true});}
+ // 0.117 terms/privacy acceptance per account (PDPA record: which version, when, which address)
+ async loadConsent(uid){try{return JSON.parse(await readFile(path.join(this.directory,'consents.json'),'utf8'))[uid]??null;}catch(e){if(e.code==='ENOENT')return null;throw e;}}
+ saveConsent(uid,doc){const job=(this.consentQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'consents.json');let all={};try{all=JSON.parse(await readFile(file,'utf8'));}catch{}all[uid]=doc;await writeFile(file,JSON.stringify(all));});this.consentQueue=job;return job;}
  async loadPrices(){try{return JSON.parse(await readFile(path.join(this.directory,'prices.json'),'utf8'));}catch{return {};}}
  savePrices(serverId,prices){this.allPrices={...(this.allPrices??{}),[serverId]:prices};return writeFile(path.join(this.directory,'prices.json'),JSON.stringify(this.allPrices),{mode:0o600});}
  deleteGuild(){return this.flushGuilds();}
@@ -94,6 +97,8 @@ export class FirebaseStore{
  async loadSlip(id){const s=await this.db.collection('backofficeFinanceSlips').doc(id).get();return s.exists?s.data():null;}
  saveSlip(s){return this.db.collection('backofficeFinanceSlips').doc(s.id).set({type:s.type,data:s.data,at:Date.now()});}
  deleteSlip(id){return this.db.collection('backofficeFinanceSlips').doc(id).delete();}
+ async loadConsent(uid){const s=await this.db.collection('playerConsents').doc(uid).get();return s.exists?s.data():null;}
+ saveConsent(uid,doc){return this.db.collection('playerConsents').doc(uid).set(doc);}
  async loadPrices(){const out={};for(const d of (await this.db.collection('multiplayerPrices').get()).docs)out[d.id]=d.data().prices??{};return out;}
  savePrices(serverId,prices){return this.db.collection('multiplayerPrices').doc(serverId).set({prices});}
  deleteGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).delete();}

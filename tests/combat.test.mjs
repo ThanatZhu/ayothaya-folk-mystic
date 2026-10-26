@@ -49,7 +49,7 @@ test('root holds a monster, shield reduces retaliation, dead player respawns saf
  const w=new CombatWorld();Object.assign(w.mobs[0],{x:-.8,z:1.2});w.select(0);w.skill(2);const start={x:w.mobs[0].x,z:w.mobs[0].z};
  tick(w,.5);assert.equal(w.mobs[0].x,start.x);assert.equal(w.mobs[0].z,start.z);
  w.skill(5);w.mobs[0].attackCD=0;const hp=w.player.hp;w.update(.05);assert.ok(hp-w.player.hp<=3);
- w.player.hp=0;w.player.down=.1;tick(w,.2);assert.equal(w.player.hp,140);assert.ok(walkable(w.player.x,w.player.z));
+ w.player.hp=0;w.player.down=.1;tick(w,.2);assert.equal(w.player.hp,0);w.respawn(false);assert.equal(w.player.hp,140);assert.ok(walkable(w.player.x,w.player.z));
 });
 test('ten skill slots map to 1 through 9 then 0, each is usable with sufficient resources',()=>{
  assert.deepEqual(SKILLS.map(s=>s.key),['1','2','3','4','5','6','7','8','9','0']);

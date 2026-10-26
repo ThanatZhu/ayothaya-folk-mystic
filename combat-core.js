@@ -214,7 +214,14 @@ export class CombatWorld{
   this.fall();return true;
  }
  fall(){const p=this.player;  p.down=this.roleCombat?20:3;this.auto=false;this.targetId=null;this.path=[];p.moving=false;p.running=false;this.status={};
-  const lost=deathPenalty(this);this.notice((this.roleCombat?'หมดแรง · รอเพื่อนชุบหรือกลับลานใน 20 วินาที':'หมดแรง · กลับลานใน 3 วินาที')+(lost?' · Base EXP -'+lost:''));}
+  const lost=deathPenalty(this);this.notice('หมดแรง · เลือกจุดเกิดหรือรอเพื่อนชุบชีวิต'+(lost?' · Base EXP -'+lost:''));}
+ respawn(here=true){
+  const p=this.player;if(p.hp>0)return false;
+  this.auto=false;this.targetId=null;this.path=[];this.status={};this.knock=null;this.basicPending=null;this.legacyPending=null;
+  if(this.roleCombat)this.roleCombat.state.pending=null;
+  Object.assign(p,here?{}:this.spawn,{hp:p.maxHp,mp:p.maxMp,down:0,shield:0,moving:false,running:false});
+  this.notice('คืนขวัญแล้ว · พร้อมออกเดินทาง');return true;
+ }
  // 0.58 combo: a skill on a rooted monster hits 30% harder.
  // 0.103 skill damage also passes the monster's DEF (MDEF for magic classes); duels and war targets are handled elsewhere
  guardOf(mob,magic){if(!mob||mob.pvp)return 1;const t=MONSTER_TYPES[mob.type];return defFactor((magic?monsterMdef(t):monsterDef(t))*(mob.petArmor?.left>0?1-mob.petArmor.power:1)*(1-(this.derived?.armorPen??0)));}
@@ -306,7 +313,7 @@ export class CombatWorld{
   if(this.basicPending){const c=this.basicPending;if(p.hp<=0||held(this.status)){this.emit('castCancel',{castId:c.castId});this.basicPending=null;}else if((c.left-=dt)<=1e-8){this.basicPending=null;this.basicHit(c.target,c.castId);}}
   if(this.legacyPending){const c=this.legacyPending;if(p.hp<=0||held(this.status)||this.status.silence){this.emit('castCancel',{castId:c.castId});this.legacyPending=null;}else if((c.left-=dt)<=1e-8){this.legacyPending=null;c.release();p.attackCD=Math.max(p.attackCD,.16);}}
   this.mercStep(dt);this.roleCombat?.step(dt,input);if(monsters&&this.roleCombat)stepRoleMonsters(this.mobs,dt,()=>this);
-  if(p.hp<=0){p.moving=false;p.running=false;p.down-=dt;if(p.down<=0){Object.assign(p,{...this.spawn,hp:p.maxHp,mp:p.maxMp,shield:0});this.notice('กลับถึงลานแล้ว · ลองใหม่ได้เลย');}return;}
+  if(p.hp<=0){p.moving=false;p.running=false;p.down=Math.max(0,(p.down??0)-dt);return;}
   // 0.100.11 HP comes back on its own: towns 4 % of max HP a second, the field 1 % a second after 6 s out of combat
   this.calm=this.status.poison?0:(this.calm??0)+dt;
   if(p.hp>0&&p.hp<p.maxHp&&(this.safe||this.calm>6))p.hp=Math.min(p.maxHp,p.hp+Math.max(8,p.maxHp*(this.safe?.04:.01))*dt);

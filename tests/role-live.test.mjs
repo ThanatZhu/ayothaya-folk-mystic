@@ -67,10 +67,10 @@ test('poison advances once per shared room and retains the original owner for da
 function roleRealm(now=()=>10000){const map={id:'f',safe:false,nav,spawn:{x:-5,z:-5},mobs:[]};return new RealmServer({catalog:{capital:'f',maps:[map]},roleSkills:true,now});}
 const joinRole=(realm,uid,record)=>realm.join({uid,serverId:'server-1',slotId:'slot-1',record:record??{character:{name:'Hero'+uid,gender:'male',classId:'swordsman',jobId:'guardian'},skills:{[ROLE_MARK]:Array(15).fill(0),swordsman:Array(15).fill(10)},state:initialSave(),bag:{coins:0,items:{}}},send:()=>{}});
 
-test('private cooldowns survive relog, elapsed down time respawns at the map spawn, and snapshots omit the backup',()=>{
+test('private cooldowns survive relog, death still waits for a respawn choice after time offline, and snapshots omit the backup',()=>{
  const realm=roleRealm(),a=joinRole(realm,'a');a.world.cooldowns[12]=25;a.world.player.hp=0;a.world.player.down=5;a.world.player.x=8;const saved=realm.record(a,{state:initialSave()});
  const next=roleRealm(()=>12000),b=joinRole(next,'a',saved);assert.equal(b.world.cooldowns[12],23);assert.equal(b.world.player.down,3);assert.equal(b.world.player.hp,0);assert.equal(next.snapshot(b).self.roleSkillBackup,undefined);
- const later=roleRealm(()=>20000),c=joinRole(later,'a',saved);assert.ok(c.world.player.hp>0);assert.equal(c.world.player.x,-5);assert.equal(c.world.player.z,-5);
+ const later=roleRealm(()=>20000),c=joinRole(later,'a',saved);assert.equal(c.world.player.hp,0);assert.equal(c.world.player.down,0);assert.equal(c.world.player.x,8);
 });
 
 test('PvP reflection resolves once per hit and cannot recurse or award two wins on a reflection knockout',t=>{

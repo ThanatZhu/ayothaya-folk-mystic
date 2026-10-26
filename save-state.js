@@ -1,6 +1,6 @@
 import {validExperience} from './experience.js?v=105.3';
 import {walkable} from './combat-core.js?v=novice174';
-import {serializeTraveler,restoreTraveler} from './world-state.js?v=101.5';
+import {serializeTraveler,restoreTraveler} from './world-state.js?v=death178';
 
 export function captureSave(world,map,camera,controls,motion){
  return {schema:1,mapId:map.id,traveler:serializeTraveler(world),

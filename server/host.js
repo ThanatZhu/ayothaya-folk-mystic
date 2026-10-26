@@ -357,9 +357,11 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      try{if(recent||deferred)await session.queue;else await checkpoint(session);send({type:'saved',id:message.id});}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
     if(message.type==='travel'){
      if(typeof message.id!=='string'||message.id.length>50||typeof message.destination!=='string')return;
-     let destination;try{destination=realm.travelDestination(session.peer,message.destination,{warp:message.warp===true});}catch(e){send({type:'travel-error',id:message.id,code:e.message});return;}
+     let destination;try{destination=realm.travelDestination(session.peer,message.destination,{warp:message.warp===true,respawn:message.respawn===true});}catch(e){send({type:'travel-error',id:message.id,code:e.message});return;}
      session.closing=true;session.explicitLeave=true;session.peer.suspended=true;
-     const record=realm.record(session.peer,session.lease.record);record.state.mapId=destination.id;record.state.position={...destination.spawn};session.travelRecord=record;
+     const record=realm.record(session.peer,session.lease.record);record.state.mapId=destination.id;record.state.position={...destination.spawn};
+     if(message.respawn===true){record.state.traveler.hp=session.peer.world.player.maxHp;record.state.traveler.mp=session.peer.world.player.maxMp;if(record.roleCooldowns)record.roleCooldowns.down=0;}
+     session.travelRecord=record;
      logTravel(realm.logs,realm.now(),session.peer.character.name,session.peer.channel??1,session.peer.room?.map?.id,destination.id,message.warp===true);
      try{await checkpoint(session,true);realm.leave(session.peer.id,{travel:true});send({type:'traveled',id:message.id});ws.close(1000,'traveled');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;
     }

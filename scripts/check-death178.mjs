@@ -1,0 +1,32 @@
+// Real game integration, isolated account/server; never touches production saves.
+import {mkdir,mkdtemp,readFile,writeFile} from 'node:fs/promises';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import assert from 'node:assert/strict';
+import {WebSocket} from 'ws';
+import {LocalStore} from '../server/storage.js';
+import {createHost} from '../server/host.js';
+import {initialSave} from '../realm-state.js';
+import {XP_CURVE} from '../experience.js';
+const out=new URL('../outputs/death178/',import.meta.url);await mkdir(out,{recursive:true});const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8'));
+const store=await new LocalStore(await mkdtemp(fileURLToPath(new URL('store-',out)))).init(),origins=[],service=await createHost({mode:'local',store,catalog,origins,serveStatic:true});await new Promise(r=>service.server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+service.server.address().port;origins.push(base);
+const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await chromium.launch({channel:'msedge',headless:true,args:['--explicitly-allowed-ports='+service.server.address().port]}),errors=[],checks=[];
+try{
+ const seeded=await store.createLocal({name:'FrameReview',gender:'male'}),record=store.rows.get(seeded.uid);record.daily={day:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),streak:1};record.xpCurve=XP_CURVE;record.story={v:3,quest:0,step:0,count:0,done:false};record.bag={coins:1234,items:{}};record.state={...initialSave(),mapId:'rice-fields',position:{...catalog.maps.find(m=>m.id==='rice-fields').spawn}};
+ const context=await browser.newContext({viewport:{width:1440,height:900}});await context.route('http://127.0.0.1:8787/**',r=>r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'}));
+ await context.routeWebSocket('ws://127.0.0.1:8787/realtime',route=>{const socket=new WebSocket(base.replace('http','ws')+'/realtime',{origin:base}),queue=[];route.onMessage(m=>socket.readyState===1?socket.send(m):queue.push(m));socket.on('open',()=>queue.splice(0).forEach(m=>socket.send(m)));socket.on('message',m=>route.send(m.toString()));socket.on('error',e=>errors.push(e.message));route.onClose(()=>socket.close());socket.on('close',(code,reason)=>route.close({code:code===1006?1000:code,reason:reason.toString()}));});
+ await context.addInitScript(({record,token})=>{sessionStorage.setItem('ayothaya-entry-v1',JSON.stringify({owner:'guest',serverId:'server-1',slotId:'slot-1'}));sessionStorage.setItem('ayothaya-local-network:slot-1',JSON.stringify({token,serverId:'server-1',slotId:'slot-1'}));localStorage.setItem('ayothaya-character-v2:slot-1',JSON.stringify(record));localStorage.setItem('ayothaya.lang','th');localStorage.setItem('ayothaya-coach-off','1');localStorage.setItem('ayothaya-perf',JSON.stringify({quality:'low',fps:30}));localStorage.setItem('ayothaya-welcome:ayothaya-story:server-1:slot-1','1');},{record,token:seeded.token});
+ const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base+'/game.html?server=server-1&map=rice-fields');await page.waitForFunction(()=>window.__ayothaya&&document.getElementById('online-button')?.dataset.state==='online',null,{timeout:120000});await page.waitForTimeout(700);await page.evaluate(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();});const peer=[...service.realm.peers.values()][0];peer.room.mobs.length=0;peer.world.player.hp=0;peer.world.fall();const deathSpot={x:peer.world.player.x,z:peer.world.player.z};
+ await page.locator('#role-down-panel').waitFor({state:'visible'});
+ for(const [width,height] of [[1920,1080],[1440,900],[1024,768],[844,390],[667,375],[390,844],[320,568]]){
+  await page.setViewportSize({width,height});await page.waitForTimeout(150);await page.evaluate(()=>document.getElementById('orientation-gate')?.close());
+  const fit=await page.locator('#role-down-panel').evaluate(d=>{const r=d.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,scroll:d.scrollHeight-d.clientHeight,modal:d.matches(':modal'),buttons:[...d.querySelectorAll('button')].map(b=>{const r=b.getBoundingClientRect();return {bottom:r.bottom,right:r.right,height:r.height};}),backdrop:getComputedStyle(d,'::backdrop').backgroundColor};});
+  assert.ok(fit.modal&&fit.x>=0&&fit.y>=0&&fit.right<=width&&fit.bottom<=height&&fit.scroll<2,JSON.stringify(fit));assert.ok(fit.buttons.every(b=>b.bottom<=height&&b.right<=width&&b.height>=44));checks.push({width,height,fit});await page.screenshot({path:fileURLToPath(new URL('death-'+width+'.png',out))});
+ }
+ await page.setViewportSize({width:1440,height:900});await page.keyboard.press('Escape');assert.equal(await page.locator('#role-down-panel').isVisible(),true);
+ await page.locator('[data-respawn=here]').click();await page.waitForFunction(()=>!document.getElementById('role-down-panel').open);assert.ok(peer.world.player.hp>0);assert.equal(peer.world.player.x,deathSpot.x);assert.equal(peer.world.player.z,deathSpot.z);
+ // Party revive closes the modal without requiring either button.
+ peer.world.player.hp=0;peer.world.fall();await page.locator('#role-down-panel').waitFor({state:'visible'});peer.world.player.hp=peer.world.player.maxHp*.5;peer.world.player.down=0;await page.waitForFunction(()=>!document.getElementById('role-down-panel').open);
+ peer.world.player.hp=0;peer.world.fall();await page.locator('#role-down-panel').waitFor({state:'visible'});await page.locator('[data-respawn=capital]').click();await page.waitForURL('**map=ayutthaya',{timeout:30000});await page.waitForFunction(()=>window.__ayothaya?.map.id==='ayutthaya'&&document.getElementById('online-button')?.dataset.state==='online',null,{timeout:120000});
+ const arrived=[...service.realm.peers.values()].find(p=>p.uid===seeded.uid);assert.equal(arrived.room.map.id,'ayutthaya');assert.ok(arrived.world.player.hp>0);assert.equal(arrived.bag.coins,1234);assert.equal(await page.locator('#role-down-panel').isVisible(),false);checks.push({here:true,partyRevive:true,capital:true});
+ assert.deepEqual(errors,[]);await writeFile(new URL('game-checks.json',out),JSON.stringify({checks,errors},null,2));console.log(JSON.stringify({passed:true,checks:checks.length,errors}));await context.close();
+}finally{await browser.close();await service.close();}

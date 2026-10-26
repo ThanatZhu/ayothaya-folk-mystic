@@ -64,7 +64,7 @@ export function refineAnnouncement(who,r,before,after){
  return null;
 }
 const WALK_FREE_MS=5;
-const allowed=new Set(['arenaRooms','walkTo','walkPace','walkCancel','bossDirectory','switchChannel','storyCheck','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildSearch','guildApply','guildApplicationAnswer','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','petSkill','bountyClaim','albumDeposit','weeklyClaim','rebirth','hire','selectAlly','returnToSpawn']);
+const allowed=new Set(['arenaRooms','walkTo','walkPace','walkCancel','bossDirectory','switchChannel','storyCheck','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildSearch','guildApply','guildApplicationAnswer','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','petSkill','bountyClaim','albumDeposit','weeklyClaim','rebirth','hire','selectAlly','returnToSpawn','respawn']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -103,7 +103,7 @@ export class RealmServer{
   let room=this.rooms.get(roomId);if(room&&room.peers.size>=this.capacity&&hasChannel&&!map.instance&&!hallGuild){const alt=CHANNELS.find(c=>(this.rooms.get(makeRoomId(c.id))?.peers.size??0)<this.capacity);if(alt){ch=alt.id;roomId=makeRoomId(ch);room=this.rooms.get(roomId);}}if(room&&room.peers.size>=this.capacity)throw new Error('room-full');
   if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,serverId,channel:typeof hasChannel==='boolean'&&hasChannel?ch:null,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);this.wakeMvp(room);}
   const world=new CombatWorld({...map,classId:hero.classId,jobId:hero.jobId,roleSkills:this.roleSkills});restoreTraveler(world,record.state.traveler);if(record.xpCurve!==XP_CURVE)world.baseXp=migrateXp(world.baseXp);world.mobs=room.mobs;
-  const skills=this.roleSkills?normalizeRoleSkills(record.skills,hero.classId):normalizeSkills(record.skills,hero.classId);world.skillLevels=[...skills[hero.classId]];if(this.roleSkills&&record.skills?.[ROLE_MARK]&&record.roleCooldowns?.version===1){const saved=record.roleCooldowns,elapsed=Math.max(0,(this.now()-saved.at)/1000);if(Array.isArray(saved.values)&&saved.values.length===15)world.cooldowns=saved.values.map(n=>Math.max(0,Math.min(120,Number.isFinite(n)?n:0)-elapsed));if(saved.down>0){const remaining=saved.down-elapsed;if(remaining>0){world.player.hp=0;world.player.down=remaining;}else{Object.assign(world.player,world.spawn);world.roleRespawn=true;}}}
+  const skills=this.roleSkills?normalizeRoleSkills(record.skills,hero.classId):normalizeSkills(record.skills,hero.classId);world.skillLevels=[...skills[hero.classId]];if(this.roleSkills&&record.skills?.[ROLE_MARK]&&record.roleCooldowns?.version===1){const saved=record.roleCooldowns,elapsed=Math.max(0,(this.now()-saved.at)/1000);if(Array.isArray(saved.values)&&saved.values.length===15)world.cooldowns=saved.values.map(n=>Math.max(0,Math.min(120,Number.isFinite(n)?n:0)-elapsed));if(saved.down>0){world.player.hp=0;world.player.down=Math.max(0,saved.down-elapsed);}}
   const position=record.state.position;if(position&&!evicted&&!arenaEvicted&&!world.roleRespawn&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
   const peer={roleSkillBackup:record.roleSkillBackup??(this.roleSkills&&!record.skills?.[ROLE_MARK]?copy(record.skills??{}):null),id:randomUUID(),uid,serverId,slotId,channel:ch,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
   peer.equipment=normalizeEquipment(record.equipment,hero.classId);
@@ -324,7 +324,13 @@ export class RealmServer{
    // Client capability flags and hand-written input packets cannot unlock it.
    const distance=Math.hypot(m.x,m.z),n=Math.max(1,distance);if(distance>.08)cancelWalk(p);p.input={x:m.x/n,z:m.z/n,attack:m.attack,run:this.runEnabled&&m.run===true&&distance>.08};p.inputAt=now;p.inputSeq=m.seq;if(distance>.08||m.attack)w.clearEmote();return true;
   }
-  if(m.type==='returnToSpawn'){if(w.player.hp<=0)w.player.down=0;return true;}
+  if(m.type==='returnToSpawn'){if(w.player.hp<=0){cancelWalk(p);p.input={x:0,z:0,attack:false,run:false};w.respawn(false);p.saveNow=true;}return true;}
+  if(m.type==='respawn'){
+   if(typeof m.id!=='string'||m.id.length>50)return false;
+   if(m.destination!=='here'||w.player.hp>0){p.send({type:'respawnError',id:m.id,code:'respawn-invalid'});return false;}
+   cancelWalk(p);p.input={x:0,z:0,attack:false,run:false};w.respawn(true);p.saveNow=true;
+   p.send({type:'snapshot',...this.snapshot(p)});p.send({type:'respawned',id:m.id});return true;
+  }
   if(m.type==='selectAlly'){const ally=w.roleAllies?.().find(a=>a.id===m.target);if(!ally)return this.error(p,'invalid-target');w.supportTargetId=ally.id;return true;}
   if(m.type==='autoConfig'){w.autoConfig=normalizeAuto(m);return true;} // 0.90 skills + potion thresholds for AUTO
   if(['skill','attack','select','auto','emote'].includes(m.type)){
@@ -922,7 +928,14 @@ export class RealmServer{
   }
   return out;
  }
- travelDestination(p,id,{warp=false}={}){
+ travelDestination(p,id,{warp=false,respawn=false}={}){
+  if(respawn){
+   const destination=this.catalog.maps.find(m=>m.id===id);
+   if(p.world.player.hp>0||id!==this.catalog.capital||!destination)throw Error('respawn-invalid');
+   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw Error('room-full');
+   cancelWalk(p);this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();
+   p.input={x:0,z:0,attack:false,run:false};return destination;
+  }
   const portal=p.room.map.portals?.find(v=>v.to===id&&distance(v,p.world.player)<2.6);
   const destination=this.catalog.maps.find(m=>m.id===id);
   if(id===ARENA_MAP){const room=arenaReservation(this,p.key);if(!destination||!room||p.duel||p.trade||p.world.player.hp<=0)throw Error('arena-not-ready');return destination;}

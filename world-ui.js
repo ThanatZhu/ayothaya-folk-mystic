@@ -8,7 +8,7 @@ import {createMentorUI} from './mentor-ui.js?v=training164';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=novice174';
-import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=101.5';
+import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=death178';
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
@@ -17,6 +17,13 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0,lastBig=0;
  const mentors=createMentorUI({game,account,catalog,map,inTown:()=>map.id==='ayutthaya',recall:()=>api.recall(),travel:async id=>{await travel(id);return traveling;},talkTo:name=>api.talkTo(name)});
  const conversationUI=createNPCConversation({game,onClose:()=>endTalk()});
+ game.respawnTravel=async()=>{
+  if(world.player.hp>0)return false;
+  const before={hp:world.player.hp,mp:world.player.mp,down:world.player.down};
+  if(!game.online){if(game.networkExpected)throw Error('not-connected');world.respawn(true);}
+  const ok=await travel(catalog.capital,false,false,true);
+  if(!ok&&!game.online)Object.assign(world.player,before);return ok;
+ };
  function endTalk(){if(conversation)conversation.talking=false;conversation=null;conversationUI.close();game.clearInput();}
  if(!account)try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}
  document.title=map.name+' · อโยธยา Folk Mystic';$('status').textContent=map.name+(map.safe?' · เขตปลอดภัย':' · นอกเมือง');
@@ -25,17 +32,17 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  if(map.safe){$('target-name').textContent='เขตปลอดภัย';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
- async function travel(id,recall=false,warp=false){
-  if(traveling||!(reachable.has(id)||recall||warp||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||world.player.hp<=0)return false;
+ async function travel(id,recall=false,warp=false,respawn=false){
+  if(traveling||!(reachable.has(id)||recall||warp||respawn||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||(!respawn&&world.player.hp<=0))return false;
   if(lookup(id)?.guildHall&&!game.online){world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');return false;}
   if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return false;}
   traveling=true;game.clearInput();
   getLoadingScreen().show(id,{travel:true});
   if(account){
-   if(!await account.travel(lookup(id),{warp})){traveling=false;getLoadingScreen().hide();world.notice(warp?'วาร์ปไม่สำเร็จ · เบี้ยไม่พอหรือเชื่อมต่อขัดข้อง':'เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return false;}
+   if(!await account.travel(lookup(id),{warp,respawn})){traveling=false;getLoadingScreen().hide();world.notice(warp?'วาร์ปไม่สำเร็จ · เบี้ยไม่พอหรือเชื่อมต่อขัดข้อง':'เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return false;}
   }else try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
   getLoadingScreen().stage(1,'กำลังเดินทางไป '+lookup(id).name+'…');
-  location.assign('?server='+account.serverId+'&map='+encodeURIComponent(id));
+  location.assign('?server='+(account?.serverId??'server-1')+'&map='+encodeURIComponent(id));
   return true;
  }
  // 0.59 realistic map: render the real scene straight down once (sprites hidden, no fog) and draw labels over it.

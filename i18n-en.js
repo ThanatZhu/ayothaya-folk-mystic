@@ -4527,3 +4527,5 @@ Object.assign(globalThis.I18N_EN,{
  "แสดงเพิ่ม (อีก {0} ชิ้น)": "Show more ({0} left)",
  "รุ้ง · เซ็ทบอส": "Rainbow · boss set"
 });
+
+Object.assign(globalThis.I18N_EN,{"เส้นทางยังไม่สิ้นสุด": "Your journey continues", "คุณหมดแรงแล้ว": "You have fallen", "เลือกจุดเกิดเพื่อออกเดินทางต่อ": "Choose where to revive and continue", "หรือรอให้เพื่อนชุบชีวิต": "Or wait for a friend to revive you", "เกิดที่นี่": "Revive here", "คืนชีพ ณ ตำแหน่งเดิม": "Return at this location", "เกิดที่อยุธยา": "Revive in Ayutthaya", "กลับจุดเกิดในเมือง": "Return to the town spawn", "กำลังคืนขวัญ…": "Reviving…", "เชื่อมต่อไม่สำเร็จ กรุณาลองอีกครั้ง": "Connection failed. Please try again.", "หมดแรง · เลือกจุดเกิดหรือรอเพื่อนชุบชีวิต": "Fallen · Choose where to revive or wait for a friend", "คืนขวัญแล้ว · พร้อมออกเดินทาง": "Revived · Ready for your journey"});

@@ -18,8 +18,8 @@ export class MultiplayerClient extends EventTarget{
     else if(m.type==='equipment-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
     else if(m.type==='trained'){this.training=m.training;if(m.advanced)this.stopped=true;this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
     else if(m.type==='training-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
-    else if(['petChanged','mailChanged','arenaChanged','identityChanged'].includes(m.type)){this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
-    else if(['petError','mailError','arenaError','identityError'].includes(m.type)){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
+    else if(['petChanged','mailChanged','arenaChanged','identityChanged','respawned'].includes(m.type)){this.pending.get(m.id)?.resolve(m);this.pending.delete(m.id);}
+    else if(['petError','mailError','arenaError','identityError','respawnError'].includes(m.type)){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
     else if(m.type==='saved'){this.pending.get(m.id)?.resolve();this.pending.delete(m.id);this.emit('saved',m);}
     else if(m.type==='traveled'){this.stopped=true;this.pending.get(m.id)?.resolve();this.pending.delete(m.id);}
     else if(m.type==='travel-error'){this.pending.get(m.id)?.reject(new Error(m.code));this.pending.delete(m.id);}
@@ -52,7 +52,7 @@ export class MultiplayerClient extends EventTarget{
  train(mentor,action,jobId){return this.request('train',crypto.randomUUID(),{mentor,action,jobId});}
  equip(item){return this.request('equip',crypto.randomUUID(),{item});}
  flush(settings){if(this.saving)return this.saving;this.saving=this.request('save',crypto.randomUUID(),{settings}).finally(()=>{this.saving=null;});return this.saving;}
- async travel(destination,warp=false){await this.request('travel',crypto.randomUUID(),{destination,warp});this.stopped=true;}
+ async travel(destination,warp=false,respawn=false){await this.request('travel',crypto.randomUUID(),{destination,warp,respawn});this.stopped=true;}
  async leave(){if(this.status!=='online')throw new Error('not-connected');await this.request('leave','leave');this.stopped=true;this.socket?.close();}
  stop(){this.stopped=true;this.generation++;clearTimeout(this.timer);this.socket?.close();for(const task of this.pending.values())task.reject(new Error('stopped'));this.pending.clear();this.state('offline');}
 }

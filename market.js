@@ -42,7 +42,7 @@ export function normalizeStall(stall,bag,max=STALL_MAX){
  return {title:String(stall?.title??'').slice(0,24)||'แผงขายของ',items};
 }
 export function buyFromStall(sellerBag,stall,buyerBag,id,qty,max=STALL_MAX){
- const s=normalizeStall(stall,sellerBag,max),row=s.items[id];
+ const s=normalizeStall(stall,sellerBag,max),row=Object.hasOwn(s.items,id)?s.items[id]:null;
  if(!row)throw new Error('not-sold');if(!Number.isSafeInteger(qty)||qty<1||qty>row.count)throw new Error('bad-count');
  const cost=row.price*qty;
  const [buyer1,seller1]=moveOffer(buyerBag,sellerBag,{coins:cost,items:{}});

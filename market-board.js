@@ -63,7 +63,7 @@ const logged=(shop,entry)=>[entry,...(shop.log??[])].slice(0,LOG_MAX);
 // A customer buys `qty` of `id` from a sell shop: coins go to the shop pouch (less tax), goods to the buyer.
 export function buyFromShop(shop,buyerBag,id,qty,perks,{who='',now=0}={}){
  if(!shopIsOpen(shop,now))throw new Error('stall-none');
- if(shop.kind!=='sell')throw new Error('not-sold');const row=shop.items[id];
+ if(shop.kind!=='sell')throw new Error('not-sold');const row=Object.hasOwn(shop.items??{},id)&&itemDef(id)?shop.items[id]:null;
  if(!row)throw new Error('not-sold');if(!Number.isSafeInteger(qty)||qty<1||qty>row.count)throw new Error('bad-count');
  const cost=row.price*qty,tax=taxOf(cost,perks);
  const [paid]=moveOffer(buyerBag,{coins:0,items:{}},{coins:cost,items:{}},{toCap:Infinity});
@@ -74,7 +74,7 @@ export function buyFromShop(shop,buyerBag,id,qty,perks,{who='',now=0}={}){
 // A customer sells `qty` of `id` to a buying store: goods go to the shop pouch, escrowed coins (less tax) to the seller.
 export function sellToShop(shop,sellerBag,id,qty,perks,{who='',now=0}={}){
  if(!shopIsOpen(shop,now))throw new Error('stall-none');
- if(shop.kind!=='buy')throw new Error('not-wanted');const row=shop.items[id];
+ if(shop.kind!=='buy')throw new Error('not-wanted');const row=Object.hasOwn(shop.items??{},id)&&itemDef(id)?shop.items[id]:null;
  if(!row)throw new Error('not-wanted');if(!Number.isSafeInteger(qty)||qty<1||qty>row.count)throw new Error('bad-count');
  const pay=row.price*qty,tax=taxOf(pay,perks);
  const [gave]=moveOffer(sellerBag,{coins:0,items:{}},{coins:0,items:{[id]:qty}},{toCap:Infinity});

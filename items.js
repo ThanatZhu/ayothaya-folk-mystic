@@ -244,7 +244,7 @@ export function rollAffix(rand=Math.random){const keys=Object.keys(AFFIXES),k=ke
 export function itemDef(id){
  if(typeof id!=='string')return null;
  const m=/^([a-z-]+?)(?:\+(\d{1,2}))?(?:~(card-[a-z-]+))?(?:!([savidl])([1-3]))?$/.exec(id);
- const it=m&&ITEMS[m[1]];if(!it)return null;
+ const it=m&&Object.hasOwn(ITEMS,m[1])&&ITEMS[m[1]];if(!it)return null;
  const n=m[2]?+m[2]:0,card=m[3]?ITEMS[m[3]]:null;
  if(!m[2]&&!m[3]&&!m[4])return {...it,id,base:id,refine:0,refineTier:0,refinePercent:0,card:null,affix:null,rarity:baseRarity(it,id)};
  if(m[4]&&it.kind!=='gear')return null;

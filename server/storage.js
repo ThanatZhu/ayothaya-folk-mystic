@@ -4,6 +4,7 @@ import path from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {character,initialSave} from '../realm-state.js';
 import {validateCharacterChange} from '../realm-store.js';
+export const MIRROR_CUTOFF=Date.parse('2026-10-26T00:00:00+07:00');
 // Firestore Spark allows 20k writes/day. 0.41.1 budget: world authority renews every 40 s (~90 writes/h) and a
 // player saves only when changed, at most once a minute (lease kept alive at least every 100 s).
 export const AUTHORITY_TTL=120000,AUTHORITY_RENEW=40000,SAVE_MIN_GAP=60000,SAVE_MAX_GAP=100000;
@@ -125,6 +126,9 @@ export class FirebaseStore{
    if(!legacy.exists)throw new Error('character-not-found');
    const record=online.exists?online.data().record:legacy.data();if(!online.exists){delete record.identityReceipts;delete record.petCollection;delete record.mailbox;delete record.walkRoute;delete record.albumSchema;delete record.albumRewards;} // Never import a premium wallet from the client-writable mirror.
    if(record.serverId!==identity.serverId||legacy.data().serverId!==identity.serverId)throw new Error('character-server');
+   // 0.114.1 the mirror is client-writable, so a first join only trusts its progress if it was last written before the
+   // cutoff (rules pin updatedAt to request.time). Anything newer starts as a Lv.1 novice with just its name and looks.
+   if(!online.exists&&!(legacy.data().updatedAt?.toMillis?.()<MIRROR_CUTOFF)){const c=record.character??{};record.character={name:c.name,gender:c.gender,classId:'novice',...(c.appearance===undefined?{}:{appearance:c.appearance})};record.state=initialSave();}
    character(record.character); // Legacy XP is imported once; later joins use the private server profile.
    if(online.exists){const next=character({...legacy.data().character,classId:record.character.classId,jobId:record.character.jobId??''});validateCharacterChange(record.character,next,record.state);record.character=next;}
    tx.set(refs.lease,{leaseId,expires:Date.now()+ttl,slotId:identity.slotId});

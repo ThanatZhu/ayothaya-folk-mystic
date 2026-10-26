@@ -11,7 +11,7 @@ const friends=new Set(['heal','cleanse','revive','greatRevive','link','intercept
 const selfKinds=new Set(['taunt','anchor','guard','counter','evade','stealth','clones','summon','greatSummon','spirit','greatSpirit','crow','smoke','ward','sanctuary','regen','lifeTree','yantra','groupHeal','lastStand','purify']);
 export function createRoleCombat(world,{moveBody,lineClear,types}={}){
  const specific=roleById(world.profession.id),role=specific??{id:'novice',color:'#ffe3a0',branches:[]};
- const branch=role.branches.find(b=>b.id===world.jobId),state={fields:[],pets:[],combo:0,shield:0,pending:null,meta:{},passiveAt:{}};
+ const branch=role.branches.find(b=>b.id===world.jobId),state={fields:[],pets:[],spiritShots:[],petSerial:0,shotSerial:0,combo:0,shield:0,pending:null,meta:{},passiveAt:{}};
  const w=world,p=w.player,me=()=>({id:w.roleOwnerId??'self',world:w,player:p}),allies=()=>w.roleAllies?.()??[me()],enemies=()=>w.foes().filter(m=>m.hp>0),visible=(a,b)=>lineClear(a,b,w.nav);
  const mods=()=>Object.fromEntries((branch?.passives??[]).filter((_,i)=>(w.skillLevels[13+i]??0)>0).map(s=>[s.modifier,s.value]));
  function trigger(mod,at=p){const skill=branch?.passives.find(s=>s.modifier===mod);if(!skill||(w.skillLevels[13+branch.passives.indexOf(skill)]??0)<1||w.time-(state.passiveAt[skill.id]??-9)<1)return;state.passiveAt[skill.id]=w.time;w.emit('rolePassive',{roleSkillId:skill.id,from:{x:p.x,z:p.z},to:{x:at.x,z:at.z},kind:'passive',color:role.color});}
@@ -31,7 +31,32 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
  function area(at,r=3){return enemies().filter(m=>dist(m,at)<=r&&visible(at,m));}
  function team(at,r=4.5){return allies().filter(a=>a.player.hp>0&&dist(a.player,at)<=r&&visible(at,a.player));}
  function line(at,range=8){const dx=at.x-p.x,dz=at.z-p.z,len=Math.hypot(dx,dz)||1;return enemies().filter(m=>{const x=m.x-p.x,z=m.z-p.z,t=(x*dx+z*dz)/len,c=Math.abs(x*dz-z*dx)/len;return t>=0&&t<=range&&c<1.25&&visible(p,m);});}
- function pet(s,kind){state.pets=state.pets.filter(a=>a.kind!==kind);state.pets.push({kind,x:p.x+.7,z:p.z+.4,left:s.seconds,power:s.kind.startsWith('great')?48:28,tick:.4,skillId:s.roleSkillId});status(me(),kind,s.seconds);}
+ function pet(s,kind){
+  state.pets=state.pets.filter(a=>a.kind!==kind);
+  const owner=w.roleOwnerId??'self',tier=s.kind.startsWith('great')?'master':'base',id=owner+':'+kind+':'+(++state.petSerial),a={id,owner,kind,tier,x:p.x+.7,z:p.z+.4,left:s.seconds,power:s.kind.startsWith('great')?48:28,tick:.4,skillId:s.roleSkillId,spawnedAt:w.time,endsAt:w.time+s.seconds,maxLeft:s.seconds,face:{...p.face},attackAt:null};
+  state.pets.push(a);status(me(),kind,s.seconds);
+  if(kind==='spirit'&&w.spiritPrototype===true){for(const shot of state.spiritShots)if(!state.pets.some(pet=>pet.id===shot.petId))w.emit('spiritImpact',{owner:shot.owner,petId:shot.petId,skillId:shot.skillId,tier:shot.tier,shotId:shot.shotId,targetId:shot.targetId,x:shot.to.x,z:shot.to.z,to:{...shot.to},hit:false,impactAt:w.time});state.spiritShots=state.spiritShots.filter(shot=>state.pets.some(pet=>pet.id===shot.petId));w.emit('spiritSummon',{owner,petId:id,skillId:a.skillId,tier,x:a.x,z:a.z,from:{x:p.x,z:p.z},to:{x:a.x,z:a.z},duration:.55,spawnedAt:a.spawnedAt,endsAt:a.endsAt});}
+ }
+ // The opt-in companion lab resolves these bolts on the simulation clock; live worlds retain their existing hit timing.
+ function spiritShot(pet,target){
+  const duration=.3,from={x:pet.x,z:pet.z},to={x:target.x,z:target.z},owner=w.roleOwnerId??'self',shotId=pet.id+':shot:'+(++state.shotSerial),launchAt=w.time,impactAt=launchAt+duration;
+  const data={owner,petId:pet.id,skillId:pet.skillId,tier:pet.tier,shotId,x:pet.x,z:pet.z,from,to,targetId:target.id,duration,launchAt,impactAt};
+  pet.attackAt=launchAt;pet.targetId=target.id;pet.face={x:to.x-from.x,z:to.z-from.z};
+  state.spiritShots.push({...data,target,left:duration,power:pet.power*(1+(mods().summonPower??0))});w.emit('spiritShot',data);
+ }
+ function spiritImpacts(dt){
+  for(const shot of state.spiritShots){
+   shot.left-=dt;
+   const pet=state.pets.find(a=>a.id===shot.petId&&a.left>dt),target=shot.target;
+   const valid=!!pet&&p.hp>0&&target?.hp>0&&w.foes().includes(target)&&visible(p,target);
+   if(!valid||shot.left<=1e-8){
+    const hit=valid&&shot.left<=1e-8,at=hit?target:shot.to;
+    if(hit){damage(target,shot.power);trigger('summonPower',target);if(mods().bondHeal&&target.roleStatus?.mark){heal(me(),mods().bondHeal);trigger('bondHeal');}}
+    w.emit('spiritImpact',{owner:shot.owner,petId:shot.petId,skillId:shot.skillId,tier:shot.tier,shotId:shot.shotId,targetId:shot.targetId,x:at.x,z:at.z,to:{x:at.x,z:at.z},hit,impactAt:w.time});shot.done=true;
+   }
+  }
+  state.spiritShots=state.spiritShots.filter(s=>!s.done);
+ }
  function field(s,at){state.fields=state.fields.filter(f=>f.skillId!==s.roleSkillId);state.fields.push({x:at.x,z:at.z,left:s.seconds+(['sanctuary'].includes(s.type)?mods().sanctuaryDuration??0:0),tick:0,radius:s.radius*(1+(['zone','wall'].includes(s.type)?mods().zoneRadius??0:0)),power:s.power,kind:s.type,skillId:s.roleSkillId});if(['zone','wall'].includes(s.type))trigger('zoneRadius');if(s.type==='sanctuary')trigger('sanctuaryDuration');}
  function perform(s,target){
   const firstHit=(w.damageContext?.hitIndex??0)===0,m=mods(),kind=s.type,at=target?.player??target??p,n=s.power??0,around=()=>area(p,s.radius),near=()=>area(at,s.radius),a=target?.world?target:me();
@@ -116,12 +141,25 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   step(dt,input){
    const hpMod=mods().maxHp??0;if(hpMod!==(state.hpMod??0)){const base=w.derived?.maxHp??p.maxHp/(1+(state.hpMod??0));p.maxHp=Math.round(base*(1+hpMod));p.hp=Math.min(p.hp,p.maxHp);state.hpMod=hpMod;trigger('maxHp');}
    for(const [key,effect] of Object.entries(w.roleDebuffs??{})){if(!w.status[key]){delete w.roleDebuffs[key];continue;}effect.left=w.status[key];if(key==='poison')tickPoison(w.roleDebuffs,dt,e=>{const owner=w.roleResolveOwner?.(e.owner),victim=owner?.foes().find(m=>m.id===e.pvpId);if(victim)owner.hurt(victim,e.power,'#a9d86f');});if(key==='poison'&&!w.roleDebuffs.poison)delete w.status.poison;}
-   for(const k of Object.keys(state.meta))if(!w.status[k])delete state.meta[k];if(p.hp<=0){if(state.pending)w.emit('castCancel',{castId:state.pending.castId});state.pending=null;state.fields=[];state.pets=[];state.combo=0;state.shield=0;return;}
+   for(const k of Object.keys(state.meta))if(!w.status[k])delete state.meta[k];if(p.hp<=0){if(state.pending)w.emit('castCancel',{castId:state.pending.castId});state.pending=null;state.fields=[];state.pets=[];if(w.spiritPrototype===true)for(const shot of state.spiritShots)w.emit('spiritImpact',{owner:shot.owner,petId:shot.petId,skillId:shot.skillId,tier:shot.tier,shotId:shot.shotId,targetId:shot.targetId,x:shot.to.x,z:shot.to.z,to:{...shot.to},hit:false,impactAt:w.time});state.spiritShots=[];state.combo=0;state.shield=0;return;}
    if(state.pending){const c=state.pending;if(w.status.stun||w.status.sleep||w.status.silence||(['revive','greatRevive'].includes(c.s.type)&&(Math.hypot(input.x??0,input.z??0)>.08||dist(p,c.origin)>.15))){w.emit('castCancel',{castId:c.castId});state.pending=null;w.notice('การร่ายถูกยกเลิก');}else if((c.left-=dt)<=1e-8){if(!valid(c.s,c.target,true)){w.damageContext={castId:c.castId,hitIndex:c.hit,roleSkillId:c.s.roleSkillId,source:'skill'};try{if(['comboBurst','comboFinish'].includes(c.s.type))state.combo=c.combo;perform(c.times?{...c.s,power:c.s.power/c.times.length}:c.s,c.target);}finally{w.damageContext=null;}w.emit('roleRelease',{roleSkillId:c.s.roleSkillId,castId:c.castId,hitIndex:c.hit});c.hit++;if(c.times&&c.hit<c.times.length)c.left+=c.times[c.hit]-c.times[c.hit-1];else{state.pending=null;p.attackCD=Math.max(p.attackCD,.16);}}else{w.emit('castCancel',{castId:c.castId});state.pending=null;}}}
    for(const f of state.fields){f.left-=dt;f.tick-=dt;if(f.tick>0)continue;f.tick=1;
     if(['regen','lifeTree'].includes(f.kind))for(const ally of team(f,f.radius)){heal(ally,f.power);status(ally,f.kind,1.2);}else if(['sanctuary','yantra'].includes(f.kind)){for(const ally of team(f,f.radius))status(ally,'sanctuary',1.2);if(f.kind==='yantra')for(const enemy of area(f,f.radius))enemyStatus(enemy,'slow',1.2);}else{for(const enemy of area(f,f.radius)){damage(enemy,f.power*(f.kind==='holyField'&&enemy.roleStatus?.curse?1.35+(mods().holyBonus??0):1));if(['trap','wall'].includes(f.kind))crowd(enemy,1.1);if(['zone','thorns'].includes(f.kind))enemyStatus(enemy,'slow',1.2);}if(f.kind==='mine'&&area(f,f.radius).length)f.left=0;}}
    state.fields=state.fields.filter(f=>f.left>0);
-   for(const pet of state.pets){pet.left-=dt;pet.tick-=dt;const target=w.target;if(target?.hp>0&&visible(p,target)&&dist(p,target)<12){const d=dist(pet,target)||1,n=Math.min(d,dt*5);pet.x+=(target.x-pet.x)/d*n;pet.z+=(target.z-pet.z)/d*n;if(pet.tick<=0&&dist(pet,target)<(pet.kind==='spirit'?6:1.4)){pet.tick=1.2;damage(target,pet.power*(1+(mods().summonPower??0)));trigger('summonPower',target);if(mods().bondHeal&&target.roleStatus?.mark){heal(me(),mods().bondHeal);trigger('bondHeal');}}}else{pet.x+=(p.x+.7-pet.x)*Math.min(1,dt*3);pet.z+=(p.z+.4-pet.z)*Math.min(1,dt*3);}}
+   if(w.spiritPrototype===true)spiritImpacts(dt);else state.spiritShots=[];
+   for(const pet of state.pets){
+    pet.left-=dt;pet.tick-=dt;const target=w.target;
+    if(pet.kind==='spirit'&&w.spiritPrototype===true){
+     if(pet.left<=0){w.emit('spiritDismiss',{owner:pet.owner,petId:pet.id,skillId:pet.skillId,tier:pet.tier,x:pet.x,z:pet.z,duration:.4});continue;}
+     // Fixed-camera prototype keeps the companion visibly left/behind the hero rather than overlapping the face.
+     const anchor={x:p.x-1.15,z:p.z-.5},blend=1-Math.exp(-dt*7);
+     pet.x+=(anchor.x-pet.x)*blend;pet.z+=(anchor.z-pet.z)*blend;
+     if(target?.hp>0&&visible(p,target)&&dist(p,target)<12){pet.face={x:target.x-pet.x,z:target.z-pet.z};if(pet.tick<=0){pet.tick=1.2;spiritShot(pet,target);}}
+     else{pet.targetId=null;pet.face={...p.face};}
+     continue;
+    }
+    if(target?.hp>0&&visible(p,target)&&dist(p,target)<12){const d=dist(pet,target)||1,n=Math.min(d,dt*5);pet.x+=(target.x-pet.x)/d*n;pet.z+=(target.z-pet.z)/d*n;if(pet.tick<=0&&dist(pet,target)<(pet.kind==='spirit'?6:1.4)){pet.tick=1.2;damage(target,pet.power*(1+(mods().summonPower??0)));trigger('summonPower',target);if(mods().bondHeal&&target.roleStatus?.mark){heal(me(),mods().bondHeal);trigger('bondHeal');}}}else{pet.x+=(p.x+.7-pet.x)*Math.min(1,dt*3);pet.z+=(p.z+.4-pet.z)*Math.min(1,dt*3);}
+   }
    state.pets=state.pets.filter(a=>a.left>0);if(state.combo)w.status.combo=.2;
   }
  };

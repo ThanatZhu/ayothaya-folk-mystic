@@ -4533,3 +4533,5 @@ Object.assign(globalThis.I18N_EN,{"เส้นทางยังไม่สิ
 Object.assign(globalThis.I18N_EN,{"ยันต์คืนขวัญ": "Soul Revival Talisman", "ใช้ 1 ชิ้นเมื่อเลือกเกิดที่นี่ · ฟื้น HP / MP เต็ม ณ จุดที่หมดแรง · ใช้ผ่านหน้าต่างเกิดใหม่เท่านั้น": "Consumes 1 when reviving here · Restores full HP / MP at the fallen location · Use only in the revival window", "ใช้ยันต์คืนขวัญ 1 ชิ้น": "Consumes 1 Revival Talisman", "ต้องมียันต์คืนขวัญ 1 ชิ้น": "Requires 1 Revival Talisman", "มี {0} ชิ้น": "Owned: {0}"});
 
 Object.assign(globalThis.I18N_EN,{"ซื้อยันต์ · 200 ทองแท่ง": "Buy · 200 gold bars", "ทองแท่ง {0}": "Gold bars: {0}", "ซื้อยันต์คืนขวัญ 1 ชิ้น ราคา 200 ทองแท่ง": "Buy 1 Revival Talisman for 200 gold bars", "ซื้อได้ในโหมดออนไลน์": "Available online", "ได้รับยันต์คืนขวัญ 1 ชิ้น · หัก 200 ทองแท่ง": "Received 1 Revival Talisman · Spent 200 gold bars", "ใช้ 1 ชิ้นเมื่อเลือกเกิดที่นี่ · ฟื้น HP / MP เต็ม ณ จุดที่หมดแรง · ซื้อผ่านหน้าต่างเกิดใหม่ 200 ทองแท่ง": "Consumes 1 to revive here · Restores full HP / MP at the fallen location · Buy in the revival window for 200 gold bars"});
+
+Object.assign(globalThis.I18N_EN,{"โหลดภาพพรายไม่สำเร็จ":"Could not load the spirit artwork"});

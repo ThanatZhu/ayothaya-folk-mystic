@@ -27,13 +27,13 @@ test('all three basics max at four ranks using exactly the nine Novice points',(
  let s=normalizeSkills(null,'novice');const raw=JSON.stringify(s);
  for(const i of NOVICE_SLOTS){if(!s.novice[i])s=upgradeSkill(s,'novice',i,progress);while(s.novice[i]<4)s=upgradeSkill(s,'novice',i,progress);assert.throws(()=>upgradeSkill(s,'novice',i,progress),/skill-max/);}
  assert.equal(spentPoints(s),9);assert.equal(availablePoints(s,progress),0);assert.equal(JSON.stringify(normalizeSkills(null,'novice')),raw);
- assert.equal(SKILL_MAX,10,'professional paths keep their ten ranks');
+ assert.equal(SKILL_MAX,5,'0.119 class actives have five ranks');
 });
 
 test('old Novice allocations are refunded without touching profession ranks or source saves',()=>{
- const raw={_tree84:Array(15).fill(0),[ROLE_MARK]:Array(15).fill(0),novice:Array(15).fill(6),hunter:[3,0,0,0,2,0,0,0,0,0,0,0,0,0,0]},before=JSON.stringify(raw);
+ const raw={_tree84:Array(17).fill(0),[ROLE_MARK]:Array(17).fill(0),novice:Array(17).fill(5),hunter:[3,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0]},before=JSON.stringify(raw);
  const s=normalizeRoleSkills(raw,'hunter');assert.equal(JSON.stringify(raw),before);assert.deepEqual(s.hunter,raw.hunter);
- assert.deepEqual(s.novice,NOVICE_SLOTS.reduce((a,i)=>(a[i]=4,a),Array(15).fill(0)));assert.equal(spentPoints(s),12);assert.deepEqual(normalizeRoleSkills(s,'hunter'),s);
+ assert.deepEqual(s.novice,NOVICE_SLOTS.reduce((a,i)=>(a[i]=4,a),Array(17).fill(0)));assert.equal(spentPoints(s),14); // Novice 3x(4-1) free first rank; class ranks all costassert.deepEqual(normalizeRoleSkills(s,'hunter'),s);
 });
 
 test('authority enforces the reduced tree and persists only valid Novice ranks',()=>{

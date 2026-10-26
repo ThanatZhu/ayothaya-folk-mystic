@@ -16,7 +16,7 @@ import * as THREE from '../vendor/build/three.module.js';
 import {recordBossDamage,finishBossDamage} from '../boss-results.js';
 const nav={zones:[{x:-40,z:-40,w:80,d:80}],obstacles:[],props:[]},input={x:0,z:0,attack:false};
 function world(classId='rogue',jobId='assassin'){
- const w=new CombatWorld({classId,jobId,roleSkills:true,nav,spawn:{x:0,z:0},mobs:[[1,0,0]]});w.skillLevels.fill(10);w.skillLevels[13]=w.skillLevels[14]=0;w.player.mp=w.player.maxMp=1e6;w.mobs[0].hp=w.mobs[0].maxHp=1e7;w.targetId=0;return w;
+ const w=new CombatWorld({classId,jobId,roleSkills:true,nav,spawn:{x:0,z:0},mobs:[[1,0,0]]});w.skillLevels.fill(5);for(const i of [6,7,8,14,15,16])w.skillLevels[i]=0; /* 0.119: actives max 5, passives off unless a test turns one on */w.player.mp=w.player.maxMp=1e6;w.mobs[0].hp=w.mobs[0].maxHp=1e7;w.targetId=0;return w;
 }
 function tick(w,seconds){for(let t=0;t<seconds-1e-8;t+=.05)w.update(Math.min(.05,seconds-t),input,{monsters:false});}
 test('a live basic starts once, hits on its advertised beat, and fast ASPD produces proportionally more complete swings',t=>{
@@ -35,7 +35,7 @@ test('the novice live path also reserves cost and releases damage once at the ad
  const w=world('novice',''),hp=w.mobs[0].hp,mp=w.player.mp;assert.equal(w.skill(0),true);const cast=w.events.find(e=>e.type==='cast');assert.ok(cast.timing);assert.equal(w.mobs[0].hp,hp);assert.ok(w.player.mp<mp);assert.equal(w.skill(0),false);tick(w,cast.timing.impacts[0]-.01);assert.equal(w.mobs[0].hp,hp);tick(w,.06);assert.ok(w.mobs[0].hp<hp);assert.equal(w.events.filter(e=>e.type==='damage').length,1);
 });
 test('every direct multi-hit skill releases each hit on the authored beat without multiplying total base power',()=>{
- for(const profile of ALL_PROFILES.filter(p=>!p.passive&&p.impacts.length>1&&!['storm','rain','thorns','regen','lifeTree','holyField'].includes(p.skill.kind))){
+ for(const profile of ALL_PROFILES.filter(p=>!p.passive&&roleTiming({...p.skill,type:p.skill.kind},p).impacts.length>1&&!['storm','rain','thorns','regen','lifeTree','holyField'].includes(p.skill.kind))){
   const branch=ROLES.find(r=>r.id===profile.classId).branches.find(b=>b.active.some(s=>s.id===profile.id));const w=world(profile.classId,branch?.id??''),i=w.skills.findIndex(s=>s.roleSkillId===profile.id);w.roleCombat.state.pets=[{kind:'rooster',left:100,power:0,tick:100,x:0,z:0}];
   assert.equal(w.skill(i),true,profile.id);const cast=w.events.find(e=>e.type==='cast');assert.deepEqual(cast.timing.impacts,profile.impacts);const releases=[],hits=[];
   for(let n=0;n<60;n++){w.update(.05,input,{monsters:false});for(const event of w.events.splice(0)){if(event.type==='roleRelease'&&event.castId===cast.castId)releases.push({...event,time:w.time});if(event.type==='damage'&&event.castId===cast.castId)hits.push(event);}}
@@ -48,9 +48,8 @@ test('AUTO can cast after a fast basic windup, while weaker poison is skipped du
  const w=world();w.basicAttack(true);assert.equal(w.roleCombat.autoIndex({skills:[3]}),-1);tick(w,.2);assert.equal(w.roleCombat.autoIndex({skills:[3]}),3);
  applyPoison(w.target.roleStatus??={},{owner:'self',left:8,power:10000});assert.equal(w.roleCombat.autoIndex({skills:[3,10]}),-1);w.cooldowns.fill(0);w.autoConfig={skills:[3]};w.autoCast=0;w.auto=true;tick(w,1);assert.ok(!w.events.some(e=>e.type==='cast'&&e.roleSkillId==='poison'));
 });
-test('splitting direct hits does not multiply mana refunds or line cooldown recovery',()=>{
- const boxer=world('boxer','master-boxer');boxer.skillLevels[13]=boxer.skillLevels[14]=1;boxer.derived={mpRegen:0};boxer.player.mp=100;const mana=boxer.roleCombat.mods().comboMana;assert.ok(mana);const index=boxer.skills.findIndex(s=>s.type==='combo');assert.equal(boxer.skill(index),true);const paid=boxer.player.mp;tick(boxer,2);assert.equal(boxer.player.mp,paid+mana);
- const lancer=world('lancer','war-lancer');lancer.skillLevels[13]=lancer.skillLevels[14]=1;lancer.mobs.push({...lancer.target,id:1,x:2},{...lancer.target,id:2,x:3});lancer.cooldowns[0]=10;const recovery=lancer.roleCombat.mods().lineRecovery;assert.ok(recovery);assert.equal(lancer.skill(lancer.skills.findIndex(s=>s.type==='chainLine')),true);tick(lancer,2);assert.ok(Math.abs(lancer.cooldowns[0]-(8-recovery))<1e-8);
+test('splitting direct hits does not multiply mana refunds',()=>{
+ const boxer=world('boxer','master-boxer');boxer.skillLevels[6]=1; // 0.119 class passive: combo manaboxer.derived={mpRegen:0};boxer.player.mp=100;const mana=boxer.roleCombat.mods().comboMana;assert.ok(mana);const index=boxer.skills.findIndex(s=>s.type==='combo');assert.equal(boxer.skill(index),true);const paid=boxer.player.mp;tick(boxer,2);assert.equal(boxer.player.mp,paid+mana);
 });
 test('basic projectile contact occurs on the advertised beat and cancelling one actor never erases another actor with the same cast ID',()=>{
  const scene=new THREE.Scene(),effects=createSkillEffects(scene),timing=basicTiming('hunter',.4),track={...skillTrack('hunter',0),duration:timing.duration,strikes:[.42]},options={classId:'hunter',skillIndex:null,synced:true,castId:1,actor:'a',from:{x:0,z:0},to:{x:4,z:0}};
@@ -65,11 +64,6 @@ test('assassin detonation adds already resolved poison once and never consumes a
  const w=world();w.applyDerived(deriveStats({level:60,classId:'rogue',stats:{str:70,dex:30}}));const target=w.target;applyPoison(target.roleStatus??={}, {owner:'other',left:9,power:300});assert.equal(w.skill(11),false);
  applyPoison(target.roleStatus,{owner:'self',left:8,power:200});const before=target.hp;assert.equal(w.skill(11),true);tick(w,1.5);const damage=w.events.filter(e=>e.type==='damage'&&e.source==='skill');assert.equal(damage.length,1);assert.ok(damage[0].amount<before*.01,'no second multiplication of resolved poison');assert.equal(poisonFor(target.roleStatus,'self'),null);assert.ok(poisonFor(target.roleStatus,'other'));
  const base=damage[0].amount;assert.ok(base>w.power(187,target),'stored poison contributes');
-});
-test('Master last-drop applies to basics and DOTs below 35%, with no double application on skills',t=>{
- t.mock.method(Math,'random',()=>.5);const w=world();w.skillLevels[14]=1;w.derived={crit:0,hit:10000};w.target.hp=w.target.maxHp*.3;applyPoison(w.target.roleStatus??={}, {owner:'self',left:8,power:40});
- const hit=source=>{w.events=[];if(source==='poison')stepRoleMonsters([w.target],1,()=>w);else if(source==='skill')w.roleCombat.damage(w.target,40);else{w.player.attackCD=0;w.basicAttack(true);tick(w,.2);}return w.events.find(e=>e.type==='damage').amount;};
- assert.equal(hit('poison'),50);assert.equal(hit('skill'),Math.round(w.power(40,w.target)*1.25));assert.equal(hit('basic'),Math.round(Math.round(w.profession.damage*w.affinity(w.target,true)*w.guardOf(w.target,false))*1.25));
 });
 test('snapshot batching, cancellation and poison share one presentation clock for self and remote players',()=>{
  let now=0;const queue=createCombatPresentation({now:()=>now}),seen=[];

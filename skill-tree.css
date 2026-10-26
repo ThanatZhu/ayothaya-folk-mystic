@@ -155,3 +155,10 @@ html body #skill-window .skill-node{background:transparent!important;box-shadow:
  #skill-window .skill-node .skill-icon{width:100%;height:100%}
  #skill-window .skill-node>.skill-upgrade{width:30px;min-width:30px;height:30px;min-height:30px;font-size:22px;right:-4px}
 }
+
+/* 0.119 class skill window: actives in two rows of three (ultimate last), passives on the third row; no link lines */
+#skill-window .skill-tree.role-tree{grid-template-columns:repeat(3,minmax(0,80px))}
+#skill-window .skill-node.passive .skill-icon,#skill-window .skill-node.passive .skill-select{border-radius:50%}
+#skill-window .skill-node.passive{border-style:dashed}
+#skill-window .skill-node.ultimate{border-color:#f4cf7a;box-shadow:0 0 0 1px #f4cf7a55,0 0 14px #f4cf7a33}
+@media(max-width:640px),(orientation:landscape) and (max-height:560px){#skill-window .skill-tree.role-tree{grid-template-columns:repeat(3,minmax(0,64px))}}

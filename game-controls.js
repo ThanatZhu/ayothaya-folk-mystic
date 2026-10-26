@@ -4,7 +4,7 @@ import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progress.js';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing} from './combat-animation165.js?v=align169';
-import {createLiveRoleVfx} from './role-skill-vfx.js?v=align169';
+import {createLiveRoleVfx} from './role-skill-vfx.js?v=vfx119';
 import {createRolePlayUI} from './role-play-ui.js';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
@@ -208,7 +208,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    // 1.10 owner: numbers, the hit flash and the death wait for the moment the swing / spell connects
    strikeAt=world.time-lag+(fast?fast.strikes[0]*fast.duration:.42*attackDuration(world.profession.id)/swingScale);if(e.predicted)predictions.push({index:Number.isInteger(e.skillIndex)?e.skillIndex:null,at:wall(),strikeAt});strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    const presentation=fast??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
-   const from=e.from??world.player,to=e.to??from;
+   const from=e.from??world.player,to=e.to??from,noviceFx=world.profession.id==='novice'&&fast&&Number.isInteger(e.skillIndex)?'novice:'+e.skillIndex:null;
+   // 0.119 Novice basics play their painted sheet on the same beats as the swing.
+   if(noviceFx&&roleEffects.has(noviceFx)){roleEffects.spawn({...e,roleSkillId:noviceFx,from,to,lag,timing:{impacts:fast.strikes.map(b=>b*fast.duration),duration:fast.duration}});return;}
    const effect=skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,synced:true,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});effect.age=lag;
  }
  function effect(e){
@@ -220,7 +222,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(e.type==='rolePassive'){roleEffects.spawn(e);
   }else if(e.type==='cast'){playCast(e);
   }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(!e.synced&&strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
-  }else if(e.type==='damage'){const v=mobViews[e.id];if(!e.synced&&strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
+  }else if(e.type==='damage'){roleEffects.hit(e);const v=mobViews[e.id];if(!e.synced&&strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='knock'){kick=Math.max(kick,1.4);if(network)world.knock={vx:e.vx,vz:e.vz,t:e.t};} // 0.111 boss slam: shake and slide back (online: mirror the server's slide)
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff7a6a');hitTintUntil=world.time+.45;}
@@ -234,7 +236,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const roleKey=world.roleCombat&&!world.roleCombat.legacy?'role1:':'';const HOT_KEY='ayothaya-hotbar:'+roleKey+world.profession.id,AUTO_KEY='ayothaya-auto:'+roleKey+world.profession.id;
  // 0.101 five more slots (keys Alt+1-5) hold the Master skills; a ten-slot hotbar saved before keeps its order.
  const order=[...Array(SLOTS).keys()],isOrder=h=>Array.isArray(h)&&h.length===SLOTS&&[...h].sort((a,b)=>a-b).join()===order.join();
- let hotbar=order;try{let h=JSON.parse(localStorage.getItem(HOT_KEY));if(Array.isArray(h)&&h.length===BASE_SLOTS)h=[...h,...order.slice(BASE_SLOTS)];if(isOrder(h))hotbar=h;}catch{}
+ let hotbar=order;try{let h=JSON.parse(localStorage.getItem(HOT_KEY));if(Array.isArray(h)&&(h.length===BASE_SLOTS||h.length===15))h=[...h,...order.slice(h.length)]; /* 0.119 two more slots: a saved bar keeps its order */if(isOrder(h))hotbar=h;}catch{}
  if(world.profession.id==='novice')hotbar=[...hotbar.filter(i=>NOVICE_SLOTS.includes(i)),...hotbar.filter(i=>!NOVICE_SLOTS.includes(i))];
  try{world.autoConfig=normalizeAuto(JSON.parse(localStorage.getItem(AUTO_KEY)));}catch{world.autoConfig=normalizeAuto(null);}
  let autoSent='';
@@ -467,6 +469,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
+ // Warm the HTTP cache with this character's own skill sheets once the map has settled.
+ setTimeout(()=>roleEffects.prefetch(world.skills.map((s,i)=>s.roleSkillId??'novice:'+i)),4000);
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
  return {roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

@@ -3,7 +3,7 @@ import {ITEMS,DROPS,SHOPS,ATLASES,ATLAS_LAYOUTS,ITEM_ATLAS,BAG_SLOTS,BAG_MAX,BAG
 import {MONSTER_TYPES} from '../combat-core.js';
 import {ROLES} from '../assets/skills-next/catalog.js';
 import {roleIconRegion} from '../assets/skills-next/icon-regions.js';
-import {liveRoleSkills,roleRequirements} from '../role-skill-progress.js';
+import {liveRoleSkills,roleSkillMax} from '../role-skill-progress.js';
 import {scaledSkill,SKILL_MAX} from '../skill-progress.js';
 import {CLASSES} from '../classes.js';
 import {JOBS} from '../advancement.js';
@@ -32,9 +32,10 @@ const monsterArt=async(t,i)=>{
  return {src:'assets/brand69/ayothaya-emblem.png'};
 };
 const itemRows=Object.entries(ITEMS).filter(([,i])=>i.kind!=='ui'&&i.kind!=='reserved'&&!i.retired).map(([id,it])=>({id,...it,art:it.monsterCard?{src:'assets/cards147/'+id.slice(5)+'.webp'}:sprite(it),sources:[...Object.entries(SHOPS).filter(([,s])=>s.stock.includes(id)).map(([n,s])=>({type:'shop',name:n,mapId:s.mapId})),...Object.entries(DROPS).filter(([,d])=>d.items.some(([x])=>x===id)).map(([monster,d])=>({type:'drop',name:MONSTER_TYPES.find(t=>t.id===monster)?.name??monster,monster,rate:d.items.find(([x])=>x===id)[1]})),...RECIPES.filter(r=>r.out===id).map(()=>({type:'craft'}))]}));
+// 0.119 class skills: slots 0-5 actives, 6-8 class passives, 10-13 Master actives, 14-16 Master passives; each opens at a Job level
 const skills=ROLES.flatMap(r=>{
- const convert=(s,slot,job='')=>{const live=liveRoleSkills(r.id,job)[slot],region=roleIconRegion(s.icon);return {...s,slot,max:slot>=13?1:SKILL_MAX,requires:roleRequirements(slot).map(([index,level])=>({name:r.base[index]?.name??String(index+1),level})),className:r.name,branchName:r.branches.find(b=>b.id===job)?.name??null,levels:s.passive?[]:[1,10].map(n=>({level:n,...scaledSkill(live,n)})),art:{src:'assets/skills-next/'+s.icon.sheet,...region}};};
- return [...r.base.map((s,i)=>convert(s,i)),...r.branches.flatMap(b=>[...b.active.map((s,i)=>convert(s,10+i,b.id)),...b.passives.map((s,i)=>convert(s,13+i,b.id))])];
+ const convert=(s,slot,job='')=>{const live=liveRoleSkills(r.id,job)[slot];return {...s,slot,max:roleSkillMax(slot),job:s.job,requires:[],className:r.name,branchName:r.branches.find(b=>b.id===job)?.name??null,levels:s.passive?[]:[1,SKILL_MAX].map(n=>({level:n,...scaledSkill(live,n)})),art:{src:'assets/skills-next/'+s.art,rect:[0,0,256,256],width:256,height:256}};};
+ return [...r.base.map((s,i)=>convert(s,i)),...r.passives.map((s,i)=>convert(s,6+i)),...r.branches.flatMap(b=>[...b.active.map((s,i)=>convert(s,10+i,b.id)),...b.passives.map((s,i)=>convert(s,14+i,b.id))])];
 });
 const monsters=await Promise.all(MONSTER_TYPES.map(async(t,i)=>({...t,id:t.id??'legacy-'+i,art:await monsterArt(t,i),locations:catalog.maps.filter(m=>(m.mobs??[]).some(([,,n])=>n===i)).map(m=>({id:m.id,name:m.name})),drops:(DROPS[t.id]?.items??[]).map(([id,rate,count=1])=>({id,name:name(id),rate,count,art:sprite(ITEMS[id])}))})));
 const maps=catalog.maps.map(m=>({id:m.id,name:m.name,subtitle:m.subtitle,safe:!!m.safe,kind:m.kind,spawn:m.spawn,worldBoss:m.worldBoss,portals:(m.portals??[]).map(p=>({to:p.to,name:catalog.maps.find(x=>x.id===p.to)?.name??p.to,x:p.x,y:-p.z})),npcs:(m.npcs??[]).map(n=>({name:n.name,x:n.x,y:-n.z,shop:!!SHOPS[n.name]})),monsters:monsters.filter(t=>t.locations.some(l=>l.id===m.id)).map(t=>({id:t.id,name:t.name,level:t.level??1})),boss:m.worldBoss?monsters.find(t=>t.id===m.worldBoss.id)?.name:null}));

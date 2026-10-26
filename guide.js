@@ -93,7 +93,7 @@ function record(kind,r){
  const id=`ref-${kind}-${r.id}`,title=r.name??r.title;let body='',sub='';
  if(kind==='skills'){
   sub=r.className+' / '+(r.branchName??label('base'));
-  body=`${badge(r.passive?label('passive'):'Lv.1–'+r.max)}<p>${esc(r.tip)}</p><p class="muted">${esc(label('need'))}: ${esc(r.requires.map(q=>q.name+' Lv.'+q.level).join(' · ')||label('noNeed'))}</p>`;
+  body=`${badge(r.passive?label('passive'):'Lv.1–'+r.max)}<p>${esc(r.tip)}</p><p class="muted">${esc(label('need'))}: ${esc((r.job?'Job Lv.'+r.job:'')||r.requires.map(q=>q.name+' Lv.'+q.level).join(' · ')||label('noNeed'))}</p>`;
   if(r.levels.length)body+=table(['Lv.','MP',label('cooldown'), 'Power',label('range'),label('radius')],r.levels.map(v=>[v.level,v.cost??v.mp??0,number(v.cd??0),number(v.power??0),v.range??'—',v.radius??'—']));
  }
  if(kind==='items'){

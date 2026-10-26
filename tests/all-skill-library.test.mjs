@@ -5,7 +5,7 @@ import {ALL_SKILLS} from '../assets/skills-next/catalog.js';
 import {ALL_PROFILES,SKILL_PROFILES,PAINTED_SHEETS,sampleSkill} from '../assets/skill-polish/library-profiles.js';
 import {sampleClip} from '../assets/skill-polish/timing.js';
 test('every base, Master and passive skill has an explicit painted animation profile',()=>{
- assert.equal(ALL_PROFILES.length,112);assert.equal(ALL_PROFILES.filter(p=>!p.passive).length,84);assert.equal(ALL_PROFILES.filter(p=>p.passive).length,28);assert.deepEqual(new Set(Object.keys(SKILL_PROFILES)),new Set(ALL_SKILLS.map(s=>s.id)));
+ assert.equal(ALL_PROFILES.length,161);assert.equal(ALL_PROFILES.filter(p=>!p.passive).length,98);assert.equal(ALL_PROFILES.filter(p=>p.passive).length,63);for(const s of ALL_SKILLS)assert.ok(SKILL_PROFILES[s.id],s.id); /* legacy ids stay too: pets reuse them */
  const modes=new Set(['pulse','sweep','hold','travel','link','orbit','dome','planted','wall','clones','pet','rain','fan']);
  for(const p of ALL_PROFILES){assert.ok(p.layers.length>0,p.id);assert.ok(p.duration>2&&p.duration<6,p.id);assert.ok(p.scenario.length>10,p.id);for(const at of p.impacts)assert.ok(at>0&&at<p.duration,p.id);for(const l of p.layers){assert.ok(PAINTED_SHEETS[l.sheet],p.id+' sheet');assert.ok(modes.has(l.mode),p.id+' mode');assert.ok(l.start>=0&&l.span>0&&l.start+l.span<=p.duration+.2,p.id+' layer timing');assert.ok(Number.isFinite(l.y)&&l.scale>0,p.id+' placement');assert.ok(l.count>0&&l.count<=12,p.id+' budget');}}
 });

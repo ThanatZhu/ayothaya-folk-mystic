@@ -181,10 +181,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // 0.119 a pressed role skill: a single target out of reach (party friend or monster) is walked to first, then cast;
  // online the body starts on the press and the realm's cast event adopts it, instead of a round trip later.
  let predictSerial=0;
- function roleAim(i){
+ function roleAim(i,point=null){
   const s=Number.isInteger(i)?scaledSkill(world.skills[i],world.skillLevels?.[i]??0):null;if(!s?.roleSkillId||s.passive||!SKILL_PROFILES[s.roleSkillId])return null;
   const p=world.player;if(ROLE_SELF_KINDS.has(s.type))return {s,at:p,self:true};
-  if(ROLE_GROUND_KINDS.has(s.type)&&world.roleGround)return {s,at:world.roleGround};
+  // Ground skills go where the player put the circle (or the older aim-button spot); none yet means: aim first.
+  if(ROLE_GROUND_KINDS.has(s.type)){const at=point??world.roleGround;return {s,at:at?{x:at.x,z:at.z}:null,ground:true};}
   // The locked party friend (or yourself when none is locked or they left), as the realm resolves it.
   if(ROLE_FRIEND_KINDS.has(s.type)){const id=world.supportTargetId,a=id&&id!==network?.id?world.supportRoster?.find(a=>a.id===id):null;return {s,at:a??p,self:!a};}
   const m=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null;return m&&m.hp>0?{s,at:m}:null;
@@ -192,11 +193,34 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // A blocked path gives up once (with the usual notice) instead of retrying into the wall.
  const approachWalk=aim=>({radius:Math.max(.5,(aim.s.range??7)-.8),marker:false,onFail:()=>{approach=null;world.notice('ไปตรงนั้นไม่ได้');}});
  const inReach=(aim,p=world.player)=>Math.hypot(aim.at.x-p.x,aim.at.z-p.z)<=(aim.s.range??7)+.3;
- function useSkill(i){
-  if(!Number.isInteger(i))return false;approach=null;const aim=roleAim(i);
-  if(aim&&!aim.self&&!inReach(aim)&&world.player.hp>0&&Math.hypot(aim.at.x-world.player.x,aim.at.z-world.player.z)<40){const goal={x:aim.at.x,z:aim.at.z};if(walkTo(goal,approachWalk(aim)))approach={i,until:world.time+6,goal,tries:0};return true;}
+ function useSkill(i,point=null){
+  if(!Number.isInteger(i))return false;approach=null;const aim=roleAim(i,point);
+  if(aim?.ground&&!aim.at){if(groundAim?.i===i)return placeGround(groundAim.at);startGroundAim(i,aim.s);return true;}
+  stopGroundAim();
+  if(aim&&!aim.self&&!inReach(aim)&&world.player.hp>0&&Math.hypot(aim.at.x-world.player.x,aim.at.z-world.player.z)<40){const goal={x:aim.at.x,z:aim.at.z};if(walkTo(goal,approachWalk(aim)))approach={i,until:world.time+6,goal,tries:0,ground:aim.ground?goal:null};return true;}
+  if(aim?.ground)world.roleGround={x:aim.at.x,z:aim.at.z};
   if(network&&aim)predictCast(i,aim);
-  return world.skill(i);
+  const cast=world.skill(i);if(aim?.ground)world.roleGround=null;return cast;
+ }
+ // 0.119 ground AOE: the circle shows the real area at the cursor (or the target, on touch) and a ring the reach;
+ // click/tap the ground or press the skill again to put it there. Out of reach it turns orange, and placing it walks in first.
+ let groundAim=null,mouseAim=null;
+ const aimMat=(color,opacity)=>new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide});
+ const aimArea=new THREE.Mesh(new THREE.CircleGeometry(1,48),aimMat('#f4cf7a',.3)),aimEdge=new THREE.Mesh(new THREE.RingGeometry(.93,1,64),aimMat('#ffe7a6',.9)),aimReach=new THREE.Mesh(new THREE.RingGeometry(.985,1,96),aimMat('#fff0ce',.4));
+ for(const m of [aimArea,aimEdge,aimReach]){m.rotation.x=-Math.PI/2;m.renderOrder=6;m.visible=false;scene.add(m);}
+ function startGroundAim(i,s){
+  const p=world.player,range=s.range??7,foe=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null,face=Math.hypot(p.face.x,p.face.z)||1;
+  groundAim={i,radius:s.radius??2.8,range,at:foe&&foe.hp>0?{x:foe.x,z:foe.z}:{x:p.x+p.face.x/face*Math.min(range,4),z:p.z+p.face.z/face*Math.min(range,4)}};
+  world.notice(compactEffects.matches?'แตะพื้นเพื่อวางสกิล · กดสกิลซ้ำเพื่อวางตรงวง':'คลิกพื้นเพื่อวางสกิล · กดสกิลซ้ำเพื่อวางตรงวง · Esc ยกเลิก');
+ }
+ function stopGroundAim(){groundAim=null;aimArea.visible=aimEdge.visible=aimReach.visible=false;}
+ function placeGround(at){const i=groundAim?.i;stopGroundAim();return Number.isInteger(i)?useSkill(i,{x:at.x,z:at.z}):false;}
+ function drawGroundAim(p){
+  if(!groundAim)return;if(p.hp<=0||isPaused()){stopGroundAim();return;}
+  if(mouseAim){const h=groundAt(mouseAim.x,mouseAim.y);if(h)groundAim.at=h;}
+  const a=groundAim.at,far=Math.hypot(a.x-p.x,a.z-p.z)>groundAim.range+.3,y=groundHeight(world.nav,a.x,a.z)+.09;
+  for(const m of [aimArea,aimEdge]){m.visible=true;m.position.set(a.x,y,a.z);m.scale.setScalar(groundAim.radius);m.material.color.set(far?'#ff9a5a':m===aimEdge?'#ffe7a6':'#f4cf7a');}
+  aimReach.visible=true;aimReach.position.set(p.x,groundHeight(world.nav,p.x,p.z)+.085,p.z);aimReach.scale.setScalar(groundAim.range);
  }
  function predictCast(i,aim){
   const s=aim.s,p=world.player,friend=ROLE_FRIEND_KINDS.has(s.type),st=world.status??{};
@@ -294,6 +318,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  let spaceTalkHeld=false;
  addEventListener('keydown',e=>{
   if(e.code==='Space'&&spaceTalkHeld){e.preventDefault();return;}
+  if(e.code==='Escape'&&groundAim){e.preventDefault();stopGroundAim();return;}
   if(e.altKey&&/^Digit[1-5]$/.test(e.code)&&!isPaused()&&!editable(e)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(!e.repeat)useSkill(hotbar[BASE_SLOTS+Number(e.code.slice(-1))-1]);return;}
   if(isPaused()||editable(e)||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.code==='Space'){
@@ -329,8 +354,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  addEventListener('blur',()=>{spaceTalkHeld=false;clearInput();});document.addEventListener('visibilitychange',()=>{if(document.hidden){spaceTalkHeld=false;clearInput();}});
  // 0.99.15 another player under the tap opens their menu first (multiplayer-ui sets this)
  let playerTap=null,npcInteraction=null;
+ // The ground point under a screen position (raised floors re-aim at their own height).
+ function groundAt(x,y){pointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);let hit=null;groundPlane.constant=0;for(let i=0;i<4;i++){hit=raycaster.ray.intersectPlane(groundPlane,groundHit);if(!hit)break;groundPlane.constant=-groundHeight(world.nav,hit.x,hit.z);}return hit&&{x:hit.x,z:hit.z};}
  function selectAt(x,y,npc=null){
   if(isPaused())return;
+  if(groundAim){const h=groundAt(x,y);if(h)placeGround(h);return;}
   if(!world.roleAim&&(npcInteraction?.activate(npc)||npcInteraction?.tap(x,y)))return;
   if(!world.roleAim&&playerTap?.(x,y))return;
   pointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);
@@ -345,6 +373,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(hit){if(world.roleAim){world.roleAim=false;world.roleGround={x:hit.x,z:hit.z};world.notice('เลือกจุดวางแล้ว · กดสกิลเพื่อร่าย');}else walkTo({x:hit.x,z:hit.z});}
  }
  function pinchSpan(){const a=[...touches.values()];return a.length===2?Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y):0;}
+ canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='touch')mouseAim={x:e.clientX,y:e.clientY};});
+ canvas.addEventListener('contextmenu',e=>{if(groundAim){e.preventDefault();stopGroundAim();}});
  canvas.addEventListener('pointerdown',e=>{
   if(e.pointerType!=='touch'){mouseStart={x:e.clientX,y:e.clientY,npc:!world.roleAim?npcInteraction?.pick(e.clientX,e.clientY):null};return;}
   e.stopImmediatePropagation();e.preventDefault();canvas.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false,npc:!world.roleAim?npcInteraction?.pick(e.clientX,e.clientY):null});
@@ -403,7 +433,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
-  if(approach){const aim=roleAim(approach.i);if(!aim||world.time>approach.until||p.hp<=0)approach=null;else if(inReach(aim)){const i=approach.i;cancelWalk();useSkill(i);}else{
+  drawGroundAim(p);
+  if(approach){const aim=roleAim(approach.i,approach.ground);if(!aim?.at||world.time>approach.until||p.hp<=0)approach=null;else if(inReach(aim)){const {i,ground}=approach;cancelWalk();useSkill(i,ground);}else{
    // The friend or monster moved on: follow them (a few times) instead of stopping where they stood.
    const a=approach,walking=walkJob||walker.active||serverWalkState?.status==='walking',goal={x:aim.at.x,z:aim.at.z};
    if(Math.hypot(goal.x-a.goal.x,goal.z-a.goal.z)>1.5||!walking){if(a.tries<8&&walkTo(goal,approachWalk(aim)))approach={...a,goal,tries:a.tries+1};else approach=null;}}}

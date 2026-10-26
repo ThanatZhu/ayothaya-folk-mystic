@@ -1,5 +1,6 @@
 import {paintIcon,skillById} from './assets/skills-next/catalog.js?v=icons117';
 import {paintSkillRegion,clearSkillIcon} from './assets/skills-next/icon-renderer.js';
+import {NOVICE_ICONS,reworkIconURL,REWORK_REGION} from './assets/skills-next/rework-icon-map.js';
 import {isClass} from './classes.js?v=novice174';
 import {MASTER_FROM,BASE_SLOTS,isMaster} from './skill-progress.js?v=novice174';
 export const skillAtlas=id=>{if(!isClass(id))throw new Error('invalid-class');return new URL('./assets/skills/'+id+'-21.png',import.meta.url).href;};
@@ -14,7 +15,10 @@ export async function applySkillArt(buttons,classId,order=null,definitions=null)
  return Promise.all(buttons.map((button,i)=>{
   if(requests.get(button)!==request)return false;
   const slot=order?.[i]??i,k=isMaster(slot)?MASTER_FROM[slot-BASE_SLOTS]:slot,icon=button.querySelector('strong'),row=k<5?0:1; // a Master skill wears its parent's art
-  if(!icon)return;const x=Math.round((k%5)*image.width/5),right=Math.round((k%5+1)*image.width/5),y=row?Math.round(image.height*split):0,bottom=row?image.height:Math.round(image.height*split);
+  if(!icon)return;
+  // 0.118 Novice basics use the rework icons; other legacy slots keep their atlas cell
+  if(classId==='novice'&&NOVICE_ICONS[slot]){icon.classList.remove('master-art');delete icon.dataset.skillIcon;return paintSkillRegion(icon,reworkIconURL(NOVICE_ICONS[slot]),REWORK_REGION);}
+  const x=Math.round((k%5)*image.width/5),right=Math.round((k%5+1)*image.width/5),y=row?Math.round(image.height*split):0,bottom=row?image.height:Math.round(image.height*split);
   icon.classList.toggle('master-art',isMaster(slot));
   delete icon.dataset.skillIcon;
   icon.classList.add('skill-art');icon.setAttribute('aria-hidden','true');

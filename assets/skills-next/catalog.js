@@ -1,5 +1,6 @@
 import {roleIconRegion} from './icon-regions.js';
 import {paintSkillRegion} from './icon-renderer.js';
+import {REWORK_ICONS,reworkIconURL,REWORK_REGION} from './rework-icon-map.js';
 // Draft skill identities. Kept separate from live saved skill indices and server rules.
 const s=(id,name,tip,kind,extra={})=>({id,name,tip,kind,mp:18,cd:8,windup:.36,duration:1.2,power:65,range:7,radius:2.8,seconds:5,pose:0,...extra});
 const p=(id,name,tip,modifier,value)=>({id,name,tip,modifier,value,passive:true});
@@ -153,4 +154,5 @@ export function loadout(classId,branchId=''){
  const branch=branchId?role.branches.find(b=>b.id===branchId):null;if(branchId&&!branch)throw new Error('Branch does not belong to class');
  return {role,branch,active:[...role.base,...(branch?.active??[])],passives:branch?.passives??[]};
 }
-export function paintIcon(el,skill){if(!skill?.icon)return Promise.resolve(false);el.dataset.skillIcon=skill.id;return paintSkillRegion(el,new URL('./'+skill.icon.sheet,import.meta.url).href,roleIconRegion(skill.icon));}
+// 0.118 the rework PNG (rework-icon-map.js) wins; unmatched skills keep their v1 atlas cell
+export function paintIcon(el,skill){if(!skill?.icon)return Promise.resolve(false);el.dataset.skillIcon=skill.id;const art=REWORK_ICONS[skill.id];if(art)return paintSkillRegion(el,reworkIconURL(art),REWORK_REGION);return paintSkillRegion(el,new URL('./'+skill.icon.sheet,import.meta.url).href,roleIconRegion(skill.icon));}

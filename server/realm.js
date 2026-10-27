@@ -143,7 +143,8 @@ export class RealmServer{
  receive(id,m){
   const p=this.peers.get(id);if(!p||p.suspended)return false;
   if(!m||typeof m!=='object'||Array.isArray(m)||!allowed.has(m.type)||!integer(m.seq,1,Number.MAX_SAFE_INTEGER))return this.error(p,'invalid-message');
-  if(p.observer&&!OBSERVER_OK.has(m.type))return this.error(p,'observer-mode');
+  // an observer's other commands are dropped without a chat line, so a stream shows nothing of the mode
+  if(p.observer&&!OBSERVER_OK.has(m.type))return false;
   if(m.type==='observer'){if(!p.canObserve)return this.error(p,'observer-not-allowed');this.setObserver(p,m.on===true);return true;}
   if(m.seq<=p.seq)return m.type==='input'?false:this.error(p,'stale-command');p.seq=m.seq;
   if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
@@ -392,7 +393,7 @@ export class RealmServer{
  setObserver(p,on){
   p.observer=on;const w=p.world;
   if(on){if(p.partyId)this.leaveParty(p);w.auto=false;w.targetId=null;w.path=[];if(w.roleCombat)w.roleCombat.state.pending=null;p.input={x:0,z:0,attack:false,run:false};w.rivals=[];}
-  w.notice(on?'โหมดผู้ชม · ล่องหนและไม่ตกเป็นเป้า · เดินดูได้อย่างเดียว':'ปิดโหมดผู้ชม · กลับมาเล่นตามปกติ');this.social(p.room);
+  if(!on)w.notice('ปิดโหมดผู้ชม · กลับมาเล่นตามปกติ');this.social(p.room);
  }
  leaveParty(p){
   const party=this.parties.get(p?.partyId);if(!party)return;p.partyId=null;party.members.delete(p.id);

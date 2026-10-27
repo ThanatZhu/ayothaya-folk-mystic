@@ -196,7 +196,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const approachWalk=aim=>({radius:Math.max(.5,(aim.s.range??7)-.8),marker:false,onFail:()=>{approach=null;world.notice('ไปตรงนั้นไม่ได้');}});
  const inReach=(aim,p=world.player)=>Math.hypot(aim.at.x-p.x,aim.at.z-p.z)<=(aim.s.range??7)+.3;
  function useSkill(i,point=null){
-  if(world.observer){world.notice('โหมดผู้ชม · ใช้สกิลไม่ได้');return false;}
+  if(world.observer)return false;
   if(!Number.isInteger(i))return false;approach=null;const aim=roleAim(i,point);
   if(aim?.ground&&!aim.at){if(groundAim?.i===i)return placeGround(groundAim.at);startGroundAim(i,aim.s);return true;}
   stopGroundAim();

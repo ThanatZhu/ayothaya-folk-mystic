@@ -24,7 +24,7 @@ test('an observer cannot act, only walk; monsters and boss blasts ignore them', 
  const {realm,admin,say,errors}=world();
  say(admin,{type:'observer',on:true});
  for(const type of ['attack','skill','chat','auto','emote','duel'])assert.equal(say(admin,{type,index:0,on:true,text:'hi',name:'bow',target:'x'}),false,type);
- assert.ok(errors.filter(e=>e==='a:observer-mode').length>=6);
+ assert.ok(!errors.some(e=>e.startsWith('a:')),'refused without a chat line: '+errors);
  assert.equal(say(admin,{type:'input',x:1,z:0,attack:true}),true);assert.equal(admin.input.attack,false,'walking never swings');
  // a monster right next to the observer, with the normal player far away: it never hits the observer
  const mob=admin.room.mobs[0];Object.assign(mob,{x:.3,z:0,aggro:true,dead:0,hp:mob.maxHp});admin.world.player.x=0;admin.world.player.z=0;

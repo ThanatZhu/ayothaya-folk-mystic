@@ -15,11 +15,15 @@ export const giftable=id=>!!ITEMS[id]&&!ITEMS[id].retired&&!['ui','reserved'].in
 // commas, semicolons or spaces between addresses; stray quotes from the dashboard are ignored
 // the key is matched loosely (ADMIN_EMAILS, admin_email, "ADMIN EMAILS "...) since it is typed by hand in the Render dashboard
 export const adminKey=env=>Object.keys(env).find(k=>/^admin[\s_-]*emails?$/i.test(k.trim()))??null;
-export const configKeys=env=>Object.keys(env).filter(k=>/admin|github/i.test(k));
+export const configKeys=env=>Object.keys(env).filter(k=>/admin|github|observer/i.test(k));
 // the owner (asked for by name, 2026-10-20) is always an admin; ADMIN_EMAILS on Render adds more
 export const OWNER_EMAILS=['chokkungfn@gmail.com'];
 export function adminEmails(env=process.env){return new Set([...OWNER_EMAILS,...(env[adminKey(env)]??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean)]);}
 export function isAdmin(decoded,emails=adminEmails()){return !!decoded?.email&&decoded.email_verified===true&&emails.has(decoded.email.toLowerCase());}
+// 0.119 observer mode (the invisible spectator) has its own list: the owner plus OBSERVER_EMAILS, not every admin
+export const observerKey=env=>Object.keys(env).find(k=>/^observer[\s_-]*emails?$/i.test(k.trim()))??null;
+export function observerEmails(env=process.env){return new Set([...OWNER_EMAILS,...(env[observerKey(env)]??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean)]);}
+export const canObserve=(decoded,emails=observerEmails())=>isAdmin(decoded,emails);
 
 // saved: [{uid,slotId,record,savedAt}] from the store; characters in the realm right now are shown from the realm instead
 export function adminPlayers(realm,saved=[]){

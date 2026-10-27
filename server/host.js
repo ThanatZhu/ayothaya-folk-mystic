@@ -22,7 +22,7 @@ import {GAMEPLAY_RUN_ENABLED} from '../character-action-state.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
-import {isAdmin,adminEmails,OWNER_EMAILS,configKeys,adminPlayers,adminGive,adminGiveOffline} from './admin.js';
+import {canObserve,isAdmin,adminEmails,OWNER_EMAILS,configKeys,adminPlayers,adminGive,adminGiveOffline} from './admin.js';
 import {cleanFinance,cleanSlip,slipId,FINANCE_MAX_BYTES,SLIP_MAX_BYTES} from './finance.js';
 import {EvidenceLog,playerEvent} from './evidence.js';
 import {WorldReset} from './world-reset.js';
@@ -400,13 +400,13 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(message.type==='leave'){session.closing=true;session.explicitLeave=true;session.peer.suspended=true;try{await checkpoint(session,true);send({type:'left'});ws.close(1000,'left');}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
     realm.receive(session.peer.id,message);return;
    }
-   if(authenticating)return;authenticating=true;let lease,identity,claimed=false,admin=false;
+   if(authenticating)return;authenticating=true;let lease,identity,claimed=false,observer=false;
    try{
     if(message.type!=='join'||typeof message.token!=='string'||message.token.length>4000)throw new Error('authentication-required');
     let verified;if(mode==='local'){const uid=store.verifyLocal(message.token);if(!uid)throw new Error('invalid-token');verified={uid,exp:Math.floor(Date.now()/1000)+3600};}else verified=await authenticate(message.token);
     identity={uid:verified.uid,serverId:message.serverId,slotId:message.slotId};
-    // 0.119 observer mode is for the back-office admins only (a local dev realm has no e-mail, so every local player may test it)
-    admin=mode==='local'||isAdmin(verified);
+    // 0.119 observer mode: only the verified e-mails on its own list (a local dev realm has no e-mail, so every local player may test it)
+    observer=mode==='local'||canObserve(verified);
     if(reset?.maintenance)throw Error('world-reset');
     if(!['server-1','server-2'].includes(identity.serverId)||!/^slot-[1-5]$/.test(identity.slotId??''))throw new Error('invalid-identity');
     if(joinPending.has(identity.uid))throw new Error('already-online');joinPending.add(identity.uid);claimed=true;
@@ -418,7 +418,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     // Send welcome after the full authenticated session exists.
     if(lease.record.state.mapId==='duel-arena'&&!arenaReservation(realm,identity.uid+':'+identity.slotId)){lease.record.state.mapId=catalog.capital;lease.record.state.position={...catalog.maps.find(m=>m.id===catalog.capital).spawn};await store.checkpoint(lease,lease.record);}
     if(reset?.maintenance)throw Error('world-reset');
-    const queued=[],peer=realm.join({...identity,admin,...(message.channel!==undefined?{channel:message.channel}:{}),record:lease.record,send:data=>queued.push(data)});
+    const queued=[],peer=realm.join({...identity,canObserve:observer,...(message.channel!==undefined?{channel:message.channel}:{}),record:lease.record,send:data=>queued.push(data)});
     peer.ip=requestIp(req);realm.evidence(peer,'login',{agent:String(req.headers['user-agent']??'').slice(0,200)});
     session={peer,lease,ws,queue:Promise.resolve(),autoSavedAt:Date.now(),savedJson:null,expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);settled();queued.forEach(send);
    }catch(e){if(lease)await store.checkpoint(lease,lease.record,{release:true}).catch(()=>{});send({type:'error',code:['world-reset','already-online','room-full','character-not-found','character-server'].includes(e.message)?e.message:'authentication-failed'});ws.close(4003,'join-rejected');}

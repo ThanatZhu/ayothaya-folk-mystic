@@ -3021,7 +3021,7 @@ Object.assign(globalThis.I18N_EN, {
  "👁 โหมดผู้ชม · เปิดอยู่ · กดเพื่อปิด":"👁 Observer mode · on · tap to turn off",
  "👁 โหมดผู้ชม (ล่องหน · ไม่ตกเป็นเป้า)":"👁 Observer mode (invisible · untargetable)",
  "โหมดผู้ชม · เดินและดูกล้องได้อย่างเดียว":"Observer mode · you can only walk and look around",
- "โหมดผู้ชมใช้ได้เฉพาะแอดมิน":"Observer mode is for admins only",
+ "โหมดผู้ชมใช้ได้เฉพาะอีเมลที่ได้รับอนุญาต":"Observer mode is only for allowed e-mails",
  "โหมดผู้ชม · ล่องหนและไม่ตกเป็นเป้า · เดินดูได้อย่างเดียว":"Observer mode · invisible and untargetable · walking only",
  "ปิดโหมดผู้ชม · กลับมาเล่นตามปกติ":"Observer mode off · back to normal play",
  "เสียง":"Sound",

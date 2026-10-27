@@ -1,11 +1,11 @@
-import {STORY} from './story-quests.js?v=refine136';
-import {STORYBOARDS} from './quest-storyboard160.js?v=story160';
+import {STORY} from './story-quests.js?v=weapon188';
+import {STORYBOARDS} from './quest-storyboard160.js?v=weapon188';
 import {bountyScene} from './bounty-storyboards163.js?v=163';
 export function storyScene(questIndex,stepIndex){
  const quest=STORY[questIndex],step=quest?.steps[stepIndex];if(!step)return null;
  const board=STORYBOARDS[quest.id];if(!board)throw Error('Missing storyboard '+quest.id);
  return {id:`story:${quest.id}:${stepIndex}`,seenId:`story:${quest.id}`,questIndex,stepIndex,title:quest.title,step,
-  art:{src:`./assets/story160/${quest.id}.webp`,panels:3},captions:[...board.lines]};
+  art:{src:`./assets/story160/${quest.id}.webp`,panels:3,...(board.frames?{frames:board.frames}:{})},captions:[...board.lines]};
 }
 export function sceneUnlocked(scene,state){return !!scene&&!!state&&(scene.questIndex<state.quest||scene.questIndex===state.quest&&(state.done||scene.stepIndex<=state.step));}
 // Only called at actual NPC conversation entry, never by quest updates or route polling.

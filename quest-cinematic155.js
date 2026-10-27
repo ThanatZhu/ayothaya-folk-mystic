@@ -1,4 +1,4 @@
-import {storyScene,sceneUnlocked,sceneForNPCTalk,taskScene} from './quest-cinematic-data155.js?v=story163';
+import {storyScene,sceneUnlocked,sceneForNPCTalk,taskScene} from './quest-cinematic-data155.js?v=weapon188';
 import {sceneImage} from './npc-portrait155.js?v=chuk175';
 import {createPlayback,advancePlayback,acceleratePlayback,playbackFrame} from './story-playback160.js?v=story160';
 

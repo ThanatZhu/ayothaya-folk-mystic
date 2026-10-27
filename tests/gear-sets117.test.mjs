@@ -64,10 +64,10 @@ test('set gear drops in the killer\'s look at the monster\'s tier; armor only fr
  assert.ok(field.every(d=>d.slot!=='armor'&&d.grade<4));assert.ok(new Set(field.map(d=>d.look)).size>4,'a Novice gets any look');
 });
 
-test('weapons and boss sets are crafted; crafting rolls a grade per piece; quests give the class weapon and a look-matched armor',()=>{
- const r=recipeFor(weaponId('hunter',1));assert.deepEqual(r.needs,{'relic-rice':15,'iron-ore':2});
- const bag={coins:10000,items:{'relic-rice':30,'iron-ore':4}},made=craft(bag,weaponId('hunter',1),2,()=>.02);
- assert.deepEqual(made.items.map(i=>i.id),[weaponId('hunter',1)+'^3',weaponId('hunter',1)+'^3']);
+test('weapons and boss sets are crafted; crafting starts with guaranteed blue weapons; quests give the class weapon and a look-matched armor',()=>{
+ const r=recipeFor(weaponId('hunter',1));assert.deepEqual(r.needs,{'weapon-fragment-rice':15,'iron-ore':2});
+ const bag={coins:10000,items:{'weapon-fragment-rice':30,'iron-ore':4}},made=craft(bag,weaponId('hunter',1),2,()=>.02);
+ assert.deepEqual(made.items,[{id:weaponId('hunter',1),count:2}]);
  const boss=recipeFor(bossId('armor','monk'));assert.deepEqual(boss.needs,{'shard-soul':20,'shard-gem':12,'shard-divine':5,'conquest-shard':100});
  assert.equal(craft({coins:1000000,items:{'shard-soul':20,'shard-gem':12,'shard-divine':5,'conquest-shard':100}},bossId('armor','monk')).items[0].id,bossId('armor','monk'));
  assert.deepEqual(rewardItems({items:[{id:'@weapon',count:1},{id:'@armor',count:1}]},'acolyte','female').map(i=>i.id),[weaponId('acolyte',1),pieceId('wall','armor','nun',2)]);

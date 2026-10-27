@@ -1,16 +1,18 @@
 // Presentation rules share the real recipes and atomic crafting validation.
-import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=conquest1';
-import {ITEMS,DROPS,SHOPS,normalizeBag} from './items.js?v=conquest1';
+import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=weapon188';
+import {ITEMS,DROPS,SHOPS,normalizeBag,itemDef} from './items.js?v=weapon188';
 import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {CONQUEST_SHARD} from './rainbow-crafting.js';
+import {recipeAllowed,WEAPON_COLOURS} from './weapon-crafting.js';
+export const craftRecipeLabel=r=>itemDef(r.out).name+(r.weaponGrade!=null?' · '+WEAPON_COLOURS[r.weaponGrade]:'');
 const normalize=s=>String(s??'').normalize('NFKC').toLowerCase().trim();
-export function craftRecipes(bag,{classId,group='potion',query='',readyOnly=false,translate=s=>s}={}){
+export function craftRecipes(bag,{classId,gender,group='potion',query='',readyOnly=false,translate=s=>s}={}){
  const search=normalize(query);
- return RECIPES.filter(r=>{const it=ITEMS[r.out];return it&&!it.retired&&r.group===group&&(!it.classes||it.classes.includes(classId))&&(!readyOnly||craftable(bag,r)>0)&&(!search||normalize([r.out,it.name,it.text,translate(it.name)].join(' ')).includes(search));});
+ return RECIPES.filter(r=>{const it=itemDef(r.out);return it&&!it.retired&&r.group===group&&recipeAllowed(it,{classId,gender})&&(!readyOnly||craftable(bag,r)>0)&&(!search||normalize([r.out,craftRecipeLabel(r),it.text,translate(it.name)].join(' ')).includes(search));});
 }
-export function craftQuote(raw,recipe,quantity=1){
+export function craftQuote(raw,recipe,quantity=1,character=null){
  if(!recipe)return null;const bag=normalizeBag(raw),max=craftable(bag,recipe),times=Math.max(1,Math.min(max||1,99,Math.floor(Number(quantity))||1));
- let reason=null;try{craft(bag,recipe.out,times);}catch(e){reason=e.message;}
+ let reason=null;try{craft(bag,recipe.out,times,Math.random,character);}catch(e){reason=e.message;}
  return {times,max,made:recipe.count*times,cost:recipe.coins*times,canCraft:!reason,reason,needs:Object.entries(recipe.needs).map(([id,n])=>({id,have:bag.items[id]??0,need:n*times,missing:Math.max(0,n*times-(bag.items[id]??0))}))};
 }
 export function craftSources(id,catalog={maps:[]}){

@@ -1,3 +1,4 @@
+import {weaponCraftRecipes,WEAPON_MATERIALS} from './weapon-crafting.js';
 import {rainbowRecipe} from './rainbow-crafting.js';
 // 0.117 gear sets (docs/gear-sets-proposal.md, owner-approved draft numbers): replaces every pre-0.117 weapon/armor/head/
 // garment/shoes item. Accessories stay as they were. Pure data + rules, shared by the client and the realm server.
@@ -41,7 +42,7 @@ const pct=(k,n)=>STAT_NAME[k]+' +'+(k==='hit'?n:+(n*100).toFixed(1)+'%');
 export const GRADES=[{name:'ธรรมดา',color:'#5fb8ff',mul:1,chance:.60},{name:'ดี',color:'#5fd27a',mul:1.1,chance:.25},{name:'หายาก',color:'#b678ff',mul:1.25,chance:.10},
  {name:'ตำนาน',color:'#ff9a3c',mul:1.4,chance:.04},{name:'เทพ',color:'#ff4b4b',mul:1.6,chance:.01}];
 export const RAINBOW={name:'บอส',color:'rainbow'};
-// Red only drops from bosses; elsewhere its 1% stays with the blue grade.
+// Random red grades only roll on boss drops. Weapon crafting chooses its explicit progression grade.
 export function rollGrade(rand=Math.random,boss=false){const r=rand();let acc=0;for(let g=GRADES.length-1;g>0;g--){if(g===4&&!boss)continue;acc+=GRADES[g].chance;if(r<acc)return g;}return 0;}
 
 // Boss sets (rainbow): Lv.80, base = red grade of tier 6, crafted from boss shards. Effects marked live:false need new
@@ -114,8 +115,8 @@ const BOSS_MATERIALS={weapon:[40,25,10],piece:[20,12,5]};
 const TIER_RELIC=['relic-rice','relic-mill','relic-bamboo','relic-himmapan','relic-naga','relic-kailash'];
 export function gearRecipes(items){
  const r=[];
- for(const [cls] of WEAPON_CLASSES)for(let t=1;t<=6;t++){const needs={[TIER_RELIC[t-1]]:10+5*t,'iron-ore':2*t};if(t>1)needs['lek-lai']=t-1;
-  r.push({out:weaponId(cls,t),count:1,group:'gear',needs,coins:price(t,5)/2});}
+ for(const [cls] of WEAPON_CLASSES)for(let t=1;t<=6;t++){const needs={[WEAPON_MATERIALS[t-1][0]]:10+5*t,'iron-ore':2*t};if(t>1)needs['lek-lai']=t-1;
+  r.push(...weaponCraftRecipes({out:weaponId(cls,t),count:1,group:'gear',needs,coins:price(t,5)/2}));}
  for(const id of Object.keys(items).filter(id=>items[id].bossSet)){const [a,b,c]=items[id].slot==='weapon'?BOSS_MATERIALS.weapon:BOSS_MATERIALS.piece;r.push(rainbowRecipe(id,{'shard-soul':a,'shard-gem':b,'shard-divine':c}));}
  return r;
 }

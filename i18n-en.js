@@ -4719,3 +4719,79 @@ Object.assign(globalThis.I18N_EN,{
  "ไม่พบรายการที่ตรงกับตัวกรอง":"No listings match these filters","ยังไม่มีสินค้าวางขาย · เปิดร้านแล้วสินค้าจะแสดงที่นี่":"No items for sale yet. Open a shop to list your goods.","หน้า {0} / {1}":"Page {0} / {1}",
  "เรียงตาม":"Sort by","{11} รายการ":"{11} listings","ก่อนหน้า":"Previous","หน้า {16} / {17}":"Page {16} / {17}","ซื้อ {3} ชิ้น · {4} รายการ":"{3} items bought · {4} transactions","/ ชิ้น":"/ item","{4} {5} ชิ้น{6}":"{4} {5} items{6}","ต้องการ":"Wanted","· ลงขาย":"· Listed","ตัวกรองเพิ่มเติม":"More filters"
 });
+
+// Class weapon crafting lesson and deterministic colour advancement.
+Object.assign(globalThis.I18N_EN,{
+  "กดคราฟต์อาวุธสีฟ้า": "Craft your blue weapon",
+  "กด คราฟต์อาวุธ เพื่อเปิดสูตรของอาชีพเรา": "Select Craft Weapon to open your class recipe",
+  "· ฟ้า → ม่วง → ส้ม → แดง · ใช้วัตถุดิบจากแมพช่วงเลเวลนี้": "· Blue → Purple → Orange → Red · Materials from this level range",
+  "· ใช้อาวุธสีก่อนหน้าที่อยู่ในกระเป๋า ไม่ตีบวก ไม่ใส่การ์ด และไม่มีออปชันสุ่ม": "· Use the previous colour in your bag, without refinement, a card or a random affix",
+  "· คราฟต์เริ่มต้นได้สีฟ้าแน่นอน": "· First craft always produces blue",
+  "ยังไม่ปลดล็อกสูตรนี้ หรือไม่ตรงกับอาชีพของคุณ": "Recipe locked or unavailable for your class",
+  "ครูแสนดาบสอนคราฟต์อาวุธที่โรงตีเหล็ก": "Master Saen Daab teaches weapon crafting at the forge",
+  "▶ คราฟต์อาวุธ": "▶ Craft Weapon",
+  "สีฟ้า": "Blue",
+  "สีม่วง": "Purple",
+  "สีส้ม": "Orange",
+  "สีแดง": "Red",
+  "เศษวัสดุสำหรับคราฟต์และพัฒนาสีอาวุธ · ดรอปจากมอนสเตอร์ในช่วงเลเวลเดียวกับอาวุธ": "Fragments for crafting and advancing weapon colours · Dropped by monsters in the matching level range",
+  "อาวุธจากมือเรา": "A Weapon Made by Your Own Hands",
+  "เรียนคราฟต์อาวุธกับครูแสนดาบ": "Learn weapon crafting from Master Saen Daab",
+  "มีวิชาประจำตัวแล้ว ก็ต้องรู้จักสร้างอาวุธของตน เริ่มจากสีฟ้าก่อน ใช้เศษศาสตราทุ่งนา 15 ชิ้นกับแร่เหล็ก 2 ชิ้น ข้าเตรียมของสำหรับครั้งแรกให้แล้ว": "You have chosen your class. Now learn to make its weapon. Start with blue: 15 Ricefield Weapon Fragments and 2 iron ore. I have supplied your first materials.",
+  "คราฟต์อาวุธสีฟ้าของอาชีพตัวเอง 1 ชิ้น": "Craft one blue weapon for your own class",
+  "กด คราฟต์อาวุธ → หมวด อุปกรณ์ → อาวุธสีฟ้า Lv.10 ของอาชีพเรา → คราฟต์ 1 ชิ้น · ใช้เศษศาสตราทุ่งนา 15 แร่เหล็ก 2 และ 250 เบี้ย": "Select Craft Weapon → Equipment → Your class blue Lv.10 weapon → Craft 1 · Requires 15 Ricefield Weapon Fragments, 2 iron ore and 250 cowries",
+  "ถามครูแสนดาบเรื่องพัฒนาสีอาวุธ": "Ask Master Saen Daab about advancing weapon colours",
+  "สีฟ้าคือจุดเริ่ม พัฒนาเป็นม่วง ส้ม แล้วแดง โดยใช้อาวุธสีก่อนหน้าและวัตถุดิบจากแมพช่วงเลเวลนั้น เก็บอาวุธที่ยังไม่ตีบวก ใส่การ์ด หรือมีออปชันสุ่มไว้ในกระเป๋าสำหรับพัฒนา ส่วนสีรุ้งเป็นสูตรพิเศษของแต่ละอาชีพ": "Blue is the beginning. Advance to purple, orange, then red, using the previous colour and materials from that level range. Keep a clean weapon in your bag without refinement, cards or random affixes. Rainbow uses a separate class-specific recipe.",
+  "หลังผ่านการฝึกอาชีพ เจ้ากลับมาที่โรงตีเหล็ก เสียงค้อนกับกลิ่นถ่านยังคุ้นเคย แต่คราวนี้ครูแสนดาบวางที่ว่างไว้ให้เจ้าลองลงมือ": "After class training, you return to the forge. The familiar hammering and charcoal smell remain, but this time Master Saen Daab has cleared a space for you to work.",
+  "ครูชี้ไปที่เศษศาสตราทุ่งนากับเศษแร่ เขาอธิบายว่าวัตถุดิบที่เก็บจากเส้นทางผจญภัย ไม่ได้มีไว้ขายอย่างเดียว": "The teacher points to weapon fragments and rough ore. Materials gathered on your travels are useful for more than selling.",
+  "ต้องเริ่มจากอาวุธระดับใด?": "What weapon colour should I start with?",
+  "เริ่มสีฟ้าของอาชีพเจ้า คราฟต์ได้แน่นอน ไม่ต้องสุ่มสี แล้วค่อยใช้ชิ้นเดิมพัฒนาเป็นม่วง ส้ม และแดงด้วยวัตถุดิบจากแมพช่วงเลเวลนั้น": "Start with a blue weapon for your class. The colour is guaranteed. Then use the previous weapon and materials from its level range to advance to purple, orange and red.",
+  "ข้าจะลองสร้างอาวุธเอง": "I will make my own weapon.",
+  "ครูแสนดาบตรวจรอยค้อนบนอาวุธที่เจ้าเพิ่งสร้าง ก่อนพยักหน้ารับอย่างพอใจ รอยเล็กน้อยเหล่านี้คือหลักฐานว่าเจ้าได้เริ่มเรียนรู้แล้ว": "Master Saen Daab inspects the hammer marks on your new weapon and nods. Those small imperfections show that you have begun learning.",
+  "เขาเลื่อนถาดวัตถุดิบอีกหลายชนิดมาให้ดู เส้นทางของอาวุธยังไม่จบที่สีฟ้า ทุกช่วงเลเวลมีสิ่งให้เก็บมาพัฒนาต่อ": "He slides over several trays of material fragments. Blue is only the start, and every level range offers materials to continue the work.",
+  "ควรพัฒนาสีหรือตีบวกก่อน?": "Should I advance the colour or refine it first?",
+  "พัฒนาสีก่อนถ้าจะใช้ชิ้นนั้นเป็นวัตถุดิบ สูตรรับเฉพาะชิ้นสะอาดในกระเป๋า อาวุธที่ตีบวก ใส่การ์ด หรือมีออปชันสุ่มจะไม่ถูกสูตรนี้กิน ส่วนของรุ้งต้องเปลี่ยนอาชีพแล้วและเลือกให้ตรงสาย": "Advance its colour first if you intend to use it as an ingredient. These recipes only consume clean weapons in your bag. Refined, carded or affixed weapons stay safe. Rainbow recipes unlock after choosing a class and must match your class.",
+  "ข้าจะเก็บวัตถุดิบมาพัฒนาต่อ": "I will gather materials and continue improving it.",
+  "ครูแสนดาบสอนให้เริ่มคราฟต์อาวุธสีฟ้าของอาชีพตัวเอง แล้วนำอาวุธเดิมกับวัตถุดิบจากแต่ละช่วงแผนที่มาพัฒนาเป็นม่วง ส้ม และแดง": "Master Saen Daab teaches you to craft your class blue weapon, then use the previous colour and materials from each level range to advance to purple, orange and red.",
+  "เมื่อเลือกเส้นทางอาชีพของตัวเองแล้ว เจ้ากลับมาที่โรงตีเหล็ก ครูแสนดาบชวนให้เรียนรู้วิธีสร้างอาวุธด้วยมือตนเอง": "After choosing your class, you return to the forge. Master Saen Daab invites you to learn how to make a weapon with your own hands.",
+  "เศษศาสตราทุ่งนากับแร่เหล็กที่เก็บจากเส้นทางใกล้เมือง คือวัตถุดิบเริ่มต้นของอาวุธสีฟ้า ไม่ใช่ของไร้ค่าที่ต้องขายทิ้งเสมอไป": "Ricefield Weapon Fragments and iron ore gathered near the city are the first ingredients for a blue weapon, rather than things that must always be sold.",
+  "ก่อนออกเดินทางต่อ ครูอธิบายว่าอาวุธสีก่อนหน้ากับวัสดุจากแมพช่วงเลเวลนั้น จะพาไปสู่สีม่วง สีส้ม และสีแดงทีละขั้น": "Before you travel again, the teacher explains how a previous weapon and materials from its level range lead to purple, orange and red, one step at a time.",
+  "เศษศาสตราทุ่งนา": "Ricefield Weapon Fragment",
+  "เศษศาสตราบึงบัว": "Lotus Marsh Weapon Fragment",
+  "เศษศาสตราป่าไผ่": "Bamboo Grove Weapon Fragment",
+  "เศษศาสตราหิมพานต์": "Himmapan Weapon Fragment",
+  "เศษศาสตรานาคบาดาล": "Underwater Naga Weapon Fragment",
+  "เศษศาสตราไกรลาส": "Kailash Weapon Fragment"
+});
+
+// 0.122 connection drops
+Object.assign(globalThis.I18N_EN,{
+  "หลุดจากเกม": "Disconnected",
+  "{0}{1} · ออนไลน์ {2} นาที{3}{4} · เวลา {5}": "{0}{1} · online {2} min{3}{4} · at {5}",
+  "แท็บดับ/ถูกปิดเอง": "Tab died / closed by the system",
+  "การเชื่อมต่อหลุด · close": "Connection dropped · close",
+  "· แท็บถูกซ่อน": "· tab hidden",
+  "เซิร์ฟเวอร์กำลังอัปเดต…": "Server updating…",
+  "เซิร์ฟเวอร์กำลังอัปเดต · รอสักครู่ เกมจะต่อกลับเอง": "Server updating · hold on, the game reconnects by itself"
+});
+
+// Stat allocation and Path Renewal Talisman.
+Object.assign(globalThis.I18N_EN,{
+  "รีเซ็ตสถานะ": "Reset stats",
+  "ยันต์คืนวิถี": "Path Renewal Talisman",
+  "รีเซ็ต STR AGI VIT INT DEX LUK ที่ลงไว้และคืนแต้มทั้งหมด · ไม่ลบโบนัสจุติหรืออุปกรณ์ · ใช้ได้ 1 ครั้ง · ราคา 100 ทองแท่ง": "Reset allocated STR AGI VIT INT DEX LUK and refund all points · Keeps rebirth bonuses and gear · Single use · 100 gold bars",
+  "รีเซ็ตแต้มสถานะที่ลงไว้ทั้งหมด · ใช้จากกระเป๋า · เก็บโบนัสจุติและอุปกรณ์เดิม": "Refund all allocated stat points · Use from the bag · Keeps rebirth bonuses and gear",
+  "ไอเท็มตัวละครและของตีบวก · ใช้ทองแท่ง": "Character and refinement items · Gold bars",
+  "ไม่มียันต์คืนวิถีในกระเป๋า": "No Path Renewal Talisman in your bag",
+  "ยังไม่ได้ลงแต้มสถานะ": "No allocated stat points",
+  "ออกจากลานประลองก่อนรีเซ็ตสถานะ": "Leave the arena before resetting stats",
+  "เชื่อมต่อเกมออนไลน์ก่อนใช้ไอเท็ม": "Connect to the game before using this item",
+  "รีเซ็ต STR AGI VIT INT DEX LUK ที่ลงไว้เป็น 1 และคืนแต้มทั้งหมด": "Reset allocated STR AGI VIT INT DEX LUK to 1 and refund all points",
+  "เก็บเลเวล อาชีพ โบนัสจุติ และอุปกรณ์ไว้ตามเดิม": "Keeps your level, class, rebirth bonuses and gear",
+  "ใช้ยันต์คืนวิถี 1 ชิ้นจากกระเป๋า": "Consumes 1 Path Renewal Talisman from your bag",
+  "ยืนยันรีเซ็ตสถานะ": "Confirm stat reset",
+  "คืนแต้มสถานะ": "Stat points refunded",
+  "รีเซ็ตสถานะแล้ว · คืนแต้มที่ลงไว้ทั้งหมด": "Stats reset · All allocated points refunded",
+  "ยังยืนยันผลไม่ได้ · ตรวจสอบรายการเดิมเพื่อไม่ใช้ไอเท็มซ้ำ": "Result unconfirmed · Check the same request to avoid consuming another item",
+  "กดค้างเพื่อเพิ่มต่อเนื่อง": "Hold to allocate repeatedly"
+});

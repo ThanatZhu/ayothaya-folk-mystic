@@ -38,17 +38,17 @@ import {createGame} from './game-controls.js?v=skill-crit1';
 import {atlasPath,className} from './classes.js?v=novice174';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=death178';
-import {createStoryUI} from './story-ui.js?v=chuk175';
-import {createBagUI} from './bag-ui.js?v=live185';
-import {createStatusUI} from './status-ui.js?v=tier167';
+import {createStoryUI} from './story-ui.js?v=weapon188';
+import {createBagUI} from './bag-ui.js?v=stat-reset189';
+import {createStatusUI} from './status-ui.js?v=stat-reset189';
 import {createProfileUI} from './profile-ui.js?v=profile171';
 import {createRefineUI} from './refine-ui.js?v=tier167';
-import {createCraftUI} from './craft-ui.js?v=conquest1';
+import {createCraftUI} from './craft-ui.js?v=weapon188';
 import {createWeather} from './weather-fx.js?v=181';
 import {createMarketUI} from './market-ui.js?v=storage161';
-import {createSocialUI} from './social-ui.js?v=conquest1';
+import {createSocialUI} from './social-ui.js?v=weapon188';
 import {createLifeUI} from './life-ui.js?v=profile171';
-import {createPetUI} from './pet-ui.js?v=menu-icons3';
+import {createPetUI} from './pet-ui.js?v=stat-reset189';
 import {createControlsUI} from './controls-ui.js?v=01';
 import {createQuestsUI} from './quests-ui.js?v=quest173';
 import {createLifeNPC} from './life-npc.js?v=hire177-arena166';
@@ -75,7 +75,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=maps193');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps194');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);
@@ -116,7 +116,7 @@ try {
  let savedTilt=0;try{savedTilt=Number(localStorage.getItem(TILT_KEY))||0;}catch{}
  setTilt(savedTilt);$('tilt').oninput=e=>setTilt(Number(e.target.value));
  controls.addEventListener('start',()=>{rotating=null;});addEventListener('keydown',e=>{if(document.querySelector('dialog:modal')||$('account-panel').dataset.blocking==='true'||e.ctrlKey||e.metaKey||e.altKey||e.repeat||e.target.closest?.('input,textarea,select'))return;/* 0.71.1 Q / E are the potion slots only; the camera turns with the on-screen arrows or by dragging */});addEventListener('resize',resize);resize();
- const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas,capitalAtlas,leafAtlas]=await Promise.all([map.procedural&&!map.scene?Promise.resolve({scene:new THREE.Group()}):new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./'+(map.scene??map.model)+(map.scene?'?v=63':'?v=29'),e=>{if(e.total)loading.stage(2,'กำลังโหลดฉาก '+Math.round(e.loaded/e.total*100)+'%');}),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId)),loader.loadAsync('./assets/capital-materials19.png'),loader.loadAsync('./assets/capital-leaves19.png')]);
+ const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas,capitalAtlas,leafAtlas]=await Promise.all([map.procedural&&!map.scene?Promise.resolve({scene:new THREE.Group()}):new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./'+(map.scene??map.model)+(map.scene?'?v=64':'?v=29'),e=>{if(e.total)loading.stage(2,'กำลังโหลดฉาก '+Math.round(e.loaded/e.total*100)+'%');}),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId)),loader.loadAsync('./assets/capital-materials19.png'),loader.loadAsync('./assets/capital-leaves19.png')]);
  loading.stage(3);clearCourtTrees(gltf.scene,map);
  const tiles={wood:frame(materials.image,[0,0,.5,.5],true),roof:frame(materials.image,[.5,0,.5,.5],true),sand:frame(materials.image,[0,.5,.5,.5],true),grass:frame(materials.image,[.5,.5,.5,.5],true)},cache=new Map();
  for(const [key,rect] of Object.entries({brick:[0,0,.5,.5],plaster:[.5,0,.5,.5],paving:[0,.5,.5,.5],meadow:[.5,.5,.5,.5]}))tiles[key]=frame(worldMaterials.image,rect,true);
@@ -230,7 +230,7 @@ try {
  $('overview').onclick=toggleOverview;
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
- worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI,catalog});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI,worldUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
+ worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI,catalog,account});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI,worldUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
  createCbtEventUI({game,account,loading,autoOpen:!map.pvpArena});
  const arenaUI=createArenaUI({game,account,map,catalog,worldUI});
  createActionbar({game,bagUI,account});

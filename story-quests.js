@@ -5,7 +5,7 @@
 
 import {WEAPON_CLASSES,weaponId,pieceId,gearLook} from './gear-sets.js';
 export const STORY_TITLE='บทที่ 1 · ประทีปที่ดับพร้อมกัน';
-export const STORY_VERSION=3; // v3 removes t13; v2 progress is mapped below instead of restarting the story.
+export const STORY_VERSION=4; // v4 adds the class-weapon crafting lesson after t17; older saves retain their current quest.
 
 // Step types:
 // talk {npc, mapId, say} · defeat {monster (MONSTER_TYPES id), count, mapId} · enter {mapId}
@@ -75,8 +75,13 @@ export const STORY=[
  {id:'t16',title:'ใต้ถุนโรงสี',reward:{baseXp:120,jobXp:66,coins:800,items:[{id:'lek-lai',count:1}]},steps:[
   {type:'enter',mapId:'mill-cellar',hint:'ลงดันเจี้ยนใต้ถุนโรงสี',how:'ทางลงอยู่ในโรงสีใต้เงาจันทร์ · มาเป็นปาร์ตี้ได้ บอสท้ายดันเจี้ยนดรอปของดี'},
  ]},
- {id:'t17',title:'เส้นทางอาชีพ',reward:{baseXp:150,jobXp:0,coins:1000,items:[{id:'@weapon',count:1}]},steps:[
+ {id:'t17',title:'เส้นทางอาชีพ',reward:{baseXp:150,jobXp:0,coins:1000,items:[{id:'@weapon',count:1},{id:'weapon-fragment-rice',count:15},{id:'iron-ore',count:2}]},steps:[
   {type:'do',action:'job',hint:'เปลี่ยนอาชีพที่ลานครู',how:'Job ตันเมื่อไหร่ จะมีหน้าต่างเควสเด้ง · ไปหาครูประจำสายที่ลานครูแห่งอโยธยา ทำบททดสอบให้ครบ 3 ด่าน'},
+ ]},
+ {id:'t17-craft',title:'อาวุธจากมือเรา',reward:{baseXp:100,jobXp:50,coins:500,items:[]},steps:[
+  {type:'talk',npc:'ครูแสนดาบ',mapId:'ayutthaya',hint:'เรียนคราฟต์อาวุธกับครูแสนดาบ',say:'มีวิชาประจำตัวแล้ว ก็ต้องรู้จักสร้างอาวุธของตน เริ่มจากสีฟ้าก่อน ใช้เศษศาสตราทุ่งนา 15 ชิ้นกับแร่เหล็ก 2 ชิ้น ข้าเตรียมของสำหรับครั้งแรกให้แล้ว'},
+  {type:'do',action:'craftWeapon',hint:'คราฟต์อาวุธสีฟ้าของอาชีพตัวเอง 1 ชิ้น',how:'กด คราฟต์อาวุธ → หมวด อุปกรณ์ → อาวุธสีฟ้า Lv.10 ของอาชีพเรา → คราฟต์ 1 ชิ้น · ใช้เศษศาสตราทุ่งนา 15 แร่เหล็ก 2 และ 250 เบี้ย'},
+  {type:'talk',npc:'ครูแสนดาบ',mapId:'ayutthaya',hint:'ถามครูแสนดาบเรื่องพัฒนาสีอาวุธ',say:'สีฟ้าคือจุดเริ่ม พัฒนาเป็นม่วง ส้ม แล้วแดง โดยใช้อาวุธสีก่อนหน้าและวัตถุดิบจากแมพช่วงเลเวลนั้น เก็บอาวุธที่ยังไม่ตีบวก ใส่การ์ด หรือมีออปชันสุ่มไว้ในกระเป๋าสำหรับพัฒนา ส่วนสีรุ้งเป็นสูตรพิเศษของแต่ละอาชีพ'},
  ]},
  {id:'t18',chapter:C2,title:'ข่าวจากบึงบัว',reward:{baseXp:98,jobXp:54,coins:600,items:[{id:'green-herb',count:5}]},steps:[
   {type:'talk',npc:'ขุนอินทร์',mapId:'ayutthaya',hint:'ฟังข่าวจากขุนอินทร์',say:'มีคนเห็นโคมลอยเหนือบึงบัวหลังโรงสี ทั้งที่ประทีปในเมืองสว่างแล้ว ไปดูทีเถิด'},
@@ -109,9 +114,10 @@ export const STARTER_WEAPON={novice:'starter-wraps',...Object.fromEntries(WEAPON
 export const rewardItems=(reward,classId,gender)=>(reward?.items??[]).map(i=>i.id==='@weapon'?{...i,id:STARTER_WEAPON[classId]??'starter-wraps'}:i.id==='@armor'?{...i,id:pieceId('wall','armor',gearLook(classId,gender)??'swordsman',2)}:i);
 
 export function normalizeStory(state){
- const s=state&&typeof state==='object'&&[2,STORY_VERSION].includes(state.v)?state:{};
- const old=Number.isInteger(s.quest)?Math.min(Math.max(s.quest,0),STORY.length+(s.v===2?1:0)):0;
- const quest=s.v===2&&old>12?old-1:old; // old t13 (index 12) now points straight to t14; no reward is granted.
+ const s=state&&typeof state==='object'&&[2,3,STORY_VERSION].includes(state.v)?state:{};
+ const legacy=STORY.filter(q=>q.id!=='t17-craft'),old=Number.isInteger(s.quest)?Math.max(s.quest,0):0;
+ const legacyIndex=s.v===2&&old>12?old-1:old;
+ const quest=s.v===2||s.v===3?(legacyIndex>=legacy.length?STORY.length:STORY.findIndex(q=>q.id===legacy[legacyIndex].id)):Math.min(old,STORY.length);
  const done=quest>=STORY.length;
  const steps=done?0:STORY[quest].steps.length;
  const step=!done&&Number.isInteger(s.step)?Math.min(Math.max(s.step,0),steps-1):0;

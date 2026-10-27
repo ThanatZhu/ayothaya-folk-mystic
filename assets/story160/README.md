@@ -2,7 +2,7 @@
 
 Generated with the built-in image_gen tool. New opaque story paintings, no reference edits.
 
-22 quest atlases, each with three 1024 x 512 shots stacked vertically. The game crops each third without stretching. Live Mali text is rendered separately. NPCs and scene details carry the story; no fixed player portrait replaces the saved character.
+23 quest atlases, each with three 1024 x 512 shots stacked vertically. The game crops each third without stretching. Live Mali text is rendered separately. NPCs and scene details carry the story; no fixed player portrait replaces the saved character.
 
 ## Prompt set
 
@@ -203,3 +203,7 @@ TOP: Sunlit Thai training arena of packed earth with low timber fence and shaded
 MIDDLE: Two Thai young adult martial trainees in indigo and russet cotton outfits respectfully bowing to each other before friendly sparring, medium shot.
 BOTTOM: Close two practice weapons held lowered in readiness above arena dust, instructor hand signaling patience, hopeful anticipation, no victory pose or damage UI.
 ```
+
+## Class weapon crafting lesson (t17-craft)
+
+Generated with built-in image_gen using t8.webp as the NPC identity, painting style and stacked-scene reference. The exact final prompt is in [t17-craft.prompt.txt](./t17-craft.prompt.txt). Measured 2:1 source frames in quest-storyboard160.js keep the generated unequal panel boundaries from stretching or bleeding into the next shot. The live narrative, NPC arrival guard, progressive text, tap acceleration and single Skip button all use the existing cinematic runtime.

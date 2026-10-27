@@ -1,6 +1,6 @@
 import {loadStoryNPCLife} from './npc-identity175.js';
 import * as THREE from 'three';
-import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=106.0';
+import {loadLifeArt,lifeFrameAt,mapFrames} from './character-life-art.js?v=106.0';
 import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE,CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
 import {createPosturePlayback} from './character-action-state.js?v=106.0';
 
@@ -16,7 +16,7 @@ export function loadNPCLife(id){
    }
    return textures.get(canvas);
   };
-  return {...art,clips:Object.fromEntries(Object.entries(art.clips).map(([action,clip])=>[action,{...clip,frames:clip.frames.map(texture)}]))};
+  return {...art,clips:Object.fromEntries(Object.entries(art.clips).map(([action,clip])=>[action,{...clip,frames:mapFrames(clip.frames,texture)}]))};
  }).catch(error=>{cache.delete(id);console.warn('NPC pose artwork unavailable',id,error);return null;}));
  return cache.get(id);
 }

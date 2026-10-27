@@ -38,20 +38,20 @@ test('the whole chapter can be played through in order and pays each reward once
 });
 
 test('wrong NPC, wrong map or wrong monster do not advance', () => {
- const s=normalizeStory({v:3,quest:0,step:0});
+ const s=normalizeStory({v:4,quest:0,step:0});
  assert.equal(storyEvent(s,{type:'talk',npc:'แม่บัว',mapId:'ayutthaya'}).changed,false);
  assert.equal(storyEvent(s,{type:'talk',npc:'ลุงเรือง',mapId:'rice-fields'}).changed,false);
- const hunt=normalizeStory({v:3,quest:4,step:0});
+ const hunt=normalizeStory({v:4,quest:4,step:0});
  assert.equal(storyEvent(hunt,{type:'defeat',monster:'rat',mapId:'rice-fields'}).changed,false);
  const one=storyEvent(hunt,{type:'defeat',monster:'straw',mapId:'rice-fields'});
- assert.deepEqual(one.state,{v:3,quest:4,step:0,count:1,done:false});
+ assert.deepEqual(one.state,{v:4,quest:4,step:0,count:1,done:false});
 });
 
 test('corrupt saves are clamped instead of crashing', () => {
- assert.deepEqual(normalizeStory({v:3,quest:99,step:-4,count:'x'}),{v:3,quest:STORY.length,step:0,count:0,done:true});
- assert.deepEqual(normalizeStory({v:3,quest:4,step:7,count:99}),{v:3,quest:4,step:1,count:0,done:false});
- assert.deepEqual(normalizeStory({v:3,quest:4,step:0,count:99}),{v:3,quest:4,step:0,count:5,done:false});
- assert.deepEqual(normalizeStory({quest:8,step:1}),{v:3,quest:0,step:0,count:0,done:false},'old chain progress starts the tutorial over');
+ assert.deepEqual(normalizeStory({v:4,quest:99,step:-4,count:'x'}),{v:4,quest:STORY.length,step:0,count:0,done:true});
+ assert.deepEqual(normalizeStory({v:4,quest:4,step:7,count:99}),{v:4,quest:4,step:1,count:0,done:false});
+ assert.deepEqual(normalizeStory({v:4,quest:4,step:0,count:99}),{v:4,quest:4,step:0,count:5,done:false});
+ assert.deepEqual(normalizeStory({quest:8,step:1}),{v:4,quest:0,step:0,count:0,done:false},'old chain progress starts the tutorial over');
 });
 
 test('auto-walk finds the next map through portals', () => {
@@ -63,7 +63,7 @@ test('auto-walk finds the next map through portals', () => {
 });
 
 test('tutorial steps finish from the player state or their own action, and rewards fit the class', () => {
- const at=id=>normalizeStory({v:3,quest:STORY.findIndex(q=>q.id===id),step:0});
+ const at=id=>normalizeStory({v:4,quest:STORY.findIndex(q=>q.id===id),step:0});
  assert.equal(storyEvent(at('t2'),{type:'check',ctx:{weapon:false}}).changed,false);
  const worn=storyEvent(at('t2'),{type:'check',ctx:{weapon:true}});assert.equal(worn.completed.id,'t2');
  assert.equal(storyEvent(at('t11'),{type:'check',ctx:{level:99,weapon:true}}).changed,false,'crafting only counts when it happens');
@@ -78,7 +78,7 @@ test('removing the capture quest preserves old v2 progress before, during, after
  assert.equal(STORY.some(q=>q.id==='t13'),false);assert.equal(STORY.some(q=>q.steps.some(s=>s.type==='do'&&s.action==='pet')),false);
  for(const q of STORY)assert.equal(q.reward.items.some(i=>i.id==='pet-lure'||i.id==='pet-food'),false);
  const before=normalizeStory({v:2,quest:11,step:0,count:2});assert.equal(currentObjective(before).quest.id,'t12');assert.equal(before.count,2);
- const removed=normalizeStory({v:2,quest:12,step:0});assert.equal(currentObjective(removed).quest.id,'t14');assert.equal(removed.v,3);assert.equal(storyEvent(removed,{type:'do',action:'pet'}).changed,false);
+ const removed=normalizeStory({v:2,quest:12,step:0});assert.equal(currentObjective(removed).quest.id,'t14');assert.equal(removed.v,4);assert.equal(storyEvent(removed,{type:'do',action:'pet'}).changed,false);
  const after=normalizeStory({v:2,quest:14,step:3,count:0});assert.equal(currentObjective(after).quest.id,'t15');assert.equal(after.step,3);assert.deepEqual(normalizeStory(after),after,'migration runs once');
  assert.equal(normalizeStory({v:2,quest:23,step:0,done:true}).done,true);assert.equal(currentObjective(normalizeStory({v:2,quest:20,step:0})).quest.id,'t21');
 });

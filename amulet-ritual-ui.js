@@ -1,10 +1,10 @@
 import {amuletRevealBatch,revealAmulet,revealAllAmulets,amuletRevealComplete,amuletRevealTier} from './amulet-ritual-state.js';
 import {itemDef} from './items.js';
-import {iconStyle} from './bag-ui.js';
+import {iconStyle} from './bag-ui.js?v=amulet-aura1';
 const ART='assets/gacha-neutral/';
 
 export function createAmuletRitual({root,dialog,onDone}){
- for(const href of ['amulet-ritual.css?v=1','amulet-ritual-v2.css?v=1']){const link=document.createElement('link');link.rel='stylesheet';link.href=href;document.head.append(link);}
+ for(const href of ['amulet-ritual.css?v=amulet-aura1','amulet-ritual-v2.css?v=1']){const link=document.createElement('link');link.rel='stylesheet';link.href=href;document.head.append(link);}
  const stage=document.createElement('section');stage.className='amulet-ceremony';stage.hidden=true;stage.dataset.phase='idle';stage.dataset.tier='material';stage.setAttribute('aria-label','พิธีเปิดกรุและเผยของรางวัล');
  stage.innerHTML=`<header class="relic-heading"><div><small>AYOTHAYA · SEALED REWARDS</small><h3>พิธีเปิดผนึก</h3></div><label><input class="relic-skip-choice" type="checkbox">ข้ามแอนิเมชัน</label><button type="button" class="relic-skip">ข้ามพิธี</button></header>
  <div class="relic-scene"><div class="relic-effects" aria-hidden="true"><div class="relic-rays" aria-hidden="true"></div><div class="relic-orbit" aria-hidden="true"></div><div class="relic-sparks" aria-hidden="true">${Array.from({length:12},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div></div><div class="relic-vault" aria-hidden="true"><span class="relic-vault-halo"></span><img class="relic-vault-closed" src="${ART}sealed.webp" alt="" draggable="false"><img class="relic-vault-awakening" src="${ART}awakening.webp" alt="" draggable="false"><img class="relic-vault-open" src="${ART}revealed.webp" alt="" draggable="false"></div><div class="relic-impact" aria-hidden="true"><img src="assets/amulet-ritual-v2/flash.webp" alt="" draggable="false"></div><div class="relic-invocation"><small>ผนึกแห่งอโยธยา</small><strong>กำลังอัญเชิญ…</strong></div><div class="relic-grid" aria-label="ของรางวัลที่บันทึกแล้ว"></div></div>

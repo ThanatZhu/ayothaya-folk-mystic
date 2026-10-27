@@ -5,7 +5,7 @@ import {openHudPanel} from './hud-panels.js';
 import {createGachaRatesHelp} from './gacha-rates-ui.js';
 
 export function loadPremiumStyles(){
- for(const href of ['pet-ui.css?v=premium1','pet-ritual148.css?v=premium1','premium-hub.css?v=1'])if(!document.querySelector(`link[href="${href}"]`)){const link=document.createElement('link');link.rel='stylesheet';link.href=href;document.head.append(link);}
+ for(const href of ['pet-ui.css?v=premium1','pet-ritual148.css?v=premium1','premium-hub.css?v=menu-icons2'])if(!document.querySelector(`link[href="${href}"]`)){const link=document.createElement('link');link.rel='stylesheet';link.href=href;document.head.append(link);}
 }
 export function premiumDialog(id,title){
  const dialog=document.createElement('dialog');dialog.id=id;dialog.className='premium-window';dialog.setAttribute('aria-labelledby',id+'-title');

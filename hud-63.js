@@ -51,7 +51,7 @@ export function createHud63({game,partyUI}={}){
   nav.before(toggle);
   const open=(el,v)=>{el.setAttribute('aria-expanded',String(v));};
   more.onclick=e=>{e.stopPropagation();const v=!nav.classList.contains('more-open');nav.classList.toggle('more-open',v);open(more,v);};
-  toggle.onclick=e=>{e.stopPropagation();const v=!nav.classList.contains('phone-open');nav.classList.toggle('phone-open',v);open(toggle,v);};
+  toggle.onclick=e=>{e.stopPropagation();const v=!nav.classList.contains('phone-open');nav.classList.toggle('phone-open',v);if(v)nav.scrollTop=0;open(toggle,v);};
   // Picking an entry (or clicking elsewhere) closes the drawer/panel; the button's own action still runs.
   nav.addEventListener('click',e=>{if(e.target.closest('button')&&e.target.closest('button')!==more){nav.classList.remove('more-open','phone-open');open(more,false);open(toggle,false);}});
   addEventListener('pointerdown',e=>{if(!e.target.closest('#game-menu,#menu-toggle')){nav.classList.remove('more-open','phone-open');open(more,false);open(toggle,false);}});

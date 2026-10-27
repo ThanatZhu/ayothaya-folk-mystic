@@ -17,7 +17,7 @@ import {createEquipmentUI} from './equipment-ui.js?v=appearance-paused';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=talk137';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=chuk175';
 import {createGameMenu} from './game-menu.js?v=34';
-import {createSkillWindow} from './skill-window.js?v=ult1192';
+import {createSkillWindow} from './skill-window.js?v=ult1193';
 import {createAutoSettings} from './auto-settings.js?v=hud143';
 import {createMmoHud} from './mmo-hud.js?v=dot1191';
 import {createSoftLook} from './soft-look.js?v=actor1165';
@@ -75,7 +75,7 @@ function frame(image,rect,repeat=false){
 let gameHandle=null;
 const landscape=createLandscapeGuard({allowPortrait:true,onChange:()=>gameHandle?.clearInput()});
 try {
- const response=await fetch('./maps/world.json?v=maps192');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
+ const response=await fetch('./maps/world.json?v=maps193');if(!response.ok)throw new Error('โหลดข้อมูลเมืองไม่ได้');
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);
@@ -116,7 +116,7 @@ try {
  let savedTilt=0;try{savedTilt=Number(localStorage.getItem(TILT_KEY))||0;}catch{}
  setTilt(savedTilt);$('tilt').oninput=e=>setTilt(Number(e.target.value));
  controls.addEventListener('start',()=>{rotating=null;});addEventListener('keydown',e=>{if(document.querySelector('dialog:modal')||$('account-panel').dataset.blocking==='true'||e.ctrlKey||e.metaKey||e.altKey||e.repeat||e.target.closest?.('input,textarea,select'))return;/* 0.71.1 Q / E are the potion slots only; the camera turns with the on-screen arrows or by dragging */});addEventListener('resize',resize);resize();
- const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas,capitalAtlas,leafAtlas]=await Promise.all([map.procedural&&!map.scene?Promise.resolve({scene:new THREE.Group()}):new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./'+(map.scene??map.model)+(map.scene?'?v=62':'?v=29'),e=>{if(e.total)loading.stage(2,'กำลังโหลดฉาก '+Math.round(e.loaded/e.total*100)+'%');}),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId)),loader.loadAsync('./assets/capital-materials19.png'),loader.loadAsync('./assets/capital-leaves19.png')]);
+ const [gltf,materials,flora,people,monsters,worldMaterials,regionalFlora,heroAtlas,capitalAtlas,leafAtlas]=await Promise.all([map.procedural&&!map.scene?Promise.resolve({scene:new THREE.Group()}):new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/')).loadAsync('./'+(map.scene??map.model)+(map.scene?'?v=63':'?v=29'),e=>{if(e.total)loading.stage(2,'กำลังโหลดฉาก '+Math.round(e.loaded/e.total*100)+'%');}),loader.loadAsync('./assets/materials.png'),loader.loadAsync('./assets/flora.png'),loader.loadAsync('./assets/people.png'),loader.loadAsync('./assets/monsters.png'),loader.loadAsync('./assets/world-materials-05.png'),loader.loadAsync('./assets/regional-flora-05.png'),loader.loadAsync(atlasPath(account.character.classId)),loader.loadAsync('./assets/capital-materials19.png'),loader.loadAsync('./assets/capital-leaves19.png')]);
  loading.stage(3);clearCourtTrees(gltf.scene,map);
  const tiles={wood:frame(materials.image,[0,0,.5,.5],true),roof:frame(materials.image,[.5,0,.5,.5],true),sand:frame(materials.image,[0,.5,.5,.5],true),grass:frame(materials.image,[.5,.5,.5,.5],true)},cache=new Map();
  for(const [key,rect] of Object.entries({brick:[0,0,.5,.5],plaster:[.5,0,.5,.5],paving:[0,.5,.5,.5],meadow:[.5,.5,.5,.5]}))tiles[key]=frame(worldMaterials.image,rect,true);

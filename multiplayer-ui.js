@@ -1,5 +1,6 @@
 import {announce} from './announcement-ui.js?v=149';
 import {realmAnnouncement} from './announcement-state.js?v=149';
+import {chatStream,chatVisible} from './chat-channels191.js';
 import {characterHead} from './character-label.js?v=149';
 import {createPartyLayout} from './party-layout.js?v=overlay143';
 import {createDesktopChat} from './desktop-chat-ui.js?v=channel144';
@@ -73,8 +74,17 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  // Chat dock behaviour.
  function setCollapsed(value){dock.classList.toggle('collapsed',value);$('dock-toggle').setAttribute('aria-expanded',String(!value));$('dock-toggle').setAttribute('aria-label',value?'เปิดแชต':'ย่อแชต');if(!value){unread=0;$('dock-unread').hidden=true;$('online-messages').scrollTop=$('online-messages').scrollHeight;}}
  setCollapsed(compact.matches);
+ let chatRoom='';
+ function refreshChat(){
+  let last=null;for(const row of $('online-messages').children){row.hidden=!chatVisible(dock.dataset.channel,row.dataset.chatStream);if(!row.hidden)last=row;}
+  $('dock-preview').toggleAttribute('data-i18n-skip',last?.dataset.previewSkip==='true');$('dock-preview').textContent=last?.dataset.preview??'';
+ }
+ function roomHistory(detail){
+  if(detail.room&&detail.room!==chatRoom){chatRoom=detail.room;for(const row of $('online-messages').querySelectorAll('[data-chat-stream="room"]')){seenMessages.delete(row.dataset.messageId);row.remove();}}
+  for(const message of detail.history??[])log(message);refreshChat();
+ }
  $('dock-toggle').onclick=()=>setCollapsed(!dock.classList.contains('collapsed'));
- function setChannel(channel){dock.dataset.channel=channel;$('online-whisper-to').hidden=channel!=='whisper';for(const tab of dock.querySelectorAll('[role=tab]'))tab.setAttribute('aria-selected',String(tab.dataset.channel===channel));$('online-text').placeholder=(compact.matches?'':'Enter · ')+(channel==='whisper'?'พิมพ์ข้อความกระซิบ…':channel==='party'?'พิมพ์ถึงปาร์ตี้…':channel==='guild'?'พิมพ์ถึงกิลด์…':channel==='world'?'พิมพ์ถึงทุกคนในเซิร์ฟ…':'พิมพ์ถึงทุกคนในห้อง… (/w ชื่อ ข้อความ = กระซิบ)');$('online-messages').scrollTop=$('online-messages').scrollHeight;}
+ function setChannel(channel){dock.dataset.channel=channel;$('online-whisper-to').hidden=channel!=='whisper';for(const tab of dock.querySelectorAll('[role=tab]'))tab.setAttribute('aria-selected',String(tab.dataset.channel===channel));$('online-text').placeholder=(compact.matches?'':'Enter · ')+(channel==='whisper'?'พิมพ์ข้อความกระซิบ…':channel==='party'?'พิมพ์ถึงปาร์ตี้…':channel==='guild'?'พิมพ์ถึงกิลด์…':channel==='world'?'พิมพ์ถึงทุกคนในเซิร์ฟ…':'พิมพ์ถึงทุกคนในห้อง… (/w ชื่อ ข้อความ = กระซิบ)');refreshChat();$('online-messages').scrollTop=$('online-messages').scrollHeight;}
  for(const tab of dock.querySelectorAll('[role=tab]'))tab.onclick=()=>setChannel(tab.dataset.channel);
  setChannel('room');
  let noteTimer;const dockNote=text=>{$('dock-note').textContent=text;clearTimeout(noteTimer);noteTimer=setTimeout(()=>{$('dock-note').textContent='';},3500);};
@@ -83,13 +93,15 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  addEventListener('keydown',e=>{if(e.code!=='Enter'||e.repeat||e.isComposing||e.ctrlKey||e.metaKey||e.altKey||!active||dock.hidden||editable(e)||document.querySelector('dialog[open]'))return;e.preventDefault();if(desktopChat.desktop())desktopChat.open();else{setCollapsed(false);$('online-text').focus();}});
  const desktopChat=createDesktopChat({shell,dock,game,setCollapsed});
  function log(m,live=false){
-  if(seenMessages.has(m.id))return;seenMessages.add(m.id);if(seenMessages.size>160)seenMessages.delete(seenMessages.values().next().value);
+  if(seenMessages.has(m.id))return;seenMessages.add(m.id);if(seenMessages.size>640)seenMessages.delete(seenMessages.values().next().value);
   const mine=m.actor===client?.id,p=el('p',['party','system','guild','whisper','world'].includes(m.channel)?m.channel:''),name=el('b','',m.channel==='whisper'&&mine?'ถึง '+m.to:m.name),time=el('time','',new Date(m.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+  const stream=chatStream(m);p.dataset.chatStream=stream;p.dataset.messageId=m.id;p.dataset.preview=m.name+': '+m.text;p.dataset.previewSkip=String(m.channel!=='system');if(stream==='announcement')p.classList.add('announcement');
   const mark=el('span','chat-author-mark',Array.from(m.name??'?')[0]);mark.setAttribute('aria-hidden','true');mark.dataset.i18nSkip='';p.append(mark);
   if(m.channel==='party')p.append(el('span','mp-tag','ปาร์ตี้'));if(m.channel==='guild')p.append(el('span','mp-tag','กิลด์'));if(m.channel==='whisper')p.append(el('span','mp-tag','กระซิบ'));if(m.channel==='world')p.append(el('span','mp-tag','โลก'));if(mine)p.classList.add('mine');name.dataset.initial=Array.from(m.name??'?')[0];const said=el('span','chat-message-text',' '+m.text);if(m.channel!=='system'){name.dataset.i18nSkip='';said.dataset.i18nSkip='';}p.append(name,said,time);
-  const box=$('online-messages'),atEnd=box.scrollHeight-box.scrollTop-box.clientHeight<40;box.append(p);while(box.children.length>80)box.firstChild.remove();if(atEnd)box.scrollTop=box.scrollHeight;
-  $('dock-preview').toggleAttribute('data-i18n-skip',m.channel!=='system');$('dock-preview').textContent=m.name+': '+m.text;
-  if(live){if(dock.classList.contains('collapsed')){unread++;$('dock-unread').textContent=unread>9?'9+':String(unread);$('dock-unread').hidden=false;}if(m.channel==='room'||m.channel==='party')bubble(m);}
+  const box=$('online-messages'),atEnd=box.scrollHeight-box.scrollTop-box.clientHeight<40;box.append(p);
+  // System traffic cannot evict the player's map conversation from another tab.
+  const history=box.querySelectorAll('[data-chat-stream="'+stream+'"]');for(let i=0;i<history.length-80;i++)history[i].remove();refreshChat();if(!p.hidden&&atEnd)box.scrollTop=box.scrollHeight;
+  if(live){if((stream!=='system'||dock.dataset.channel==='system')&&dock.classList.contains('collapsed')){unread++;$('dock-unread').textContent=unread>9?'9+':String(unread);$('dock-unread').hidden=false;}if(m.channel==='room'||m.channel==='party')bubble(m);}
  }
  // Speech bubbles over the speaker; positioned every frame in update().
  function bubble(m){let b=bubbles.get(m.actor);if(!b){b={node:el('span','chat-bubble')};labels.append(b.node);bubbles.set(m.actor,b);}b.node.textContent=m.text.length>70?m.text.slice(0,69)+'…':m.text;b.node.classList.toggle('party',m.channel==='party');b.until=performance.now()+5500;}
@@ -227,8 +239,8 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   if(active)return;wakeServer();
   try{await account.beginOnline();active=true;client=new MultiplayerClient({url,identity});game.setNetwork(client);account.setOnline(client);
    client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':detail==='reconnecting'?(client.updating?'เซิร์ฟเวอร์กำลังอัปเดต…':'กำลังเชื่อมต่อใหม่…'):detail==='connecting'?'กำลังเข้าห้อง…':detail==='error'?'เชื่อมต่อไม่ได้':'ผู้เล่นออนไลน์');status(detail==='connecting'?'กำลังเข้าห้อง…':detail==='reconnecting'?(client.updating?'เซิร์ฟเวอร์กำลังอัปเดต · รอสักครู่ เกมจะต่อกลับเอง':'กำลังเชื่อมต่อใหม่…'):statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();if(detail==='error'&&!dialog.open){game.clearInput();openHudPanel(dialog);}});
-   client.addEventListener('channelSwitched',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}}for(const [id,v] of views){if(!v.loading)remove(v);views.delete(id);}presentation.clear();game.roleEffects?.clear();if(detail.snapshot)acceptSnapshot(detail.snapshot);drawChannels();});
-   client.addEventListener('welcome',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}drawChannels();}for(const m of detail.history)log(m);
+   client.addEventListener('channelSwitched',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}}for(const [id,v] of views){if(!v.loading)remove(v);views.delete(id);}presentation.clear();game.roleEffects?.clear();roomHistory(detail);if(detail.snapshot)acceptSnapshot(detail.snapshot);drawChannels();});
+   client.addEventListener('welcome',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}drawChannels();}roomHistory(detail);
     // 1.01 the server decides the map (someone no longer in a guild wakes up in the capital, not the hall): follow it.
     const parts=String(detail.room??'').split(':'),mapId=detail.snapshot?.self?.mapId??(parts[1]?.startsWith('ch')?parts[2]:parts[1]);if(mapId&&document.body.dataset.map&&mapId!==document.body.dataset.map){const go=()=>location.assign('?server='+account.serverId+'&channel='+currentChannel+'&map='+encodeURIComponent(mapId));
      // the page opens the saved map first, so save the server's choice before reloading (else it would loop)

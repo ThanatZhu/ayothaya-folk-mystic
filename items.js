@@ -26,6 +26,7 @@ export const expandCost=bag=>bagCap(bag)>=BAG_MAX?null:2000*((bagCap(bag)-BAG_SL
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
 export const ITEMS={
  'soul-talisman':{image:'assets/revival180/soul-talisman.png',icon:0,name:'ยันต์คืนขวัญ',kind:'revival',sell:0,text:'ใช้ 1 ชิ้นเมื่อเลือกเกิดที่นี่ · ฟื้น HP / MP เต็ม ณ จุดที่หมดแรง · ซื้อผ่านหน้าต่างเกิดใหม่ 200 ทองแท่ง'},
+ 'stat-reset-scroll':{image:'assets/stat-reset189/stat-reset-scroll.webp',icon:0,name:'ยันต์คืนวิถี',kind:'scroll',sell:0,text:'รีเซ็ต STR AGI VIT INT DEX LUK ที่ลงไว้และคืนแต้มทั้งหมด · ไม่ลบโบนัสจุติหรืออุปกรณ์ · ใช้ได้ 1 ครั้ง · ราคา 100 ทองแท่ง'},
  'rename-card':{image:'assets/arena166/rename-card.webp',icon:0,name:'บัตรเปลี่ยนชื่อ',kind:'scroll',text:'ใช้เปลี่ยนชื่อตัวละคร 1 ครั้ง · ซื้อด้วยทองแท่ง 1,000 แท่ง · กดปากกาข้างชื่อ'},
  'straw-bundle':{icon:0,name:'ฟางมัดเรืองแสง',kind:'loot',sell:4,text:'ฟางจากหุ่นที่ขยับเอง ยังอุ่นเหมือนมีลมหายใจ'},
  'rat-tooth':{icon:1,name:'ฟันหนูยุ้ง',kind:'loot',sell:3,text:'ฟันคม ๆ ที่แทะเศษสายใยขวัญ'},

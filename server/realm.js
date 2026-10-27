@@ -264,7 +264,8 @@ export class RealmServer{
    p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);w.emit('carded',{slot:m.slot,card:m.card});this.storyCheck(p);return true;
   }
   if(m.type==='statUp'||m.type==='equip'||m.type==='unequip'){
-   if(now-p.gearAt<200)return this.itemFail(p,'gear-rate');p.gearAt=now;
+   const rateKey=m.type==='statUp'?'statAt':'gearAt',gap=m.type==='statUp'?100:200;
+   if(now-(p[rateKey]??-Infinity)<gap)return this.itemFail(p,'gear-rate');p[rateKey]=now;
    const who=this.who(p);
    try{
     if(m.type==='statUp')p.stats=raiseStat(p.stats,m.stat,who.level,who.reborn);

@@ -1,3 +1,5 @@
+import {normalizeStats,STATS} from './character-stats.js';
+import {STAT_RESET_ITEM} from './stat-reset-item.js';
 import {character} from './realm-state.js';
 import {addLoot,normalizeBag} from './items.js';
 import {normalizePetAccount} from './pet-account.js';
@@ -9,7 +11,7 @@ export const RENAME_CARD='rename-card',RENAME_PRICE=PREMIUM_RENAME_PRICE;
 // Receipts live in the private profile, so a reconnect/retry cannot charge twice.
 export function identityAction(record,action){
  const id=action.id;if(typeof id!=='string'||!/^[A-Za-z0-9_-]{8,80}$/.test(id))throw Error('invalid-request');
- if(!['renameBuy','renameUse','revivalBuy'].includes(action.type))throw Error('invalid-action');
+ if(!['renameBuy','renameUse','revivalBuy','statResetUse'].includes(action.type))throw Error('invalid-action');
  const name=action.type==='renameUse'?character({...record.character,name:action.name}).name:'';
  const signature=JSON.stringify([action.type,name]),receipts=record.identityReceipts??[],previous=receipts.find(r=>r.id===id);
  if(previous){if(previous.signature!==signature)throw Error('request-conflict');return structuredClone(record);}
@@ -19,6 +21,11 @@ export function identityAction(record,action){
   if(next.petCollection.balance<price)throw Error('not-enough-gold');
   const added=addLoot(next.bag,{items:[{id:item,count:1}]});if(added.lost.length)throw Error('bag-full');
   next.bag=added.bag;next.petCollection.balance-=price;
+ }else if(action.type==='statResetUse'){
+  if(!(next.bag.items[STAT_RESET_ITEM]>0))throw Error('no-stat-reset');
+  if(!STATS.some(k=>normalizeStats(next.stats)[k]>1))throw Error('no-allocated-stats');
+  if(--next.bag.items[STAT_RESET_ITEM]===0)delete next.bag.items[STAT_RESET_ITEM];
+  next.stats=normalizeStats(null);
  }else{
   if(name===next.character.name)throw Error('name-unchanged');
   if(!(next.bag.items[RENAME_CARD]>0))throw Error('no-rename-card');

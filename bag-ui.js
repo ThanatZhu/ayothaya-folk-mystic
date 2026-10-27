@@ -2,11 +2,11 @@ import {refineTierBadge} from './refine-tier-ui.js';
 // Bag (กระเป๋า · B), NPC shops, two quick-use slots (Q / E) and loot notices.
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
 import {activeEvent,surgeOn} from './events.js?v=64';
-import {ATLAS_LAYOUTS} from './items.js?v=revival-shop181';
+import {ATLAS_LAYOUTS} from './items.js?v=stat-reset189';
 import {GRADES,gearLook,setLines,bossLines,familyName,BOSS_SETS,SET_SLOTS} from './gear-sets.js';
 import {levelGifts} from './experience.js?v=105.3';
 import {consumeRevival,revivalCount} from './revival-item.js?v=revival180';
-import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=revival-shop181';
+import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=stat-reset189';
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=novice174';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {pickPotion} from './auto-play.js?v=novice174';
@@ -15,7 +15,7 @@ import {normalizePetAccount} from './pet-account.js';
 const $=id=>document.getElementById(id);
 const QUICK_KEY='ayothaya-quick-slots';
 // 0.109.4 four quick slots (Q E Z X); potions, the wind wing and the recall incense can sit in them
-const QUICK_KEYS=['Q','E','Z','X'],QUICK_IDX=[0,1,2,3],quickable=id=>['potion','wing','scroll'].includes(itemDef(id)?.kind);
+const QUICK_KEYS=['Q','E','Z','X'],QUICK_IDX=[0,1,2,3],quickable=id=>id!=='stat-reset-scroll'&&id!=='rename-card'&&['potion','wing','scroll'].includes(itemDef(id)?.kind);
 // 0.83 bag tabs: item kinds per category ('all' shows everything).
 const TABS=[['all','ทั้งหมด',null],['use','ใช้ได้',['potion','scroll','wing','revival']],['gear','อุปกรณ์',['gear']],['card','การ์ด',['card']],['loot','วัตถุดิบ',['loot']]];
 const GEAR_PLACES=[['head','หมวก'],['weapon','อาวุธ'],['accessory','เครื่องประดับ'],['armor','เสื้อเกราะ'],['garment','ผ้าคลุม'],['shoes','รองเท้า']]; // left column, then right
@@ -103,7 +103,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
   try{const r=useItem(local,id,world.player,world.status);local=r.bag;world.player.hp=r.hp;world.player.mp=r.mp;world.status=r.status;if(r.food){world.food=r.food;world.notice('อิ่มอร่อย · '+itemDef(id).text);}save();render();}catch(e){fail(e.message);}
  }
  // quick slots: the incense recalls like its bag button, everything else is used
- function quickUse(id){if(!id)return;if(itemDef(id)?.kind!=='scroll'){use(id);return;}if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[id]--;if(!b.items[id])delete b.items[id];local=b;save();render();}}
+ function quickUse(id){if(!id)return;if(id==='stat-reset-scroll'){api.onStatReset?.();return;}if(id==='rename-card'){document.getElementById('rename-pen')?.click();return;}if(itemDef(id)?.kind!=='scroll'){use(id);return;}if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[id]--;if(!b.items[id])delete b.items[id];local=b;save();render();}}
  function trade(type,npc,id,qty){
   if(game.online){world.trade?.(type,npc,id,qty);return;}
   try{local=type==='buy'?buy(local,npc,id,qty):sell(local,id,qty);save();world.emit('storyDo',{action:'shop'});world.notice((type==='buy'?'ซื้อ ':'ขาย ')+itemLabel([{id,count:qty}])+' · เหลือเบี้ย '+local.coins);render();}catch(e){fail(e.message);}
@@ -232,8 +232,8 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    if(worn){$('bag-detail').innerHTML=wornIt?`${icon(wornId,'item-icon big')}<div><strong class="r${wornIt.rarity??0}${gradeTone(wornIt)}">${wornIt.name}</strong>${refineTierBadge(wornIt)}<p>${wornIt.text??''}</p>${setInfo(wornIt,gear)}${wornIt.card?`<small>การ์ด: ${itemDef(wornIt.card)?.text??''}</small>`:''}<div class="bag-actions"><button type="button" data-act="off">ถอด</button><button type="button" data-act="status">ใส่การ์ด · หน้าสถานะ</button></div></div>`:`<p class="bag-hint">ช่อง${GEAR_PLACES.find(g=>g[0]===worn)[1]}ว่าง · แตะอุปกรณ์ในแท็บ อุปกรณ์ แล้วกด สวมใส่</p>`;
     $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{if(el.dataset.act==='off'){api.onTakeOff?.(worn);}else{dialog.close();$('menu-status')?.click();}});}
    const it=!worn&&selected&&itemDef(selected);
-   if(!worn)$('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong class="r${it.rarity??0}${gradeTone(it)}">${it.name} ×${b.items[selected]}</strong>${refineTierBadge(it)}<p>${it.text??''}</p>${setInfo(it,gear)}<small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'||it.kind==='wing'?'<button type="button" data-act="use">'+(it.kind==='wing'?'ใช้ · วาร์ปสุ่ม':'ใช้')+'</button>':''}${game.actionBar?.desktop?'<small>ลากไอเท็มไปวางในตารางปุ่มลัดด้านล่าง</small>':quickable(selected)?QUICK_KEYS.map((k,i)=>'<button type="button" data-act="q'+i+'">'+'ปุ่มลัด '+k+'</button>').join(''):''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${selected==='rename-card'?'<button type="button" data-act="rename">เปลี่ยนชื่อ</button>':it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}<button type="button" data-act="discard" class="danger">ทิ้ง</button></div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
-   if(!worn)$('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='rename')document.getElementById('rename-pen')?.click();else if(a==='use')use(selected);else if(a==='discard')askDiscard(selected);else if(a==='wear')api.onWear?.(selected);else if(a==='recall'){if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[selected]--;if(!b.items[selected])delete b.items[selected];local=b;save();}}else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
+   if(!worn)$('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong class="r${it.rarity??0}${gradeTone(it)}">${it.name} ×${b.items[selected]}</strong>${refineTierBadge(it)}<p>${it.text??''}</p>${setInfo(it,gear)}<small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'||it.kind==='wing'?'<button type="button" data-act="use">'+(it.kind==='wing'?'ใช้ · วาร์ปสุ่ม':'ใช้')+'</button>':''}${game.actionBar?.desktop?'<small>ลากไอเท็มไปวางในตารางปุ่มลัดด้านล่าง</small>':quickable(selected)?QUICK_KEYS.map((k,i)=>'<button type="button" data-act="q'+i+'">'+'ปุ่มลัด '+k+'</button>').join(''):''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${selected==='stat-reset-scroll'?'<button type="button" data-act="stat-reset">รีเซ็ตสถานะ</button>':selected==='rename-card'?'<button type="button" data-act="rename">เปลี่ยนชื่อ</button>':it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}<button type="button" data-act="discard" class="danger">ทิ้ง</button></div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
+   if(!worn)$('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='stat-reset'){dialog.close();api.onStatReset?.();}else if(a==='rename')document.getElementById('rename-pen')?.click();else if(a==='use')use(selected);else if(a==='discard')askDiscard(selected);else if(a==='wear')api.onWear?.(selected);else if(a==='recall'){if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[selected]--;if(!b.items[selected])delete b.items[selected];local=b;save();}}else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
   }
   if(shopDialog.open&&shopNpc){
    const shop=SHOPS[shopNpc.name];$('shop-title').textContent=shop.title;$('shop-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');

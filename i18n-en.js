@@ -4760,3 +4760,24 @@ Object.assign(globalThis.I18N_EN,{
   "เซิร์ฟเวอร์กำลังอัปเดต…": "Server updating…",
   "เซิร์ฟเวอร์กำลังอัปเดต · รอสักครู่ เกมจะต่อกลับเอง": "Server updating · hold on, the game reconnects by itself"
 });
+
+// Stat allocation and Path Renewal Talisman.
+Object.assign(globalThis.I18N_EN,{
+  "รีเซ็ตสถานะ": "Reset stats",
+  "ยันต์คืนวิถี": "Path Renewal Talisman",
+  "รีเซ็ต STR AGI VIT INT DEX LUK ที่ลงไว้และคืนแต้มทั้งหมด · ไม่ลบโบนัสจุติหรืออุปกรณ์ · ใช้ได้ 1 ครั้ง · ราคา 100 ทองแท่ง": "Reset allocated STR AGI VIT INT DEX LUK and refund all points · Keeps rebirth bonuses and gear · Single use · 100 gold bars",
+  "รีเซ็ตแต้มสถานะที่ลงไว้ทั้งหมด · ใช้จากกระเป๋า · เก็บโบนัสจุติและอุปกรณ์เดิม": "Refund all allocated stat points · Use from the bag · Keeps rebirth bonuses and gear",
+  "ไอเท็มตัวละครและของตีบวก · ใช้ทองแท่ง": "Character and refinement items · Gold bars",
+  "ไม่มียันต์คืนวิถีในกระเป๋า": "No Path Renewal Talisman in your bag",
+  "ยังไม่ได้ลงแต้มสถานะ": "No allocated stat points",
+  "ออกจากลานประลองก่อนรีเซ็ตสถานะ": "Leave the arena before resetting stats",
+  "เชื่อมต่อเกมออนไลน์ก่อนใช้ไอเท็ม": "Connect to the game before using this item",
+  "รีเซ็ต STR AGI VIT INT DEX LUK ที่ลงไว้เป็น 1 และคืนแต้มทั้งหมด": "Reset allocated STR AGI VIT INT DEX LUK to 1 and refund all points",
+  "เก็บเลเวล อาชีพ โบนัสจุติ และอุปกรณ์ไว้ตามเดิม": "Keeps your level, class, rebirth bonuses and gear",
+  "ใช้ยันต์คืนวิถี 1 ชิ้นจากกระเป๋า": "Consumes 1 Path Renewal Talisman from your bag",
+  "ยืนยันรีเซ็ตสถานะ": "Confirm stat reset",
+  "คืนแต้มสถานะ": "Stat points refunded",
+  "รีเซ็ตสถานะแล้ว · คืนแต้มที่ลงไว้ทั้งหมด": "Stats reset · All allocated points refunded",
+  "ยังยืนยันผลไม่ได้ · ตรวจสอบรายการเดิมเพื่อไม่ใช้ไอเท็มซ้ำ": "Result unconfirmed · Check the same request to avoid consuming another item",
+  "กดค้างเพื่อเพิ่มต่อเนื่อง": "Hold to allocate repeatedly"
+});

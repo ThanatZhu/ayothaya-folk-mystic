@@ -1,6 +1,6 @@
-import {createAmuletGachaPanel} from './amulet-gacha-ui.js?v=amulet-aura1';
+import {createAmuletGachaPanel} from './amulet-gacha-ui.js?v=stat-reset189';
 import {createPetSummonPanel} from './pet-summon-ui.js';
-import {createPremiumShopPanel} from './premium-shop-ui.js';
+import {createPremiumShopPanel} from './premium-shop-ui.js?v=stat-reset189';
 import {openHudPanel} from './hud-panels.js';
 import {createGachaRatesHelp} from './gacha-rates-ui.js';
 

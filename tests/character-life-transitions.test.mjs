@@ -103,7 +103,10 @@ test('per-frame atlas sources append locomotion without replacing the existing r
   './assets/character-life100/../character-life101/locomotion/test.png',
   './assets/character-life101/transition/test.png'
  ].sort());
- assert.equal(draws.length,4);assert.equal(art.clips.walk.frames.length,4);
- assert.equal(art.clips.sit.frames[0],art.clips.sitDown.frames[1]);
+ // 0.122 frames are drawn on first use, once each, and shared between clips
+ assert.equal(draws.length,0);assert.equal(art.clips.walk.frames.length,4);
+ [...art.clips.walk.frames];assert.equal(draws.length,2);
+ assert.equal(art.clips.sit.frames[0],art.clips.sitDown.frames[1]);assert.equal(draws.length,3);
  assert.equal(art.clips.walk.frames[0],art.clips.walk.frames[2]);
+ art.clips.sitDown.frames[0];assert.equal(draws.length,4);
 });

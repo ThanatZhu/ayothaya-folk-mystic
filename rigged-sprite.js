@@ -2,7 +2,7 @@ import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=size1';
 import * as THREE from './vendor/build/three.module.js';
 import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {FRAME_COUNT} from './animation-frames.js?v=37';
-import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=106.0';
+import {loadLifeArt,lifeFrameAt,mapFrames,builtFrames} from './character-life-art.js?v=106.0';
 import {createPosturePlayback} from './character-action-state.js?v=106.0';
 import {poseTexture,poseScale,posesFit} from './skill-pose-art.js?v=pose119';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
@@ -11,47 +11,46 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  const material=new THREE.MeshBasicMaterial({map:texture,alphaTest:.45,transparent:false,depthWrite:true,side:THREE.DoubleSide,color:'#fff1da'});
  const mesh=new THREE.Mesh(geometry,material);mesh.frustumCulled=false;
  const posture=createPosturePlayback();let transitionFlip=null;
- let frames=null,life=null,version=0,disposed=false,currentClass=classId,currentGender=gender,currentAppearance=appearance,loadedClass=null,appearanceDirty=false,poseFit=false;
+ let frames=null,life=null,version=0,disposed=false,currentClass=classId,currentGender=gender,loadedGender=gender,currentAppearance=appearance,loadedClass=null,appearanceDirty=false,poseFit=false;
  const textureFor=cell=>{const t=new THREE.CanvasTexture(cell);t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;return t;};
  function release(){
   // Idle/sit/sleep clips can reuse the same canvas and therefore GPU texture.
   const owned=new Set(frames?Object.values(frames).flat():[]);
-  if(life)for(const art of Object.values(life))if(art)for(const clip of Object.values(art.clips))for(const texture of clip.frames)owned.add(texture);
+  if(life)for(const art of Object.values(life))if(art)for(const clip of Object.values(art.clips))for(const texture of builtFrames(clip.frames))owned.add(texture);
   owned.forEach(t=>t.dispose());frames=null;life=null;
  }
- async function loadLife(id,look,gear){
-  return Object.fromEntries(await Promise.all(['male','female'].map(async gender=>{
-   const art=await lifeArtLoader(`${id}-${gender}`,{classId:id,appearance:look,equipment:gear});
-   return [gender,art];
-  })));
+ // 0.122 only the gender on screen: the other one doubled every hero's canvases (setRig reloads on a change)
+ async function loadLife(id,look,gear,shown){
+  return {[shown]:await lifeArtLoader(`${id}-${shown}`,{classId:id,appearance:look,equipment:gear})};
  }
  function textures(art){
   if(!art)return null;
   const converted=new Map(),convert=cell=>{if(!converted.has(cell))converted.set(cell,textureFor(cell));return converted.get(cell);};
-  return {...art,clips:Object.fromEntries(Object.entries(art.clips).map(([name,clip])=>[name,{...clip,frames:clip.frames.map(convert)}]))};
+  return {...art,clips:Object.fromEntries(Object.entries(art.clips).map(([name,clip])=>[name,{...clip,frames:mapFrames(clip.frames,convert)}]))};
  }
- function install(art,newLife,id,gear=equipment){
-  const next=Object.fromEntries(Object.entries(art).map(([key,cells])=>[key,cells.map(textureFor)]));
+ function install(art,newLife,id,gear,shown){
+  const next={[shown]:(art[shown]??[]).map(textureFor)};
   const nextLife=newLife&&Object.fromEntries(Object.entries(newLife).map(([key,value])=>[key,textures(value)]));
-  release();frames=next;life=nextLife;loadedClass=id;appearanceDirty=false;poseFit=posesFit(id,currentAppearance,gear);
-  material.map=frames[currentGender][Math.min(mesh.userData.artFrame??0,frames[currentGender].length-1)];
+  release();frames=next;life=nextLife;loadedClass=id;loadedGender=shown;appearanceDirty=false;poseFit=posesFit(id,currentAppearance,gear);
+  material.map=frames[loadedGender][Math.min(mesh.userData.artFrame??0,frames[loadedGender].length-1)];
   mesh.userData.artReady=true;mesh.userData.lifeAction=null;delete mesh.userData.artError;
  }
  async function artwork(id,look,gear){
-  const [art,result]=await Promise.all([paintedArtLoader(id,look,gear),loadLife(id,look,gear).then(value=>({value}),error=>({error}))]);
-  return {art,newLife:result.value??null,lifeError:result.error?.message??null};
+  const shown=currentGender,[art,result]=await Promise.all([paintedArtLoader(id,look,gear),loadLife(id,look,gear,shown).then(value=>({value}),error=>({error}))]);
+  return {art,shown,newLife:result.value??null,lifeError:result.error?.message??null};
  }
- mesh.userData.supportsAuthoredAction=action=>!!life?.[currentGender]?.clips[action]?.frames.length;
+ mesh.userData.supportsAuthoredAction=action=>!!life?.[loadedGender]?.clips[action]?.frames.length;
  mesh.userData.supportsAction=action=>['idle','walk'].includes(action)||mesh.userData.supportsAuthoredAction(action);
  mesh.userData.setRig=(id,g)=>{
   if(disposed)return Promise.resolve(false);
   currentGender=g;
-  if(id===currentClass&&id===loadedClass&&frames&&!appearanceDirty)return mesh.userData.ready;
+  if(id===currentClass&&id===loadedClass&&g===loadedGender&&frames&&!appearanceDirty)return mesh.userData.ready;
   currentClass=id;const token=++version;mesh.userData.artReady=!!frames;delete mesh.userData.artError;
   if(typeof document==='undefined'&&paintedArtLoader===loadPaintedCharacter)return mesh.userData.ready=Promise.resolve(false);
-  mesh.userData.ready=artwork(id,currentAppearance,equipment).then(({art,newLife,lifeError})=>{
+  mesh.userData.ready=artwork(id,currentAppearance,equipment).then(({art,shown,newLife,lifeError})=>{
    if(disposed||token!==version)return false;
-   install(art,newLife,id);mesh.userData.lifeError=lifeError;return true;
+   install(art,newLife,id,equipment,shown);mesh.userData.lifeError=lifeError;
+   return shown===currentGender||mesh.userData.setRig(currentClass,currentGender); // switched back while loading
   }).catch(error=>{if(disposed||token!==version)return false;mesh.userData.artError=error.message;console.error('Character animation artwork failed',id,error);return false;});
   return mesh.userData.ready;
  };
@@ -60,17 +59,17 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  mesh.userData.setEquipment=async value=>{
   if(disposed)return false;
   const token=++version;
-  const id=currentClass,{art,newLife,lifeError}=await artwork(id,currentAppearance,value);
+  const id=currentClass,{art,shown,newLife,lifeError}=await artwork(id,currentAppearance,value);
   if(disposed||token!==version)return false;
-  install(art,newLife,id,value);equipment=value;mesh.userData.lifeError=lifeError;return true;
+  install(art,newLife,id,value,shown);equipment=value;mesh.userData.lifeError=lifeError;return true;
  };
  mesh.userData.rigType='painted-frames';
  mesh.onBeforeRender=(_r,_s,camera)=>{mesh.quaternion.copy(camera.quaternion);mesh.updateMatrixWorld();};
  mesh.userData.pose=(pose,flip=false)=>{
   if(disposed)return;
   const requested=pose.mode==='rest'?'sit':pose.mode??'idle';
-  const resolved=posture.sample(requested,pose.time??0,{clips:life?.[currentGender]?.clips??{},reduced:pose.reduced});
-  const action=resolved.mode,clip=life?.[currentGender]?.clips[action];
+  const resolved=posture.sample(requested,pose.time??0,{clips:life?.[loadedGender]?.clips??{},reduced:pose.reduced});
+  const action=resolved.mode,clip=life?.[loadedGender]?.clips[action];
   if(resolved.transition){transitionFlip??=flip;flip=transitionFlip;}else transitionFlip=null;
   const clipDuration=clip?.frameDurations?.reduce((a,b)=>a+b,0)??(clip?.frames.length??0)/(clip?.fps??1);
   const clipTime=action==='attack'&&Number.isFinite(pose.actionPhase)?Math.min(.999999,Math.max(0,pose.actionPhase))*clipDuration:['run','walk'].includes(action)&&Number.isFinite(pose.phase)?(((pose.phase%1)+1)%1)*clipDuration:resolved.time;
@@ -78,13 +77,13 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   let frame=Math.max(0,Math.min(FRAME_COUNT-1,Math.round(pose.artFrame??0)));
   // Front/back walk only where that art exists; otherwise the side cycle (with its left/right flip).
   // A class without front/back art: walking falls back to the side cycle, standing to the original idle frame.
-  const missing=frames&&frame>=frames[currentGender].length;if(missing)frame=pose.stand?0:12+(frame-12)%8;
+  const missing=frames&&frame>=frames[loadedGender].length;if(missing)frame=pose.stand?0:12+(frame-12)%8;
   if(frame>=20&&lifeIndex<0)flip=false; // front/back walk art is drawn facing the camera / away from it
   // 0.119 a skill with its own pose sheet draws it; until it loads, or for gear the sheet cannot show, the class frames play.
   const skill=pose.skillArt,art=skill&&poseFit&&frames&&!mesh.userData.directional&&loadedClass===currentClass?poseTexture(skill.id,currentClass,currentGender,skill.frame):null;
   mesh.userData.skillArt=art?skill.id:null;
   if(!mesh.userData.directional&&frames){
-   material.map=art??(lifeIndex>=0?clip.frames[lifeIndex]:frames[currentGender][frame]);
+   material.map=art??(lifeIndex>=0?clip.frames[lifeIndex]:frames[loadedGender][frame]);
    mesh.userData.artFrame=frame;mesh.userData.lifeAction=lifeIndex>=0?action:null;mesh.userData.lifeFrame=lifeIndex;mesh.userData.lifeTransition=resolved.transition;
   }
   // Pose cells share the 320 frame and its ground anchor; their scale brings the standing body to the class frames' height.

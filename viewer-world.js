@@ -2,7 +2,7 @@ import {storyNPCIdentity,storyNPCPlacement} from './npc-identity175.js';
 import {createArenaStage} from './arena-stage166.js';
 import {createArenaUI} from './arena-ui166.js?v=profile171';
 import {createAnnouncementUI} from './announcement-ui.js?v=149';
-import {createAutoTargetUI} from './auto-target-ui.js?v=139';
+import {createAutoTargetUI} from './auto-target-ui.js?v=at1';
 import {createBossBrowserUI} from './boss-browser-ui.js?v=travel161';
 import './role-i18n.js?v=116';
 import {createActionbar} from './actionbar-ui.js?v=overlay143';

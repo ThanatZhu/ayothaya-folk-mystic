@@ -20,9 +20,9 @@ test('rainbow recipes use 50000 shards for amulets and 100 for other gear; origi
  const craftId=gear.find(([,it])=>!it.bossSet)[0],full={coins:1000000,items:{[CONQUEST_SHARD]:AMULET_CRAFT_SHARDS+1,...Object.fromEntries(Object.keys(ITEMS).filter(id=>![craftId,CONQUEST_SHARD].includes(id)).slice(0,BAG_SLOTS-1).map(id=>[id,1]))}},copy=structuredClone(full);
  assert.throws(()=>craft(full,craftId),/bag-full/);assert.deepEqual(full,copy);assert.equal(craftable(bag,RECIPES.find(r=>r.out===out)),2);
 });
-test('only MVP/world bosses drop 1–3 once, unaffected by additional loot rolls',()=>{
+test('only the Cloud Peak Yaksha drops 1–3 once, unaffected by additional loot rolls (0.122)',()=>{
  assert.equal(conquestCount(()=>0),1);assert.equal(conquestCount(()=>1),3);
- const bosses=FRONTIER_MONSTERS.filter(conquestBoss);assert.ok(bosses.length>5);
+ const bosses=FRONTIER_MONSTERS.filter(conquestBoss);assert.deepEqual(bosses.map(m=>m.id),['cloud-peak-yaksha']);
  for(const m of FRONTIER_MONSTERS)assert.equal(!!DROPS[m.id]?.items.some(([id])=>id===CONQUEST_SHARD),conquestBoss(m),m.id);
  for(const random of [()=>0,()=>.99999])for(const rolls of [1,2,4])for(const boss of bosses){const items=rollLoot(boss.id,random,null,rolls).items.filter(i=>i.id===CONQUEST_SHARD);assert.equal(items.length,1,boss.id);assert.equal(items[0].count,random()===0?1:3);}
  assert.ok(craftSources(CONQUEST_SHARD).some(s=>s.kind==='event'));assert.ok(craftSources(CONQUEST_SHARD).some(s=>s.kind==='drop'));

@@ -4700,7 +4700,7 @@ Object.assign(globalThis.I18N_EN,{
   "กิลด์ {0} ได้อันดับ {1} · รางวัลสำหรับสมาชิกที่ร่วมรบ: เศษตราพิชิตอโยธยา {2} ชิ้น": "Guild {0} placed {1} · Participating member reward: {2} Ayothaya Conquest Seal Shards",
   "กองรางวัลกิลด์วอร์": "Guild War Rewards",
   "เศษตราพิชิตอโยธยา": "Ayothaya Conquest Seal Shard",
-  "ใช้ร่วมกับวัตถุดิบเดิม · สะสม 100 เศษ และ 1,000,000 เบี้ย เพื่อคราฟไอเท็มสายรุ้ง 1 ชิ้น · กิลด์วอร์อันดับ 1–3 สำหรับสมาชิกที่ร่วมรบ หรือ MVP/บอสโลก · สุ่มครั้งละ 1–3 เศษ": "Use with the original recipe materials: 100 shards and 1,000,000 cowries per rainbow item · Participating members of Guild War ranks 1–3, or MVP/world bosses · Random 1–3 shards per reward",
+  "ใช้ร่วมกับวัตถุดิบเดิม · สะสม 100 เศษ และ 1,000,000 เบี้ย เพื่อคราฟไอเท็มสายรุ้ง 1 ชิ้น · กิลด์วอร์อันดับ 1–3 สำหรับสมาชิกที่ร่วมรบ หรือยักษ์เมฆาคุ้มขุนเขา (บอสยอดเขาไกรลาส) · สุ่มครั้งละ 1–3 เศษ": "Use with the original recipe materials: 100 shards and 1,000,000 cowries per rainbow item · Participating members of Guild War ranks 1–3, or the Cloud Peak Yaksha (Kailash Peak boss) · Random 1–3 shards per reward",
   "อันดับ 1: ผู้ครองป้อมเมื่อจบ · อันดับ 2–3: ดาเมจต่อศิลาราชสีห์สูงสุดในกิลด์ที่เหลือ · เท่ากันดูจำนวนยึดป้อมและล้มคู่ต่อสู้ · สมาชิกที่ร่วมรบทุกคนใน 3 อันดับแรกได้รับเศษตราพิชิตอโยธยา สุ่มคนละ 1–3 เศษ ทางจดหมาย": "Rank 1: final fortress holder · Ranks 2–3: highest guardian-stone damage among remaining guilds · Ties use captures, then knockouts · Every participating member of the top three guilds receives 1–3 random Ayothaya Conquest Seal Shards by mail",
   "{0} · ดาเมจศิลา {1}": "{0} · Stone damage {1}",
   "🏆 อันดับกิลด์วอร์ ·": "🏆 Guild War standings ·"
@@ -4851,7 +4851,7 @@ Object.assign(globalThis.I18N_EN,{
  "เปลี่ยนอาชีพ · กล่องเลือกเซ็ตแดง Lv.55": "Class advancement · Red Lv.55 equipment set choice box"
 });
 
-Object.assign(globalThis.I18N_EN,{"ใช้ร่วมกับวัตถุดิบเดิม · พระเครื่องรุ้งใช้ 50,000 เศษต่อองค์ อุปกรณ์รุ้งอื่นใช้ 100 เศษต่อชิ้น · ค่าคราฟ 1,000,000 เบี้ย · กิลด์วอร์อันดับ 1–3 สำหรับสมาชิกที่ร่วมรบ หรือ MVP/บอสโลก · สุ่มครั้งละ 1–3 เศษ":"Use with the original materials: rainbow amulets require 50,000 shards each; other rainbow equipment requires 100 shards each. Crafting fee: 1,000,000 cowries. Participating members of Guild War ranks 1-3, or MVP/world bosses, receive 1-3 shards per reward."});
+Object.assign(globalThis.I18N_EN,{"ใช้ร่วมกับวัตถุดิบเดิม · พระเครื่องรุ้งใช้ 50,000 เศษต่อองค์ อุปกรณ์รุ้งอื่นใช้ 100 เศษต่อชิ้น · ค่าคราฟ 1,000,000 เบี้ย · กิลด์วอร์อันดับ 1–3 สำหรับสมาชิกที่ร่วมรบ หรือ ยักษ์เมฆาคุ้มขุนเขา (บอสยอดเขาไกรลาส) · สุ่มครั้งละ 1–3 เศษ":"Use with the original materials: rainbow amulets require 50,000 shards each; other rainbow equipment requires 100 shards each. Crafting fee: 1,000,000 cowries. Participating members of Guild War ranks 1-3, or the Cloud Peak Yaksha (Kailash Peak boss), receive 1-3 shards per reward."});
 // 0.122 quest cards, world-map walking, portrait HUD
 Object.assign(globalThis.I18N_EN,{
   "เนื้อเรื่อง": "Story",

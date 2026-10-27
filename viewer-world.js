@@ -20,7 +20,7 @@ import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=ult1193';
 import {createAutoSettings} from './auto-settings.js?v=hud143';
 import {createMmoHud} from './mmo-hud.js?v=dot1191';
-import {createSoftLook} from './soft-look.js?v=actor1165';
+import {createSoftLook,markOccluders} from './soft-look.js?v=occl1201';
 import {lightingProfile,applyWorldLighting,applyMeadowLighting,createActorLighting,contactShadowTexture} from './world-lighting159.js?v=shadow160';
 import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=maps175';
@@ -134,6 +134,7 @@ try {
   }o.material=cache.get(cacheKey);
  }});scene.add(gltf.scene);
  const worldLight=applyWorldLighting({scene,model:gltf.scene,map,sun,hemi,renderer});
+ markOccluders(gltf.scene);   // low props in front of a character cover it (soft-look.js)
  // v2 scenes already contain their trees, props and ground detail: never layer the old procedural set on top.
  const idle={update(){}};if(!map.scene&&!map.pvpArena)createCapitalProps({scene,map});
  const landscapeDetails=map.scene||map.pvpArena?idle:createLandscapeDetails({scene,map});

@@ -23,7 +23,7 @@ test('a party keeps together across travel and shares one dungeon instance; anot
  assert.equal(a2.partyId,'party-test');assert.equal(b2.partyId,'party-test');
  assert.equal(a2.room,b2.room,'same instance');assert.notEqual(a2.room,c2.room,'solo player gets a separate instance');
  assert.equal(realm.parties.get('party-test').leader,a2.id,'leader restored');
- assert.equal(a2.room.mobs.length,11);
+ assert.equal(a2.room.mobs.length,19);
 });
 
 test('instance monsters stay down; the dungeon boss pays every member once per Thai day', () => {

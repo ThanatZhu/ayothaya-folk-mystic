@@ -153,10 +153,45 @@ const PACK=[[0,0],[2.2,.7],[-1.8,1.6],[-.9,-2.2],[2,-1.6]];
 export const LEADER={hp:3,xp:2,loot:3,respawn:3,scale:1.35,member:.6};
 export const mobXp=m=>m.leader?LEADER.xp:m.pack!==undefined?LEADER.member:1;
 export const mobRespawn=m=>(MONSTER_TYPES[m.type].respawn??12)*(m.leader?LEADER.respawn:1);
-export function packSpawns(mobs,{packs=false,nav=DEFAULT_NAV}={}){
- if(!packs)return mobs;
- return mobs.flatMap(([x,z,type],i)=>{const T=MONSTER_TYPES[type];return T?.boss||T?.elite||T?.sheet==='elite-monsters'?[[x,z,type,i]]:PACK.slice(0,4+i%2).map(([dx,dz],k)=>{
-  for(const f of [1,.6,.3])if(walkable(x+dx*f,z+dz*f,.4,nav))return [x+dx*f,z+dz*f,type,i,k===0];return [x,z,type,i,k===0];});});
+// 0.122 spread out (tester: "two groups on one spot"): each camp monster gets its own home 6–14 m around the camp
+// point, at least 3 m from every other monster, and a doubled camp gets its own point at least 12 m from every camp
+// instead of 3–7 m beside the original. Seeded random, so the realm server and every client still build identical
+// spots and ids. Tight ground falls back to 3–8 m, then 1.5–20 m (1.5 m apart), and only then to the old pack shape.
+export const SPREAD={min:6,max:14,gap:3,campGap:12};
+const seeded=seed=>()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};
+const special=T=>!T||T.boss||T.elite||T.mvp||T.worldBoss||T.sheet==='elite-monsters';
+export function packSpawns(mobs,{packs=false,nav=DEFAULT_NAV,mobPopulation=1}={}){
+ const rand=seeded(mobs.reduce((h,[x,z,t],i)=>Math.imul(h^Math.round(x*10)^Math.round(z*10)<<8^t<<16^i,2654435761)|0,mobs.length+1));
+ const spots=mobs.map(([x,z])=>({x,z})),free=(x,z,gap)=>walkable(x,z,.4,nav)&&spots.every(p=>Math.hypot(x-p.x,z-p.z)>=gap);
+ const place=(cx,cz)=>{
+  for(const [lo,hi,gap] of [[SPREAD.min,SPREAD.max,SPREAD.gap],[3,8,1.5],[1.5,20,1.5]])for(let t=0;t<90;t++){
+   const a=rand()*Math.PI*2,r=Math.sqrt(lo*lo+rand()*(hi*hi-lo*lo)),x=cx+Math.cos(a)*r,z=cz+Math.sin(a)*r;
+   if(free(x,z,gap)){spots.push({x,z});return [x,z];}
+  }
+  return null;
+ };
+ const packed=(cx,cz,k)=>{const [dx,dz]=PACK[k%PACK.length];for(const f of [1,.6,.3])if(walkable(cx+dx*f,cz+dz*f,.4,nav))return [cx+dx*f,cz+dz*f];return [cx,cz];};
+ const base=!packs?mobs.map(s=>[...s]):mobs.flatMap(([x,z,type],i)=>special(MONSTER_TYPES[type])?[[x,z,type,i]]:
+  Array.from({length:4+i%2},(_,k)=>[...(place(x,z)??packed(x,z,k)),type,i,k===0]));
+ if(mobPopulation!==2)return base;
+ // Duplicate complete ordinary camps after packing, so odd camp sizes still
+ // double exactly. Original spawn IDs stay stable; copied camps get new IDs.
+ const groups=new Map(),centers=mobs.map(([x,z])=>({x,z})),extra=[];
+ for(const [i,s]of base.entries()){
+  if(special(MONSTER_TYPES[s[2]]))continue;
+  const key=s[3]===undefined?'single-'+i:'pack-'+s[3],at=s[3]===undefined?s:mobs[s[3]];
+  if(!groups.has(key))groups.set(key,{center:{x:at[0],z:at[1]},members:[]});groups.get(key).members.push(s);
+ }
+ for(const g of groups.values()){
+  let c=null;
+  for(const [lo,hi,gap] of [[SPREAD.campGap*1.6,SPREAD.campGap*2.4,SPREAD.campGap],[SPREAD.campGap,SPREAD.campGap*1.6,SPREAD.campGap*.7],[SPREAD.campGap*.5,SPREAD.campGap*3,SPREAD.campGap*.5]]){
+   for(let t=0;t<40&&!c;t++){const a=rand()*Math.PI*2,r=lo+rand()*(hi-lo),x=g.center.x+Math.cos(a)*r,z=g.center.z+Math.sin(a)*r;if(walkable(x,z,.4,nav)&&centers.every(p=>Math.hypot(x-p.x,z-p.z)>=gap))c={x,z};}
+   if(c)break;
+  }
+  c??=g.center;centers.push(c);
+  for(const [k,s] of g.members.entries()){const copy=[...(place(c.x,c.z)??packed(c.x,c.z,k+1)),...s.slice(2)];if(copy[3]!==undefined)copy[3]+=base.length;extra.push(copy);}
+ }
+ return [...base,...extra];
 }
 // A struck monster calls up to two idle packmates within 6 m, so camps fight together.
 export function rallyPack(mobs,mob){
@@ -322,13 +357,18 @@ export class CombatWorld{
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);
   if(this.auto&&!stop&&!knocked&&!manual&&this.manualGrace===0){
-   let m=this.target;if(!m||!this.prey(m)||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_SEEK+2){m=this.nearest(AUTO_RANGE);
+   // 0.122 a kind picked in the AUTO window (or a quest hunt) is looked for across the whole map: with the 30 m limit
+   // a picked kind living further away left the hero standing among other monsters until AUTO switched off.
+   const seek=['type','entity'].includes(this.autoTarget?.kind)||Number.isInteger(this.hunt)?Infinity:AUTO_SEEK;
+   let m=this.target;if(!m||!this.prey(m)||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>seek+2){m=this.nearest(AUTO_RANGE);
     // 0.91 nothing left near where AUTO was switched on (e.g. turned on at the respawn yard): take the closest monster
     // within 30 m of the player and move the hunting spot there.
-    if(!m){m=this.foes().filter(x=>x.hp>0&&this.prey(x)&&distance(x,p)<=AUTO_SEEK).sort((a,b)=>distance(a,p)-distance(b,p))[0]??null;if(m)this.anchor={x:m.x,z:m.z};}
+    if(!m){m=this.foes().filter(x=>x.hp>0&&this.prey(x)&&distance(x,p)<=seek).sort((a,b)=>distance(a,p)-distance(b,p))[0]??null;if(m)this.anchor={x:m.x,z:m.z};}
     this.targetId=m?.id??null;this.path=[];}
    // 0.97 nothing to hunt within 30 m for 25 s: AUTO switches itself off and says why, so the button never shows on while idle.
-   if(m)this.autoIdle=0;else if((this.autoIdle+=dt)>25){this.auto=false;this.autoIdle=0;this.notice('ปิด AUTO · ไม่พบมอนสเตอร์ในระยะ 30 ม.');}
+   // A picked kind that lives on this map is waited for (respawn) instead.
+   const waits=seek===Infinity&&this.foes().some(x=>this.prey(x));
+   if(m||waits)this.autoIdle=0;else if((this.autoIdle+=dt)>25){this.auto=false;this.autoIdle=0;this.notice('ปิด AUTO · ไม่พบมอนสเตอร์ในระยะ 30 ม.');}
    if(m){
     // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
     this.autoCast=Math.max(0,this.autoCast-dt);
@@ -344,8 +384,9 @@ export class CombatWorld{
   }
   p.moving=Math.hypot(p.x-ox,p.z-oz)>.001;p.running=p.moving&&manual&&wantsRun;
   if(!monsters)return; // Shared-room servers advance each monster exactly once per tick.
+  const level=baseProgress(this).level; // 0.122 territory: a monster 15+ levels above attacks on approach
   for(const m of this.mobs){
-   const baseType=MONSTER_TYPES[m.type],type=m.roleStatus?.slow||m.petSlow>0?{...baseType,speed:baseType.speed*(baseType.boss?.8:.5)}:baseType,decoy=m.roleStatus?.decoy,aim=decoy?{...p,x:p.x+1.2,hp:1}:p,outcome=advanceMonster(m,aim,type,dt,this.nav,{moveBody,lineClear});
+   const baseType=MONSTER_TYPES[m.type],type=m.roleStatus?.slow||m.petSlow>0?{...baseType,speed:baseType.speed*(baseType.boss?.8:.5)}:baseType,decoy=m.roleStatus?.decoy,aim=decoy?{...p,x:p.x+1.2,hp:1}:p,outcome=advanceMonster(m,aim,type,dt,this.nav,{moveBody,lineClear,level});
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
    if(m.justEnraged){m.justEnraged=false;this.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
    if(outcome==='burst'&&Math.hypot(p.x-m.x,p.z-m.z)<=MONSTER_BEHAVIOUR[type.id].aoe&&this.takeMonsterHit(type,type.damage,m)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}

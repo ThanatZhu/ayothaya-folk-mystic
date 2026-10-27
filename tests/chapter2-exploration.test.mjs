@@ -21,7 +21,7 @@ function route(map,goal,from=map.spawn){
 test('chapter 2 ships reviewed geometry, matching navigation and separate loading illustrations',()=>{
  for(const [i,m] of maps.entries()){
   if(m.safe){assert.equal(m.exploration,true);assert.equal(new CombatWorld(m).mobs.length,0);}
-  else{assert.equal(m.exploration,false);assert.equal(new CombatWorld(m).mobs.length,29);assert.ok(m.worldBoss);}
+  else{assert.equal(m.exploration,false);assert.equal(new CombatWorld(m).mobs.length,56);assert.ok(m.worldBoss);}
   const blob=read(m.scene);assert.ok(blob.length<=5000000);
   assert.equal(createHash('sha256').update(blob).digest('hex'),manifest.maps[i].sha256);
   assert.equal(m.nav.grid.rows.length,m.nav.grid.h);

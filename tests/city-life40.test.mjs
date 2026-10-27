@@ -9,8 +9,8 @@ import {walkable} from '../combat-core.js';
 import {levelStart} from '../experience.js';
 const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8')),city=catalog.maps.find(m=>m.id==='ayutthaya');
 const record=(mentor=MENTORS[0],level=25,jobXp=1260)=>({character:{name:'ศิษย์ทดสอบ',gender:'female',classId:'novice'},state:{...initialSave(),position:{x:mentor.x,z:mentor.z+1.3},traveler:{...initialSave().traveler,baseXp:levelStart(level),jobXp,kills:9}}});
-test('capital has eight unique teachers for seven professions, 32 reachable walking citizens and no monsters',()=>{
- assert.equal(city.safe,true);assert.equal(city.mobs.length,0);assert.equal(new Set(MENTORS.map(m=>m.id)).size,8);assert.equal(new Set(MENTORS.map(m=>m.classId)).size,7);assert.equal(city.citizens.length,32);
+test('capital has eight unique teachers for seven professions, 16 reachable walking citizens and no monsters',()=>{
+ assert.equal(city.safe,true);assert.equal(city.mobs.length,0);assert.equal(new Set(MENTORS.map(m=>m.id)).size,8);assert.equal(new Set(MENTORS.map(m=>m.classId)).size,7);assert.equal(city.citizens.length,16);
  for(const c of city.citizens){assert.ok(c.route.filter(p=>p.rest).length>=4);for(let t=0;t<routeDuration(c.route,c.speed,c.pause);t+=.3){const p=sampleRoute(c.route,t,c);assert.ok(walkable(p.x,p.z,.3,city.nav),`${c.id} route at ${p.x},${p.z}`);}}
 });
 test('walking loops repeat exactly, stop at authored rest points and do not pause at pathfinding nodes',()=>{

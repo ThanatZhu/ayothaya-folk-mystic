@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=novice174';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=death178';
+import {nextHop} from './story-quests.js?v=weapon188';
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
@@ -76,7 +77,22 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
    if(cost===null||traveling||world.player.hp<=0){atlas.close();return;}
    if(!game.online&&!api.payWarp?.(cost)){atlas.close();world.notice('เบี้ยไม่พอ');return;}
    atlas.close();travel(id,false,true);
-  }});
+  },
+  onWalk:id=>walkToMap(id)});
+ // 0.122 "เดินไป" on the world map: walk to the gate toward that map and through it; the destination is stored only
+ // as the gate is taken, so the next map carries on (below) while a walk cancelled by hand leaves nothing behind.
+ const WALK_KEY='ayothaya-walk-to-map';
+ function walkToMap(id){
+  const dest=lookup(id);if(!dest||world.player.hp<=0)return;
+  if(id===map.id){world.notice('ถึง '+dest.name+' แล้ว');return;}
+  const hop=nextHop(catalog.maps,map.id,id),portal=map.portals.find(p=>p.to===hop);
+  if(!portal){world.notice('ยังไม่มีทางเดินไป '+dest.name);return;}
+  const go=()=>{try{sessionStorage.setItem(WALK_KEY,id);}catch{}travel(hop).then(ok=>{if(ok===false)try{sessionStorage.removeItem(WALK_KEY);}catch{}});};
+  game.clearInput();if(world.auto)world.setAuto?.(false);world.notice('เดินไป '+dest.name);
+  game.walkTo({x:portal.x,z:portal.z},{radius:1.2,kind:'map',onArrive:go,onFail:()=>world.notice('เดินไปจุดเดินทางไม่ได้')});
+ }
+ {let pendingWalk=null;try{pendingWalk=sessionStorage.getItem(WALK_KEY);sessionStorage.removeItem(WALK_KEY);}catch{}
+  if(pendingWalk)setTimeout(()=>walkToMap(pendingWalk),1500);}
  const worldButton=document.createElement('button');worldButton.type='button';worldButton.id='world-toggle';worldButton.textContent='World';dialog.append(worldButton);
  worldButton.onclick=()=>{game.clearInput();atlas.show();};
  function openMap(){if(account?.paused||mentors.paused||atlas.open)return;endTalk();openHudPanel(dialog);drawCityMap();}

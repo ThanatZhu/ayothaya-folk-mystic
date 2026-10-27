@@ -4852,3 +4852,11 @@ Object.assign(globalThis.I18N_EN,{
 });
 
 Object.assign(globalThis.I18N_EN,{"ใช้ร่วมกับวัตถุดิบเดิม · พระเครื่องรุ้งใช้ 50,000 เศษต่อองค์ อุปกรณ์รุ้งอื่นใช้ 100 เศษต่อชิ้น · ค่าคราฟ 1,000,000 เบี้ย · กิลด์วอร์อันดับ 1–3 สำหรับสมาชิกที่ร่วมรบ หรือ MVP/บอสโลก · สุ่มครั้งละ 1–3 เศษ":"Use with the original materials: rainbow amulets require 50,000 shards each; other rainbow equipment requires 100 shards each. Crafting fee: 1,000,000 cowries. Participating members of Guild War ranks 1-3, or MVP/world bosses, receive 1-3 shards per reward."});
+// 0.122 quest cards, world-map walking, portrait HUD
+Object.assign(globalThis.I18N_EN,{
+  "เนื้อเรื่อง": "Story",
+  "บททดสอบอาชีพ": "Job trial",
+  "เดินไป": "Walk there",
+  "ยังไม่มีทางเดินไป": "No walking route to",
+  "แตะชื่อเมืองบนแผนที่ แล้วกดเดินไปหรือวาร์ป · จุดสีเทายังไม่เปิดเดินทาง": "Tap a town on the map, then walk there or warp · grey spots aren't open yet"
+});

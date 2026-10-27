@@ -13,9 +13,9 @@ m.landmarks=m.landmarks.map(l=>l[1]===38&&l[2]===-70?[MASTER_COURT.name,38,-70]:
 for(const a of MENTORS){if(!walkable(a.x,a.z,.3,m.nav))throw new Error('Mentor spot blocked: '+a.id);m.npcs.push({...a,mentorId:a.id,texture:0});m.nav.props.push([a.x,a.z,.43]);}
 const loops=[[[2,0],[20,0],[20,-30],[2,-30]],[[36,-26],[38,-37],[10,-32],[6,-5]],[[0,-34],[0,-64],[37,-70],[38,-34]],[[-44,-3],[-44,-30],[-4,-32],[-3,0]],[[-44,-34],[-44,-68],[-4,-70],[-3,-34]],[[0,-70],[0,-91],[38,-96],[38,-74]],[[38,-32],[38,-49],[54,-49],[54,-31]],[[-44,-70],[-44,-95],[-4,-96],[-3,-73]]];
 m.citizens=[];
-for(let i=0;i<32;i++){const points=loops[i%loops.length].map(([x,z])=>({x,z})),route=[];
+for(let i=0;i<16;i++){const points=loops[i%loops.length].map(([x,z])=>({x,z})),route=[];
  for(let k=0;k<points.length;k++){const from=points[k],to=points[(k+1)%points.length];if(!walkable(from.x,from.z,.32,m.nav)||!walkable(to.x,to.z,.32,m.nav))throw new Error('Citizen waypoint blocked '+i);const path=findPath(from,to,m.nav);if(!path.length)throw new Error('Citizen route disconnected '+i);route.push({...from,rest:true},...path.slice(0,-1));}
  const compact=[];for(const p of route){while(compact.length>1&&!compact.at(-1).rest){const a=compact.at(-2),b=compact.at(-1),cross=(b.x-a.x)*(p.z-b.z)-(b.z-a.z)*(p.x-b.x),dot=(b.x-a.x)*(p.x-b.x)+(b.z-a.z)*(p.z-b.z);if(Math.abs(cross)>.00001||dot<0)break;compact.pop();}compact.push(p);}
  m.citizens.push({id:'citizen-'+i,style:(i+Math.floor(i/8))%8,speed:.85+(i%5)*.09,pause:1.8+(i%4)*.5,offset:i*13.73,route:compact});
 }
-catalog.version=40;await writeFile(path,JSON.stringify(catalog,null,2)+'\n');console.log('Added',MENTORS.length,'mentors and',m.citizens.length,'pedestrians');
+catalog.version=Math.max(catalog.version??0,195);await writeFile(path,JSON.stringify(catalog,null,2)+'\n');console.log('Added',MENTORS.length,'mentors and',m.citizens.length,'pedestrians');

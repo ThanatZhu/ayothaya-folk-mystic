@@ -2,7 +2,7 @@ import {createAdminResetUI} from './admin-reset-ui.js?v=166';
 import {adminLevelHTML,bindAdminLevels} from './admin-level-panel.js';
 import {legacyPetItem} from './mailbox.js';
 import {petGrantHTML,bindPetGrant} from './admin-pet-panel.js?v=127';
-import {paintAdminSkills,paintAdminMonsters} from './admin-art.js?v=127';
+import {paintAdminSkills,paintAdminMonsters} from './admin-art.js?v=at1';
 import {liveRoleSkills} from './role-skill-progress.js';
 import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS} from './role-combat.js';
 import {roleById} from './assets/skills-next/catalog.js';

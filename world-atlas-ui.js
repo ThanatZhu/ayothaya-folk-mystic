@@ -1,4 +1,4 @@
-import {warpCost} from './world-state.js?v=101.5';
+import {warpCost,hops} from './world-state.js?v=101.5';
 
 // 0.112.4 the world map is Thailand (models3d/world-thailand/build_thailand.py renders it in Blender from Natural Earth
 // data). Every place is pinned at a real longitude / latitude, in the same frame the render uses.
@@ -24,14 +24,14 @@ const SIDE={'ayutthaya':'r','rice-fields':'l','moonlit-mill':'t','old-orchard':'
 const LATER=[['เชียงใหม่ · ล้านนา',[98.99,18.79]],['พิษณุโลก',[100.26,16.82]],['พิมาย',[102.49,15.22]],['ด่านเจดีย์สามองค์',[98.38,15.30]],
  ['จันทบูร',[102.10,12.61]],['นครศรีธรรมราช',[99.96,8.43]],['ปัตตานี',[101.25,6.87]],['ตะนาวศรี',[98.85,12.10]]];
 
-export function createWorldAtlas({catalog,currentId,coins,onWarp,onClose}){
+export function createWorldAtlas({catalog,currentId,coins,onWarp,onWalk,onClose}){
  const dialog=document.createElement('dialog');
  dialog.id='world-atlas-dialog';dialog.setAttribute('aria-labelledby','atlas-heading');
- dialog.innerHTML=`<header class="atlas-header"><div><h2 id="atlas-heading">แผนที่สยาม</h2><p>แตะชื่อเมืองบนแผนที่ แล้วกดวาร์ป · จุดสีเทายังไม่เปิดเดินทาง</p></div><nav aria-label="ควบคุมแผนที่โลก"><button type="button" data-zoom="minus" aria-label="ย่อแผนที่โลก">−</button><button type="button" data-zoom="reset" aria-label="แสดงแผนที่โลกทั้งหมด">100%</button><button type="button" data-zoom="plus" aria-label="ขยายแผนที่โลก">+</button><button type="button" id="atlas-close" aria-label="ปิดแผนที่โลก">✕</button></nav></header>
+ dialog.innerHTML=`<header class="atlas-header"><div><h2 id="atlas-heading">แผนที่สยาม</h2><p>แตะชื่อเมืองบนแผนที่ แล้วกดเดินไปหรือวาร์ป · จุดสีเทายังไม่เปิดเดินทาง</p></div><nav aria-label="ควบคุมแผนที่โลก"><button type="button" data-zoom="minus" aria-label="ย่อแผนที่โลก">−</button><button type="button" data-zoom="reset" aria-label="แสดงแผนที่โลกทั้งหมด">100%</button><button type="button" data-zoom="plus" aria-label="ขยายแผนที่โลก">+</button><button type="button" id="atlas-close" aria-label="ปิดแผนที่โลก">✕</button></nav></header>
  <div class="atlas-viewport" tabindex="0" aria-label="ภาพแผนที่โลก เลื่อนเพื่อสำรวจเมื่อขยาย"><div class="atlas-stage"><div class="atlas-surface"><img src="${IMG}" width="1536" height="1024" alt="ภาพแผนที่โลกอโยธยา" draggable="false"></div></div></div>
- <footer class="atlas-footer"><div class="atlas-destination-info"><select id="atlas-destination" aria-label="เลือกจุดหมาย"></select><p id="atlas-detail" role="status" aria-live="polite"></p></div><div class="atlas-travel"><span id="atlas-wallet"></span><button type="button" id="atlas-warp">วาร์ป</button></div></footer>`;
+ <footer class="atlas-footer"><div class="atlas-destination-info"><select id="atlas-destination" aria-label="เลือกจุดหมาย"></select><p id="atlas-detail" role="status" aria-live="polite"></p></div><div class="atlas-travel"><span id="atlas-wallet"></span><button type="button" id="atlas-walk">เดินไป</button><button type="button" id="atlas-warp">วาร์ป</button></div></footer>`;
  document.body.append(dialog);
- const $=s=>dialog.querySelector(s),viewport=$('.atlas-viewport'),surface=$('.atlas-surface'),select=$('#atlas-destination'),warp=$('#atlas-warp');
+ const $=s=>dialog.querySelector(s),viewport=$('.atlas-viewport'),surface=$('.atlas-surface'),select=$('#atlas-destination'),warp=$('#atlas-warp'),walk=$('#atlas-walk');
  const pins=new Map();let selected=currentId,zoom=1,busy=false,drag=null,suppressClick=false;
  for(const map of catalog.maps){if(map.pvpArena&&map.id!==currentId)continue;
   const option=document.createElement('option');option.value=map.id;option.textContent=map.name;select.append(option);
@@ -62,6 +62,8 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onClose}){
   $('#atlas-wallet').textContent=`มี ${money.toLocaleString('th-TH')} เบี้ย`;
   warp.textContent=cost===null?'วาร์ป':`วาร์ป · ${cost} เบี้ย`;
   warp.disabled=busy||cost===null||money<cost;
+  // 0.122 walk there for free through the gates (any map a warp reaches; party dungeons and guild halls stay closed)
+  walk.disabled=busy||!onWalk||cost===null||hops(catalog.maps,currentId,selected)===null;
  }
  function fit(){
   const width=Math.min(viewport.clientWidth,viewport.clientHeight*ASPECT)*zoom;
@@ -89,6 +91,7 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onClose}){
  viewport.addEventListener('pointerup',endDrag);viewport.addEventListener('pointercancel',endDrag);
  viewport.addEventListener('click',e=>{if(suppressClick){e.preventDefault();e.stopPropagation();}},true);
  warp.onclick=()=>{refresh();if(warp.disabled)return;busy=true;warp.disabled=true;onWarp(selected);};
+ walk.onclick=()=>{refresh();if(walk.disabled)return;dialog.close();onWalk(selected);};
  $('#atlas-close').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{busy=false;onClose?.();});
  return {

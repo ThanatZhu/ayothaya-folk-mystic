@@ -18,9 +18,9 @@ export function lablaeCitizens(){
   'ลับแลมีทั้งย่านช่าง สวนดอกไม้ และวัด ลองเดินชมให้ทั่วเถิด',
   'กำลังเอางานสานไปส่งที่ตลาด ถ้าชอบงานฝีมือก็ลองไปชมย่านช่างนะ'
  ];
- return circuits.flatMap((points,k)=>Array.from({length:6},(_,i)=>{
-  const id=k*6+i,style=id%8,speed=.9+(id%4)*.08,pause=3;
+ return circuits.flatMap((points,k)=>Array.from({length:3},(_,i)=>{
+  const slot=2*i+k%2,id=k*6+slot,style=id%8,speed=.9+(id%4)*.08,pause=3;
   const route=points.map(([x,z],j)=>({x,z,rest:j%3===0}));
-  return {id:'lablae-citizen-'+(id+1),style,text:texts[style],speed,pause,offset:routeDuration(route,speed,pause)*i/6,route};
+  return {id:'lablae-citizen-'+(id+1),style,text:texts[style],speed,pause,offset:routeDuration(route,speed,pause)*slot/6,route};
  }));
 }

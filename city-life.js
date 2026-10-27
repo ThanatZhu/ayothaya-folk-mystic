@@ -4,6 +4,7 @@ import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1'
 import {groundHeight} from './combat-core.js?v=novice174';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {citizenBodyHeight} from './npc-size.js?v=size1';
+import {lazyFrames} from './character-life-art.js?v=106.0';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction,resetNPCLife,npcLifeFlip,npcLifePreservesGesture} from './npc-life-animation.js?v=chuk175';
 const tr=s=>globalThis.I18N?.t(s)??s;
 
@@ -23,13 +24,22 @@ export async function createCityLife({scene,map,shadow,paving}){
  const metadata=await response.json(),loader=new THREE.TextureLoader(),sheets={};
  await Promise.all(Object.keys(metadata).map(async id=>{const tex=await loader.loadAsync('./assets/citizens40/'+id+'.png');tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.LinearFilter;tex.minFilter=THREE.LinearMipmapLinearFilter;sheets[id]=tex;}));
  const citizens=(map.citizens??[]).map(c=>({...CITIZEN_STYLES[c.style],...c,citizen:true,x:c.route[0].x,z:c.route[0].z,talking:false}));
- const actors=await Promise.all([...map.npcs.filter(n=>n.mentorId),...citizens].map(async n=>{
-  const meta=metadata[n.sheet],rects=meta.rects.slice(n.row*meta.columns,(n.row+1)*meta.columns),bodyHeight=citizenBodyHeight(n.sheet,n.row);
-  // Isolate each connected silhouette before filtering: atlas neighbours cannot bleed into a head/foot.
-  const frames=rects.map((r,i)=>{const pad=3,c=document.createElement('canvas');c.width=r[2]+pad*2;c.height=r[3]+pad*2;
-   c.getContext('2d').drawImage(sheets[n.sheet].image,...r,pad,pad,r[2],r[3]);
+ // 0.122 citizens on the same sheet row share its frames, drawn on first use (most play their life art instead);
+ // a flip uses a mirrored clone (same GPU image) instead of rewriting a shared texture's UVs.
+ const rows=new Map(),rowFrames=(sheet,row)=>{
+  const key=sheet+':'+row,meta=metadata[sheet],rects=meta.rects.slice(row*meta.columns,(row+1)*meta.columns);
+  if(!rows.has(key))rows.set(key,lazyFrames(rects.length,i=>{
+   // Isolate each connected silhouette before filtering: atlas neighbours cannot bleed into a head/foot.
+   const r=rects[i],pad=3,c=document.createElement('canvas');c.width=r[2]+pad*2;c.height=r[3]+pad*2;
+   c.getContext('2d').drawImage(sheets[sheet].image,...r,pad,pad,r[2],r[3]);
    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearFilter;texture.generateMipmaps=false;
-   return {texture,w:c.width,h:c.height,anchor:meta.anchors[n.row*meta.columns+i]+pad,pad};});
+   const mirrored=texture.clone();mirrored.repeat.x=-1;mirrored.offset.x=1;mirrored.needsUpdate=true;
+   return {texture,mirrored,w:c.width,h:c.height,anchor:meta.anchors[row*meta.columns+i]+pad,pad};
+  }));
+  return rows.get(key);
+ };
+ const actors=await Promise.all([...map.npcs.filter(n=>n.mentorId),...citizens].map(async n=>{
+  const bodyHeight=citizenBodyHeight(n.sheet,n.row),frames=rowFrames(n.sheet,n.row);
   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:frames[0].texture,alphaTest:.5,transparent:false,depthWrite:true,color:'#fff5e7'}));scene.add(sprite);
   sprite.userData.npc=n;if(n.citizen)sprite.userData.citizenId=n.id;
   const walk=n.citizen?createCitizenMotion(n,Date.now()/1000+n.offset):null;if(walk){n.x=walk.pose.x;n.z=walk.pose.z;}
@@ -67,7 +77,7 @@ export async function createCityLife({scene,map,shadow,paving}){
    if(preserveGesture)resetNPCLife(a.sprite);
    const authored=!preserveGesture&&applyNPCLife(a.sprite,a.life,action,time+n.row*1.7,{flip:n.citizen?(a.lifeFlip??false):false,reduced,phase});
    const f=a.frames[frame];if(!authored){delete a.sprite.userData.lifeAction;delete a.sprite.userData.lifeFrame;
-    const tex=f.texture;tex.repeat.x=flip?-1:1;tex.offset.x=flip?1:0;a.sprite.material.map=tex;
+    a.sprite.material.map=flip?f.mirrored:f.texture;
     const scale=n.visualHeight/a.bodyHeight;a.sprite.scale.set(f.w*scale,f.h*scale,1);
     a.sprite.center.set(flip?1-f.anchor/f.w:f.anchor/f.w,f.pad/f.h);
     if(!reduced&&action==='idle')a.sprite.scale.y*=1+Math.sin((time+n.row)*Math.PI*2/4.1)*.0025;

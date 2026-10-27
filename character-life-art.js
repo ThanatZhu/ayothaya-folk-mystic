@@ -21,6 +21,23 @@ function image(path){
  })().catch(error=>{images.delete(path);throw error;}));
  return images.get(path);
 }
+// 0.122 a frame list whose frames are made on first read: a 320 px canvas per frame for every clip of every actor was
+// ~150 MB in the capital, and on phones Chrome keeps 2D canvases in GPU memory. length, indexing, map-free iteration
+// work as on an array; mapFrames keeps a conversion (canvas -> texture) just as lazy; builtFrames lists what exists.
+const BUILT=Symbol('built');
+export function lazyFrames(count,build){
+ const made=new Map(),index=k=>typeof k==='string'&&/^\d+$/.test(k)&&+k<count?+k:-1;
+ return new Proxy(new Array(count),{
+  has:(t,k)=>index(k)>=0||Reflect.has(t,k),
+  get(t,k){
+   if(k===BUILT)return [...made.values()];
+   const i=index(k);if(i<0)return Reflect.get(t,k);
+   if(!made.has(i))made.set(i,build(i));return made.get(i);
+  },
+ });
+}
+export const mapFrames=(frames,fn)=>lazyFrames(frames.length,i=>fn(frames[i]));
+export const builtFrames=frames=>frames[BUILT]??frames;
 // Do not silently remove an equipped silhouette or paint standing accessories
 // over a seated face. Those appearances need their own authored pose layers.
 export function lifeAppearanceCompatibility(classId,appearance={},equipment=null){
@@ -66,17 +83,17 @@ export async function loadLifeArt(id,{classId=null,appearance={},equipment=null}
  const pending=(async()=>{
   // A frame can point at an appended atlas while old rest frames keep using the
   // actor's original source. Image caching shares each atlas across its frames.
-  const frames=await Promise.all(entry.frames.map(async frame=>{
-   const source=frame.source??entry.source;
-   if(typeof source!=='string'||!source)throw new Error(`Missing frame source: ${id}`);
-   const img=await image(source);
+  const sources=entry.frames.map(frame=>frame.source??entry.source);
+  if(sources.some(source=>typeof source!=='string'||!source))throw new Error(`Missing frame source: ${id}`);
+  const atlas=new Map(await Promise.all([...new Set(sources)].map(async source=>[source,await image(source)])));
+  const frames=lazyFrames(entry.frames.length,i=>{
    const canvas=document.createElement('canvas');canvas.width=canvas.height=FRAME_SIZE;
    const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
-   ctx.drawImage(img,...frame.rect,0,0,FRAME_SIZE,FRAME_SIZE);
+   ctx.drawImage(atlas.get(sources[i]),...entry.frames[i].rect,0,0,FRAME_SIZE,FRAME_SIZE);
    return dyeOutfit(canvas,dye);
-  }));
+  });
   const clips=Object.fromEntries(Object.entries(entry.clips).map(([action,clip])=>[
-   action,{...clip,frames:clip.frames.map(index=>frames[index]),source:'authored'}
+   action,{...clip,frames:mapFrames(clip.frames,index=>frames[index]),source:'authored'}
   ]));
   return {id,clips,facing:entry.facing??'right',frameSize:FRAME_SIZE,foot:FRAME_FOOT,review:entry.review??'draft'};
  })();

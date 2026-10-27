@@ -12,8 +12,8 @@ export function loadPaintedCharacter(classId,appearance={},equipment=null){
   const response=await fetch('./assets/'+directory+'/'+classId+'.json');if(!response.ok)throw new Error('Animation metadata: '+classId);
   const meta=await response.json(),images={};
   await Promise.all([...new Set(Object.values(meta.frames).flat().map(f=>f.source))].map(async source=>{const image=new Image();image.src='./assets/'+directory+'/'+source;await image.decode();images[source]=image;}));
-  const result={};
-  for(const gender of ['male','female']){result[gender]=meta.frames[gender].map((frame,index)=>{
+  // 0.122 a gender's forty frames are drawn when first read: a hero shows one, and the other doubled its canvases
+  const result={},build=gender=>meta.frames[gender].map((frame,index)=>{
    const {rect,anchor,scale,source}=frame,{factor,foot}=paintedFrameCalibration(directory,classId,gender,index,frame,meta.frames[gender][0].scale);
    const cell=document.createElement('canvas');cell.width=cell.height=256;const ctx=cell.getContext('2d');ctx.imageSmoothingEnabled=false;
    const [x,y,w,h]=rect;ctx.drawImage(images[source],x,y,w,h,128-anchor*scale,244-h*scale,w*scale,h*scale);
@@ -23,7 +23,8 @@ export function loadPaintedCharacter(classId,appearance={},equipment=null){
    const padded=document.createElement('canvas');padded.width=padded.height=FRAME_SIZE;const out=padded.getContext('2d');out.imageSmoothingEnabled=false;
    out.drawImage(styled,FRAME_SIZE/2-128*factor,FRAME_FOOT-foot*factor,256*factor,256*factor);
    return padded;
-  });}
+  });
+  for(const gender of ['male','female']){let made;Object.defineProperty(result,gender,{enumerable:true,get:()=>made??=build(gender)});}
   return result;
  })();cache.set(key,pending);if(cache.size>8)cache.delete(cache.keys().next().value);pending.catch(()=>{if(cache.get(key)===pending)cache.delete(key);});return pending;
 }

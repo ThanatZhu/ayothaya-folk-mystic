@@ -3,16 +3,18 @@ import assert from 'node:assert/strict';
 import {readFile,access} from 'node:fs/promises';
 import {ITEMS,CHAPTERS,CLASSES,RECIPES,WORLD_MAP_BOSSES,levelChapter,chapterGear,featuredGear,createItemGuide,searchItems,cardSlots,itemEffects,fitsClass} from '../equipment-journey-data170.js';
 import {DROPS} from '../items.js';
+import {AMULET_REWARDS} from '../amulets.js';
+const gearCount=1062+AMULET_REWARDS.filter(r=>r.tier!=='material').length;
 import {weaponId,pieceId} from '../gear-sets.js';
 const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8')),guide=createItemGuide(catalog);
-test('all Base levels and all 1,062 gear items belong to exactly one progression chapter',()=>{
+test('all Base levels and all regular and gacha gear items belong to exactly one progression chapter',()=>{
  for(let level=1;level<=99;level++)assert.equal(CHAPTERS.filter(c=>level>=c.min&&level<=c.max).length,1);
- const gear=Object.entries(ITEMS).filter(([,i])=>i.kind==='gear');assert.equal(gear.length,1062);
+ const gear=Object.entries(ITEMS).filter(([,i])=>i.kind==='gear');assert.equal(gear.length,gearCount);
  for(const [id,it]of gear){const chapter=levelChapter(it.level??1),fits=CLASSES.filter(c=>fitsClass(it,c.id));assert.ok(chapter);assert.ok(fits.length,id+' fits some class');for(const cls of fits)assert.equal(chapterGear(chapter,cls.id).filter(i=>i.id===id).length,1,id);}
 });
 test('every displayed item has a real source and each drop location matches the actual spawn index',()=>{
  for(const [id,it]of Object.entries(ITEMS).filter(([,i])=>['gear','card'].includes(i.kind))){
-  const s=guide.sources(id);assert.ok(s.shop.length||s.quest.length||s.drop.length||s.recipe,id);
+  const s=guide.sources(id);assert.ok(s.shop.length||s.quest.length||s.drop.length||s.recipe||s.gacha.length,id);
   for(const d of s.drop){assert.ok(d.chance>0&&d.chance<=1,id);assert.ok(it.set?DROPS[d.monster].sets?.tier===it.set.tier:DROPS[d.monster].items.some(r=>r[0]===id&&r[1]===d.chance));assert.ok(d.maps.length,d.monster+' location');}
  }
 });
@@ -39,7 +41,7 @@ test('all 84 equipment recipes and material sources preserve exact quantities, f
 });
 test('catalog search finds all 49 cards and all classes; class weapons top out at tier 6 (Lv.85)',()=>{
  assert.equal(searchItems({classId:'shaman',kind:'card'}).length,49);
- assert.equal(searchItems({classId:'novice',kind:'gear',allClasses:true}).length,1062);
+ assert.equal(searchItems({classId:'novice',kind:'gear',allClasses:true}).length,gearCount);
  assert.ok(searchItems({classId:'shaman',query:'INT',kind:'gear'}).length>0);
  assert.equal(Math.max(...Object.values(ITEMS).filter(i=>i.kind==='gear'&&i.slot==='weapon').map(i=>i.level??1)),85);
  assert.ok(itemEffects(ITEMS['card-rat']).length>0);
@@ -48,3 +50,5 @@ test('all chapter artwork exists and the public page is reachable from both navi
  for(const c of CHAPTERS)await access(new URL('../'+c.image,import.meta.url));
  for(const file of ['index.html','world-atlas.html'])assert.ok((await readFile(new URL('../'+file,import.meta.url),'utf8')).includes('equipment-journey.html'));
 });
+
+test('gacha gear sources match the real reward pool without claiming monster drops',()=>{for(const r of AMULET_REWARDS.filter(r=>r.tier!=='material')){const source=guide.sources(r.id);assert.equal(source.gacha.length,1);assert.equal(source.gacha[0].chance,r.rate);assert.equal(source.gacha[0].price,100);assert.equal(source.drop.length,0);}});

@@ -5,6 +5,7 @@ import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {STORY,STARTER_WEAPON} from './story-quests.js';
 import {WORLD_MAP_BOSSES} from './chapter2-monsters.js';
 import {REFINE_MAX,REFINE_TIERS} from './refine-tiers.js';
+import {AMULET_REWARDS,AMULET_PRICE,AMULET_PITY} from './amulets.js';
 export {ITEMS,RECIPES,REFINE_MAX,REFINE_TIERS,WORLD_MAP_BOSSES};
 export const CLASSES=[{id:'novice',name:'ผู้ฝึกตน'},...WEAPON_CLASSES.map(([id])=>({id,name:{swordsman:'นักดาบ',lancer:'นักทวน',hunter:'นายพราน',boxer:'นักมวย',rogue:'จอมโจร',shaman:'หมอผี',acolyte:'พระ / แม่ชี'}[id]}))];
 export const SLOTS={weapon:'อาวุธ',armor:'เสื้อเกราะ',head:'หมวก',garment:'ผ้าคลุม',shoes:'รองเท้า',accessory:'เครื่องประดับ'};
@@ -53,7 +54,8 @@ export function createItemGuide(catalog){
   const quest=STORY.flatMap(q=>(q.reward?.items??[]).filter(i=>i.id===id||(i.id==='@weapon'&&(q.id==='t1'?id===STARTER_WEAPON.novice:q.id==='t17'&&id!==STARTER_WEAPON.novice&&Object.values(STARTER_WEAPON).includes(id)))||(i.id==='@armor'&&ITEMS[id]?.slot==='armor'&&ITEMS[id].set?.family==='wall'&&ITEMS[id].set.tier===2)).map(i=>({id:q.id,title:q.title,count:i.count,steps:q.steps.map(s=>({npc:s.npc,mapId:s.mapId,mapName:mapById.get(s.mapId)?.name,action:s.action,level:s.level,hint:s.hint}))})));
   const it=ITEMS[id];if(it?.set)drop.push(...Object.entries(DROPS).filter(([,d])=>d.sets?.tier===it.set.tier&&(it.slot==='armor'?d.sets.armor:d.sets.piece)).map(([monster,d])=>({monster,name:monsterById.get(monster)?.name??monster,level:monsterById.get(monster)?.level??1,chance:it.slot==='armor'?d.sets.armor/5:d.sets.piece/15,count:1,maps:monsterMaps(monster),boss:!!(monsterById.get(monster)?.boss||monsterById.get(monster)?.elite),worldBoss:!!monsterById.get(monster)?.worldBoss,respawn:monsterById.get(monster)?.respawn??null})));
   const recipe=RECIPES.find(r=>r.out===id)??null;
-  return {shop,drop,quest,recipe};
+  const gacha=AMULET_REWARDS.filter(r=>r.id===id).map(r=>({pool:'amulets',chance:r.rate,count:r.count,price:AMULET_PRICE,pity:AMULET_PITY}));
+  return {shop,drop,quest,recipe,gacha};
  }
  function recipeDetails(id){const r=RECIPES.find(r=>r.out===id);return r?{...r,needs:Object.entries(r.needs).map(([id,count])=>({id,name:ITEMS[id]?.name??id,count,sources:sources(id)}))}:null;}
  return {sources,recipeDetails,monsterMaps,mapName:id=>mapById.get(id)?.name??id};

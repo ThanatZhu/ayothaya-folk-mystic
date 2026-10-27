@@ -51,4 +51,8 @@
 - `tests/gacha-rate-info.test.mjs`: ตารางครบทุกชิ้น เรทปกติรวม 100% และเรทครั้งการันตีตรงกับ pool จริง
 - `outputs/gacha-rates-validation.json`: ปุ่ม ? ตารางเรท การปิด/คืนโฟกัส และภาพพิธีที่เป็นกลางบนจอ 4 ขนาด
 
-ยังไม่ได้พุชหรือเปิดการเติมเงินจริง
+การเติมเงินจริงยังไม่เปิด
+
+## Release validation
+
+Integrated against production main, preserving observer mode, revival purchases, spirit companions and skill timing. Full suite: 754 passed, 14 skipped, 0 failed (768 total). Static Vercel build and native Edge checks pass on desktop and phone sizes. Equipment guide sources include the actual amulet gacha pool; all 167 new player-facing strings have English translations.

@@ -4749,3 +4749,14 @@ Object.assign(globalThis.I18N_EN,{
   "เศษศาสตรานาคบาดาล": "Underwater Naga Weapon Fragment",
   "เศษศาสตราไกรลาส": "Kailash Weapon Fragment"
 });
+
+// 0.122 connection drops
+Object.assign(globalThis.I18N_EN,{
+  "หลุดจากเกม": "Disconnected",
+  "{0}{1} · ออนไลน์ {2} นาที{3}{4} · เวลา {5}": "{0}{1} · online {2} min{3}{4} · at {5}",
+  "แท็บดับ/ถูกปิดเอง": "Tab died / closed by the system",
+  "การเชื่อมต่อหลุด · close": "Connection dropped · close",
+  "· แท็บถูกซ่อน": "· tab hidden",
+  "เซิร์ฟเวอร์กำลังอัปเดต…": "Server updating…",
+  "เซิร์ฟเวอร์กำลังอัปเดต · รอสักครู่ เกมจะต่อกลับเอง": "Server updating · hold on, the game reconnects by itself"
+});

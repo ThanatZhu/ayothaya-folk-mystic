@@ -26,8 +26,8 @@
       "id": "lablae",
       "name": "เมืองลับแล",
       "scene": "maps/v7/lablae.glb",
-      "bytes": 3131996,
-      "sha256": "d95da777a72dec352ab5e77b00615cc81999ae0bfd09afced555238110d39464",
+      "bytes": 3322800,
+      "sha256": "7ee10d75f3da8e74493a08e523a6ad5ec13f32de67dbd9663aa77e38671b22bc",
       "source": "chapter2-v2",
       "triangles": 229255,
       "realism": "maps-v7"

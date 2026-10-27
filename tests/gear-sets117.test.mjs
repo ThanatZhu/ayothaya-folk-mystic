@@ -6,7 +6,7 @@ import {craft,recipeFor} from '../crafting.js';
 import {rewardItems} from '../story-quests.js';
 import {pieceId,weaponId,bossId,setBonuses,STAT_CAPS,GRADES,rollGrade,STARTER} from '../gear-sets.js';
 const root=new URL('../',import.meta.url);
-const gear=Object.entries(ITEMS).filter(([,it])=>it.kind==='gear'&&it.slot!=='accessory');
+const gear=Object.entries(ITEMS).filter(([,it])=>it.kind==='gear'&&it.slot!=='accessory'&&!it.classReward);
 
 test('0.117 catalog: 960 set pieces, 42 tier weapons, 39 boss pieces, the 5-piece starter kit, each on its own sliced icon',()=>{
  assert.equal(gear.filter(([,it])=>it.set).length,960);assert.equal(gear.filter(([,it])=>it.tier&&it.slot==='weapon').length,42);

@@ -37,6 +37,9 @@ export class LocalStore{
  }
  // 0.103 back office: every saved character, and a gift written into one that is not in a game right now.
  async listProfiles(){return [...this.rows].map(([uid,r])=>({uid,slotId:'slot-1',record:copy(r),savedAt:r.savedAt??null}));}
+ async classRewardPage({after=null,limit=100}={}){const rows=(await this.listProfiles()).sort((a,b)=>a.uid.localeCompare(b.uid)).filter(r=>after===null||r.uid.localeCompare(after)>0),page=rows.slice(0,limit);return {rows:page,after:page.at(-1)?.uid??after,done:rows.length<=limit};}
+ async loadClassRewardState(){try{return JSON.parse(await readFile(path.join(this.directory,'class-reward192.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}}
+ saveClassRewardState(state){const data=JSON.stringify(state);this.rewardQueue=(this.rewardQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'class-reward192.json');await writeFile(file+'.tmp',data,{mode:0o600});await rename(file+'.tmp',file);});return this.rewardQueue;}
  async deleteCharacter(identity){
   const row=this.rows.get(identity.uid);if(!row||identity.slotId!=='slot-1')throw new Error('character-not-found');
   const lock=this.leases.get(identity.uid);if(lock&&lock.expires>Date.now())throw new Error('player-online');
@@ -124,6 +127,12 @@ export class FirebaseStore{
   const snap=await this.db.collectionGroup('characters').limit(limit).get();
   return snap.docs.filter(d=>d.ref.parent.parent?.parent?.id==='multiplayerProfiles'&&d.data().record).map(d=>({uid:d.ref.parent.parent.id,slotId:d.id,record:d.data().record,savedAt:d.data().updatedAt??null}));
  }
+ async classRewardPage({after=null,limit=100}={}){
+  let query=this.db.collectionGroup('characters').orderBy('__name__').limit(limit);if(after)query=query.startAfter(this.db.doc(after));
+  const snap=await query.get();return {rows:snap.docs.filter(d=>d.ref.parent.parent?.parent?.id==='multiplayerProfiles'&&d.data().record).map(d=>({uid:d.ref.parent.parent.id,slotId:d.id,record:d.data().record})),after:snap.docs.at(-1)?.ref.path??after,done:snap.docs.length<limit};
+ }
+ async loadClassRewardState(){const s=await this.db.collection('multiplayerRuntime').doc('classReward192').get();return s.exists?s.data():null;}
+ saveClassRewardState(state){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);tx.set(this.db.collection('multiplayerRuntime').doc('classReward192'),state);});}
  // Same lease rule as acquire(): a live lease means the character is in a game, and the transaction re-runs if
  // the lease or the profile changes underneath it, so a login in between cannot be overwritten.
  async giveOffline(identity,apply){

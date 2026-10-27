@@ -4795,3 +4795,58 @@ Object.assign(globalThis.I18N_EN,{
   "ยังยืนยันผลไม่ได้ · ตรวจสอบรายการเดิมเพื่อไม่ใช้ไอเท็มซ้ำ": "Result unconfirmed · Check the same request to avoid consuming another item",
   "กดค้างเพื่อเพิ่มต่อเนื่อง": "Hold to allocate repeatedly"
 });
+
+// 0.192 class advancement rewards
+Object.assign(globalThis.I18N_EN,{
+ "เลือกอาวุธสีแดง Lv.55": "Choose a red Lv.55 weapon",
+ "กล่องศาสตราแดง Lv.55": "Red Lv.55 Weapon Choice Box",
+ "เลือกอาวุธสีแดง Lv.55 ของอาชีพตนเอง 1 ชิ้น จาก 5 สายเซ็ต · ทะลวง / เพชฌฆาต / มนตรา / กำแพงเพชร / วายุ": "Choose one red Lv.55 weapon for your class from five set families: Pierce / Executioner / Mantra / Diamond Wall / Wind",
+ "อาวุธชุด": "Set weapon",
+ "· รางวัลเปลี่ยนอาชีพ · ร่วมโบนัสเซ็ตสายเดียวกัน": "· Class advancement reward · Counts toward the matching set bonus",
+ "เจาะเกราะสำหรับรับมือศัตรูป้องกันสูง": "Pierce the armor of heavily defended enemies",
+ "เน้นโอกาสคริติคอลและความแรงคริติคอล": "Critical chance and critical damage",
+ "ลดคูลดาวน์และประหยัด MP": "Shorter cooldowns and lower MP costs",
+ "เพิ่มความอึดและลดความเสียหาย": "More durability and less incoming damage",
+ "โจมตีและเคลื่อนที่คล่องตัว": "Faster attacks and movement",
+ "ไม่มีกล่องศาสตราในกระเป๋า": "No weapon choice box in your bag",
+ "เปลี่ยนอาชีพก่อนเลือกอาวุธ": "Advance your class before choosing a weapon",
+ "กระเป๋าเต็ม · กล่องยังอยู่ กรุณาจัดช่องว่างก่อน": "Bag full · Your box is safe. Free a slot first.",
+ "ออกจากลานประลองก่อนเลือกอาวุธ": "Leave the arena before choosing a weapon",
+ "เลือกศาสตราคู่กาย": "Choose Your Weapon",
+ "รางวัลเปลี่ยนอาชีพ · สีแดง Lv.55": "Class Advancement Reward · Red Lv.55",
+ "เลือก 1 จาก 5 สายเซ็ต · ได้อาวุธตรงอาชีพตนเอง": "Choose one of five set families · Receive a weapon for your class",
+ "ร่วมโบนัสเซ็ตสายเดียวกัน · ต้องเลเวล 55 จึงสวมใส่ได้": "Counts toward the matching set · Requires Lv.55 to equip",
+ "ใช้กล่อง 1 ใบ · รับอาวุธ 1 ชิ้น": "Use one box · Receive one weapon",
+ "ยืนยันเลือกอาวุธ": "Confirm Weapon Choice",
+ "กล่องศาสตราแดง": "Red Weapon Choice Box",
+ "เลือกสายเซ็ตอาวุธ": "Choose a weapon set family",
+ "โบนัสเมื่อสะสมเซ็ตเดียวกัน": "Matching set bonuses",
+ "เลือกสายเซ็ตเพื่อดูอาวุธและโบนัส": "Select a set family to preview its weapon and bonuses",
+ "ได้รับอาวุธสีแดง Lv.55 แล้ว · ตรวจดูในกระเป๋า": "Red Lv.55 weapon received · Check your bag",
+ "ยังยืนยันผลไม่ได้ · ตรวจสอบรายการเดิมเพื่อไม่ใช้กล่องซ้ำ": "Result unconfirmed · Check the original request to avoid using another box",
+ "เปลี่ยนอาชีพสำเร็จ · รับศาสตราแดง Lv.55": "Class Advanced · Claim Your Red Lv.55 Weapon",
+ "ยินดีด้วยกับการเปลี่ยนอาชีพ! รับกล่องศาสตราแดง Lv.55 แล้วเปิดจากกระเป๋า เลือกได้ 1 สายเซ็ต: ทะลวง เพชฌฆาต มนตรา กำแพงเพชร หรือวายุ อาวุธตรงกับอาชีพที่เล่นขณะเปิดกล่อง เป็นสีแดง เลเวลสวมใส่ 55 และร่วมโบนัสเซ็ตสายเดียวกัน": "Congratulations on advancing your class! Claim the Red Lv.55 Weapon Choice Box and open it from your bag. Choose Pierce, Executioner, Mantra, Diamond Wall or Wind. Receive a red weapon for your class at the time of opening. It requires Lv.55 to equip and counts toward the matching set bonus.",
+ "หนึ่งกล่องต่อตัวละคร รวมผู้ที่เปลี่ยนอาชีพสำเร็จไปแล้วด้วย": "One box per character, including characters who advanced their class previously.",
+ "เปลี่ยนอาชีพ · กล่องเลือกอาวุธแดง Lv.55": "Class advancement · Red Lv.55 weapon choice box"
+});
+
+Object.assign(globalThis.I18N_EN,{
+ "เลือกเซ็ตสีแดง Lv.55": "Choose a red Lv.55 equipment set",
+ "กล่องยุทธภัณฑ์แดง Lv.55": "Red Lv.55 Equipment Set Choice Box",
+ "เลือกเซ็ตสีแดง Lv.55 ตรงอาชีพตนเองครบ 5 ชิ้น · อาวุธ หมวก เสื้อ ผ้าคลุม รองเท้า · ทะลวง / เพชฌฆาต / มนตรา / กำแพงเพชร / วายุ": "Choose five red Lv.55 pieces for your class: weapon, headgear, armor, cloak and shoes. Set families: Pierce / Executioner / Mantra / Diamond Wall / Wind.",
+ "ไม่มีกล่องยุทธภัณฑ์ในกระเป๋า": "No equipment set choice box in your bag",
+ "เปลี่ยนอาชีพก่อนเลือกเซ็ต": "Advance your class before choosing a set",
+ "ออกจากลานประลองก่อนเลือกเซ็ต": "Leave the arena before choosing a set",
+ "เลือกเซ็ตคู่กาย": "Choose Your Equipment Set",
+ "รางวัลเปลี่ยนอาชีพ · ทั้งเซ็ตสีแดง Lv.55": "Class Advancement Reward · Full Red Lv.55 Set",
+ "เลือก 1 จาก 5 สายเซ็ต · ได้อุปกรณ์ทั้งเซ็ตตรงอาชีพตนเอง": "Choose one of five families · Receive a full set for your class",
+ "ใช้กล่อง 1 ใบ · รับอุปกรณ์ครบ 5 ชิ้น": "Use one box · Receive all five equipment pieces",
+ "ยืนยันเลือกทั้งเซ็ต": "Confirm Full Set",
+ "กล่องยุทธภัณฑ์แดง": "Red Equipment Set Choice Box",
+ "เลือกสายเซ็ตอุปกรณ์": "Choose an equipment set family",
+ "เลือกสายเซ็ตเพื่อดูอุปกรณ์และโบนัส": "Select a family to preview all equipment and bonuses",
+ "ได้รับเซ็ตสีแดง Lv.55 ครบ 5 ชิ้นแล้ว · ตรวจดูในกระเป๋า": "All five red Lv.55 pieces received · Check your bag",
+ "เปลี่ยนอาชีพสำเร็จ · รับทั้งเซ็ตสีแดง Lv.55": "Class Advanced · Claim Your Full Red Lv.55 Set",
+ "ยินดีด้วยกับการเปลี่ยนอาชีพ! รับกล่องยุทธภัณฑ์แดง Lv.55 แล้วเปิดจากกระเป๋า เลือก 1 สายเซ็ต: ทะลวง เพชฌฆาต มนตรา กำแพงเพชร หรือวายุ ได้ครบ 5 ชิ้น ได้แก่ อาวุธ หมวก เสื้อ ผ้าคลุม และรองเท้า ตรงกับอาชีพและรูปลักษณ์ตัวละครขณะเปิดกล่อง ทุกชิ้นสีแดง สวมใส่เมื่อเลเวล 55 และร่วมโบนัสเซ็ตสายเดียวกัน": "Congratulations on advancing your class! Claim the Red Lv.55 Equipment Set Choice Box and open it from your bag. Choose Pierce, Executioner, Mantra, Diamond Wall or Wind to receive five pieces: weapon, headgear, armor, cloak and shoes. All pieces match your class and appearance when you open the box, are red grade, require Lv.55 to equip and count toward the matching set bonus.",
+ "เปลี่ยนอาชีพ · กล่องเลือกเซ็ตแดง Lv.55": "Class advancement · Red Lv.55 equipment set choice box"
+});

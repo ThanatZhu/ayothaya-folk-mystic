@@ -23,7 +23,7 @@ test('affixes: parse, add stats, raise rarity, survive refine, and roll on ~35% 
 
 test('0.117 six weapon tiers (Lv.10–85) plus a Lv.80 boss weapon exist for all 7 classes, crafted not sold', () => {
  for(const c of ['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte']){
-  const w=Object.entries(ITEMS).filter(([,it])=>it.slot==='weapon'&&it.classes?.includes(c));
+  const w=Object.entries(ITEMS).filter(([,it])=>it.slot==='weapon'&&it.classes?.includes(c)&&!it.classReward);
   assert.deepEqual(w.map(([,it])=>it.level).sort((a,b)=>a-b),[10,25,40,55,70,80,85]);
   for(const [id] of w)assert.ok(!SHOPS['ครูแสนดาบ'].stock.includes(id),id+' is crafted');
   const t2=w.find(([,it])=>it.level===25)[0];

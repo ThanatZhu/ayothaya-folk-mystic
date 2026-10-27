@@ -6,6 +6,7 @@ import {buildAmuletItems} from './amulets.js';
 import {buildWeaponMaterials,WEAPON_MATERIALS,weaponMaterialTier} from './weapon-crafting.js';
 import {CONQUEST_SHARD,CONQUEST_ITEM,conquestCount,conquestBoss} from './rainbow-crafting.js';
 import {FRONTIER_MONSTERS} from './monster-catalog.js';
+import {buildClassRewardItems} from './class-reward-items192.js';
 // Items, loot, coins (เบี้ย) and NPC shops. Pure rules shared by the client (offline guests + UI) and the realm
 // server (authoritative online bag). Bag state: {coins, items:{[id]:count}}.
 // Art: one atlas, 6x4 cells of 256 px (1536x1024, transparent). Drop a finished file over the same path to re-skin.
@@ -117,6 +118,7 @@ export const ITEMS={
  'refine-hammer':{atlas:'refine',icon:3,name:'ค้อนตีบวก',kind:'ui'},'refine-success':{atlas:'refine',icon:4,name:'ตีบวกสำเร็จ',kind:'ui'},'refine-broken':{atlas:'refine',icon:5,name:'อุปกรณ์แตก',kind:'ui'},
 };
 Object.assign(ITEMS,buildGearItems());
+Object.assign(ITEMS,buildClassRewardItems(ITEMS));
 Object.assign(ITEMS,buildAmuletItems());
 // 0.47 guild emblems: 24 cells of assets/emblems47 (docs/emblems47-art.md), picked when founding a guild.
 // Ids are letters (emblem-a … emblem-x) because item ids are [a-z-]; the guild stores the number 1–24.

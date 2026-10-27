@@ -1,6 +1,8 @@
 import {NOVICE_SLOTS,NOVICE_MAX} from '../skill-progress.js';
 import {arenaReservation} from './arena-rooms166.js';
 import {identityAction} from '../identity166.js';
+import {grantClassReward,chooseClassSet} from '../class-reward192.js';
+import {classRewardBackfill} from './class-reward-backfill192.js';
 import {buyPremiumItem} from '../premium-shop-action.js';
 import {drawAmulets} from '../amulet-gacha.js';
 import {AMULETS} from '../amulets.js';
@@ -42,7 +44,7 @@ const JOIN_CODES=['world-reset','already-online','room-full','character-not-foun
 export const joinError=e=>JOIN_CODES.includes(e?.message)?e.message:['authentication-required','invalid-token','invalid-identity'].includes(e?.message)||/^auth\/(?!internal|network)/.test(String(e?.code??''))?'authentication-failed':'server-busy';
 // The drops a client reports with its join (multiplayer-client.js), trimmed to known fields.
 export const cleanDiag=list=>(Array.isArray(list)?list.slice(-5):[]).filter(d=>d&&typeof d==='object').map(d=>({kind:d.kind==='page'?'page':'socket',at:Number.isFinite(d.at)?d.at:0,close:Number.isInteger(d.close)?d.close:0,reason:String(d.reason??'').slice(0,60),code:String(d.code??'').slice(0,40),online:Number.isFinite(d.online)?Math.round(d.online):0,hidden:d.hidden===true,net:String(d.net??'').slice(0,16)}));
-export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false}={}){
+export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false,classRewards=mode==='firebase'}={}){
  if(!['local','firebase'].includes(mode))throw new Error('invalid-auth-mode');
  if(!catalog)catalog=JSON.parse(await readFile(path.join(root,'maps/world.json'),'utf8'));
  // A replacement instance (zero-downtime redeploy) starts while the old one still owns the world.
@@ -54,7 +56,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  let shopsReady=mode==='local'||!store?.loadShops,loadMarket=async()=>{};
  let bossTimersReady=mode==='local'||!store?.loadMapBosses;
  const authoritative=()=>(mode!=='firebase'||Date.now()<=store.authorityUntil)&&resetReady&&bossTimersReady&&mailReady&&shopsReady;
- let renewing=false,authorityError='';
+ let renewing=false,authorityError='',classRewardState=null,classRewardTask=null;
  const renew=async()=>{
   if(mode!=='firebase'||renewing)return;renewing=true;
   if(!(Date.now()<=store.authorityUntil))shopsReady=!store?.loadShops;
@@ -62,6 +64,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    const held=Date.now()<=store.authorityUntil&&resetReady;if(!held)resetReady=false;
    await store.renewAuthority();
    if(!held){
+    classRewardState=null;
     if(reset){
      const previous=reset.job;reset.job=await repository.state();
      if(reset.job&&(reset.job.id!==previous?.id||(reset.job.status==='completed'&&previous?.status!=='completed'))){sessions.clear();await clearWorld();}
@@ -104,6 +107,14 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   }})).catch(e=>console.error('war-mail',e.message)).finally(()=>{warMailTask=null;});return warMailTask;
  };
  realm.onWarRewards=drainWarMail;
+ const drainClassRewards=()=>{
+  if(!classRewards||classRewardTask||closing||reset?.maintenance||!authoritative()||!store?.classRewardPage||!store?.saveClassRewardState||classRewardState?.completedAt)return classRewardTask;
+  classRewardTask=trackWrite(classRewardBackfill({store,canWrite:()=>!closing&&!reset?.maintenance&&authoritative(),deliver:async(row,apply)=>{
+   const account=[...sessions.values()].filter(s=>s.peer.uid===row.uid),session=account.find(s=>s.peer.slotId===row.slotId);
+   if(session)await persistMail(session,apply);
+   else{if(account.length||joinPending.has(row.uid))throw Error('player-online');await store.giveOffline({uid:row.uid,slotId:row.slotId},apply);}
+  }})).then(state=>{classRewardState=state;}).catch(e=>console.error('class-reward192',e.message)).finally(()=>{classRewardTask=null;});return classRewardTask;
+ };
 // 0.119 observer e-mails saved from the back office (see /admin/observers); a peer keeps its verified e-mail so a
  // removed address loses the mode straight away
  let observerSaved=[];
@@ -155,7 +166,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let done;const pending=new Promise(r=>{done=r;});mutations.add(pending);
    mutationDone=()=>{mutations.delete(pending);done();};
   }
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,marketBrowse:1,marketDemand:1,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,skillCriticals:1,adminLevels:1,rainbowCrafting:1,guildWarPodium:1,weaponCrafting:188,statResetItem:189,statHold:189,amuletGacha:1,premiumShop:1,observerMode:1,dropReports:1,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,respawnChoice:1,revivalTalisman:200,spiritCompanion:185,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,skillRework:119,skillGcd:ROLE_GLOBAL_CD,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,marketBrowse:1,marketDemand:1,classReward:classRewards?192:0,classRewardBackfill:classRewardState?{scanned:classRewardState.scanned,eligible:classRewardState.eligible,delivered:classRewardState.delivered,scanComplete:classRewardState.scanComplete,pending:classRewardState.pending.length}:null,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,skillCriticals:1,adminLevels:1,rainbowCrafting:1,guildWarPodium:1,weaponCrafting:188,statResetItem:189,statHold:189,amuletGacha:1,premiumShop:1,observerMode:1,dropReports:1,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,respawnChoice:1,revivalTalisman:200,spiritCompanion:185,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,skillRework:119,skillGcd:ROLE_GLOBAL_CD,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.117 terms/privacy acceptance after sign-in: GET the version this account accepted, POST {version} to record it.
   // Firebase mode trusts only the verified ID token's uid; the loopback dev server uses the uid it is given.
@@ -386,7 +397,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  }
  async function persistMail(s,apply,applyLive=()=>{}){
   if(s.trainingBusy||s.closing||s.peer.trade)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;s.peer.mailMutationBusy=true;
-  const job=s.queue.catch(()=>{}).then(async()=>{const before=realm.record(s.peer,s.lease.record),same=JSON.stringify(before),record=apply(before);let timer;
+  const job=s.queue.catch(()=>{}).then(async()=>{const before=realm.record(s.peer,s.lease.record),same=JSON.stringify(before);let record=apply(before);if(classRewards){try{record=grantClassReward(record);}catch(e){if(e.message!=='mailbox-full')throw e;}}let timer;
    if(JSON.stringify(record)===same)return record; // re-reading a read mail, deleting nothing: no write
    if(!spendWrite(s))throw Error('rate-limit');
    try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,no)=>{timer=setTimeout(()=>no(Error('save-timeout')),15000);})]);}
@@ -405,8 +416,16 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
    if(reset?.maintenance){send({type:'error',code:'world-reset'});ws.close(4012,'world-reset');return;}
    if(session){if(session.closing||session.trainingBusy){if(message.type==='save'&&typeof message.id==='string'){const id=message.id.slice(0,50);session.queue.then(()=>send({type:'saved',id}),()=>{});return;} // the busy job checkpoints; answer once it lands
-    if(!['input','ping'].includes(message.type)){const reply=message.type==='premiumBuy'?'shopError':message.type==='amuletDraw'?'amuletError':['renameBuy','renameUse','revivalBuy','statResetUse'].includes(message.type)?'identityError':MAIL_ACTIONS.includes(message.type)?'mailError':PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error',walkTo:'walkError',walkPace:'walkError'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(!['input','ping'].includes(message.type)){const reply=message.type==='classSetChoose'?'classSetError':message.type==='premiumBuy'?'shopError':message.type==='amuletDraw'?'amuletError':['renameBuy','renameUse','revivalBuy','statResetUse'].includes(message.type)?'identityError':MAIL_ACTIONS.includes(message.type)?'mailError':PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error',walkTo:'walkError',walkPace:'walkError'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(message.type==='classSetChoose'){
+     const p=session.peer,id=message.id;
+     if(!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'classSetError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
+     if(p.duel||p.room.map.id==='duel-arena'){send({type:'classSetError',id,code:'arena-busy'});return;}
+     try{await persistMail(session,r=>chooseClassSet(r,message));send({type:'classSetChanged',id,bag:p.bag});realm.evidence(p,'classWeapon',{family:message.family,request:id});}
+     catch(e){send({type:'classSetError',id,code:e.message});}return;
+    }
     if(message.type==='premiumBuy'){
+
      const p=session.peer,id=message.id;
      if(!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'shopError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
      try{let order;await persistMail(session,record=>{order=buyPremiumItem(record,message);return order.record;});
@@ -461,7 +480,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      let result;try{result=trainingAction(realm.record(session.peer,session.lease.record),message.mentor,message.action,message.jobId,session.peer.bag);}catch(e){send({type:'training-error',id:message.id,code:e.message});return;}
      session.trainingBusy=true;session.peer.suspended=true;session.peer.input={x:0,z:0,attack:false};session.peer.training=result.training;if(result.bag){realm.setBag(session.peer,result.bag);delete result.bag;} // 0.98 trial materials and cowries paid
      if(result.advanced){session.closing=true;session.explicitLeave=true;session.peer.stats=statsAfterClassChange(session.peer.character,result.character,session.peer.stats);result.statReset=true;session.peer.character=result.character;session.peer.world.jobXp=0;session.peer.skills=normalizeSkills(session.peer.skills,result.character.classId);}
-     try{await checkpoint(session,result.advanced);send({type:'trained',id:message.id,...result});if(result.advanced){realm.leave(session.peer.id);ws.close(1000,'trained');}else session.peer.suspended=false;}
+     try{if(result.advanced&&classRewards){try{session.peer.mailbox=grantClassReward(realm.record(session.peer,session.lease.record)).mailbox;}catch(e){if(e.message!=='mailbox-full')throw e;}}
+     await checkpoint(session,result.advanced);send({type:'trained',id:message.id,...result});if(result.advanced){realm.leave(session.peer.id);ws.close(1000,'trained');}else session.peer.suspended=false;}
      catch{session.closing=true;send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}finally{session.trainingBusy=false;}return;
     }
     if(message.type==='save'){if(typeof message.id!=='string'||message.id.length>50)return;
@@ -499,6 +519,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(old?.background){await finishBackground(old);}else if(old){const closed=new Promise(r=>{old.onClosed=r;});try{old.ws.send(JSON.stringify({type:'error',code:'replaced'}));}catch{}old.ws.close(4009,'replaced');await Promise.race([closed,new Promise(r=>setTimeout(r,8000))]);}
     if(reset?.maintenance)throw Error('world-reset');
     lease=await store.acquire(identity,randomUUID(),{takeover:true});if(reset?.maintenance)throw Error('world-reset');if(ws.readyState!==WebSocket.OPEN)throw new Error('connection-closed');
+    if(classRewards){try{const rewarded=grantClassReward(lease.record);if(rewarded!==lease.record){await store.checkpoint(lease,rewarded);lease.record=rewarded;}}catch(e){if(e.message!=='mailbox-full')throw e;}}
     // Send welcome after the full authenticated session exists.
     if(lease.record.state.mapId==='duel-arena'&&!arenaReservation(realm,identity.uid+':'+identity.slotId)){lease.record.state.mapId=catalog.capital;lease.record.state.position={...catalog.maps.find(m=>m.id===catalog.capital).spawn};await store.checkpoint(lease,lease.record);}
     if(reset?.maintenance)throw Error('world-reset');
@@ -517,7 +538,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const tick=setInterval(()=>{const now=performance.now();carry=Math.min(.25,carry+(now-lastTick)/1000);lastTick=now;if(reset?.maintenance){carry=0;return;}if(!authoritative()){carry=0;for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}while(carry>=.05){carry-=.05;realm.step(.05);}},50);
  // Waiting for authority: retry every 5 s (a read while another host holds it). Holding it: renew every 40 s, but
  // after a failed renewal retry in 5 s (0.114.2) - two 40 s misses used to outlive the lease and kick everyone.
- let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()&&!authorityError?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();
+ let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()&&!authorityError?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();drainClassRewards();
  // Save only what changed, at most once a minute; an idle player just keeps the lease alive (see storage.js budget).
  const dueForSave=s=>{if(s.peer.saveNow){s.peer.saveNow=false;return true;} // trades / stall sales save at once
   const age=Date.now()-(s.autoSavedAt??0);if(age<SAVE_MIN_GAP)return false;return age>=SAVE_MAX_GAP||JSON.stringify(realm.record(s.peer,s.lease.record))!==s.savedJson;};
@@ -527,7 +548,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const backgroundWalks=setInterval(()=>{if(reset?.maintenance)return;for(const s of sessions.values())if(s.background&&!s.closing&&(!s.peer.routeWalker?.active||Date.now()>=s.backgroundUntil))finishBackground(s);},250);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
   lastLogSaveCount=realm.logs.length;
-  const logSaver=setInterval(()=>{if(reset?.maintenance)return;drainWarMail();if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
+  const logSaver=setInterval(()=>{if(reset?.maintenance)return;drainWarMail();drainClassRewards();if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
  return {server,realm,wss,evidence,async close(){closing=true;await evidence?.stop();clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
   // 0.114.2 a redeploy gives us ~9 s: players' progress first (all at once, 6 s cap), then shops, bosses, guild/leader/
   // price changes and logs together, and the authority release last so the next host can start at once.
@@ -535,7 +556,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   await capped(Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);})),6000);
   const later=f=>Promise.resolve().then(f); // one failing save (even a synchronous throw) never stops the shutdown
   const dirty=[...[...realm.guildsDirty].filter(g=>realm.guilds.get(g.id)===g&&store?.saveGuild).map(g=>later(()=>store.saveGuild(g))),...[...realm.leadersDirty].filter(()=>store?.saveLeaders).map(id=>later(()=>saveLeader(id,realm.leaders.get(id)))),...[...realm.pricesDirty].filter(()=>store?.savePrices).map(id=>later(()=>store.savePrices(id,realm.prices.get(id))))];
-  await capped(Promise.allSettled([later(()=>realm.flushShops()),later(()=>realm.mapBosses.flush()).catch(e=>console.error('map-boss-save',e.message)),later(()=>store?.saveDashboardLogs?.(realm.logs)),...dirty]),1500);
+  await capped(Promise.allSettled([classRewardTask,later(()=>realm.flushShops()),later(()=>realm.mapBosses.flush()).catch(e=>console.error('map-boss-save',e.message)),later(()=>store?.saveDashboardLogs?.(realm.logs)),...dirty]),1500);
  }for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
 }
 export async function start(){

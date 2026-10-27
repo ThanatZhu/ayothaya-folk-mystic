@@ -20,7 +20,7 @@ import {CombatWorld,monsterHit,MONSTER_TYPES,moveBody,lineClear,walkable,rallyPa
 import {awardExperience,baseProgress,levelGifts,migrateXp,XP_CURVE} from '../experience.js';
 import {refineGear} from '../refine.js';
 import {STORAGE_SLOTS,STORAGE_NPC,normalizeStorage,normalizeOffer,moveOffer,hasOffer,swapOffers,normalizeStall,buyFromStall} from '../market.js';
-import {MARKET_ZONE,SHOP_DURATION,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,searchMarket,publicShop,shopIsOpen,closeInactiveShop,shopHasClaims,shopHasListings} from '../market-board.js';
+import {MARKET_ZONE,SHOP_DURATION,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,browseMarket,marketOptions,marketDay,priceKey,publicShop,shopIsOpen,closeInactiveShop,shopHasClaims,shopHasListings} from '../market-board.js';
 import {REBIRTH_MAX,rebirthStatBonus,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot,CHANNELS,normalizeChannel} from '../realm-state.js';
@@ -548,7 +548,7 @@ export class RealmServer{
   for(const p of this.peers.values())if(p.suspended&&p.resumeUntil&&p.resumeUntil<this.now())this.leave(p.id);
   for(const [id,v] of this.invites)if(v.expires<this.now())this.invites.delete(id);
   for(const party of [...this.parties.values()])for(const [uid,until] of party.pending??[])if(until<this.now()){party.pending.delete(uid);if(party.members.size+party.pending.size<2){for(const id of party.members){const a=this.peers.get(id);a.partyId=null;this.social(a.room);}this.parties.delete(party.id);}}
-  if(this.tickId%20===1){this.expireShops();for(const p of this.peers.values())this.expireStall(p);}
+  if(this.tickId%20===1){this.expireShops();for(const p of this.peers.values())this.expireStall(p);this.flushMarketBrowsers();}
   this.warTick();
   if(this.tickId%20===0)for(const p of this.peers.values())if(!p.suspended)this.storyCheck(p);
   if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
@@ -593,7 +593,25 @@ export class RealmServer{
  storyCheck(p){for(let i=0;i<30&&this.storyProgress(p,{type:'check',ctx:this.storyContext(p)});i++);}
  // ---- 0.70 central market: consignment shops (open while the owner is offline), buying stores, search, tax, prices.
  shopList(serverId){return [...this.shops.values()].filter(s=>s.serverId===serverId&&shopIsOpen(s,this.now())).map(publicShop);}
- shopsChanged(serverId,closedIds=[]){const list=this.shopList(serverId);for(const p of this.peers.values())if(p.serverId===serverId&&!p.suspended){if(p.room.map.id===MARKET_ZONE.mapId)p.world.emit('shops',{list});if(closedIds.length)p.world.emit('shopsClosed',{ids:closedIds});}}
+ shopsChanged(serverId,closedIds=[]){this.marketChanged(serverId);const list=this.shopList(serverId);for(const p of this.peers.values())if(p.serverId===serverId&&!p.suspended){if(p.room.map.id===MARKET_ZONE.mapId)p.world.emit('shops',{list});if(closedIds.length)p.world.emit('shopsClosed',{ids:closedIds});}}
+ marketChanged(serverId){(this.marketDirty??=new Set()).add(serverId);}
+ marketStalls(serverId){return [...this.peers.values()].filter(o=>o.serverId===serverId&&o.stall&&!o.suspended).map(o=>({owner:o.id,name:o.character.name,...o.stall,mapId:o.room.map.id}));}
+ sendMarketResults(p,input){
+  const data=browseMarket([...this.shops.values()].filter(s=>s.serverId===p.serverId),this.marketStalls(p.serverId),input,this.prices.get(p.serverId)??{},this.now());
+  // Keep sell-form reference-price warnings for the owner's inventory without sending every historical item or day bucket.
+  const prices=this.prices.get(p.serverId)??{};for(const item of Object.keys(p.bag?.items??{})){const key=priceKey(item),r=prices[key];if(r)data.prices[key]={last:r.last,avg:r.avg,n:r.n,t:r.t};}
+  if(p.marketBrowse===input)p.marketBrowse.page=data.page;
+  if(Number.isSafeInteger(input.requestId))data.requestId=input.requestId;
+  const signature=JSON.stringify(data);if(signature===p.marketBrowseSignature)return;
+  p.marketBrowseSignature=signature;p.world.emit('marketResults',data);
+ }
+ flushMarketBrowsers(){
+  const viewers=[...this.peers.values()].filter(p=>p.marketBrowse&&!p.suspended),servers=new Set(viewers.map(p=>p.serverId));this.marketStallSignatures??=new Map();
+  // Detect live-stall changes (including movement/disconnect) once per second. No client polling or idle broadcasts.
+  for(const id of servers){const signature=JSON.stringify([marketDay(this.now()),this.marketStalls(id)]);if(signature!==this.marketStallSignatures.get(id)){this.marketChanged(id);this.marketStallSignatures.set(id,signature);}}
+  for(const p of viewers)if(this.marketDirty?.has(p.serverId))this.sendMarketResults(p,p.marketBrowse);
+  this.marketDirty?.clear();for(const id of this.marketStallSignatures.keys())if(!servers.has(id))this.marketStallSignatures.delete(id);
+ }
  saveShop(shop,deleted=false){
   if(!this.onShop)return Promise.resolve();this.shopWrites??=new Map();const saved=copy(shop),task=(this.shopWrites.get(shop.id)??Promise.resolve()).catch(()=>{}).then(()=>this.onShop(saved,deleted));this.shopWrites.set(shop.id,task);
   task.catch(e=>console.error('shop-save',e.message)).finally(()=>{if(this.shopWrites.get(shop.id)===task)this.shopWrites.delete(shop.id);});return task;
@@ -611,13 +629,16 @@ export class RealmServer{
   if(!p.stall)return;const expired=Number.isFinite(p.stall.expiresAt)&&p.stall.expiresAt<=now;
   if(expired||!shopHasListings(p.stall)){p.stall=null;if(expired)p.world.notice('แผงครบ 24 ชั่วโมงแล้ว · ตั้งร้านใหม่เพื่อขายต่อ');}
  }
- traded(serverId,peers,item,coins,count){for(const a of peers)if(a)a.tradeXp=Math.min(1e9,(a.tradeXp??0)+coins);const prices=this.prices.get(serverId)??{};this.prices.set(serverId,recordPrice(prices,item,Math.round(coins/count),this.now()));this.pricesDirty.add(serverId);}
+ traded(serverId,peers,item,coins,count){for(const a of peers)if(a)a.tradeXp=Math.min(1e9,(a.tradeXp??0)+coins);const prices=this.prices.get(serverId)??{};this.prices.set(serverId,recordPrice(prices,item,Math.round(coins/count),this.now(),count));this.pricesDirty.add(serverId);this.marketChanged(serverId);}
  mine(p){return [...this.shops.values()].filter(s=>s.ownerKey===p.key).map(s=>({...publicShop(s),pouch:s.pouch,escrow:s.escrow,log:s.log}));}
  marketCommand(p,m){
   const w=p.world,perks=tradePerks(p.tradeXp),fail=c=>this.itemFail(p,c),now=this.now();
   this.expireShops(now);for(const peer of this.peers.values())this.expireStall(peer,now);
-  if(m.type==='marketSearch'){const stalls=[...this.peers.values()].filter(o=>o.serverId===p.serverId&&o.stall&&!o.suspended).map(o=>({owner:o.id,name:o.character.name,title:o.stall.title,items:o.stall.items,x:o.stall.x,z:o.stall.z,mapId:o.room.map.id}));
-   w.emit('marketResults',{query:String(m.query??'').slice(0,30),rows:searchMarket([...this.shops.values()].filter(s=>s.serverId===p.serverId),stalls,m.query,now),prices:this.prices.get(p.serverId)??{}});return true;}
+  if(m.type==='marketSearch'){
+   if(m.close===true){delete p.marketBrowse;delete p.marketBrowseSignature;return true;}
+   const options={...marketOptions(m),...(Number.isSafeInteger(m.requestId)?{requestId:m.requestId}:{})};
+   p.marketBrowse=m.watch===true?options:null;delete p.marketBrowseSignature;this.sendMarketResults(p,options);return true;
+  }
   if(m.type==='shopMine'){w.emit('shopMine',{shops:this.mine(p),perks});return true;}
   if(m.type==='shopList'){w.emit('shops',{list:this.shopList(p.serverId)});return true;}
   if(m.type==='shopOpen'){

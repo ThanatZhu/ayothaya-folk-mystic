@@ -93,9 +93,13 @@ export function collectShop(shop,bag,{close=false}={}){
 }
 // Reference prices: last sale and a moving average per base item (refine/card/affix variants share the base).
 export const priceKey=id=>itemDef(id)?.base??id;
-export function recordPrice(prices,id,unit,now){
+export const marketDay=now=>Math.floor((now+7*60*60*1000)/(24*60*60*1000)); // Bangkok calendar day
+export function recordPrice(prices,id,unit,now,count=1){
  const k=priceKey(id),p=prices[k];
- return {...prices,[k]:{last:unit,avg:p?Math.round(p.avg*.8+unit*.2):unit,n:(p?.n??0)+1,t:now}};
+ const day=marketDay(now),days=(p?.days??[]).filter(d=>Number.isSafeInteger(d.day)&&d.day>day-7&&d.day<=day),today=days.find(d=>d.day===day);
+ const units=Number.isSafeInteger(count)&&count>0?count:1;
+ const next={day,units:(today?.units??0)+units,trades:(today?.trades??0)+1,last:now};
+ return {...prices,[k]:{last:unit,avg:p?Math.round(p.avg*.8+unit*.2):unit,n:(p?.n??0)+1,t:now,days:[next,...days.filter(d=>d.day!==day)].slice(0,7)}};
 }
 export function priceHint(prices,id,price){
  const p=prices?.[priceKey(id)];if(!p||p.n<2)return null;
@@ -112,3 +116,45 @@ export function searchMarket(shops,stalls,query,now=Date.now()){
 }
 // What players see of a shop (no log or pouch of other people's shops).
 export const publicShop=s=>({id:s.id,kind:s.kind,title:s.title,ownerName:s.ownerName,x:s.x,z:s.z,items:s.items,createdAt:s.createdAt??0,expiresAt:shopDeadline(s),status:s.status??'open',...(s.closedReason?{closedReason:s.closedReason}:{})});
+
+// Browsing is paginated rather than silently truncating the market to 40 search hits.
+export const MARKET_PAGE_SIZE=24;
+export function marketOptions(input={}){
+ const number=(v,fallback,min,max)=>v!==''&&v!=null&&Number.isFinite(Number(v))?Math.min(max,Math.max(min,Math.floor(Number(v)))):fallback;
+ const minPrice=number(input.minPrice,0,0,PRICE_MAX),maxPrice=number(input.maxPrice,PRICE_MAX,0,PRICE_MAX);
+ return {query:String(input.query??'').trim().slice(0,30),kind:['sell','buy','all'].includes(input.kind)?input.kind:'sell',
+  category:['all','weapon','armor','card','loot','potion','scroll'].includes(input.category)?input.category:'all',
+  sort:['newest','price-low','price-high','popular'].includes(input.sort)?input.sort:'newest',
+  minPrice:Math.min(minPrice,maxPrice),maxPrice:Math.max(minPrice,maxPrice),page:number(input.page,1,1,1000000),pageSize:number(input.pageSize,MARKET_PAGE_SIZE,1,48)};
+}
+export function marketDemand(prices,now=Date.now()){
+ const day=marketDay(now);
+ return Object.entries(prices??{}).flatMap(([item,p])=>{
+  const d=p.days?.find(d=>d.day===day);return itemDef(item)&&d?.units>0?[{item,units:d.units,trades:d.trades,last:d.last}]:[];
+ }).sort((a,b)=>b.units-a.units||b.trades-a.trades||b.last-a.last||a.item.localeCompare(b.item));
+}
+export function browseMarket(shops,stalls,input={},prices={},now=Date.now()){
+ const options=marketOptions(input),q=options.query.toLocaleLowerCase(),rows=[];
+ const append=(s,live)=>{
+  for(const [item,r] of Object.entries(s.items??{})){
+   if(!TRADABLE(item)||!itemDef(item)||!Number.isSafeInteger(r?.count)||r.count<=0||!Number.isSafeInteger(r.price)||r.price<=0)continue;
+   rows.push({kind:live?'sell':s.kind,...(live?{owner:s.owner}:{shop:s.id}),live,name:live?s.name:s.ownerName,title:s.title,item,
+    price:r.price,count:r.count,x:s.x,z:s.z,mapId:live?s.mapId:MARKET_ZONE.mapId,createdAt:s.createdAt??0});
+  }
+ };
+ for(const s of shops)if(shopIsOpen(s,now))append(s,false);
+ for(const s of stalls)if(s.status!=='closed'&&(!Number.isFinite(s.expiresAt)||s.expiresAt>now))append(s,true);
+ const demand=marketDemand(prices,now),units=new Map(demand.map(d=>[d.item,d.units]));
+ const filtered=rows.filter(r=>{
+  const d=itemDef(r.item),cat=options.category;
+  return (options.kind==='all'||r.kind===options.kind)&&(cat==='all'||cat==='weapon'&&d.kind==='gear'&&d.slot==='weapon'||cat==='armor'&&d.kind==='gear'&&d.slot!=='weapon'||d.kind===cat)&&
+   r.price>=options.minPrice&&r.price<=options.maxPrice&&(!q||[r.item,d.name,r.name,r.title].some(v=>String(v??'').toLocaleLowerCase().includes(q)));
+ });
+ const latest=(a,b)=>b.createdAt-a.createdAt||String(a.shop??a.owner).localeCompare(String(b.shop??b.owner))||a.item.localeCompare(b.item);
+ filtered.sort((a,b)=>options.sort==='price-low'?a.price-b.price||latest(a,b):options.sort==='price-high'?b.price-a.price||latest(a,b):options.sort==='popular'?(units.get(priceKey(b.item))??0)-(units.get(priceKey(a.item))??0)||latest(a,b):latest(a,b));
+ const total=filtered.length,pages=Math.max(1,Math.ceil(total/options.pageSize)),page=Math.min(options.page,pages),pageRows=filtered.slice((page-1)*options.pageSize,page*options.pageSize);
+ const reference={};for(const r of pageRows){const key=priceKey(r.item),p=prices[key];if(p)reference[key]={last:p.last,avg:p.avg,n:p.n,t:p.t};}
+ const selling=rows.filter(r=>r.kind==='sell');
+ return {...options,page,pages,total,rows:pageRows,prices:reference,trending:demand.slice(0,5),day:marketDay(now),
+  stats:{listings:selling.length,sellers:new Set(selling.map(r=>r.shop?'shop:'+r.shop:'stall:'+r.owner)).size,unitsToday:demand.reduce((n,d)=>n+d.units,0)}};
+}

@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=107';
 import {TRADABLE} from './market.js?v=107';
-import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket,shopHasListings} from './market-board.js?v=shops155';
+import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket,shopHasListings,MARKET_PAGE_SIZE} from './market-board.js?v=market188';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 const tr=s=>globalThis.I18N?.t(s)??s;
@@ -15,16 +15,21 @@ const money=n=>(n??0).toLocaleString('th-TH')+' เบี้ย';
 const when=t=>t?new Date(t).toLocaleString(globalThis.I18N?.locale??'th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
 
 export function createMarketBoardUI({game,map,scene,camera,bagUI}){
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./market-board-layout.css?v=154',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./market-board-layout.css?v=market188',import.meta.url).href;document.head.append(css);
  const world=game.world,cmd=(type,data)=>world.market?.(type,data),fail=c=>world.notice(ITEM_ERRORS[c]??c);
  let tab='search',results={query:'',rows:[],prices:{}},mine={shops:[],perks:tradePerks(0)},shops=[],kind='sell',shown='';
+ let browse={query:'',kind:'sell',category:'all',sort:'newest',minPrice:'',maxPrice:'',page:1,pageSize:MARKET_PAGE_SIZE},requestId=0,pending=false,searchTimer=null,renderedBrowse='',filtersExpanded=false,demandExpanded=false;
+ const categories=[['all','ทั้งหมด'],['weapon','อาวุธ'],['armor','เครื่องสวมใส่'],['card','การ์ด'],['loot','วัตถุดิบ'],['potion','ยา'],['scroll','คัมภีร์']];
+ function stopBrowse(){clearTimeout(searchTimer);cmd('marketSearch',{close:true});}
+ function requestBrowse({reset=false}={}){clearTimeout(searchTimer);if(reset)browse.page=1;pending=true;requestId++;cmd('marketSearch',{...browse,watch:true,requestId});render(true);}
  const dialog=document.createElement('dialog');dialog.id='market-board';dialog.tabIndex=-1;dialog.setAttribute('aria-labelledby','board-title');
  dialog.innerHTML=`<header><h2 id="board-title">ตลาดกลาง</h2><button class="mp-icon" id="board-close" aria-label="ปิดตลาดกลาง">×</button></header>
-  <nav class="board-tabs" role="tablist"><button type="button" data-tab="search">ค้นหาของ</button><button type="button" data-tab="open">เปิดร้าน</button><button type="button" data-tab="mine">ร้านของฉัน</button></nav><div id="board-body"></div>`;
+  <nav class="board-tabs" role="tablist"><button type="button" data-tab="search">สินค้าทั้งหมด</button><button type="button" data-tab="open">เปิดร้าน</button><button type="button" data-tab="mine">ร้านของฉัน</button></nav><div id="board-body"></div>`;
  ($('game-shell')??document.body).append(dialog);
  dialog.querySelector('#board-close').onclick=()=>dialog.close();
- dialog.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;if(tab==='mine')cmd('shopMine');render(true);});
- function open(t='search'){if(!game.online)return world.notice('ตลาดกลางต้องเข้าโหมดออนไลน์');tab=t;cmd('shopMine');openHudPanel(dialog);dialog.focus({preventScroll:true});render(true);}
+ dialog.addEventListener('close',stopBrowse);
+ dialog.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;if(tab==='search')requestBrowse();else{stopBrowse();if(tab==='mine')cmd('shopMine');render(true);}});
+ function open(t='search'){if(!game.online)return world.notice('ตลาดกลางต้องเข้าโหมดออนไลน์');tab=t;cmd('shopMine');openHudPanel(dialog);dialog.focus({preventScroll:true});if(tab==='search')requestBrowse();else render(true);}
  // Entry points: a button beside the bag's market bar, the M-key world map is untouched.
  const entry=document.createElement('button');entry.type='button';entry.id='open-market-board';entry.innerHTML=icon('market-stalls','item-icon small')+'ตลาดกลาง';
  entry.onclick=()=>{$('bag-window')?.close();open();};
@@ -52,28 +57,49 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
  // Walk to a shop, then open its counter.
  let counter=null;
  function visit(id){const s=shops.find(v=>v.id===id);if(!s)return;
-  if(Math.hypot(world.player.x-s.x,world.player.z-s.z)<4){counter=id;tab='shop';openHudPanel(dialog);render(true);return;}
+  if(Math.hypot(world.player.x-s.x,world.player.z-s.z)<4){counter=id;tab='shop';stopBrowse();openHudPanel(dialog);render(true);return;}
   game.walkTo({x:s.x,z:s.z},{radius:2.2,kind:'npc',onArrive:()=>visit(id),onFail:()=>world.notice('ไปที่ร้านไม่ได้')});}
 
  game.onEvent(e=>{
   if(e.type==='shops'){shops=e.list.filter(s=>s.status!=='closed'&&shopHasListings(s));syncSigns();if(tab!=='open')render(true);} // never wipe a half-filled open-shop form
   if(e.type==='shopsClosed'){const ids=new Set(e.ids??[]);shops=shops.filter(s=>!ids.has(s.id));results={...results,rows:results.rows.filter(r=>!ids.has(r.shop))};syncSigns();if(tab!=='open')render(true);}
   if(e.type==='shopMine'){mine={shops:e.shops,perks:e.perks};if(tab!=='open')render(true);}
-  if(e.type==='marketResults'){results=e;if(tab!=='open')render(true);}
+  if(e.type==='marketResults'&&dialog.open&&tab==='search'&&(e.requestId==null||e.requestId===requestId)){results=e;pending=false;browse.page=e.page??1;render(true);}
  });
 
  const listRow=(id,r,btn)=>`<li data-id="${esc(id)}">${icon(id)}<div><strong>${esc(itemDef(id)?.name)}</strong><small>${money(r.price)} · เหลือ ${r.count}</small></div>${btn}</li>`;
  const qty=max=>`<span class="qty"><button type="button" data-q="-1" aria-label="ลด">−</button><output>1</output><button type="button" data-q="1" data-max="${max}" aria-label="เพิ่ม">+</button></span>`;
  const wireQty=body=>body.querySelectorAll('.qty').forEach(q=>{const out=q.querySelector('output'),max=+q.querySelector('[data-max]').dataset.max;q.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{out.value=String(Math.min(max,Math.max(1,+out.value+ +b.dataset.q)));});});
  function render(force=false){
-  if(!dialog.open)return;const bag=bagUI.bag(),sig=JSON.stringify([tab,kind,results,mine,shops,counter,bag]);if(!force&&sig===shown)return;shown=sig;
+  if(!dialog.open)return;const bag=bagUI.bag(),sig=JSON.stringify([tab,kind,results,mine,shops,counter,bag,pending]);if(!force&&sig===shown)return;shown=sig;
   dialog.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
-  const body=$('board-body'),perks=mine.perks??tradePerks(0);dialog.dataset.boardTab=tab;dialog.dataset.boardKind=kind;
+  const body=$('board-body'),perks=mine.perks??tradePerks(0),focused=body.contains(document.activeElement)?document.activeElement:null,focusId=focused?.id,selection=focused?.selectionStart,selectionEnd=focused?.selectionEnd,scroll=body.scrollTop;
+  const browseKey=JSON.stringify(browse),scrolls=['.board-results','.board-demand','.board-trending'].map(selector=>{const n=body.querySelector(selector);return {selector,top:n?.scrollTop??0,left:n?.scrollLeft??0};});dialog.dataset.boardTab=tab;dialog.dataset.boardKind=kind;
   if(tab==='search'){
-   body.innerHTML=`<form class="board-search"><input id="board-q" maxlength="30" placeholder="พิมพ์ชื่อของ เช่น ฟันหนู" value="${esc(results.query)}" aria-label="ชื่อของที่ต้องการค้นหา"><button type="submit" class="mp-primary">ค้นหา</button></form>
-    <p class="market-note">ค้นทุกร้านค้างและแผงในเซิร์ฟนี้ · ร้านขายเรียงจากถูกไปแพง ร้านรับซื้อเรียงจากให้ราคาดีสุด</p>
-    <ul class="market-list board-results">${results.rows.map((r,i)=>{const p=results.prices?.[priceKey(r.item)];return `<li>${icon(r.item)}<div><strong>${r.kind==='buy'?'รับซื้อ ':''}${esc(itemDef(r.item)?.name)}</strong><small>${money(r.price)} · ${r.count} ชิ้น · ${esc(r.name)}${r.live?' (ออนไลน์)':''}${p?` · ราคากลาง ${money(p.avg)}`:''}</small></div><button type="button" data-go="${i}">เดินไป</button></li>`;}).join('')||'<li class="empty">'+(results.query?'ไม่พบของชิ้นนี้ในตลาด':'ยังไม่ได้ค้นหา')+'</li>'}</ul>`;
-   body.querySelector('form').onsubmit=e=>{e.preventDefault();const q=body.querySelector('#board-q').value.trim();if(q)cmd('marketSearch',{query:q});};
+   const stats=results.stats??{},option=(value,label,selected)=>`<option value="${value}"${selected===value?' selected':''}>${label}</option>`;
+   body.innerHTML=`<section class="board-overview" aria-label="ภาพรวมตลาด"><div><small>รายการขายทั้งหมด</small><strong>${(stats.listings??0).toLocaleString()}</strong></div><div><small>ร้านและแผงขาย</small><strong>${(stats.sellers??0).toLocaleString()}</strong></div><div><small>ชิ้นที่ซื้อวันนี้</small><strong>${(stats.unitsToday??0).toLocaleString()}</strong></div></section>
+    <section class="board-demand" aria-labelledby="board-demand-title"><div class="board-section-title"><h3 id="board-demand-title">คนซื้อเยอะวันนี้</h3><small>ยอดซื้อสำเร็จ · เวลาไทย</small></div><div class="board-trending">${(results.trending??[]).map((r,i)=>`<button type="button" data-trend="${i}" class="board-trend">${icon(r.item)}<span><strong>${esc(itemDef(r.item)?.name)}</strong><small>ซื้อ ${r.units.toLocaleString()} ชิ้น · ${r.trades.toLocaleString()} รายการ</small></span></button>`).join('')||'<p class="board-quiet">ยังไม่มียอดซื้อวันนี้ · เมื่อมีการซื้อขาย สินค้ายอดนิยมจะแสดงที่นี่</p>'}</div></section>
+    <form class="board-search"><input id="board-q" maxlength="30" placeholder="ค้นหาสินค้า ชื่อผู้ขาย หรือชื่อร้าน" value="${esc(browse.query)}" aria-label="ค้นหาสินค้า ชื่อผู้ขาย หรือชื่อร้าน"><button type="submit" class="mp-primary">ค้นหา</button><button type="button" id="board-refresh">รีเฟรช</button></form>
+    <nav class="board-categories" aria-label="ประเภทสินค้า">${categories.map(([id,label])=>`<button type="button" data-category="${id}" aria-pressed="${browse.category===id}">${label}</button>`).join('')}</nav>
+    <div class="board-filters"><label>ประเภทร้าน<select id="board-kind-filter">${[['sell','ร้านขายของ'],['buy','ร้านรับซื้อ'],['all','ทุกร้าน']].map(([v,l])=>option(v,l,browse.kind)).join('')}</select></label><label>เรียงตาม<select id="board-sort">${[['newest','ลงขายล่าสุด'],['price-low','ราคาต่ำไปสูง'],['price-high','ราคาสูงไปต่ำ'],['popular','ยอดซื้อวันนี้']].map(([v,l])=>option(v,l,browse.sort)).join('')}</select></label><label class="board-price-range">ราคาต่อชิ้น<input id="board-price-min" type="number" min="0" max="9999999" inputmode="numeric" placeholder="ต่ำสุด" aria-label="ราคาต่ำสุด" value="${esc(browse.minPrice)}"><span>–</span><input id="board-price-max" type="number" min="0" max="9999999" inputmode="numeric" placeholder="สูงสุด" aria-label="ราคาสูงสุด" value="${esc(browse.maxPrice)}"></label><button type="button" id="board-reset">ล้างตัวกรอง</button></div>
+    <div class="board-section-title"><h3>${browse.kind==='buy'?'รายการรับซื้อ':'สินค้าที่วางขาย'} <small>${(results.total??0).toLocaleString()} รายการ</small></h3><span id="board-status" role="status">${pending?'กำลังโหลดสินค้า…':'อัปเดตอัตโนมัติเมื่อมีรายการเปลี่ยน'}</span></div>
+    <ul class="market-list board-results" aria-busy="${pending}">${results.rows.map((r,i)=>{const p=results.prices?.[priceKey(r.item)];return `<li class="board-product">${icon(r.item)}<div class="board-product-copy"><span class="board-listing-kind">${r.kind==='buy'?'รับซื้อ':r.live?'แผงออนไลน์':'ร้านค้าง'}</span><strong>${esc(itemDef(r.item)?.name??r.item)}</strong><b class="board-product-price">${money(r.price)} <small>/ ชิ้น</small></b><small>${r.kind==='buy'?'ต้องการ':'เหลือ'} ${r.count.toLocaleString()} ชิ้น${p?` · ราคากลาง ${money(p.avg)}`:''}</small></div><div class="board-product-owner"><span>${r.kind==='buy'?'ผู้รับซื้อ':'ผู้ขาย'} <b>${esc(r.name)}</b></span><small>${esc(r.title)}${r.createdAt?' · ลงขาย '+when(r.createdAt):''}</small></div><button type="button" data-go="${i}">เดินไปร้าน</button></li>`;}).join('')||`<li class="empty board-empty">${pending?'กำลังโหลดสินค้า…':browse.query||browse.category!=='all'||browse.kind!=='sell'||browse.minPrice!==''||browse.maxPrice!==''?'ไม่พบรายการที่ตรงกับตัวกรอง':'ยังไม่มีสินค้าวางขาย · เปิดร้านแล้วสินค้าจะแสดงที่นี่'}</li>`}</ul>
+    <div class="board-pagination"><button type="button" id="board-prev" ${pending||(results.page??1)<=1?'disabled':''}>ก่อนหน้า</button><span>หน้า ${(results.page??1).toLocaleString()} / ${(results.pages??1).toLocaleString()}</span><button type="button" id="board-next" ${pending||(results.page??1)>=(results.pages??1)?'disabled':''}>ถัดไป</button></div>`;
+   const compact=matchMedia('(max-width:900px), (pointer:coarse)').matches;
+   for(const [selector,className,label,expanded,setExpanded] of [['.board-filters','board-filter-panel','ตัวกรองเพิ่มเติม',filtersExpanded,value=>filtersExpanded=value],['.board-demand','board-demand-panel','คนซื้อเยอะวันนี้',demandExpanded,value=>demandExpanded=value]]){
+    const content=body.querySelector(selector),panel=document.createElement('details'),summary=document.createElement('summary');panel.className=className;summary.textContent=tr(label);content.before(panel);panel.append(summary,content);panel.open=!compact||expanded;
+    panel.ontoggle=()=>{if(compact)setExpanded(panel.open);};
+   }
+   const readFilters=()=>{browse.query=body.querySelector('#board-q').value;browse.minPrice=body.querySelector('#board-price-min').value;browse.maxPrice=body.querySelector('#board-price-max').value;};
+   body.querySelector('form').onsubmit=e=>{e.preventDefault();readFilters();requestBrowse({reset:true});};
+   body.querySelector('#board-q').oninput=e=>{browse.query=e.target.value;clearTimeout(searchTimer);searchTimer=setTimeout(()=>requestBrowse({reset:true}),300);};
+   body.querySelector('#board-refresh').onclick=()=>{readFilters();requestBrowse();};
+   body.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{readFilters();browse.category=b.dataset.category;requestBrowse({reset:true});});
+   for(const [id,key] of [['board-kind-filter','kind'],['board-sort','sort']])body.querySelector('#'+id).onchange=e=>{readFilters();browse[key]=e.target.value;requestBrowse({reset:true});};
+   for(const id of ['board-price-min','board-price-max'])body.querySelector('#'+id).oninput=()=>{readFilters();clearTimeout(searchTimer);searchTimer=setTimeout(()=>requestBrowse({reset:true}),400);};
+   body.querySelector('#board-reset').onclick=()=>{browse={query:'',kind:'sell',category:'all',sort:'newest',minPrice:'',maxPrice:'',page:1,pageSize:MARKET_PAGE_SIZE};requestBrowse();};
+   body.querySelectorAll('[data-trend]').forEach(b=>b.onclick=()=>{const r=results.trending[+b.dataset.trend];browse={...browse,query:itemDef(r.item)?.name??r.item,kind:'sell',category:'all',minPrice:'',maxPrice:''};requestBrowse({reset:true});});
+   for(const [id,step] of [['board-prev',-1],['board-next',1]])body.querySelector('#'+id).onclick=()=>{browse.page=(results.page??1)+step;requestBrowse();};
    body.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const r=results.rows[+b.dataset.go];
     if(r.mapId!==map.id)return world.notice('ร้านนี้อยู่ที่อยุธยา · เดินทางไปก่อน');dialog.close();
     if(r.shop)visit(r.shop);else game.walkTo({x:r.x,z:r.z},{radius:2,kind:'npc',onArrive:()=>{cmd('stallList');$('bag-window');world.notice('ถึงแผง '+r.name+' แล้ว · เปิดกระเป๋า > ตลาด เพื่อซื้อ');}});});
@@ -112,6 +138,8 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
    wireQty(body);
    body.querySelectorAll('.deal').forEach(b=>b.onclick=()=>{const li=b.closest('li');cmd(s.kind==='buy'?'shopSell':'shopBuy',{shop:s.id,item:li.dataset.id,count:+li.querySelector('output').value});});
   }
+  body.scrollTop=scroll;if(tab==='search'){if(browseKey===renderedBrowse)for(const s of scrolls){const n=body.querySelector(s.selector);if(n){n.scrollTop=s.top;n.scrollLeft=s.left;}}renderedBrowse=browseKey;}else renderedBrowse='';
+  if(focusId){const next=body.querySelector('#'+focusId);if(next){next.focus({preventScroll:true});if(selection!=null&&next.type!=='number')next.setSelectionRange?.(selection,selectionEnd);}}
  }
  // A buying store names a base item: exact name first, then the first tradable item whose name contains the text.
  const findItem=q=>{if(!q)return null;const ids=Object.keys(ITEMS).filter(TRADABLE);return ids.find(id=>ITEMS[id].name===q)??ids.find(id=>ITEMS[id].name.includes(q))??null;};

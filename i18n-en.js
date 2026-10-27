@@ -4706,6 +4706,20 @@ Object.assign(globalThis.I18N_EN,{
   "🏆 อันดับกิลด์วอร์ ·": "🏆 Guild War standings ·"
 });
 
+Object.assign(globalThis.I18N_EN,{
+ "สินค้าทั้งหมด":"All listings","รายการขายทั้งหมด":"Sale listings","ร้านและแผงขาย":"Shops and stalls","ชิ้นที่ซื้อวันนี้":"Items bought today","ภาพรวมตลาด":"Market overview",
+ "คนซื้อเยอะวันนี้":"Popular purchases today","ยอดซื้อสำเร็จ · เวลาไทย":"Completed purchases · Thailand time",
+ "ซื้อ {0} ชิ้น · {1} รายการ":"{0} items bought · {1} transactions",
+ "ยังไม่มียอดซื้อวันนี้ · เมื่อมีการซื้อขาย สินค้ายอดนิยมจะแสดงที่นี่":"No purchases today yet. Popular items appear after completed trades.",
+ "ค้นหาสินค้า ชื่อผู้ขาย หรือชื่อร้าน":"Search items, sellers or shops","ประเภทสินค้า":"Item category","เครื่องสวมใส่":"Armor and accessories","คัมภีร์":"Scrolls",
+ "ประเภทร้าน":"Shop type","ทุกร้าน":"All shops","ลงขายล่าสุด":"Newest listings","ราคาต่ำไปสูง":"Price: low to high","ราคาสูงไปต่ำ":"Price: high to low","ยอดซื้อวันนี้":"Purchases today",
+ "ราคาต่อชิ้น":"Unit price","ต่ำสุด":"Minimum","สูงสุด":"Maximum","ราคาต่ำสุด":"Minimum price","ราคาสูงสุด":"Maximum price","ล้างตัวกรอง":"Clear filters",
+ "รายการรับซื้อ":"Buying orders","สินค้าที่วางขาย":"Items for sale","กำลังโหลดสินค้า…":"Loading listings…","อัปเดตอัตโนมัติเมื่อมีรายการเปลี่ยน":"Updates automatically when listings change",
+ "แผงออนไลน์":"Online stall","ร้านค้าง":"Consignment shop","ผู้ขาย":"Seller","ผู้รับซื้อ":"Buyer","ลงขาย":"Listed","เดินไปร้าน":"Go to shop",
+ "ไม่พบรายการที่ตรงกับตัวกรอง":"No listings match these filters","ยังไม่มีสินค้าวางขาย · เปิดร้านแล้วสินค้าจะแสดงที่นี่":"No items for sale yet. Open a shop to list your goods.","หน้า {0} / {1}":"Page {0} / {1}",
+ "เรียงตาม":"Sort by","{11} รายการ":"{11} listings","ก่อนหน้า":"Previous","หน้า {16} / {17}":"Page {16} / {17}","ซื้อ {3} ชิ้น · {4} รายการ":"{3} items bought · {4} transactions","/ ชิ้น":"/ item","{4} {5} ชิ้น{6}":"{4} {5} items{6}","ต้องการ":"Wanted","· ลงขาย":"· Listed","ตัวกรองเพิ่มเติม":"More filters"
+});
+
 // Class weapon crafting lesson and deterministic colour advancement.
 Object.assign(globalThis.I18N_EN,{
   "กดคราฟต์อาวุธสีฟ้า": "Craft your blue weapon",

@@ -185,3 +185,7 @@ table.drops tr.mon td{background:#ffffff08;border-top:2px solid var(--rule)}tabl
 
 /* 0.119 skill table: one header row per path (class skills, each Master path) */
 #view tr.section th{background:#1d3328;color:#f4cf7a;font-weight:700;text-align:left;padding-top:10px}
+/* 0.119 observer e-mails tab */
+.obs-add{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.obs-add input{flex:1 1 240px;min-height:40px;padding:6px 12px;border:1px solid #c6a16488;border-radius:10px;background:#0e2926cc;color:#fff0ce;font:500 14px var(--font-game,Mali),sans-serif}
+.obs-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.obs-list li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:10px 14px;border:1px solid #c6a16488;border-radius:10px;background:linear-gradient(135deg,#24382bf4,#152925f0)}
+.obs-list b{color:#fff0ce;overflow-wrap:anywhere}.obs-list small{flex:1;color:#c9b98f;font-size:12px}.obs-list button{min-height:32px;padding:4px 14px;border:1px solid #e0806f;border-radius:999px;background:#3a1f1c;color:#ffd9cf;font:700 12px var(--font-game,Mali),sans-serif;cursor:pointer}.obs-list button:disabled{opacity:.5;cursor:default}

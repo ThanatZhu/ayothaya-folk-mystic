@@ -22,7 +22,7 @@ import {GAMEPLAY_RUN_ENABLED} from '../character-action-state.js';
 import {trainingAction} from '../city-life-data.js';
 import {normalizeSkills} from '../skill-progress.js';
 import {cleanBalance} from '../balance.js';
-import {canObserve,isAdmin,adminEmails,OWNER_EMAILS,configKeys,adminPlayers,adminGive,adminGiveOffline} from './admin.js';
+import {canObserve,observerEmails,envObservers,cleanObservers,isAdmin,adminEmails,OWNER_EMAILS,configKeys,adminPlayers,adminGive,adminGiveOffline} from './admin.js';
 import {cleanFinance,cleanSlip,slipId,FINANCE_MAX_BYTES,SLIP_MAX_BYTES} from './finance.js';
 import {EvidenceLog,playerEvent} from './evidence.js';
 import {WorldReset} from './world-reset.js';
@@ -58,6 +58,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(store.loadGuilds){realm.guilds=new Map((await store.loadGuilds()).map(g=>[g.id,g]));store.realmGuilds=realm.guilds;}
     if(store.loadLeaders){store.allLeaders=await store.loadLeaders();realm.leaders=new Map(Object.entries(store.allLeaders));}
     if(store.loadDashboardLogs)realm.logs=await store.loadDashboardLogs();
+    await loadObservers();refreshObservers();
     bossTimersReady=!store.loadMapBosses;mailReady=!store.loadMailAnnouncements;resetReady=true;
    }
    if(!shopsReady){await loadMarket();shopsReady=true;}
@@ -78,6 +79,12 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  // 0.70 market: shops stay open while their owners are offline, so they live outside the player saves.
  if(store?.loadShops){loadMarket=async()=>{realm.shops=new Map((await store.loadShops()).map(s=>[s.id,s]));store.realmShops=realm.shops;const prices=await store.loadPrices();store.allPrices=prices;realm.prices=new Map(Object.entries(prices));};realm.onShop=(s,deleted)=>trackWrite(deleted?store.deleteShop(s):store.saveShop(s));realm.onPrices=(id,p)=>trackWrite(store.savePrices(id,p));if(mode==='local')await loadMarket();}
  if(store?.loadLeaders){const l=await store.loadLeaders();store.allLeaders=l;realm.leaders=new Map(Object.entries(l));realm.onLeaders=(id,rows)=>trackWrite(store.saveLeaders(id,rows));}
+// 0.119 observer e-mails saved from the back office (see /admin/observers); a peer keeps its verified e-mail so a
+ // removed address loses the mode straight away
+ let observerSaved=[];
+ const loadObservers=async()=>{if(!store?.loadObservers)return;try{observerSaved=cleanObservers(await store.loadObservers());}catch(e){console.error('observers-load',e.message);}};
+ const refreshObservers=()=>{if(mode==='local')return;const list=observerEmails(process.env,observerSaved);for(const p of realm.peers.values()){const ok=list.has(p.observerEmail??'');if(p.canObserve===ok)continue;p.canObserve=ok;if(!ok&&p.observer)realm.setObserver(p,false);}};
+ await loadObservers();
  if(store?.loadGuilds){realm.guilds=new Map((await store.loadGuilds()).map(g=>[g.id,g]));store.realmGuilds=realm.guilds;realm.onGuild=(g,deleted)=>trackWrite(deleted?store.deleteGuild(g):store.saveGuild(g)).catch(e=>console.error('guild-save',e.message));}
   if(store?.loadDashboardLogs){try{const saved=await store.loadDashboardLogs();if(Array.isArray(saved)&&saved.length)realm.logs=saved;}catch(e){console.error('dashboard-logs-load',e.message);}}
  const repository=createResetStore(store);
@@ -228,6 +235,17 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      if(mode==='local'){await writeFile(path.join(root,'balance-data.js'),text);await writeFile(path.join(root,'dist','balance-data.js'),text).catch(()=>{});reply(200,{ok:true,changes,local:true});}
      else{const r=await commitBalance(text);console.log('admin-balance',who,changes,r.commit??'unchanged');audit('admin-balance',who,{changes,commit:r.commit??null});reply(200,{ok:true,changes,...r});}
     }catch(e){console.error('admin-balance',e.message);reply(502,{error:e.message});}
+    return;
+   }
+   // 0.119 observer e-mails from the back office: GET the lists, POST {emails} replaces the saved list. Taking an address
+   // off turns observer mode off for that player at once; a new address works from that player's next join.
+   if(url.pathname==='/admin/observers'&&req.method==='GET'){reply(200,{owner:OWNER_EMAILS,env:envObservers(),emails:observerSaved});return;}
+   if(url.pathname==='/admin/observers'&&req.method==='POST'){
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>16000){reply(413,{error:'too-large'});return;}}
+    try{const emails=cleanObservers(JSON.parse(data)?.emails);if(!store?.saveObservers)throw new Error('store-unsupported');await trackWrite(store.saveObservers(emails));
+     const added=emails.filter(e=>!observerSaved.includes(e)),removed=observerSaved.filter(e=>!emails.includes(e));observerSaved=emails;refreshObservers();
+     console.log('admin-observers',who,emails.length);audit('admin-observers',who,{added,removed});reply(200,{owner:OWNER_EMAILS,env:envObservers(),emails});}
+    catch(e){reply(e.message==='store-unsupported'?503:400,{error:e instanceof SyntaxError?'invalid':e.message});}
     return;
    }
    // 0.109.7 weather override from the back office: GET the current state per realm, POST {serverId, weather|'auto', minutes, mapId}
@@ -406,7 +424,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     let verified;if(mode==='local'){const uid=store.verifyLocal(message.token);if(!uid)throw new Error('invalid-token');verified={uid,exp:Math.floor(Date.now()/1000)+3600};}else verified=await authenticate(message.token);
     identity={uid:verified.uid,serverId:message.serverId,slotId:message.slotId};
     // 0.119 observer mode: only the verified e-mails on its own list (a local dev realm has no e-mail, so every local player may test it)
-    observer=mode==='local'||canObserve(verified);
+    observer=mode==='local'||canObserve(verified,observerEmails(process.env,observerSaved));
     if(reset?.maintenance)throw Error('world-reset');
     if(!['server-1','server-2'].includes(identity.serverId)||!/^slot-[1-5]$/.test(identity.slotId??''))throw new Error('invalid-identity');
     if(joinPending.has(identity.uid))throw new Error('already-online');joinPending.add(identity.uid);claimed=true;
@@ -419,7 +437,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(lease.record.state.mapId==='duel-arena'&&!arenaReservation(realm,identity.uid+':'+identity.slotId)){lease.record.state.mapId=catalog.capital;lease.record.state.position={...catalog.maps.find(m=>m.id===catalog.capital).spawn};await store.checkpoint(lease,lease.record);}
     if(reset?.maintenance)throw Error('world-reset');
     const queued=[],peer=realm.join({...identity,canObserve:observer,...(message.channel!==undefined?{channel:message.channel}:{}),record:lease.record,send:data=>queued.push(data)});
-    peer.ip=requestIp(req);realm.evidence(peer,'login',{agent:String(req.headers['user-agent']??'').slice(0,200)});
+    peer.ip=requestIp(req);peer.observerEmail=verified.email_verified===true?String(verified.email??'').toLowerCase():'';realm.evidence(peer,'login',{agent:String(req.headers['user-agent']??'').slice(0,200)});
     session={peer,lease,ws,queue:Promise.resolve(),autoSavedAt:Date.now(),savedJson:null,expires:verified.exp*1000,closing:false,released:false};sessions.set(peer.id,session);peer.send=send;clearTimeout(timer);settled();queued.forEach(send);
    }catch(e){if(lease)await store.checkpoint(lease,lease.record,{release:true}).catch(()=>{});send({type:'error',code:['world-reset','already-online','room-full','character-not-found','character-server'].includes(e.message)?e.message:'authentication-failed'});ws.close(4003,'join-rejected');}
    finally{if(claimed)joinPending.delete(identity.uid);}

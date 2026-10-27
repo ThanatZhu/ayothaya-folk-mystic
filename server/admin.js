@@ -20,9 +20,17 @@ export const configKeys=env=>Object.keys(env).filter(k=>/admin|github|observer/i
 export const OWNER_EMAILS=['chokkungfn@gmail.com'];
 export function adminEmails(env=process.env){return new Set([...OWNER_EMAILS,...(env[adminKey(env)]??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean)]);}
 export function isAdmin(decoded,emails=adminEmails()){return !!decoded?.email&&decoded.email_verified===true&&emails.has(decoded.email.toLowerCase());}
-// 0.119 observer mode (the invisible spectator) has its own list: the owner plus OBSERVER_EMAILS, not every admin
+// 0.119 observer mode (the invisible spectator) has its own list: the owner, OBSERVER_EMAILS and the addresses saved
+// from the back office (saved), not every admin
 export const observerKey=env=>Object.keys(env).find(k=>/^observer[\s_-]*emails?$/i.test(k.trim()))??null;
-export function observerEmails(env=process.env){return new Set([...OWNER_EMAILS,...(env[observerKey(env)]??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean)]);}
+export const envObservers=(env=process.env)=>(env[observerKey(env)]??'').replace(/["']/g,'').split(/[\s,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+export function observerEmails(env=process.env,saved=[]){return new Set([...OWNER_EMAILS,...envObservers(env),...saved]);}
+export function cleanObservers(list){
+ if(!Array.isArray(list)||list.length>50)throw new Error('invalid');
+ const out=[...new Set(list.map(s=>String(s).trim().toLowerCase()).filter(Boolean))];
+ if(out.some(e=>e.length>254||!/^[^\s@,;"'<>]+@[^\s@,;"'<>]+\.[^\s@,;"'<>]+$/.test(e)))throw new Error('bad-email');
+ return out;
+}
 export const canObserve=(decoded,emails=observerEmails())=>isAdmin(decoded,emails);
 
 // saved: [{uid,slotId,record,savedAt}] from the store; characters in the realm right now are shown from the realm instead

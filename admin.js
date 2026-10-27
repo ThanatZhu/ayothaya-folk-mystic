@@ -75,8 +75,8 @@ function set(r,f,v){
  showCount();
 }
 // 0.101.2 side menu: what each page is for, in one line
-const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP']};
-const NAV=[['ผู้เล่นและชุมชน',['players','mail','evidence']],['โลกเกมตอนนี้',['weather','boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
+const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP'],observers:['👁','ผู้ชมล่องหน','อีเมลที่เปิดโหมดผู้ชมได้ (ล่องหน ไม่ตกเป็นเป้า ไว้ไลฟ์วอกิลด์)']};
+const NAV=[['ผู้เล่นและชุมชน',['players','mail','evidence','observers']],['โลกเกมตอนนี้',['weather','boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
 // 0.118 evidence log (player names and details are shown exactly as recorded: data-i18n-skip): search what players and admins did (server keeps players 90 days, admins 3 years) and export it.
 const bkkDay=(t=Date.now())=>new Date(t+7*3600e3).toISOString().slice(0,10);
 const ev={stream:'players',from:bkkDay(),to:bkkDay(),type:'',q:'',rows:null,total:0,truncated:false,loading:false,msg:''};
@@ -156,7 +156,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses','mail','evidence'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses','mail','evidence','observers'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
  $('page-title').textContent=name;$('page-help').textContent=(tab==='skills'&&skillSet==='live'?'ชุดสกิลที่ใช้ในเกมปัจจุบัน · ดูรูป บทบาท และสาย Master':help)+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -177,7 +177,7 @@ function render(withFilters=true){
  if(withFilters)filters();pageHead();
  if(tab==='skills'&&skillSet==='live'){currentSkills();return;}
  if(tab==='table'){$('view').innerHTML=skillTable();$('view').querySelectorAll('tbody[data-path]').forEach(t=>paintAdminSkills(t,tableView,liveRoleSkills(tableView,t.dataset.path)));return;}
- if(tab==='evidence'){evidenceTab();return;}if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
+ if(tab==='evidence'){evidenceTab();return;}if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='observers'){observersTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
  const rows=rowsFor(),cols=columns(rows),cards=['skills','monsters'].includes(tab)&&viewMode==='cards';
  const undo=(r,i)=>`<button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button>`;
  const note=tab==='skills'?'<p class="admin-legacy-note">ชุดสกิลเดิมก่อนปรับระบบอาชีพ · ไม่ใช่ชุดสกิลปัจจุบันที่แสดงในเกม</p>':'';
@@ -356,7 +356,7 @@ async function adminFetch(path,body){
  const r=await fetch(API+path,{method:body?'POST':'GET',headers,body:body&&JSON.stringify(body)}),j=await r.json().catch(()=>({}));
  if(!r.ok)throw new Error(j.error??String(r.status));return j;
 }
-const ADMIN_ERRORS={'mailbox-full':'กล่องจดหมายเต็ม','player-online':'ผู้เล่นคนนี้เพิ่งเข้าเกม · กดรีเฟรชแล้วส่งใหม่','bag-full':'กระเป๋าผู้เล่นเต็ม · ส่งของน้อยลงหรือส่งเป็นเบี้ยแทน','character-not-found':'ไม่พบตัวละครนี้ในเซฟ','not-admin':'อีเมลนี้ไม่อยู่ในรายชื่อ ADMIN_EMAILS บน Render','admin-unset':'เซิร์ฟเวอร์ยังไม่เห็นค่า ADMIN_EMAILS · ตั้งที่ Render แล้วกด Save, rebuild and deploy','bad-token':'ตรวจการล็อกอิน Google ไม่ผ่าน · ออกแล้วล็อกอินใหม่','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน','github-unset':'เซิร์ฟเวอร์ยังไม่มี GITHUB_TOKEN (ตั้งที่ Render)','github-failed':'ส่งขึ้น GitHub ไม่สำเร็จ · ตรวจสิทธิ์ของ GITHUB_TOKEN','github-conflict':'ไฟล์บน GitHub เพิ่งเปลี่ยน · กดบันทึกอีกครั้ง','invalid':'ข้อมูลไม่ถูกต้อง'};
+const ADMIN_ERRORS={'mailbox-full':'กล่องจดหมายเต็ม','player-online':'ผู้เล่นคนนี้เพิ่งเข้าเกม · กดรีเฟรชแล้วส่งใหม่','bag-full':'กระเป๋าผู้เล่นเต็ม · ส่งของน้อยลงหรือส่งเป็นเบี้ยแทน','character-not-found':'ไม่พบตัวละครนี้ในเซฟ','not-admin':'อีเมลนี้ไม่อยู่ในรายชื่อ ADMIN_EMAILS บน Render','admin-unset':'เซิร์ฟเวอร์ยังไม่เห็นค่า ADMIN_EMAILS · ตั้งที่ Render แล้วกด Save, rebuild and deploy','bad-token':'ตรวจการล็อกอิน Google ไม่ผ่าน · ออกแล้วล็อกอินใหม่','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน','github-unset':'เซิร์ฟเวอร์ยังไม่มี GITHUB_TOKEN (ตั้งที่ Render)','github-failed':'ส่งขึ้น GitHub ไม่สำเร็จ · ตรวจสิทธิ์ของ GITHUB_TOKEN','github-conflict':'ไฟล์บน GitHub เพิ่งเปลี่ยน · กดบันทึกอีกครั้ง','invalid':'ข้อมูลไม่ถูกต้อง','bad-email':'รูปแบบอีเมลไม่ถูกต้อง'};
 // Firebase connects as soon as the tab opens, so the click below can open the Google popup straight away
 // (a popup opened after an await is no longer a click, and the browser blocks it).
 function warmFirebase(){if(LOCAL||fbWarm)return;fbWarm=import('./firebase-client.js').then(m=>m.deadline(m.connectFirebase())).then(c=>{fbConn=c;if(tab==='players')playersTab();}).catch(()=>{fbWarm=null;adminMsg='เชื่อมต่อ Google ไม่ได้ · ลองรีโหลดหน้า';if(tab==='players')playersTab();});}
@@ -400,6 +400,31 @@ function weatherTab(){
  $('wx-login')&&($('wx-login').onclick=async()=>{if(await signIn())loadWeather();});
  $('wx-server')&&($('wx-server').onchange=e=>{wx.serverId=e.target.value;});$('wx-map')&&($('wx-map').onchange=e=>{wx.mapId=e.target.value;});$('wx-min')&&($('wx-min').onchange=e=>{wx.minutes=+e.target.value;});
  $('view').querySelectorAll('[data-wx]').forEach(b=>b.onclick=()=>setWeather(b.dataset.wx));
+}
+// 0.119 observer tab: who may turn on observer mode. The owner and OBSERVER_EMAILS (backend setting) are fixed here;
+// the saved list is added to or taken from, and a removed address loses the mode at once.
+let obsList=null,obsMsg='',obsBusy=false;
+async function loadObservers(){try{obsList=await adminFetch('/admin/observers');obsMsg='';}catch(e){obsMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}if(tab==='observers')observersTab();}
+async function saveObservers(emails,done){
+ obsBusy=true;obsMsg='กำลังบันทึก…';observersTab();
+ try{obsList=await adminFetch('/admin/observers',{emails});obsMsg=done;}catch(e){obsMsg=ADMIN_ERRORS[e.message]??'บันทึกไม่สำเร็จ · '+e.message;}
+ obsBusy=false;observersTab();
+}
+function observersTab(){
+ warmFirebase();const user=LOCAL||fbConn?.auth.currentUser;
+ if(user&&!obsList&&!obsMsg)loadObservers();
+ const row=(email,note,del)=>`<li><b>${esc(email)}</b><small>${note}</small>${del?`<button type="button" data-obs-del="${esc(email)}" ${obsBusy?'disabled':''}>ลบ</button>`:''}</li>`;
+ $('view').innerHTML=!user?`<div class="wx"><p>ต้องล็อกอิน Google ด้วยบัญชีแอดมินก่อน</p><button type="button" id="obs-login" class="wx-auto">ล็อกอิน</button></div>`:
+  `<div class="wx obs-admin"><p class="wx-now">อีเมล Google (ยืนยันแล้ว) ในรายชื่อนี้เปิด <b>👁 โหมดผู้ชม</b> ได้ในหน้าตั้งค่าของทุกตัวละครในบัญชี · ตัวละครล่องหน ไม่ตกเป็นเป้า เดินดูได้อย่างเดียว</p>
+  <form id="obs-add" class="obs-add"><input id="obs-email" type="email" required maxlength="254" placeholder="name@gmail.com" aria-label="อีเมลที่จะเพิ่ม" autocomplete="off"><button type="submit" class="wx-auto" ${obsBusy?'disabled':''}>+ เพิ่มอีเมล</button></form>
+  <p class="wx-msg" role="status">${esc(obsMsg)}</p>
+  ${obsList?`<ul class="obs-list">${obsList.owner.map(e=>row(e,'เจ้าของเกม · ลบไม่ได้',false)).join('')}${obsList.env.map(e=>row(e,'ตั้งไว้ที่ OBSERVER_EMAILS บนเซิร์ฟเวอร์',false)).join('')}${obsList.emails.map(e=>row(e,'เพิ่มจากหน้านี้',true)).join('')}</ul>`:''}
+  <small>เพิ่มแล้วใช้ได้ตอนเข้าเกมครั้งถัดไป · ลบแล้วโหมดผู้ชมปิดทันที · เก็บได้สูงสุด 50 อีเมล</small></div>`;
+ $('obs-login')&&($('obs-login').onclick=async()=>{if(await signIn())loadObservers();});
+ $('obs-add')&&($('obs-add').onsubmit=e=>{e.preventDefault();const email=$('obs-email').value.trim().toLowerCase();if(!email||!obsList)return;
+  if([...obsList.owner,...obsList.env,...obsList.emails].includes(email)){obsMsg='อีเมลนี้อยู่ในรายชื่อแล้ว';observersTab();return;}
+  saveObservers([...obsList.emails,email],`เพิ่ม ${email} แล้ว · ใช้ได้ตอนเข้าเกมครั้งถัดไป`);});
+ $('view').querySelectorAll('[data-obs-del]').forEach(b=>b.onclick=()=>{const email=b.dataset.obsDel;if(!confirm(`ลบ ${email} ออกจากรายชื่อผู้ชมล่องหน?`))return;saveObservers(obsList.emails.filter(e=>e!==email),`ลบ ${email} แล้ว`);});
 }
 // 0.109.8 world boss tab: pick a realm, a field map and a boss, then summon it (one at a time per map; it does not respawn).
 async function summonBoss(){

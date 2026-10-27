@@ -71,6 +71,8 @@ export class LocalStore{
  async purgeEvidence(stream,before){let files=[];try{files=await readdir(this.evidenceDir(stream));}catch{return;}for(const f of files)if(f.endsWith('.jsonl')&&f.slice(0,10)<before)await rm(path.join(this.evidenceDir(stream),f),{force:true});}
  async loadConsent(uid){try{return JSON.parse(await readFile(path.join(this.directory,'consents.json'),'utf8'))[uid]??null;}catch(e){if(e.code==='ENOENT')return null;throw e;}}
  saveConsent(uid,doc){const job=(this.consentQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'consents.json');let all={};try{all=JSON.parse(await readFile(file,'utf8'));}catch{}all[uid]=doc;await writeFile(file,JSON.stringify(all));});this.consentQueue=job;return job;}
+ async loadObservers(){try{return JSON.parse(await readFile(path.join(this.directory,'observers.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return [];throw e;}}
+ saveObservers(emails){return writeFile(path.join(this.directory,'observers.json'),JSON.stringify(emails),{mode:0o600});}
  async loadPrices(){try{return JSON.parse(await readFile(path.join(this.directory,'prices.json'),'utf8'));}catch{return {};}}
  savePrices(serverId,prices){this.allPrices={...(this.allPrices??{}),[serverId]:prices};return writeFile(path.join(this.directory,'prices.json'),JSON.stringify(this.allPrices),{mode:0o600});}
  deleteGuild(){return this.flushGuilds();}
@@ -110,6 +112,9 @@ export class FirebaseStore{
  async purgeEvidence(stream,before){for(let round=0;round<20;round++){const snap=await this.evidenceRef(stream).where('day','<',before).limit(300).get();if(snap.empty)return;const batch=this.db.batch();snap.docs.forEach(d=>batch.delete(d.ref));await batch.commit();}}
  async loadConsent(uid){const s=await this.db.collection('playerConsents').doc(uid).get();return s.exists?s.data():null;}
  saveConsent(uid,doc){return this.db.collection('playerConsents').doc(uid).set(doc);}
+ // 0.119 observer e-mails added from the back office (server-only doc, written with the admin SDK)
+ async loadObservers(){const s=await this.db.collection('multiplayerRuntime').doc('observerEmails').get();return s.exists?s.data().emails??[]:[];}
+ saveObservers(emails){return this.db.collection('multiplayerRuntime').doc('observerEmails').set({emails,updatedAt:Date.now()});}
  async loadPrices(){const out={};for(const d of (await this.db.collection('multiplayerPrices').get()).docs)out[d.id]=d.data().prices??{};return out;}
  savePrices(serverId,prices){return this.db.collection('multiplayerPrices').doc(serverId).set({prices});}
  deleteGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).delete();}

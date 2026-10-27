@@ -58,7 +58,7 @@ http.createServer(async(req,res)=>{try{
  if(url.pathname==='/mobile-review.html'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(reviewPage());return;}
  if(url.pathname==='/mobile-fixture.html'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(await fixture());return;}
  const file=path.resolve(root,'.'+decodeURIComponent(url.pathname));
- if(!file.startsWith(root)||path.basename(file).startsWith('.')||!['.js','.css','.html','.png','.svg','.ttf','.json','.glb','.txt'].includes(path.extname(file))){res.writeHead(404).end();return;}
- const mime={'.js':'text/javascript','.css':'text/css','.html':'text/html','.png':'image/png','.svg':'image/svg+xml','.ttf':'font/ttf','.json':'application/json','.txt':'text/plain; charset=utf-8'};
+ if(!file.startsWith(root)||path.basename(file).startsWith('.')||!['.js','.css','.html','.png','.webp','.jpg','.jpeg','.svg','.ttf','.json','.glb','.txt'].includes(path.extname(file))){res.writeHead(404).end();return;}
+ const mime={'.js':'text/javascript','.css':'text/css','.html':'text/html','.png':'image/png','.webp':'image/webp','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.ttf':'font/ttf','.json':'application/json','.txt':'text/plain; charset=utf-8'};
  res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');res.end(await readFile(file));
  }catch{res.writeHead(404).end();}}).listen(Number(process.env.MOBILE_REVIEW_PORT||8896),'127.0.0.1',()=>console.log('Mobile HUD review: http://127.0.0.1:8896/mobile-review.html'));

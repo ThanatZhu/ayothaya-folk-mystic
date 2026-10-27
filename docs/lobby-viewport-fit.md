@@ -1,9 +1,10 @@
 # Lobby viewport fit
 
-`play.html` now loads `lobby-fit.css` as its layout owner. The legacy
+`play.html` now loads `arrival186.css` as its layout owner (see `arrival186.md`). The legacy
 `phone-lobby.css`, `viewport-fit.css`, `character-slots.css`, and
-`mobile-lobby-ui.css` are no longer loaded by this page. Other pages retain
-their existing styles. `lobby-v2.css` still supplies decorative styling.
+`mobile-lobby-ui.css`, `lobby.css`, `lobby-classes.css`, `lobby-v2.css` and
+`lobby-fit.css` are no longer loaded by this page. Other pages retain their
+existing styles; these sources remain for older review pages.
 
 The game shell uses the visual viewport height on desktop and touch devices,
 reserves safe-area insets, and gives its remaining space to a size container.

@@ -1,3 +1,4 @@
+import {createArrivalShowcase} from './arrival-showcase186.js?v=186.1';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createMotionPreview} from './motion-preview.js?v=mobile2';
 import {characterMotion} from './character-motion.js?v=novice174';
@@ -18,7 +19,8 @@ createLandscapeGuard({allowPortrait:true});
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',poseMode='cycle',previewTime=0;
 let roster=[],selectedChannel=normalizeChannel(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1);
 const say=text=>$('lobby-status').textContent=text;
-const lobbyMotion=createMotionPreview($('hero-preview'));
+const lobbyMotion=createMotionPreview($('hero-preview')),arrival=createArrivalShowcase($('arrival-showcase'));
+$('explore-paths').onclick=()=>arrival.open();
 // 0.113 the dressing room is off for now: new characters take the default look, saved looks still show in the preview
 const atlases=new Map();let atlasToken=0;
 async function drawAtlas(){
@@ -26,7 +28,7 @@ async function drawAtlas(){
  if(!atlases.has(src))atlases.set(src,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;}));
  try{const img=await atlases.get(src);if(token===atlasToken)lobbyMotion.setSource(customizeAtlas(img,validateAppearance(record?.character.appearance),id),previewGender,id,record?.equipment);}catch{atlases.delete(src);}
 }
-function show(next){screen=next;document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
+function show(next){screen=next;arrival.setScreen(next);document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
 function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#delete-character,.character-slot').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
@@ -101,7 +103,7 @@ let previewLast=0;const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 let lastRigDraw=0;
 function animatePreview(ms){const dt=Math.min(.05,(ms-previewLast)/1000);previewLast=ms;
  if(!document.hidden&&screen==='character'){
- const stopped=document.body.classList.contains('motion-off')||reduced.matches;if(!stopped)previewTime+=dt;
+ const stopped=false;previewTime+=dt*(reduced.matches?.45:.7);
  const state=previewPose(previewTime,poseMode,stopped);
  if(ms-lastRigDraw>=1000/30){lastRigDraw=ms;const mode=poseMode==='attack'?'attack':state.casting?'attack':state.moving?'walk':'idle';lobbyMotion.draw(characterMotion({time:mode==='attack'?previewTime%.95:previewTime,mode,classId:selectedClass,reduced:stopped}));}
  $('hero-preview').dataset.pose=stopped?'idle':state.casting?'attack':state.moving?'walk':'idle';
@@ -120,9 +122,9 @@ function drawRoster(){
 }
 function displayCharacter(){
  const srv=SERVERS[0];$('realm-caption').textContent=srv.name+' · '+srv.subtitle;
- $('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
+ document.body.dataset.characterMode=record?'select':'create';$('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
  $('character-form').hidden=!!record||roster.length>=5;
- $('progression-hint').textContent=!record?'เริ่มเป็นผู้ฝึกตน Lv. 1 · Job 10 ตันแล้วเปลี่ยนอาชีพ · Job 40 ตันรับ Master · Base สูงสุด 99':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(advanceReady(record.state.traveler,'novice').ok?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ฝึก Job ผู้ฝึกตนให้ตัน (Job 10) เพื่อเปลี่ยนอาชีพ'):'อาชีพ '+className(record.character.classId,record.character.gender)+'ฝึก Job ให้ตัน (Job 40) เพื่อรับ Master';
+ $('progression-hint').textContent=!record?'ผู้ฝึกตน → อาชีพที่ Job 10 → Master ที่ Job 40':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(advanceReady(record.state.traveler,'novice').ok?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ฝึก Job ผู้ฝึกตนให้ตัน (Job 10) เพื่อเปลี่ยนอาชีพ'):'อาชีพ '+className(record.character.classId,record.character.gender)+'ฝึก Job ให้ตัน (Job 40) เพื่อรับ Master';
  if(record){selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
  else{$('character-form').reset();selectedClass='novice';preview('male');}
  $('stage-name').textContent=record?.character.name??'';
@@ -151,9 +153,10 @@ $('enter-world').onclick=()=>{
  if(!record||busy)return;
  try{const srv=record.serverId||selected||'server-1';sessionStorage.setItem(CHANNEL_KEY,String(selectedChannel));sessionStorage.setItem(ENTRY_KEY,JSON.stringify({owner,serverId:srv,slotId:record.slotId,channel:selectedChannel}));getLoadingScreen().show(record.state.mapId,{travel:true,message:'กำลังเข้าสู่โลกอโยธยา…'});requestAnimationFrame(()=>location.assign('./game.html?server='+srv+'&channel='+selectedChannel+'&map='+record.state.mapId));}catch{say('กรุณาเปิดอนุญาตพื้นที่เก็บข้อมูลของเบราว์เซอร์เพื่อเข้าเกม');}
 };
-for(let i=0;i<25;i++){const p=document.createElement('i');p.className='ember';p.style.left=((i*37)%100)+'%';p.style.top=(25+(i*23)%75)+'%';p.style.animationDelay=(-i*.71)+'s';p.style.animationDuration=(7+i%8)+'s';$('embers').append(p);}
+for(let i=0;i<14;i++){const p=document.createElement('i');p.className='ember';p.style.left=((i*37)%100)+'%';p.style.top=(25+(i*23)%75)+'%';p.style.animationDelay=(-i*.71)+'s';p.style.animationDuration=(7+i%8)+'s';$('embers').append(p);}
 
 addEventListener('pageshow',e=>{if(e.persisted)getLoadingScreen().hide();});
+addEventListener('pagehide',e=>{if(!e.persisted)arrival.dispose();});
 
 // Updated lobbies pause creation during the server reset. Existing save transactions also
 // reject missing characters; the reset removes legacy migration sources before their slots.

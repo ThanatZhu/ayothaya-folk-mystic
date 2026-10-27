@@ -47,10 +47,15 @@ export function createMentorUI({game,account,catalog,map,inTown=()=>false,recall
  addEventListener('keydown',e=>{if(trainingWalk.resuming&&['KeyW','KeyA','KeyS','KeyD'].includes(e.code)&&!e.target.closest?.('input,textarea,select'))trainingWalk.cancelResume();});
  addEventListener('pointerdown',e=>{if(trainingWalk.resuming&&e.target.closest?.('#joystick,#game-shell>canvas,#city-map'))trainingWalk.cancelResume();},true);
  function goGoal(goal){if(busy)return;if(panel.open)panel.close();trainingWalk.go(goal);}
+ let journalTrial='';
  function renderJournal(s){
+  const trialKey=JSON.stringify([account.training.classId,account.training.tier,account.training.startKills]),sameTrial=trialKey===journalTrial;
+  const completedOpen=sameTrial&&!!journal.querySelector('.training-completed')?.open;
+  const scrollOwner=journal.closest('#activity-content')??journal.querySelector('#training-details'),scroll=sameTrial?scrollOwner.scrollTop:0;
+  journalTrial=trialKey;
   const lines=journal.querySelector('.training-lines');lines.replaceChildren();
   const profession=document.createElement('strong');profession.textContent=className(account.training.classId,account.character.gender);lines.append(profession);
-  const completed=document.createElement('details');completed.className='training-completed';const summary=document.createElement('summary');completed.append(summary);let doneCount=0;
+  const completed=document.createElement('details');completed.className='training-completed';completed.open=completedOpen;const summary=document.createElement('summary');completed.append(summary);let doneCount=0;
   function row(label,done,goal){
    const target=!done&&goal?resolveGoal(goal):null,node=document.createElement(done||!goal?'div':'button');
    node.className='training-objective';node.dataset.done=String(done);
@@ -72,6 +77,7 @@ export function createMentorUI({game,account,catalog,map,inTown=()=>false,recall
   const destination=resolveGoal(next);button.disabled=!destination;button.title=destination?'เดินไปหา '+destination.name+' · '+destination.mapName:'';button.onclick=()=>{const current=status();if(current)goGoal(trainingNextGoal(current,game.world.bag,game.online));};
   journal.querySelector('#training-summary').textContent='มอนสเตอร์ '+s.progress+'/'+s.target;
   journal.querySelector('.training-help').textContent=trialReady(s,game.world.bag,game.online)?'ครบแล้ว · กลับลานครูเพื่อส่งบททดสอบ':'กดรายการที่ยังขาดเพื่อเดินไปหา · ข้ามแผนที่ให้อัตโนมัติ';
+  scrollOwner.scrollTop=scroll;
  }
  const compact=matchMedia('(max-height:600px)'),foldButton=journal.querySelector('#training-toggle');let folded=compact.matches,manualFold=false;
  function fold(){journal.dataset.folded=String(folded);journal.querySelector('#training-details').hidden=folded;journal.querySelector('#training-summary').hidden=!folded;foldButton.setAttribute('aria-expanded',String(!folded));foldButton.querySelector('b').textContent=folded?'+':'−';}

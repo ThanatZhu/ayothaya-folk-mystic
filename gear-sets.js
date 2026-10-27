@@ -1,3 +1,4 @@
+import {rainbowRecipe} from './rainbow-crafting.js';
 // 0.117 gear sets (docs/gear-sets-proposal.md, owner-approved draft numbers): replaces every pre-0.117 weapon/armor/head/
 // garment/shoes item. Accessories stay as they were. Pure data + rules, shared by the client and the realm server.
 // Art: assets/gear2/<sheet>-<cell>.webp, sliced from the 57 generated sheets (outputs/gear-sets/manifest.json).
@@ -55,7 +56,7 @@ export const BOSS_SETS={
  acolyte:{name:'พุทธคุณ',bonus:{},soon:{2:'ฮีลแรงขึ้น 15%',3:'ฮีลเกินหลอด กลายเป็นโล่ (สูงสุด 15% ของ HP)',5:'เพื่อนรอบตัวโดนตีเจ็บน้อยลง 10% (ออร่า)'}},
 };
 export const SHARDS=[['shard-soul','เศษวิญญาณบอส','บอสต่ำกว่า Lv.50'],['shard-gem','เศษมณีบอส','บอส Lv.50–98'],['shard-divine','เศษเทพ','บอสร่างตื่น และยักษ์เมฆา Lv.99']];
-const BOSS_COST={weapon:[40,25,10,60000],piece:[20,12,5,30000]};
+
 
 const L=t=>TIERS[t-1],price=(t,k)=>Math.max(100,Math.round(L(t)*L(t)*k/100)*100);
 const DEF_PER={head:.12,armor:.55,garment:.1,shoes:.1};
@@ -109,13 +110,13 @@ export function buildGearItems(){
 }
 
 // Weapon and boss-set recipes for crafting.js. Tier materials are the Chapter II map relics of that level band.
+const BOSS_MATERIALS={weapon:[40,25,10],piece:[20,12,5]};
 const TIER_RELIC=['relic-rice','relic-mill','relic-bamboo','relic-himmapan','relic-naga','relic-kailash'];
 export function gearRecipes(items){
  const r=[];
  for(const [cls] of WEAPON_CLASSES)for(let t=1;t<=6;t++){const needs={[TIER_RELIC[t-1]]:10+5*t,'iron-ore':2*t};if(t>1)needs['lek-lai']=t-1;
   r.push({out:weaponId(cls,t),count:1,group:'gear',needs,coins:price(t,5)/2});}
- for(const id of Object.keys(items).filter(id=>items[id].bossSet)){const [a,b,c,coins]=items[id].slot==='weapon'?BOSS_COST.weapon:BOSS_COST.piece;
-  r.push({out:id,count:1,group:'gear',needs:{'shard-soul':a,'shard-gem':b,'shard-divine':c},coins});}
+ for(const id of Object.keys(items).filter(id=>items[id].bossSet)){const [a,b,c]=items[id].slot==='weapon'?BOSS_MATERIALS.weapon:BOSS_MATERIALS.piece;r.push(rainbowRecipe(id,{'shard-soul':a,'shard-gem':b,'shard-divine':c}));}
  return r;
 }
 

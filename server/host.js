@@ -5,6 +5,7 @@ import {buyPremiumItem} from '../premium-shop-action.js';
 import {drawAmulets} from '../amulet-gacha.js';
 import {AMULETS} from '../amulets.js';
 import {raiseCharacterLevels} from '../admin-levels.js';
+import {drainWarMailbox} from './war-mail.js';
 const AMULET_NAMES=Object.fromEntries(AMULETS.map(a=>[a.id,a.name]));
 import {MAIL_ACTIONS,composeMail,deliverMail,mailboxAction,mailboxBulkAction,publicInbox,inboxSummary,hasMailGift} from '../mailbox.js';
 import {PET_MUTATIONS,petAccountAction,publicPetAccount} from '../pet-account.js';
@@ -83,7 +84,20 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  // 0.47 guilds: loaded once, written on each change (rare: create/join/leave/emblem), outside the per-player saves.
  // 0.70 market: shops stay open while their owners are offline, so they live outside the player saves.
  if(store?.loadShops){loadMarket=async()=>{realm.shops=new Map((await store.loadShops()).map(s=>[s.id,s]));store.realmShops=realm.shops;const prices=await store.loadPrices();store.allPrices=prices;realm.prices=new Map(Object.entries(prices));};realm.onShop=(s,deleted)=>trackWrite(deleted?store.deleteShop(s):store.saveShop(s));realm.onPrices=(id,p)=>trackWrite(store.savePrices(id,p));if(mode==='local')await loadMarket();}
- if(store?.loadLeaders){const l=await store.loadLeaders();store.allLeaders=l;realm.leaders=new Map(Object.entries(l));realm.onLeaders=(id,rows)=>trackWrite(store.saveLeaders(id,rows));}
+ let leaderQueue=Promise.resolve();
+ const saveLeader=(id,rows)=>{const snapshot=structuredClone(rows);leaderQueue=leaderQueue.catch(()=>{}).then(()=>store.saveLeaders(id,snapshot));return trackWrite(leaderQueue);};
+ if(store?.loadLeaders){const l=await store.loadLeaders();store.allLeaders=l;realm.leaders=new Map(Object.entries(l));realm.onLeaders=saveLeader;}
+ let warMailTask=null;
+ const drainWarMail=()=>{
+  if(warMailTask||closing||reset?.maintenance||!authoritative()||!store?.giveOffline||!store?.saveLeaders)return warMailTask;
+  warMailTask=trackWrite(drainWarMailbox({boards:realm.leaders,save:saveLeader,canWrite:()=>!closing&&!reset?.maintenance&&authoritative(),deliver:async gift=>{
+   const account=[...sessions.values()].filter(s=>s.peer.uid===gift.uid),session=account.find(s=>s.peer.slotId===gift.slotId&&s.peer.serverId===gift.serverId);
+   const apply=record=>({...record,mailbox:deliverMail(record.mailbox,gift.mail).mailbox});
+   if(session)await persistMail(session,apply);
+   else{if(account.length||joinPending.has(gift.uid))throw Error('player-online');await store.giveOffline({uid:gift.uid,slotId:gift.slotId},apply);}
+  }})).catch(e=>console.error('war-mail',e.message)).finally(()=>{warMailTask=null;});return warMailTask;
+ };
+ realm.onWarRewards=drainWarMail;
 // 0.119 observer e-mails saved from the back office (see /admin/observers); a peer keeps its verified e-mail so a
  // removed address loses the mode straight away
  let observerSaved=[];
@@ -106,7 +120,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   for(const s of active){s.ws.close(4012,'world-reset');s.onClosed?.();}sessions.clear();
   await realm.flushShops();await realm.mapBosses.flush();
   for(const g of realm.guildsDirty)if(realm.guilds.get(g.id)===g&&store.saveGuild)await trackWrite(store.saveGuild(g));
-  for(const id of realm.leadersDirty)if(store.saveLeaders)await trackWrite(store.saveLeaders(id,realm.leaders.get(id)));
+  for(const id of realm.leadersDirty)if(store.saveLeaders)await saveLeader(id,realm.leaders.get(id));
   for(const id of realm.pricesDirty)if(store.savePrices)await trackWrite(store.savePrices(id,realm.prices.get(id)));
   while(writes.size)await Promise.all([...writes]);
   await store.queue;await store.mailQueue;await store.bossQueue;
@@ -135,7 +149,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let done;const pending=new Promise(r=>{done=r;});mutations.add(pending);
    mutationDone=()=>{mutations.delete(pending);done();};
   }
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,skillCriticals:1,adminLevels:1,amuletGacha:1,premiumShop:1,observerMode:1,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,respawnChoice:1,revivalTalisman:200,spiritCompanion:185,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,skillRework:119,skillGcd:ROLE_GLOBAL_CD,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,skillCriticals:1,adminLevels:1,rainbowCrafting:1,guildWarPodium:1,amuletGacha:1,premiumShop:1,observerMode:1,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,respawnChoice:1,revivalTalisman:200,spiritCompanion:185,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,skillRework:119,skillGcd:ROLE_GLOBAL_CD,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.117 terms/privacy acceptance after sign-in: GET the version this account accepted, POST {version} to record it.
   // Firebase mode trusts only the verified ID token's uid; the loopback dev server uses the uid it is given.
@@ -505,14 +519,14 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const backgroundWalks=setInterval(()=>{if(reset?.maintenance)return;for(const s of sessions.values())if(s.background&&!s.closing&&(!s.peer.routeWalker?.active||Date.now()>=s.backgroundUntil))finishBackground(s);},250);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
   lastLogSaveCount=realm.logs.length;
-  const logSaver=setInterval(()=>{if(reset?.maintenance)return;if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
+  const logSaver=setInterval(()=>{if(reset?.maintenance)return;drainWarMail();if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
  return {server,realm,wss,evidence,async close(){closing=true;await evidence?.stop();clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
   // 0.114.2 a redeploy gives us ~9 s: players' progress first (all at once, 6 s cap), then shops, bosses, guild/leader/
   // price changes and logs together, and the authority release last so the next host can start at once.
   const capped=(p,ms)=>{let t;return Promise.race([Promise.resolve(p).catch(()=>{}),new Promise(r=>{t=setTimeout(r,ms);})]).finally(()=>clearTimeout(t));};
   await capped(Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);})),6000);
   const later=f=>Promise.resolve().then(f); // one failing save (even a synchronous throw) never stops the shutdown
-  const dirty=[...[...realm.guildsDirty].filter(g=>realm.guilds.get(g.id)===g&&store?.saveGuild).map(g=>later(()=>store.saveGuild(g))),...[...realm.leadersDirty].filter(()=>store?.saveLeaders).map(id=>later(()=>store.saveLeaders(id,realm.leaders.get(id)))),...[...realm.pricesDirty].filter(()=>store?.savePrices).map(id=>later(()=>store.savePrices(id,realm.prices.get(id))))];
+  const dirty=[...[...realm.guildsDirty].filter(g=>realm.guilds.get(g.id)===g&&store?.saveGuild).map(g=>later(()=>store.saveGuild(g))),...[...realm.leadersDirty].filter(()=>store?.saveLeaders).map(id=>later(()=>saveLeader(id,realm.leaders.get(id)))),...[...realm.pricesDirty].filter(()=>store?.savePrices).map(id=>later(()=>store.savePrices(id,realm.prices.get(id))))];
   await capped(Promise.allSettled([later(()=>realm.flushShops()),later(()=>realm.mapBosses.flush()).catch(e=>console.error('map-boss-save',e.message)),later(()=>store?.saveDashboardLogs?.(realm.logs)),...dirty]),1500);
  }for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
 }

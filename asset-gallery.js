@@ -1,6 +1,6 @@
 // 0.116 asset gallery (ayothaya-assets-9x7k.html, back office): every asset live in the game, read from the shipped data
 // (audio-catalog180.js, maps/world.json, the guide's game-data.json, loading-theme.js) plus the build's file index.
-import {BGM,SFX,THEME_OF,themeOf,audioUrl} from './audio-catalog180.js?v=180';
+import {BGM,SFX,THEME_OF,themeOf,audioUrl,COMBAT_CLASSES,COMBAT_FAMILIES,COMBAT_NAMES,combatFile,combatUrl} from './audio-catalog180.js?v=180';
 import {LOADING_THEMES} from './loading-theme.js?v=105';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -19,13 +19,20 @@ function toggle(button,url,loop){
 }
 $('stop').onclick=stop;
 const usedBy=theme=>Object.entries(THEME_OF).filter(([,t])=>t===theme).map(([id])=>world?.maps.find(m=>m.id===id)?.name??id);
+const combat=f=>/^(fam|cls)-/.test(f);
 function trackRow(label,sub,files,loop){
  const el=document.createElement('div');el.className='track';
- el.innerHTML=`<button class="play" title="ฟัง">▶</button><strong>${esc(label)}</strong><small>${esc(sub)}</small><small>${files.map(f=>esc(f)+'.mp3 · '+(size.has('assets/audio180/'+f+'.mp3')?mb(size.get('assets/audio180/'+f+'.mp3')):'–')).join(' · ')}</small>`;
- let k=0;el.querySelector('.play').onclick=e=>toggle(e.currentTarget,audioUrl(files[k++%files.length]),loop);return el;
+ el.innerHTML=`<button class="play" title="ฟัง">▶</button><strong>${esc(label)}</strong><small>${esc(sub)}</small><small>${files.map(f=>{const p=(combat(f)?'assets/audio-combat/':'assets/audio180/')+f+'.mp3';return esc(f)+'.mp3 · '+(size.has(p)?mb(size.get(p)):'–');}).join(' · ')}</small>`;
+ let k=0;el.querySelector('.play').onclick=e=>{const f=files[k++%files.length];toggle(e.currentTarget,combat(f)?combatUrl(f):audioUrl(f),loop);};return el;
 }
 for(const [id,t] of Object.entries(BGM))$('bgm-list').append(trackRow(t.name,`${t.note} · ${Math.round(t.seconds)} วินาทีต่อรอบ · ${id==='boss'?'เมื่อสู้บอสใกล้ตัว':usedBy(id).join(', ')}`,['bgm-'+id],true));
 for(const [id,s] of Object.entries(SFX))$('sfx-list').append(trackRow(s.name,`เล่นเมื่อ: ${s.on}${s.files.length>1?` · ${s.files.length} แบบ`:''}`,s.files.map(f=>'sfx-'+f),false));
+// 0.121 combat sounds: each press plays the next file of the row (swing, hit… / cast, hit…)
+for(const c of COMBAT_CLASSES){
+ $('sfx-list').append(trackRow(`${COMBAT_NAMES[c]} · โจมตีปกติ`,'กดซ้ำเพื่อฟังทีละแบบ: เหวี่ยง 3 แบบ แล้วโดนเป้า 3 แบบ',[0,1,2].map(v=>combatFile('cls',c,'swing',v)).concat([0,1,2].map(v=>combatFile('cls',c,'hit',v))),false));
+ $('sfx-list').append(trackRow(`${COMBAT_NAMES[c]} · ไม้ตาย`,'เล่นเพิ่มตอนใช้ไม้ตาย',[combatFile('cls',c,'ult',0)],false));
+}
+for(const f of COMBAT_FAMILIES)$('sfx-list').append(trackRow(`สกิลสาย${COMBAT_NAMES[f]}`,'กดซ้ำเพื่อฟังทีละแบบ: ง้าง โดน ง้าง โดน',[0,1].flatMap(v=>[combatFile('fam',f,'cast',v),combatFile('fam',f,'hit',v)]),false));
 
 // ---- maps
 for(const m of world?.maps??[]){

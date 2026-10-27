@@ -4,7 +4,9 @@
 import {itemDef,RARITY_NAME} from './items.js?v=107';
 import {createLevelUpNotice} from './level-up-notice.js?v=1';
 import {MONSTER_TYPES} from './combat-core.js?v=novice174';
-import {BGM,SFX,themeOf,audioUrl} from './audio-catalog180.js?v=180';
+import {BGM,SFX,themeOf,audioUrl,COMBAT_CLASSES,COMBAT_FAMILIES,combatFile,combatUrl} from './audio-catalog180.js?v=180';
+import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
+import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS} from './role-combat.js';
 const KEY='ayothaya-audio';
 
 export function createFeedback({game,map}){
@@ -14,26 +16,62 @@ export function createFeedback({game,map}){
  function start(){ // browsers only allow audio after a tap / key press
   if(ctx)return ctx.state==='suspended'&&!document.hidden&&ctx.resume();
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-  ctx=new AC();master=ctx.createGain();master.connect(ctx.destination);
+  // 0.121 a limiter on the way out: a crowd of hits no longer clips
+  ctx=new AC();master=ctx.createGain();const limiter=ctx.createDynamicsCompressor();master.connect(limiter);limiter.connect(ctx.destination);
+  limiter.threshold.value=-10;limiter.knee.value=6;limiter.ratio.value=12;limiter.attack.value=.002;limiter.release.value=.15;
   musicBus=ctx.createGain();sfxBus=ctx.createGain();musicBus.connect(master);sfxBus.connect(master);
-  levels();for(const s of Object.values(SFX))s.files.forEach(load);music();
+  levels();for(const s of Object.values(SFX))s.files.forEach(load);preloadClass();music();
  }
  for(const t of ['pointerdown','keydown'])addEventListener(t,start,{capture:true,passive:true});
  document.addEventListener('visibilitychange',()=>{if(!ctx)return;document.hidden?ctx.suspend():ctx.resume();});
  function levels(){if(!ctx)return;musicBus.gain.value=settings.music*.6;sfxBus.gain.value=settings.sfx;}
  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{}levels();};
  function load(file){
-  if(!loading.has(file))loading.set(file,fetch(audioUrl(file)).then(r=>r.ok?r.arrayBuffer():Promise.reject(r.status))
+  if(!loading.has(file))loading.set(file,fetch(/^(fam|cls)-/.test(file)?combatUrl(file):audioUrl(file)).then(r=>r.ok?r.arrayBuffer():Promise.reject(r.status))
    .then(data=>new Promise((ok,no)=>ctx.decodeAudioData(data,ok,no))).then(buffer=>{buffers.set(file,buffer);return buffer;}).catch(()=>null));
   return loading.get(file);
  }
 
  // ---- effects: a random variant, slightly varied pitch for the frequent ones
- const play=name=>{
-  if(!ctx||ctx.state!=='running'||!settings.sfx)return;const fx=SFX[name];if(!fx)return;
-  const file=fx.files[Math.floor(Math.random()*fx.files.length)],buffer=buffers.get(file);if(!buffer)return void load(file);
-  const src=ctx.createBufferSource();src.buffer=buffer;if(fx.files.length>1)src.playbackRate.value=.96+Math.random()*.08;src.connect(sfxBus);src.start();
- };
+ const play=name=>{const fx=SFX[name];if(fx)playFile(fx.files[Math.floor(Math.random()*fx.files.length)],{vary:fx.files.length>1});};
+ // one file now or `at` seconds from now; at most 14 effects sound at once, the rest are skipped
+ let voices=0;
+ function playFile(file,{gain=1,at=0,vary=true}={}){
+  if(!ctx||ctx.state!=='running'||!settings.sfx||voices>=14)return;const buffer=buffers.get(file);if(!buffer)return void load(file);
+  const src=ctx.createBufferSource(),level=ctx.createGain();src.buffer=buffer;if(vary)src.playbackRate.value=.96+Math.random()*.08;level.gain.value=gain;
+  src.connect(level);level.connect(sfxBus);voices++;src.onended=()=>{voices--;level.disconnect();};src.start(ctx.currentTime+Math.max(0,at));
+ }
+
+ // ---- 0.121 combat: the class's own swing and hit for basic attacks; a skill plays its effect family's cast when it
+ // starts (the client's predicted start, else the realm's), its family hit when its damage lands (once per blow, however
+ // many it hits) and, for heals and buffs that deal none, at its impact time; an ultimate adds the class sting.
+ const classId=()=>world.profession?.id,classSet=id=>COMBAT_CLASSES.includes(id);
+ const variant=n=>Math.floor(Math.random()*n);
+ const familyOf=id=>{const f=SKILL_PROFILES[id]?.layers?.[0]?.sheet;return COMBAT_FAMILIES.includes(f)?f:null;};
+ function preloadClass(){
+  const c=classId();if(!classSet(c))return;for(const part of ['swing','hit'])for(const v of [0,1,2])load(combatFile('cls',c,part,v));load(combatFile('cls',c,'ult',0));
+  for(const p of Object.values(SKILL_PROFILES))if(p.classId===c&&familyOf(p.id))for(const part of ['cast','hit'])for(const v of [0,1])load(combatFile('fam',familyOf(p.id),part,v));
+ }
+ const predicted=new Map(),blows=new Set();
+ function skillCast(e){
+  const family=familyOf(e.roleSkillId),profile=SKILL_PROFILES[e.roleSkillId],now=performance.now()/1000;
+  if(!family)return play('cast');
+  if(e.predicted)predicted.set(e.roleSkillId,now);
+  else if(now-(predicted.get(e.roleSkillId)??-9)<1.5)return void predicted.delete(e.roleSkillId); // already sounded on the press
+  playFile(combatFile('fam',family,'cast',variant(2)),{gain:.75});
+  if(profile?.skill?.ultimate&&classSet(profile.classId))playFile(combatFile('cls',profile.classId,'ult',0),{gain:.9,vary:false});
+  const kind=profile?.skill?.kind??e.kind;
+  if(ROLE_SELF_KINDS.has(kind)||ROLE_FRIEND_KINDS.has(kind))playFile(combatFile('fam',family,'hit',variant(2)),{at:(e.timing?.impacts?.[0]??.36)-Math.max(0,e.lag??0),gain:.8});
+ }
+ function damageSound(e){
+  if(e.source==='poison')return;
+  if(e.source==='skill'||e.source==='spirit'){
+   const key=(e.castId??e.shotId)+':'+(e.hitIndex??0),family=familyOf(e.roleSkillId);if(blows.has(key))return;if(blows.size>200)blows.clear();blows.add(key);
+   if(family)playFile(combatFile('fam',family,'hit',variant(2)),{gain:e.source==='spirit'?.55:1});else play('hit');
+  }else if(classSet(classId()))playFile(combatFile('cls',classId(),'hit',variant(3)));
+  else play('hit');
+  if(e.crit)play('crit');
+ }
 
  // ---- music: the map's track, the boss track while a boss nearby is in a fight; 1.6 s crossfades
  const home=themeOf(map);let current=null,playing=null,bossUntil=0;
@@ -59,8 +97,8 @@ export function createFeedback({game,map}){
  const banner=(html,cls)=>{const b=document.createElement('div');b.className='big-banner '+cls;b.innerHTML=html;document.body.append(b);setTimeout(()=>b.remove(),3200);};
  game.onEvent(e=>{
   if(e.type==='cast'||e.type==='playerHit')levelNotice.hide();
-  if(e.type==='cast')play(Number.isInteger(e.skillIndex)?'cast':'swing');
-  else if(e.type==='damage'){const now=performance.now();if(now-lastHit>45){lastHit=now;play(e.color==='#ffd27a'?'crit':'hit');}}
+  if(e.type==='cast'){if(e.roleSkillId)skillCast(e);else if(Number.isInteger(e.skillIndex))play('cast');else if(classSet(classId()))playFile(combatFile('cls',classId(),'swing',variant(3)),{gain:.7});else play('swing');}
+  else if(e.type==='damage'){const now=performance.now();if(now-lastHit>45||e.source==='skill'){lastHit=now;damageSound({...e,crit:e.crit??e.color==='#ffd27a'});}}
   else if(e.type==='playerHit')play('hurt');
   else if(e.type==='dodge')play('dodge');
   else if(e.type==='defeat')play('defeat');

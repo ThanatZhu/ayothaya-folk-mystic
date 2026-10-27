@@ -53,3 +53,9 @@ html body.mobile-play #activity-dock #activity-fold{font-size:0!important}
 
 @media(min-width:901px) and (pointer:fine){#activity-dock:not([data-horizontal=true]) #activity-fold{display:block;width:64px;min-width:64px;height:44px;min-height:44px;padding:0;flex-shrink:0}
  #activity-dock:not([data-horizontal=true]) #activity-fold::before{width:64px;height:44px}}
+/* 0.122 ROX-style quest cards (desktop and phone): every quest is its own card with a kind badge; the pane scrolls */
+#activity-quest-pane{display:flex;flex-direction:column;gap:6px;padding:6px}
+html body.field-hud.hud63 #activity-dock #activity-quest-pane>:is(#quest-tracker,#training-journal){margin:0!important;padding:7px 9px!important;border:1px solid #c6a16466!important;border-radius:8px!important;background:#0c2620d9!important;box-shadow:none!important}
+#activity-dock .quest-kind{align-self:flex-start;display:inline-block;width:max-content;max-width:100%;margin:0 0 2px;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;line-height:1.5}
+#activity-dock .quest-kind[data-kind=story]{background:#e9c46b;color:#2b2008}
+#activity-dock .quest-kind[data-kind=job]{background:#8fd6b0;color:#0d2a20}

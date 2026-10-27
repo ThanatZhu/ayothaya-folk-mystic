@@ -170,6 +170,37 @@ html body #craft-window[data-craft176] .craft176-sources small{display:block;col
  html body #craft-window[data-craft176] .craft176-materials>h3{font-size:12px}
  html body #craft-window[data-craft176] .craft176-footer{grid-template-columns:1fr 1fr;gap:5px}
  html body #craft-window[data-craft176] .craft176-submit{grid-column:1/-1}
+ /* 0.122 portrait phones (tester feedback): the recipe list showed one row and the materials one item, under a big
+    preview and footer. The list gets more height and slimmer rows, the preview becomes one row (icon beside the name),
+    materials use the full width in two columns, and the footer drops its labels and shrinks its buttons. */
+ html body #craft-window[data-craft176] .craft176-workspace{grid-template-rows:minmax(150px,1fr) minmax(0,1.3fr)}
+ html body #craft-window[data-craft176] #craft-list{gap:4px}
+ html body #craft-window[data-craft176] #craft-list button{min-height:44px;padding:4px 7px;gap:7px}
+ html body #craft-window[data-craft176] #craft-list button>span{gap:1px}
+ html body #craft-window[data-craft176] #craft-list strong{font-size:12px;line-height:1.4}
+ html body #craft-window[data-craft176] .craft176-detail{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:6px}
+ html body #craft-window[data-craft176] .craft176-preview{display:grid;grid-template-columns:56px minmax(0,1fr);column-gap:10px;align-items:center;text-align:left;overflow:visible;padding:0}
+ html body #craft-window[data-craft176] .craft176-preview>*{grid-column:2;margin:0}
+ html body #craft-window[data-craft176] .craft176-display{grid-column:1;grid-row:1/span 4;min-height:56px}
+ html body #craft-window[data-craft176] #craft-output{width:52px}
+ html body #craft-window[data-craft176] .craft176-sparks{display:none}
+ html body #craft-window[data-craft176] #craft-output-count{font-size:11px;padding:2px 8px;justify-self:start}
+ html body #craft-window[data-craft176] .craft176-materials{display:flex;flex-direction:column;min-height:0}
+ html body #craft-window[data-craft176] .craft176-source-hint{font-size:10px;margin:0 0 4px}
+ html body #craft-window[data-craft176] #craft-materials{gap:5px}
+ html body #craft-window[data-craft176] .craft176-material{min-height:40px;padding:4px 8px;gap:8px;flex-wrap:nowrap}
+ html body #craft-window[data-craft176] .craft176-search{height:34px}
+ html body #craft-window[data-craft176] .craft176-search>span{font-size:16px}
+ html body #craft-window[data-craft176] #craft-search{font-size:13px}
+ html body #craft-window[data-craft176] .craft176-material>span{font-size:11px;line-height:1.35;flex-basis:auto}
+ html body #craft-window[data-craft176] .craft176-material>b{margin-left:0;font-size:11px}
+ html body #craft-window[data-craft176] #craft-readiness{font-size:11px;margin:4px 0 0}
+ html body #craft-window[data-craft176] .craft176-footer{grid-template-columns:auto minmax(0,1fr);gap:6px 10px;padding:8px 2px 0}
+ html body #craft-window[data-craft176] .craft176-quantity>label,html body #craft-window[data-craft176] .craft176-cost>small{display:none}
+ html body #craft-window[data-craft176] .craft176-quantity button,html body #craft-window[data-craft176] #craft-quantity{height:32px}
+ html body #craft-window[data-craft176] #craft-quantity{width:40px}
+ html body #craft-window[data-craft176] #craft-total{font-size:15px;justify-content:flex-end}
+ html body #craft-window[data-craft176] #craft-make{height:44px;min-height:44px!important;font-size:15px}
 }
 @media(prefers-reduced-motion:reduce){html body #craft-window[data-craft176].craft176-complete .craft176-sparks{animation:none}}
 

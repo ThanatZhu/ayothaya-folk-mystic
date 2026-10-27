@@ -322,13 +322,18 @@ export class CombatWorld{
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
   if(input.attack)this.basicAttack(true);
   if(this.auto&&!stop&&!knocked&&!manual&&this.manualGrace===0){
-   let m=this.target;if(!m||!this.prey(m)||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>AUTO_SEEK+2){m=this.nearest(AUTO_RANGE);
+   // 0.122 a kind picked in the AUTO window (or a quest hunt) is looked for across the whole map: with the 30 m limit
+   // a picked kind living further away left the hero standing among other monsters until AUTO switched off.
+   const seek=['type','entity'].includes(this.autoTarget?.kind)||Number.isInteger(this.hunt)?Infinity:AUTO_SEEK;
+   let m=this.target;if(!m||!this.prey(m)||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>seek+2){m=this.nearest(AUTO_RANGE);
     // 0.91 nothing left near where AUTO was switched on (e.g. turned on at the respawn yard): take the closest monster
     // within 30 m of the player and move the hunting spot there.
-    if(!m){m=this.foes().filter(x=>x.hp>0&&this.prey(x)&&distance(x,p)<=AUTO_SEEK).sort((a,b)=>distance(a,p)-distance(b,p))[0]??null;if(m)this.anchor={x:m.x,z:m.z};}
+    if(!m){m=this.foes().filter(x=>x.hp>0&&this.prey(x)&&distance(x,p)<=seek).sort((a,b)=>distance(a,p)-distance(b,p))[0]??null;if(m)this.anchor={x:m.x,z:m.z};}
     this.targetId=m?.id??null;this.path=[];}
    // 0.97 nothing to hunt within 30 m for 25 s: AUTO switches itself off and says why, so the button never shows on while idle.
-   if(m)this.autoIdle=0;else if((this.autoIdle+=dt)>25){this.auto=false;this.autoIdle=0;this.notice('ปิด AUTO · ไม่พบมอนสเตอร์ในระยะ 30 ม.');}
+   // A picked kind that lives on this map is waited for (respawn) instead.
+   const waits=seek===Infinity&&this.foes().some(x=>this.prey(x));
+   if(m||waits)this.autoIdle=0;else if((this.autoIdle+=dt)>25){this.auto=false;this.autoIdle=0;this.notice('ปิด AUTO · ไม่พบมอนสเตอร์ในระยะ 30 ม.');}
    if(m){
     // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
     this.autoCast=Math.max(0,this.autoCast-dt);

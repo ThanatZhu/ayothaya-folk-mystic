@@ -34,3 +34,10 @@
  html body.field-hud.hud63 #world-map header{gap:16px;padding-bottom:10px}
  html body.field-hud.hud63 #world-map h1{font-size:22px;line-height:1.45}
 }
+/* 0.122 portrait phones (tester feedback): the area map used a 330 px window (about 200 px of map) on an empty screen.
+   It now takes the phone's width, scrolls when zoomed (+), and the World button sits under the map, not over it. */
+@media(orientation:portrait) and (max-width:600px){
+ html body.field-hud #world-map[data-hud-panel]{width:calc(100vw - 16px)!important;max-width:none!important;padding:10px!important}
+ html body.field-hud #world-map #city-map-viewport{width:100%!important;height:min(calc((100vw - 36px) / 1.031),calc(var(--visible-height,100dvh) - 170px))!important}
+ html body.field-hud #world-map #world-toggle{position:static;display:block;margin:10px auto 0}
+}

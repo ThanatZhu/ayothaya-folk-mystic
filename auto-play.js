@@ -12,8 +12,10 @@ export function normalizeAuto(raw){
 }
 // The first chosen skill that is learned, off cooldown, affordable and useful right now; -1 = none.
 // Self skills wait for a reason: recover under 60 % HP, guard when unshielded, focus under 40 % MP.
+// 0.119 a needed heal / shield / mana skill at once; otherwise the ready attack with the longest cooldown (ties: hotbar order)
 export function pickAutoSkill(world,cfg,scaled){
  const p=world.player,m=world.target;if(!cfg?.skills?.length||p.hp<=0)return -1;
+ let best=-1,bestCd=-1;
  for(const i of cfg.skills){
   const base=world.skills[i],level=world.skillLevels?.[i]??1;if(!base||base.reserved||base.passive||level<1||world.cooldowns[i]>0)continue;
   const s=scaled(base,level);if(!s||p.mp<(s.cost??0))continue;
@@ -22,9 +24,9 @@ export function pickAutoSkill(world,cfg,scaled){
   if(s.type==='mana'||s.type==='focus'){if(p.mp<p.maxMp*.4)return i;continue;}
   if(SELF.has(s.type)||s.type==='dash')continue;
   if(!m||m.hp<=0)continue;
-  const reach=s.range??s.radius??world.profession.range;if(Math.hypot(m.x-p.x,m.z-p.z)-(world.bodyRadius?.(m)??0)<=reach)return i; /* 1.12 reach to the body edge */
+  const reach=s.range??s.radius??world.profession.range;if(Math.hypot(m.x-p.x,m.z-p.z)-(world.bodyRadius?.(m)??0)<=reach&&(s.cd??0)>bestCd){best=i;bestCd=s.cd??0;} /* 1.12 reach to the body edge */
  }
- return -1;
+ return best;
 }
 // Best potion for the threshold that fired: the strongest one in the bag that restores that bar.
 export function pickPotion(bag,player,cfg){

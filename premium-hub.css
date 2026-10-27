@@ -31,7 +31,10 @@
 :root #pet-window .pet-roster{align-content:start;grid-template-rows:none;grid-auto-rows:minmax(120px,1fr);overflow:auto}.pet-roster .pet-empty{grid-column:1/-1;align-self:center;text-align:center;font-size:13px}.pet-empty p{color:#adc9b6}:root #pet-window .pet-inspect{overflow:auto;display:block}.pet-inspect>img{max-height:230px}.premium-menu-art{display:block!important;width:100%!important;height:100%!important;object-fit:contain}
 /* The legacy menu hides children of <i> to show its sprite sheet. These two
    entries use their own painted images instead of that shared sprite sheet. */
-:root #game-menu :is(#menu-gacha,#menu-premium-store) .premium-menu-art{visibility:visible!important;pointer-events:none}
+/* Match the visible artwork size of the padded legacy sprite cells while
+   keeping the existing button targets and label baselines unchanged. */
+:root #game-menu :is(#menu-gacha,#menu-premium-store) .premium-menu-art{visibility:visible!important;pointer-events:none;position:absolute;inset:16%;width:68%!important;height:68%!important}
+:root #game-menu #menu-premium-store .premium-menu-art{inset:15%;width:70%!important;height:70%!important}
 :root :is(#menu-gacha,#menu-premium-store)>i{background:none!important;border:0!important;position:relative;display:block}:root :is(#menu-gacha,#menu-premium-store)>i:after,:root :is(#menu-gacha,#menu-premium-store)>i:before{display:none!important}
 @media(max-height:550px){
  :root dialog.premium-window:is(#pet-window,#gacha-window,#premium-store-window){border-width:12px!important;border-image-width:26px!important;padding:0 5px!important;height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px)!important}

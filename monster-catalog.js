@@ -55,7 +55,11 @@ export const MONSTER_BEHAVIOUR={'bog-hopper':{leap:true},'bog-lantern':{aoe:2.4,
  'rat-chief-awakened':{enrage:true,slam:slam(4,3.2,1.4,.08,9,7)},'monkey-chief-awakened':{skirmish:1.2,enrage:true,slam:slam(4.2,3.4,1.5,.09,8,6.5)},'mill-keeper-awakened':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.6,1.6,.1,8,6.5)},'marsh-ape-awakened':{skirmish:1.2,enrage:true,slam:slam(4.6,3.8,1.6,.1,8,6)}};
 export const BOSS_SIGHT=10,BOSS_GIVE_UP=25;
 Object.assign(MONSTER_BEHAVIOUR,CHAPTER2_BEHAVIOUR);
-export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear}){
+// 0.122 territory and strolling (owner-approved numbers): a monster 15+ levels above the player attacks anyone who
+// comes within 5 m of it while inside its 9 m leash; an idle ordinary monster strolls within 4 m of home at 40% speed,
+// resting 3–7 s between walks. `level` is the target player's base level (null: no territory check).
+export const TERRITORY={gap:15,range:5,leash:9},STROLL={radius:4,pace:.4,rest:[3,7],timeout:6};
+export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear,level=null}){
  m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);m.strike=Math.max(0,(m.strike??0)-dt);m.moving=false;
  m.flee=Math.max(0,(m.flee??0)-dt);m.leapCD=Math.max(0,(m.leapCD??0)-dt);
  m.slamCD=Math.max(0,(m.slamCD??0)-dt);m.pressure=Math.max(0,(m.pressure??0)-dt*.4);if(type.boss)m.armor=true;
@@ -65,9 +69,21 @@ export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear}){
  // 0.111.3 a boss is a boss: it picks a fight with anyone within BOSS_SIGHT, chases without the 9 m leash and only gives
  // up (walking home) once its target is past BOSS_GIVE_UP; other monsters keep the old wait-until-hit + leash rule.
  if(type.boss){if(!target)m.aggro=false;else{const td=Math.hypot(m.x-target.x,m.z-target.z);if(td<=BOSS_SIGHT)m.aggro=true;else if(td>BOSS_GIVE_UP)m.aggro=false;}}
- else if(!target||Math.hypot(m.x-m.home.x,m.z-m.home.z)>9)m.aggro=false;
+ else{
+  if(!m.aggro&&target&&Number.isFinite(level)&&(type.level??1)-level>=TERRITORY.gap&&Math.hypot(m.x-target.x,m.z-target.z)<=TERRITORY.range&&Math.hypot(target.x-m.home.x,target.z-m.home.z)<=TERRITORY.leash)m.aggro=true;
+  if(!target||Math.hypot(m.x-m.home.x,m.z-m.home.z)>TERRITORY.leash)m.aggro=false;
+ }
  if(m.hit>.26&&!(m.windup>0))return;
- const goal=m.aggro&&target?target:m.home,dx=goal.x-m.x,dz=goal.z-m.z,d=Math.hypot(dx,dz),reach=type.reach??1.35;
+ let goal=m.aggro&&target?target:m.home;
+ const strolling=!(m.aggro&&target)&&!type.boss&&Math.hypot(m.x-m.home.x,m.z-m.home.z)<=STROLL.radius+1;
+ if(!strolling)m.stroll=null;
+ else{
+  m.rest=Math.max(0,(m.rest??STROLL.rest[0]*Math.random())-dt);
+  if(!m.stroll&&m.rest===0){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*STROLL.radius;m.stroll={x:m.home.x+Math.cos(a)*r,z:m.home.z+Math.sin(a)*r,left:STROLL.timeout};}
+  if(m.stroll){m.stroll.left-=dt;if(m.stroll.left<=0||Math.hypot(m.stroll.x-m.x,m.stroll.z-m.z)<=.2){m.stroll=null;m.rest=STROLL.rest[0]+Math.random()*(STROLL.rest[1]-STROLL.rest[0]);}}
+  goal=m.stroll??m;
+ }
+ const dx=goal.x-m.x,dz=goal.z-m.z,d=Math.hypot(dx,dz),reach=type.reach??1.35;
  // Hit often enough, a boss drops whatever it was winding up and answers with a slam (enraged: sooner, every 2/3 of the cooldown).
  if(b.slam&&m.aggro&&target&&m.slamCD===0&&!m.slamming&&m.pressure>=b.slam.hits*(rage?.6:1)){m.slamming=true;m.windup=b.slam.windup;m.pressure=0;m.slamCD=b.slam.cd*(rage?.67:1);return;}
  if(m.windup>0){m.windup=Math.max(0,m.windup-dt*(rage?1.4:1));if(m.windup===0){m.strike=.24;m.attackCD=rage?1:1.4;if(m.slamming){m.slamming=false;return 'slam';}if(b.aoe)return 'burst';if(target&&Math.hypot(m.x-target.x,m.z-target.z)<=reach&&lineClear(m,target,nav)){if(b.skirmish)m.flee=b.skirmish;return 'hit';}}return;}
@@ -75,5 +91,5 @@ export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear}){
  if(m.flee>0&&target&&m.root===0){const away=Math.hypot(m.x-target.x,m.z-target.z)||1;moveBody(m,(m.x-target.x)/away*speed*1.2*dt,(m.z-target.z)/away*speed*1.2*dt,nav);m.step+=dt*9;m.moving=true;return;}
  if(b.leap&&m.aggro&&target&&m.root===0&&m.leapCD===0&&d>3&&d<6&&lineClear(m,target,nav)){moveBody(m,dx/d*(d-reach*.8),dz/d*(d-reach*.8),nav);m.leapCD=4;m.attackCD=Math.min(m.attackCD,.3);return 'leap';}
  if(m.aggro&&target&&d<=reach&&m.attackCD===0&&lineClear(m,target,nav)){m.windup=b.windup??type.windup??.45;return;}
- if(m.root===0&&d>(m.aggro?reach*.76:.12)){const step=Math.min(d,speed*dt);moveBody(m,dx/d*step,dz/d*step,nav);m.step+=dt*7;m.moving=true;}
+ if(m.root===0&&d>(m.aggro?reach*.76:.12)){const step=Math.min(d,speed*(goal===m.stroll?STROLL.pace:1)*dt);moveBody(m,dx/d*step,dz/d*step,nav);m.step+=dt*7;m.moving=true;}
 }

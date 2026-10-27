@@ -557,6 +557,7 @@ export class RealmServer{
    if(this.roleSkills)stepRoleMonsters(room.mobs,dt,id=>this.peers.get(id)?.room===room?this.peers.get(id).world:null);
    // 0.99.11 the living players of the room once per tick; each monster just takes the closest (no per-monster sort)
    const alive=[...room.peers].map(id=>this.peers.get(id)).filter(p=>!p.suspended&&!p.observer&&p.world.player.hp>0);
+   const levels=new Map(alive.map(p=>[p,baseProgress(p.world).level])); // 0.122 territory aggro (monster-catalog.js)
    for(const m of room.mobs){
     m.petSlow=Math.max(0,(m.petSlow??0)-dt);if(m.petArmor)m.petArmor.left=Math.max(0,m.petArmor.left-dt);if(m.hp<=0){m.petSlow=0;delete m.petArmor;}
     let target=null,near=Infinity;for(const p of alive){const d=distance(p.world.player,m);if(d<near){near=d;target=p;}}
@@ -565,7 +566,7 @@ export class RealmServer{
     if(type.mvp&&m.hp<=0&&!m.summoned)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
     if(type.worldBoss&&!m.summoned){const left=this.mapBosses.remaining(room);if(left>0){m.hp=0;m.dead=left;room.contributors.delete(m.id);continue;}if(m.hp<=0)m.dead=0;}
     const decoyOwner=this.peers.get(m.roleStatus?.decoy?.owner);if(decoyOwner?.room===room)target={world:{player:{...decoyOwner.world.player,x:decoyOwner.world.player.x+1.2,hp:1},takeMonsterHit(){}}};
-    const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
+    const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear,level:levels.get(target)??null});
     if(result==='respawn'){room.damageEncounters?.delete(m.id);room.contributors.delete(m.id);if(type.worldBoss)this.announce(room.serverId,'👑 บอสประจำแมพ '+type.name+' ปรากฏที่ '+room.map.name+' · CH '+(room.channel??1));else if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);else if(type.awakened)this.announce(room.serverId,`⚡ ${type.name} (Lv.${type.level}) ตื่นขึ้นที่ ${room.map.name}!`);}
     if(m.justEnraged){m.justEnraged=false;for(const id of room.peers)this.peers.get(id).world.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
     if(result==='burst')for(const id of room.peers){const a=this.peers.get(id);if(!a.suspended&&!a.observer&&a.world.player.hp>0&&distance(a.world.player,m)<=MONSTER_BEHAVIOUR[type.id].aoe)a.world.takeMonsterHit(type,type.damage,m);}

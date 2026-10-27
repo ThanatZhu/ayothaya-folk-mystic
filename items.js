@@ -3,6 +3,7 @@ import {REFINE_MAX,refineTier,refinePercent,gearStatText} from './refine-tiers.j
 import {WORLD_DROP_ITEMS,WORLD_CARD_ATLASES,chapter2Drops} from './chapter2-loot.js';
 import {buildGearItems,setDrops,shardDrop,rollSetPiece,gradeItem} from './gear-sets.js';
 import {buildAmuletItems} from './amulets.js';
+import {CONQUEST_SHARD,CONQUEST_ITEM,conquestCount,conquestBoss} from './rainbow-crafting.js';
 import {FRONTIER_MONSTERS} from './monster-catalog.js';
 // Items, loot, coins (เบี้ย) and NPC shops. Pure rules shared by the client (offline guests + UI) and the realm
 // server (authoritative online bag). Bag state: {coins, items:{[id]:count}}.
@@ -186,6 +187,8 @@ export const DROPS={
 };
 Object.assign(ITEMS,WORLD_DROP_ITEMS);
 Object.assign(DROPS,chapter2Drops(ITEMS));
+ITEMS[CONQUEST_SHARD]=CONQUEST_ITEM;
+for(const monster of FRONTIER_MONSTERS)if(conquestBoss(monster)&&DROPS[monster.id])DROPS[monster.id].items.push([CONQUEST_SHARD,1,1]);
 // 0.117 set gear by monster level (`sets`, resolved per killer in rollLoot) and boss shards for the rainbow sets.
 for(const m of FRONTIER_MONSTERS){const d=DROPS[m.id];if(!d)continue;const rule=setDrops(m),shard=shardDrop(m);if(rule)d.sets=rule;if(shard)d.items.push(shard);}
 
@@ -226,11 +229,11 @@ export function addLoot(bag,{coins=0,items=[]}={}){
 }
 
 // look: the killer's gear look (gear-sets.js gearLook); null (Novice) drops any look.
-export function rollLoot(monsterId,rand=Math.random,event=null,rolls=1,look=null){
- if(rolls>1){const all={coins:0,items:[]};for(let i=0;i<rolls;i++){const r=rollLoot(monsterId,rand,i?null:event,1,look);all.coins+=r.coins;all.items.push(...r.items);}return all;} // 0.64 leaders/surge roll several times
+export function rollLoot(monsterId,rand=Math.random,event=null,rolls=1,look=null,includeConquest=true){
+ if(rolls>1){const all={coins:0,items:[]};for(let i=0;i<rolls;i++){const r=rollLoot(monsterId,rand,i?null:event,1,look,false);all.coins+=r.coins;all.items.push(...r.items);}if(includeConquest&&DROPS[monsterId]?.items.some(([id])=>id===CONQUEST_SHARD))all.items.push({id:CONQUEST_SHARD,count:conquestCount(rand)});return all;} // Event/leader multipliers never multiply the rare shard award.
  const d=DROPS[monsterId];if(!d)return {coins:0,items:[]};
  const [lo,hi]=d.coins,coins=lo+Math.floor(rand()*(hi-lo+1)),items=[];
- for(const [id,chance,n=1] of d.items)if(rand()<chance)items.push({id:ITEMS[id]?.kind==='gear'&&rand()<.35?id+'!'+rollAffix(rand):id,count:n}); // 0.57: 35% of dropped gear gets a random affix
+ for(const [id,chance,n=1] of d.items){if(id===CONQUEST_SHARD){if(includeConquest)items.push({id,count:conquestCount(rand)});continue;}if(rand()<chance)items.push({id:ITEMS[id]?.kind==='gear'&&rand()<.35?id+'!'+rollAffix(rand):id,count:n});} // 0.57: 35% of dropped gear gets a random affix
  if(d.sets)for(const id of rollSetPiece(d.sets,look,rand)){const [base,grade]=id.split('^');items.push({id:rand()<.35?composeId(base,0,null,rollAffix(rand),+(grade??0)):id,count:1});}
  if(event&&rand()<event.drop)items.push({id:event.token,count:1});
  return {coins,items};

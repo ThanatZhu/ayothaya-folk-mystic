@@ -1,7 +1,8 @@
 // Presentation rules share the real recipes and atomic crafting validation.
-import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=107';
-import {ITEMS,DROPS,SHOPS,normalizeBag} from './items.js?v=107';
+import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=conquest1';
+import {ITEMS,DROPS,SHOPS,normalizeBag} from './items.js?v=conquest1';
 import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {CONQUEST_SHARD} from './rainbow-crafting.js';
 const normalize=s=>String(s??'').normalize('NFKC').toLowerCase().trim();
 export function craftRecipes(bag,{classId,group='potion',query='',readyOnly=false,translate=s=>s}={}){
  const search=normalize(query);
@@ -14,6 +15,7 @@ export function craftQuote(raw,recipe,quantity=1){
 }
 export function craftSources(id,catalog={maps:[]}){
  const maps=catalog.maps??[],sources=[];
+ if(id===CONQUEST_SHARD)sources.push({kind:'event',name:'กิลด์วอร์อันดับ 1–3',detail:'สมาชิกที่ร่วมรบทุกคน · สุ่ม 1–3 เศษ · รับทางจดหมาย'});
  for(const [name,shop]of Object.entries(SHOPS))if(shop.stock.includes(id))sources.push({kind:'shop',name,map:maps.find(m=>m.id===shop.mapId)?.name??shop.mapId,currency:shop.currency?ITEMS[shop.currency]?.name:null});
  for(const [monster,drop]of Object.entries(DROPS))if(drop.items.some(([item,rate])=>item===id&&rate>0)){
   const index=MONSTER_TYPES.findIndex(t=>t.id===monster),type=MONSTER_TYPES[index];if(!type)continue;

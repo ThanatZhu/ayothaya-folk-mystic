@@ -4,6 +4,7 @@ import {checkWalk,startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} 
 import {normalizeAutoTarget} from '../auto-targets.js';
 import {publicBossDirectory} from './boss-directory.js';
 import {recordBossDamage,finishBossDamage} from '../boss-results.js';
+import {warBoardKey,warRound,warContribution,warRankings,finishWarRound} from '../guild-war-rewards.js';
 import {normalizeMailbox,inboxSummary} from '../mailbox.js';
 import {normalizePetAccount,activePremiumPet,publicPetAccount} from '../pet-account.js';
 import {castPremiumPet,petIncoming,petBlessing,PET_SKILL_ERRORS} from '../pet-combat.js';
@@ -409,9 +410,11 @@ export class RealmServer{
  warTick(){
   const w=warWindow(this.now(),this.warAlways);
   for(const serverId of new Set([...SERVER_IDS,...[...this.peers.values()].map(p=>p.serverId)])){
-   const s=this.warState(serverId);
+   const s=this.warState(serverId),key=warBoardKey(serverId),saved=this.leaders.get(key);
+   // A restart after closing time must settle the saved participants, too.
+   if(!s.active&&saved?.active&&(!w.active||saved.active.id!==String(w.startsAt))){const result=finishWarRound(saved,saved.active,serverId,this.now()),owner=this.castleOwner(serverId),winner=this.guilds.get(saved.active.holder);if(owner&&owner!==winner){owner.castle=false;this.guildChanged(owner);}if(winner&&!winner.castle){winner.castle=true;this.guildChanged(winner);}this.leaders.set(key,result.board);this.leadersDirty.add(key);this.onWarRewards?.(key);}
    if(!w.active&&w.nextAt>this.now()&&w.nextAt-this.now()<=15*6e4&&s.reminded!==w.nextAt){s.reminded=w.nextAt;this.herald(serverId,`⏰ อีก 15 นาทีกิลด์วอร์เริ่ม! · ${warLabel(this.now())} ที่โรงสีใต้เงาจันทร์`);}
-   if(w.active&&!s.active){s.active=true;s.holder=this.castleOwner(serverId)?.id??null;s.stone.hp=s.stone.maxHp;this.herald(serverId,`⚔️ กิลด์วอร์เริ่มแล้ว! · ไปที่${this.catalog.maps.find(m=>m.id===WAR.map)?.name??WAR.map} ทำลาย${WAR.stone.name}เพื่อยึด${WAR.name} · ${WAR.minutes} นาที`);}
+   if(w.active&&!s.active){const board=this.leaders.get(key)??{},owner=this.castleOwner(serverId),round=warRound(board,w.startsAt,owner?.id??null);if(owner)round.guilds[owner.id]??={id:owner.id,name:owner.name,damage:0,captures:0,kills:0};s.active=true;s.round=round;s.holder=round.holder;s.stone.hp=s.stone.maxHp;this.leaders.set(key,{...board,active:round});this.leadersDirty.add(key);this.herald(serverId,`⚔️ กิลด์วอร์เริ่มแล้ว! · ไปที่${this.catalog.maps.find(m=>m.id===WAR.map)?.name??WAR.map} ทำลาย${WAR.stone.name}เพื่อยึด${WAR.name} · ${WAR.minutes} นาที`);}
    if(!w.active&&s.active){s.active=false;this.warEnd(serverId,s);}
   }
   for(const p of this.peers.values())this.warRivals(p);
@@ -427,19 +430,21 @@ export class RealmServer{
   w.rivals=list;
  }
  warHit(p,mob,damage,color){
-  const s=this.wars.get(p.serverId);if(!s?.active||!p.world.rivals.includes(mob))return;
+  const s=this.wars.get(p.serverId),guild=this.guildOf(p);if(!s?.active||!guild||p.observer||p.suspended||!p.world.rivals.includes(mob))return;
+  const contribution=(player,options)=>{warContribution(s.round,player,this.guildOf(player),options);this.leadersDirty.add(warBoardKey(p.serverId));};
   if(mob===s.stone){const amount=Math.min(mob.hp,Math.round(damage*petBlessing(p.world)));mob.hp-=amount;p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color,magic:!!p.world.derived?.magic,synced:!!p.world.roleCombat,...p.world.damageContext});
-   if(mob.hp>0)return;const g=this.guildOf(p);s.holder=g.id;mob.hp=mob.maxHp;
+   contribution(p,{damage:amount});if(mob.hp>0)return;const g=guild;s.holder=g.id;if(s.round)s.round.holder=g.id;contribution(p,{capture:true});mob.hp=mob.maxHp;
    for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id)a.world.targetId=null;}
    this.announce(p.serverId,`🏯 กิลด์ ${g.name} ยึด${WAR.name}ได้! · ${p.character.name} ทำลาย${WAR.stone.name}`);return;}
   const a=this.peers.get(mob.id.slice(4)),v=a?.world.player;if(!v||v.hp<=0)return;
   const rawAmount=monsterHit(a.world,Math.max(1,Math.round(damage*WAR.scale))),amount=a.world.roleCombat?a.world.roleCombat.incoming(rawAmount,{...p.world.player,id:'war:'+p.id,pvp:true,secondary:!!p.world.roleSecondary}):petIncoming(a.world,rawAmount);if(!amount){a.world.emit('dodge',{x:v.x,z:v.z});return;}
   v.hp=Math.max(0,v.hp-amount);mob.hp=v.hp;p.world.emit('damage',{id:mob.id,x:v.x,z:v.z,amount,color,magic:!!p.world.derived?.magic,synced:!!p.world.roleCombat,...p.world.damageContext});a.world.emit('playerHit',{x:v.x,z:v.z,amount});
-  if(v.hp>0)return; // knocked out: back to the map's start in 3 s, no EXP loss
+  contribution(p,{});contribution(a,{});if(v.hp>0)return;contribution(p,{kill:true}); // knocked out: back to the map's start in 3 s, no EXP loss
   v.down=3;Object.assign(a.world,{auto:false,targetId:null,path:[],status:{}});
   a.world.notice('ถูก '+p.character.name+' ล้มในกิลด์วอร์ · กลับจุดเกิดใน 3 วินาที');p.world.notice('⚔️ ล้ม '+a.character.name+' ได้!');
  }
  warEnd(serverId,s){
+  if(s.round){s.round.holder=s.holder;const key=warBoardKey(serverId),result=finishWarRound(this.leaders.get(key),s.round,serverId,this.now());if(result.changed){this.leaders.set(key,result.board);this.leadersDirty.add(key);if(result.board.last.rankings.length)this.herald(serverId,'🏆 อันดับกิลด์วอร์ · '+result.board.last.rankings.map(g=>g.rank+'. '+g.name).join(' · '));this.onWarRewards?.(key);}}
   const prev=this.castleOwner(serverId),g=s.holder&&this.guilds.get(s.holder);
   if(prev&&prev!==g){prev.castle=false;this.guildChanged(prev);}
   if(!g){this.herald(serverId,'🏯 กิลด์วอร์จบแล้ว · ไม่มีกิลด์ใดยึด'+WAR.name+'ได้');return;}
@@ -475,7 +480,7 @@ export class RealmServer{
   return {rows:rows.slice(0,10).map(([k,v],i)=>{const look=this.leaders.get(p.serverId)?.[k]??v;return {rank:i+1,me:k===p.key,name:v.name,classId:look.classId,gender:look.gender,jobId:look.jobId,appearance:look.appearance,equipment:look.equipment,level:look.level,points:v.points,wins:v.wins,losses:v.losses,draws:v.draws};}),me:mine<0?null:{rank:mine+1,points:rows[mine][1].points},last:a.last,endsAt:arenaEnds(this.now())};}
  warView(p){
   const s=this.wars.get(p.serverId),owner=this.castleOwner(p.serverId),here=p.room.map.id===WAR.map;
-  return {active:!!s?.active,next:warLabel(this.now()),owner:owner?.name??null,holder:s?.active&&s.holder?this.guilds.get(s.holder)?.name??null:null,
+  return {active:!!s?.active,next:warLabel(this.now()),owner:owner?.name??null,holder:s?.active&&s.holder?this.guilds.get(s.holder)?.name??null:null,rankings:s?.active?warRankings(s.round).slice(0,3):this.leaders.get(warBoardKey(p.serverId))?.last?.rankings??[],
    stone:s?.active&&here?{hp:s.stone.hp,maxHp:s.stone.maxHp}:null,left:s?.active?Math.max(0,Math.ceil((warWindow(this.now(),this.warAlways).endsAt-this.now())/1000)):0,rivals:here?p.world.rivals:[]};
  }
  startDuel(a,b){
@@ -568,7 +573,7 @@ export class RealmServer{
      target.world.takeMonsterHit(type,type.damage,m);
     }
    }
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock};if(e.type.startsWith('spirit'))for(const key of ['launchAt','impactAt','spawnedAt','endsAt'])if(Number.isFinite(e[key]))e[key]+=this.clock-p.world.time; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp&&!e.levelGiftsGranted)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','refineRejected','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopsClosed','shopMine','marketResults','friends','friendAsk','guild','guildAsk','guildDirectory','guildApplication','daily','mvp','dungeonClear','tamed','album','crafted','hired'].includes(e.type)||p.observer)p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock};if(e.type==='cast'&&e.skillIndex!=null&&p.room.map.id===WAR.map&&this.wars.get(p.serverId)?.active){warContribution(this.wars.get(p.serverId).round,p,this.guildOf(p));this.leadersDirty.add(warBoardKey(p.serverId));}if(e.type.startsWith('spirit'))for(const key of ['launchAt','impactAt','spawnedAt','endsAt'])if(Number.isFinite(e[key]))e[key]+=this.clock-p.world.time; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp&&!e.levelGiftsGranted)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','refineRejected','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopsClosed','shopMine','marketResults','friends','friendAsk','guild','guildAsk','guildDirectory','guildApplication','daily','mvp','dungeonClear','tamed','album','crafted','hired'].includes(e.type)||p.observer)p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){this.broadcasting=true;const events=copy(room.events);for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p,{delta:true}),events});}this.broadcasting=false;room.events=[];}
   }
  }

@@ -68,8 +68,8 @@ test('weapons and boss sets are crafted; crafting rolls a grade per piece; quest
  const r=recipeFor(weaponId('hunter',1));assert.deepEqual(r.needs,{'relic-rice':15,'iron-ore':2});
  const bag={coins:10000,items:{'relic-rice':30,'iron-ore':4}},made=craft(bag,weaponId('hunter',1),2,()=>.02);
  assert.deepEqual(made.items.map(i=>i.id),[weaponId('hunter',1)+'^3',weaponId('hunter',1)+'^3']);
- const boss=recipeFor(bossId('armor','monk'));assert.deepEqual(boss.needs,{'shard-soul':20,'shard-gem':12,'shard-divine':5});
- assert.equal(craft({coins:99999,items:{'shard-soul':20,'shard-gem':12,'shard-divine':5}},bossId('armor','monk')).items[0].id,bossId('armor','monk'));
+ const boss=recipeFor(bossId('armor','monk'));assert.deepEqual(boss.needs,{'shard-soul':20,'shard-gem':12,'shard-divine':5,'conquest-shard':100});
+ assert.equal(craft({coins:1000000,items:{'shard-soul':20,'shard-gem':12,'shard-divine':5,'conquest-shard':100}},bossId('armor','monk')).items[0].id,bossId('armor','monk'));
  assert.deepEqual(rewardItems({items:[{id:'@weapon',count:1},{id:'@armor',count:1}]},'acolyte','female').map(i=>i.id),[weaponId('acolyte',1),pieceId('wall','armor','nun',2)]);
  assert.equal(rewardItems({items:[{id:'@weapon',count:1}]},'novice')[0].id,'starter-wraps');
  assert.equal(canWear(weaponId('lancer',1),{classId:'lancer',level:9}),'low-level');assert.equal(canWear(pieceId('pierce','head','monk',1),{classId:'lancer',level:10}),null,'any class wears any look');

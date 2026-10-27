@@ -3,6 +3,7 @@
 import {normalizeBag,addLoot,ITEMS} from './items.js?v=107';
 import {gearRecipes,rollGrade,withGrade} from './gear-sets.js';
 import {WORLD_RELIC_RECIPES} from './chapter2-loot.js';
+import {rainbowRecipe} from './rainbow-crafting.js';
 
 export const CRAFT_GROUPS=[['potion','ยา'],['food','อาหาร'],['refine','หินตีบวก'],['gear','อุปกรณ์']];
 // out: item made, count: how many per craft, needs: materials used, coins: cowries spent.
@@ -26,6 +27,8 @@ export const RECIPES=[
 // 0.117 class weapons per tier (map relics + ore) and the rainbow boss sets (boss shards), from gear-sets.js.
 RECIPES.push(...gearRecipes(ITEMS));
 RECIPES.push(...WORLD_RELIC_RECIPES);
+// Keep each recipe's original materials and add the conquest cost to every rainbow item.
+for(const [id,item] of Object.entries(ITEMS))if(item.kind==='gear'&&item.rainbow){const i=RECIPES.findIndex(r=>r.out===id),r=rainbowRecipe(id,RECIPES[i]?.needs);if(i>=0)RECIPES[i]=r;else RECIPES.push(r);}
 export const recipeFor=out=>RECIPES.find(r=>r.out===out)??null;
 // How many times the bag can afford a recipe.
 export function craftable(bag,r){const b=normalizeBag(bag);let n=r.coins?Math.floor(b.coins/r.coins):99;for(const [id,k] of Object.entries(r.needs))n=Math.min(n,Math.floor((b.items[id]??0)/k));return Math.max(0,Math.min(99,n));}

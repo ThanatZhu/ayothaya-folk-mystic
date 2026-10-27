@@ -1,7 +1,7 @@
 // Crafting authority stays with the realm; this window only previews and sends a request.
-import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=107';
-import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=107';
-import {craftRecipes,craftQuote,craftSources} from './craft-view176.js';
+import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=conquest1';
+import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=conquest1';
+import {craftRecipes,craftQuote,craftSources} from './craft-view176.js?v=conquest1';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9,7 +9,7 @@ const number=n=>Number(n??0).toLocaleString('th-TH');
 const icon=(id,cls='')=>`<i class="item-icon ${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 const failures=new Set(['no-recipe','no-material','no-coins','bag-full','bad-count','craft-rate'].map(k=>ITEM_ERRORS[k]));
 export function createCraftUI({game,bagUI,catalog}){
- if(!document.querySelector('link[data-craft176]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./craft176.css?v=176';css.dataset.craft176='';document.head.append(css);}
+ if(!document.querySelector('link[data-craft176]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./craft176.css?v=conquest1';css.dataset.craft176='';document.head.append(css);}
  const world=game.world,dialog=document.createElement('dialog');dialog.id='craft-window';dialog.dataset.craft176='';dialog.setAttribute('aria-labelledby','craft-title');
  dialog.innerHTML=`<header><div><small>AYOTHAYA · CRAFTING</small><h2 id="craft-title">คราฟต์ไอเท็ม</h2></div><b class="coins" id="craft-coins"></b><button type="button" class="mp-icon" id="craft-close" aria-label="ปิดหน้าคราฟต์">×</button></header>
  <div class="craft176-tabs" role="tablist" aria-label="หมวดสูตรคราฟต์">${CRAFT_GROUPS.map(([id,name])=>`<button type="button" role="tab" data-group="${id}" aria-controls="craft-workspace">${name}</button>`).join('')}</div>
@@ -60,7 +60,7 @@ export function createCraftUI({game,bagUI,catalog}){
  const open=document.createElement('button');open.type='button';open.id='bag-craft';open.textContent='⚒ คราฟต์';open.onclick=()=>{open.closest('dialog')?.close();openHudPanel(dialog);render(true);};document.getElementById('bag-coins')?.after(open);
  function materials(q){
   const sig=JSON.stringify([selected,q?.needs,sourceId]);if(sig===materialSig)return;materialSig=sig;
-  if(sourceId){const rows=craftSources(sourceId,catalog);$('craft-materials').innerHTML=`<div class="craft176-sources"><button type="button" data-source-back>กลับไปดูวัตถุดิบ</button><h4>${icon(sourceId,'small')}${esc(itemDef(sourceId).name)}</h4><ul>${rows.map(s=>`<li><b>${s.kind==='drop'?'ดรอปจาก':s.kind==='shop'?'ซื้อ / แลกที่':'คราฟต์ในหมวด'} ${esc(s.name)}</b><small>${esc(s.kind==='drop'?(s.maps.join(' · ')||'ดูตำแหน่งในแผนที่'):s.kind==='shop'?[s.map,s.currency].filter(Boolean).join(' · '):'เปิดหมวดสูตรเพื่อดูวัตถุดิบ')}</small></li>`).join('')||'<li>ยังไม่มีข้อมูลแหล่งหาในตำรา</li>'}</ul></div>`;return;}
+  if(sourceId){const rows=craftSources(sourceId,catalog);$('craft-materials').innerHTML=`<div class="craft176-sources"><button type="button" data-source-back>กลับไปดูวัตถุดิบ</button><h4>${icon(sourceId,'small')}${esc(itemDef(sourceId).name)}</h4><ul>${rows.map(s=>`<li><b>${s.kind==='drop'?'ดรอปจาก':s.kind==='shop'?'ซื้อ / แลกที่':s.kind==='event'?'กิจกรรม':'คราฟต์ในหมวด'} ${esc(s.name)}</b><small>${esc(s.kind==='event'?s.detail:s.kind==='drop'?(s.maps.join(' · ')||'ดูตำแหน่งในแผนที่'):s.kind==='shop'?[s.map,s.currency].filter(Boolean).join(' · '):'เปิดหมวดสูตรเพื่อดูวัตถุดิบ')}</small></li>`).join('')||'<li>ยังไม่มีข้อมูลแหล่งหาในตำรา</li>'}</ul></div>`;return;}
   $('craft-materials').innerHTML=(q?.needs??[]).map(n=>`<button type="button" class="craft176-material ${n.missing?'short':'ok'}" data-source="${esc(n.id)}" aria-label="แหล่งหา ${esc(itemDef(n.id).name)}">${icon(n.id,'small')}<span>${esc(itemDef(n.id).name)}<small>${n.missing?'ขาด '+number(n.missing)+' ชิ้น':'มีวัตถุดิบครบ'}</small></span><b>${number(n.have)} / ${number(n.need)}</b><em aria-hidden="true">${n.missing?'!':'✓'}</em></button>`).join('');
  }
  function render(force=false){

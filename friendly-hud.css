@@ -45,3 +45,4 @@ body[data-safe=true] .target-panel{display:none}
 }
 
 .emote-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}.emote-actions button{min-height:44px;border-radius:10px;font-size:11px}.level-badge{position:absolute;right:7px;top:-8px;border:1px solid #beaa69;border-radius:7px;padding:1px 6px;background:#394d35;font-size:9px;color:#f2dfaf}
+.camera-tilt{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin:6px 0;font:500 13px var(--font-game,Mali,Tahoma,sans-serif);color:#fff0ce;text-align:left}.camera-tilt input{width:100%;accent-color:#d6b46a;min-height:32px}.camera-tilt output{min-width:3.2em;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}

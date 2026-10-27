@@ -16,7 +16,7 @@ const {chromium}=await import(pathToFileURL(process.argv[2]).href),browser=await
 try{
  catalog.maps.find(m=>m.id==='ayutthaya').citizens=[]; // Isolate input checks from randomly wandering passers-by.
  const seed=await store.createLocal({name:'StoryQA',gender:'female'}),record=store.rows.get(seed.uid),npc=catalog.maps.find(m=>m.id==='ayutthaya').npcs.find(n=>n.name==='ลุงเรือง');
- record.character.classId='rogue';record.character.appearance={outfit:'crimson',hair:'original',hairColor:'original',eyes:'original',beard:'none',tattoo:'none',garment:'original'};record.xpCurve=XP_CURVE;record.state=initialSave();record.state.mapId='ayutthaya';record.state.position={x:npc.x,z:npc.z+1};record.state.traveler.baseXp=levelStart(99);record.story={v:3,quest:0,step:0,count:0,done:false};
+ record.character.classId='rogue';record.character.appearance={outfit:'crimson',hair:'original',hairColor:'original',eyes:'original',beard:'none',tattoo:'none',garment:'original'};record.xpCurve=XP_CURVE;record.state=initialSave();record.state.mapId='ayutthaya';record.state.position={x:npc.x,z:npc.z+1};record.state.traveler.baseXp=levelStart(99);record.story={v:4,quest:0,step:0,count:0,done:false};
  record.gear={weapon:'daggers-crafted',head:'hat-headband',armor:'vest-cotton',garment:'cloak-cotton',shoes:'shoes-woven',accessory:'ring-ruby'};record.bag={coins:50000,slots:100,items:{...Object.fromEntries(Object.keys(ITEMS).slice(0,80).map(id=>[id,2])),'hp-small':8,'mp-small':8,'iron-ore':50}};
  record.daily={day:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),streak:1};
  async function launch(mobile=false,lang='th',source=seed,save=record,dpr=1){
@@ -90,7 +90,7 @@ try{
  await artPage.evaluate(()=>window.artFixture.scenes.onTalk({name:'ลุงเรือง',x:0,z:0}));await ready(artPage);await artPage.locator('#cinematic-skip').click();
  checks.push('route completion never autoplays; actual matching NPC dialog and nearby player are both required');
  await artContext.close();
- record.story={v:3,quest:0,step:0,count:0,done:false};store.rows.get(seed.uid).story=record.story;
+ record.story={v:4,quest:0,step:0,count:0,done:false};store.rows.get(seed.uid).story=record.story;
  const phone=await launch(true,'en');await phone.page.waitForTimeout(450);await phone.page.locator('.npc-label').filter({hasText:/Rueang|เรือง/}).first().click({force:true});await ready(phone.page);
  await phone.page.locator('.cinematic-stage').tap({position:{x:100,y:100}});assert.equal(await phone.page.locator('#quest-cinematic').getAttribute('data-text-speed'),'120');
  await phone.page.waitForTimeout(200);assert.ok(!/[฀-๿]/.test(await phone.page.locator('#cinematic-caption').innerText()));await fit(844,390,phone.page);

@@ -12,7 +12,7 @@ test('all 43 steps have three authored shots, with one distinct painted atlas pe
   assert.ok(scene.captions.every(x=>x.length>30));assert.equal(scene.art.panels,3);images.add(scene.art.src);
   assert.ok((await stat(new URL('../'+scene.art.src,import.meta.url))).size>10000);
  }
- assert.equal(images.size,22);assert.equal(Object.keys(STORYBOARDS).length,22);assert.equal(storyScene(999,0),null);
+ assert.equal(images.size,STORY.length);assert.equal(Object.keys(STORYBOARDS).length,STORY.length);assert.equal(storyScene(999,0),null);
 });
 test('replays retain current/past-step locks',()=>{
  const state={quest:3,step:0,done:false};assert.ok(sceneUnlocked(storyScene(0,0),state));assert.ok(sceneUnlocked(storyScene(3,0),state));

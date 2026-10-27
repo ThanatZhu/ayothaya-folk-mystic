@@ -1,5 +1,5 @@
 import {ITEMS,CLASSES,SLOTS,GRADES,FAMILIES,familyName,CHAPTERS,REFINE_MAX,REFINE_TIERS,WORLD_MAP_BOSSES,levelChapter,cardSlots,featuredGear,bossGear,chapterGear,itemEffects,createItemGuide,searchItems} from './equipment-journey-data170.js?v=117';
-import {ATLASES,ITEM_ATLAS,ATLAS_LAYOUTS} from './items.js?v=tier167';
+import {itemDef,ATLASES,ITEM_ATLAS,ATLAS_LAYOUTS} from './items.js?v=tier167';
 const $=id=>document.getElementById(id),node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!=null)el.textContent=text;return el;};
 const params=new URLSearchParams(location.search),selected=CLASSES.find(c=>c.id===params.get('class'))?.id??'swordsman';
 let classId=selected,level=Math.max(1,Math.min(99,Number(params.get('level'))||1)),guide,visible=18,previousFocus=null;
@@ -7,14 +7,14 @@ const sourcesCache=new Map(),source=id=>{if(!sourcesCache.has(id))sourcesCache.s
 const num=n=>Number(n).toLocaleString('th-TH',{maximumFractionDigits:3});
 const percent=n=>num(n*100)+'%';
 const tints={wind:'hue-rotate(95deg) saturate(1.5) brightness(1.15)',gold:'sepia(.55) saturate(2.4) hue-rotate(-10deg) brightness(1.12)',violet:'hue-rotate(215deg) saturate(1.7) brightness(1.05)'};
-function art(id){const it=ITEMS[id],el=node('span','item-art');el.setAttribute('aria-hidden','true');if(!it)return el;
+function art(id){const it=itemDef(id),el=node('span','item-art');el.setAttribute('aria-hidden','true');if(!it)return el;
  const direct=it.image??(it.monsterCard?'assets/cards147/'+id.slice(5)+'.webp':null);
  if(direct){el.style.backgroundImage=`url("${direct}")`;el.style.backgroundSize='contain';el.style.backgroundPosition='center';}
  else{const {columns=6,rows=4}=ATLAS_LAYOUTS[it.atlas]??{};el.style.backgroundImage=`url("${ATLASES[it.atlas]??ITEM_ATLAS}")`;el.style.backgroundSize=columns*100+'% '+rows*100+'%';el.style.backgroundPosition=(it.icon%columns)/(columns-1)*100+'% '+Math.floor(it.icon/columns)/(rows-1)*100+'%';}
  if(tints[it.tint])el.style.filter=tints[it.tint]+' drop-shadow(0 4px 3px #0007)';return el;
 }
 function sourceHint(id){const s=source(id),ways=[];if(s.quest.length)ways.push('รางวัลเควส');if(s.shop.length)ways.push('ซื้อได้');if(s.recipe)ways.push('คราฟได้');if(s.drop.length)ways.push('สุ่มดรอป');if(s.gacha.length)ways.push('กาชา');return ways.join(' / ')||'ยังไม่พบแหล่งได้รับ';}
-function itemCard(item,extra=''){const id=typeof item==='string'?item:item.id,it=ITEMS[id];if(!it)return node('span');
+function itemCard(item,extra=''){const id=typeof item==='string'?item:item.id,it=itemDef(id);if(!it)return node('span');
  const button=node('button','item-card');button.type='button';button.dataset.item=id;button.setAttribute('aria-label',it.name+' ดูวิธีได้รับ');button.append(art(id));const text=node('span');
  text.append(node('strong','',it.name));text.append(node('small','',extra||(it.kind==='gear'?`Lv.${it.level??1} · ${SLOTS[it.slot]}${it.set?' · ชุด'+familyName(it.set.family)+' ขั้น '+it.set.tier:it.tier?' · ขั้น '+it.tier:it.bossSet?' · เซ็ทบอส':''}`:it.kind==='card'?'การ์ดใส่'+SLOTS[it.slot]:'วัตถุดิบ')));text.append(node('small','source-hint',sourceHint(id)));button.append(text);return button;
 }
@@ -52,7 +52,7 @@ function renderCatalog(reset=true){if(reset)visible=18;const rows=searchItems({c
 function detailSection(title){const section=node('section','detail-section');section.append(node('h3','',title));$('item-detail').append(section);return section;}
 function row(title,subtitle,value){const r=node('div','source-row'),left=node('div');left.append(node('strong','',title));if(subtitle)left.append(node('small','',subtitle));r.append(left,node('span','',value));return r;}
 function describeMaterial(s){if(s.shop.length)return 'ซื้อจาก '+s.shop[0].npc+' · '+s.shop[0].mapName;if(s.drop.length){const best=[...s.drop].sort((a,b)=>Number(a.boss)-Number(b.boss)||b.chance-a.chance)[0];return best.name+' · '+best.maps.map(m=>m.name).join(', ');}if(s.recipe)return 'มีสูตรคราฟ กดดูรายละเอียด';return 'กดดูแหล่งได้รับ';}
-function openItem(id){const it=ITEMS[id];if(!it)return;const dialog=$('item-dialog'),root=$('item-detail'),s=source(id);if(!dialog.open)previousFocus=document.activeElement;root.replaceChildren();
+function openItem(id){const it=itemDef(id);if(!it)return;const dialog=$('item-dialog'),root=$('item-detail'),s=source(id);if(!dialog.open)previousFocus=document.activeElement;root.replaceChildren();
  const hero=node('div','detail-hero'),body=node('div');hero.append(art(id));const title=node('h2','',it.name);title.id='detail-title';body.append(title,node('p','',id),node('p','',it.kind==='gear'?`สวมใส่ Base Lv.${it.level??1} · ${SLOTS[it.slot]} · ${it.classes?.map(c=>CLASSES.find(x=>x.id===c)?.name??c).join(', ')??'ทุกอาชีพ'}`:it.kind==='card'?'การ์ดสำหรับ'+SLOTS[it.slot]:'วัตถุดิบและของคราฟ'),node('p','',itemEffects(it)));hero.append(body);root.append(hero);
  if(it.kind==='gear'){const rules=detailSection('ก่อนลงทุนกับชิ้นนี้');rules.append(node('p','',`${it.set?'ชุด'+familyName(it.set.family)+' ขั้น '+it.set.tier+' · สุ่มได้ 5 เกรด · ':it.bossSet?'เซ็ทบอส กรอบสีรุ้ง · ':''}ช่องการ์ด ${cardSlots(it)} ช่อง · ตีบวกได้ถึง +${REFINE_MAX}`));if(!cardSlots(it))rules.append(node('p','recipe-note','ชิ้นนี้ไม่มีช่องการ์ด ตรวจให้ตรงกับบิลด์ก่อนเลือกคราฟหรือตีบวก'));}
  if(s.quest.length){const section=detailSection('รับแน่นอนเมื่อทำเควสสำเร็จ');for(const q of s.quest)section.append(row(q.title,q.steps.map(step=>[step.npc,step.mapName,step.level?'ถึง Base Lv.'+step.level:null].filter(Boolean).join(' · ')).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(' / '),`×${q.count}`));}

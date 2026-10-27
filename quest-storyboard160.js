@@ -1,5 +1,12 @@
 // Each quest has its own three painted shots. Presentation never changes quest state.
 export const STORYBOARDS={
+ 't17-craft':{npc:'ครูแสนดาบ',frames:[[0,0,1024,512],[90,512,844,422],[0,979,1024,512]],lines:[
+  'เมื่อเลือกเส้นทางอาชีพของตัวเองแล้ว เจ้ากลับมาที่โรงตีเหล็ก ครูแสนดาบชวนให้เรียนรู้วิธีสร้างอาวุธด้วยมือตนเอง',
+  'เศษศาสตราทุ่งนากับแร่เหล็กที่เก็บจากเส้นทางใกล้เมือง คือวัตถุดิบเริ่มต้นของอาวุธสีฟ้า ไม่ใช่ของไร้ค่าที่ต้องขายทิ้งเสมอไป',
+  'ก่อนออกเดินทางต่อ ครูอธิบายว่าอาวุธสีก่อนหน้ากับวัสดุจากแมพช่วงเลเวลนั้น จะพาไปสู่สีม่วง สีส้ม และสีแดงทีละขั้น'],shots:[
+  'Teacher welcomes back-facing traveller at the Ayutthaya riverside forge and presents unfinished steel, enchanted rice and iron ore.',
+  'Close view of the same teacher pointing to rough iron and enchanted field fragments for a blue starter weapon.',
+  'Wide low angle at the glowing anvil, an apprentice watches the teacher and three trays subtly glimmer purple, orange and red.']},
  t1:{npc:'ลุงเรือง',lines:[
   'ค่ำคืนนั้น ลมเหนือแม่น้ำนิ่งสนิท แต่ประทีปทั่วอโยธยากลับดับลงพร้อมกัน',
   'ลุงเรืองเฝ้ามองตะเกียงในมือ ไม่มีรอยฝน ไม่มีแม้แต่ควัน ราวกับใครพรากแสงไปจากเมือง',

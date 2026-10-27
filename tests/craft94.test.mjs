@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {RECIPES,craft,craftable} from '../crafting.js';
-import {ITEMS,useItem,foodBuff} from '../items.js';
+import {ITEMS,itemDef,useItem,foodBuff} from '../items.js';
 import {refineGear} from '../refine.js';
 import {deriveStats} from '../character-stats.js';
 import {CombatWorld} from '../combat-core.js';
@@ -9,7 +9,7 @@ import {serializeTraveler,restoreTraveler} from '../world-state.js';
 import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 test('every recipe uses and makes real items',()=>{
- for(const r of RECIPES){assert.ok(ITEMS[r.out],r.out);for(const id of Object.keys(r.needs))assert.ok(ITEMS[id],id);}
+ for(const r of RECIPES){assert.ok(itemDef(r.out),r.out);for(const id of Object.keys(r.needs))assert.ok(itemDef(id),id);}
 });
 test('crafting spends materials and cowries, and refuses when short',()=>{
  const bag={coins:100,items:{'straw-bundle':7}};

@@ -3,18 +3,18 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {craftRecipes,craftQuote,craftSources} from '../craft-view176.js';
 import {RECIPES,craft} from '../crafting.js';
-import {ITEMS,BAG_SLOTS} from '../items.js';
+import {ITEMS,itemDef,BAG_SLOTS} from '../items.js';
 import {MONSTER_TYPES} from '../combat-core.js';
 const recipe=id=>RECIPES.find(r=>r.out===id);
-const bag={coins:25000,items:{'relic-rice':15,'lek-lai':4,'iron-ore':12,'straw-bundle':9}};
+const bag={coins:25000,items:{'weapon-fragment-rice':15,'lek-lai':4,'iron-ore':12,'straw-bundle':9}};
 test('recipe browsing respects class, localized search, and ready-only filtering',()=>{
  const rows=craftRecipes(bag,{classId:'swordsman',group:'gear'});
  assert.ok(rows.some(r=>r.out==='weapon-swordsman-one'));
- assert.ok(rows.every(r=>!ITEMS[r.out].classes||ITEMS[r.out].classes.includes('swordsman')));
+ assert.ok(rows.every(r=>!itemDef(r.out).classes||itemDef(r.out).classes.includes('swordsman')));
  assert.ok(!craftRecipes(bag,{classId:'mage',group:'gear'}).some(r=>r.out==='weapon-swordsman-one'));
  assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'ทุ่งนา',readyOnly:true}).map(r=>r.out),['weapon-swordsman-one']);
- assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'WEAPON-SWORDSMAN-ONE'}).map(r=>r.out),['weapon-swordsman-one']);
- assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'Wingblade',translate:s=>s===ITEMS['weapon-swordsman-one'].name?'Garuda Wingblade':s}).map(r=>r.out),['weapon-swordsman-one']);
+ assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'WEAPON-SWORDSMAN-ONE'}).map(r=>r.out),['weapon-swordsman-one','weapon-swordsman-one^2','weapon-swordsman-one^3','weapon-swordsman-one^4']);
+ assert.deepEqual(craftRecipes(bag,{classId:'swordsman',group:'gear',query:'Wingblade',translate:s=>s===ITEMS['weapon-swordsman-one'].name?'Garuda Wingblade':s}).map(r=>r.out),['weapon-swordsman-one','weapon-swordsman-one^2','weapon-swordsman-one^3','weapon-swordsman-one^4']);
  assert.deepEqual(craftRecipes(bag,{group:'food',readyOnly:true}),[]);
 });
 test('quantity preview uses the actual multi-output recipe, costs and shortage',()=>{

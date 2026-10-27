@@ -22,7 +22,8 @@ function guide(step,{world,weapon,walking}){
   case 'auto':return [{sel:'#auto-attack',text:'กด AUTO ให้ตัวละครล่าเอง'}];
   case 'refine':return [{sel:'#refine-go:not(:disabled)',text:'กด ตีบวก (+1 ถึง +4 ไม่แตก)'},{sel:'#refine-list button[data-slot]:not(:disabled)',text:'เลือกอุปกรณ์ที่จะตีบวก'},{sel:'#npc-refine',text:'เลือก ตีบวกอุปกรณ์'},{sel:'#quest-go',text:'กด ▶ เดินไปหาครูแสนดาบ'}];
   case 'card':return [{sel:'#status-window [data-slotcard="weapon"]',text:'กด ใส่การ์ด'},...menu('menu-status','เปิดหน้าสถานะ')];
-  case 'craft':return [{sel:'#craft-list button[data-out]:not(:disabled)',text:'กด ทำ'},{sel:'#craft-window[open] .refine-note',text:'วัตถุดิบยังไม่พอ · ล่ามอนเก็บของดรอป (ฟางมัด 3 = ยาแดง 2 ขวด)'},{sel:'#bag-craft',text:'กด ⚒ คราฟต์'},...menu('menu-bag','เปิดกระเป๋า')];
+  case 'craftWeapon':return [{sel:'#craft-make:not(:disabled)',text:'กดคราฟต์อาวุธสีฟ้า'},{sel:'#quest-go',text:'กด คราฟต์อาวุธ เพื่อเปิดสูตรของอาชีพเรา'}];
+  case 'craft':return [{sel:'#craft-make:not(:disabled)',text:'กด ทำ'},{sel:'#craft-window[open] #craft-readiness',text:'วัตถุดิบยังไม่พอ · ล่ามอนเก็บของดรอป (ฟางมัด 3 = ยาแดง 2 ขวด)'},{sel:'#bag-craft',text:'กด ⚒ คราฟต์'},...menu('menu-bag','เปิดกระเป๋า')];
   case 'shop':return [{sel:'#shop-list button.deal:not(:disabled)',text:'กด ซื้อ หรือ ขาย',reveal:'#shop-window[open]'},{sel:'.shop-tabs [data-tab="sell"]',text:'แตะแท็บ ขาย ก่อน'},{sel:'#npc-shop',text:'เปิดร้านค้า'},{sel:'#quest-go',text:'กด ▶ เดินไปหาแม่บัว'}];
   case 'guild':return menu('menu-social','เปิด สังคม แล้วไปที่แท็บกิลด์');
   case 'duel':return menu('menu-players','เปิดรายชื่อผู้เล่น แล้วกด ท้าดวล');

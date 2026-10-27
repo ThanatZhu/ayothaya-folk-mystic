@@ -1,9 +1,9 @@
-import {dialogueFor} from './story-dialogue.js?v=chuk175';
-import {createQuestCinematics} from './quest-cinematic155.js?v=story163';
+import {dialogueFor} from './story-dialogue.js?v=weapon188';
+import {createQuestCinematics} from './quest-cinematic155.js?v=weapon188';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
-import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=refine136';
-import {createCoach} from './coach.js?v=walk149';
+import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=weapon188';
+import {createCoach} from './coach.js?v=weapon188';
 import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
 import {storyReady} from './story-navigation173.js';
@@ -87,6 +87,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
     case 'equip':return '▶ สวมใส่';
     case 'skill':return '▶ อัปสกิล';
     case 'auto':return '▶ เปิด AUTO';
+    case 'craftWeapon':return '▶ คราฟต์อาวุธ';
     case 'craft':return '▶ คราฟต์';
     case 'card':return '▶ ใส่การ์ด';
     case 'refine':return '▶ ตีบวก';
@@ -171,10 +172,11 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
      world.storyCheck?.();
      return;
     }
+    case 'craftWeapon':{dispatchEvent(new CustomEvent('craft-weapon-tutorial'));world.notice(s.how??s.hint);return;}
     case 'craft':{
      const craftWin=document.getElementById('craft-window');
      if(craftWin?.open){
-      const btn=document.querySelector('#craft-list button[data-out]:not(:disabled)');
+      const btn=document.querySelector('#craft-list button[data-recipe]:not(:disabled)');
       if(btn){btn.click();return;}
       world.notice(s.how??s.hint);
      }else{

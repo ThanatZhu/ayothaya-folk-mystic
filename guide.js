@@ -15,7 +15,7 @@ const table=(headers,rows)=>`<div class="data-table"><table><thead><tr>${headers
 const reward=r=>[r.coins?number(r.coins)+' '+label('coins'):'',r.baseXp?number(r.baseXp)+' Base EXP':'',r.jobXp?number(r.jobXp)+' Job EXP':'',...(r.items??[]).map(i=>name(i.id)+' ×'+i.count)].filter(Boolean).join(' · ');
 const stats=it=>[...['atk','matk','def','mdef'].filter(k=>it[k]).map(k=>k.toUpperCase()+' +'+number(it[k])),...Object.entries(it.bonus??{}).filter(([,n])=>n).map(([k,n])=>k.toUpperCase()+' +'+number(n))].join(' · ')||label('statsEmpty');
 const copyButton=id=>`<button type="button" class="copy" data-copy="${esc(id)}">${esc(label('link'))}</button>`;
-const dbLink=(kind,id,text)=>`<a href="#ref-${esc(kind)}-${esc(id)}">${esc(text)}</a>`;
+const dbLink=(kind,id,text)=>`<a href="#ref-${esc(kind)}-${esc(kind==='items'?id.split('^')[0]:id)}">${esc(text)}</a>`;
 
 function art(a){
  if(!a?.src)return '';

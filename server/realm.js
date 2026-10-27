@@ -190,8 +190,8 @@ export class RealmServer{
   }
   if(m.type==='craft'){
    if(now-(p.craftAt??-Infinity)<300)return this.itemFail(p,'craft-rate');p.craftAt=now;
-   let r;try{r=craft(p.bag,m.item,m.times);}catch(e){return this.itemFail(p,e.message);}
-   this.setBag(p,r.bag);w.emit('crafted',{item:m.item,count:r.made});this.storyProgress(p,{type:'do',action:'craft'});
+   let r;try{r=craft(p.bag,m.item,m.times,Math.random,p.character);}catch(e){return this.itemFail(p,e.message);}
+   this.setBag(p,r.bag);w.emit('crafted',{item:m.item,count:r.made});this.storyProgress(p,{type:'do',action:'craft'});if(r.items.some(i=>{const it=itemDef(i.id);return it?.slot==='weapon'&&it.grade===0&&!it.rainbow&&it.classes?.includes(p.character.classId);}))this.storyProgress(p,{type:'do',action:'craftWeapon'});
    // 0.117 a rainbow boss-set piece is announced to the channel
    if(itemDef(m.item)?.rainbow)this.announce(p.serverId,`🌈 ${p.character.name} คราฟ ${itemDef(m.item).name} สำเร็จ`);return true;
   }

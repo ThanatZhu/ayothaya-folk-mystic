@@ -1,15 +1,15 @@
 import {AMULETS,AMULET_TIERS,AMULET_MATERIALS,AMULET_PRICE,AMULET_PITY,AMULET_REWARDS,amuletArt,amuletAtTier} from './amulets.js';
 import {normalizePetAccount} from './pet-account.js';
 import {itemDef} from './items.js';
-import {iconStyle} from './bag-ui.js';
-import {createAmuletRitual} from './amulet-ritual-ui.js';
+import {iconStyle,gradeFrame} from './bag-ui.js?v=amulet-aura1';
+import {createAmuletRitual} from './amulet-ritual-ui.js?v=amulet-aura1';
 import {createGachaRatesHelp} from './gacha-rates-ui.js';
 
 const errors={'no-gems':'ทองแท่งไม่พอ','bag-full':'กระเป๋าหรือกองไอเท็มเต็ม · ยังไม่หักทอง กรุณาจัดกระเป๋าก่อน',
  'not-connected':'เชื่อมต่อออนไลน์ก่อนสุ่มพระเครื่อง','server-busy':'เซิร์ฟเวอร์กำลังบันทึก ลองอีกครั้งด้วยคำขอเดิม',
  'rate-limit':'ส่งคำขอเร็วเกินไป รอสักครู่แล้วลองใหม่','request-conflict':'คำขอเดิมมีจำนวนไม่ตรงกัน กรุณาเปิดหน้าต่างใหม่'};
 export function createAmuletGachaPanel({game,parent,dialog,ratesHelp=true}){
- if(!document.querySelector('link[data-amulet-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='amulet-gacha.css?v=tier-shadow2';css.dataset.amuletUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-amulet-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='amulet-gacha.css?v=amulet-aura1';css.dataset.amuletUi='';document.head.append(css);}
  const root=document.createElement('section');root.id='amulet-gacha';root.setAttribute('role','tabpanel');root.setAttribute('aria-labelledby','pet-tab-amulets');root.hidden=true;parent.append(root);
  root.innerHTML=`<div class="amulet-scroll"><header class="amulet-intro"><div><small>AYOTHAYA · BENCHAPHAKHI</small><h3>กรุเบญจภาคี</h3><p>พระเครื่อง 5 แบบ · ส้ม แดง และรุ้ง · มีวัตถุดิบร่วมในตู้</p></div><span class="amulet-rainbow-tag">ส้ม · แดง · รุ้ง</span></header>
  <div class="amulet-layout"><nav class="amulet-roster" aria-label="เลือกดูพระเครื่อง">${AMULETS.map(a=>`<button type="button" data-amulet="${a.id}" aria-pressed="false"><img class="amulet-rainbow-art" src="${amuletArt(a)}" alt="" width="96" height="96"><span><b>${a.name}</b><small>${a.theme}</small></span></button>`).join('')}</nav>
@@ -29,8 +29,9 @@ export function createAmuletGachaPanel({game,parent,dialog,ratesHelp=true}){
   if(!force&&sig===signature)return;signature=sig;
   const a=amuletAtTier(selected,selectedTier),owned=Object.entries(game.world.bag?.items??{}).reduce((n,[id,count])=>n+(itemDef(id)?.base===a.id?count:0),0),equipped=itemDef(game.world.gear?.accessory)?.base===a.id;
   $('.amulet-inspect').innerHTML=`<div class="amulet-tier-choices" role="group" aria-label="ระดับพระที่ต้องการดู">${AMULET_TIERS.map(t=>`<button type="button" data-amulet-tier="${t.id}" aria-pressed="${t.id===selectedTier}">ระดับ${t.name}</button>`).join('')}</div><span class="amulet-region">${a.origin} · ${a.theme} · ระดับ${a.tierName}</span><img class="amulet-main-art amulet-${selectedTier}-art" src="${amuletArt(a)}" alt="${a.name} ระดับ${a.tierName}" width="320" height="320"><h3>${a.name}</h3><h4>${selectedTier==='rainbow'?a.ability+' · เอฟเฟกต์พิเศษเฉพาะรุ้ง':'สเตตัสอุปกรณ์เท่านั้น · ไม่มีเอฟเฟกต์พิเศษ'}</h4><ul>${a.effects.map(t=>`<li>${t}</li>`).join('')}</ul><div class="amulet-stat-chips">${Object.entries(a.bonus).map(([k,v])=>`<span>${k.toUpperCase()} +${v}</span>`).join('')}${['atk','matk','def','mdef'].filter(k=>a[k]).map(k=>`<span>${k.toUpperCase()} +${a[k]}</span>`).join('')}</div><p class="amulet-owned">${equipped?'สวมใส่อยู่ · ':''}ในกระเป๋า ${owned} องค์ · ทุกอาชีพ · Lv.1</p>`;
+  $('.amulet-main-art').style.cssText='background:transparent;'+gradeFrame(itemDef(a.id));
   root.querySelectorAll('[data-amulet-tier]').forEach(b=>b.onclick=()=>{selectedTier=b.dataset.amuletTier;render(true);});
-  root.querySelectorAll('[data-amulet]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.amulet===selected));b.querySelector('img').className='amulet-'+selectedTier+'-art';});
+  root.querySelectorAll('[data-amulet]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.amulet===selected));const img=b.querySelector('img');img.className='amulet-'+selectedTier+'-art';img.style.cssText='background:transparent;'+gradeFrame(itemDef(amuletAtTier(b.dataset.amulet,selectedTier).id));});
   $('.amulet-wallet').textContent=s.balance.toLocaleString('th-TH')+' ทองแท่ง';
   $('.amulet-pity b').textContent=`การันตีรุ้งอีก ${AMULET_PITY-s.amuletGacha.pity} ครั้ง`;
   $('.amulet-pity progress').value=s.amuletGacha.pity;

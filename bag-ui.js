@@ -30,14 +30,15 @@ const loaded={};if(typeof Image==='function')for(const k of new Set(Object.value
 // (owner's pick "B1"). Boss sets cycle that glow through the rainbow (owner's pick "R3"), one colour at a time so the
 // piece itself stays readable; the keyframes are added once here because iconStyle is used on many pages.
 const glow=c=>'drop-shadow(0 0 3px '+c+') drop-shadow(0 0 6px '+c+')';
-if(typeof document!=='undefined'&&!document.getElementById('gear-rainbow-css')){const css=document.createElement('style');css.id='gear-rainbow-css';
+if(typeof document!=='undefined'&&!document.getElementById('gear-rainbow-css-amulet1')){const css=document.createElement('style');css.id='gear-rainbow-css-amulet1';
  const stops=['#ff6b6b','#ffd25a','#7fe08f','#7cc8ff','#c99bff','#ff6b6b'];
  css.textContent='@keyframes gear-rainbow{'+stops.map((c,i)=>i*20+'%{filter:'+glow(c)+'}').join('')+'}'
+  +'@keyframes amulet-item-pulse{0%,100%{filter:drop-shadow(0 0 2px var(--amulet-aura)) drop-shadow(0 0 4px var(--amulet-aura))}50%{filter:drop-shadow(0 0 3px var(--amulet-aura)) drop-shadow(0 0 7px var(--amulet-aura))}}'
+  +'@media (prefers-reduced-motion:reduce){[style*="amulet-item-pulse"]{animation:none!important;filter:'+glow('var(--amulet-aura)')+'}}'
   +'@media (prefers-reduced-motion:reduce){[style*="gear-rainbow"]{animation:none!important;filter:'+glow('#ffd25a')+'}}';document.head.append(css);}
 export function gradeFrame(def){
  if(def?.rainbow)return ';filter:'+glow('#ff6b6b')+';animation:gear-rainbow 3s linear infinite';
- if(def?.amuletTier==='orange')return ';filter:'+glow('#ff9b3f');
- if(def?.amuletTier==='red')return ';filter:'+glow('#fa4e5e');
+ if(def?.amuletTier==='orange'||def?.amuletTier==='red'){const c=def.amuletTier==='orange'?'#ff9b3f':'#fa4e5e';return ';--amulet-aura:'+c+';filter:'+glow(c)+';animation:amulet-item-pulse 2.4s ease-in-out infinite';}
  if(!def?.graded)return '';const c=GRADES[def.grade??0].color;
  return ';filter:'+glow(c);
 }
@@ -54,7 +55,7 @@ function setInfo(it,gear){
 }
 export function iconStyle(id){
  const def=itemDef(id);if(!def)return '';
- if(def.image)return `background-image:url(${def.image});background-size:contain;background-position:center;background-repeat:no-repeat`+(def.amulet?';background-color:'+({orange:'#6b391a',red:'#651e2b',rainbow:'#153c35'}[def.amuletTier]??'transparent'):'')+gradeFrame(def);
+ if(def.image)return `background-image:url(${def.image});background-size:contain;background-position:center;background-repeat:no-repeat;background-color:transparent`+gradeFrame(def);
  if(def.monsterCard)return 'background-image:url(assets/cards147/'+id.slice(5)+'.webp);background-size:contain;background-position:center;background-color:transparent;border-radius:3px';
  const ph=def.ph&&!loaded[def.atlas],item=ph?{...def,...def.ph}:def;
  return `background-image:url(${ATLASES[item.atlas]??ITEM_ATLAS});background-size:600% 400%;background-position:${item.icon%6*20}% ${Math.floor(item.icon/6)/3*100}%`+(TINTS[item.tint]?';filter:'+TINTS[item.tint]:'')+(ph?`;--ph:'${id}'`:'');

@@ -1,4 +1,4 @@
-import {createAmuletGachaPanel} from './amulet-gacha-ui.js';
+import {createAmuletGachaPanel} from './amulet-gacha-ui.js?v=amulet-aura1';
 import {createPetSummonPanel} from './pet-summon-ui.js';
 import {createPremiumShopPanel} from './premium-shop-ui.js';
 import {openHudPanel} from './hud-panels.js';

@@ -1,5 +1,5 @@
 import {createPremiumPetPanel} from './pet-collection-ui.js?v=premium1';
-import {createPremiumHub,loadPremiumStyles,premiumDialog} from './premium-hub-ui.js?v=menu-icons3';
+import {createPremiumHub,loadPremiumStyles,premiumDialog} from './premium-hub-ui.js?v=amulet-aura1';
 import {activePremiumPet} from './pet-account.js';
 import {createAnimatedPet} from './pet-motion.js?v=128';
 import {createMailboxUI} from './mailbox-ui.js?v=150';

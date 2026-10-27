@@ -52,3 +52,9 @@ Receipt 64 คำขอล่าสุดอยู่ที่ `petCollection.am
 ห้ามสุ่มชุดใหม่จนกว่าจะเปิดผลครบแล้วกดเสร็จสิ้น การปิดหน้าต่างหรือเปลี่ยนแท็บระหว่างพิธีจะข้ามช่วงนำเข้าไปเป็นหีบปิดที่พร้อมเปิด เก็บชุดเดิมไว้เมื่อกลับมา ของยังอยู่ในกระเป๋าแม้ออกจากเกมหรือโหลดหน้าใหม่แล้วไม่ได้ดูพิธีต่อ โหมด reduced-motion และตัวเลือกข้ามแอนิเมชันตัดการเคลื่อนไหวโดยไม่เปลี่ยนผลหรือเรต
 
 ภาพหีบปิด/เปิด: `assets/amulet-ritual/closed.png` และ `open.png` สร้างด้วย built-in `image_gen` มี prompt และแหล่งภาพที่ `assets/amulet-ritual/prompts.json` ไม่มีการเปลี่ยนภาพพระพิมพ์เดิม
+
+## Item-shaped rarity aura
+
+All five amulet designs at rainbow/red/orange rarity use the existing transparent artwork. `iconStyle` keeps the image surface transparent; no colour fill or gradient is painted on the filtered image. Shadows therefore follow the item silhouette in bags, equipment, crafting, mail/trade displays and gacha rewards. The gacha catalogue images use the same grade helper. Orange and red gently pulse only shadow intensity; rainbow keeps the existing colour cycle. Item opacity and artwork colours remain constant, and reduced-motion preferences stop the animation.
+
+Gacha result cards retain their normal jade surface, without rarity box shadows or a coloured card halo. The brief reveal flash is layered behind the item art. Browser validation compares all 15 variants before/after on transparent pixels, checks normal/reduced motion, and covers every catalogue preview and all three prize tiers at 1440×900, 844×390 and 390×844.

@@ -209,13 +209,12 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // click/tap the ground or press the skill again to put it there. Out of reach it turns orange, and placing it walks in first.
  // 0.119 observer (allowed e-mails only): invisible and untargetable on the realm, and not drawn here either: only the camera moves,
  // and the choice is remembered per character, so a reconnect or a map change turns it back on.
- const observerButton=document.createElement('button'),observerBadge=document.createElement('div');let observerAsked=false;
+ const observerButton=document.createElement('button');let observerAsked=false;
  observerButton.type='button';observerButton.id='observer-toggle';observerButton.hidden=true;$('return-lobby')?.before(observerButton);
- observerBadge.id='observer-badge';observerBadge.hidden=true;observerBadge.textContent='👁 โหมดผู้ชม · ล่องหน';$('game-shell').append(observerBadge);
  const observerKey=()=>'ayothaya.observer:'+(world.heroName??''),rememberedObserver=()=>{try{return localStorage.getItem(observerKey())==='1';}catch{return false;}};
  observerButton.onclick=()=>{const on=!world.observer;try{localStorage.setItem(observerKey(),on?'1':'');}catch{}world.setObserver?.(on);};
  function syncObserver(){
-  observerButton.hidden=!world.canObserve;observerButton.setAttribute('aria-pressed',String(!!world.observer));observerBadge.hidden=!world.observer;
+  observerButton.hidden=!world.canObserve;observerButton.setAttribute('aria-pressed',String(!!world.observer));
   observerButton.textContent=world.observer?'👁 โหมดผู้ชม · เปิดอยู่ · กดเพื่อปิด':'👁 โหมดผู้ชม (ล่องหน · ไม่ตกเป็นเป้า)';
   if(world.canObserve&&!world.observer&&!observerAsked&&rememberedObserver()){observerAsked=true;world.setObserver?.(true);}
  }

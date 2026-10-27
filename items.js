@@ -2,6 +2,7 @@ import {patch,patchDrops} from './balance.js';
 import {REFINE_MAX,refineTier,refinePercent,gearStatText} from './refine-tiers.js';
 import {WORLD_DROP_ITEMS,WORLD_CARD_ATLASES,chapter2Drops} from './chapter2-loot.js';
 import {buildGearItems,setDrops,shardDrop,rollSetPiece,gradeItem} from './gear-sets.js';
+import {buildAmuletItems} from './amulets.js';
 import {FRONTIER_MONSTERS} from './monster-catalog.js';
 // Items, loot, coins (เบี้ย) and NPC shops. Pure rules shared by the client (offline guests + UI) and the realm
 // server (authoritative online bag). Bag state: {coins, items:{[id]:count}}.
@@ -113,6 +114,7 @@ export const ITEMS={
  'refine-hammer':{atlas:'refine',icon:3,name:'ค้อนตีบวก',kind:'ui'},'refine-success':{atlas:'refine',icon:4,name:'ตีบวกสำเร็จ',kind:'ui'},'refine-broken':{atlas:'refine',icon:5,name:'อุปกรณ์แตก',kind:'ui'},
 };
 Object.assign(ITEMS,buildGearItems());
+Object.assign(ITEMS,buildAmuletItems());
 // 0.47 guild emblems: 24 cells of assets/emblems47 (docs/emblems47-art.md), picked when founding a guild.
 // Ids are letters (emblem-a … emblem-x) because item ids are [a-z-]; the guild stores the number 1–24.
 export const emblemId=n=>'emblem-'+String.fromCharCode(96+n);

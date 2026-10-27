@@ -7,7 +7,7 @@
 import {createActivityDock} from './activity-dock.js?v=drag146';
 import {createMobilePlayUI} from './mobile-play-ui.js?v=1161d';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
-const SECONDARY=['menu-social','menu-status','menu-pet','menu-mail','menu-boss-result','menu-party'];
+const SECONDARY=['menu-social','menu-status','menu-pet','menu-gacha','menu-premium-store','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63({game,partyUI}={}){

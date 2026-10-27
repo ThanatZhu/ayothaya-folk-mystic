@@ -1,15 +1,17 @@
 // Server-owned pet collection. Preview storage and payment APIs are deliberately unrelated.
 import {normalizePetPreview,previewPetDraw,upgradePreviewPet,addPreviewCopy} from './pet-gacha.js';
 import {petAtStars,premiumPet} from './premium-pets.js';
+import {normalizePremiumShop} from './premium-shop-catalog.js';
+import {normalizeAmuletGacha} from './amulets.js';
 export const PET_MUTATIONS=['petDraw','petUpgrade','petEquip','petAuto'];
 export function normalizePetAccount(raw){
  const s=normalizePetPreview(raw),v=raw??{};
- return {...s,equipped:Object.hasOwn(s.collection,v.equipped)?v.equipped:null,auto:v.auto!==false,
+ return {...s,amuletGacha:normalizeAmuletGacha(v.amuletGacha),premiumShop:normalizePremiumShop(v.premiumShop),equipped:Object.hasOwn(s.collection,v.equipped)?v.equipped:null,auto:v.auto!==false,
   readyAt:Number.isSafeInteger(v.readyAt)&&v.readyAt>0?v.readyAt:0,
   receipts:Array.isArray(v.receipts)?v.receipts.filter(r=>typeof r?.id==='string'&&typeof r?.signature==='string').slice(-32):[]};
 }
 export const activePremiumPet=raw=>{const s=normalizePetAccount(raw);return s.equipped?petAtStars(s.equipped,s.collection[s.equipped].stars):null;};
-export const publicPetAccount=raw=>{const {receipts,...s}=normalizePetAccount(raw);return s;};
+export const publicPetAccount=raw=>{const {receipts,...s}=normalizePetAccount(raw);const {receipts:amuletReceipts,...amuletGacha}=s.amuletGacha;return {...s,amuletGacha,premiumShop:{}};};
 export function petAccountAction(raw,m,random=Math.random){
  if(!/^[a-zA-Z0-9_-]{8,80}$/.test(m.requestId??''))throw Error('bad-request-id');
  const signature=JSON.stringify([m.type,m.count??null,m.pet??null,m.on??null,m.gems??null]),s=normalizePetAccount(raw),old=s.receipts.find(r=>r.id===m.requestId);

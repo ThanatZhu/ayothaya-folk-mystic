@@ -1,0 +1,38 @@
+[
+  {
+    "source": "assets/amulet-ritual-v2/sealed.png",
+    "runtime": "assets/amulet-ritual-v2/sealed.webp",
+    "sha256": "dbb9a61d7195b7266c8c10ce8ed523676e2aaf4b9f3af1f4ffa0a189e54d6ee1",
+    "sourceBytes": 1494743,
+    "bytes": 196598,
+    "width": 960,
+    "height": 960
+  },
+  {
+    "source": "assets/amulet-ritual-v2/awakening.png",
+    "runtime": "assets/amulet-ritual-v2/awakening.webp",
+    "sha256": "ea07848ea3d0e462ce642ab9864a47ca45a86384f76375f5980aff222c96687c",
+    "sourceBytes": 1572896,
+    "bytes": 219654,
+    "width": 960,
+    "height": 960
+  },
+  {
+    "source": "assets/amulet-ritual-v2/revealed.png",
+    "runtime": "assets/amulet-ritual-v2/revealed.webp",
+    "sha256": "881a6c37feacfc72391f894d3fe926a447958e83482b0c0703779bcfc480e3eb",
+    "sourceBytes": 1502585,
+    "bytes": 237474,
+    "width": 960,
+    "height": 960
+  },
+  {
+    "source": "assets/amulet-ritual-v2/flash.png",
+    "runtime": "assets/amulet-ritual-v2/flash.webp",
+    "sha256": "d8b735b06796386c071905154419a5dfa2f357be54646bb36b0cae8007b942ba",
+    "sourceBytes": 1845759,
+    "bytes": 228946,
+    "width": 768,
+    "height": 768
+  }
+]

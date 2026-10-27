@@ -1,0 +1,16 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "file": "assets/amulet-ritual/closed.png",
+      "prompt": "Use case: stylized-concept. Asset: ONE isolated 2D hand-painted game prop for Ayothaya Thai fantasy MMORPG gacha summoning ceremony, transparent alpha background, square 1:1. A small closed antique emerald-green lacquer treasure reliquary chest with elegant restrained gold bands and a single jade diamond clasp, three-quarter front view, a slightly domed lid visibly separated by a crisp horizontal seam. Beautiful high-quality painted wood and gold, generous complete silhouette. No religious figures or Buddha, no humanoids, no text, no extra objects, no background, no floor, no particles or glow (these are added in code). Keep the whole chest INCLUDING its lid and feet within central 75 percent of canvas with generous transparent padding. Lid is firmly CLOSED. Center of box at canvas center, consistent pleasant soft warm lighting from upper left. Charming premium MMORPG item art, readable at 80px and polished at 400px, crisp edges, restrained traditional Thai corner detailing, not photorealistic, not plastic.",
+      "source": "exec-e7459dd1-1d09-4cc2-96dd-62f1307de9dc.png"
+    },
+    {
+      "file": "assets/amulet-ritual/open.png",
+      "prompt": "EDIT the provided game treasure chest into its OPEN state, as the second animation key pose. Preserve exactly the same emerald green wood, gold bands, jade diamond clasp, carved feet, three-quarter front camera view, lighting, square canvas size and position of the LOWER BODY and FEET. Only raise its domed lid on the back hinge to roughly 75 degrees, revealing an empty dark green interior with a soft warm golden rim. Keep the entire raised lid visible with transparent margin, no clipping. Do not shift or zoom the lower chest. No objects, characters, Buddha figures, text, floating effects or glow outside the chest. Transparent alpha background. Same hand-painted 2D Thai fantasy MMORPG prop style and quality. Do not change any lower body geometry or design. This is an animated in-game reliquary, not a real religious object.",
+      "reference": "closed.png",
+      "source": "exec-f7912811-4b61-42a0-bc70-d3d5cd696fa8.png"
+    }
+  ]
+}

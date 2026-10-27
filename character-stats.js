@@ -88,7 +88,8 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
  const s=normalizeStats(stats),g=normalizeGear(gear),worn=GEAR_SLOTS.map(k=>g[k]&&itemDef(g[k])).filter(Boolean);
  // Existing per-level gains remain. Each item then gains its own milestone multiplier (5/10/15/20%).
  const equipment=worn.map(effectiveGearStats);
- const cards=worn.map(it=>it.card&&ITEMS[it.card]?.effect).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
+ // Innate amulet effects share the same live modifiers as cards; only equipped pieces contribute.
+ const cards=worn.flatMap(it=>[it.card&&ITEMS[it.card]?.effect,it.amulet&&it.effect]).filter(Boolean),sum=f=>cards.reduce((n,e)=>n+(f(e)??0),0);
  // 0.117 set bonuses and each piece's own % (gear-sets.js); caps in STAT_CAPS
  const sets=setBonuses(worn),set=k=>sets.total[k]??0;
  const add=k=>equipment.reduce((n,it)=>n+(it.bonus?.[k]??0),0)+sum(e=>e.bonus?.[k])+(pet?.[k]??0)+(food?.[k]??0),S={}; // Cards, pet, food and rebirth are not multiplied by an item's Tier.
@@ -112,7 +113,7 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
   // flee = the dodge chance against a monster of the same level, for the status window
   hit:level+S.dex+Math.floor(S.luk/3)+sum(e=>e.hit)+set('hit'),fleeStat:level+S.agi+Math.floor(S.luk/5),
   mdef:roundGearStat(Math.floor((S.int-1)/2)+equipment.reduce((n,it)=>n+it.mdef,0)+sum(e=>e.mdef)),
-  flee:Math.min(.75,dodgeChance(level+S.agi+Math.floor(S.luk/5),monsterHit({level}),S.luk)+sum(e=>e.flee)),
+  fleeBonus:sum(e=>e.flee),flee:Math.min(.75,dodgeChance(level+S.agi+Math.floor(S.luk/5),monsterHit({level}),S.luk)+sum(e=>e.flee)),
   crit:Math.min(STAT_CAPS.crit,.01+(S.luk-1)*.004+sum(e=>e.crit)+set('crit')),
   delay:Math.max(.5,(1-(S.agi-1)*.006-(S.dex-1)*.002)*(1-sum(e=>e.delay)-set('aspd'))),
   // card specials: extra damage vs size/element, damage taken from an element, coin bonus

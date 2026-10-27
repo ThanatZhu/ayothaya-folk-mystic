@@ -1,0 +1,49 @@
+{
+  "generator": "built-in image_gen",
+  "style": "Approved reference: abstract faceless amulet relief, sparse smooth gold casing",
+  "reference": "codex-clipboard-c3e2e608-0244-4fde-8781-7a7b89562307.png",
+  "prompts": [
+    {
+      "id": "somdej",
+      "prompt": "Using the attached reference ONLY for the simple raised amulet motif: create ONE Thai fantasy RPG accessory icon, square, transparent alpha background. Centered upright pendant, front view, entire thin SIMPLE smooth gold casing and small hanging loop visible with 8% transparent margin all around. Sparse decoration, no emerald jewels, no filigree scrolls, no ornate outer frame. Hand-painted crisp 2D inventory art with aged clay/stone, soft highlights. Center is ONLY a VERY ABSTRACT seated AMULET RELIEF like the reference: plain featureless pointed teardrop head, smooth geometric shoulders, a simple U-shaped arm loop, oval crossed-leg bar. Absolutely NO facial features, eyes, nose, mouth, hair curls, realistic Buddha portrait, realistic human body anatomy, monk portrait or deity face. Reference looks like embossed simple shapes, follow it exactly. No symbols/text/labels, glow, background or particles. These are game item collectibles. Specific shape/material: rectangular ivory powder stone tablet, pale cream, minimalist arched niche and three horizontal plinth bars beneath the abstract motif."
+    },
+    {
+      "id": "phra-rod",
+      "prompt": "Using the attached reference ONLY for the simple raised amulet motif: create ONE Thai fantasy RPG accessory icon, square, transparent alpha background. Centered upright pendant, front view, entire thin SIMPLE smooth gold casing and small hanging loop visible with 8% transparent margin all around. Sparse decoration, no emerald jewels, no filigree scrolls, no ornate outer frame. Hand-painted crisp 2D inventory art with aged clay/stone, soft highlights. Center is ONLY a VERY ABSTRACT seated AMULET RELIEF like the reference: plain featureless pointed teardrop head, smooth geometric shoulders, a simple U-shaped arm loop, oval crossed-leg bar. Absolutely NO facial features, eyes, nose, mouth, hair curls, realistic Buddha portrait, realistic human body anatomy, monk portrait or deity face. Reference looks like embossed simple shapes, follow it exactly. No symbols/text/labels, glow, background or particles. These are game item collectibles. Specific shape/material: small oval/leaf-shaped dark brown terracotta tablet, minimally embossed arch with only a few simple leaf marks, abstract featureless amulet motif."
+    },
+    {
+      "id": "nang-phaya",
+      "prompt": "Using the attached reference ONLY for the simple raised amulet motif: create ONE Thai fantasy RPG accessory icon, square, transparent alpha background. Centered upright pendant, front view, entire thin SIMPLE smooth gold casing and small hanging loop visible with 8% transparent margin all around. Sparse decoration, no emerald jewels, no filigree scrolls, no ornate outer frame. Hand-painted crisp 2D inventory art with aged clay/stone, soft highlights. Center is ONLY a VERY ABSTRACT seated AMULET RELIEF like the reference: plain featureless pointed teardrop head, smooth geometric shoulders, a simple U-shaped arm loop, oval crossed-leg bar. Absolutely NO facial features, eyes, nose, mouth, hair curls, realistic Buddha portrait, realistic human body anatomy, monk portrait or deity face. Reference looks like embossed simple shapes, follow it exactly. No symbols/text/labels, glow, background or particles. These are game item collectibles. Specific shape/material: triangular red terracotta tablet, apex up, no extra pattern, only the simple featureless seated geometric amulet motif."
+    },
+    {
+      "id": "phong-suphan",
+      "prompt": "Using the attached reference ONLY for the simple raised amulet motif: create ONE Thai fantasy RPG accessory icon, square, transparent alpha background. Centered upright pendant, front view, entire thin SIMPLE smooth gold casing and small hanging loop visible with 8% transparent margin all around. Sparse decoration, no emerald jewels, no filigree scrolls, no ornate outer frame. Hand-painted crisp 2D inventory art with aged clay/stone, soft highlights. Center is ONLY a VERY ABSTRACT seated AMULET RELIEF like the reference: plain featureless pointed teardrop head, smooth geometric shoulders, a simple U-shaped arm loop, oval crossed-leg bar. Absolutely NO facial features, eyes, nose, mouth, hair curls, realistic Buddha portrait, realistic human body anatomy, monk portrait or deity face. Reference looks like embossed simple shapes, follow it exactly. No symbols/text/labels, glow, background or particles. These are game item collectibles. Specific shape/material: softly trapezoidal russet clay tablet, narrow rounded top wider base, NO chest anatomy, only simple smooth angular amulet silhouette with featureless head and no surrounding decoration."
+    },
+    {
+      "id": "sum-kor",
+      "prompt": "Using the attached reference ONLY for the simple raised amulet motif: create ONE Thai fantasy RPG accessory icon, square, transparent alpha background. Centered upright pendant, front view, entire thin SIMPLE smooth gold casing and small hanging loop visible with 8% transparent margin all around. Sparse decoration, no emerald jewels, no filigree scrolls, no ornate outer frame. Hand-painted crisp 2D inventory art with aged clay/stone, soft highlights. Center is ONLY a VERY ABSTRACT seated AMULET RELIEF like the reference: plain featureless pointed teardrop head, smooth geometric shoulders, a simple U-shaped arm loop, oval crossed-leg bar. Absolutely NO facial features, eyes, nose, mouth, hair curls, realistic Buddha portrait, realistic human body anatomy, monk portrait or deity face. Reference looks like embossed simple shapes, follow it exactly. No symbols/text/labels, glow, background or particles. These are game item collectibles. Specific shape/material: rounded arch-shaped warm ochre tablet, one simple arch outline, the same smooth featureless amulet motif; no ornate flowers."
+    }
+  ],
+  "sources": [
+    {
+      "id": "somdej",
+      "path": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-709fcf3d-9531-4fe2-a74d-9e079b4533ea.png"
+    },
+    {
+      "id": "phra-rod",
+      "path": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-b0465025-076d-4f69-a286-022176c20ee6.png"
+    },
+    {
+      "id": "nang-phaya",
+      "path": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-8a1ba29b-8fd9-4bc0-890b-ecfa70471731.png"
+    },
+    {
+      "id": "phong-suphan",
+      "path": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-b6f5fba7-c563-4a43-88da-d2ab2a022c0b.png"
+    },
+    {
+      "id": "sum-kor",
+      "path": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-3697afaf-a0f6-4913-85df-1b860f736380.png"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "sealed",
+    "prompt": "Create one polished hand-painted 2D Thai fantasy MMORPG gacha ritual animation keyframe sprite, square canvas. A mysterious small ivory ancient Thai amulet tablet, abstract faceless seated relief with a teardrop-shaped smooth head and NO facial features, simple minimal carving, suspended inside a CLOSED emerald and aged-gold shrine reliquary on a small round dark-jade pedestal. Four delicate gold filaments form a visible protective seal around the tablet. State ONE: dormant and SEALED, warm faint gold glow, tiny drifting gold motes. Symmetric front three-quarter game illustration, clean silhouette, premium emerald and antique gold palette, crisp readable shapes rather than excessive filigree. The complete object including pedestal fits within middle 75% of canvas, consistent centered camera, base at y82%, tablet center at y44%. Only the object and restrained light effects, no scene background, NO writing, letters, UI borders, people, monks, or realistic Buddha face. Real alpha transparent background. This is a ritual device illustration, not a card icon, and later frames will show the same amulet rising from this same pedestal.",
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-3eb13a08-c880-40bd-988c-bc9dd84faa3d.png"
+  },
+  {
+    "id": "flash",
+    "prompt": "A single game VFX texture sprite for a Thai fantasy MMORPG amulet summoning reveal: brilliant WHITE-GOLD radiant flash starburst, bright central small white core, eight strong elegant tapered rays, fine glitter specks and two soft circular shockwave arcs, restrained antique gold highlights on a neutral white light so code can tint it orange red or rainbow. Hand-painted polished 2D game VFX, ethereal magical energy, circular composition, all light fully within canvas, black must not be baked in. NO object, character, amulet, lettering, border, UI, background scenery. Real transparent alpha background, soft fading alpha edges, square image. A flash effect texture only, designed for a brief 180ms pop.",
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-1b57c130-5b7c-4e51-ba00-2e56beff5a5d.png"
+  },
+  {
+    "id": "awakening",
+    "prompt": "Edit this supplied gacha ritual sprite into animation keyframe TWO: the SAME jade-and-gold reliquary on the SAME pedestal, SAME canvas, camera angle, object scale and pedestal base position. The ivory faceless amulet has risen slightly by 8% of canvas height. The delicate gold protective seal is breaking into small luminous fragments around it. The reliquary roof lifts slightly and the glass fades into luminous gold mist. Add clear upward streams of restrained white-gold energy, moderate glow, beautiful crisp hand-painted MMORPG sprite. Preserve the exact abstract faceless relief: teardrop smooth head, NO facial features or realistic face. Keep all artwork in frame, real alpha transparent outside the object and light. No text, UI or background. Do NOT redesign or change the pedestal. This is a mid-animation charging pose, not the final explosion.",
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-91af8d1b-c400-4b49-affc-198f85c1f488.png"
+  },
+  {
+    "id": "revealed",
+    "prompt": "Edit the supplied gacha ritual sprite into animation keyframe THREE: the SAME exact jade-and-gold pedestal at SAME position and scale on SAME square canvas. The upper glass enclosure and roof have now magically dissolved into tiny gold light fragments, leaving the original ivory faceless amulet floating freely above the pedestal. Keep original abstract teardrop head relief with NO facial details, same amulet design, center at x50% y37%. A graceful radiant white-gold halo, elegant tapered rays and a few upward spirit ribbons surround it, suitable for a rare item reveal. Amulet and pedestal must remain clearly readable with crisp polished hand-painted 2D MMORPG style; NOT overexposed, no opaque rectangular field. Real alpha transparent outside all artwork and soft glowing edges. No scene background, text, UI, people or realistic Buddha face. Consistent animation frame that can crossfade from the original sprite.",
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-3e82e86b-33ac-42b8-bb16-8b6eeeacca1e.png"
+  }
+]

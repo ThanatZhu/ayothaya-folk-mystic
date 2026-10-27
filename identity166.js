@@ -3,8 +3,8 @@ import {addLoot,normalizeBag} from './items.js';
 import {normalizePetAccount} from './pet-account.js';
 
 import {REVIVAL_ITEM,REVIVAL_PRICE} from './revival-item.js';
-
-export const RENAME_CARD='rename-card',RENAME_PRICE=1000;
+import {PREMIUM_RENAME_PRICE} from './premium-shop-catalog.js';
+export const RENAME_CARD='rename-card',RENAME_PRICE=PREMIUM_RENAME_PRICE;
 // The host checkpoints the complete result before exposing either wallet or name.
 // Receipts live in the private profile, so a reconnect/retry cannot charge twice.
 export function identityAction(record,action){

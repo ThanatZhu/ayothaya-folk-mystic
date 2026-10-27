@@ -96,7 +96,7 @@ export const TANK_CLASSES=new Set(['swordsman']);
 export function monsterHit(world,raw,rand=Math.random,monsterId=null){
  // 0.103 dodge from FLEE against this monster's HIT; magic monsters (lanterns) go through MDEF instead of DEF
  const p=world.player,d=world.derived,t=monsterId?MONSTER_TYPES.find(x=>x.id===monsterId):null;
- const dodge=d?(t&&d.fleeStat!=null?dodgeChance(d.fleeStat,monsterHitStat(t),d.total?.luk??1):d.flee):0;
+ const dodge=d?(t&&d.fleeStat!=null?Math.min(.75,dodgeChance(d.fleeStat,monsterHitStat(t),d.total?.luk??1)+(d.fleeBonus??0)):d.flee):0;
  if(d&&rand()<dodge*(world.status?.blind?.5:1))return 0;
  // 0.112.2 percent bosses (Straw King): a tank takes pctHit.tank of its max HP minus its DEF; anyone else a random
  // min..max share of max HP that DEF and element resist do not touch. A guard shield still cuts it like any hit.

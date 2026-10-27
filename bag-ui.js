@@ -36,6 +36,8 @@ if(typeof document!=='undefined'&&!document.getElementById('gear-rainbow-css')){
   +'@media (prefers-reduced-motion:reduce){[style*="gear-rainbow"]{animation:none!important;filter:'+glow('#ffd25a')+'}}';document.head.append(css);}
 export function gradeFrame(def){
  if(def?.rainbow)return ';filter:'+glow('#ff6b6b')+';animation:gear-rainbow 3s linear infinite';
+ if(def?.amuletTier==='orange')return ';filter:'+glow('#ff9b3f');
+ if(def?.amuletTier==='red')return ';filter:'+glow('#fa4e5e');
  if(!def?.graded)return '';const c=GRADES[def.grade??0].color;
  return ';filter:'+glow(c);
 }
@@ -52,7 +54,7 @@ function setInfo(it,gear){
 }
 export function iconStyle(id){
  const def=itemDef(id);if(!def)return '';
- if(def.image)return `background-image:url(${def.image});background-size:contain;background-position:center;background-repeat:no-repeat`+gradeFrame(def);
+ if(def.image)return `background-image:url(${def.image});background-size:contain;background-position:center;background-repeat:no-repeat`+(def.amulet?';background-color:'+({orange:'#6b391a',red:'#651e2b',rainbow:'#153c35'}[def.amuletTier]??'transparent'):'')+gradeFrame(def);
  if(def.monsterCard)return 'background-image:url(assets/cards147/'+id.slice(5)+'.webp);background-size:contain;background-position:center;background-color:transparent;border-radius:3px';
  const ph=def.ph&&!loaded[def.atlas],item=ph?{...def,...def.ph}:def;
  return `background-image:url(${ATLASES[item.atlas]??ITEM_ATLAS});background-size:600% 400%;background-position:${item.icon%6*20}% ${Math.floor(item.icon/6)/3*100}%`+(TINTS[item.tint]?';filter:'+TINTS[item.tint]:'')+(ph?`;--ph:'${id}'`:'');

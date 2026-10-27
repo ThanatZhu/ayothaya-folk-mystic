@@ -4,7 +4,7 @@ import {WORLD_DROP_ITEMS,WORLD_CARD_ATLASES,chapter2Drops} from './chapter2-loot
 import {buildGearItems,setDrops,shardDrop,rollSetPiece,gradeItem} from './gear-sets.js';
 import {buildAmuletItems} from './amulets.js';
 import {buildWeaponMaterials,WEAPON_MATERIALS,weaponMaterialTier} from './weapon-crafting.js';
-import {CONQUEST_SHARD,CONQUEST_ITEM,conquestCount,conquestBoss} from './rainbow-crafting.js';
+import {CONQUEST_SHARD,CONQUEST_ITEM,CONQUEST_STACK,conquestCount,conquestBoss} from './rainbow-crafting.js';
 import {FRONTIER_MONSTERS} from './monster-catalog.js';
 import {buildClassRewardItems} from './class-reward-items192.js';
 // Items, loot, coins (เบี้ย) and NPC shops. Pure rules shared by the client (offline guests + UI) and the realm
@@ -19,6 +19,7 @@ Object.assign(ATLASES,WORLD_CARD_ATLASES);
 // Cards reuse each creature's authored 4x2 sheet; other item atlases remain 6x4.
 export const ATLAS_LAYOUTS=Object.fromEntries(Object.keys(WORLD_CARD_ATLASES).map(key=>[key,{columns:4,rows:2}]));
 export const BAG_SLOTS=40,MAX_STACK=999,MAX_COINS=9999999;
+export const stackLimit=id=>id===CONQUEST_SHARD?CONQUEST_STACK:MAX_STACK;
 // 0.109.6 bag expansion: each bag carries its own size (40 base, +10 per expansion at Mae Bua's, up to 100)
 export const BAG_MAX=100,BAG_STEP=10;
 export const bagCap=bag=>{const n=bag?.slots;return Number.isSafeInteger(n)?Math.min(BAG_MAX,Math.max(BAG_SLOTS,n)):BAG_SLOTS;};
@@ -213,7 +214,7 @@ const int=(v,min,max)=>Number.isSafeInteger(v)?Math.min(Math.max(v,min),max):min
 export function normalizeBag(bag,cap=bagCap(bag)){
  const b=bag&&typeof bag==='object'?bag:{},items={},slots=bagCap(b);
  for(const [id,n] of Object.entries(b.items&&typeof b.items==='object'?b.items:{})){
-  if(!BAGGABLE(id))continue;const c=int(n,0,MAX_STACK);if(c>0&&Object.keys(items).length<cap)items[id]=c;
+  if(!BAGGABLE(id))continue;const c=int(n,0,stackLimit(id));if(c>0&&Object.keys(items).length<cap)items[id]=c;
  }
  return slots>BAG_SLOTS?{coins:int(b.coins,0,MAX_COINS),items,slots}:{coins:int(b.coins,0,MAX_COINS),items};
 }
@@ -227,7 +228,7 @@ export function addLoot(bag,{coins=0,items=[]}={}){
  const gained=int(coins,0,MAX_COINS);b.coins=Math.min(MAX_COINS,b.coins+gained);
  for(const {id,count:n=1} of items){
   if(!BAGGABLE(id)||!(n>0))continue;
-  const room=id in b.items||Object.keys(b.items).length<bagCap(b)?MAX_STACK-(b.items[id]??0):0,take=Math.min(room,n);
+  const room=id in b.items||Object.keys(b.items).length<bagCap(b)?stackLimit(id)-(b.items[id]??0):0,take=Math.min(room,n);
   if(take>0){b.items[id]=(b.items[id]??0)+take;added.push({id,count:take});}
   if(take<n)lost.push({id,count:n-take});
  }

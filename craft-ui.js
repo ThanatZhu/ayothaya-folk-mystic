@@ -1,7 +1,7 @@
 // Crafting authority stays with the realm; this window only previews and sends a request.
-import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=weapon188';
-import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=weapon188';
-import {craftRecipes,craftQuote,craftSources,craftRecipeLabel} from './craft-view176.js?v=weapon188';
+import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=amulet-craft193';
+import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=amulet-craft193';
+import {craftRecipes,craftQuote,craftSources,craftRecipeLabel} from './craft-view176.js?v=amulet-craft193';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {recipeAllowed} from './weapon-crafting.js';
@@ -11,7 +11,7 @@ const number=n=>Number(n??0).toLocaleString('th-TH');
 const icon=(id,cls='')=>`<i class="item-icon ${cls}" style="${iconStyle(id)}" aria-hidden="true"></i>`;
 const failures=new Set(['no-recipe','no-material','no-coins','bag-full','bad-count','craft-rate','craft-locked'].map(k=>ITEM_ERRORS[k]));
 export function createCraftUI({game,bagUI,catalog,account}){
- if(!document.querySelector('link[data-craft176]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./craft176.css?v=weapon188';css.dataset.craft176='';document.head.append(css);}
+ if(!document.querySelector('link[data-craft176]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./craft176.css?v=amulet-craft193';css.dataset.craft176='';document.head.append(css);}
  const world=game.world,character=()=>({classId:world.profession.id,gender:account?.character?.gender}),dialog=document.createElement('dialog');dialog.id='craft-window';dialog.dataset.craft176='';dialog.setAttribute('aria-labelledby','craft-title');
  dialog.innerHTML=`<header><div><small>AYOTHAYA · CRAFTING</small><h2 id="craft-title">คราฟต์ไอเท็ม</h2></div><b class="coins" id="craft-coins"></b><button type="button" class="mp-icon" id="craft-close" aria-label="ปิดหน้าคราฟต์">×</button></header>
  <div class="craft176-tabs" role="tablist" aria-label="หมวดสูตรคราฟต์">${CRAFT_GROUPS.map(([id,name])=>`<button type="button" role="tab" data-group="${id}" aria-controls="craft-workspace">${name}</button>`).join('')}</div>

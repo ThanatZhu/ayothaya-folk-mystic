@@ -4,7 +4,7 @@ import {normalizeBag,addLoot,ITEMS,itemDef} from './items.js?v=107';
 import {gearRecipes,rollGrade,withGrade} from './gear-sets.js';
 import {WORLD_RELIC_RECIPES} from './chapter2-loot.js';
 import {recipeAllowed} from './weapon-crafting.js';
-import {rainbowRecipe} from './rainbow-crafting.js';
+import {rainbowRecipe,AMULET_CRAFT_SHARDS,RAINBOW_SHARDS} from './rainbow-crafting.js';
 
 export const CRAFT_GROUPS=[['potion','ยา'],['food','อาหาร'],['refine','หินตีบวก'],['gear','อุปกรณ์']];
 // out: item made, count: how many per craft, needs: materials used, coins: cowries spent.
@@ -29,7 +29,7 @@ export const RECIPES=[
 RECIPES.push(...gearRecipes(ITEMS));
 RECIPES.push(...WORLD_RELIC_RECIPES);
 // Keep each recipe's original materials and add the conquest cost to every rainbow item.
-for(const [id,item] of Object.entries(ITEMS))if(item.kind==='gear'&&item.rainbow){const i=RECIPES.findIndex(r=>r.out===id),r=rainbowRecipe(id,RECIPES[i]?.needs);if(i>=0)RECIPES[i]=r;else RECIPES.push(r);}
+for(const [id,item] of Object.entries(ITEMS))if(item.kind==='gear'&&item.rainbow){const i=RECIPES.findIndex(r=>r.out===id),r=rainbowRecipe(id,RECIPES[i]?.needs,item.amulet?AMULET_CRAFT_SHARDS:RAINBOW_SHARDS);if(i>=0)RECIPES[i]=r;else RECIPES.push(r);}
 export const recipeFor=out=>RECIPES.find(r=>r.out===out)??null;
 // How many times the bag can afford a recipe.
 export function craftable(bag,r){const b=normalizeBag(bag);let n=r.coins?Math.floor(b.coins/r.coins):99;for(const [id,k] of Object.entries(r.needs))n=Math.min(n,Math.floor((b.items[id]??0)/k));return Math.max(0,Math.min(99,n));}

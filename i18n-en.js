@@ -4850,3 +4850,11 @@ Object.assign(globalThis.I18N_EN,{
  "ยินดีด้วยกับการเปลี่ยนอาชีพ! รับกล่องยุทธภัณฑ์แดง Lv.55 แล้วเปิดจากกระเป๋า เลือก 1 สายเซ็ต: ทะลวง เพชฌฆาต มนตรา กำแพงเพชร หรือวายุ ได้ครบ 5 ชิ้น ได้แก่ อาวุธ หมวก เสื้อ ผ้าคลุม และรองเท้า ตรงกับอาชีพและรูปลักษณ์ตัวละครขณะเปิดกล่อง ทุกชิ้นสีแดง สวมใส่เมื่อเลเวล 55 และร่วมโบนัสเซ็ตสายเดียวกัน": "Congratulations on advancing your class! Claim the Red Lv.55 Equipment Set Choice Box and open it from your bag. Choose Pierce, Executioner, Mantra, Diamond Wall or Wind to receive five pieces: weapon, headgear, armor, cloak and shoes. All pieces match your class and appearance when you open the box, are red grade, require Lv.55 to equip and count toward the matching set bonus.",
  "เปลี่ยนอาชีพ · กล่องเลือกเซ็ตแดง Lv.55": "Class advancement · Red Lv.55 equipment set choice box"
 });
+// 0.122 quest cards, world-map walking, portrait HUD
+Object.assign(globalThis.I18N_EN,{
+  "เนื้อเรื่อง": "Story",
+  "บททดสอบอาชีพ": "Job trial",
+  "เดินไป": "Walk there",
+  "ยังไม่มีทางเดินไป": "No walking route to",
+  "แตะชื่อเมืองบนแผนที่ แล้วกดเดินไปหรือวาร์ป · จุดสีเทายังไม่เปิดเดินทาง": "Tap a town on the map, then walk there or warp · grey spots aren't open yet"
+});

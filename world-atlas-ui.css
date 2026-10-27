@@ -51,3 +51,16 @@
 .atlas-name.side-t{top:auto;bottom:100%;margin:0 0 3px}
 .atlas-name.side-l{left:auto;right:100%;top:50%;transform:translateY(-50%);margin:0 4px 0 0}
 .atlas-name.side-r{left:100%;top:50%;transform:translateY(-50%);margin:0 0 0 4px}
+/* 0.122 walk there (free, through the gates) beside the paid warp */
+#world-atlas-dialog #atlas-walk{min-height:44px;padding:8px 18px;font-weight:bold}
+/* 0.122 portrait phones: the dialog's column grew to its content and pushed the close button and the travel buttons
+   off screen. One shrinkable column; the footer stacks the destination over a row of wallet, walk and warp. */
+@media(orientation:portrait) and (max-width:600px){
+ #world-atlas-dialog[open]{grid-template-columns:minmax(0,1fr)}
+ .atlas-header>div{min-width:0}#world-atlas-dialog h2{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .atlas-header button{min-width:36px;height:36px;padding:0 6px}
+ .atlas-footer{flex-direction:column;align-items:stretch;gap:6px}
+ .atlas-travel{flex-direction:row;gap:6px}
+ #atlas-wallet{flex:1;min-width:0}
+ #world-atlas-dialog #atlas-walk,#world-atlas-dialog #atlas-warp{flex:1;min-width:0;min-height:40px;padding:5px 8px;font-size:13px}
+}

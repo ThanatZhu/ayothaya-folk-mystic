@@ -4,7 +4,7 @@ import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=arena166';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
-import {createMentorUI} from './mentor-ui.js?v=training164';
+import {createMentorUI} from './mentor-ui.js?v=quest-scroll190';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=novice174';

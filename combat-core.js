@@ -14,6 +14,7 @@ import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=73';
 import {getClass,classSkills} from './classes.js?v=novice174';
 import {scaledSkill} from './skill-progress.js?v=novice174';
+import {PROLOGUE_BOSS} from './prologue.js?v=1';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[
@@ -34,7 +35,7 @@ export const MONSTER_TYPES=[
  {name:'คางคกใบบัว',hp:65,speed:1,damage:6,baseXp:14,jobXp:7},
  {name:'ไหผีจอมซน',hp:90,speed:.8,damage:8,baseXp:18,jobXp:12}
 ];
-MONSTER_TYPES.push(...FRONTIER_MONSTERS);
+MONSTER_TYPES.push(...FRONTIER_MONSTERS,PROLOGUE_BOSS);
 MONSTER_TYPES.forEach((m,i)=>patch('monsters',monsterKey(m,i),m)); // 0.85 admin balance overrides
 // 0.52 pacing: AUTO looks for monsters within 14 of where it was switched on (was 8); towns are walked 30% faster.
 // 1.12 owner: reach is measured to the monster's edge, not its centre, so a big boss is hit from its body's edge.
@@ -222,6 +223,8 @@ export class CombatWorld{
  // 0.95 guild war: rivals are enemy-guild players and the guardian stone, kept in step by the server the same way.
  foes(){return this.foe||this.rivals.length?[...this.mobs,...(this.foe?[this.foe]:[]),...this.rivals]:this.mobs;}
  get target(){return this.foes().find(m=>m.id===this.targetId&&m.hp>0)??null;}
+ // the prologue lends a Novice another class's skills for a while (realm only; the saved character never changes)
+ setProfession(classId,jobId=''){this.profession=advanceStats(getClass(classId),jobId);this.jobId=jobId;this.roleCombat=createRoleCombat(this,{moveBody,lineClear,types:MONSTER_TYPES});this.skills=this.roleCombat.skills;this.cooldowns=this.skills.map(()=>0);this.skillLevels=this.skills.map(s=>s.reserved||s.master?0:1);}
  emit(type,extra={}){if(type==='cast'||type==='playerHit')this.clearEmote();this.events.push({type,...(['damage','miss'].includes(type)&&this.roleCombat?{synced:true,...this.damageContext}:{}),...extra});}
  clearEmote(){this.emote=null;}
  setEmote(action){

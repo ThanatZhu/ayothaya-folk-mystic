@@ -45,7 +45,7 @@ const JOIN_CODES=['world-reset','already-online','room-full','character-not-foun
 export const joinError=e=>JOIN_CODES.includes(e?.message)?e.message:['authentication-required','invalid-token','invalid-identity'].includes(e?.message)||/^auth\/(?!internal|network)/.test(String(e?.code??''))?'authentication-failed':'server-busy';
 // The drops a client reports with its join (multiplayer-client.js), trimmed to known fields.
 export const cleanDiag=list=>(Array.isArray(list)?list.slice(-5):[]).filter(d=>d&&typeof d==='object').map(d=>({kind:d.kind==='page'?'page':'socket',at:Number.isFinite(d.at)?d.at:0,close:Number.isInteger(d.close)?d.close:0,reason:String(d.reason??'').slice(0,60),code:String(d.code??'').slice(0,40),online:Number.isFinite(d.online)?Math.round(d.online):0,hidden:d.hidden===true,net:String(d.net??'').slice(0,16)}));
-export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false,classRewards=mode==='firebase'}={}){
+export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false,classRewards=mode==='firebase',prologue=mode!=='local'||process.env.PROLOGUE==='on'}={}){
  if(!['local','firebase'].includes(mode))throw new Error('invalid-auth-mode');
  if(!catalog)catalog=JSON.parse(await readFile(path.join(root,'maps/world.json'),'utf8'));
  // A replacement instance (zero-downtime redeploy) starts while the old one still owns the world.
@@ -86,7 +86,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  };
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
  let savedList={at:0,rows:[]},lastLogSaveCount=0;
- const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,roleSkills:process.env.ROLE_SKILLS!=='off',spiritCompanions:true,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set(),metrics={bytesSent:0,messagesSent:0,startedAt:Date.now()};let closing=false;
+ const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,roleSkills:process.env.ROLE_SKILLS!=='off',spiritCompanions:true,prologue,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set(),metrics={bytesSent:0,messagesSent:0,startedAt:Date.now()};let closing=false;
  if(mode==='local'&&store?.loadMailAnnouncements){realm.mailAnnouncements=await store.loadMailAnnouncements();mailReady=true;}
  if(mode==='local'&&store?.loadMapBosses)realm.mapBosses.restore(await store.loadMapBosses());
  if(store?.saveMapBosses)realm.mapBosses.onChange=rows=>trackWrite(store.saveMapBosses(rows));

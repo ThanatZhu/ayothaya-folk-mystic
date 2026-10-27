@@ -1,5 +1,5 @@
 import {dialogueFor} from './story-dialogue.js?v=weapon188';
-import {createQuestCinematics} from './quest-cinematic155.js?v=weapon188';
+import {createQuestCinematics} from './quest-cinematic155.js?v=prologue1';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=weapon188';
@@ -101,7 +101,10 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   return '▶ เดินไป';
  }
  let markedNpc=null,shown='';
+ // the prologue (prologue-ui.js) can take over the tracker and hold the welcome card back
+ const hooks={override:null,holdWelcome:false};
  function render(){
+  if(hooks.override){const o=hooks.override(),sig='prologue'+JSON.stringify(o);if(sig===shown)return;shown=sig;panel.setAttribute('aria-busy','false');$('quest-chapter').textContent=o.chapter;$('quest-title').textContent=o.title;$('quest-hint').textContent=o.hint;$('quest-how').hidden=true;$('quest-distance').hidden=true;$('quest-go').hidden=true;return;}
   const story=state(),synced=ready(),obj=synced?currentObjective(story):null;
   // A level-up below the goal changes EXP, not the quest step. Include the displayed level in the cache.
   const sig=JSON.stringify([synced,story,game.walking&&walking,obj?.step.type==='level'?baseLevel():null]);
@@ -295,8 +298,8 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   node.hidden=!target;if(target){const text=label+' '+Math.ceil(Math.hypot(target.x-world.player.x,target.z-world.player.z))+' ม.';if(node.textContent!==text)node.textContent=text;}
  }
 
- const api={context:null,cinematics,update(){if(walking&&!game.walking)walking=false;cinematics.observe();
-  if(ready()&&!document.hidden){if(resume){resume=false;clearResume();go();}if(welcomePending&&performance.now()>=welcomeAt){welcomePending=false;welcome();}}
+ const api={context:null,cinematics,get override(){return hooks.override;},set override(v){hooks.override=v;},get holdWelcome(){return hooks.holdWelcome;},set holdWelcome(v){hooks.holdWelcome=v;},update(){if(walking&&!game.walking)walking=false;cinematics.observe();if(hooks.override){render();return;}
+  if(ready()&&!document.hidden){if(resume){resume=false;clearResume();go();}if(welcomePending&&performance.now()>=welcomeAt&&!hooks.holdWelcome&&!cinematics.isOpen){welcomePending=false;welcome();}}
   coach.update();distanceHint();
   if(ready()&&!game.online&&api.context&&performance.now()-checked>1000){checked=performance.now();for(let i=0;i<30&&offline({type:'check',ctx:api.context()})?.changed;i++);}
   render();}};

@@ -34,11 +34,13 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=population195';
+import {createGame} from './game-controls.js?v=prologue1';
 import {atlasPath,className} from './classes.js?v=novice174';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=quest-scroll190';
-import {createStoryUI} from './story-ui.js?v=weapon188';
+import {createWorldUI} from './world-ui.js?v=prologue1';
+import {createStoryUI} from './story-ui.js?v=prologue1';
+import {createPrologueUI} from './prologue-ui.js?v=1';
+import {TRIAL_CLASSES} from './prologue.js?v=1';
 import {createClassRewardUI} from './class-reward-ui192.js';
 import {createBagUI} from './bag-ui.js?v=class-reward192';
 import {createStatusUI} from './status-ui.js?v=stat-reset189';
@@ -80,8 +82,10 @@ try {
  const catalog=await response.json();loading.stage(1);
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);
+ // ทุ่งนิมิต: while the teacher's lent class is on, this page plays as that class (skill bar, sprite); the realm decides it
+ const asked=new URLSearchParams(location.search).get('trial'),trial=map.prologue&&TRIAL_CLASSES.includes(asked)?asked:null;if(trial&&account.character.classId==='novice')Object.defineProperty(account,'character',{value:{...account.character,classId:trial},configurable:true,writable:true});
  loading.theme(map.id);loading.stage(2);
- history.replaceState(null,'','?server='+account.serverId+'&map='+encodeURIComponent(map.id));
+ history.replaceState(null,'','?server='+account.serverId+'&map='+encodeURIComponent(map.id)+(trial?'&trial='+trial:''));
  let worldUI=null,multiplayer=null,overview=false;
 
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}); // 0.80 ask for the dedicated GPU on dual-GPU laptops
@@ -231,7 +235,7 @@ try {
  $('overview').onclick=toggleOverview;
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
- worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});createClassRewardUI({game,bagUI,account});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI,catalog,account});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI,worldUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
+ worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});createPrologueUI({game,worldUI,storyUI,map,account,trial});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});createClassRewardUI({game,bagUI,account});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI,catalog,account});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI,worldUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
  createCbtEventUI({game,account,loading,autoOpen:!map.pvpArena});
  const arenaUI=createArenaUI({game,account,map,catalog,worldUI});
  createActionbar({game,bagUI,account});

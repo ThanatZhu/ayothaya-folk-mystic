@@ -9,6 +9,7 @@ test('all ten hunting maps double each ordinary type exactly, including dungeon 
   const original=structuredClone(map),before=new CombatWorld({...map,mobPopulation:1}),after=new CombatWorld(map);
   assert.deepEqual(map,original,'population expansion cannot mutate authored map data');
   assert.deepEqual(after.mobs.slice(0,before.mobs.length),before.mobs,'original IDs, leaders and combat stats stay stable');
+  if(map.prologue){assert.deepEqual(after.mobs,before.mobs,'the prologue keeps its authored training field');continue;}
   if(!before.mobs.length){assert.equal(after.mobs.length,0);continue;}
   fields++;assert.equal(map.mobPopulation,2);
   for(const type of new Set(before.mobs.map(m=>m.type))){const a=before.mobs.filter(m=>m.type===type),b=after.mobs.filter(m=>m.type===type);assert.equal(b.length,a.length*(regular(a[0])?2:1),map.id+': '+MONSTER_TYPES[type].id);}

@@ -1,6 +1,7 @@
 import {roleTiming} from './combat-timing.js';
+import {skillHit} from './skill-critical.js';
 import {applyPoison,poisonFor,takePoison,tickPoison} from './role-poison.js';
-import {petIncoming} from './pet-combat.js';
+import {petIncoming} from './pet-combat.js?v=skill-crit1';
 import {roleById} from './assets/skills-next/catalog.js';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {scaledSkill} from './skill-progress.js?v=novice174';
@@ -29,12 +30,12 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
  function clean(a){for(const key of harmful)delete a.world.status[key];if(a.world.roleCombat)for(const key of harmful)delete a.world.roleCombat.state.meta[key];}
  function crowd(m,seconds){if(types[m.type]?.boss||m.pvp){m.roleStagger=clamp((m.roleStagger??0)+35,0,100);if(m.roleStagger>=100){m.roleStagger=0;m.charge=0;m.windup=0;m.slamming=false;m.attackCD=Math.max(m.attackCD??0,.6);w.emit('combo',{x:m.x,z:m.z});}return;}enemyStatus(m,'root',seconds);m.charge=0;m.windup=0;}
  function damage(m,n,kind='skill',resolved=0){
-  if(!m||m.hp<=0||!visible(p,m))return;if(kind==='reflection'){w.roleSecondary=true;try{w.hurt(m,Math.round(n),role.color);}finally{w.roleSecondary=false;}return;}if(w.status.inspired)n*=1.2;const a=mods(),s=m.roleStatus??{};
+  if(!m||m.hp<=0||!visible(p,m))return;if(kind==='reflection'){const previous=w.damageContext;w.damageContext={source:'reflection',crit:false};w.roleSecondary=true;try{w.hurt(m,Math.round(n),role.color);}finally{w.roleSecondary=false;w.damageContext=previous;}return;}if(w.status.inspired)n*=1.2;const a=mods(),s=m.roleStatus??{};
   if(s.mark)n*=1.2+(a.markBonus??0);if(s.brand)n*=1.2;if(s.break)n*=1.3*(1+(a.brokenBonus??0));
   if(a.farBonus&&dist(p,m)>4){n*=1+a.farBonus;trigger('farBonus',m);}
   if(a.markBonus&&s.mark)trigger('markBonus',m);if(a.brokenBonus&&s.break)trigger('brokenBonus',m);
   if(a.damageDealt)n*=1+a.damageDealt;
-  w.roleSecondary=kind!=='skill';try{w.hurt(m,w.power(n,m)+resolved,role.color);}finally{w.roleSecondary=false;}
+  w.roleSecondary=kind!=='skill';try{skillHit(w,m,w.power(n,m)+resolved,role.color,kind==='skill'?{}:{source:kind});}finally{w.roleSecondary=false;}
  }
  function area(at,r=3){return enemies().filter(m=>dist(m,at)<=r&&visible(at,m));}
  function team(at,r=4.5){return allies().filter(a=>a.player.hp>0&&dist(a.player,at)<=r&&visible(at,a.player));}
@@ -152,7 +153,7 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   autoIndex(config){if(state.pending||w.basicPending||w.legacyPending)return -1;let best=-1,bestCd=-1;for(const i of config.skills){const s=scaledSkill(w.skills[i],w.skillLevels[i]??0);if(!s||s.reserved||s.passive||w.cooldowns[i]>0||p.mp<s.cost)continue;const target=targetFor(s);if(valid(s,target))continue;if(['poison','venom'].includes(s.type)){const old=poisonFor(target.roleStatus,w.roleOwnerId??'self');if(old?.left>1&&old.power>=w.power(s.power,target))continue;}if(['revive','greatRevive'].includes(s.type))return i;if(s.type==='heal'){if(target.player.hp>target.player.maxHp*.6)continue;return i;}if(['guard','counter','stealth','smoke'].includes(s.type)&&w.status[s.type])continue;if(['summon','greatSummon'].includes(s.type)&&state.pets.some(a=>a.kind==='rooster'))continue;if(['spirit','greatSpirit'].includes(s.type)&&state.pets.some(a=>a.kind==='spirit'))continue;if(['sanctuary','regen','lifeTree','yantra','ward'].includes(s.type)&&(!w.target||state.fields.some(f=>f.kind===s.type)))continue;if(['lastStand'].includes(s.type)){if(p.hp>p.maxHp*.35)continue;return i;}if(s.type==='cleanse'){if(!harmful.some(k=>target.world.status[k]))continue;return i;}if((s.cd??0)>bestCd){best=i;bestCd=s.cd??0;}}return best;},
   step(dt,input){
    const hpMod=mods().maxHp??0;if(hpMod!==(state.hpMod??0)){const base=w.derived?.maxHp??p.maxHp/(1+(state.hpMod??0));p.maxHp=Math.round(base*(1+hpMod));p.hp=Math.min(p.hp,p.maxHp);state.hpMod=hpMod;trigger('maxHp');}
-   for(const [key,effect] of Object.entries(w.roleDebuffs??{})){if(!w.status[key]){delete w.roleDebuffs[key];continue;}effect.left=w.status[key];if(key==='poison')tickPoison(w.roleDebuffs,dt,e=>{const owner=w.roleResolveOwner?.(e.owner),victim=owner?.foes().find(m=>m.id===e.pvpId);if(victim)owner.hurt(victim,e.power,'#a9d86f');});if(key==='poison'&&!w.roleDebuffs.poison)delete w.status.poison;}
+   for(const [key,effect] of Object.entries(w.roleDebuffs??{})){if(!w.status[key]){delete w.roleDebuffs[key];continue;}effect.left=w.status[key];if(key==='poison')tickPoison(w.roleDebuffs,dt,e=>{const owner=w.roleResolveOwner?.(e.owner),victim=owner?.foes().find(m=>m.id===e.pvpId);if(victim)skillHit(owner,victim,e.power,'#a9d86f',{source:'poison'});});if(key==='poison'&&!w.roleDebuffs.poison)delete w.status.poison;}
    for(const k of Object.keys(state.meta))if(!w.status[k])delete state.meta[k];if(p.hp<=0){if(state.pending)w.emit('castCancel',{castId:state.pending.castId});state.pending=null;state.fields=[];state.pets=[];if(spiritEnabled())for(const shot of state.spiritShots)w.emit('spiritImpact',{owner:shot.owner,petId:shot.petId,skillId:shot.skillId,tier:shot.tier,shotId:shot.shotId,targetId:shot.targetId,x:shot.to.x,z:shot.to.z,to:{...shot.to},hit:false,impactAt:w.time});state.spiritShots=[];state.combo=0;state.shield=0;return;}
    if(state.pending){const c=state.pending;if(w.status.stun||w.status.sleep||w.status.silence||(['revive','greatRevive'].includes(c.s.type)&&(Math.hypot(input.x??0,input.z??0)>.08||dist(p,c.origin)>.15))){w.emit('castCancel',{castId:c.castId});state.pending=null;w.notice('การร่ายถูกยกเลิก');}else if((c.left-=dt)<=1e-8){if(!valid(c.s,c.target,true)){w.damageContext={castId:c.castId,hitIndex:c.hit,roleSkillId:c.s.roleSkillId,source:'skill'};try{if(['comboBurst','comboFinish'].includes(c.s.type))state.combo=c.combo;perform(c.times?{...c.s,power:c.s.power/c.times.length}:c.s,c.target);}finally{w.damageContext=null;}w.emit('roleRelease',{roleSkillId:c.s.roleSkillId,castId:c.castId,hitIndex:c.hit});c.hit++;if(c.times&&c.hit<c.times.length)c.left+=c.times[c.hit]-c.times[c.hit-1];else{state.pending=null;p.attackCD=Math.max(p.attackCD,.16);w.skills.forEach((x,i)=>{if(x&&!x.passive&&!x.reserved)w.cooldowns[i]=Math.max(w.cooldowns[i]??0,ROLE_GLOBAL_CD);});}}else{w.emit('castCancel',{castId:c.castId});state.pending=null;if(c.hit===0){p.mp=Math.min(p.maxMp,p.mp+c.cost);w.cooldowns[c.index]=0;w.notice('สกิลไม่สำเร็จ · คืน MP');}}}}
    for(const f of state.fields){f.left-=dt;f.tick-=dt;if(f.tick>0)continue;f.tick=1;
@@ -178,4 +179,4 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
  };
 }
 // One call per shared room, not per player. The original owner retains kill credit for poison.
-export function stepRoleMonsters(mobs,dt,resolve){for(const m of mobs){if(m.hp<=0){m.roleStatus={};continue;}const status=m.roleStatus??{};tickPoison(status,dt,s=>{if(m.hp>0){const owner=resolve(s.owner);if(owner){owner.damageContext={source:'poison'};try{owner.hurt(m,s.power,'#a9d86f');}finally{owner.damageContext=null;}}}});for(const [key,s] of Object.entries(status)){if(key==='poison')continue;s.left-=dt;if(s.left<=0)delete status[key];}if(m.hp<=0)m.roleStatus={};}}
+export function stepRoleMonsters(mobs,dt,resolve){for(const m of mobs){if(m.hp<=0){m.roleStatus={};continue;}const status=m.roleStatus??{};tickPoison(status,dt,s=>{if(m.hp>0){const owner=resolve(s.owner);if(owner){owner.damageContext={source:'poison'};try{skillHit(owner,m,s.power,'#a9d86f',{source:'poison'});}finally{owner.damageContext=null;}}}});for(const [key,s] of Object.entries(status)){if(key==='poison')continue;s.left-=dt;if(s.left<=0)delete status[key];}if(m.hp<=0)m.roleStatus={};}}

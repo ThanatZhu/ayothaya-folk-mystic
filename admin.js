@@ -1,4 +1,5 @@
 import {createAdminResetUI} from './admin-reset-ui.js?v=166';
+import {adminLevelHTML,bindAdminLevels} from './admin-level-panel.js';
 import {legacyPetItem} from './mailbox.js';
 import {petGrantHTML,bindPetGrant} from './admin-pet-panel.js?v=127';
 import {paintAdminSkills,paintAdminMonsters} from './admin-art.js?v=127';
@@ -80,7 +81,7 @@ const NAV=[['ผู้เล่นและชุมชน',['players','mail','e
 // 0.118 evidence log (player names and details are shown exactly as recorded: data-i18n-skip): search what players and admins did (server keeps players 90 days, admins 3 years) and export it.
 const bkkDay=(t=Date.now())=>new Date(t+7*3600e3).toISOString().slice(0,10);
 const ev={stream:'players',from:bkkDay(),to:bkkDay(),type:'',q:'',rows:null,total:0,truncated:false,loading:false,msg:''};
-const EV_TYPES={players:[['','ทุกประเภท'],['login','เข้าเกม'],['logout','ออกจากเกม'],['chat','แชต'],['trade','แลกของ'],['market','ตลาด / แผง / ร้าน'],['mail','จดหมาย / รับของ'],['pet','สัตว์เลี้ยง'],['rename','เปลี่ยนชื่อ'],['travel','ย้ายแมพ'],['consent','ยอมรับนโยบาย']],admin:[['','ทุกการกระทำ'],['admin-mail','ส่งของ / จดหมาย'],['admin-balance','ปรับค่าสมดุล'],['admin-weather','สภาพอากาศ'],['admin-boss','เสกบอส'],['admin-finance','บัญชีการเงิน'],['admin-world-reset','รีเซ็ตโลก'],['admin-evidence-search','ค้นบันทึกนี้']]};
+const EV_TYPES={players:[['','ทุกประเภท'],['login','เข้าเกม'],['logout','ออกจากเกม'],['chat','แชต'],['trade','แลกของ'],['market','ตลาด / แผง / ร้าน'],['mail','จดหมาย / รับของ'],['pet','สัตว์เลี้ยง'],['rename','เปลี่ยนชื่อ'],['travel','ย้ายแมพ'],['consent','ยอมรับนโยบาย']],admin:[['','ทุกการกระทำ'],['admin-mail','ส่งของ / จดหมาย'],['admin-balance','ปรับค่าสมดุล'],['admin-levels','เพิ่มเลเวลผู้เล่น'],['admin-weather','สภาพอากาศ'],['admin-boss','เสกบอส'],['admin-finance','บัญชีการเงิน'],['admin-world-reset','รีเซ็ตโลก'],['admin-evidence-search','ค้นบันทึกนี้']]};
 const EV_LABEL=Object.fromEntries([...EV_TYPES.players,...EV_TYPES.admin].filter(([k])=>k));
 Object.assign(EV_LABEL,{'market-stall':'ซื้อจากแผง','market-shop-buy':'ซื้อจากร้าน','market-shop-sell':'ขายให้ร้าน','admin-mail-all':'ประกาศทุกคน','admin-world-reset-preview':'ดูตัวอย่างรีเซ็ต','admin-world-reset-execute':'สั่งรีเซ็ตโลก'});
 const evTime=t=>new Date(t).toLocaleString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -356,7 +357,7 @@ async function adminFetch(path,body){
  const r=await fetch(API+path,{method:body?'POST':'GET',headers,body:body&&JSON.stringify(body)}),j=await r.json().catch(()=>({}));
  if(!r.ok)throw new Error(j.error??String(r.status));return j;
 }
-const ADMIN_ERRORS={'mailbox-full':'กล่องจดหมายเต็ม','player-online':'ผู้เล่นคนนี้เพิ่งเข้าเกม · กดรีเฟรชแล้วส่งใหม่','bag-full':'กระเป๋าผู้เล่นเต็ม · ส่งของน้อยลงหรือส่งเป็นเบี้ยแทน','character-not-found':'ไม่พบตัวละครนี้ในเซฟ','not-admin':'อีเมลนี้ไม่อยู่ในรายชื่อ ADMIN_EMAILS บน Render','admin-unset':'เซิร์ฟเวอร์ยังไม่เห็นค่า ADMIN_EMAILS · ตั้งที่ Render แล้วกด Save, rebuild and deploy','bad-token':'ตรวจการล็อกอิน Google ไม่ผ่าน · ออกแล้วล็อกอินใหม่','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน','github-unset':'เซิร์ฟเวอร์ยังไม่มี GITHUB_TOKEN (ตั้งที่ Render)','github-failed':'ส่งขึ้น GitHub ไม่สำเร็จ · ตรวจสิทธิ์ของ GITHUB_TOKEN','github-conflict':'ไฟล์บน GitHub เพิ่งเปลี่ยน · กดบันทึกอีกครั้ง','invalid':'ข้อมูลไม่ถูกต้อง','bad-email':'รูปแบบอีเมลไม่ถูกต้อง'};
+const ADMIN_ERRORS={'bad-level':'ระบุเลเวลเป็นจำนวนเต็มภายในเพดานของอาชีพ','server-busy':'ตัวละครกำลังบันทึกหรือแลกเปลี่ยนของ กรุณาลองอีกครั้ง','mailbox-full':'กล่องจดหมายเต็ม','player-online':'ผู้เล่นคนนี้เพิ่งเข้าเกม · กดรีเฟรชแล้วส่งใหม่','bag-full':'กระเป๋าผู้เล่นเต็ม · ส่งของน้อยลงหรือส่งเป็นเบี้ยแทน','character-not-found':'ไม่พบตัวละครนี้ในเซฟ','not-admin':'อีเมลนี้ไม่อยู่ในรายชื่อ ADMIN_EMAILS บน Render','admin-unset':'เซิร์ฟเวอร์ยังไม่เห็นค่า ADMIN_EMAILS · ตั้งที่ Render แล้วกด Save, rebuild and deploy','bad-token':'ตรวจการล็อกอิน Google ไม่ผ่าน · ออกแล้วล็อกอินใหม่','origin':'เปิดหน้านี้จากเว็บเกมเท่านั้น','player-offline':'ผู้เล่นออฟไลน์ไปแล้ว','bad-item':'ไม่มีไอเท็มนี้','bad-count':'จำนวนต้อง 1–999','bad-coins':'เบี้ยต้อง 0–10,000,000','nothing':'ยังไม่ได้เลือกของหรือใส่เบี้ย','need-login':'ต้องล็อกอิน Google ก่อน','github-unset':'เซิร์ฟเวอร์ยังไม่มี GITHUB_TOKEN (ตั้งที่ Render)','github-failed':'ส่งขึ้น GitHub ไม่สำเร็จ · ตรวจสิทธิ์ของ GITHUB_TOKEN','github-conflict':'ไฟล์บน GitHub เพิ่งเปลี่ยน · กดบันทึกอีกครั้ง','invalid':'ข้อมูลไม่ถูกต้อง','bad-email':'รูปแบบอีเมลไม่ถูกต้อง'};
 // Firebase connects as soon as the tab opens, so the click below can open the Google popup straight away
 // (a popup opened after an await is no longer a click, and the browser blocks it).
 function warmFirebase(){if(LOCAL||fbWarm)return;fbWarm=import('./firebase-client.js').then(m=>m.deadline(m.connectFirebase())).then(c=>{fbConn=c;if(tab==='players')playersTab();}).catch(()=>{fbWarm=null;adminMsg='เชื่อมต่อ Google ไม่ได้ · ลองรีโหลดหน้า';if(tab==='players')playersTab();});}
@@ -375,7 +376,7 @@ async function loadPlayers(quiet=false,fresh=false){
  catch(e){adminMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}
  if(tab==='players')playersTab();
 }
-function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(itemGrantSending||petGrantSending||document.activeElement?.closest?.('#give,.admin-pet-grant'))return;loadPlayers(true);},15000);}
+function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(itemGrantSending||petGrantSending||levelAdjustSending||document.activeElement?.closest?.('#give,.admin-pet-grant,.admin-level-panel'))return;loadPlayers(true);},15000);}
 // 0.109.7 weather tab: set rain / mist / storm (or clear) on a realm for some minutes, or hand it back to the clock.
 async function loadWeather(){try{weatherState=(await adminFetch('/admin/weather')).servers;weatherMsg='';}catch(e){weatherMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}if(tab==='weather')weatherTab();}
 async function setWeather(weather){
@@ -496,6 +497,7 @@ function drawBossMap(){
  if(bx.spot){const x=px(bx.spot.x),y=pz(-bx.spot.y);g.fillStyle='#ff5a3c';g.strokeStyle='#fff3d6';g.lineWidth=2;g.beginPath();g.arc(x,y,7,0,7);g.fill();g.stroke();}
  c.onclick=e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)*c.width/r.width/k+b.x,z=(e.clientY-r.top)*c.height/r.height/k+b.z;bx.spot={x:Math.round(x),y:Math.round(-z)};bossTab();};
 }
+let levelAdjustSending=false;
 function playersTab(){
  warmFirebase();
  const user=LOCAL?'เครื่องตัวเอง (localhost)':fbConn?.auth.currentUser?.email??'';
@@ -515,7 +517,7 @@ function playersTab(){
  const head=`<div class="players-head"><h2>ผู้เล่น${players?' <small>'+counts.online+' ออนไลน์ · '+counts.offline+' ออฟไลน์</small>':''}</h2>`+
   (user?`<span class="who">👤 ${esc(user)}</span>${LOCAL?'':'<button type="button" id="sign-out">ออกจากระบบ</button>'}<button type="button" id="load-players">↻ รีเฟรช</button>`:'<button type="button" id="sign-in" class="primary">ล็อกอิน Google</button>')+
   (adminMsg?`<span class="msg">${esc(adminMsg)}</span>`:'')+'</div>';
- const row=x=>`<button type="button" class="prow${x.id===picked?' on':''}" data-pick="${esc(x.id)}">${face(x)}<span class="pinfo"><b>${esc(x.name)} ${state(x)}</b><span>${esc(className(x.classId))} · Lv.${x.level}</span><span>เซิร์ฟ ${esc(x.server.replace('server-',''))} · ${esc(x.map)}</span></span><span class="coin">${x.coins.toLocaleString('th-TH')}<small>เบี้ย</small></span></button>`;
+ const row=x=>`<button type="button" class="prow${x.id===picked?' on':''}" data-pick="${esc(x.id)}">${face(x)}<span class="pinfo"><b>${esc(x.name)} ${state(x)}</b><span>${esc(className(x.classId))} · Base Lv.${x.level} · Job Lv.${x.jobLevel??1}</span><span>เซิร์ฟ ${esc(x.server.replace('server-',''))} · ${esc(x.map)}</span></span><span class="coin">${x.coins.toLocaleString('th-TH')}<small>เบี้ย</small></span></button>`;
  const plist=`<section class="plist"><input id="player-search" type="search" placeholder="🔍 ค้นหาชื่อผู้เล่น" value="${esc(search)}">${chips}${list.slice(0,shownRows).map(row).join('')||`<p class="hint">${players?'ไม่พบผู้เล่น':'กำลังโหลด…'}</p>`}${list.length>shownRows?`<button type="button" id="more-players" class="more">แสดงเพิ่ม (อีก ${list.length-shownRows} คน)</button>`:''}</section>`;
  let gift='<p class="hint big">← เลือกผู้เล่นทางซ้ายเพื่อดูกระเป๋าและส่งของ</p>';
  if(p){
@@ -523,7 +525,7 @@ function playersTab(){
   const bag=Object.entries(p.items).filter(([id,n])=>n>0&&ITEMS[id]).map(([id,n])=>`<span class="cell" title="${esc(itemName(id))} ×${n}">${pic(id,n)}</span>`).join('')||'<span class="hint">ว่าง</span>';
   const quick=QUICK.map(([id,n],i)=>`<button type="button" class="qbtn" data-quick="${i}">${id==='coins'?`<i class="ico" style="${iconStyle('cowrie')}"></i>`:`<i class="ico" data-item="${esc(id)}" style="${iconStyle(id)}"></i>`}<span>+${id==='coins'?n.toLocaleString('th-TH')+' เบี้ย':esc(itemName(id))+' ×'+n}</span></button>`).join('');
   const lines=basket.map((l,i)=>`<li>${pic(l.id)}<span>${esc(itemName(l.id))}</span><b>×${l.count}</b><button type="button" data-drop="${i}" aria-label="เอาออก">×</button></li>`).join('')+(giftCoins?`<li><i class="ico" style="${iconStyle('cowrie')}"></i><span>เบี้ย</span><b>${giftCoins.toLocaleString('th-TH')}</b><button type="button" data-drop="coins" aria-label="เอาออก">×</button></li>`:'');
-  gift=`<nav class="admin-gift-tabs" aria-label="ประเภทของที่จะมอบ"><button type="button" data-gift-pane="pets" aria-pressed="${giftPane==='pets'}">สัตว์เลี้ยงและทองแท่ง</button><button type="button" data-gift-pane="items" aria-pressed="${giftPane==='items'}">กระเป๋าและไอเท็ม</button></nav><form id="give" ${giftPane==='pets'?'hidden':''}><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small> ${state(p)}</div></div>`+
+  gift=adminLevelHTML(p,levelAdjustSending)+`<nav class="admin-gift-tabs" aria-label="ประเภทของที่จะมอบ"><button type="button" data-gift-pane="pets" aria-pressed="${giftPane==='pets'}">สัตว์เลี้ยงและทองแท่ง</button><button type="button" data-gift-pane="items" aria-pressed="${giftPane==='items'}">กระเป๋าและไอเท็ม</button></nav><form id="give" ${giftPane==='pets'?'hidden':''}><div class="ghead">${face(p)}<div><h3>${esc(p.name)}</h3><small>${esc(className(p.classId))} · Lv.${p.level} · ${p.coins.toLocaleString('th-TH')} เบี้ย</small> ${state(p)}</div></div>`+
    (p.offline?'<p class="hint offline-note">ผู้เล่นออฟไลน์อยู่ · ของที่ส่งจะเข้าจดหมาย ให้ผู้เล่นกดรับเมื่อเข้าเกม</p>':'')+
    `<h4>กระเป๋า</h4><div class="grid bag">${bag}</div>`+
    `<h4>ส่งด่วน</h4><div class="quick">${quick}</div>`+
@@ -550,6 +552,12 @@ function playersTab(){
  refocus('player-search',v=>{search=v;shownRows=50;});
  $('view').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{if(picked!==b.dataset.pick){picked=b.dataset.pick;basket=[];giftCoins=0;}adminMsg='';playersTab();});
  $('view').querySelectorAll('[data-gift-pane]').forEach(b=>b.onclick=()=>{giftPane=b.dataset.giftPane;playersTab();});
+ if(p)bindAdminLevels($('view'),{player:p,onSend:async payload=>{
+  if(levelAdjustSending)return;levelAdjustSending=true;playersTab();
+  try{const r=await adminFetch('/admin/levels',payload);adminMsg='เพิ่มเลเวลให้ '+r.name+' แล้ว · Base Lv.'+r.level+' · Job Lv.'+r.jobLevel;await loadPlayers(true,true);}
+  catch(e){adminMsg=ADMIN_ERRORS[e.message]??'เพิ่มเลเวลไม่สำเร็จ · '+e.message;}
+  finally{levelAdjustSending=false;playersTab();}
+ }});
  if(p)bindPetGrant($('view'),{player:p,draft:petGrantDrafts.get(p.id),busy:petGrantSending,onSend:async()=>{
   if(petGrantSending)return;const draft=petGrantDrafts.get(p.id),payload={peer:p.id,gems:draft.gems,pet:draft.pet||null},signature=JSON.stringify(payload);
   if(!petGrantPending||petGrantPending.signature!==signature)petGrantPending={signature,id:crypto.randomUUID()};petGrantSending=true;playersTab();

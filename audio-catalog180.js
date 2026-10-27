@@ -38,3 +38,14 @@ export const SFX={
  click:{name:'กดปุ่ม',on:'กดปุ่มในหน้าจอ',files:['click']},
 };
 export const audioUrl=file=>`${AUDIO_BASE}${file}.mp3?v=${AUDIO_VERSION}`;
+// 0.121 combat sounds (scripts/build-combat-sfx.mjs: Kenney CC0 + our own synthesis). Each class has its own basic
+// swing / hit (3 variants) and an ultimate sting; each skill plays its effect family's cast at the start and its hit on
+// every impact (2 variants). The family is the skill's first effect sheet in the skill profiles.
+export const COMBAT_BASE='assets/audio-combat/',COMBAT_VERSION='121';
+export const COMBAT_CLASSES=['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
+export const COMBAT_FAMILIES=['fist','sword','lance','arrow','shield','dust','banner','shadow','holy','talisman','spirit','lotus','venom','vines','rooster','rooster-crow','life-tree'];
+export const COMBAT_NAMES={swordsman:'นักดาบ',lancer:'นักทวน',hunter:'นายพราน',boxer:'นักมวย',rogue:'จอมโจร',shaman:'หมอผี',acolyte:'พระ / แม่ชี',
+ fist:'หมัด',sword:'ดาบ',lance:'ทวน',arrow:'ธนู',shield:'โล่',dust:'ฝุ่นดิน',banner:'ธงศึก',shadow:'เงา',holy:'แสงศักดิ์สิทธิ์',talisman:'ยันต์',spirit:'วิญญาณ',
+ lotus:'บัว',venom:'พิษ',vines:'เถาวัลย์',rooster:'ไก่ชน','rooster-crow':'ไก่ขัน','life-tree':'ต้นไม้แห่งชีวิต'};
+export const combatFile=(kind,id,part,v)=>`${kind}-${id}-${part}${v}`;
+export const combatUrl=file=>`${COMBAT_BASE}${file}.mp3?v=${COMBAT_VERSION}`;

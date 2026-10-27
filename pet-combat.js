@@ -1,4 +1,5 @@
 export const PET_SKILL_ERRORS={'pet-cooldown':'สกิลสัตว์เลี้ยงยังไม่พร้อม','pet-not-equipped':'เลือกสัตว์เลี้ยงติดตามก่อน','pet-safe-zone':'ออกนอกเมืองก่อนใช้สกิลโจมตี','pet-no-target':'เลือกมอนสเตอร์ในระยะก่อน','pet-cannot-act':'ยังใช้สกิลไม่ได้ในขณะนี้'};
+import {skillHit} from './skill-critical.js';
 // Pet effects are separate from class shields and cannot erase a class skill's state.
 export function tickPetEffects(w,dt){const s=w.petEffects;if(!s)return;for(const k of ['shieldLeft','guardLeft','blessingLeft'])s[k]=Math.max(0,(s[k]??0)-dt);if(!s.shieldLeft)s.shield=0;if(w.player.hp<=0)w.petEffects=null;}
 export function petIncoming(w,amount){const s=w.petEffects;if(!s)return amount;let n=amount*(s.guardLeft>0?1-s.guard:1);if(s.shieldLeft>0){const absorb=Math.min(n,s.shield);s.shield-=absorb;n-=absorb;}return Math.max(0,Math.round(n));}
@@ -10,7 +11,7 @@ export function castPremiumPet(w,pet,{lineClear,types}={}){
  if(offensive&&(w.safe||!visible(target)))throw Error(w.safe?'pet-safe-zone':'pet-no-target');
  const fx=w.petEffects??={shield:0,shieldLeft:0,guard:0,guardLeft:0,blessingLeft:0};
  const heal=share=>{const n=Math.max(0,Math.min(p.maxHp-p.hp,Math.round(p.maxHp*share)));p.hp+=n;w.emit('heal',{x:p.x,z:p.z,amount:n,color:s.color});};
- const damage=m=>w.hurt(m,Math.max(1,Math.round((w.derived?.atk??w.profession.damage??30)*s.power*w.guardOf(m,false))),s.color);
+ const damage=m=>skillHit(w,m,Math.max(1,Math.round((w.derived?.atk??w.profession.damage??30)*s.power*w.guardOf(m,false))),s.color,{source:'petSkill',magic:false});
  if(s.kind==='fireBurst')w.mobs.filter(m=>visible(m)&&Math.hypot(m.x-target.x,m.z-target.z)<=3).forEach(damage);
  if(s.kind==='lotusCleanse'){heal(s.power);delete w.status.poison;delete w.roleDebuffs?.poison;}
  if(s.kind==='riceHeal')heal(s.power);

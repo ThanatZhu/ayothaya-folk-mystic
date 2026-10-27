@@ -21,7 +21,7 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=novice174';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=live185';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=skill-crit1';
 import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,NOVICE_SLOTS,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=novice174';
 import {createRouteWalker} from './route-walk.js?v=bridge164';
 
@@ -258,7 +258,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(roleClip&&roleEffects.time<roleClip.start+roleClip.impacts.at(-1))return; // the realm still holds the last cast
   if(roleEffects.time<gcdUntil)return; // and its one-second gap between skills
   const foe=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null,to=aim.self&&!friend&&foe?foe:aim.at;
-  playCast({type:'cast',predicted:true,roleSkillId:s.roleSkillId,castId:'p'+(++predictSerial),timing:roleTiming(s,SKILL_PROFILES[s.roleSkillId]),from:{x:p.x,z:p.z},to:{x:to.x,z:to.z},kind:s.type,lag:0});
+  const predictedCast={type:'cast',predicted:true,roleSkillId:s.roleSkillId,castId:'p'+(++predictSerial),timing:roleTiming(s,SKILL_PROFILES[s.roleSkillId]),from:{x:p.x,z:p.z},to:{x:to.x,z:to.z},kind:s.type,lag:0};
+  playCast(predictedCast);for(const fn of listeners)fn(predictedCast); // the cast sound starts with the body (feedback.js skips the realm's echo)
   roleClip.predicted=wall();
  }
  function playCast(e){

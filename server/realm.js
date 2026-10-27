@@ -426,7 +426,7 @@ export class RealmServer{
   if(!g){if(w.rivals.length){if(String(w.targetId).startsWith('war:'))w.targetId=null;w.rivals=[];}return;}
   const list=s.holder===g.id?[]:[s.stone];p.rivalCache??=new Map();
   for(const id of p.room.peers){const a=this.peers.get(id);if(a===p||a.suspended||a.observer||!this.guildOf(a)||a.guildId===g.id)continue;
-   let v=p.rivalCache.get(a.id);if(!v){v={id:'war:'+a.id,pvp:true,name:a.character.name};p.rivalCache.set(a.id,v);}
+   let v=p.rivalCache.get(a.id);if(!v){v={id:'war:'+a.id,pvp:true,name:a.character.name,classId:a.character.classId,gender:a.character.gender};p.rivalCache.set(a.id,v);}
    Object.assign(v,{x:a.world.player.x,z:a.world.player.z,hp:a.world.player.hp,maxHp:a.world.player.maxHp,guild:this.guildOf(a)?.name??''});list.push(v);}
   w.rivals=list;
  }
@@ -487,7 +487,7 @@ export class RealmServer{
  startDuel(a,b){
   const until=this.now()+DUEL.time;
   for(const [x,y] of [[a,b],[b,a]]){const v=x.world.player;x.duelAsk=null;x.duel={foe:y.id,until};v.hp=v.maxHp;v.mp=v.maxMp;x.world.auto=false;
-   x.world.foe={id:'duel:'+y.id,pvp:true,name:y.character.name,x:0,z:0,hp:1,maxHp:1};this.duelSync(x);x.world.targetId=x.world.foe.id;x.world.path=[];
+   x.world.foe={id:'duel:'+y.id,pvp:true,name:y.character.name,classId:y.character.classId,gender:y.character.gender,x:0,z:0,hp:1,maxHp:1};this.duelSync(x);x.world.targetId=x.world.foe.id;x.world.path=[];
    x.world.notice('⚔️ เริ่มประลองกับ '+y.character.name+' · 90 วินาที · เดินห่างเกิน 20 ม. = เสมอ');}
  }
  // Copies the opponent's position and HP onto the stand-in target; false when the bout has to stop.

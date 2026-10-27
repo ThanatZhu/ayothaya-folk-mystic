@@ -40,7 +40,7 @@ html body.field-hud.hud63 #account-panel:not([data-blocking=true]) .account-card
 
 html body.field-hud.hud63 #mail-window[data-hud-panel][open]{height:min(660px,var(--window-height))!important;overflow:hidden}
 
-/* AUTO uses the utility-window centre, clear of the right-hand event and battle rails. */
+/* Compact AUTO panels use the utility-window centre; desktop docking follows below. */
 html body.field-hud.hud63 #auto-target-window[data-hud-panel][open]{
  inset:calc(var(--vv-top,0px) + var(--window-top)) var(--window-right) calc(100dvh - var(--vv-top,0px) - var(--vv-h,var(--visible-height,100dvh)) + var(--window-bottom)) var(--window-left)!important;
  margin:auto!important;
@@ -48,4 +48,15 @@ html body.field-hud.hud63 #auto-target-window[data-hud-panel][open]{
  height:min(550px,calc(var(--vv-h,var(--visible-height,100dvh)) - var(--window-top) - var(--window-bottom)))!important;
  max-height:calc(var(--vv-h,var(--visible-height,100dvh)) - var(--window-top) - var(--window-bottom))!important;
  z-index:70;overflow:hidden!important;
+}
+/* Desktop: dock above battle buttons, with one clear column for event icons. */
+@media(min-width:901px) and (min-height:650px){
+ html body.field-hud.hud63:not(.mobile-play) #auto-target-window[data-hud-panel][open]{
+  --auto-picker-bottom:calc(var(--window-bottom) + 124px);
+  --auto-picker-top:max(var(--window-top),min(calc(var(--events-top,220px) + 60px),calc(var(--visible-height,100dvh) - var(--auto-picker-bottom) - 300px)));
+  inset:var(--auto-picker-top) calc(var(--window-right) + 60px) calc(100dvh - var(--visible-height,100dvh) + var(--auto-picker-bottom)) auto!important;
+  margin:auto 0 0 auto!important;
+  height:min(550px,calc(var(--visible-height,100dvh) - var(--auto-picker-top) - var(--auto-picker-bottom)))!important;
+  max-height:calc(var(--visible-height,100dvh) - var(--auto-picker-top) - var(--auto-picker-bottom))!important;
+ }
 }

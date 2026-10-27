@@ -81,7 +81,7 @@ const NAV=[['ผู้เล่นและชุมชน',['players','mail','e
 // 0.118 evidence log (player names and details are shown exactly as recorded: data-i18n-skip): search what players and admins did (server keeps players 90 days, admins 3 years) and export it.
 const bkkDay=(t=Date.now())=>new Date(t+7*3600e3).toISOString().slice(0,10);
 const ev={stream:'players',from:bkkDay(),to:bkkDay(),type:'',q:'',rows:null,total:0,truncated:false,loading:false,msg:''};
-const EV_TYPES={players:[['','ทุกประเภท'],['login','เข้าเกม'],['logout','ออกจากเกม'],['chat','แชต'],['trade','แลกของ'],['market','ตลาด / แผง / ร้าน'],['mail','จดหมาย / รับของ'],['pet','สัตว์เลี้ยง'],['rename','เปลี่ยนชื่อ'],['travel','ย้ายแมพ'],['consent','ยอมรับนโยบาย']],admin:[['','ทุกการกระทำ'],['admin-mail','ส่งของ / จดหมาย'],['admin-balance','ปรับค่าสมดุล'],['admin-levels','เพิ่มเลเวลผู้เล่น'],['admin-weather','สภาพอากาศ'],['admin-boss','เสกบอส'],['admin-finance','บัญชีการเงิน'],['admin-world-reset','รีเซ็ตโลก'],['admin-evidence-search','ค้นบันทึกนี้']]};
+const EV_TYPES={players:[['','ทุกประเภท'],['login','เข้าเกม'],['logout','ออกจากเกม'],['disconnect','หลุดจากเกม'],['chat','แชต'],['trade','แลกของ'],['market','ตลาด / แผง / ร้าน'],['mail','จดหมาย / รับของ'],['pet','สัตว์เลี้ยง'],['rename','เปลี่ยนชื่อ'],['travel','ย้ายแมพ'],['consent','ยอมรับนโยบาย']],admin:[['','ทุกการกระทำ'],['admin-mail','ส่งของ / จดหมาย'],['admin-balance','ปรับค่าสมดุล'],['admin-levels','เพิ่มเลเวลผู้เล่น'],['admin-weather','สภาพอากาศ'],['admin-boss','เสกบอส'],['admin-finance','บัญชีการเงิน'],['admin-world-reset','รีเซ็ตโลก'],['admin-evidence-search','ค้นบันทึกนี้']]};
 const EV_LABEL=Object.fromEntries([...EV_TYPES.players,...EV_TYPES.admin].filter(([k])=>k));
 Object.assign(EV_LABEL,{'market-stall':'ซื้อจากแผง','market-shop-buy':'ซื้อจากร้าน','market-shop-sell':'ขายให้ร้าน','admin-mail-all':'ประกาศทุกคน','admin-world-reset-preview':'ดูตัวอย่างรีเซ็ต','admin-world-reset-execute':'สั่งรีเซ็ตโลก'});
 const evTime=t=>new Date(t).toLocaleString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -91,6 +91,8 @@ function evDetail(e){
  if(e.type==='trade')return 'แลกกับ '+(e.with?.name??'?')+' · ให้: '+evBag(e.gave)+' · ได้: '+evBag(e.got);
  if(e.type?.startsWith('market'))return itemName(e.item)+' ×'+e.count+' · '+num(e.coins)+' เบี้ย'+(e.seller?' · ผู้ขาย '+e.seller.name:e.shop?' · ร้าน '+e.shop.owner:'');
  if(e.type==='login')return e.agent??'';
+ // 0.122 reported by the client on its next join: a socket drop (close code, last server error) or a tab that died
+ if(e.type==='disconnect')return `${e.kind==='page'?'แท็บดับ/ถูกปิดเอง':'การเชื่อมต่อหลุด · close '+e.close+(e.reason?' '+e.reason:'')}${e.code?' · '+e.code:''} · ออนไลน์ ${Math.round(e.online/60)} นาที${e.hidden?' · แท็บถูกซ่อน':''}${e.net?' · '+e.net:''} · เวลา ${evTime(e.at)}`;
  if(e.type==='travel')return '→ '+e.to+(e.warp?' (วาร์ป)':'');
  if(e.type==='consent')return 'ฉบับ '+e.version+(e.email?' · '+e.email:'');
  const {t,type,uid,slot,server,name,ip,ch,map,admin,...rest}=e;return Object.keys(rest).length?JSON.stringify(rest):'';

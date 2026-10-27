@@ -5,7 +5,7 @@ const CLASSES=['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte']
 export const ADVENTURER_TIME=1200;
 const cache=new WeakMap();
 export function adventurerOffer(map){
- if(!map||map.safe||map.instance||map.pvpArena||map.id==='duel-arena'||map.guildHall)return null;
+ if(!map||map.safe||map.instance||map.prologue||map.pvpArena||map.id==='duel-arena'||map.guildHall)return null;
  const types=[...new Set((map.mobs??[]).map(([,,n])=>n))].map(n=>MONSTER_TYPES[n]).filter(Boolean),regular=types.filter(t=>!t.boss&&!t.mvp&&!t.worldBoss&&!t.elite);
  if(!regular.length)return null;
  const level=Math.max(...regular.map(t=>t.level||1)),cost=level<=10?200:level<=20?400:level<=35?800:level<=50?1500:level<=70?2500:4000;

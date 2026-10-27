@@ -4848,7 +4848,14 @@ Object.assign(globalThis.I18N_EN,{
  "ได้รับเซ็ตสีแดง Lv.55 ครบ 5 ชิ้นแล้ว · ตรวจดูในกระเป๋า": "All five red Lv.55 pieces received · Check your bag",
  "เปลี่ยนอาชีพสำเร็จ · รับทั้งเซ็ตสีแดง Lv.55": "Class Advanced · Claim Your Full Red Lv.55 Set",
  "ยินดีด้วยกับการเปลี่ยนอาชีพ! รับกล่องยุทธภัณฑ์แดง Lv.55 แล้วเปิดจากกระเป๋า เลือก 1 สายเซ็ต: ทะลวง เพชฌฆาต มนตรา กำแพงเพชร หรือวายุ ได้ครบ 5 ชิ้น ได้แก่ อาวุธ หมวก เสื้อ ผ้าคลุม และรองเท้า ตรงกับอาชีพและรูปลักษณ์ตัวละครขณะเปิดกล่อง ทุกชิ้นสีแดง สวมใส่เมื่อเลเวล 55 และร่วมโบนัสเซ็ตสายเดียวกัน": "Congratulations on advancing your class! Claim the Red Lv.55 Equipment Set Choice Box and open it from your bag. Choose Pierce, Executioner, Mantra, Diamond Wall or Wind to receive five pieces: weapon, headgear, armor, cloak and shoes. All pieces match your class and appearance when you open the box, are red grade, require Lv.55 to equip and count toward the matching set bonus.",
- "เปลี่ยนอาชีพ · กล่องเลือกเซ็ตแดง Lv.55": "Class advancement · Red Lv.55 equipment set choice box"
+ "เปลี่ยนอาชีพ · กล่องเลือกเซ็ตแดง Lv.55": "Class advancement · Red Lv.55 equipment set choice box",
+ "ทุ่งนิมิต": "Field of Visions",
+ "นิมิตก่อนออกเดินทาง · บทนำของนักเดินทางทุกคน": "A vision before the journey · Every traveller's prologue",
+ "วิญญาณครู": "Teacher Spirit",
+ "เจ้าตื่นแล้วหรือ นี่คือทุ่งนิมิต ก่อนออกเดินทาง ลองหมัดของเจ้ากับหุ่นฟางในทุ่งนี้ดูก่อน": "Awake at last? This is the Field of Visions. Before your journey, try your fists on the straw dolls in this meadow.",
+ "ลานตื่นนิมิต": "Waking Glade",
+ "ต้นไทรครู": "Teacher's Banyan",
+ "ลานศิลาโบราณ": "Ancient Stone Terrace"
 });
 
 Object.assign(globalThis.I18N_EN,{"ใช้ร่วมกับวัตถุดิบเดิม · พระเครื่องรุ้งใช้ 50,000 เศษต่อองค์ อุปกรณ์รุ้งอื่นใช้ 100 เศษต่อชิ้น · ค่าคราฟ 1,000,000 เบี้ย · กิลด์วอร์อันดับ 1–3 สำหรับสมาชิกที่ร่วมรบ หรือ ยักษ์เมฆาคุ้มขุนเขา (บอสยอดเขาไกรลาส) · สุ่มครั้งละ 1–3 เศษ":"Use with the original materials: rainbow amulets require 50,000 shards each; other rainbow equipment requires 100 shards each. Crafting fee: 1,000,000 cowries. Participating members of Guild War ranks 1-3, or the Cloud Peak Yaksha (Kailash Peak boss), receive 1-3 shards per reward."});

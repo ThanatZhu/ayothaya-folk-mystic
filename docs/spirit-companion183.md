@@ -25,3 +25,14 @@ The engine emits spiritSummon/spiritShot/spiritImpact/spiritDismiss with stable 
 - Actual measured shot→impact .30s; damage emitted in the same simulation tick as impact, HP1200→1172.
 - Final human-model screenshots visually inspected, including clear shoulder spacing. outputs/spirit182/ contains captures and checks.json.
 - Static build passed. No production accounts were used. No push/deployment performed.
+
+## Distinct companion attacks (spirit-shot184)
+
+User approved the human-faced spirit and requested visibly distinct companion attacks. The prototype now has:
+- Pre-shot soulflame gathering at the spirit's palm, a visible casting/throw pose, and a short source aura pulse.
+- A newly generated painted jade comet with jasmine petals and sacred-thread details (spirit-shot-v3.png; exact built-in image_gen prompt in prompt-shot-v3.json).
+- A continuous soft curved ribbon from the spirit to the moving projectile. The flight arcs above the player so its origin stays legible; no player swing animation is triggered by the companion.
+- A painted lotus/mist seal and petals at impact. Sprite-atlas borders feather in the renderer to avoid rectangular cut edges and neighboring-frame fragments.
+- Teal floating damage with the source label พราย. Only prototype companion hits get source/pet/shot attribution; prior damage context restores even if damage handling throws. Subsequent player hits retain their normal source.
+
+Damage strength, the1.2s cadence and .30s impact delay are unchanged. Reviewed mid-flight and full impact frames. Final checks:23/23 focused tests (spirit combat, existing role-live, localization),8 browser checks including mid-flight capture, source-labelled damage, exact impact timing and six viewport sizes; no console/shader/asset errors. Static build passed. New screenshots: outputs/spirit182/mid-flight-detail.png and impact-detail.png. Still a review prototype; no deployment performed.

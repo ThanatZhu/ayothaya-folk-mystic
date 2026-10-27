@@ -51,7 +51,7 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
    const valid=!!pet&&p.hp>0&&target?.hp>0&&w.foes().includes(target)&&visible(p,target);
    if(!valid||shot.left<=1e-8){
     const hit=valid&&shot.left<=1e-8,at=hit?target:shot.to;
-    if(hit){damage(target,shot.power);trigger('summonPower',target);if(mods().bondHeal&&target.roleStatus?.mark){heal(me(),mods().bondHeal);trigger('bondHeal');}}
+    if(hit){const previous=w.damageContext;w.damageContext={source:'spirit',petId:shot.petId,shotId:shot.shotId,roleSkillId:shot.skillId,owner:shot.owner};try{damage(target,shot.power);}finally{w.damageContext=previous;}trigger('summonPower',target);if(mods().bondHeal&&target.roleStatus?.mark){heal(me(),mods().bondHeal);trigger('bondHeal');}}
     w.emit('spiritImpact',{owner:shot.owner,petId:shot.petId,skillId:shot.skillId,tier:shot.tier,shotId:shot.shotId,targetId:shot.targetId,x:at.x,z:at.z,to:{x:at.x,z:at.z},hit,impactAt:w.time});shot.done=true;
    }
   }

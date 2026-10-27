@@ -33,11 +33,23 @@ test('resummoning replaces identity and cancels the old pet projectile; no attac
  const blocked=world();blocked.nav={...nav,obstacles:[{x:1,z:-2,w:1,d:4}]};summon(blocked);advance(blocked,1);assert.equal(blocked.events.some(e=>e.type==='spiritShot'),false);
 });
 test('live default spirit attacks keep immediate damage and rooster behavior is untouched',()=>{
- const w=world(false);summon(w);const hp=w.target.hp;advance(w,.5);assert.ok(w.target.hp<hp);assert.equal(w.events.some(e=>e.type==='spiritShot'),false);assert.equal(w.events.some(e=>e.type==='spiritSummon'),false);
+ const w=world(false);summon(w);const hp=w.target.hp;advance(w,.5);assert.ok(w.target.hp<hp);assert.equal(w.events.some(e=>e.type==='spiritShot'),false);assert.equal(w.events.some(e=>e.type==='spiritSummon'),false);assert.ok(w.events.filter(e=>e.type==='damage').every(e=>e.source!=='spirit'&&e.petId===undefined&&e.shotId===undefined));
  const hunter=new CombatWorld({classId:'hunter',roleSkills:true,nav,spawn:{x:0,z:0},mobs:[[1,0,0]]});hunter.spiritPrototype=true;hunter.skillLevels.fill(1);hunter.player.mp=10000;hunter.targetId=0;hunter.mobs[0].hp=100000;const index=hunter.skills.findIndex(s=>s.type==='summon');assert.equal(hunter.skill(index),true);advance(hunter,2);assert.ok(hunter.mobs[0].hp<100000);assert.equal(hunter.events.some(e=>e.type==='spiritShot'),false);
 });
 test('realm pet snapshots include stable identity, skill and tier without enabling prototype behavior',()=>{
  const map={id:'field',safe:false,nav,spawn:{x:0,z:0},mobs:[[3,0,0]],portals:[]},realm=new RealmServer({catalog:{capital:'field',maps:[map]},roleSkills:true});
  const p=realm.join({uid:'spirit-view',serverId:'server-1',slotId:'slot-1',record:{character:{name:'SpiritView',classId:'shaman',jobId:'spirit-master',gender:'male'},skills:{[ROLE_MARK]:Array(15).fill(0),shaman:Array(15).fill(1)},state:initialSave(),bag:{items:{},coins:0}},send(){}});
  p.world.player.mp=10000;p.world.skillLevels.fill(1);summon(p.world);realm.clock=120;const view=realm.snapshot(p).rolePets[0];assert.equal(view.owner,p.id);assert.equal(view.id,p.world.roleCombat.state.pets[0].id);assert.equal(view.skillId,'spirit');assert.equal(view.tier,'base');assert.equal(view.maxLeft,14);assert.equal(view.spawnedAt,120);assert.equal(view.endsAt,134);assert.equal(p.world.spiritPrototype,undefined);
+});
+
+
+test('prototype spirit damage carries companion identity and never leaks into later player hits',()=>{
+ const w=world();summon(w);const e=shot(w),beforeContext=w.damageContext;advance(w,.3);
+ const damage=w.events.find(event=>event.type==='damage'&&event.shotId===e.shotId);assert.ok(damage);assert.equal(damage.source,'spirit');assert.equal(damage.petId,e.petId);assert.equal(damage.roleSkillId,'spirit');assert.equal(damage.owner,'test-owner');assert.equal(damage.id,e.targetId);assert.equal(w.damageContext,beforeContext);
+ const prior={source:'basic',castId:882};w.damageContext=prior;w.hurt(w.target,5);const later=w.events.filter(event=>event.type==='damage').at(-1);assert.equal(later.source,'basic');assert.equal(later.castId,882);assert.equal(later.petId,undefined);assert.equal(later.shotId,undefined);assert.equal(w.damageContext,prior);
+});
+
+test('prototype spirit attribution restores an existing context even if damage processing throws',()=>{
+ const w=world();summon(w);shot(w);const prior={source:'skill',castId:111};w.damageContext=prior;const hurt=w.hurt;w.hurt=()=>{throw Error('injected-impact-failure');};
+ assert.throws(()=>advance(w,.3),/injected-impact-failure/);assert.equal(w.damageContext,prior);w.hurt=hurt;
 });

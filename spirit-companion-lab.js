@@ -3,7 +3,7 @@ import {CombatWorld} from './combat-core.js?v=spirit182';
 import {createRiggedSprite} from './rigged-sprite.js?v=novice174';
 import {characterMotion} from './character-motion.js?v=novice174';
 import {skillPose,skillTrack} from './skill-choreography.js?v=novice174';
-import {createSpiritCompanionVfx} from './spirit-companion-vfx.js?v=human183';
+import {createSpiritCompanionVfx} from './spirit-companion-vfx.js?v=spirit-shot184';
 
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion:reduce)'),stage=$('stage');
 const nav={zones:[{x:-18,z:-16,w:36,d:32}],obstacles:[],props:[]};
@@ -11,7 +11,7 @@ const world=new CombatWorld({nav,spawn:{x:-2,z:.7},mobs:[[3,0,0]],classId:'shama
 world.player.hp=world.player.maxHp=1000;world.player.mp=world.player.maxMp=1000;world.heroName='หมอผีอโยธยา';
 const dummy=world.mobs[0];Object.assign(dummy,{x:3,z:0,hp:1200,maxHp:1200,home:{x:3,z:0}});
 const skillIndex=world.skills.findIndex(s=>s.roleSkillId==='spirit'),skill=world.skills[skillIndex];
-let walking=false,attacking=false,loaded=false,disposed=false,castAt=-100,last=0,damageFlash=-100,phaseUntil=0,walkIndex=0,demo=false,walkPhase=0;
+let walking=false,attacking=false,loaded=false,disposed=false,castAt=-100,last=0,damageFlash=-100,phaseUntil=0,walkIndex=0,demo=false,walkPhase=0,paused=false;
 const walkPoints=[{x:-3.8,z:1.7},{x:-2.6,z:-1.4},{x:-.2,z:-.7},{x:-1.1,z:2.2}],ownedGeometry=[],ownedMaterials=[],ownedTextures=[],numbers=[],eventHistory=[];
 const scene=new THREE.Scene();scene.background=new THREE.Color('#3e5545');scene.fog=new THREE.Fog('#3e5545',20,45);
 const camera=new THREE.OrthographicCamera(-9,9,5,-5,.1,90);camera.position.set(0,11,15);camera.lookAt(0,.7,0);
@@ -57,7 +57,7 @@ function event(e){
  if(e.type==='spiritShot')phase('ปล่อยลูกไฟพราย →',e.duration??.3);
  if(e.type==='spiritImpact'){phase(e.hit?'ลูกไฟกระทบ · ดาเมจทำงานตรงจังหวะ':'เป้าหมายหายไป · ลูกไฟสลาย',.6);if(e.hit)damageFlash=world.time;}
  if(e.type==='damage'){
-  const p=projectAt(e.x,1.8,e.z),node=document.createElement('span');node.className='damage-number';node.textContent=Math.round(e.amount);node.style.left=p.x+'px';node.style.top=p.y+'px';$('damage-layer').append(node);numbers.push({node,left:.75});
+  const p=projectAt(e.x,1.8,e.z),node=document.createElement('span');node.className='damage-number'+(e.source==='spirit'?' spirit-damage':'');node.dataset.damageSource=e.source??'player';if(e.source==='spirit'){const label=document.createElement('small');label.textContent='พราย';node.append(label,document.createTextNode(Math.round(e.amount)));}else node.textContent=Math.round(e.amount);node.style.left=p.x+'px';node.style.top=p.y+'px';$('damage-layer').append(node);numbers.push({node,left:.75});
  }
 }
 function summon(){
@@ -84,7 +84,7 @@ function ui(){
  const hp=projectAt(world.player.x,2.5,world.player.z),tp=projectAt(dummy.x,2.5,dummy.z);$('hero-label').style.left=hp.x+'px';$('hero-label').style.top=hp.y+'px';$('target-label').style.left=tp.x+'px';$('target-label').style.top=tp.y+'px';
 }
 renderer.setAnimationLoop(ms=>{
- const dt=last?Math.min(.05,(ms-last)/1000):0;last=ms;if(!loaded||disposed||document.hidden)return;
+ const dt=last?Math.min(.05,(ms-last)/1000):0;last=ms;if(!loaded||disposed||document.hidden)return;if(paused){renderer.render(scene,camera);return;}
  if(demo){const t=world.time-demoStarted;if(t>1.9&&!attacking)setAttack(true);if(t>5.2&&!walking)setWalk(true);if(t>10.5)demo=false;}
  let direction={x:0,z:0,attack:false};if(walking){const to=walkPoints[walkIndex%walkPoints.length],dx=to.x-world.player.x,dz=to.z-world.player.z,d=Math.hypot(dx,dz);if(d<.15)walkIndex++;else direction={x:dx/d,z:dz/d,attack:false};}
  const before={x:world.player.x,z:world.player.z};world.update(dt,direction,{monsters:false});walkPhase+=Math.hypot(world.player.x-before.x,world.player.z-before.z)*1.1;
@@ -104,4 +104,4 @@ try{
 }catch(error){console.error(error);$('load-status').textContent='เตรียมภาพไม่สำเร็จ · '+error.message;document.body.dataset.ready='error';}
 function dispose(){if(disposed)return;disposed=true;renderer.setAnimationLoop(null);observer.disconnect();hero.userData.dispose();vfx.dispose();ownedGeometry.forEach(g=>g.dispose());ownedMaterials.forEach(m=>m.dispose());ownedTextures.forEach(t=>t.dispose());renderer.dispose();}
 addEventListener('pagehide',e=>{if(!e.persisted)dispose();});
-window.__spiritLab={world,scene,camera,renderer,vfx,actions:{summon,attack:()=>setAttack(true),stop:()=>setAttack(false),walk:()=>setWalk(true),reset,demo:playDemo},get loaded(){return loaded;},get events(){return [...eventHistory];},get metrics(){return {textures:renderer.info.memory.textures,geometries:renderer.info.memory.geometries,drawCalls:renderer.info.render.calls,vfx:vfx.metrics};}};
+window.__spiritLab={pause(value=true){paused=!!value;},world,scene,camera,renderer,vfx,actions:{summon,attack:()=>setAttack(true),stop:()=>setAttack(false),walk:()=>setWalk(true),reset,demo:playDemo},get loaded(){return loaded;},get events(){return [...eventHistory];},get metrics(){return {textures:renderer.info.memory.textures,geometries:renderer.info.memory.geometries,drawCalls:renderer.info.render.calls,vfx:vfx.metrics};}};

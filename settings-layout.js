@@ -19,7 +19,7 @@ function arrange(){
  put('sound',$('audio-settings'));
  put('view',card.querySelector('.camera-tilt'),perf);
  put('play',perf?.querySelector('[data-lang-toggle]')?.closest('label'),$('open-controls'),card.querySelector('.account-guide'));
- put('account',$('return-lobby'),$('link-account'),$('logout-account'));
+ put('account',$('observer-toggle'),$('return-lobby'),$('link-account'),$('logout-account'));
  // "back to the game" closes the card, full width, with the save note under it
  for(const el of [$('close-account'),card.querySelector('.minor')])if(el)card.append(el);
  for(const s of grid.querySelectorAll('.settings-section'))s.hidden=![...s.children].some(c=>c.tagName!=='H2'&&!c.hidden);

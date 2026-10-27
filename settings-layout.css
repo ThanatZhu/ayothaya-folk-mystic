@@ -37,3 +37,7 @@ html body #account-panel .account-card.settings-v2{width:min(720px,94vw)!importa
  .settings-v2 h1{font-size:19px}
 }
 @media (max-height:520px) and (min-width:701px){.settings-grid{grid-template-columns:1fr 1fr}.settings-col{display:grid}.settings-section[data-section]{order:0}}
+/* 0.119 observer (admins): the toggle in the account section and a badge while it is on */
+.settings-v2 #observer-toggle[aria-pressed=true]{border-color:#9fe0c0;background:linear-gradient(#1f4b3c,#123228);color:#c9f5df}
+#observer-badge{position:fixed;left:50%;top:max(104px,env(safe-area-inset-top));transform:translateX(-50%);z-index:30;padding:4px 14px;border:1px solid #c6a16499;border-radius:999px;background:#152925e6;box-shadow:0 2px 10px #0008;color:#fff0ce;font:700 12px/1.6 var(--font-game,Mali,Tahoma,sans-serif);pointer-events:none}
+#observer-badge[hidden]{display:none}

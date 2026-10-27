@@ -153,10 +153,30 @@ const PACK=[[0,0],[2.2,.7],[-1.8,1.6],[-.9,-2.2],[2,-1.6]];
 export const LEADER={hp:3,xp:2,loot:3,respawn:3,scale:1.35,member:.6};
 export const mobXp=m=>m.leader?LEADER.xp:m.pack!==undefined?LEADER.member:1;
 export const mobRespawn=m=>(MONSTER_TYPES[m.type].respawn??12)*(m.leader?LEADER.respawn:1);
-export function packSpawns(mobs,{packs=false,nav=DEFAULT_NAV}={}){
- if(!packs)return mobs;
- return mobs.flatMap(([x,z,type],i)=>{const T=MONSTER_TYPES[type];return T?.boss||T?.elite||T?.sheet==='elite-monsters'?[[x,z,type,i]]:PACK.slice(0,4+i%2).map(([dx,dz],k)=>{
+export function packSpawns(mobs,{packs=false,nav=DEFAULT_NAV,mobPopulation=1}={}){
+ const base=!packs?mobs:mobs.flatMap(([x,z,type],i)=>{const T=MONSTER_TYPES[type];return T?.boss||T?.elite||T?.sheet==='elite-monsters'?[[x,z,type,i]]:PACK.slice(0,4+i%2).map(([dx,dz],k)=>{
   for(const f of [1,.6,.3])if(walkable(x+dx*f,z+dz*f,.4,nav))return [x+dx*f,z+dz*f,type,i,k===0];return [x,z,type,i,k===0];});});
+ if(mobPopulation!==2)return base;
+ // Duplicate complete ordinary camps after packing, so odd camp sizes still
+ // double exactly. Original spawn IDs stay stable; copied camps get new IDs.
+ const groups=new Map(),used=base.map(([x,z])=>({x,z})),extra=[];
+ for(const [i,s]of base.entries()){
+  const type=MONSTER_TYPES[s[2]];if(!type||type.boss||type.elite||type.mvp||type.worldBoss||type.sheet==='elite-monsters')continue;
+  const key=s[3]===undefined?'single-'+i:'pack-'+s[3];if(!groups.has(key))groups.set(key,[]);groups.get(key).push(s);
+ }
+ const free=(x,z)=>walkable(x,z,.4,nav)&&used.every(p=>Math.hypot(x-p.x,z-p.z)>=.65);
+ let groupIndex=0;
+ for(const group of groups.values()){
+  const offsets=[];for(const radius of [2.8,4.2,1.8,5.6,1,7])for(let k=0;k<16;k++){
+   const angle=groupIndex*2.399963229728653+k*Math.PI/8;offsets.push([Math.cos(angle)*radius,Math.sin(angle)*radius]);
+  }
+  const common=offsets.find(([dx,dz])=>group.every(([x,z])=>free(x+dx,z+dz)));
+  for(const s of group){const [x,z]=s,offset=common&&free(x+common[0],z+common[1])?common:offsets.find(([dx,dz])=>free(x+dx,z+dz))??[0,0],copy=[x+offset[0],z+offset[1],...s.slice(2)];
+   if(copy[3]!==undefined)copy[3]+=base.length;extra.push(copy);used.push({x:copy[0],z:copy[1]});
+  }
+  groupIndex++;
+ }
+ return [...base,...extra];
 }
 // A struck monster calls up to two idle packmates within 6 m, so camps fight together.
 export function rallyPack(mobs,mob){

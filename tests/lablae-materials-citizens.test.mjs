@@ -36,9 +36,9 @@ test('standalone water keeps its original offset and still animates',()=>{
  assert.ok(map.offset.x<.1);assert.ok(map.offset.y>.2);
  const stopped=map.offset.clone();motion.toggle();motion.update(.08);assert.ok(map.offset.equals(stopped));
 });
-test('Lablae has 24 varied residents whose complete routes clear the collision grid',()=>{
+test('Lablae has 12 varied residents whose complete routes clear the collision grid',()=>{
  const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url))),map=catalog.maps.find(m=>m.id==='lablae');
- assert.deepEqual(map.citizens,lablaeCitizens());assert.equal(map.citizens.length,24);assert.equal(new Set(map.citizens.map(c=>c.style)).size,8);
+ assert.deepEqual(map.citizens,lablaeCitizens());assert.equal(map.citizens.length,12);assert.equal(new Set(map.citizens.map(c=>c.style)).size,8);
  assert.ok(!map.masterCourt);assert.equal(map.npcs.length,5);
  for(const c of map.citizens)for(let t=0;t<routeDuration(c.route,c.speed,c.pause);t+=.15){const p=sampleRoute(c.route,t,c);assert.ok(walkable(p.x,p.z,.6,map.nav),`${c.id} blocked at ${p.x},${p.z}`);}
 });

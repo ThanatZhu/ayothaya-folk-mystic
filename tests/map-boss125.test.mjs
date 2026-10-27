@@ -41,7 +41,7 @@ test('all nine field bosses have the exact 500k ladder, one reachable spawn and 
   assert.equal(spawns.length,1);assert.equal(MONSTER_TYPES[spawns[0][2]].id,b.id);
   assert.ok(findPath(map.spawn,{x:spawns[0][0],z:spawns[0][1]},map.nav).length);
   assert.ok(Math.hypot(spawns[0][0]-map.spawn.x,spawns[0][1]-map.spawn.z)>=14);
-  if(i>=4){const sim=new CombatWorld(map);assert.equal(sim.mobs.length,29);for(const m of sim.mobs)assert.ok(walkable(m.x,m.z,.32,map.nav));}
+  if(i>=4){const sim=new CombatWorld(map);assert.equal(sim.mobs.length,56);for(const m of sim.mobs)assert.ok(walkable(m.x,m.z,.32,map.nav));}
  }
  for(const map of catalog.maps.filter(m=>m.safe||m.instance))assert.equal(map.mobs.filter(([,,i])=>MONSTER_TYPES[i].worldBoss).length,0);
  for(let i=5;i<9;i++){

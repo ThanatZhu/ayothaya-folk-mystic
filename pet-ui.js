@@ -14,5 +14,5 @@ export function createPetUI({game,scene}){
  const panel=createPremiumPetPanel({game,dialog}),mail=createMailboxUI({game});let view=null;
  menu.onclick=()=>{if(dialog.open)dialog.close();else{game.clearInput();openHudPanel(dialog);panel.render(true);}};dialog.querySelector('#pet-close').onclick=()=>dialog.close();
  game.onEvent(e=>{if(e.type==='petSkill'&&(!e.actor||e.actor===world.networkSelfId))view?.attack(e.to,e.lag??0);});
- return {update(dt){const pet=activePremiumPet(world.petCollection);panel.render();mail.update();world.petBonus=pet?.bonus??{};if(view&&view.id!==pet?.id){view.dispose();view=null;}if(pet&&!view)view=createAnimatedPet(scene,pet.id);view?.follow({x:world.player.x,z:world.player.z,y:groundHeight(world.nav,world.player.x,world.player.z)},dt);}};
+ return {update(dt){const pet=activePremiumPet(world.petCollection);panel.render();mail.update();world.petBonus=pet?.bonus??{};if(view&&view.id!==pet?.id){view.dispose();view=null;}if(pet&&!view)view=createAnimatedPet(scene,pet.id);view?.follow({x:world.player.x,z:world.player.z,y:groundHeight(world.nav,world.player.x,world.player.z)},dt);if(view?.sprite)view.sprite.visible=!world.observer;}};
 }

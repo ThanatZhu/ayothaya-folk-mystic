@@ -207,7 +207,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // 0.119 ground AOE: the circle shows the real area at the cursor (or the target, on touch) and a ring the reach;
  // click/tap the ground or press the skill again to put it there. Out of reach it turns orange, and placing it walks in first.
- // 0.119 observer (admins): invisible and untargetable on the realm; here the hero turns see-through with a badge,
+ // 0.119 observer (admins): invisible and untargetable on the realm, and not drawn here either: only the camera moves,
  // and the choice is remembered per character, so a reconnect or a map change turns it back on.
  const observerButton=document.createElement('button'),observerBadge=document.createElement('div');let observerAsked=false;
  observerButton.type='button';observerButton.id='observer-toggle';observerButton.hidden=true;$('return-lobby')?.before(observerButton);
@@ -219,7 +219,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   observerButton.textContent=world.observer?'👁 โหมดผู้ชม · เปิดอยู่ · กดเพื่อปิด':'👁 โหมดผู้ชม (ล่องหน · ไม่ตกเป็นเป้า)';
   if(world.isAdmin&&!world.observer&&!observerAsked&&rememberedObserver()){observerAsked=true;world.setObserver?.(true);}
  }
- function ghostHero(on){hero.sprite.traverse(o=>{const m=o.material;if(!m||m.userData.ghost===on)return;m.userData.ghost=on;m.userData.alphaTest??=m.alphaTest;m.transparent=on;m.opacity=on?.5:1;m.alphaTest=on?m.userData.alphaTest*.5:m.userData.alphaTest;m.needsUpdate=true;});}
+ let heroHidden=false;
+ function hideHero(on){
+  if(on)hero.sprite.visible=hero.shadow.visible=playerRing.visible=shield.visible=false;else if(heroHidden)hero.sprite.visible=hero.shadow.visible=playerRing.visible=true;
+  if(on!==heroHidden){heroHidden=on;playerLabel.style.display=on?'none':'';}
+ }
  let groundAim=null,mouseAim=null,gcdUntil=0;
  // 0.119 cast bar under the hero while a skill winds up to its first release (the realm's own beats).
  const castBar=document.createElement('div');castBar.id='role-cast-bar';castBar.hidden=true;castBar.setAttribute('role','progressbar');castBar.setAttribute('aria-valuemin','0');castBar.setAttribute('aria-valuemax','100');castBar.innerHTML='<span></span><i><b></b></i>';$('game-shell').append(castBar);
@@ -486,7 +490,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   const floor=groundHeight(world.nav,p.x,p.z);
-  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);drawCastBar(p,floor);ghostHero(!!world.observer);
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);drawCastBar(p,floor);
   hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);
   const azimuth=controls.getAzimuthalAngle(),poseFace=rolePose?(roleClip.facing??p.face):t<castUntil?(castFace??p.face):p.face;
   if(hero.frames)hero.sprite.material.map=hero.frames[0];
@@ -496,10 +500,10 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   hero.sprite.userData.pose?.(visualPose,heroFlip);
   if(world.time>=hitTintUntil)hero.sprite.material.color.lerp(new THREE.Color('#fff1da'),Math.min(1,dt*4)); // 1.09.4 a faint red that lingers a moment when hithero.sprite.visible=p.hp>0;hero.shadow.visible=p.hp>0;
   footDust.update(dt);
-  if(locomotion&&!reduced){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,floor+(!world.nav.grid&&p.z>4.25?.44:.09),p.z-p.face.z/faceLength*.25);}}
+  if(locomotion&&!reduced&&!world.observer){const step=Math.floor(gait*2+.5);if(step!==lastStep){lastStep=step;footDust.puff(p.x-p.face.x/faceLength*.25,floor+(!world.nav.grid&&p.z>4.25?.44:.09),p.z-p.face.z/faceLength*.25);}}
   let flash=0,shake=0;for(const s of strikes){const d=t-s.at;if(d>=0&&d<.45){flash=Math.max(flash,s.power*Math.exp(-d*9));if(d<.25)shake=Math.max(shake,s.power*Math.exp(-d*16));}}strikes=strikes.filter(s=>t-s.at<.5);
   castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,floor+1.3,p.z);kick*=Math.exp(-dt*14);shakeAmount=reduced?0:Math.max(shake*.11,kick*.07,roleShake);
-  hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,floor+.1,p.z);shield.visible=p.shield>0;
+  hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,floor+.1,p.z);shield.visible=p.shield>0;hideHero(!!world.observer);
   // Camera follows the player while preserving user-controlled azimuth and zoom.
   const follow=new THREE.Vector3(p.x,floor+1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
   controls.update();camera.updateMatrixWorld();

@@ -11,6 +11,7 @@ import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
 import {createRealmStore} from './realm-store.js?v=114';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
+import {ensureConsent} from './consent.js?v=1';
 wakeServer();
 const $=id=>document.getElementById(id);
 createLandscapeGuard({allowPortrait:true});
@@ -53,6 +54,8 @@ function setButtons(){
  $('login-quick').hidden=!!u;$('link-google').hidden=!(u&&u.isAnonymous);
 }
 async function selectIdentity(id){
+ // 0.117 online accounts (Google or quick play) accept the terms and privacy policy once per version
+ if(id!=='guest'){lock(true);const ok=await ensureConsent(connection?.auth.currentUser).catch(()=>false);lock(false);if(!ok){say('ต้องยอมรับข้อกำหนดและนโยบายความเป็นส่วนตัวก่อนเล่นออนไลน์ · หรือเลือกเล่นออฟไลน์บนเครื่องนี้');return;}}
  lock(true);say('กำลังเตรียมรายชื่อเซิร์ฟเวอร์…');
  try{await catalogReady;owner=id;store=createRealmStore({connection,owner,catalog});showIdentity();show('servers');}
  catch(e){report(e);}finally{lock(false);}

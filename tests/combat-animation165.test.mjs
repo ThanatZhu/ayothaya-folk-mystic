@@ -10,8 +10,8 @@ import {skillPose,skillTrack} from '../skill-choreography.js';
 const active=ALL_PROFILES.filter(p=>!p.passive),classes=['novice','swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
 const event=p=>({roleSkillId:p.id,castId:19,lag:.07,timing:roleTiming({type:p.skill.kind,windup:p.skill.windup},p)});
 
-test('all 84 base/Master skills use the same advertised release clock for body and effect',()=>{
- assert.equal(active.length,84);
+test('all 98 base/Master skills use the same advertised release clock for body and effect',()=>{
+ assert.equal(active.length,98);
  for(const p of active){
   const e=event(p),a=createRoleAnimation(e,10),bodyEnd=a.start+a.duration,release=a.impacts.at(-1);
   assert.equal(a.start,9.93);assert.equal(sampleRolePose(a,a.start-.001),null);assert.equal(sampleRolePose(a,bodyEnd),null);assert.equal(roleAnimationActive(a,bodyEnd),false);
@@ -26,7 +26,7 @@ test('all 84 base/Master skills use the same advertised release clock for body a
 });
 
 test('server timing overrides and delivery lag retime effects and poses without restarting or changing damage rules',()=>{
- const p=active.find(p=>p.id==='mae-mai'),original=JSON.stringify(p),e=event(p);e.timing={...e.timing,impacts:[.2,.4,.7],duration:.86};
+ const p=active.find(p=>p.id==='mb-maemai'),original=JSON.stringify(p),e=event(p);e.timing={...e.timing,impacts:[.2,.4,.7],duration:.86};
  const local=createRoleAnimation(e,4),remote=createRoleAnimation({...e,lag:.19},4.12);
  for(let age=.01;age<.86;age+=.02){const l=sampleRolePose(local,local.start+age),r=sampleRolePose(remote,remote.start+age);assert.equal(l.artFrame,r.artFrame);assert.ok(Math.abs(l.time-r.time)<1e-9);}
  for(const [i,at]of e.timing.impacts.entries())assert.equal(roleEffectTime(local,at),p.impacts[i]);
@@ -62,7 +62,7 @@ test('every profession and gender renders authored skill pixels instead of direc
 });
 
 test('in-world effect origins remain attached to the caster while the approved preview keeps its authored lunge',()=>{
- const p=active.find(p=>p.id==='flying-knee'),a=createRoleAnimation(event(p),0),t=p.impacts[0];
+ const p=active.find(p=>p.id==='mb-flying-knee'),a=createRoleAnimation(event(p),0),t=p.impacts[0];
  assert.ok(sampleSkill(p.id,t).heroX>-2);assert.equal(sampleRoleEffect(a,t).heroX,-2);assert.equal(sampleRoleEffect(a,t).heroZ,0);
  assert.equal(sampleRoleEffect(a,t).heroY,sampleRolePose(a,a.start+t).y);
 });

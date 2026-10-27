@@ -3,14 +3,14 @@ import {CombatWorld} from './combat-core.js?v=spirit182';
 import {createRiggedSprite} from './rigged-sprite.js?v=novice174';
 import {characterMotion} from './character-motion.js?v=novice174';
 import {skillPose,skillTrack} from './skill-choreography.js?v=novice174';
-import {createSpiritCompanionVfx} from './spirit-companion-vfx.js?v=spirit-shot184';
+import {createSpiritCompanionVfx} from './spirit-companion-vfx.js?v=live185';
 
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion:reduce)'),stage=$('stage');
 const nav={zones:[{x:-18,z:-16,w:36,d:32}],obstacles:[],props:[]};
-const world=new CombatWorld({nav,spawn:{x:-2,z:.7},mobs:[[3,0,0]],classId:'shaman',roleSkills:true});world.spiritPrototype=true;world.roleOwnerId='lab-shaman';
+const world=new CombatWorld({nav,spawn:{x:-2,z:.7},mobs:[[3,0,0]],classId:'shaman',jobId:'spirit-master',roleSkills:true});world.spiritPrototype=true;world.roleOwnerId='lab-shaman';
 world.player.hp=world.player.maxHp=1000;world.player.mp=world.player.maxMp=1000;world.heroName='หมอผีอโยธยา';
 const dummy=world.mobs[0];Object.assign(dummy,{x:3,z:0,hp:1200,maxHp:1200,home:{x:3,z:0}});
-const skillIndex=world.skills.findIndex(s=>s.roleSkillId==='spirit'),skill=world.skills[skillIndex];
+const skillIndex=world.skills.findIndex(s=>s.type==='greatSpirit'),skill=world.skills[skillIndex];world.skillLevels[skillIndex]=1;
 let walking=false,attacking=false,loaded=false,disposed=false,castAt=-100,last=0,damageFlash=-100,phaseUntil=0,walkIndex=0,demo=false,walkPhase=0,paused=false;
 const walkPoints=[{x:-3.8,z:1.7},{x:-2.6,z:-1.4},{x:-.2,z:-.7},{x:-1.1,z:2.2}],ownedGeometry=[],ownedMaterials=[],ownedTextures=[],numbers=[],eventHistory=[];
 const scene=new THREE.Scene();scene.background=new THREE.Color('#3e5545');scene.fog=new THREE.Fog('#3e5545',20,45);

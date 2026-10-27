@@ -1,4 +1,5 @@
 import {ALL_SKILLS,roleById} from '../skills-next/catalog.js';
+import {LEGACY_SKILLS} from '../skills-next/catalog-legacy.js';
 import {sampleClip} from './timing.js';
 
 export const PAINTED_SHEETS={
@@ -15,7 +16,7 @@ const ring=(sheet,at=.7,scale=1.8,extra={})=>L(sheet,at-.2,2,scale,{mode:'orbit'
 const poses={swordsman:{cast:5,strike:6,second:7,guard:8},lancer:{cast:5,strike:6,second:7,guard:8},hunter:{cast:6,strike:7,second:8,guard:5},boxer:{cast:5,strike:6,second:7,guard:0},rogue:{cast:5,strike:6,second:7,guard:5},shaman:{cast:8,strike:9,second:6,guard:8},acolyte:{cast:11,strike:7,second:8,guard:9}};
 const profiles={};
 function define(id,layers,extra={}){
- const skill=ALL_SKILLS.find(s=>s.id===id);if(!skill)throw new Error('Missing skill '+id);
+ const skill=LEGACY_SKILLS.find(s=>s.id===id);if(!skill)throw new Error('Missing skill '+id);
  profiles[id]={id,skill,classId:skill.classId,title:skill.name,color:roleById(skill.classId).color,layers,impacts:[.72],duration:3.6,movement:'none',target:'enemy',scenario:skill.tip,...extra};
  return profiles[id];
 }
@@ -150,6 +151,9 @@ profiles['reverse-fate'].layers[2].reflect=true;
 profiles['return-force'].layers[1].reflect=true;
 Object.assign(profiles['arrow-rain'].layers[0],{waves:4,interval:.35});
 profiles.clones.ghosts=true;
+// 0.119 each reworked skill borrows the painted profile of its catalog `fx` skill until its own VFX lands; the
+// pre-0.119 profiles stay keyed by their old ids (pet effects reuse them).
+for(const skill of ALL_SKILLS){const from=profiles[skill.fx];if(!from)throw new Error('Missing fx profile '+skill.fx);profiles[skill.id]={...from,layers:from.layers.map(l=>({...l})),id:skill.id,skill,classId:skill.classId,title:skill.name,color:roleById(skill.classId).color,scenario:skill.name+' · '+skill.tip};}
 for(const p of Object.values(profiles)){
  p.passive=!!p.skill.passive;
  p.branch=roleById(p.classId).branches.find(b=>b.id===p.skill.branchId)??null;

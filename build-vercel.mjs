@@ -18,9 +18,11 @@ for(const entry of await readdir(root,{withFileTypes:true})){
   await cp(path.join(root,entry.name),path.join(output,entry.name));
  }
 }
+// The pose art pack keeps its PNG masters, raw images and review pages in the repo; the game ships only game/ and the map.
+const poses=path.join(root,'assets','skills-next','poses-2026-10')+path.sep;
 for(const directory of ['assets','maps','vendor']){
  await cp(path.join(root,directory),path.join(output,directory),{
-  recursive:true,filter:source=>!(/\.(blend|blend1|py)$/.test(source))
+  recursive:true,filter:source=>!(/\.(blend|blend1|py)$/.test(source))&&!(source.startsWith(poses)&&!/^(game|pose-map\.js)/.test(source.slice(poses.length)))
  });
 }
 for(const name of ['index.html','game.html','lobby.js','viewer-world.js','firebase-config.js','maps/world.json','vendor/build/three.module.js']){

@@ -4,13 +4,14 @@ import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {FRAME_COUNT} from './animation-frames.js?v=37';
 import {loadLifeArt,lifeFrameAt} from './character-life-art.js?v=106.0';
 import {createPosturePlayback} from './character-action-state.js?v=106.0';
+import {poseTexture,poseScale,posesFit} from './skill-pose-art.js?v=pose119';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
 export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt}={}){
  const geometry=new THREE.PlaneGeometry(1,1);geometry.translate(0,.5,0);
  const material=new THREE.MeshBasicMaterial({map:texture,alphaTest:.45,transparent:false,depthWrite:true,side:THREE.DoubleSide,color:'#fff1da'});
  const mesh=new THREE.Mesh(geometry,material);mesh.frustumCulled=false;
  const posture=createPosturePlayback();let transitionFlip=null;
- let frames=null,life=null,version=0,disposed=false,currentClass=classId,currentGender=gender,currentAppearance=appearance,loadedClass=null,appearanceDirty=false;
+ let frames=null,life=null,version=0,disposed=false,currentClass=classId,currentGender=gender,currentAppearance=appearance,loadedClass=null,appearanceDirty=false,poseFit=false;
  const textureFor=cell=>{const t=new THREE.CanvasTexture(cell);t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;return t;};
  function release(){
   // Idle/sit/sleep clips can reuse the same canvas and therefore GPU texture.
@@ -29,10 +30,10 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   const converted=new Map(),convert=cell=>{if(!converted.has(cell))converted.set(cell,textureFor(cell));return converted.get(cell);};
   return {...art,clips:Object.fromEntries(Object.entries(art.clips).map(([name,clip])=>[name,{...clip,frames:clip.frames.map(convert)}]))};
  }
- function install(art,newLife,id){
+ function install(art,newLife,id,gear=equipment){
   const next=Object.fromEntries(Object.entries(art).map(([key,cells])=>[key,cells.map(textureFor)]));
   const nextLife=newLife&&Object.fromEntries(Object.entries(newLife).map(([key,value])=>[key,textures(value)]));
-  release();frames=next;life=nextLife;loadedClass=id;appearanceDirty=false;
+  release();frames=next;life=nextLife;loadedClass=id;appearanceDirty=false;poseFit=posesFit(id,currentAppearance,gear);
   material.map=frames[currentGender][Math.min(mesh.userData.artFrame??0,frames[currentGender].length-1)];
   mesh.userData.artReady=true;mesh.userData.lifeAction=null;delete mesh.userData.artError;
  }
@@ -61,7 +62,7 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   const token=++version;
   const id=currentClass,{art,newLife,lifeError}=await artwork(id,currentAppearance,value);
   if(disposed||token!==version)return false;
-  install(art,newLife,id);equipment=value;mesh.userData.lifeError=lifeError;return true;
+  install(art,newLife,id,value);equipment=value;mesh.userData.lifeError=lifeError;return true;
  };
  mesh.userData.rigType='painted-frames';
  mesh.onBeforeRender=(_r,_s,camera)=>{mesh.quaternion.copy(camera.quaternion);mesh.updateMatrixWorld();};
@@ -79,12 +80,16 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   // A class without front/back art: walking falls back to the side cycle, standing to the original idle frame.
   const missing=frames&&frame>=frames[currentGender].length;if(missing)frame=pose.stand?0:12+(frame-12)%8;
   if(frame>=20&&lifeIndex<0)flip=false; // front/back walk art is drawn facing the camera / away from it
+  // 0.119 a skill with its own pose sheet draws it; until it loads, or for gear the sheet cannot show, the class frames play.
+  const skill=pose.skillArt,art=skill&&poseFit&&frames&&!mesh.userData.directional&&loadedClass===currentClass?poseTexture(skill.id,currentClass,currentGender,skill.frame):null;
+  mesh.userData.skillArt=art?skill.id:null;
   if(!mesh.userData.directional&&frames){
-   material.map=lifeIndex>=0?clip.frames[lifeIndex]:frames[currentGender][frame];
+   material.map=art??(lifeIndex>=0?clip.frames[lifeIndex]:frames[currentGender][frame]);
    mesh.userData.artFrame=frame;mesh.userData.lifeAction=lifeIndex>=0?action:null;mesh.userData.lifeFrame=lifeIndex;mesh.userData.lifeTransition=resolved.transition;
   }
-  const painted=frames&&!mesh.userData.directional,extent=painted?FRAME_SIZE/LOGICAL_SIZE:1;
-  const positions=geometry.attributes.position,foot=mesh.userData.directional?(mesh.userData.footV??1):painted?FRAME_FOOT/LOGICAL_SIZE:1;
+  // Pose cells share the 320 frame and its ground anchor; their scale brings the standing body to the class frames' height.
+  const painted=frames&&!mesh.userData.directional,size=art?poseScale(skill.id,currentGender):1,extent=painted?size*FRAME_SIZE/LOGICAL_SIZE:1;
+  const positions=geometry.attributes.position,foot=mesh.userData.directional?(mesh.userData.footV??1):painted?size*FRAME_FOOT/LOGICAL_SIZE:1;
   // A sub-pixel breath about the planted contact; no joint cuts, moving bag or gait deformation.
   const breath=pose.reduced?1:['idle','sit','sleep','rest'].includes(action)?1+Math.sin((pose.time??0)*Math.PI*2/(action==='sleep'?4.8:4.1))*.0025:1;
   positions.setXYZ(0,(flip?.5:-.5)*extent,foot*breath,0);positions.setXYZ(1,(flip?-.5:.5)*extent,foot*breath,0);

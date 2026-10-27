@@ -114,3 +114,22 @@
 .gift .pick-count{margin:0;font-size:12px;color:#bdb39c;font-variant-numeric:tabular-nums}
 .gift .more{width:100%}
 #tip .tip-grade{margin:4px 0 0;font-weight:700;color:#f4cf7a}
+
+/* 0.118 evidence log tab */
+.luxury-office .ev-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;margin-bottom:12px}
+.luxury-office .ev-filters label{display:grid;gap:4px;font-size:11px;color:var(--muted)}
+.luxury-office .ev-filters .ev-q{flex:1 1 220px}
+.luxury-office .ev-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 12px;font-size:12px;color:var(--muted)}
+.luxury-office .ev-export{display:flex;gap:6px}
+.luxury-office .ev-scroll{max-height:68dvh;overflow:auto;border:1px solid var(--rule);border-radius:8px}
+.luxury-office .ev-table{width:100%;min-width:900px;border-collapse:collapse}
+.luxury-office .ev-table th{position:sticky;top:0;z-index:1;text-align:left;padding:8px 10px;font-size:11px;color:var(--gold);background:#10271f;border-bottom:1px solid var(--rule);white-space:nowrap}
+.luxury-office .ev-table td{text-align:left;vertical-align:top;padding:7px 10px;font-size:12px;border-bottom:1px solid #dfbd761a}
+.luxury-office .ev-table b{display:block;color:var(--ink)}
+.luxury-office .ev-table small{display:block;color:var(--muted);font-size:10px}
+.luxury-office .ev-time,.luxury-office .ev-ip{white-space:nowrap;font-variant-numeric:tabular-nums}
+.luxury-office .ev-detail{max-width:520px;overflow-wrap:anywhere}
+.luxury-office .ev-type{display:inline-block;padding:1px 8px;border-radius:999px;border:1px solid var(--rule);font-size:11px;white-space:nowrap}
+.luxury-office .ev-chat{border-color:#b2d6bf66;color:#b2d6bf}.luxury-office .ev-trade,.luxury-office .ev-market{border-color:#dfbd7666;color:#f0d397}
+.luxury-office .ev-admin{border-color:#e7a39a66;color:#e7a39a}
+.luxury-office .ev-note{margin-top:12px;font-size:11px;color:var(--muted)}

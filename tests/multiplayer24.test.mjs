@@ -42,7 +42,7 @@ test('safe cities cannot spawn or attack monsters and reject invalid skill slots
 });
 test('all professions use server-authorized skills against the same shared monster',()=>{
  for(const c of [NOVICE,...CLASSES]){
-  const {realm,add,send,step}=fixture({safe:false});const a=add('playerOne',c.id),b=add('playerTwo');assert.equal(a.peer.world.mobs,b.peer.world.mobs);
+  const {realm,add,send,step}=fixture({safe:false});const a=add('playerOne',c.id),b=add('playerTwo');assert.equal(a.peer.world.mobs,b.peer.world.mobs);if(c.id!=='novice')a.peer.world.skillLevels[0]=1; // 0.119 class skills start unlearned
   const hp=a.peer.world.mobs[0].hp;send(a.peer,'select',{target:0});send(a.peer,'skill',{index:0});step(2);
   // snapshots carry only changed monster fields: merge what playerTwo received, as the client does
   const seen=Object.assign({},...b.messages.flatMap(m=>m.mobs??m.snapshot?.mobs??[]).filter(m=>m.id===0));

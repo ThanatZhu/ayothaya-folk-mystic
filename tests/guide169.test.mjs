@@ -14,7 +14,7 @@ test('public reference is a deterministic export of gameplay data, not a hand-ma
  const before=read('assets/guide169/game-data.json');execFileSync(process.execPath,['scripts/build-guide169.mjs'],{cwd:fileURLToPath(root)});
  assert.equal(read('assets/guide169/game-data.json'),before);
  assert.deepEqual(data.rules.refine.rates,REFINE_RATE);assert.deepEqual(data.rules.refine.tiers,REFINE_TIERS);
- assert.equal(data.skills.length,ROLES.reduce((sum,r)=>sum+r.base.length+r.branches.reduce((n,b)=>n+b.active.length+b.passives.length,0),0));
+ assert.equal(data.skills.length,ROLES.reduce((sum,r)=>sum+r.base.length+r.passives.length+r.branches.reduce((n,b)=>n+b.active.length+b.passives.length,0),0));
  assert.equal(data.pets.length,PREMIUM_PETS.length);
  assert.ok(data.items.length>350);assert.ok(data.recipes.length>90);assert.equal(data.maps.length,14);
  for(const it of data.items){assert.ok(!ITEMS[it.id].retired);assert.notEqual(it.kind,'reserved');}
@@ -32,7 +32,7 @@ test('detailed handbook covers live systems and distinguishes preview rewards',(
  for(const id of ['account','masters','refine','cards','album','gacha','quests','bosses','party','war','arena','rebirth','mail','events','faq'])assert.ok(ids.includes(id),id);
  assert.match(book,/ต้องฝาก|กดฝาก/);assert.match(book,/200 ฉบับ/);assert.match(book,/ยังไม่เปิด ranked queue/);assert.match(book,/ยังไม่กำหนดวันสิ้นสุด/);
  assert.equal(data.rules.cbt.claimEnabled,false);assert.equal(data.rules.cbt.rankedQueueEnabled,false);
- for(const s of data.skills)assert.equal(s.max,s.passive?1:10);
+ for(const s of data.skills)assert.equal(s.max,s.passive?3:5); // 0.119 ranks
 });
 test('guide is linked from home and game without loading the game or auth runtime',()=>{
  const html=read('guide.html'),js=read('guide.js');
@@ -44,7 +44,7 @@ test('guide is linked from home and game without loading the game or auth runtim
 test('illustrated walkthroughs have real optimized images, valid chapter links and readable callout text',()=>{
  const {pictures}=JSON.parse(read('assets/guide169/visuals.json'));
  const ids=new Set(book.trim().split(/\n@/).map(s=>s.replace(/^@/,'').split('|')[0]));
- assert.equal(pictures.length,17);assert.equal(new Set(pictures.map(p=>p.id)).size,pictures.length);
+ assert.equal(pictures.length,20);assert.equal(new Set(pictures.map(p=>p.id)).size,pictures.length);
  let bytes=0;
  for(const p of pictures){
   assert.ok(p.title&&p.alt&&p.description,p.id);assert.ok(p.width>300&&p.height>250,p.id);

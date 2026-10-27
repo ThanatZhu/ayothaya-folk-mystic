@@ -1,25 +1,27 @@
 import {characterHead} from './character-label.js?v=149';
-import {createRoleWorldDecor} from './role-world-decor.js';
+import {createRoleWorldDecor} from './role-world-decor.js?v=live185';
 import {loadMonsterFrames} from './monster-art.js?v=world125';
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progress.js';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
-import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing} from './combat-animation165.js?v=align169';
-import {createLiveRoleVfx} from './role-skill-vfx.js?v=align169';
-import {revivalCount} from './revival-item.js?v=revival180';
-import {createRolePlayUI} from './role-play-ui.js?v=revival-shop181';
+import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
+import {prefetchPoses} from './skill-pose-art.js?v=pose119';
+import {createLiveRoleVfx} from './role-skill-vfx.js?v=live185';
+import {revivalCount} from './revival-item.js?v=live185';
+import {createRolePlayUI} from './role-play-ui.js?v=live185';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
 import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=icons117';
-import {presentationDelta} from './combat-timing.js';
+import {presentationDelta,roleTiming} from './combat-timing.js';
+import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS,ROLE_GROUND_KINDS,ROLE_GLOBAL_CD} from './role-combat.js';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=106.0';
 import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=novice174';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=death178';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=live185';
 import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,NOVICE_SLOTS,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=novice174';
 import {createRouteWalker} from './route-walk.js?v=bridge164';
 
@@ -28,8 +30,8 @@ import {rebirthRank} from './character-stats.js?v=107';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=novice174';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
- const world=new CombatWorld(config),SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
- const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world),roleUI=createRolePlayUI({world,buyItem:async id=>{if(!network)throw Error('not-connected');const r=await network.request('revivalBuy',id);world.bag=r.bag;world.petCollection=r.petCollection;return r;},canBuy:()=>network?.status==='online',itemCount:()=>network?revivalCount(world.bag):respawnInventory?.count()??0,clear:()=>clearInput(),respawn:async destination=>{clearInput();cancelWalk();if(networkExpected&&!network)throw Error('not-connected');if(destination==='capital')return respawnTravel?.();if(network){await network.request('respawn',crypto.randomUUID(),{destination:'here'});return true;}return respawnInventory?.use()??false;}});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null,respawnTravel=null,respawnInventory=null;
+ const world=new CombatWorld(config);world.spiritCompanion=true;const SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
+ const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world,camera),roleUI=createRolePlayUI({world,buyItem:async id=>{if(!network)throw Error('not-connected');const r=await network.request('revivalBuy',id);world.bag=r.bag;world.petCollection=r.petCollection;return r;},canBuy:()=>network?.status==='online',itemCount:()=>network?revivalCount(world.bag):respawnInventory?.count()??0,clear:()=>clearInput(),respawn:async destination=>{clearInput();cancelWalk();if(networkExpected&&!network)throw Error('not-connected');if(destination==='capital')return respawnTravel?.();if(network){await network.request('respawn',crypto.randomUUID(),{destination:'here'});return true;}return respawnInventory?.use()??false;}});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null,respawnTravel=null,respawnInventory=null;
  // Skill levels: the server owns them online; guests keep them in their local save.
  const progress=()=>({classId:world.profession.id,jobId:world.jobId??'',jobXp:world.jobXp});
  if(world.roleCombat&&!skillState.skills?.[ROLE_MARK])try{localStorage.setItem('ayothaya-role-skill-backup:'+world.profession.id,JSON.stringify(skillState.skills??{}));}catch{}
@@ -64,8 +66,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const walker=createRouteWalker(()=>world.nav),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),groundHit=new THREE.Vector3();
  const marker=new THREE.Mesh(new THREE.RingGeometry(.2,.3,32),new THREE.MeshBasicMaterial({color:'#f4cf7a',transparent:true,opacity:0,depthWrite:false,depthTest:false,side:THREE.DoubleSide}));
  marker.rotation.x=-Math.PI/2;marker.renderOrder=5;marker.visible=false;scene.add(marker);let markerAge=0;
- let walkJob=null,arrivalPending=null,serverWalkState=null,walkPaceSent=null,walkPredictedArrival=false,networkExpected=false;
- function cancelWalk(){const id=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null);walker.cancel();arrivalPending=null;if(id&&network?.walkSchema===1)network.command('walkCancel',{id});walkJob=null;serverWalkState=null;walkPaceSent=null;walkPredictedArrival=false;marker.visible=false;}
+ let approach=null,walkJob=null,arrivalPending=null,serverWalkState=null,walkPaceSent=null,walkPredictedArrival=false,networkExpected=false;
+ function cancelWalk(){approach=null;const id=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null);walker.cancel();arrivalPending=null;if(id&&network?.walkSchema===1)network.command('walkCancel',{id});walkJob=null;serverWalkState=null;walkPaceSent=null;walkPredictedArrival=false;marker.visible=false;}
  const wantsRun=()=>supportsAction('run')&&(runToggled||keys.has('ShiftLeft')||keys.has('ShiftRight'));
  const listeners=new Set(); // story/quest UI listens to the same events the HUD does (offline and online)
  function walkTo(target,opts={}){
@@ -136,13 +138,14 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  function popup(e,positive=false,anchor=anchorOf(e)){
   const crit=!positive&&(e.crit||e.color==='#ffd27a'),magic=!positive&&!!e.magic,el=document.createElement('span');const mob=Number.isInteger(e.id)?world.mobs[e.id]:null,big=!positive&&!crit&&mob&&typeof e.amount==='number'&&e.amount>=mob.maxHp*.2;
-  el.className='damage-number'+(crit?' crit':'')+(magic?' magic':'')+(big?' big':'')+(positive?' heal':'');
+  const companion=e.source==='spirit';el.dataset.damageSource=companion?'spirit':'player';
+  el.className='damage-number'+(companion?' spirit-damage':'')+(crit?' crit':'')+(magic?' magic':'')+(big?' big':'')+(positive?' heal':'');
   // 1.09 owner: numbers only (no minus or plus sign) and four fixed colours instead of one per skill/element:
   // white = your hit, gold = critical, red = damage you take, green = healing. Words (MISS, คอมโบ!) keep their own.
   const word=typeof e.amount==='string';
-  el.textContent=String(e.amount); // owner: plain numbers, no + or −
+  if(companion){const tag=document.createElement('small');tag.textContent='พราย';el.append(tag,document.createTextNode(String(e.amount)));}else el.textContent=String(e.amount); // owner: plain numbers, no + or −
   // 1.09.4 owner: physical white, physical crit orange; magic blue, magic crit purple; taken red; heal green
-  el.style.setProperty('color',word?(e.color??'#fff4dc'):positive?'#8ff08c':e.hurt?'#ff5a4a':magic?(crit?'#c27bff':'#6cc8ff'):crit?'#ff9a2e':'#fff4dc','important');
+  el.style.setProperty('color',companion?'#b5ffe6':word?(e.color??'#fff4dc'):positive?'#8ff08c':e.hurt?'#ff5a4a':magic?(crit?'#c27bff':'#6cc8ff'):crit?'#ff9a2e':'#fff4dc','important');
   const same=floats.filter(f=>f.key===anchor.key);for(const f of same)f.slot+=crit?1.3:1;
   if(same.length>=FLOAT_STACK){const old=same[0];old.el.remove();floats.splice(floats.indexOf(old),1);}
   const f={el,key:anchor.key,pos:anchor.pos,age:0,slot:0,off:0,side:same.length%2?1:-1}; // popcorn: alternate left / right as they rise
@@ -177,9 +180,75 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }
   if(Math.hypot(m.x-p.x,m.z-p.z)-bodyRadius(m)<=world.profession.range+1.5&&wall()>=nextBasicAt){nextBasicAt=wall()+attackInterval();cast(null,world.profession.kind,world.profession.color);}
  }
+ // 0.119 a pressed role skill: a single target out of reach (party friend or monster) is walked to first, then cast;
+ // online the body starts on the press and the realm's cast event adopts it, instead of a round trip later.
+ let predictSerial=0;
+ function roleAim(i,point=null){
+  const s=Number.isInteger(i)?scaledSkill(world.skills[i],world.skillLevels?.[i]??0):null;if(!s?.roleSkillId||s.passive||!SKILL_PROFILES[s.roleSkillId])return null;
+  const p=world.player;if(ROLE_SELF_KINDS.has(s.type))return {s,at:p,self:true};
+  // Ground skills go where the player put the circle (or the older aim-button spot); none yet means: aim first.
+  if(ROLE_GROUND_KINDS.has(s.type)){const at=point??world.roleGround;return {s,at:at?{x:at.x,z:at.z}:null,ground:true};}
+  // The locked party friend (or yourself when none is locked or they left), as the realm resolves it.
+  if(ROLE_FRIEND_KINDS.has(s.type)){const id=world.supportTargetId,a=id&&id!==network?.id?world.supportRoster?.find(a=>a.id===id):null;return {s,at:a??p,self:!a};}
+  const m=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null;return m&&m.hp>0?{s,at:m}:null;
+ }
+ // A blocked path gives up once (with the usual notice) instead of retrying into the wall.
+ const approachWalk=aim=>({radius:Math.max(.5,(aim.s.range??7)-.8),marker:false,onFail:()=>{approach=null;world.notice('ไปตรงนั้นไม่ได้');}});
+ const inReach=(aim,p=world.player)=>Math.hypot(aim.at.x-p.x,aim.at.z-p.z)<=(aim.s.range??7)+.3;
+ function useSkill(i,point=null){
+  if(!Number.isInteger(i))return false;approach=null;const aim=roleAim(i,point);
+  if(aim?.ground&&!aim.at){if(groundAim?.i===i)return placeGround(groundAim.at);startGroundAim(i,aim.s);return true;}
+  stopGroundAim();
+  if(aim&&!aim.self&&!inReach(aim)&&world.player.hp>0&&Math.hypot(aim.at.x-world.player.x,aim.at.z-world.player.z)<40){const goal={x:aim.at.x,z:aim.at.z};if(walkTo(goal,approachWalk(aim)))approach={i,until:world.time+6,goal,tries:0,ground:aim.ground?goal:null};return true;}
+  if(aim?.ground)world.roleGround={x:aim.at.x,z:aim.at.z};
+  if(network&&aim)predictCast(i,aim);
+  const cast=world.skill(i);if(aim?.ground)world.roleGround=null;return cast;
+ }
+ // 0.119 ground AOE: the circle shows the real area at the cursor (or the target, on touch) and a ring the reach;
+ // click/tap the ground or press the skill again to put it there. Out of reach it turns orange, and placing it walks in first.
+ let groundAim=null,mouseAim=null,gcdUntil=0;
+ // 0.119 cast bar under the hero while a skill winds up to its first release (the realm's own beats).
+ const castBar=document.createElement('div');castBar.id='role-cast-bar';castBar.hidden=true;castBar.setAttribute('role','progressbar');castBar.setAttribute('aria-valuemin','0');castBar.setAttribute('aria-valuemax','100');castBar.innerHTML='<span></span><i><b></b></i>';$('game-shell').append(castBar);
+ const castAt=new THREE.Vector3();let castBarId=null;
+ function drawCastBar(p,floor){
+  const end=roleClip?roleClip.start+roleClip.impacts[0]:0,show=!!roleClip&&p.hp>0&&roleEffects.time<end&&end-roleClip.start>.2;
+  castBar.hidden=!show;if(!show){castBarId=null;return;}
+  if(castBarId!==roleClip.castId){castBarId=roleClip.castId;castBar.querySelector('span').textContent=world.skills.find(s=>s?.roleSkillId===roleClip.id)?.name??'';}
+  const q=Math.max(0,Math.min(1,(roleEffects.time-roleClip.start)/(end-roleClip.start)));castBar.querySelector('b').style.width=(q*100).toFixed(1)+'%';castBar.setAttribute('aria-valuenow',String(Math.round(q*100)));
+  castAt.set(p.x,floor,p.z).project(camera);const r=canvas.getBoundingClientRect();castBar.style.left=(r.left+(castAt.x+1)/2*r.width)+'px';castBar.style.top=(r.top+(1-castAt.y)/2*r.height+10)+'px';
+ }
+ const aimMat=(color,opacity)=>new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide});
+ const aimArea=new THREE.Mesh(new THREE.CircleGeometry(1,48),aimMat('#f4cf7a',.3)),aimEdge=new THREE.Mesh(new THREE.RingGeometry(.93,1,64),aimMat('#ffe7a6',.9)),aimReach=new THREE.Mesh(new THREE.RingGeometry(.985,1,96),aimMat('#fff0ce',.4));
+ for(const m of [aimArea,aimEdge,aimReach]){m.rotation.x=-Math.PI/2;m.renderOrder=6;m.visible=false;scene.add(m);}
+ function startGroundAim(i,s){
+  const p=world.player,range=s.range??7,foe=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null,face=Math.hypot(p.face.x,p.face.z)||1;
+  groundAim={i,radius:s.radius??2.8,range,at:foe&&foe.hp>0?{x:foe.x,z:foe.z}:{x:p.x+p.face.x/face*Math.min(range,4),z:p.z+p.face.z/face*Math.min(range,4)}};
+  world.notice(compactEffects.matches?'แตะพื้นเพื่อวางสกิล · กดสกิลซ้ำเพื่อวางตรงวง':'คลิกพื้นเพื่อวางสกิล · กดสกิลซ้ำเพื่อวางตรงวง · Esc ยกเลิก');
+ }
+ function stopGroundAim(){groundAim=null;aimArea.visible=aimEdge.visible=aimReach.visible=false;}
+ function placeGround(at){const i=groundAim?.i;stopGroundAim();return Number.isInteger(i)?useSkill(i,{x:at.x,z:at.z}):false;}
+ function drawGroundAim(p){
+  if(!groundAim)return;if(p.hp<=0||isPaused()){stopGroundAim();return;}
+  if(mouseAim){const h=groundAt(mouseAim.x,mouseAim.y);if(h)groundAim.at=h;}
+  const a=groundAim.at,far=Math.hypot(a.x-p.x,a.z-p.z)>groundAim.range+.3,y=groundHeight(world.nav,a.x,a.z)+.09;
+  for(const m of [aimArea,aimEdge]){m.visible=true;m.position.set(a.x,y,a.z);m.scale.setScalar(groundAim.radius);m.material.color.set(far?'#ff9a5a':m===aimEdge?'#ffe7a6':'#f4cf7a');}
+  aimReach.visible=true;aimReach.position.set(p.x,groundHeight(world.nav,p.x,p.z)+.085,p.z);aimReach.scale.setScalar(groundAim.range);
+ }
+ function predictCast(i,aim){
+  const s=aim.s,p=world.player,friend=ROLE_FRIEND_KINDS.has(s.type),st=world.status??{};
+  // Only what the realm will accept: anything it may refuse waits for its answer as before.
+  if(p.hp<=0||(world.cooldowns?.[i]??0)-(wall()-cooldownsAt)>.08||p.mp<s.cost*(1-((world.derivedView??world.derived)?.mpCut??0))||st.stun||st.sleep||st.silence||(world.safe&&!aim.self&&!friend))return;
+  if(roleClip&&roleEffects.time<roleClip.start+roleClip.impacts.at(-1))return; // the realm still holds the last cast
+  if(roleEffects.time<gcdUntil)return; // and its one-second gap between skills
+  const foe=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null,to=aim.self&&!friend&&foe?foe:aim.at;
+  playCast({type:'cast',predicted:true,roleSkillId:s.roleSkillId,castId:'p'+(++predictSerial),timing:roleTiming(s,SKILL_PROFILES[s.roleSkillId]),from:{x:p.x,z:p.z},to:{x:to.x,z:to.z},kind:s.type,lag:0});
+  roleClip.predicted=wall();
+ }
  function playCast(e){
    const aim=castFacing(e,world.player.face);if(aim)world.player.face={...aim};
-   if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip=createRoleAnimation(e,roleEffects.time);castUntil=world.time-Math.max(0,e.lag??0)+roleClip.duration;actionStart=world.time-Math.max(0,e.lag??0);castFace=aim;strikeAt=world.time;actionMode='cast';activeSkill=null;basicCastId=null;world.clearEmote();roleEffects.spawn(e);return;}
+   // The realm's cast of a predicted press: keep the running body and VFX, take its id and timing.
+   if(e.roleSkillId&&!e.predicted&&roleClip?.predicted){const old=roleClip.castId;if(roleClip.id===e.roleSkillId){roleClip.castId=e.castId;roleClip.predicted=null;if(e.timing?.impacts?.length){roleClip.impacts=[...e.timing.impacts];roleClip.duration=e.timing.duration;castUntil=roleClip.start+roleClip.duration;}gcdUntil=roleClip.start+roleClip.impacts.at(-1)+ROLE_GLOBAL_CD;roleEffects.rekey(old,e.castId);return;}roleEffects.cancel(old);}
+   if(e.roleSkillId&&SKILL_PROFILES[e.roleSkillId]){roleClip=createRoleAnimation(e,roleEffects.time);castUntil=world.time-Math.max(0,e.lag??0)+roleClip.duration;actionStart=world.time-Math.max(0,e.lag??0);castFace=aim;strikeAt=world.time;actionMode='cast';activeSkill=null;basicCastId=null;world.clearEmote();roleEffects.spawn(e);gcdUntil=roleClip.start+roleClip.impacts.at(-1)+ROLE_GLOBAL_CD;return;}
    if(e.timing&&!Number.isInteger(e.skillIndex)){
     const timing=e.timing,lag=Math.max(0,e.lag??0),start=world.time-lag;
     if(!roleAnimationActive(roleClip,roleEffects.time)){roleClip=null;activeSkill=null;basicCastId=e.castId;castFace=aim;actionStart=start;castUntil=actionStart+timing.duration;actionMode='attack';swingScale=attackDuration(world.profession.id)/timing.duration;}
@@ -209,10 +278,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    // 1.10 owner: numbers, the hit flash and the death wait for the moment the swing / spell connects
    strikeAt=world.time-lag+(fast?fast.strikes[0]*fast.duration:.42*attackDuration(world.profession.id)/swingScale);if(e.predicted)predictions.push({index:Number.isInteger(e.skillIndex)?e.skillIndex:null,at:wall(),strikeAt});strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    const presentation=fast??{...skillTrack(world.profession.id,0),duration:attackDuration(world.profession.id),strikes:[.42]};
-   const from=e.from??world.player,to=e.to??from;
+   const from=e.from??world.player,to=e.to??from,noviceFx=world.profession.id==='novice'&&fast&&Number.isInteger(e.skillIndex)?'novice:'+e.skillIndex:null;
+   // 0.119 Novice basics play their painted sheet on the same beats as the swing.
+   if(noviceFx&&roleEffects.has(noviceFx)){roleEffects.spawn({...e,roleSkillId:noviceFx,from,to,lag,timing:{impacts:fast.strikes.map(b=>b*fast.duration),duration:fast.duration}});return;}
    const effect=skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,synced:true,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});effect.age=lag;
  }
  function effect(e){
+  if(e.type.startsWith('spirit')){roleDecor.handleEvent(e);return;}
   if(e.type==='experience'){
    toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');
   }
@@ -220,8 +292,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(e.type==='castCancel'){if(roleClip?.castId===e.castId){roleClip=null;castUntil=world.time;}if(basicCastId===e.castId)castUntil=world.time;roleEffects.cancel(e.castId,e.actor??network?.id??'self');skillEffects.cancel(e.castId,e.actor??'self');
   }else if(e.type==='rolePassive'){roleEffects.spawn(e);
   }else if(e.type==='cast'){playCast(e);
-  }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(!e.synced&&strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
-  }else if(e.type==='damage'){const v=mobViews[e.id];if(!e.synced&&strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
+  }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(e.source!=='spirit'&&!e.synced&&strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
+  }else if(e.type==='roleRelease'){if(!e.actor||e.actor===network?.id)retimeRoleAnimation(roleClip,e,roleEffects.time);roleEffects.hit(e);
+  }else if(e.type==='damage'){roleEffects.hit(e);const v=mobViews[e.id];if(e.source!=='spirit'&&!e.synced&&strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='knock'){kick=Math.max(kick,1.4);if(network)world.knock={vx:e.vx,vz:e.vz,t:e.t};} // 0.111 boss slam: shake and slide back (online: mirror the server's slide)
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff7a6a');hitTintUntil=world.time+.45;}
@@ -235,13 +308,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const roleKey=world.roleCombat&&!world.roleCombat.legacy?'role1:':'';const HOT_KEY='ayothaya-hotbar:'+roleKey+world.profession.id,AUTO_KEY='ayothaya-auto:'+roleKey+world.profession.id;
  // 0.101 five more slots (keys Alt+1-5) hold the Master skills; a ten-slot hotbar saved before keeps its order.
  const order=[...Array(SLOTS).keys()],isOrder=h=>Array.isArray(h)&&h.length===SLOTS&&[...h].sort((a,b)=>a-b).join()===order.join();
- let hotbar=order;try{let h=JSON.parse(localStorage.getItem(HOT_KEY));if(Array.isArray(h)&&h.length===BASE_SLOTS)h=[...h,...order.slice(BASE_SLOTS)];if(isOrder(h))hotbar=h;}catch{}
+ let hotbar=order;try{let h=JSON.parse(localStorage.getItem(HOT_KEY));if(Array.isArray(h)&&(h.length===BASE_SLOTS||h.length===15))h=[...h,...order.slice(h.length)]; /* 0.119 two more slots: a saved bar keeps its order */if(isOrder(h))hotbar=h;}catch{}
  if(world.profession.id==='novice')hotbar=[...hotbar.filter(i=>NOVICE_SLOTS.includes(i)),...hotbar.filter(i=>!NOVICE_SLOTS.includes(i))];
  try{world.autoConfig=normalizeAuto(JSON.parse(localStorage.getItem(AUTO_KEY)));}catch{world.autoConfig=normalizeAuto(null);}
  let autoSent='';
  const skillButtons=world.skills.map((s,i)=>{
   const b=document.createElement('button');b.type='button';b.className='skill'+(isMaster(i)?' master-slot':'');b.hidden=isMaster(i);
-  b.innerHTML=`<kbd>${HOTBAR_KEYS[i]}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.addEventListener('click',()=>{if(!isPaused())world.skill(hotbar[i]);});$('skills').append(b);return b;
+  b.innerHTML=`<kbd>${HOTBAR_KEYS[i]}</kbd><strong>${s.icon}</strong><span>${s.short}</span><em></em><small class="skill-level"></small>`;b.addEventListener('click',()=>{if(!isPaused())useSkill(hotbar[i]);});$('skills').append(b);return b;
  });
  function paintHotbar(){skillButtons.forEach((b,i)=>{const s=world.skills[hotbar[i]];if(!s)return;b.querySelector('strong').textContent=s.icon;b.querySelector('span').textContent=s.short??s.name;b.setAttribute('aria-label',`สกิล ${HOTBAR_KEYS[i]} ${s.name}`);b.title=`${HOTBAR_KEYS[i]} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;b.style.setProperty('--skill-color',s.color);});applySkillArt(skillButtons,world.profession.id,hotbar,world.skills);}
  paintHotbar();
@@ -259,7 +332,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  let spaceTalkHeld=false;
  addEventListener('keydown',e=>{
   if(e.code==='Space'&&spaceTalkHeld){e.preventDefault();return;}
-  if(e.altKey&&/^Digit[1-5]$/.test(e.code)&&!isPaused()&&!editable(e)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(!e.repeat)world.skill(hotbar[BASE_SLOTS+Number(e.code.slice(-1))-1]);return;}
+  if(e.code==='Escape'&&groundAim){e.preventDefault();stopGroundAim();return;}
+  if(e.altKey&&/^Digit[1-5]$/.test(e.code)&&!isPaused()&&!editable(e)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(!e.repeat)useSkill(hotbar[BASE_SLOTS+Number(e.code.slice(-1))-1]);return;}
   if(isPaused()||editable(e)||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.code==='Space'){
    const button=e.target.closest?.('button,a,[role=button]');
@@ -273,7 +347,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(e.repeat)return;
   if(e.code==='KeyF')world.toggleAuto();
   if(e.code==='Space')world.basicAttack();
-  if(/^Digit[0-9]$/.test(e.code)){const n=Number(e.code.slice(-1));world.skill(hotbar[n===0?9:n-1]);}
+  if(/^Digit[0-9]$/.test(e.code)){const n=Number(e.code.slice(-1));useSkill(hotbar[n===0?9:n-1]);}
  });
  addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='Space')spaceTalkHeld=false;});
  const joystick=$('joystick'),knob=$('stick');
@@ -294,8 +368,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  addEventListener('blur',()=>{spaceTalkHeld=false;clearInput();});document.addEventListener('visibilitychange',()=>{if(document.hidden){spaceTalkHeld=false;clearInput();}});
  // 0.99.15 another player under the tap opens their menu first (multiplayer-ui sets this)
  let playerTap=null,npcInteraction=null;
+ // The ground point under a screen position (raised floors re-aim at their own height).
+ function groundAt(x,y){pointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);let hit=null;groundPlane.constant=0;for(let i=0;i<4;i++){hit=raycaster.ray.intersectPlane(groundPlane,groundHit);if(!hit)break;groundPlane.constant=-groundHeight(world.nav,hit.x,hit.z);}return hit&&{x:hit.x,z:hit.z};}
  function selectAt(x,y,npc=null){
   if(isPaused())return;
+  if(groundAim){const h=groundAt(x,y);if(h)placeGround(h);return;}
   if(!world.roleAim&&(npcInteraction?.activate(npc)||npcInteraction?.tap(x,y)))return;
   if(!world.roleAim&&playerTap?.(x,y))return;
   pointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);
@@ -310,6 +387,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(hit){if(world.roleAim){world.roleAim=false;world.roleGround={x:hit.x,z:hit.z};world.notice('เลือกจุดวางแล้ว · กดสกิลเพื่อร่าย');}else walkTo({x:hit.x,z:hit.z});}
  }
  function pinchSpan(){const a=[...touches.values()];return a.length===2?Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y):0;}
+ canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='touch')mouseAim={x:e.clientX,y:e.clientY};});
+ canvas.addEventListener('contextmenu',e=>{if(groundAim){e.preventDefault();stopGroundAim();}});
  canvas.addEventListener('pointerdown',e=>{
   if(e.pointerType!=='touch'){mouseStart={x:e.clientX,y:e.clientY,npc:!world.roleAim?npcInteraction?.pick(e.clientX,e.clientY):null};return;}
   e.stopImmediatePropagation();e.preventDefault();canvas.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false,npc:!world.roleAim?npcInteraction?.pick(e.clientX,e.clientY):null});
@@ -362,12 +441,20 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(!paused||walker.active||arrivalPending)world.update(dt,steering);
   if(arrivalPending&&!document.hidden&&!isPaused()){const done=arrivalPending;arrivalPending=null;done.opts.onArrive?.();}
   if(network&&world.auto&&!paused)predictAuto(dt);
-  roleUI.update();roleDecor.update();roleEffects.advance(visualDt);
+  roleUI.update();roleEffects.advance(visualDt);
   world.events.splice(0).forEach(e=>{e=ageQueuedCombatEvent(e,wall());effect(e);for(const fn of listeners)fn(e);});
+  roleDecor.update(visualDt);
   const roleShake=roleEffects.update(0);
   if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
+  drawGroundAim(p);
+  if(approach){const aim=roleAim(approach.i,approach.ground);if(!aim?.at||world.time>approach.until||p.hp<=0)approach=null;else if(inReach(aim)){const {i,ground}=approach;cancelWalk();useSkill(i,ground);}else{
+   // The friend or monster moved on: follow them (a few times) instead of stopping where they stood.
+   const a=approach,walking=walkJob||walker.active||serverWalkState?.status==='walking',goal={x:aim.at.x,z:aim.at.z};
+   if(Math.hypot(goal.x-a.goal.x,goal.z-a.goal.z)>1.5||!walking){if(a.tries<8&&walkTo(goal,approachWalk(aim)))approach={...a,goal,tries:a.tries+1};else approach=null;}}}
+  // A press the realm refused (no cast came back): drop the predicted body and effect.
+  if(roleClip?.predicted&&wall()-roleClip.predicted>Math.min(1.2,.45+netLag*3)){roleEffects.cancel(roleClip.castId);roleClip=null;castUntil=t;}
   const roleActive=roleAnimationActive(roleClip,roleEffects.time);
   if(roleClip&&!roleActive){roleClip=null;castUntil=t;}
   const chosen=actionChoice({time:t,dead:p.hp<=0,hit:t<hitUntil&&t>=castUntil&&!roleActive,cast:roleActive?'cast':t<castUntil?actionMode:false,moving:p.moving,running:p.running,emote:world.emote,guard:p.shield>0});
@@ -379,13 +466,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const rolePose=p.hp>0?sampleRolePose(roleClip,roleEffects.time,{reduced}):null;
   const pose=rolePose??(skillActive?skillPose(world.profession.id,activeSkill,(t-actionStart)*skillScale,{reduced}):characterMotion({time:poseTime,phase:locomotion?gait:null,mode,classId:world.profession.id,reduced,view:heroView=walkView(p.face,controls.getAzimuthalAngle(),heroView)}));
   if(mode==='attack'&&activeSkill===null)pose.actionPhase=Math.max(0,Math.min(1,(t-actionStart)/(attackDuration(world.profession.id)/swingScale)));
-  if(visualPose){visualPose.profileFrame=!!pose.profileFrame;visualPose.actionPhase=pose.actionPhase??null;}
+  if(visualPose){visualPose.profileFrame=!!pose.profileFrame;visualPose.actionPhase=pose.actionPhase??null;visualPose.skillArt=pose.skillArt??null;}
   if(!visualPose||reduced)visualPose={...pose};
   else for(const key of Object.keys(pose))visualPose[key]=typeof pose[key]!=='number'||['frame','artFrame','stand','time','phase','actionPhase'].includes(key)?pose[key]:(visualPose[key]??pose[key])+(pose[key]-(visualPose[key]??pose[key]))*(1-Math.exp(-dt*24));
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   const floor=groundHeight(world.nav,p.x,p.z);
-  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);drawCastBar(p,floor);
   hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);
   const azimuth=controls.getAzimuthalAngle(),poseFace=rolePose?(roleClip.facing??p.face):t<castUntil?(castFace??p.face):p.face;
   if(hero.frames)hero.sprite.material.map=hero.frames[0];
@@ -456,11 +543,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  updateHelp();addEventListener('resize',updateHelp);
  toast(mobileLayout()?'ลากจอยเดิน · แตะมอนและสกิลด้านขวา':'WASD เดิน · คลิกมอนเลือกเป้า · Space คุยกับ NPC / โจมตี · F ออโต้');
- function setNetwork(client){networkExpected=true;network=client;clearInput();world.auto=false;autoSent='';client.addEventListener('welcome',()=>{autoSent='';});client.addEventListener('walkError',e=>{if(walkJob?.id!==e.detail.id)return;const job=walkJob;walkJob=null;walker.cancel();marker.visible=false;if(job.opts.onFail)job.opts.onFail(e.detail.code);else world.notice('เดินไปจุดนั้นไม่ได้');}); // a fresh server world starts on default AUTO settings
+ function setNetwork(client){networkExpected=true;network=client;world.spiritCompanion=false;clearInput();world.auto=false;autoSent='';client.addEventListener('welcome',()=>{autoSent='';});client.addEventListener('walkError',e=>{if(walkJob?.id!==e.detail.id)return;const job=walkJob;walkJob=null;walker.cancel();marker.visible=false;if(job.opts.onFail)job.opts.onFail(e.detail.code);else world.notice('เดินไปจุดนั้นไม่ได้');}); // a fresh server world starts on default AUTO settings
   // 0.97 the AUTO button shows only what the server reports.
   world.skill=i=>{world.clearEmote();const point=world.roleGround;world.roleGround=null;return client.command('skill',{index:i,roleSchema:1,...(point?{point}: {})});};world.basicAttack=()=>{world.clearEmote();return client.command('attack');};world.select=id=>client.command('select',{target:id});world.toggleAuto=()=>client.command('auto',{on:!world.auto});world.setAuto=(on,hunt,target)=>client.command('auto',{on,hunt,...(target?{target}: {})});world.questTalk=(npc,expected)=>client.command('questTalk',{npc,expected});world.storyCheck=()=>client.command('storyCheck');world.useItem=item=>client.command('useItem',{item});world.statUp=stat=>client.command('statUp',{stat});world.equipGear=item=>client.command('equip',{item});world.netState=()=>client.status+'/'+(client.socket?.readyState??'-')+(client.stopped?'/stopped':'');world.unequipGear=slot=>client.command('unequip',{slot});world.refine=(slot,npc,lekLai,guard,attempt)=>client.command('refine',{slot,npc,lekLai,guard,attempt});world.insertCard=(slot,card)=>client.command('insertCard',{slot,card});world.petCommand=(type,data={},id=crypto.randomUUID())=>client.request(type,id,data);world.market=(type,data={})=>client.command(type,data);world.trade=(type,npc,item,count)=>client.command(type,{npc,item,count});world.discard=(item,count)=>client.command('discard',{item,count});
  }
- function applyNetworkSnapshot(snapshot){const s=snapshot.self;world.networkMapId=s.mapId;world.networkSelfId=s.id;world.arenaRoom=s.arenaRoom??null;if(s.character){world.heroName=s.character.name;playerLabel.querySelector('b').textContent=s.character.name;}{const o=snapshot.weather;world.weatherOverride=o?{id:o.id,mapId:o.mapId??null,endsAt:Date.now()+o.left}:null;} // 0.109.7 admin weather
+ function applyNetworkSnapshot(snapshot){const s=snapshot.self;world.spiritCompanion=s.spiritCompanionSchema===1;world.networkMapId=s.mapId;world.networkSelfId=s.id;world.arenaRoom=s.arenaRoom??null;if(s.character){world.heroName=s.character.name;playerLabel.querySelector('b').textContent=s.character.name;}{const o=snapshot.weather;world.weatherOverride=o?{id:o.id,mapId:o.mapId??null,endsAt:Date.now()+o.left}:null;} // 0.109.7 admin weather
  if('weekly' in s)world.weekly=s.weekly??null;world.rebirth=s.rebirth??0;if(s.story)world.story=s.story;if('stall' in s)world.myStall=s.stall??null;if('guild' in s)world.myGuild=s.guild??null;world.status=s.status??{};world.supportTargetId=s.supportTargetId;world.supportRoster=s.supportRoster??[];world.roleFieldsView=snapshot.roleFields??[];world.rolePetsView=snapshot.rolePets??[];world.food=s.food??null;if('mvp' in s)world.mvp=s.mvp??null;if('pet' in s)world.pet=s.pet??null;if('mailbox' in s)world.mailbox=s.mailbox;if('petCollection' in s)world.petCollection=s.petCollection;if('bounty' in s)world.bounty=s.bounty??null;world.mercLeft=s.merc??0;world.mercenary=s.mercenary??null;world.adventurers=s.adventurers??[];world.adventurerSchema=s.adventurerSchema??0;if('album' in s){world.album=s.album??[];world.albumRewards=s.albumRewards??[];world.albumSchema=s.albumSchema??1;}if(s.bag)world.bag=s.bag;if(s.stats){world.stats=s.stats;world.gear=s.gear;world.statPoints=s.statPoints;world.derivedView=s.derived;}if(Array.isArray(s.skillLevels))world.skillLevels=[...s.skillLevels];if(Number.isInteger(s.skillPoints))world.skillPoints=s.skillPoints;const {x,z,moving,face,...state}=s.player;Object.assign(world.player,state);if(!serverSelf){world.player.x=x;world.player.z=z;}serverSelf={x,z,moving,face,inputAck:s.inputAck};world.cooldowns=[...s.cooldowns];cooldownsAt=performance.now()/1000;world.kills=s.kills;world.baseXp=s.baseXp;world.jobXp=s.jobXp;world.targetId=s.targetId;world.auto=s.auto;world.autoTarget=s.autoTarget??null;world.hunt=s.hunt??null;world.foe=s.duel?.foe??null;world.war=s.war??null;world.rivals=s.war?.rivals??[];world.duelLeft=s.duel?.left??0;if(Math.abs(world.time-snapshot.time)>.25)world.time=snapshot.time;
   serverWalkState=s.walkRoute??null;if(walkJob&&serverWalkState?.id===walkJob.id&&serverWalkState.status!=='walking'){const job=walkJob;walkJob=null;walker.cancel();if(serverWalkState.status==='arrived')arrivalPending=job;else if(serverWalkState.status==='failed')job.opts.onFail?.(serverWalkState.reason);}
   serverSelf.running=s.player.running===true;world.emote=activeEmote(s.emote,snapshot.time);
@@ -468,6 +555,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
+ // Warm the HTTP cache with this character's own skill sheets once the map has settled.
+ setTimeout(()=>{const ids=world.skills.map((s,i)=>s.roleSkillId??'novice:'+i);roleEffects.prefetch(ids);prefetchPoses(ids);},4000);
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
  return {set respawnInventory(value){respawnInventory=value;},set respawnTravel(fn){respawnTravel=fn;},roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

@@ -3,6 +3,7 @@ import {legacyPetItem} from './mailbox.js';
 import {petGrantHTML,bindPetGrant} from './admin-pet-panel.js?v=127';
 import {paintAdminSkills,paintAdminMonsters} from './admin-art.js?v=127';
 import {liveRoleSkills} from './role-skill-progress.js';
+import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS} from './role-combat.js';
 import {roleById} from './assets/skills-next/catalog.js';
 // 0.85 back-office dashboard: every tunable game number in one place (paths, skills, items, monsters).
 // Edits are kept as overrides (balance.js FIELDS); "บันทึกเข้าเกม" posts them to the local dev server, which writes
@@ -16,7 +17,7 @@ import {multiplayerURL} from './multiplayer-config.js?v=28';
 import {iconStyle} from './bag-ui.js?v=107';
 import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
-import {SKILL_TREE,scaledSkill} from './skill-progress.js?v=novice174';
+import {scaledSkill} from './skill-progress.js?v=novice174';
 import {WEATHERS} from './weather.js?v=181';
 import {deriveStats} from './character-stats.js';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
@@ -75,10 +76,57 @@ function set(r,f,v){
 }
 // 0.101.2 side menu: what each page is for, in one line
 const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP']};
-const NAV=[['ผู้เล่นและชุมชน',['players','mail']],['โลกเกมตอนนี้',['weather','boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
+const NAV=[['ผู้เล่นและชุมชน',['players','mail','evidence']],['โลกเกมตอนนี้',['weather','boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
+// 0.118 evidence log (player names and details are shown exactly as recorded: data-i18n-skip): search what players and admins did (server keeps players 90 days, admins 3 years) and export it.
+const bkkDay=(t=Date.now())=>new Date(t+7*3600e3).toISOString().slice(0,10);
+const ev={stream:'players',from:bkkDay(),to:bkkDay(),type:'',q:'',rows:null,total:0,truncated:false,loading:false,msg:''};
+const EV_TYPES={players:[['','ทุกประเภท'],['login','เข้าเกม'],['logout','ออกจากเกม'],['chat','แชต'],['trade','แลกของ'],['market','ตลาด / แผง / ร้าน'],['mail','จดหมาย / รับของ'],['pet','สัตว์เลี้ยง'],['rename','เปลี่ยนชื่อ'],['travel','ย้ายแมพ'],['consent','ยอมรับนโยบาย']],admin:[['','ทุกการกระทำ'],['admin-mail','ส่งของ / จดหมาย'],['admin-balance','ปรับค่าสมดุล'],['admin-weather','สภาพอากาศ'],['admin-boss','เสกบอส'],['admin-finance','บัญชีการเงิน'],['admin-world-reset','รีเซ็ตโลก'],['admin-evidence-search','ค้นบันทึกนี้']]};
+const EV_LABEL=Object.fromEntries([...EV_TYPES.players,...EV_TYPES.admin].filter(([k])=>k));
+Object.assign(EV_LABEL,{'market-stall':'ซื้อจากแผง','market-shop-buy':'ซื้อจากร้าน','market-shop-sell':'ขายให้ร้าน','admin-mail-all':'ประกาศทุกคน','admin-world-reset-preview':'ดูตัวอย่างรีเซ็ต','admin-world-reset-execute':'สั่งรีเซ็ตโลก'});
+const evTime=t=>new Date(t).toLocaleString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const evBag=o=>!o?'—':[o.coins?num(o.coins)+' เบี้ย':'',...Object.entries(o.items??{}).map(([id,n])=>itemName(id)+' ×'+n)].filter(Boolean).join(', ')||'—';
+function evDetail(e){
+ if(e.type==='chat')return '['+e.channel+(e.to?' → '+e.to.name:'')+'] '+e.text;
+ if(e.type==='trade')return 'แลกกับ '+(e.with?.name??'?')+' · ให้: '+evBag(e.gave)+' · ได้: '+evBag(e.got);
+ if(e.type?.startsWith('market'))return itemName(e.item)+' ×'+e.count+' · '+num(e.coins)+' เบี้ย'+(e.seller?' · ผู้ขาย '+e.seller.name:e.shop?' · ร้าน '+e.shop.owner:'');
+ if(e.type==='login')return e.agent??'';
+ if(e.type==='travel')return '→ '+e.to+(e.warp?' (วาร์ป)':'');
+ if(e.type==='consent')return 'ฉบับ '+e.version+(e.email?' · '+e.email:'');
+ const {t,type,uid,slot,server,name,ip,ch,map,admin,...rest}=e;return Object.keys(rest).length?JSON.stringify(rest):'';
+}
+function evRows(){return ev.rows??[];}
+async function loadEvidence(){
+ ev.loading=true;ev.msg='กำลังค้นหา…';evidenceTab();
+ try{const p=new URLSearchParams({stream:ev.stream,from:ev.from,to:ev.to,type:ev.type,q:ev.q}),r=await adminFetch('/admin/evidence?'+p);ev.rows=r.events;ev.total=r.total;ev.truncated=r.truncated;ev.msg='';}
+ catch(e){ev.msg=({'range-too-long':'ค้นได้ครั้งละไม่เกิน 31 วัน','bad-range':'ช่วงวันที่ไม่ถูกต้อง','evidence-unsupported':'เซิร์ฟเวอร์นี้ยังไม่มีระบบบันทึกหลักฐาน (รอ deploy)','not-found':'เซิร์ฟเวอร์นี้ยังไม่มีระบบบันทึกหลักฐาน (รอ deploy)','need-login':'ต้องล็อกอิน Google ก่อน'})[e.message]??'ค้นหาไม่สำเร็จ · '+e.message;}
+ finally{ev.loading=false;if(tab==='evidence')evidenceTab();}
+}
+function evDownload(kind){
+ const rows=evRows();if(!rows.length)return;
+ const stamp=ev.stream+'-'+ev.from+'_'+ev.to,cell=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const text=kind==='json'?JSON.stringify({query:{stream:ev.stream,from:ev.from,to:ev.to,type:ev.type,q:ev.q},exportedAt:new Date().toISOString(),events:rows},null,1)
+  :'﻿'+[['เวลา (กรุงเทพ)','ประเภท','ผู้ทำ','UID','IP','เซิร์ฟ','CH','แมพ','รายละเอียด'].map(cell).join(','),...rows.map(e=>[evTime(e.t),EV_LABEL[e.type]??e.type,e.admin??e.name,e.uid,e.ip,e.server,e.ch,e.map,evDetail(e)].map(cell).join(','))].join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:kind==='json'?'application/json':'text/csv;charset=utf-8'}));a.download='ayothaya-evidence-'+stamp+'.'+kind;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function evidenceTab(){
+ const rows=evRows(),types=EV_TYPES[ev.stream];
+ $('view').innerHTML=`<div class="ev-admin"><form class="ev-filters" id="ev-form">
+<label>บันทึกของ <select id="ev-stream"><option value="players"${ev.stream==='players'?' selected':''}>ผู้เล่น (เก็บ 90 วัน)</option><option value="admin"${ev.stream==='admin'?' selected':''}>แอดมิน (เก็บ 3 ปี)</option></select></label>
+<label>ตั้งแต่ <input id="ev-from" type="date" value="${ev.from}"></label><label>ถึง <input id="ev-to" type="date" value="${ev.to}"></label>
+<label>ประเภท <select id="ev-type">${types.map(([k,n])=>`<option value="${k}"${k===ev.type?' selected':''}>${n}</option>`).join('')}</select></label>
+<label class="ev-q">ค้นหา <input id="ev-q" type="search" value="${esc(ev.q)}" placeholder="ชื่อตัวละคร · UID · IP · ข้อความ"></label>
+<button type="submit" class="primary"${ev.loading?' disabled':''}>ค้นหา</button></form>
+<div class="ev-bar"><span>${ev.msg?esc(ev.msg):ev.rows?`พบ ${num(ev.total)} รายการ`+(ev.truncated?' · แสดง 2,000 รายการล่าสุด ให้แคบช่วงลง':''):'เลือกช่วงวันแล้วกดค้นหา · ค้นได้ครั้งละไม่เกิน 31 วัน'}</span><span class="ev-export"><button type="button" id="ev-csv"${rows.length?'':' disabled'}>⬇ CSV (Excel)</button><button type="button" id="ev-json"${rows.length?'':' disabled'}>⬇ JSON</button></span></div>
+${rows.length?`<div class="scroll ev-scroll"><table class="ev-table"><thead><tr><th>เวลา</th><th>ประเภท</th><th>${ev.stream==='admin'?'แอดมิน':'ผู้เล่น'}</th><th>IP</th><th>CH · แมพ</th><th>รายละเอียด</th></tr></thead><tbody>${rows.map(e=>`<tr><td class="ev-time">${evTime(e.t)}</td><td><span class="ev-type ev-${esc(String(e.type).split('-')[0])}">${esc(EV_LABEL[e.type]??e.type)}</span></td><td data-i18n-skip><b>${esc(e.admin??e.name??'—')}</b>${e.uid?`<small title="${esc(e.uid)}">${esc(e.uid.slice(0,10))}…</small>`:''}</td><td class="ev-ip">${esc(e.ip??'—')}</td><td>${e.ch?'CH '+esc(e.ch):''}${e.map?`<small>${esc(e.map)}</small>`:''}</td><td class="ev-detail" data-i18n-skip>${esc(evDetail(e))}</td></tr>`).join('')}</tbody></table></div>`:''}
+<p class="ev-note">ใช้เป็นหลักฐานเมื่อมีข้อร้องเรียน เช่น โดนโกงของ คำพูดผิดกฎหมาย หรือเจ้าหน้าที่ขอข้อมูล · ทุกครั้งที่ค้นจะถูกบันทึกไว้ในบันทึกของแอดมินด้วย · ส่งออกแล้วเก็บไฟล์ไว้ในที่ปลอดภัย เพราะมีข้อมูลส่วนบุคคล</p></div>`;
+ $('ev-stream').onchange=e=>{ev.stream=e.target.value;ev.type='';ev.rows=null;evidenceTab();};
+ $('ev-form').onsubmit=e=>{e.preventDefault();ev.from=$('ev-from').value||bkkDay();ev.to=$('ev-to').value||ev.from;ev.type=$('ev-type').value;ev.q=$('ev-q').value.trim();loadEvidence();};
+ $('ev-csv').onclick=()=>evDownload('csv');$('ev-json').onclick=()=>evDownload('json');
+}
 const announcementDraft={title:'',body:'',serverId:'all',pending:null,busy:false,message:''};
 function tabs(){
  PAGES.mail=['✉','จดหมายและประกาศ','ส่งประกาศเข้าจดหมายผู้เล่น · ของแจกส่งได้ที่หน้าผู้เล่น'];
+ PAGES.evidence=['🧾','บันทึกหลักฐาน','ประวัติเข้าเกม แชต การแลกของ ตลาด และการกระทำของแอดมิน · ค้นหาและส่งออกเป็นไฟล์'];
  PAGES.mapbosses=['🏔️','บอสประจำแมพ','9 แมพ · HP ไล่ตามพื้นที่ · เกิดใหม่ 60 นาทีหลังตาย แยกตามเซิร์ฟ/CH'];
  // 0.115 grouped menu: one line per page; the page's one-line help shows in its header instead.
  $('tabs').innerHTML=NAV.map(([group,ids])=>`<p class="nav-group">${group}</p>`+ids.filter(id=>PAGES[id]).map(id=>{const [icon,name,help]=PAGES[id];return `<button type="button" id="tab-${id}" aria-pressed="${id===tab}" data-tab="${id}" title="${esc(help)}"><i>${icon}</i><b>${name}</b></button>`;}).join('')).join('');
@@ -92,7 +140,7 @@ function filters(){
   const role=roleById(classId);if(!role?.branches.some(b=>b.id===masterId))masterId=role?.branches[0]?.id??'';
   f.innerHTML=`<label>อาชีพ <select id="class-pick">${paths.map(c=>`<option value="${c.id}"${c.id===classId?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><label>ชุดสกิล <select id="skill-set"><option value="live"${skillSet==='live'?' selected':''}>ชุดที่ใช้ในเกม · ดูรายละเอียด</option><option value="legacy"${skillSet==='legacy'?' selected':''}>ชุดเดิม · แก้ค่าสมดุล</option></select></label>`+(skillSet==='live'&&role?`<label>สาย Master <select id="master-pick">${role.branches.map(b=>`<option value="${b.id}"${b.id===masterId?' selected':''}>${esc(b.name)}</option>`).join('')}</select></label>`:'');
  }
- else if(tab==='table')f.innerHTML=`<label>ดู <select id="table-pick"><option value="compare"${tableView==='compare'?' selected':''}>เทียบทุกอาชีพ</option>${paths.map(c=>`<option value="${c.id}"${c.id===tableView?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><small>ตัวเลขรวมค่าที่แก้ในแท็บสกิล (ยังไม่บันทึกก็เห็นผลทันที) · เขียว/แดง = สูงสุด/ต่ำสุดของแถว</small>`;
+ else if(tab==='table')f.innerHTML=`<label>ดู <select id="table-pick"><option value="compare"${tableView==='compare'?' selected':''}>เทียบทุกอาชีพ</option>${paths.filter(c=>roleById(c.id)).map(c=>`<option value="${c.id}"${c.id===tableView?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><small>ตัวเลขจากสกิลที่ใช้ในเกมตอนนี้ · เทียบที่ขั้น 5 · เขียว/แดง = สูงสุด/ต่ำสุดของแถว</small>`;
  else if(tab==='items')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อหรือรหัสไอเท็ม"></label><label>ประเภท <select id="kind-pick"><option value="all">ทั้งหมด</option>${Object.entries(KIND).map(([k,n])=>`<option value="${k}"${k===kind?' selected':''}>${n}</option>`).join('')}</select></label>`;
  else if(tab==='drops')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อมอนหรือไอเท็ม"></label><small>100% = ดรอปทุกครั้ง · หัวหน้าฝูงและช่วงดรอป ×2 ยังทอยซ้ำตามเดิม</small>`;
  else if(tab==='monsters')f.innerHTML=`<label>ค้นหา <input id="search" type="search" value="${esc(query)}" placeholder="ชื่อหรือรหัสมอนสเตอร์"></label><label>ประเภท <select id="monster-kind">${[['all','ทั้งหมด'],['normal','ธรรมดา'],['elite','อีลิท'],['boss','บอส']].map(([k,n])=>`<option value="${k}"${monsterKind===k?' selected':''}>${n}</option>`).join('')}</select></label>`;
@@ -108,7 +156,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses','mail'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses','mail','evidence'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
  $('page-title').textContent=name;$('page-help').textContent=(tab==='skills'&&skillSet==='live'?'ชุดสกิลที่ใช้ในเกมปัจจุบัน · ดูรูป บทบาท และสาย Master':help)+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -122,14 +170,14 @@ function rowArt(r){
 function fieldInput(r,f){const b=base(r,f),v=value(r,f),edited=draft[r.group][r.key]?.[f]!==undefined,range=FIELDS[r.group][f];return `<input type="number" step="any" min="${range[0]}" max="${range[1]}" data-f="${f}" value="${v??''}" class="${edited?'edited':''}" aria-label="${esc(r.title)} ${LABEL[f]??f}" title="ค่าเดิม ${b??'—'}">`;}
 function currentSkills(){
  const defs=liveRoleSkills(classId,masterId)??classSkills(classId,SKILLS),role=roleById(classId),list=defs.map((s,i)=>({...s,artSlot:i})).filter(s=>!s.reserved);
- $('view').innerHTML=`<div class="admin-info-strip"><span>${esc(role?.role??className(classId))}</span><small>ค่าพื้นฐานก่อนเพิ่มระดับสกิล · ดูรายละเอียดเท่านั้น</small></div><div class="admin-entity-grid live-skill-grid">${list.map(s=>`<article class="admin-entity-card"><header>${rowArt({skill:true,artSlot:s.artSlot})}<div><span class="admin-tag">${s.passive?'พาสซีฟ':s.artSlot>=10?'Master':'สกิลอาชีพ'}</span><h3>${esc(s.name)}</h3><small>${esc(s.type)}</small></div></header><p class="admin-skill-tip">${esc(s.tip??'')}</p><dl class="admin-read-stats">${[['MP',s.passive?null:s.cost],['คูลดาวน์ (วิ)',s.passive?null:s.cd],['พลัง',s.passive||['taunt','guard','intercept','evade','stealth','clones','summon','greatSummon','spirit','greatSpirit','crow','smoke'].includes(s.type)?null:s.power??s.damage??s.heal]].filter(([,v])=>v!=null).map(([k,v])=>`<div><dt>${k}</dt><dd>${round(v)}</dd></div>`).join('')}</dl></article>`).join('')}</div>`;
+ $('view').innerHTML=`<div class="admin-info-strip"><span>${esc(role?.role??className(classId))}</span><small>สกิลกดใช้ 5 ขั้น · พาสซีฟ 3 ขั้น · ปลดตาม Job Level · ดูรายละเอียดเท่านั้น</small></div><div class="admin-entity-grid live-skill-grid">${list.map(s=>`<article class="admin-entity-card"><header>${rowArt({skill:true,artSlot:s.artSlot})}<div><span class="admin-tag">${s.passive?'พาสซีฟ':s.ultimate?'★ ไม้ตาย':s.artSlot>=10?'Master':'สกิลอาชีพ'}</span><h3>${esc(s.name)}</h3><small>${esc(s.type)}</small></div></header><p class="admin-skill-tip">${esc(s.tip??'')}</p><dl class="admin-read-stats">${[['ปลดที่ Job',s.job],['MP',s.passive?null:s.cost],['คูลดาวน์ (วิ)',s.passive?null:s.cd],['พลัง ขั้น 1→5',s.passive||!s.power?null:round(scaledSkill(s,1).power)+' → '+round(scaledSkill(s,5).power)],['ต่อขั้น (สูงสุด 3)',s.passive?passiveStep(s,1):null]].filter(([,v])=>v!=null).map(([k,v])=>`<div><dt>${k}</dt><dd>${round(v)}</dd></div>`).join('')}</dl></article>`).join('')}</div>`;
  paintAdminSkills($('view'),classId,defs);
 }
 function render(withFilters=true){
  if(withFilters)filters();pageHead();
  if(tab==='skills'&&skillSet==='live'){currentSkills();return;}
- if(tab==='table'){$('view').innerHTML=skillTable();paintAdminSkills($('view'),tableView==='compare'?classId:tableView);return;}
- if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
+ if(tab==='table'){$('view').innerHTML=skillTable();$('view').querySelectorAll('tbody[data-path]').forEach(t=>paintAdminSkills(t,tableView,liveRoleSkills(tableView,t.dataset.path)));return;}
+ if(tab==='evidence'){evidenceTab();return;}if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
  const rows=rowsFor(),cols=columns(rows),cards=['skills','monsters'].includes(tab)&&viewMode==='cards';
  const undo=(r,i)=>`<button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button>`;
  const note=tab==='skills'?'<p class="admin-legacy-note">ชุดสกิลเดิมก่อนปรับระบบอาชีพ · ไม่ใช่ชุดสกิลปัจจุบันที่แสดงในเกม</p>':'';
@@ -138,19 +186,25 @@ function render(withFilters=true){
  $('view').querySelectorAll('[data-i]').forEach(el=>{const r=rows[+el.dataset.i];el.querySelectorAll('input[data-f]').forEach(inp=>inp.onchange=()=>{set(r,inp.dataset.f,inp.value);const edited=draft[r.group][r.key]?.[inp.dataset.f]!==undefined;inp.classList.toggle('edited',edited);if(!edited)inp.value=base(r,inp.dataset.f)??'';el.querySelector('.undo').hidden=!draft[r.group][r.key];});el.querySelector('.undo').onclick=()=>{delete draft[r.group][r.key];showCount();render(false);};});
  if(tab==='skills')paintAdminSkills($('view'),classId);if(tab==='monsters')paintAdminMonsters($('view'));showCount();
 }
-// 0.89 skill table (owner): the balance view from the game numbers, including unsaved edits from the skill tab.
-const ROLE=['โจมตี','วงกว้าง','ตรึง','ผลัก','ฟื้นตัว','ตั้งรับ','โจมตีหนัก','พุ่ง','รวมสมาธิ','ไม้ตาย'];
-const REQ=Object.fromEntries(SKILL_TREE.map(n=>[n.slot,n.req]));
-const live=cid=>classSkills(cid,SKILLS).map((s,i)=>({...s,...(draft.skills[cid+':'+i]??{}),slot:i}));
+// 0.119 skill table (owner): the live class skills and both Master paths from the game's own numbers, rank 1→5
+// (passives 1→3). Every skill opens at a Job level; there are no prerequisite skills any more.
 const num=v=>v==null?'—':(Math.round(v*100)/100).toLocaleString('th-TH');
-const reqText=(list,slot)=>(REQ[slot]??[]).map(([r,l])=>`${esc(list[r].name)} ขั้น ${l}`).join(' + ')||'มีตั้งแต่เริ่ม';
+const roleList=(cid,job,from,to)=>liveRoleSkills(cid,job).map((s,slot)=>({...s,slot})).filter(s=>s.slot>=from&&s.slot<=to&&!s.reserved);
+const passiveStep=(s,r)=>s.modifier&&Math.abs(s.value)<1?'+'+num(s.value*r*100)+'%':'+'+num(s.value*r);
+function skillRow(s){
+ const head=`<td class="l"><span class="name">${rowArt({skill:true,artSlot:s.slot})}<span><b>${s.ultimate?'★ ':''}${esc(s.name)}</b><small>${s.passive?'พาสซีฟ':s.ultimate?'ไม้ตาย':'สกิลกดใช้'} · ${esc(s.type)}</small></span></span></td><td>${s.job}</td>`;
+ if(s.passive)return `<tr>${head}<td colspan="3" class="l"><small>${esc(s.tip??'')}</small></td>${[1,2,3].map(r=>`<td>${passiveStep(s,r)}</td>`).join('')}<td>—</td><td>—</td><td>—</td><td>—</td></tr>`;
+ const lv=[1,2,3,4,5].map(r=>scaledSkill(s,r)),top=lv[4],p=top.power??top.damage??top.heal??0;
+ return `<tr>${head}<td>${num(lv[0].cost)}</td><td>${num(lv[0].cd)}<small>→ ${num(top.cd)}</small></td><td>${num(top.radius&&!['line','break'].includes(s.type)?top.radius:top.range)}</td>${lv.map(x=>`<td>${num(x.power??x.damage??x.heal)}</td>`).join('')}<td>${top.cost?num(p/top.cost):'—'}</td><td>${top.cd?num(p/top.cd):'—'}</td></tr>`;
+}
+const tableHead='<thead><tr><th class="l">สกิล</th><th>Job</th><th>MP</th><th>คูลดาวน์</th><th>ระยะ/วง</th><th>ขั้น 1</th><th>ขั้น 2</th><th>ขั้น 3</th><th>ขั้น 4</th><th>ขั้น 5</th><th>พลัง/MP</th><th>พลัง/วิ</th></tr></thead>';
 function skillTable(){
- if(tableView!=='compare'){const list=live(tableView);
-  return `<div class="scroll"><table><thead><tr><th class="l">สกิล</th><th>MP</th><th>คูลดาวน์</th><th>ระยะ/รัศมี</th><th>นาน</th><th>ขั้น 1</th><th>ขั้น 4</th><th>ขั้น 7</th><th>ขั้น 10</th><th>พลัง/MP</th><th>พลัง/วิ</th><th class="l">ปลดล็อกเมื่อ</th></tr></thead><tbody>${list.map(s=>{const p=s.damage??s.heal??0,lv=[1,4,7,10].map(l=>scaledSkill(s,l));
-   return `<tr><td class="l"><span class="name">${rowArt({skill:true,artSlot:s.slot})}<span><b>${s.key} · ${esc(s.name)}</b><small>${ROLE[s.slot]} · ${esc(s.type)}</small></span></span></td><td>${num(s.cost)}</td><td>${num(s.cd)}</td><td>${num(s.radius??s.range)}</td><td>${num(s.duration)}</td>${lv.map(x=>`<td>${s.heal?'+'+num(x.heal):num(x.damage)}<small>${num(x.cd)} วิ</small></td>`).join('')}<td>${s.cost?num(p/s.cost):'—'}</td><td>${s.cd?num(p/s.cd):'—'}</td><td class="l req">${reqText(list,s.slot)}</td></tr>`;}).join('')}</tbody></table></div>`;}
- const all=paths.map(c=>({c,list:live(c.id)}));
- return `<div class="scroll"><table><thead><tr><th class="l">ช่อง · บทบาท</th>${all.map(a=>`<th>${esc(a.c.name)}</th>`).join('')}</tr></thead><tbody><tr><td class="l"><b>ตีธรรมดา</b><small>ATK อาชีพ · หน่วง</small></td>${all.map(a=>`<td>${num(a.c.damage)}<small>${num(a.c.delay)} วิ</small></td>`).join('')}</tr>${ROLE.map((role,slot)=>{const vals=all.map(a=>a.list[slot].damage??a.list[slot].heal??null),n=vals.filter(v=>v!=null),hi=Math.max(...n),lo=Math.min(...n);
-  return `<tr><td class="l"><b>${slot===9?0:slot+1} · ${role}</b><small>${reqText(all[0].list,slot)}</small></td>${all.map((a,i)=>{const s=a.list[slot],v=vals[i],k=n.length>1&&hi!==lo&&v!=null?(v===hi?'top':v===lo?'bottom':''):'';return `<td class="${k}">${s.heal?'+'+num(s.heal):num(s.damage)}<small>MP ${num(s.cost)} · ${num(s.cd)} วิ</small></td>`;}).join('')}</tr>`;}).join('')}</tbody></table></div>`;
+ if(tableView!=='compare'){const role=roleById(tableView);
+  // One tbody per path: each paints its own icons (both Master paths use slots 10-16).
+  return `<div class="scroll"><table>${tableHead}<tbody data-path=""><tr class="section"><th class="l" colspan="12">สกิลอาชีพ · ${esc(role.name)}</th></tr>${roleList(tableView,'',0,8).map(skillRow).join('')}</tbody>${role.branches.map(b=>`<tbody data-path="${esc(b.id)}"><tr class="section"><th class="l" colspan="12">Master · ${esc(b.name)}</th></tr>${roleList(tableView,b.id,10,16).map(skillRow).join('')}</tbody>`).join('')}</table></div><p class="admin-legacy-note">พลังคือค่าของสกิล ไม่ใช่ดาเมจสุดท้าย · ดาเมจจริง = พลัง × (1 + ATK หรือ MATK ÷ 40) แล้วผ่านเกราะ</p>`;}
+ const all=paths.filter(c=>roleById(c.id)).map(c=>({c,list:roleList(c.id,'',0,5)}));
+ return `<div class="scroll"><table><thead><tr><th class="l">ช่อง · ปลดที่ Job</th>${all.map(a=>`<th>${esc(a.c.name)}</th>`).join('')}</tr></thead><tbody><tr><td class="l"><b>ตีธรรมดา</b><small>ATK อาชีพ · หน่วง</small></td>${all.map(a=>`<td>${num(a.c.damage)}<small>${num(a.c.delay)} วิ</small></td>`).join('')}</tr>${[0,1,2,3,4,5].map(slot=>{const tops=all.map(a=>scaledSkill(a.list[slot],5)),vals=tops.map(t=>t?.power??null),n=vals.filter(v=>v!=null),hi=Math.max(...n),lo=Math.min(...n);
+  return `<tr><td class="l"><b>${slot===5?'★ ไม้ตาย':'สกิล '+(slot+1)}</b><small>ปลดที่ Job ${all[0].list[slot].job} · ขั้น 5</small></td>${all.map((a,i)=>{const s=a.list[slot],t=tops[i],v=vals[i],k=n.length>1&&hi!==lo&&v!=null?(v===hi?'top':v===lo?'bottom':''):'';return `<td class="${k}">${esc(s.name)}<br>${num(v)}<small>MP ${num(t.cost)} · ${num(t.cd)} วิ</small></td>`;}).join('')}</tr>`;}).join('')}</tbody></table></div>`;
 }
 // 0.103 drop rates: one row per item a monster can drop, edited in % (stored 0-1 in balance-data.js drops).
 const pct=v=>Math.round(v*1e6)/1e4;
@@ -499,7 +553,7 @@ function formulaTab(){
  const keep=()=>{try{localStorage.setItem('ayo-admin-formula',JSON.stringify(fx));}catch{}};
  const d=deriveStats({level:fx.level,classId:fx.classId,stats:{str:fx.str,agi:fx.agi,vit:fx.vit,int:fx.int,dex:fx.dex,luk:fx.luk}});
  const atk=d.atk+fx.watk,matk=d.matk+fx.wmatk,power=d.magic?matk:atk,cls=paths.find(c=>c.id===fx.classId)??paths[0];
- const basic=(cls.damage??0)+(d.magic?matk:atk),skills=classSkills(fx.classId,SKILLS).map(s=>scaledSkill(s,fx.skillLv)).filter(s=>s&&(s.damage??0)>0);
+ const basic=(cls.damage??0)+(d.magic?matk:atk),role=roleById(fx.classId),rank=Math.min(5,fx.skillLv),skills=role?[...roleList(fx.classId,'',0,5),...role.branches.flatMap(b=>roleList(fx.classId,b.id,10,13).map(s=>({...s,path:b.name})))].filter(s=>!ROLE_SELF_KINDS.has(s.type)&&!ROLE_FRIEND_KINDS.has(s.type)).map(s=>({...scaledSkill(s,rank),path:s.path})).filter(s=>s.power>0):[];
  const pct=n=>Math.round(n*100)+'%',num=n=>Math.round(n).toLocaleString('th-TH');
  const field=(k,label,min,max)=>`<label>${label}<input type="number" data-fx="${k}" min="${min}" max="${max}" value="${fx[k]}"></label>`;
  const rows=MONSTER_TYPES.map((t,i)=>{
@@ -507,20 +561,20 @@ function formulaTab(){
   const hitDmg=basic*guard,critDmg=basic*CRIT_MULT,avg=hit*((1-d.crit)*hitDmg+d.crit*critDmg);
   const blowGuard=magicMonster(t)?d.mdef:d.def,taken=(t.damage??0)*100/(100+blowGuard*4),dodge=dodgeChance(d.fleeStat,monsterHitStat(t),fx.luk);
   return `<tr><td class="l"><b>${esc(t.name)}</b><small>Lv.${t.level??'?'} · HP ${num(t.hp)}${magicMonster(t)?' · ตีเวท':''}</small></td><td>${monsterDef(t)} / ${monsterMdef(t)}</td><td>${monsterFlee(t)} / ${monsterHitStat(t)}</td><td>${pct(hit)}</td><td>${num(hitDmg)}<small>คริ ${num(critDmg)}</small></td><td>${avg>0?num(Math.ceil(t.hp/avg)):'—'}</td><td>${num(taken)}</td><td>${pct(dodge)}</td></tr>`;}).join('');
- const sk=skills.map(s=>{const p=1+power/40;return `<tr><td class="l"><b>${esc(s.key??'')} · ${esc(s.name)}</b><small>${esc(s.type)}</small></td><td>${num(s.damage)}</td><td>${pct(s.damage/40)}</td><td>${num(s.damage*p)}</td><td>${num(s.damage*p*defFactor(30))}</td></tr>`;}).join('');
+ const sk=skills.map(s=>{const p=1+power/40;return `<tr><td class="l"><b>${s.ultimate?'★ ':''}${esc(s.name)}</b><small>${esc(s.path?'Master · '+s.path:'สกิลอาชีพ')} · ${esc(s.type)}</small></td><td>${num(s.power)}</td><td>${pct(s.power/40)}</td><td>${num(s.power*p)}</td><td>${num(s.power*p*defFactor(30))}</td></tr>`;}).join('');
  $('view').innerHTML=`<div class="formula">
   <section class="fx-in"><h3>ลองตัวละคร</h3><label>อาชีพ<select data-fx="classId">${paths.map(c=>`<option value="${c.id}"${c.id===fx.classId?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
-   ${field('level','Base Lv.',1,99)}${field('str','STR',1,99)}${field('agi','AGI',1,99)}${field('vit','VIT',1,99)}${field('int','INT',1,99)}${field('dex','DEX',1,99)}${field('luk','LUK',1,99)}${field('watk','ATK อาวุธ',0,999)}${field('wmatk','MATK อาวุธ',0,999)}${field('skillLv','ขั้นสกิล',1,10)}</section>
+   ${field('level','Base Lv.',1,99)}${field('str','STR',1,99)}${field('agi','AGI',1,99)}${field('vit','VIT',1,99)}${field('int','INT',1,99)}${field('dex','DEX',1,99)}${field('luk','LUK',1,99)}${field('watk','ATK อาวุธ',0,999)}${field('wmatk','MATK อาวุธ',0,999)}${field('skillLv','ขั้นสกิล',1,5)}</section>
   <section class="fx-out"><h3>ค่าที่ได้ ${d.magic?'(สายเวท · ใช้ MATK)':'(สายกายภาพ · ใช้ ATK)'}</h3><dl>
    ${[['ATK',atk],['MATK',matk],['HIT',d.hit],['FLEE',d.fleeStat],['DEF',d.def],['MDEF',d.mdef],['คริ',pct(d.crit)],['HP',d.maxHp],['MP',d.maxMp],['ตีธรรมดา',basic]].map(([k,v])=>`<div><dt>${k}</dt><dd>${typeof v==='number'?num(v):v}</dd></div>`).join('')}</dl></section>
   <details class="fx-rules"><summary>สูตรที่ใช้ (ตัวเกมใช้สูตรเดียวกันนี้)</summary><ul>
    <li><b>ATK</b> = STR + (STR÷10)² + DEX÷5 + LUK÷3 + ATK อาวุธ (สายธนูสลับ STR ↔ DEX) · <b>MATK</b> = (INT−1)×1.5 + (INT÷7)² + MATK อาวุธ</li>
-   <li><b>ตีธรรมดา</b> = ดาเมจพื้นฐานอาชีพ + ATK (สายเวทใช้ MATK) · <b>สกิล</b> = ค่าสกิล × (1 + พลัง÷40) คือได้ค่าสกิล + พลัง × (ค่าสกิล÷40)</li>
+   <li><b>ตีธรรมดา</b> = ดาเมจพื้นฐานอาชีพ + ATK (สายเวทใช้ MATK) · <b>สกิล</b> = พลังสกิลตามขั้น × (1 + ATK÷40) (สายเวทใช้ MATK) แล้วคูณธาตุและเกราะ</li>
    <li><b>เกราะมอน</b>: ดาเมจ × 100 ÷ (100 + DEF) · สายเวทชน MDEF แทน · <b>คริ</b> (โอกาสจาก LUK) ×1.5 และทะลุ DEF · มอน DEF = Lv×0.5, MDEF = Lv×0.4</li>
    <li><b>โอกาสตีโดน</b> = 90% + HIT − FLEE มอน (30–100%) · HIT = Lv + DEX + LUK÷3 · FLEE มอน = Lv×0.6 · เวทโดนเสมอ</li>
    <li><b>หลบ</b> = FLEE − HIT มอน + 20% (5–70%) + LUK×0.1% · FLEE = Lv + AGI + LUK÷5 · HIT มอน = Lv×1.5 + 20</li>
    <li><b>โดนมอนตี</b> = ดาเมจมอน × 100 ÷ (100 + DEF×4) · โคม/ผีตีเวทชน MDEF (INT÷2 + ของ)</li></ul></details>
-  <h3>สกิล (ขั้น ${fx.skillLv}) เทียบมอน DEF 30</h3><div class="scroll"><table><thead><tr><th class="l">สกิล</th><th>ค่าสกิล</th><th>% ของพลัง</th><th>ดาเมจเต็ม</th><th>ผ่าน DEF 30</th></tr></thead><tbody>${sk||'<tr><td class="l" colspan="5">อาชีพนี้ไม่มีสกิลโจมตี</td></tr>'}</tbody></table></div>
+  <h3>สกิลโจมตี (ขั้น ${Math.min(5,fx.skillLv)}) เทียบมอน DEF 30</h3><div class="scroll"><table><thead><tr><th class="l">สกิล</th><th>ค่าสกิล</th><th>% ของพลัง</th><th>ดาเมจเต็ม</th><th>ผ่าน DEF 30</th></tr></thead><tbody>${sk||'<tr><td class="l" colspan="5">อาชีพนี้ไม่มีสกิลโจมตี</td></tr>'}</tbody></table></div>
   <h3>เทียบกับมอนทุกตัว (ตีธรรมดา)</h3><div class="scroll"><table><thead><tr><th class="l">มอน</th><th>DEF / MDEF</th><th>FLEE / HIT</th><th>ตีโดน</th><th>ดาเมจต่อครั้ง</th><th>ตีกี่ครั้งตาย</th><th>โดนตีครั้งละ</th><th>หลบได้</th></tr></thead><tbody>${rows}</tbody></table></div>
  </div>`;
  $('view').querySelectorAll('[data-fx]').forEach(el=>el.onchange=()=>{const k=el.dataset.fx;fx[k]=k==='classId'?el.value:Math.max(+el.min||0,Math.min(+el.max||999,Math.floor(Number(el.value)||0)));keep();formulaTab();});

@@ -8,11 +8,11 @@ import {AILMENTS} from '../ailments.js';
 import {ITEMS} from '../items.js';
 import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
-const bar=Array.from({length:15},(_,i)=>i);
+const bar=Array.from({length:17},(_,i)=>i);
 test('reordering the live hotbar preserves every skill once and AUTO follows the skill, including Master',()=>{
- const next=swapSkillSlots(bar,0,10);assert.deepEqual(bar,Array.from({length:15},(_,i)=>i));assert.equal(next[0],10);assert.equal(next[10],0);assert.equal(new Set(next).size,15);
+ const next=swapSkillSlots(bar,0,10);assert.deepEqual(bar,Array.from({length:17},(_,i)=>i));assert.equal(next[0],10);assert.equal(next[10],0);assert.equal(new Set(next).size,17);
  assert.deepEqual(orderedAutoConfig(next,{skills:[0,10,4],hp:40,mp:20}),{skills:[10,4,0],hp:40,mp:20});
- for(const [from,to] of [[-1,0],[0,15],[NaN,1],[1.5,2]])assert.equal(swapSkillSlots(bar,from,to),null);assert.equal(swapSkillSlots(Array(15).fill(0),0,1),null);
+ for(const [from,to] of [[-1,0],[0,17],[NaN,1],[1.5,2]])assert.equal(swapSkillSlots(bar,from,to),null);assert.equal(swapSkillSlots(Array(17).fill(0),0,1),null);
 });
 test('status atlas covers all 24 buffs, 12 debuffs, current ailments and every food stat',async()=>{
  assert.equal(STATUS_ICONS.length,36);assert.equal(new Set(STATUS_ICONS.map(s=>s.id)).size,36);assert.equal(STATUS_ICONS.filter(s=>s.kind==='buff').length,24);

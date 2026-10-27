@@ -4,7 +4,7 @@ import * as THREE from './vendor/build/three.module.js';
 import {ROLES,loadout,paintIcon} from './assets/skills-next/catalog.js';
 import {createTraining} from './assets/skills-next/simulation.js';
 import {createRoleVfx,createRooster} from './assets/skills-next/vfx.js';
-import {createRiggedSprite} from './rigged-sprite.js?v=novice174';
+import {createRiggedSprite} from './rigged-sprite.js?v=pose119';
 import {skillPose,skillTrack} from './skill-choreography.js?v=novice174';
 import {characterMotion} from './character-motion.js?v=novice174';
 const $=id=>document.getElementById(id),media=matchMedia('(prefers-reduced-motion:reduce)'),params=new URLSearchParams(location.search);

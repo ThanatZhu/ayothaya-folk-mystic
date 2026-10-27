@@ -1,158 +1,265 @@
-import {roleIconRegion} from './icon-regions.js';
 import {paintSkillRegion} from './icon-renderer.js';
-import {REWORK_ICONS,reworkIconURL,REWORK_REGION} from './rework-icon-map.js';
-// Draft skill identities. Kept separate from live saved skill indices and server rules.
-const s=(id,name,tip,kind,extra={})=>({id,name,tip,kind,mp:18,cd:8,windup:.36,duration:1.2,power:65,range:7,radius:2.8,seconds:5,pose:0,...extra});
-const p=(id,name,tip,modifier,value)=>({id,name,tip,modifier,value,passive:true});
+import {reworkIconURL,REWORK_REGION} from './rework-icon-map.js';
+// 0.119 skill rework (docs/skills-rework-proposal.md): per class 6 actives (the 6th is the ultimate) + 3 class
+// passives; per Master branch 4 actives (the 4th is the branch ultimate) + 3 passives. Actives level 1-5, passives
+// 1-3, every level (the first too) costs one point, and each skill opens at a Job level (`job`).
+// `kind` picks the existing role-combat behaviour; `fx` names the pre-0.119 skill whose painted VFX it reuses until
+// the new effects (docs/skills-vfx-prompts.md) land. `power` is in the role-combat scale (doc % x 0.6).
+const s=(id,name,tip,kind,fx,extra={})=>({id,name,tip,kind,fx,mp:18,cd:8,windup:.36,duration:1.2,power:65,range:7,radius:2.8,seconds:5,pose:0,...extra});
+const u=(id,name,tip,kind,fx,extra={})=>s(id,name,tip,kind,fx,{ultimate:true,windup:1,duration:1.8,...extra});
+// value = bonus per passive level (1-3)
+const p=(id,name,tip,modifier,value,fx)=>({id,name,tip,modifier,value,fx,passive:true});
+export const JOB_UNLOCK={base:[1,3,8,14,20,28],passives:[12,24,34],master:[1,6,12,20],masterPassives:[8,16,24]};
 export const ROLES=[
  {id:'swordsman',name:'นักดาบ',color:'#ffbf63',role:'แนวหน้า · ดึงศัตรู · ปกป้องเพื่อน',weakness:'ต้องอยู่ใกล้ศัตรู โล่มีเวลาจำกัดและไม่กันการโจมตีจากทุกทิศ',base:[
-  s('challenge','คำรามท้าศึก','ดึงมอนรอบตัวให้หันมาตีเรา ใช้ช่วยเพื่อนที่ถูกล้อม','taunt',{pose:8,cd:10,seconds:5,radius:4}),
-  s('guard','โล่รับคม','ลดดาเมจจากด้านหน้า 65% ต้องหันรับให้ถูกทิศ','guard',{pose:5,seconds:5,cd:12}),
-  s('intercept','ก้าวคุ้มกัน','พุ่งไปหาเพื่อน แล้วรับดาเมจแทน 40% ชั่วคราว','intercept',{pose:7,cd:14}),
-  s('cleave','ดาบกวาดวง','ฟันกลุ่มมอนที่รุมแนวหน้า เก็บศัตรูที่เข้ามาใกล้','cleave',{pose:1,power:85,range:4,cd:6,radius:3.5}),
-  s('break','ผ่าเกราะ','ทำดาเมจและลดเกราะ 30% เปิดช่องให้ทั้งปาร์ตี้','break',{pose:6,power:75,range:4}),
-  s('counter','ตั้งรับสวนคม','ตั้งรับ 3 วินาที เมื่อถูกโจมตีจะสวนกลับหนึ่งครั้ง','counter',{pose:0,power:120,seconds:3,cd:12})
+  s('sword-open','ฟันเปิดทาง','ฟันเปิดทาง ทำดาเมจและลดเกราะเป้าชั่วคราว','break','break',{power:90,mp:8,cd:4,range:2,seconds:4,pose:6}),
+  s('sword-roar','คำรามท้าศึก','ดึงศัตรูรอบตัวให้หันมาตีเรา','taunt','challenge',{mp:16,cd:14,radius:4,seconds:3,pose:8}),
+  s('sword-shield','โล่รับคม','กันดาเมจจากด้านหน้า ต้องหันรับให้ถูกทิศ','guard','guard',{mp:14,cd:12,seconds:3,pose:5}),
+  s('sword-cleave','ดาบกวาดวง','หมุนดาบกวาดศัตรูรอบตัว','cleave','cleave',{power:72,mp:18,cd:8,range:4,radius:3.5,pose:1}),
+  s('sword-cover','ก้าวคุ้มกัน','พุ่งไปหาเพื่อน แล้วรับดาเมจแทนชั่วคราว','intercept','intercept',{mp:16,cd:16,seconds:4,pose:7}),
+  u('sword-royal','ดาบอาญาสิทธิ์','ไม้ตาย · ชาร์จแล้วฟาดคลื่นดาบทองเป็นแนวยาว','line','cross-finish',{power:270,mp:45,cd:75,range:8,pose:9})
+ ],passives:[
+  p('sword-iron','กายเหล็ก','HP สูงสุดเพิ่มขึ้น','maxHp',.05,'iron-blood'),
+  p('sword-presence','บารมีแนวหน้า','รับดาเมจน้อยลง','damageTaken',.03,'iron-call'),
+  p('sword-auto-counter','สวนคมอัตโนมัติ','ทำดาเมจแรงขึ้น','damageDealt',.03,'riposte-flow')
  ],branches:[
   {id:'guardian',name:'ขุนดาบพิทักษ์',role:'แทงค์ปาร์ตี้ · รับแรงแทนเพื่อน',active:[
-   s('bastion','เขตพิทักษ์','กางโดมให้เพื่อนในวงรับดาเมจน้อยลง 45% เป็นเวลา 7 วินาที','sanctuary',{pose:5,cd:26,mp:35,seconds:7,power:45}),
-   s('shield-link','สายใยโล่','เชื่อมเพื่อนหนึ่งคน รับดาเมจแทน 55% นาน 8 วินาที','link',{pose:5,cd:20,seconds:8,power:55}),
-   s('last-stand','ยืนหยัดสุดท้าย','ฟื้น HP ตน 25% พร้อมโล่ใหญ่ ใช้กู้สถานการณ์ใกล้ล้ม','lastStand',{pose:9,cd:38,power:25})
-  ],passives:[p('iron-call','บารมีแนวหน้า','ยั่วมอนนานขึ้น 2 วินาที','tauntDuration',2),p('shield-edge','คมโล่พิทักษ์','ขณะตั้งรับ เมื่อรับดาเมจจะสะท้อน 15%','reflect',.15)]},
+   s('guard-bastion','เขตพิทักษ์','วางเขต เพื่อนในเขตโดนตีเบาลง','sanctuary','bastion',{power:30,mp:30,cd:24,radius:4,seconds:6,pose:5}),
+   s('guard-link','สายใยโล่','ผูกเพื่อน 1 คน รับดาเมจแทนบางส่วน','link','shield-link',{power:50,mp:25,cd:20,seconds:8,pose:5}),
+   s('guard-hook','ดึงศัตรู','เกี่ยวศัตรูมาหน้าเรา บอสเสียหลักแทน','pull','hook',{power:60,mp:20,cd:16,range:6,radius:2,pose:6}),
+   u('guard-wall','กำแพงกรุงศรี','ไม้ตาย · ทั้งปาร์ตี้ในวงได้โล่ใหญ่และสะท้อนแรง','ward','bastion',{power:120,mp:60,cd:90,seconds:6,pose:5})
+  ],passives:[
+   p('guard-last-stand','ยืนหยัดสุดท้าย','HP ต่ำแล้วรับดาเมจน้อยลง','lowGuard',.07,'iron-call'),
+   p('guard-shield-edge','คมโล่','สะท้อนดาเมจบางส่วน','reflect',.05,'shield-edge'),
+   p('guard-holy-armor','เกราะศักดิ์สิทธิ์','รับดาเมจน้อยลง','damageTaken',.04,'shield-edge')
+  ]},
   {id:'duelist',name:'ขุนดาบทะลวง',role:'ดาเมจเดี่ยว · อ่านจังหวะสวน',active:[
-   s('gale-riposte','ดาบสวนวายุ','ตั้งรับแล้วสวนหนัก หากศัตรูกำลังร่ายจะขัดท่าได้','riposte',{pose:0,cd:14,power:155}),
-   s('blade-brand','ตราดาบทะลวง','ประทับแผลดาบ ลดเกราะและทำให้ศัตรูรับดาเมจเพิ่ม 20%','brand',{pose:6,cd:18,power:110,seconds:7}),
-   s('cross-finish','กากบาทพิฆาต','ฟันไขว้ ดาเมจเพิ่มเมื่อ HP ศัตรูต่ำกว่า 35%','execute',{pose:9,cd:24,power:190})
-  ],passives:[p('open-wound','คมดาบซ้ำแผล','ดาเมจต่อศัตรูเกราะแตกเพิ่ม 20%','brokenBonus',.2),p('riposte-flow','แรงส่งสวนดาบ','สวนสำเร็จลดคูลดาวน์ดาบกวาด 2 วินาที','counterRecovery',2)]}
+   s('duel-riposte','ดาบสวนวายุ','ตั้งรับแล้วสวนหนัก ขัดท่าศัตรูที่กำลังร่าย','riposte','gale-riposte',{power:150,mp:22,cd:12,pose:0}),
+   s('duel-brand','ตราดาบทะลวง','ติดตราให้เป้ารับดาเมจเพิ่ม','brand','blade-brand',{power:66,mp:20,cd:16,seconds:6,pose:6}),
+   s('duel-storm','พุ่งฟันพายุ','พุ่งฟันทุกตัวในแนว','line','cleave',{power:108,mp:24,cd:14,range:5,pose:6}),
+   u('duel-cross','กากบาทพิฆาต','ไม้ตาย · ฟันกากบาท แรงสองเท่ากับเป้า HP ต่ำ','execute','cross-finish',{power:300,mp:50,cd:80,range:2,pose:9})
+  ],passives:[
+   p('duel-wound','คมดาบซ้ำแผล','ดาเมจต่อเป้าที่เกราะแตกเพิ่มขึ้น','brokenBonus',.07,'open-wound'),
+   p('duel-flow','แรงส่งสวนดาบ','สวนสำเร็จลดคูลดาวน์ดาบกวาด','counterRecovery',1,'riposte-flow'),
+   p('duel-spirit','จิตนักรบ','ทำดาเมจแรงขึ้น','damageDealt',.03,'open-wound')
+  ]}
  ]},
  {id:'lancer',name:'นักทวน',color:'#eac994',role:'คุมระยะ · สกัดการพุ่ง · แทงแนวเส้น',weakness:'ศัตรูที่แยกกันอยู่ทำให้ท่าแนวเส้นเสียประสิทธิภาพ',base:[
-  s('pierce','แทงทะลุแนว','แทงโดนทุกตัวในเส้น ไม่ใช่วงกลมรอบเป้า','line',{pose:0,power:95,cd:6}),
-  s('brace','ปลายทวนสกัด','ปักทวนขัดการร่ายและตรึงมอน บอสสะสมเสียหลักแทน','interrupt',{pose:2,power:50,seconds:2}),
-  s('sweep','กวาดทวนผลัก','ผลักมอนออกจากเพื่อน เปิดทางถอนตัว','push',{pose:1,power:60}),
-  s('spear-zone','เขตปลายทวน','วางเขต 6 วินาที ศัตรูในวงเดินช้าและโดนทวนเป็นระยะ','zone',{pose:5,power:26,seconds:6,cd:14}),
-  s('step','ย่างเท้ารักษาระยะ','ถอย 2 หน่วยและได้หลบหลีกชั่วคราว','evade',{pose:7,cd:7,seconds:2}),
-  s('sky-spear','ทวนดาวตก','ทิ้งทวนลงพื้นที่ มีสัญญาณวงก่อนตกให้หลบได้','meteor',{pose:9,power:155,windup:.8,cd:16})
+  s('lance-pierce','แทงทะลุแนว','แทงโดนทุกตัวในแนวเส้น','line','pierce',{power:84,mp:10,cd:5,range:4,pose:6}),
+  s('lance-sweep','กวาดทวนผลัก','กวาดทวนผลักศัตรูออก','push','sweep',{power:66,mp:14,cd:9,radius:3,pose:7}),
+  s('lance-check','ปลายทวนสกัด','ขัดการร่ายและตรึงเป้า','interrupt','brace',{power:60,mp:14,cd:12,range:3,seconds:1.5,pose:6}),
+  s('lance-zone','เขตปลายทวน','วางเขต ศัตรูในวงเดินช้าและโดนทวนเป็นระยะ','zone','spear-zone',{power:30,mp:20,cd:16,radius:3,seconds:5,pose:5}),
+  s('lance-step','ย่างเท้ารักษาระยะ','ถอยหลังและหลบหลีกชั่วคราว','evade','step',{mp:12,cd:10,seconds:2,pose:7}),
+  u('lance-naga','ทวนพญานาคทะลวงฟ้า','ไม้ตาย · ขว้างทวนพญานาคทะลุแนวยาวและลดเกราะ','drill','naga-drill',{power:252,mp:45,cd:75,range:10,pose:6})
+ ],passives:[
+  p('lance-reach','ปลายทวนยาว','ดาเมจต่อเป้าที่อยู่ไกลเพิ่มขึ้น','farBonus',.05,'far-point'),
+  p('lance-planted','หลักทวนมั่น','ขณะอยู่ในเขตทวนรับดาเมจน้อยลง','zoneGuard',.07,'planted'),
+  p('lance-rhythm','จังหวะทะลวง','ทำดาเมจแรงขึ้น','damageDealt',.03,'pierce-rhythm')
  ],branches:[
   {id:'vanguard',name:'ขุนทวนหลวง',role:'จัดตำแหน่งศัตรู · คุมพื้นที่ให้ทีม',active:[
-   s('spear-wall','กำแพงทวน','เขตทวนที่ทำดาเมจ ชะลอ และขัดมอนที่ก้าวเข้ามา','wall',{pose:5,seconds:7,cd:22,power:32}),
-   s('hook','ทวนเกี่ยวกลับ','เกี่ยวศัตรูเข้ามารวม บอสไม่ถูกลากแต่เสียหลัก','pull',{pose:2,power:90,cd:15}),
-   s('phalanx','กระบวนทวนพิทักษ์','แทงทะลวงพร้อมให้โล่เพื่อนรอบตัว','phalanx',{pose:9,power:150,cd:26})
-  ],passives:[p('long-wall','แนวสกัดหลวง','เขตทวนกว้างขึ้น 25%','zoneRadius',.25),p('planted','หลักทวนมั่น','ขณะมีเขตทวน รับดาเมจน้อยลง 20%','zoneGuard',.2)]},
+   s('van-wall','กำแพงทวน','ปักแนวทวนกั้นทาง ทำดาเมจและหยุดศัตรู','wall','spear-wall',{power:40,mp:28,cd:22,radius:3,seconds:5,pose:5}),
+   s('van-hook','ทวนเกี่ยวกลับ','เกี่ยวศัตรูไกลมาหน้าเรา','pull','hook',{power:72,mp:22,cd:15,range:6,radius:2,pose:6}),
+   s('van-phalanx','กระบวนทวน','แทงทะลวงพร้อมให้โล่เพื่อนรอบตัว','phalanx','phalanx',{power:60,mp:26,cd:26,range:4,pose:5}),
+   u('van-array','ค่ายกลทวนพันเล่ม','ไม้ตาย · ทวนพุ่งขึ้นจากพื้นหลายระลอกในวงใหญ่','storm','spear-storm',{power:96,mp:55,cd:85,radius:6,seconds:3,pose:5})
+  ],passives:[
+   p('van-line','แนวสกัดหลวง','เขตทวนกว้างขึ้น','zoneRadius',.1,'long-wall'),
+   p('van-soldier','ทหารกองหน้า','HP สูงสุดเพิ่มขึ้น','maxHp',.05,'long-wall'),
+   p('van-anchor','ปักหลัก','รับดาเมจน้อยลง','damageTaken',.03,'planted')
+  ]},
   {id:'war-lancer',name:'ทวนศึก',role:'ทะลวงแถวหลัง · ระเบิดดาเมจแนวเส้น',active:[
-   s('naga-drill','ทวนพญานาค','ทวนหมุนทะลวงแนวเส้น ลดเกราะทุกเป้าที่โดน','drill',{pose:6,power:160,cd:17}),
-   s('chain-pierce','แทงทะลุขบวน','แทงแรงขึ้นตามจำนวนศัตรูที่อยู่แนวเดียวกัน','chainLine',{pose:7,power:115,cd:13}),
-   s('spear-storm','ดาวทวนถล่ม','ทวนดาวตกหลายระลอกในวงกว้าง ต้องร่ายก่อน','storm',{pose:9,power:60,seconds:4,windup:1,cd:30})
-  ],passives:[p('far-point','ปลายทวนยาว','เป้าห่างเกิน 4 หน่วยรับดาเมจเพิ่ม 20%','farBonus',.2),p('pierce-rhythm','จังหวะทะลวง','แทงแนวเส้นโดนหลายตัว ลดคูลดาวน์ทวน 2 วินาที','lineRecovery',2)]}
+   s('war-drill','ทวนพญานาค','หมุนทวนเจาะแนวเส้นและลดเกราะ','drill','naga-drill',{power:66,mp:24,cd:14,range:4,pose:6}),
+   s('war-chain','แทงทะลุขบวน','แทงแนวยาว แรงขึ้นตามจำนวนศัตรูในแนว','chainLine','chain-pierce',{power:120,mp:24,cd:13,range:7,pose:6}),
+   s('war-leap','กระโดดทวน','กระโดดทิ่มทวนลงพื้นที่','meteor','sky-spear',{power:96,mp:22,cd:16,radius:2.5,pose:6}),
+   u('war-stars','ดาวทวนถล่ม','ไม้ตาย · ทวนไฟตกจากฟ้าหลายระลอกในวงกว้าง','storm','spear-storm',{power:70,mp:55,cd:85,radius:5,seconds:3,pose:5})
+  ],passives:[
+   p('war-edge','ปลายทวนคม','ทำดาเมจแรงขึ้น','damageDealt',.04,'far-point'),
+   p('war-tempo','จังหวะศึก','ทำดาเมจแรงขึ้น','damageDealt',.03,'pierce-rhythm'),
+   p('war-backline','นักล่าแนวหลัง','ดาเมจต่อเป้าที่อยู่ไกลเพิ่มขึ้น','farBonus',.05,'far-point')
+  ]}
  ]},
- {id:'hunter',name:'นายพราน',color:'#a5db84',role:'โจมตีไกล · กับดัก · ไก่ชนคู่ใจ',weakness:'ต้องคุมระยะและสั่งคู่หู ไก่มีเวลาหมดและไม่รับบอสแทนแทงค์',base:[
-  s('rooster','เรียกไก่ชน','เรียกไก่ 18 วินาที ให้ไล่จิกเป้าที่เลือก เปลี่ยนเป้าได้','summon',{pose:8,cd:22,seconds:18}),
-  s('peck','จิกขัดจังหวะ','สั่งไก่จิกขัดการร่าย ต้องมีไก่อยู่ในสนามก่อน','peck',{pose:2,power:60,cd:6}),
-  s('mark','หมายตาพราน','ตีตราให้ทั้งทีมทำดาเมจใส่เป้านี้เพิ่ม 20%','mark',{pose:6,power:35,seconds:8}),
-  s('vine-trap','บ่วงเถาวัลย์','วางบ่วงตามพื้นที่ ตรึงมอนและทำดาเมจเบา ๆ','trap',{pose:2,power:24,seconds:5,cd:12}),
-  s('retreat-shot','ศรถอยพง','ยิงแล้วถอยออก 2 หน่วย ไม่กระโดดเข้าหาศัตรู','retreatShot',{pose:3,power:75,cd:7}),
-  s('arrow-rain','ฝนศร','ยิงศรลงวงพื้นที่ 4 ระลอก เหมาะกับมอนรวมกลุ่ม','rain',{pose:1,power:38,seconds:4,cd:16})
+ {id:'hunter',name:'นายพราน',color:'#a5db84',role:'โจมตีไกล · กับดัก · ไก่ชนคู่ใจ',weakness:'ต้องคุมระยะ ตัวบางเมื่อถูกประชิด',base:[
+  s('hunt-shot','ศรเจาะจุด','ยิงศรเจาะเกราะเป้าเดียว','break','ambush',{power:90,mp:8,cd:4,range:7,seconds:3,pose:7}),
+  s('hunt-mark','หมายตาพราน','ตีตราให้ทั้งทีมทำดาเมจใส่เป้านี้เพิ่ม','mark','mark',{power:35,mp:12,cd:12,range:8,seconds:8,pose:6}),
+  s('hunt-snare','บ่วงเถาวัลย์','วางบ่วงตรึงศัตรูที่เหยียบ','trap','vine-trap',{power:24,mp:14,cd:10,radius:2,seconds:8,pose:5}),
+  s('hunt-rain','ฝนศร','ยิงศรลงวงพื้นที่หลายระลอก','rain','arrow-rain',{power:36,mp:22,cd:14,radius:3.5,seconds:3,pose:6}),
+  s('hunt-retreat','ศรถอยพง','ยิงแล้วกระโดดถอยออก','retreatShot','retreat-shot',{power:72,mp:14,cd:10,pose:7}),
+  u('hunt-rama','ศรพระราม','ไม้ตาย · ง้างศรเทพยิงทะลุแนวยาวสุดลูกหูลูกตา','line','ambush',{power:330,mp:45,cd:80,range:14,windup:1.2,pose:7})
+ ],passives:[
+  p('hunt-eye','ตาพราน','ดาเมจใส่เป้าที่มีหมายตาเพิ่มขึ้น','markBonus',.05,'weakpoint'),
+  p('hunt-nock','ขึ้นสายไว','สกิลยิงศรคูลดาวน์สั้นลง','arrowCooldown',.05,'quick-nock'),
+  p('hunt-rooster','ไก่ชนคู่ใจ','ไก่ชนแรงขึ้น','summonPower',.15,'rooster-heart')
  ],branches:[
   {id:'ranger',name:'พรานไพร',role:'ซุ่มยิง · ใช้ภูมิประเทศและกับดัก',active:[
-   s('scatter','ศรแตกแขนง','ยิงพัดกว้างด้านหน้า ไม่โดนศัตรูด้านหลัง','cone',{pose:1,power:125,cd:12}),
-   s('ambush','ซุ่มยิงพงไพร','พรางตัวแล้วเปิดยิงหนัก เป้าที่มีหมายตารับแรงขึ้น','ambush',{pose:6,power:175,cd:18}),
-   s('thicket','ดงหนามพราน','วางดงหนามทำดาเมจต่อเนื่องและชะลอมอน','thorns',{pose:9,power:40,seconds:7,cd:24})
-  ],passives:[p('weakpoint','ตาพราน','ดาเมจใส่เป้ามีหมายตาเพิ่มอีก 15%','markBonus',.15),p('quick-nock','ขึ้นสายไว','สกิลยิงศรคูลดาวน์สั้นลง 15%','arrowCooldown',.15)]},
+   s('rang-fan','ศรแตกแขนง','ยิงพัดกว้างด้านหน้า','cone','scatter',{power:54,mp:22,cd:10,range:6,pose:7}),
+   s('rang-ambush','ซุ่มยิงพงไพร','พรางตัวแล้วเปิดยิงหนัก','ambush','ambush',{power:180,mp:26,cd:18,pose:7}),
+   s('rang-thorns','ดงหนามพราน','วางดงหนามทำดาเมจต่อเนื่องและชะลอ','thorns','thicket',{power:40,mp:26,cd:22,radius:4,seconds:5,pose:5}),
+   u('rang-storm','ห่าศรหิมพานต์','ไม้ตาย · ศรตกเป็นห่าฝนในวงใหญ่','rain','arrow-rain',{power:72,mp:55,cd:85,radius:7,seconds:4,pose:6})
+  ],passives:[
+   p('rang-range','ระยะพรานไพร','ดาเมจต่อเป้าที่อยู่ไกลเพิ่มขึ้น','farBonus',.05,'weakpoint'),
+   p('rang-weakpoint','จุดอ่อน','ทำดาเมจแรงขึ้น','damageDealt',.05,'weakpoint'),
+   p('rang-move','เดินยิง','ทำดาเมจแรงขึ้น','damageDealt',.03,'quick-nock')
+  ]},
   {id:'spirit-hunter',name:'พรานอาคม',role:'คู่หูวิญญาณ · สั่งจิกและช่วยทีม',active:[
-   s('mythic-rooster','ไก่ชนหิมพานต์','เรียกไก่อาคม 24 วินาที จิกแรงและวิ่งเข้าหาเป้า','greatSummon',{pose:8,cd:30,seconds:24}),
-   s('flock','ฝูงจิกวิญญาณ','ส่งฝูงเงาไก่จิกเป็นวง ขัดท่าศัตรูที่ไม่ใช่บอส','flock',{pose:9,power:120,cd:20}),
-   s('crow','ขันปลุกขวัญ','ไก่ขันเพิ่มดาเมจทีม 20% และล้างความกลัว ต้องมีไก่ก่อน','crow',{pose:8,seconds:8,cd:22})
-  ],passives:[p('rooster-heart','ใจไก่นักสู้','ไก่จิกแรงขึ้น 25%','summonPower',.25),p('bond','คู่ขวัญพราน','ไก่จิกเป้าที่มีหมายตาจะฮีลเจ้าของ 8 HP','bondHeal',8)]}
+   s('spirit-flock','ฝูงจิกวิญญาณ','ส่งฝูงไก่วิญญาณจิกเป็นวง ขัดท่าศัตรู','uppercut','flock',{power:72,mp:24,cd:14,radius:3,pose:6}),
+   s('spirit-crow','ขันปลุกขวัญ','ไก่ขันเพิ่มดาเมจทีมชั่วคราว','crow','crow',{mp:26,cd:24,seconds:8,pose:5}),
+   s('spirit-peck','ไก่ชนจิกตา','ไก่กระโจนจิกเป้า ขัดท่าและทำให้มึนงง','interrupt','peck',{power:60,mp:20,cd:16,range:6,seconds:2,pose:6}),
+   u('spirit-giant','ไก่ชนหิมพานต์','ไม้ตาย · เรียกไก่ชนยักษ์ทองคำมาช่วยสู้','greatSummon','mythic-rooster',{mp:60,cd:90,seconds:12,pose:5})
+  ],passives:[
+   p('spirit-heart','ใจไก่นักสู้','ไก่ชนแรงขึ้น','summonPower',.15,'rooster-heart'),
+   p('spirit-bond','คู่ขวัญพราน','ไก่จิกเป้าที่มีหมายตาจะฮีลเจ้าของ','bondHeal',3,'bond'),
+   p('spirit-feather','ขนไก่วิญญาณ','ไก่จิกแล้วฮีลเจ้าของเพิ่ม','bondHeal',2,'bond')
+  ]}
  ]},
- {id:'boxer',name:'นักมวย',color:'#ff945b',role:'ประชิด · คอมโบ · ขัดท่าหนัก',weakness:'ต้องเข้าใกล้และเลือกจังหวะ หากมัวต่อคอมโบอาจโดนท่าหนัก',base:[
-  s('jab','หมัดนำ','หมัดเร็วสะสมจังหวะมวยได้สูงสุด 3 ขั้น','jab',{pose:0,power:55,cd:2,mp:7}),
-  s('elbow','ศอกตัดลม','ขัดท่าร่าย ใช้หยุดการโจมตีที่อันตราย','interrupt',{pose:1,power:65,cd:8}),
-  s('knee','เข่าปิดบัญชี','ใช้จังหวะมวยที่สะสม เพิ่มดาเมจตามจำนวนขั้น','comboFinish',{pose:6,power:85,cd:7}),
-  s('triangle','ย่างสามขุม','ถอยหลบพร้อมเพิ่มโอกาสหลบ 2 วินาที','evade',{pose:7,cd:6,seconds:2}),
-  s('parry','ปัดป้องสวนหมัด','รับการโจมตีแล้วสวนหนึ่งครั้ง ต้องอ่านจังหวะศัตรู','counter',{pose:5,power:130,cd:11,seconds:3}),
-  s('hanuman','หนุมานถวายแหวน','หมัดเสยเป็นวงเล็ก ขัดมอนและทำให้บอสเสียหลัก','uppercut',{pose:9,power:145,cd:15})
+ {id:'boxer',name:'นักมวย',color:'#ff945b',role:'ประชิดล้วน · คอมโบ · ล็อกและปิดเกม',weakness:'ต้องเข้าใกล้และเลือกจังหวะ ไม่มีท่าระยะไกล',base:[
+  s('box-jab','หมัดนำ','หมัดเร็วสะสมจังหวะมวย','jab','jab',{power:54,mp:4,cd:1.5,range:1.4,pose:6}),
+  s('box-knee-dash','เข่าลอยพุ่ง','พุ่งเข่าเข้าหาเป้าและขัดจังหวะ','leap','flying-knee',{power:90,mp:14,cd:10,range:5,pose:7}),
+  s('box-clinch','จับคอเข่าลอย','จับล็อกคอแล้วตีเข่า เป้าขยับไม่ได้ชั่วครู่','interrupt','knee',{power:126,mp:18,cd:14,range:1.4,seconds:1.5,pose:6}),
+  s('box-elbow','ศอกกลับหลัง','หมุนศอกรอบตัว ขัดการร่ายทุกตัวในวง','cleave','elbow',{power:78,mp:16,cd:9,range:2.5,radius:2.5,pose:7}),
+  s('box-triangle','ย่างสามขุม','ย่างหลบดาเมจทั้งหมดชั่วครู่','evade','triangle',{mp:12,cd:11,seconds:1,pose:0}),
+  u('box-hanuman','หนุมานถวายแหวน','ไม้ตาย · อัปเปอร์คัตหนุมาน ยิ่งสะสมจังหวะยิ่งแรง','comboFinish','hanuman',{power:240,mp:40,cd:70,range:1.6,pose:6})
+ ],passives:[
+  p('box-breath','ลมหายใจมวย','ท่าคอมโบคืน MP','comboMana',2,'breath'),
+  p('box-rhythm','จังหวะครู','ท่าปิดคอมโบแรงขึ้น','comboBonus',.08,'rhythm'),
+  p('box-heavy','หมัดหนัก','ทำดาเมจแรงขึ้น','damageDealt',.05,'rhythm')
  ],branches:[
   {id:'master-boxer',name:'ครูมวย',role:'คอมโบต่อเนื่อง · ดาเมจตามจังหวะ',active:[
-   s('mae-mai','แม่ไม้ต่อเนื่อง','ชุดหมัดสามจังหวะ เติมจังหวะมวยเต็ม 3 ขั้น','combo',{pose:9,power:145,cd:14}),
-   s('twin-fists','หนุมานประสานหมัด','ใช้จังหวะมวยทั้งหมดระเบิดหมัดคู่เป็นวง','comboBurst',{pose:6,power:165,cd:20}),
-   s('flying-knee','เข่าเหินเวหา','เข้าประชิดเป้าและขัดการร่าย ก่อนคืนหลัก','leap',{pose:7,power:155,cd:17})
-  ],passives:[p('rhythm','จังหวะครู','คอมโบปิดท้ายแรงเพิ่ม 25%','comboBonus',.25),p('breath','ลมหายใจมวย','ใช้ท่าคอมโบคืน MP 6 หน่วย','comboMana',6)]},
+   s('mb-maemai','แม่ไม้ต่อเนื่อง','ชุดท่าต่อเนื่อง เติมจังหวะมวยเต็ม','combo','mae-mai',{power:60,mp:22,cd:12,range:1.6,pose:6}),
+   s('mb-flying-knee','เข่าเหินเวหา','กระโดดเข่าจากระยะไกลลงใส่เป้า','leap','flying-knee',{power:132,mp:24,cd:15,range:6,pose:7}),
+   s('mb-headband','มวยคาดเชือก','ปลุกใจ ทีมทำดาเมจแรงขึ้นชั่วคราว','crow','mae-mai',{mp:24,cd:22,seconds:8,pose:5}),
+   u('mb-barrage','หนุมานประสานหมัด','ไม้ตาย · ร่างหนุมานรัวหมัดใส่เป้าเดียว','comboBurst','twin-fists',{power:300,mp:55,cd:80,range:2,pose:6})
+  ],passives:[
+   p('mb-teacher','ครูสอนมวย','ท่าปิดคอมโบแรงขึ้น','comboBonus',.05,'rhythm'),
+   p('mb-iron-shoulder','ไหล่เหล็ก','รับดาเมจน้อยลง','damageTaken',.03,'breath'),
+   p('mb-fast-hands','มือเร็ว','ทำดาเมจแรงขึ้น','damageDealt',.04,'rhythm')
+  ]},
   {id:'iron-boxer',name:'มวยคงกระพัน',role:'ยืนแลก · สะสมแรงเพื่อสวน',active:[
-   s('iron-body','กายคงกระพัน','ตั้งกายรับดาเมจลด 65% ชั่วคราว แต่ยังต้องหลบท่าบอส','guard',{pose:5,seconds:7,cd:24}),
-   s('anchor','ปักหลักรับศึก','ยั่วมอนใกล้ตัวพร้อมได้โล่ ใช้เป็นแนวหน้าสำรอง','anchor',{pose:5,power:100,cd:22}),
-   s('mountain-fist','หมัดสะท้อนภูผา','ตั้งรับแล้วสวน 180 ดาเมจ ใช้ได้หนึ่งครั้งต่อการตั้งรับ','counter',{pose:9,power:180,seconds:4,cd:25})
-  ],passives:[p('iron-blood','เลือดนักสู้','HP สูงสุดเพิ่ม 20%','maxHp',.2),p('unbroken','ใจไม่ยอมล้ม','เมื่อ HP ต่ำกว่า 35% รับดาเมจน้อยลง 20%','lowGuard',.2)]}
+   s('ib-stone','กายคงกระพัน','ตั้งกายรับดาเมจลดลงมากชั่วคราว','guard','iron-body',{mp:26,cd:22,seconds:5,pose:0}),
+   s('ib-anchor','ปักหลักรับศึก','ยั่วศัตรูรอบตัวพร้อมได้โล่','anchor','anchor',{power:60,mp:24,cd:20,radius:4,seconds:5,pose:0}),
+   s('ib-headbutt','โขกศีรษะ','โขกหัวเป้า ขัดท่าและทำให้มึนงง','interrupt','elbow',{power:108,mp:20,cd:14,range:1.4,seconds:1.5,pose:6}),
+   u('ib-mountain','หมัดสะท้อนภูผา','ไม้ตาย · ตั้งรับแล้วปล่อยหมัดภูผาสวนกลับ','counter','mountain-fist',{power:300,mp:50,cd:80,seconds:3,pose:0})
+  ],passives:[
+   p('ib-blood','เลือดนักสู้','ทำดาเมจแรงขึ้น','damageDealt',.05,'iron-blood'),
+   p('ib-unbroken','ใจไม่ยอมล้ม','HP ต่ำแล้วรับดาเมจน้อยลง','lowGuard',.07,'unbroken'),
+   p('ib-tough','หนังเหนียว','รับดาเมจน้อยลง','damageTaken',.04,'iron-blood')
+  ]}
  ]},
- {id:'rogue',name:'จอมโจร / มีดคู่',color:'#c69bea',role:'ลอบโจมตี · พิษ · ปลดตัวจากวงล้อม',weakness:'ตัวบาง ท่าปิดบัญชีแรงเมื่อเตรียมพิษหรือเข้าพรางตัวแล้ว',base:[
-  s('stealth','พรางเงา','พรางตัว 5 วินาที การโจมตีครั้งถัดไปแรงขึ้นแล้วเปิดเผยตัว','stealth',{pose:5,seconds:5,cd:12}),
-  s('backstab','มีดเงาทะลวง','เข้าถึงเป้า โจมตีจากพรางตัวแรงขึ้น 60%','backstab',{pose:7,power:90,cd:7}),
-  s('hamstring','เฉือนเอ็น','ทำดาเมจและลดความเร็วศัตรู 50%','slow',{pose:2,power:65}),
-  s('poison','มีดอาบพิษ','ทำให้เป้าติดพิษ 6 วินาที เตรียมระเบิดพิษภายหลัง','poison',{pose:6,power:30,seconds:6}),
-  s('smoke','ควันพรางทาง','กางควันให้เพื่อนในวงหลบหลีกเพิ่มชั่วคราว','smoke',{pose:5,cd:14,seconds:5}),
-  s('execution','มีดปิดชีพ','แรงเป็นสองเท่าเมื่อเป้า HP ต่ำกว่า 35%','execute',{pose:9,power:125,cd:15})
+ {id:'rogue',name:'จอมโจร / มีดคู่',color:'#c69bea',role:'ลอบโจมตี · พิษ · ปิดชีพ',weakness:'ตัวบาง ท่าปิดชีพแรงเมื่อเป้าใกล้ตายหรือออกจากพรางตัว',base:[
+  s('rogue-slash','มีดคู่เฉือน','ฟันมีดคู่เร็ว แรงขึ้นมากถ้าออกจากพรางตัว','backstab','backstab',{power:90,mp:6,cd:3,range:1.4,pose:6}),
+  s('rogue-stealth','พรางเงา','พรางตัว การโจมตีถัดไปแรงขึ้น','stealth','stealth',{mp:16,cd:14,seconds:4,pose:5}),
+  s('rogue-shadowstab','มีดเงาทะลวง','วาร์ปไปหลังเป้าแล้วแทง','backstab','moon-dive',{power:96,mp:16,cd:10,range:5,pose:7}),
+  s('rogue-poison','มีดอาบพิษ','ทำให้เป้าติดพิษ','poison','poison',{power:48,mp:14,cd:8,range:1.6,seconds:6,pose:6}),
+  s('rogue-smoke','ควันพรางทาง','กางควันให้เพื่อนในวงหลบหลีกเพิ่ม','smoke','smoke',{mp:18,cd:16,seconds:4,pose:5}),
+  u('rogue-execute','มีดปิดชีพ','ไม้ตาย · ฟันรวดเดียว แรงสองเท่ากับเป้า HP ต่ำ','execute','execution',{power:210,mp:35,cd:60,range:1.6,pose:7})
+ ],passives:[
+  p('rogue-long-shadow','เงาทอดยาว','พรางตัวนานขึ้น','stealthDuration',1,'long-shadow'),
+  p('rogue-light-hand','มือเบา','ทำดาเมจแรงขึ้น','damageDealt',.04,'shadow-step'),
+  p('rogue-weak-spot','จุดตาย','ทำดาเมจแรงขึ้น','damageDealt',.05,'last-drop')
  ],branches:[
   {id:'shadow',name:'โจรเงา',role:'เคลื่อนย้าย · ล่อเป้า · ช่วยหลบ',active:[
-   s('clones','เงาแยกร่าง','เงาล่อศัตรูให้เปลี่ยนเป้า พร้อมพรางตัวเจ้าของ','clones',{pose:8,cd:22,seconds:6}),
-   s('shadow-curtain','ม่านเงาคุ้มกัน','ควันใหญ่ให้ทั้งทีมหลบหลีกและล้างความกลัว','smoke',{pose:5,cd:24,seconds:8,radius:4}),
-   s('moon-dive','จู่โจมจันทรา','เข้าประชิดแล้วแทงจากเงา หากพรางอยู่แรงขึ้น','backstab',{pose:9,power:170,cd:20})
-  ],passives:[p('long-shadow','เงาทอดยาว','พรางตัวนานขึ้น 2 วินาที','stealthDuration',2),p('shadow-step','ก้าวเงา','โจมตีจากพรางคืน MP 10 หน่วย','stealthMana',10)]},
+   s('shade-clones','เงาแยกร่าง','สร้างร่างเงาล่อศัตรูพร้อมพรางตัว','clones','clones',{mp:26,cd:22,seconds:6,pose:5}),
+   s('shade-curtain','ม่านเงาคุ้มกัน','ม่านเงาให้ทีมหลบหลีกเพิ่ม','smoke','shadow-curtain',{mp:26,cd:24,seconds:5,pose:5}),
+   s('shade-swap','สลับเงา','ถอยหลบด้วยเงาและหลบหลีกชั่วคราว','evade','stealth',{mp:18,cd:12,seconds:2,pose:7}),
+   u('shade-moonfall','จู่โจมจันทรา','ไม้ตาย · ฟ้ามืด วาร์ปฟันศัตรูทุกตัวในวงใหญ่','uppercut','moon-dive',{power:120,mp:55,cd:85,radius:7,pose:7})
+  ],passives:[
+   p('shade-step','ก้าวเงา','โจมตีจากพรางตัวคืน MP','stealthMana',3,'shadow-step'),
+   p('shade-mirage','ร่างลวงตา','รับดาเมจน้อยลง','damageTaken',.03,'long-shadow'),
+   p('shade-echo','เงาสะท้อน','ทำดาเมจแรงขึ้น','damageDealt',.03,'shadow-step')
+  ]},
   {id:'assassin',name:'มือมีดอาคม',role:'พิษสะสม · ระเบิดเป้าเดี่ยว',active:[
-   s('venom-blade','คมมีดพิษอาคม','พิษแรงต่อเนื่อง 8 วินาที ไม่ซ้อนพิษชนิดเดิมทับหลายชั้น','venom',{pose:6,power:48,seconds:8,cd:17}),
-   s('venom-burst','พิษระเบิดจุดตาย','ใช้พิษที่เหลือบนเป้าระเบิดเป็นดาเมจ ต้องติดพิษก่อน','detonatePoison',{pose:9,power:100,cd:14}),
-   s('sunset-blade','มีดดับตะวัน','แทงประหาร เป้าต่ำกว่า 35% รับดาเมจสองเท่า','execute',{pose:7,power:210,cd:28})
-  ],passives:[p('deep-venom','พิษฝังลึก','พิษอยู่นานขึ้น 2 วินาที','poisonDuration',2),p('last-drop','พิษหยดสุดท้าย','ดาเมจต่อเป้าติดพิษ HP ต่ำกว่า 35% เพิ่ม 25%','venomFinish',.25)]}
+   s('venom-edge','คมมีดพิษอาคม','พิษแรงต่อเนื่องบนเป้า','venom','venom-blade',{power:48,mp:24,cd:18,range:1.6,seconds:8,pose:6}),
+   s('venom-pop','พิษระเบิดจุดตาย','ระเบิดพิษที่เหลือบนเป้าเป็นดาเมจ','detonatePoison','venom-burst',{power:60,mp:22,cd:12,range:1.6,pose:6}),
+   s('venom-hamstring','เฉือนเอ็น','ทำดาเมจและลดความเร็วเป้า','slow','hamstring',{power:78,mp:18,cd:12,range:1.6,seconds:5,pose:6}),
+   u('venom-sunset','มีดดับตะวัน','ไม้ตาย · ฟันจันทร์เสี้ยว แรงสองเท่ากับเป้า HP ต่ำ','execute','sunset-blade',{power:300,mp:55,cd:80,range:1.6,pose:7})
+  ],passives:[
+   p('venom-deep','พิษฝังลึก','พิษอยู่นานขึ้น','poisonDuration',2,'deep-venom'),
+   p('venom-last-drop','พิษหยดสุดท้าย','ท่าปิดเป้าติดพิษแรงขึ้น','venomFinish',.1,'last-drop'),
+   p('venom-blood','เลือดอสรพิษ','รับดาเมจน้อยลง','damageTaken',.03,'deep-venom')
+  ]}
  ]},
- {id:'shaman',name:'หมอผี',color:'#63decb',role:'คำสาป · วิญญาณ · เขตอาคม',weakness:'ต้องเตรียมคำสาปและเขต ไม่มีฮีลหลักหรือชุบแทนพระ',base:[
-  s('curse','ผูกคำสาป','คำสาปทำดาเมจเบาและเตรียมแรงสำหรับระเบิดอาคม','curse',{pose:0,power:35,seconds:8}),
-  s('thread','ด้ายตรึงวิญญาณ','ผูกด้ายตรึงมอน ขัดบอสด้วยค่าเสียหลัก','bind',{pose:2,power:40,seconds:3}),
-  s('spirit','พรายคุ้มกาย','เรียกพราย 14 วินาที ยิงช่วยและให้โล่เจ้าของ','spirit',{pose:8,seconds:14,cd:20}),
-  s('talisman','ยันต์ระเบิด','วางยันต์บนพื้นที่ ระเบิดเมื่อศัตรูเข้าวง','mine',{pose:2,power:110,cd:10}),
-  s('curse-burst','ถอนคำสาปแตก','ระเบิดคำสาปจากเป้าหนึ่งไปยังศัตรูรอบ ๆ ต้องสาปก่อน','detonateCurse',{pose:6,power:125,cd:10}),
-  s('great-spirit','พรายอาละวาด','คลื่นวิญญาณเป็นวง ทำดาเมจและชะลอ','soulWave',{pose:9,power:130,cd:17})
+ {id:'shaman',name:'หมอผี',color:'#63decb',role:'เวทโจมตีหมู่ · คำสาป · ผีพราย',weakness:'ตัวบาง ต้องเตรียมคำสาปและเขต ไม่มีฮีลหลัก',base:[
+  s('sham-ghostfire','ลูกไฟผีพราย','ยิงลูกไฟวิญญาณ แรงขึ้นกับเป้าที่ติดคำสาป','holy','curse-burst',{power:90,mp:10,cd:3,range:7,pose:9}),
+  s('sham-curse','ผูกคำสาป','สาปเป้า ทำดาเมจเบาและเตรียมระเบิดอาคม','curse','curse',{power:40,mp:14,cd:10,range:7,seconds:8,pose:8}),
+  s('sham-thread','ด้ายตรึงวิญญาณ','ผูกด้ายตรึงเป้า','bind','thread',{power:48,mp:16,cd:12,range:7,seconds:2,pose:8}),
+  s('sham-mist','หมอกผีพราย','หมอกวิญญาณในวงกว้าง ทำดาเมจต่อเนื่องและชะลอ','zone','great-spirit',{power:33,mp:24,cd:12,radius:3.5,seconds:5,pose:9}),
+  s('sham-talisman','ยันต์ระเบิด','วางยันต์ ระเบิดเมื่อศัตรูเข้าวง','mine','talisman',{power:96,mp:18,cd:10,radius:2,seconds:8,pose:8}),
+  u('sham-naga','พญานาคตกฟ้า','ไม้ตาย · วงเตือนแล้วพญานาคฟาดลงมาในวงใหญ่','meteor','hundred-souls',{power:360,mp:60,cd:90,radius:6,range:9,windup:1.5,pose:9})
+ ],passives:[
+  p('sham-force','พรายเรืองฤทธิ์','ทำดาเมจแรงขึ้น','damageDealt',.04,'spirit-force'),
+  p('sham-focus','สมาธิหมอผี','ระเบิดคำสาปคืน MP','curseMana',4,'soul-return'),
+  p('sham-spread','คำสาปแพร่','ทำดาเมจแรงขึ้น','damageDealt',.03,'spirit-force')
  ],branches:[
   {id:'spirit-master',name:'จ้าววิญญาณ',role:'คุมพราย · คำสาปกระจาย',active:[
-   s('spirit-lord','จ้าวพรายพิทักษ์','เรียกพรายใหญ่ 24 วินาที ช่วยยิงและให้โล่เจ้าของ','greatSpirit',{pose:8,seconds:24,cd:30}),
-   s('soul-chain','พันธนาการวิญญาณ','มัดศัตรูเป็นกลุ่ม ขัดมอนและเพิ่มเสียหลักบอส','massBind',{pose:2,power:90,cd:20}),
-   s('hundred-souls','คลื่นพรายร้อยตน','คลื่นพรายรอบเป้า แรงเพิ่มหากเป้ามีคำสาป','curseWave',{pose:9,power:170,cd:27})
-  ],passives:[p('spirit-force','พรายเรืองฤทธิ์','พรายทำดาเมจเพิ่ม 25%','summonPower',.25),p('soul-return','ขวัญหวนคืน','ระเบิดคำสาปคืน MP 12 หน่วย','curseMana',12)]},
+   s('sm-lord','จ้าวพรายพิทักษ์','เรียกพรายใหญ่ช่วยยิงและให้โล่เจ้าของ','greatSpirit','spirit-lord',{mp:30,cd:30,seconds:20,pose:8}),
+   s('sm-chains','พันธนาการวิญญาณ','มัดศัตรูเป็นกลุ่ม','massBind','soul-chain',{power:40,mp:32,cd:22,radius:4,pose:8}),
+   s('sm-drain','ผีพรายดูดชีพ','คลื่นวิญญาณรอบเป้า ทำดาเมจและชะลอ','soulWave','great-spirit',{power:72,mp:22,cd:12,radius:3,pose:9}),
+   u('sm-hundred','คลื่นพรายร้อยตน','ไม้ตาย · คลื่นผีร้อยตน แรงขึ้นกับเป้าติดคำสาป','curseWave','hundred-souls',{power:270,mp:65,cd:90,radius:5,pose:9})
+  ],passives:[
+   p('sm-return','ขวัญหวนคืน','ระเบิดคำสาปคืน MP','curseMana',4,'soul-return'),
+   p('sm-servant','ผีรับใช้','พรายแรงขึ้น','summonPower',.1,'spirit-force'),
+   p('sm-body','ร่างจิต','รับดาเมจน้อยลง','damageTaken',.05,'soul-return')
+  ]},
   {id:'yantra-master',name:'อาจารย์อาคม',role:'วางเขต · สะท้อนและคุ้มครอง',active:[
-   s('twin-seals','ยันต์คู่คุ้มภัย','มอบโล่ให้เพื่อนในวง พร้อมสะท้อนแรงบางส่วน','ward',{pose:5,power:110,cd:20,seconds:7}),
-   s('great-yantra','มหาวงนวหรคุณ','วงยันต์ลดดาเมจ 35% และชะลอศัตรูที่อยู่ในวง','yantra',{pose:9,power:35,seconds:8,cd:28}),
-   s('reverse-fate','อาคมย้อนเคราะห์','ให้เพื่อนที่เลือกสะท้อนดาเมจ 35% และได้โล่ชั่วคราว','reflect',{pose:5,power:35,cd:22,seconds:6})
-  ],passives:[p('ward-craft','ยันต์ลงรัก','โล่อาคมหนาขึ้น 25%','shieldBonus',.25),p('return-force','ย้อนแรงอาคม','ดาเมจสะท้อนเพิ่มอีก 10%','reflect',.1)]}
+   s('ym-seals','ยันต์คู่คุ้มภัย','มอบโล่ให้เพื่อนในวง พร้อมสะท้อนแรง','ward','twin-seals',{power:66,mp:26,cd:20,seconds:8,pose:8}),
+   s('ym-reverse','อาคมย้อนเคราะห์','ให้เพื่อนสะท้อนดาเมจและได้โล่ชั่วคราว','reflect','reverse-fate',{power:40,mp:26,cd:24,seconds:4,pose:8}),
+   s('ym-silence','ยันต์ใบ้','แปะยันต์ตรึงเป้า','bind','thread',{power:60,mp:22,cd:16,range:7,seconds:2,pose:8}),
+   u('ym-great','มหาวงนวหรคุณ','ไม้ตาย · วงยันต์ใหญ่ลดดาเมจทีมและชะลอศัตรู','yantra','great-yantra',{power:35,mp:65,cd:90,radius:7,seconds:6,pose:8})
+  ],passives:[
+   p('ym-lacquer','ยันต์ลงรัก','โล่อาคมหนาขึ้น','shieldBonus',.2,'ward-craft'),
+   p('ym-return','ย้อนแรงอาคม','สะท้อนดาเมจเพิ่มขึ้น','reflect',.05,'return-force'),
+   p('ym-sage','ปราชญ์อาคม','คูลดาวน์สกิลสั้นลง','cdr',.04,'ward-craft')
+  ]}
  ]},
- {id:'acolyte',name:'พระ / แม่ชี',color:'#ffe3a0',role:'ฮีลเพื่อน · ชำระสถานะ · คืนชีวิต',weakness:'ดาเมจปานกลาง ต้องใช้เวลาร่ายชุบและหาจุดปลอดภัย ไม่ชุบได้ถี่ ๆ',base:[
-  s('holy','ธรรมประทีป','ดาเมจเวทปานกลาง แรงขึ้นกับศัตรูที่ติดคำสาป','holy',{pose:0,power:70,cd:4,mp:12}),
-  s('heal','ปันขวัญเมตตา','ฮีลเพื่อนที่เลือก 135 HP หรือฮีลตนเมื่อเลือกตัวเอง','heal',{pose:4,power:135,cd:5}),
-  s('regen','บัวฟื้นฟู','วางวงฮีลต่อเนื่อง เพื่อนต้องยืนในพื้นที่','regen',{pose:4,power:30,seconds:6,cd:14}),
-  s('cleanse','ชำระอาถรรพ์','ล้างพิษ คำสาป ความกลัว และตรึงจากเพื่อนที่เลือก','cleanse',{pose:5,power:30,cd:9}),
-  s('revive','คืนขวัญ','ร่าย 2 วินาที ชุบเพื่อนที่ล้มด้วย HP 35% ใช้กับคนเป็นไม่ได้','revive',{pose:8,power:35,windup:2,cd:40,mp:40,duration:2.8}),
-  s('sanctuary','เขตบุญคุ้มภัย','วงคุ้มครองลดดาเมจทีม 30% ต้องอยู่ในวง','sanctuary',{pose:9,power:30,seconds:6,cd:20})
+ {id:'acolyte',name:'พระ / แม่ชี',color:'#ffe3a0',role:'ฮีล · บัฟทีม · ชุบ',weakness:'ดาเมจปานกลาง ต้องใช้เวลาร่ายชุบและหาจุดปลอดภัย',base:[
+  s('aco-light','ธรรมประทีป','ลูกแสงธรรม แรงขึ้นกับศัตรูที่ติดคำสาป','holy','holy',{power:78,mp:8,cd:3,range:7,pose:7}),
+  s('aco-heal','ปันขวัญเมตตา','ฮีลเพื่อนที่เลือก','heal','heal',{power:120,mp:14,cd:4,range:7,pose:11}),
+  s('aco-blessing','พรพุทธคุณ','บัฟทีมรอบตัวให้ทำดาเมจแรงขึ้น','crow','great-lotus',{mp:30,cd:45,seconds:60,pose:11}),
+  s('aco-cleanse','ชำระอาถรรพ์','ล้างพิษ คำสาป และตรึงจากเพื่อน','cleanse','cleanse',{power:30,mp:16,cd:12,range:7,pose:11}),
+  s('aco-revive','คืนขวัญ','ร่ายชุบเพื่อนที่หมดแรง','revive','revive',{power:35,mp:40,cd:40,windup:2,pose:11}),
+  u('aco-field','เขตพุทธคุณ','ไม้ตาย · โดมทองลดดาเมจทีมในวงใหญ่','sanctuary','sanctuary',{power:50,mp:60,cd:90,radius:7,seconds:6,pose:11})
+ ],passives:[
+  p('aco-kindness','เมตตาเต็มเปี่ยม','ฮีลแรงขึ้น','healBonus',.05,'kindness'),
+  p('aco-calm','จิตสงบ','คูลดาวน์สกิลสั้นลง','cdr',.03,'kindness'),
+  p('aco-merit','บุญหนุน','เขตคุ้มครองอยู่นานขึ้น','sanctuaryDuration',1,'sacred-ground')
  ],branches:[
-  {id:'healer',name:'ผู้บำเพ็ญเมตตา',role:'กู้ปาร์ตี้ · ฮีลวง · ชุบมีต้นทุน',active:[
-   s('great-lotus','มหาบัวฟื้นฟู','ฮีลเพื่อนทุกคนในวง 180 HP และล้างพิษ','groupHeal',{pose:4,power:180,cd:22,mp:36}),
-   s('great-revive','คืนขวัญมหาเมตตา','ร่าย 2.4 วินาที ชุบเพื่อนหนึ่งคน HP 65% พร้อมโล่','greatRevive',{pose:8,power:65,windup:2.4,cd:65,mp:55,duration:3.2}),
-   s('life-tree','ต้นบุญคืนชีพ','ต้นบุญฟื้น HP ต่อเนื่อง 8 วินาที ชื่อนี้ไม่ใช่ชุบอัตโนมัติ','lifeTree',{pose:9,power:45,seconds:8,cd:35,mp:40})
-  ],passives:[p('kindness','เมตตาเต็มเปี่ยม','ฮีลแรงขึ้น 20%','healBonus',.2),p('return-life','ขวัญแน่นแฟ้น','ชุบแล้วได้ HP เพิ่ม 10 จุดเปอร์เซ็นต์','reviveBonus',10)]},
-  {id:'warder',name:'ผู้พิทักษ์ธรรม',role:'ป้องกันทีม · ล้างอาถรรพ์ · ช่วยดาเมจ',active:[
-   s('dharma-dome','เขตธรรมพิทักษ์','วงคุ้มครองลดดาเมจ 50% แต่ไม่ทำให้เป็นอมตะ','sanctuary',{pose:9,power:50,seconds:7,cd:28}),
-   s('curse-cut','ธรรมตัดอาถรรพ์','ล้างสถานะเพื่อนในวง พร้อมทำดาเมจแก่ศัตรูใกล้ ๆ','purify',{pose:5,power:95,cd:18}),
-   s('holy-flame','เพลิงธรรมปราบมาร','เพลิงธรรมบนพื้น ดาเมจต่อเนื่อง แรงขึ้นกับศัตรูมีคำสาป','holyField',{pose:9,power:45,seconds:6,cd:24})
-  ],passives:[p('sacred-ground','ฐานธรรมมั่นคง','วงคุ้มครองอยู่นานขึ้น 2 วินาที','sanctuaryDuration',2),p('light-edge','แสงตัดอาถรรพ์','ดาเมจธรรมต่อศัตรูติดคำสาปเพิ่ม 25%','holyBonus',.25)]}
+  {id:'healer',name:'ผู้บำเพ็ญเมตตา',role:'กู้ปาร์ตี้ · ฮีลวง · ชุบ',active:[
+   s('heal-lotus','มหาบัวฟื้นฟู','ฮีลเพื่อนทุกคนในวงและล้างพิษ','groupHeal','great-lotus',{power:108,mp:36,cd:16,pose:11}),
+   s('heal-swift','พรเร่งฝีเท้า','บัฟทีมรอบตัวให้ทำดาเมจแรงขึ้น','crow','regen',{mp:30,cd:40,seconds:30,pose:11}),
+   s('heal-shield','โล่ศีลห้า','มอบโล่ให้เพื่อน 1 คน','reflect','bastion',{power:0,mp:24,cd:12,seconds:8,pose:11}),
+   u('heal-tree','ต้นบุญคืนชีพ','ไม้ตาย · ต้นโพธิ์ทองฟื้น HP ทีมต่อเนื่อง','lifeTree','life-tree',{power:60,mp:70,cd:120,radius:6,seconds:10,pose:11})
+  ],passives:[
+   p('heal-bond','ขวัญแน่นแฟ้น','ชุบแล้วได้ HP เพิ่ม','reviveBonus',5,'return-life'),
+   p('heal-hand','มือพร','ฮีลแรงขึ้น','healBonus',.03,'kindness'),
+   p('heal-overflow','บุญล้นพ้น','โล่หนาขึ้น','shieldBonus',.1,'return-life')
+  ]},
+  {id:'warder',name:'ผู้พิทักษ์ธรรม',role:'ป้องกันทีม · ล้างอาถรรพ์ · ปราบมาร',active:[
+   s('ward-flame','เพลิงธรรม','เพลิงธรรมบนพื้น ดาเมจต่อเนื่อง','holyField','holy-flame',{power:50,mp:24,cd:10,radius:3,seconds:4,pose:7}),
+   s('ward-cut','ธรรมตัดอาถรรพ์','ล้างสถานะเพื่อนในวงพร้อมทำดาเมจศัตรูใกล้ ๆ','purify','curse-cut',{power:90,mp:26,cd:18,radius:3,pose:11}),
+   s('ward-dome','เขตธรรมพิทักษ์','โดมคุ้มครองลดดาเมจเพื่อนในวง','sanctuary','dharma-dome',{power:50,mp:32,cd:28,radius:4,seconds:5,pose:11}),
+   u('ward-rain','ฝนธรรมปราบมาร','ไม้ตาย · ลำแสงทองตกจากฟ้าในวงใหญ่','meteor','holy-flame',{power:300,mp:65,cd:90,radius:6,range:8,windup:1.2,pose:7})
+  ],passives:[
+   p('ward-ground','ฐานธรรมมั่นคง','รับดาเมจน้อยลง','damageTaken',.05,'sacred-ground'),
+   p('ward-edge','แสงตัดอาถรรพ์','ดาเมจธรรมต่อศัตรูติดคำสาปเพิ่มขึ้น','holyBonus',.1,'light-edge'),
+   p('ward-demon','ปราบมาร','ทำดาเมจแรงขึ้น','damageDealt',.05,'light-edge')
+  ]}
  ]}
 ];
-ROLES.forEach((r,row)=>{
- r.base.forEach((a,col)=>Object.assign(a,{classId:r.id,tier:'base',icon:{sheet:'role-skills-v1.png',cols:6,rows:7,row,col}}));
- r.branches.forEach((b,branch)=>{
-  b.active.forEach((a,i)=>Object.assign(a,{classId:r.id,branchId:b.id,tier:'master',mp:Math.max(25,a.mp),duration:Math.max(a.duration,1.65),icon:{sheet:'master-skills-v1.png',cols:6,rows:7,row,col:branch*3+i}}));
-  b.passives.forEach((a,i)=>Object.assign(a,{classId:r.id,branchId:b.id,tier:'master',icon:{sheet:'master-passives-v1.png',cols:4,rows:7,row,col:branch*2+i}}));
+// Icon art follows the rework sheet layout (docs/skills-icon-prompts.md): row 1 class actives, rows 2-3 branch
+// actives 1-4 + passives 1-2, row 4 class passives 1-3 then each branch's passive 3.
+const art=(cls,r,c)=>'rework-icons-2026-10-26/icons/'+cls+'-r'+r+'-c'+c+'.png';
+ROLES.forEach(r=>{
+ r.base.forEach((a,i)=>Object.assign(a,{classId:r.id,tier:'base',job:JOB_UNLOCK.base[i],art:art(r.id,1,i+1)}));
+ r.passives.forEach((a,i)=>Object.assign(a,{classId:r.id,tier:'base',job:JOB_UNLOCK.passives[i],art:art(r.id,4,i+1)}));
+ r.branches.forEach((b,bi)=>{
+  b.active.forEach((a,i)=>Object.assign(a,{classId:r.id,branchId:b.id,tier:'master',job:JOB_UNLOCK.master[i],duration:Math.max(a.duration,1.65),art:art(r.id,bi+2,i+1)}));
+  b.passives.forEach((a,i)=>Object.assign(a,{classId:r.id,branchId:b.id,tier:'master',job:JOB_UNLOCK.masterPassives[i],art:i<2?art(r.id,bi+2,i+5):art(r.id,4,bi+4)}));
  });
 });
-export const ALL_SKILLS=ROLES.flatMap(r=>[...r.base,...r.branches.flatMap(b=>[...b.active,...b.passives])]);
+export const ALL_SKILLS=ROLES.flatMap(r=>[...r.base,...r.passives,...r.branches.flatMap(b=>[...b.active,...b.passives])]);
 export const roleById=id=>ROLES.find(r=>r.id===id);
 export const skillById=id=>ALL_SKILLS.find(s=>s.id===id);
 export function loadout(classId,branchId=''){
  const role=roleById(classId);if(!role)throw new Error('Unknown class');
  const branch=branchId?role.branches.find(b=>b.id===branchId):null;if(branchId&&!branch)throw new Error('Branch does not belong to class');
- return {role,branch,active:[...role.base,...(branch?.active??[])],passives:branch?.passives??[]};
+ return {role,branch,active:[...role.base,...(branch?.active??[])],passives:[...role.passives,...(branch?.passives??[])]};
 }
-// 0.118 the rework PNG (rework-icon-map.js) wins; unmatched skills keep their v1 atlas cell
-export function paintIcon(el,skill){if(!skill?.icon)return Promise.resolve(false);el.dataset.skillIcon=skill.id;const art=REWORK_ICONS[skill.id];if(art)return paintSkillRegion(el,reworkIconURL(art),REWORK_REGION);return paintSkillRegion(el,new URL('./'+skill.icon.sheet,import.meta.url).href,roleIconRegion(skill.icon));}
+export function paintIcon(el,skill){if(!skill?.art)return Promise.resolve(false);el.dataset.skillIcon=skill.id;return paintSkillRegion(el,reworkIconURL(skill.art),REWORK_REGION);}

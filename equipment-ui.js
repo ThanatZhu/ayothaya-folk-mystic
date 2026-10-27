@@ -4,6 +4,8 @@ import {loadPaintedCharacter} from './painted-character.js?v=size1';
 import {motionFrame} from './animation-frames.js?v=37';
 import {className} from './classes.js?v=novice174';
 import {openHudPanel} from './hud-panels.js';
+// Temporarily retired: keep saved looks and character previews, but disable the editor.
+const APPEARANCE_CUSTOMIZATION_ENABLED=false;
 const make=(tag,css,text)=>{const el=document.createElement(tag);if(css)el.className=css;if(text)el.textContent=text;return el;};
 export function equipmentIcon(item){
  const el=make('i','equipment-icon');el.setAttribute('aria-hidden','true');
@@ -13,13 +15,13 @@ export function equipmentIcon(item){
 export function createEquipmentUI({account,game,hero,onArtwork}){
  const person=account.character,panel=make('dialog');panel.id='equipment-panel';panel.setAttribute('aria-labelledby','equipment-title');
  panel.innerHTML='<header><div><small>เครื่องแต่งกายและอาวุธ</small><h2 id="equipment-title">อุปกรณ์ของฉัน</h2></div><button id="equipment-close" aria-label="ปิดอุปกรณ์">×</button></header><div class="equipment-body"><section class="equipment-preview"><strong id="equipment-name"></strong><small id="equipment-profession"></small><canvas id="equipment-hero" width="320" height="320" aria-label="ตัวละครพร้อมอุปกรณ์ที่สวมใส่"></canvas><div class="equipment-motions" aria-label="ลองท่าทาง"></div><div id="equipment-slots"></div></section><section class="equipment-bag"><div class="equipment-tabs" aria-label="หมวดอุปกรณ์"></div><p class="equipment-hint">อุปกรณ์เริ่มต้นประจำสาย · เปลี่ยนรูปลักษณ์ได้โดยไม่เพิ่มค่าสถานะ</p><div id="equipment-items"></div><p id="equipment-status" role="status" aria-live="polite"></p></section></div>';
- document.getElementById('game-shell').append(panel);const $=id=>panel.querySelector('#'+id);
+ if(APPEARANCE_CUSTOMIZATION_ENABLED)document.getElementById('game-shell').append(panel);const $=id=>panel.querySelector('#'+id);
  $('equipment-name').textContent=person.name;$('equipment-profession').textContent=className(person.classId,person.gender);
  const trigger=make('button','equipment-open','อุปกรณ์ · เสื้อผ้าและอาวุธ');trigger.id='open-equipment';trigger.type='button';
- document.querySelector('#account-panel .account-card').insertBefore(trigger,document.getElementById('return-lobby'));
- const open=()=>{game.clearInput();openHudPanel(panel);render();$('equipment-close').focus();};trigger.onclick=open;
+ if(APPEARANCE_CUSTOMIZATION_ENABLED)document.querySelector('#account-panel .account-card').insertBefore(trigger,document.getElementById('return-lobby'));
+ const open=()=>{if(!APPEARANCE_CUSTOMIZATION_ENABLED)return false;game.clearInput();openHudPanel(panel);render();$('equipment-close').focus();};trigger.onclick=open;
  $('equipment-close').onclick=()=>{panel.close();document.getElementById('open-account')?.focus();};
- addEventListener('keydown',e=>{if(e.code!=='KeyI'||e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input,textarea,select,[contenteditable=true]')||document.querySelector('dialog:modal'))return;e.preventDefault();game.clearInput();if(panel.open)panel.close();else open();});
+ if(APPEARANCE_CUSTOMIZATION_ENABLED)addEventListener('keydown',e=>{if(e.code!=='KeyI'||e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input,textarea,select,[contenteditable=true]')||document.querySelector('dialog:modal'))return;e.preventDefault();game.clearInput();if(panel.open)panel.close();else open();});
  for(const event of ['keydown','keyup','pointerdown','pointerup'])panel.addEventListener(event,e=>e.stopPropagation());
  panel.addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();panel.close();document.getElementById('open-account')?.focus();}});
  let slot='weapon',mode='idle',frames=null,busy=false,applied='',requested='',retryAt=0,previewVersion=0;
@@ -38,7 +40,7 @@ export function createEquipmentUI({account,game,hero,onArtwork}){
   }));
  }
  async function change(item){
-  if(busy||account.equipment[item.slot]===item.id)return;busy=true;render();$('equipment-status').textContent='กำลังเตรียมอุปกรณ์…';
+  if(!APPEARANCE_CUSTOMIZATION_ENABLED||busy||account.equipment[item.slot]===item.id)return;busy=true;render();$('equipment-status').textContent='กำลังเตรียมอุปกรณ์…';
   try{
    // Preflight artwork so we cannot confirm a choice with missing frames.
    const next=equipItem(account.equipment,person.classId,item.id);
@@ -63,5 +65,5 @@ export function createEquipmentUI({account,game,hero,onArtwork}){
  }
  // 0.83 the bag and the character card show the same dressed character (idle loop) on their own 320 px canvas.
  function paint(ctx,ms=performance.now()){const img=frames?.[motionFrame('idle',ms/1000,null,reduced.matches,person.classId)]??frames?.[0];if(!img)return false;ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;drawCharacterFrame(ctx,img,32,12);return true;}
- requestAnimationFrame(draw);return {open,paint};
+ requestAnimationFrame(draw);return {open,paint,canCustomize:APPEARANCE_CUSTOMIZATION_ENABLED};
 }

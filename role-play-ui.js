@@ -21,7 +21,7 @@ export function createRolePlayUI({world,clear,respawn,itemCount=()=>0,buyItem,ca
   catch(e){feedback.textContent=e.message==='no-revival-item'?'ต้องมียันต์คืนขวัญ 1 ชิ้น':'เชื่อมต่อไม่สำเร็จ กรุณาลองอีกครั้ง';}
   finally{busy=false;availability();}
  });
- const css=document.createElement('link');css.rel='stylesheet';css.href='./role-live.css?v=revival-shop181';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./role-live.css?v=live185';document.head.append(css);
  const aim=()=>{world.roleAim=true;world.notice('แตะพื้นเพื่อเลือกจุดวางสกิล');clear();};addEventListener('role-aim-ground',aim);
  return {update(){
   const dead=world.player.hp<=0;if(dead)availability();

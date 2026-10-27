@@ -32,10 +32,12 @@ export function baseProgress(saved){
  return {level,xp:total,current,required,next:maxed?0:required-current,percent:maxed?100:current/required*100,maxed};
 }
 export const levelStart=l=>START[Math.max(1,Math.min(99,l))];
-export const NOVICE_JOB_CAP=10,JOB_CAP=40;
+// 0.119 Master Job caps at 30 so its points match the Master skills exactly (docs/skills-rework-proposal.md);
+// each future Master skill raises it by 5.
+export const NOVICE_JOB_CAP=10,JOB_CAP=40,MASTER_JOB_CAP=30;
 export function jobProgress(saved,classId='novice',jobId=''){
  // 0.73 owner rule: Base Lv.99; Job Lv.10 as ผู้ฝึกตน, Job Lv.40 for a class and for its master job (RO style).
- const total=experienceOf(saved).jobXp,cap=classId==='novice'?NOVICE_JOB_CAP:JOB_CAP;
+ const total=experienceOf(saved).jobXp,cap=classId==='novice'?NOVICE_JOB_CAP:jobId?MASTER_JOB_CAP:JOB_CAP;
  let current=total,level=1;
  while(level<cap&&current>=40+level*20){current-=40+level*20;level++;}
  const required=40+level*20,maxed=level===cap;

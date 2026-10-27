@@ -12,7 +12,7 @@ Supersedes the free-here behavior in death178. Item ID: `soul-talisman`, Thai na
 
 Checks: 32 focused unit tests passed covering item rules, online death, missing inventory, last-item removal, reconnect persistence, normal items and healer revival; full static build plus real-browser respawn checks use scripts/check-death178.mjs with one test talisman seeded on the isolated account.
 
-Not pushed to production. Backend and frontend need deployment together.
+Included in release185 (see spirit185.md). Backend and frontend need deployment together; verify the health feature markers after rollout.
 
 Real-browser check completed: 8 checks passed, no browser errors; all 7 viewport sizes fit. Confirmed one-item deduction, disabled here button at zero, free capital transfer and free party revival. Reviewed mobile and zero-stock screenshots.
 

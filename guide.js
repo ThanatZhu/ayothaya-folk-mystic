@@ -93,7 +93,7 @@ function record(kind,r){
  const id=`ref-${kind}-${r.id}`,title=r.name??r.title;let body='',sub='';
  if(kind==='skills'){
   sub=r.className+' / '+(r.branchName??label('base'));
-  body=`${badge(r.passive?label('passive'):'Lv.1–'+r.max)}<p>${esc(r.tip)}</p><p class="muted">${esc(label('need'))}: ${esc(r.requires.map(q=>q.name+' Lv.'+q.level).join(' · ')||label('noNeed'))}</p>`;
+  body=`${badge(r.passive?label('passive'):'Lv.1–'+r.max)}<p>${esc(r.tip)}</p><p class="muted">${esc(label('need'))}: ${esc((r.job?'Job Lv.'+r.job:'')||r.requires.map(q=>q.name+' Lv.'+q.level).join(' · ')||label('noNeed'))}</p>`;
   if(r.levels.length)body+=table(['Lv.','MP',label('cooldown'), 'Power',label('range'),label('radius')],r.levels.map(v=>[v.level,v.cost??v.mp??0,number(v.cd??0),number(v.power??0),v.range??'—',v.radius??'—']));
  }
  if(kind==='items'){
@@ -188,7 +188,7 @@ async function copyLink(hash){
  $('#toast').textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2600);
 }
 async function load(){
- const [snapshot,words,book,visuals]=await Promise.all([fetch('assets/guide169/game-data.json?v=170').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=170').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),fetch('assets/guide169/handbook.md?v=170').then(r=>{if(!r.ok)throw Error('book');return r.text();}),fetch('assets/guide169/visuals.json?v=170').then(r=>{if(!r.ok)throw Error('visuals');return r.json();})]);
+ const [snapshot,words,book,visuals]=await Promise.all([fetch('assets/guide169/game-data.json?v=skills119').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=skills119').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),fetch('assets/guide169/handbook.md?v=skills119').then(r=>{if(!r.ok)throw Error('book');return r.text();}),fetch('assets/guide169/visuals.json?v=skills119').then(r=>{if(!r.ok)throw Error('visuals');return r.json();})]);
  data=snapshot;ui=words;pictures=visuals.pictures;setupPictureViewer();
  new ResizeObserver(()=>document.documentElement.style.setProperty('--guide-tools-height',Math.ceil($('.searchbar').getBoundingClientRect().height)+'px')).observe($('.searchbar'));
  articles=book.trim().split(/\n@/).map(section=>{const [head,...body]=section.replace(/^@/,'').split('\n'),[id,group,title]=head.split('|');return {id,group,title,body:body.join('\n')};});

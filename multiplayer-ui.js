@@ -5,7 +5,7 @@ import {createPartyLayout} from './party-layout.js?v=overlay143';
 import {createDesktopChat} from './desktop-chat-ui.js?v=channel144';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
-import {createRoleAnimation,roleAnimationActive,sampleRolePose,castFacing} from './combat-animation165.js?v=align169';
+import {createRoleAnimation,roleAnimationActive,sampleRolePose,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {createInspectUI} from './inspect-ui.js?v=108.1';
 import {iconStyle} from './bag-ui.js?v=107';
@@ -21,7 +21,7 @@ import {atlasPath,className} from './classes.js?v=novice174';
 import {rebirthRank} from './character-stats.js?v=107';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
-import {createPaintedAvatar} from './painted-avatar.js?v=novice174';
+import {createPaintedAvatar} from './painted-avatar.js?v=pose119';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,actionChoice,supportsCharacterAction} from './character-action-state.js?v=106.0';
 import {skillPose,skillTrack} from './skill-choreography.js?v=novice174';
@@ -33,6 +33,7 @@ const editable=e=>e.target instanceof Element&&!!e.target.closest('input,textare
 function el(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const url=multiplayerURL(),local=['127.0.0.1','localhost'].includes(location.hostname),views=new Map(),fx=createSkillEffects(scene),projection=new THREE.Vector3(),reduced=matchMedia('(prefers-reduced-motion:reduce)');
+ if(game.roleEffects)game.roleEffects.locate=id=>views.get(id)?.state?.player??null; // self and around effects follow the caster
  const presentation=createCombatPresentation();
  const partyStyle=document.createElement('link');partyStyle.rel='stylesheet';partyStyle.href='party-ui.css?v=130';document.head.append(partyStyle);let rosterMode='all';
  const shell=document.getElementById('game-shell'),labels=document.getElementById('world-labels'),compact=matchMedia('(pointer:coarse),(max-width:900px)');
@@ -192,6 +193,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  function presentEvent(e){
    if(e.type==='presentationSnapshot'){applySnapshot(e.snapshot);return;}
    if(e.type==='bossResult'||e.type==='bossDirectory'){game.world.events.push(e);return;}
+   if(e.type.startsWith('spirit')){game.world.events.push({...e,presentationQueuedAt:performance.now()/1000});return;}
    if(e.actor===client.id){game.world.events.push({...e,presentationQueuedAt:performance.now()/1000});return;}
    const v=views.get(e.actor);if(!v||v.loading)return;
    if(e.type==='petSkill'){v.pet?.attack(e.to,e.lag??0);const ids={fireBurst:'sky-spear',lotusCleanse:'cleanse',moonBarrier:'sanctuary',roarGuard:'guard',trueSight:'mark',flowerBind:'vine-trap',riceHeal:'heal',jadeShell:'sanctuary',waterMana:'regen',echoSlow:'hamstring'};game.roleEffects?.spawn({roleSkillId:ids[e.kind],from:{x:e.x,z:e.z},to:e.to??{x:e.x+.5,z:e.z},lag:e.lag??0});}
@@ -199,13 +201,16 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(e.type==='miss'&&Number.isInteger(e.id))game.world.events.push(e);
    if(e.type==='playerHit')game.popup?.({...e,hurt:true},{key:'r'+e.actor,pos:()=>({x:v.state.player.x,y:2.2+v.sprite.position.y,z:v.state.player.z})});
    if(e.roleSkillId&&['cast','rolePassive'].includes(e.type)){game.roleEffects?.spawn({...e,lag:e.lag??0});if(e.type==='cast'){v.roleAction=createRoleAnimation(e,clock);v.action=null;v.emote=null;v.state.emote=null;}return;}
+   if(e.type==='roleRelease'){retimeRoleAnimation(v.roleAction,e,clock);game.roleEffects?.hit(e);return;}
    if(e.type==='castCancel'){if(v.roleAction?.castId===e.castId)v.roleAction=null;if(v.action?.castId===e.castId)v.action=null;game.roleEffects?.cancel(e.castId,e.actor);fx.cancel(e.castId,e.actor);return;}
    if(e.type==='cast'){
     if(!roleAnimationActive(v.roleAction,clock))v.roleAction=null;
     const id=v.state.character.classId,skill=skillTrack(id,e.skillIndex),current=skillTrack(id,v.action?.index);
     if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock-(e.lag??0),timing:e.timing,castId:e.castId,facing:castFacing(e,v.state.player.face)};
     const track=skill&&e.timing?{...skill,duration:e.timing.duration,strikes:e.timing.impacts.map(at=>at/e.timing.duration)}:skill??{...skillTrack(id,0),duration:e.timing?.duration??attackDuration(id),strikes:[.42]},from=e.from??v.state.player,to=e.to??from;
-    const effect=fx.create(track,{...e,skillIndex:skill?e.skillIndex:null,synced:!!e.timing,from,to:{...to,y:groundHeight(game.world.nav,to.x,to.z)},direction:v.state.player.face,groundY:groundHeight(game.world.nav,from.x,from.z),reduced:reduced.matches,quality:compact.matches?'low':'high'});effect.age=e.lag??0;
+    const noviceFx=id==='novice'&&skill&&Number.isInteger(e.skillIndex)?'novice:'+e.skillIndex:null;
+    if(noviceFx&&game.roleEffects?.has(noviceFx))game.roleEffects.spawn({...e,roleSkillId:noviceFx,from,to,lag:e.lag??0});
+    else{const effect=fx.create(track,{...e,skillIndex:skill?e.skillIndex:null,synced:!!e.timing,from,to:{...to,y:groundHeight(game.world.nav,to.x,to.z)},direction:v.state.player.face,groundY:groundHeight(game.world.nav,from.x,from.z),reduced:reduced.matches,quality:compact.matches?'low':'high'});effect.age=e.lag??0;}
    }
    if(e.type==='emote'&&!Object.hasOwn(v.state,'emote'))v.emote=activeEmote({name:e.name,time:e.time??clock},clock);
    if(e.type==='playerHit'){v.hitUntil=clock+.28;v.emote=null;v.state.emote=null;}
@@ -222,7 +227,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   if(active)return;wakeServer();
   try{await account.beginOnline();active=true;client=new MultiplayerClient({url,identity});game.setNetwork(client);account.setOnline(client);
    client.addEventListener('status',({detail})=>{button.dataset.state=dialog.dataset.state=detail;chip(detail==='online'?'ออนไลน์ · '+roster.length+' คน':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':detail==='connecting'?'กำลังเข้าห้อง…':detail==='error'?'เชื่อมต่อไม่ได้':'ผู้เล่นออนไลน์');status(detail==='connecting'?'กำลังเข้าห้อง…':detail==='reconnecting'?'กำลังเชื่อมต่อใหม่…':statusText[detail]);dock.hidden=!['online','reconnecting'].includes(detail);$('online-reload').hidden=!['error','reconnecting'].includes(detail);if(dock.hidden)partyFrame.hidden=true;else drawParty();if(detail==='error'&&!dialog.open){game.clearInput();openHudPanel(dialog);}});
-   client.addEventListener('channelSwitched',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}}for(const [id,v] of views){if(!v.loading)remove(v);views.delete(id);}presentation.clear();if(detail.snapshot)acceptSnapshot(detail.snapshot);drawChannels();});
+   client.addEventListener('channelSwitched',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}}for(const [id,v] of views){if(!v.loading)remove(v);views.delete(id);}presentation.clear();game.roleEffects?.clear();if(detail.snapshot)acceptSnapshot(detail.snapshot);drawChannels();});
    client.addEventListener('welcome',({detail})=>{if(detail.channel){currentChannel=normalizeChannel(detail.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(currentChannel));}catch{}drawChannels();}for(const m of detail.history)log(m);
     // 1.01 the server decides the map (someone no longer in a guild wakes up in the capital, not the hall): follow it.
     const parts=String(detail.room??'').split(':'),mapId=detail.snapshot?.self?.mapId??(parts[1]?.startsWith('ch')?parts[2]:parts[1]);if(mapId&&document.body.dataset.map&&mapId!==document.body.dataset.map){const go=()=>location.assign('?server='+account.serverId+'&channel='+currentChannel+'&map='+encodeURIComponent(mapId));
@@ -299,7 +304,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    v.label.dataset.animationPending=['sit','sleep','run'].includes(chosen)&&!supported?chosen:'';
    const rolePose=p.hp>0?sampleRolePose(v.roleAction,clock,{reduced:reduced.matches}):null;
    const pose=rolePose??(skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed*(v.action.timing?track.duration/v.action.timing.duration:1),{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:basicActive&&mode==='attack'?elapsed*attackDuration(state.character.classId)/(v.action.timing?.duration??attackDuration(state.character.classId)):poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)}));
-   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'?0:pose.y);const angle=controls.getAzimuthalAngle(),poseFace=rolePose?(v.roleAction.facing??p.face):skillActive||basicActive?(v.action.facing??p.face):p.face;{const side=poseFace.x*Math.cos(angle)-poseFace.z*Math.sin(angle);if(rolePose||skillActive||basicActive?Math.abs(side)>1e-6:Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
+   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'||v.sprite.userData.skillArt?0:pose.y);const angle=controls.getAzimuthalAngle(),poseFace=rolePose?(v.roleAction.facing??p.face):skillActive||basicActive?(v.action.facing??p.face):p.face;{const side=poseFace.x*Math.cos(angle)-poseFace.z*Math.sin(angle);if(rolePose||skillActive||basicActive?Math.abs(side)>1e-6:Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
    if(basicActive&&mode==='attack')pose.actionPhase=Math.max(0,Math.min(1,elapsed/(v.action.timing?.duration??attackDuration(state.character.classId))));
    v.sprite.userData.setFacing?.(poseFace,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0||(p.down??0)>0;game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
    if((state.rebirth??0)!==v.rankShown){v.rankShown=state.rebirth??0;const t=v.label.querySelector('.rank-title');if(t){t.hidden=!v.rankShown;t.textContent=v.rankShown?'✦ '+rebirthRank(v.rankShown)+' ✦':'';}}

@@ -340,7 +340,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function setAutoConfig(cfg){world.autoConfig=normalizeAuto(cfg);try{localStorage.setItem(AUTO_KEY,JSON.stringify(world.autoConfig));}catch{}autoSent='';}
 
  let autoPicker=null;
- $('auto-attack').addEventListener('click',()=>{if(!isPaused()){if(autoPicker&&document.body.classList.contains('mobile-play'))autoPicker();else world.toggleAuto();}});
+ $('auto-attack').addEventListener('click',()=>{if(!isPaused()){if(autoPicker)autoPicker();else world.toggleAuto();}});
  $('attack').addEventListener('pointerdown',e=>{if(isPaused())return;e.preventDefault();attackPointer=e.pointerId;input.attack=true;$('attack').setPointerCapture(e.pointerId);world.basicAttack();});
  function releaseAttack(e){if(e.pointerId===attackPointer){input.attack=false;attackPointer=null;}}
  $('attack').addEventListener('pointerup',releaseAttack);$('attack').addEventListener('pointercancel',releaseAttack);$('attack').addEventListener('lostpointercapture',releaseAttack);

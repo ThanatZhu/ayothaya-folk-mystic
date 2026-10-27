@@ -31,46 +31,38 @@ const SoftLookShader={
 const KEY='ayothaya-graphics';
 function preferred(){try{const v=localStorage.getItem(KEY);if(v==='high'||v==='low')return v==='high';}catch{}return !matchMedia('(pointer:coarse)').matches;}
 
-// 0.116.5 characters and monsters (layer 1, game-controls.js xray) are drawn a second time after the scenery with the
-// depth buffer cleared: tree crowns, roofs and rocks in front of the camera no longer hide them, while each
-// character's own parts, and characters among themselves, still sort by depth.
+// 0.120.1 characters and monsters (layer 1, game-controls.js xray) draw with the scenery like everything else, so
+// railings, posts, trunks, walls and roofs in front of them cover them. Wherever something hides a character, that
+// part comes back as a faint jade silhouette (drawn only where the scenery is nearer than the sprite), so nobody is
+// lost behind a roof or a crown. (0.116.5 drew characters over all scenery: they stood in front of the railings.)
 export const ACTOR_LAYER=1;
-// 0.120.1 low props in front of a character still cover it (railings, fences, low walls, posts, crates, small rocks):
-// their depth goes back into the cleared buffer before the actor pass. Only solid pieces whose top is below head
-// height (1.9 m) join, so tree crowns, roofs, house walls and big boulders keep showing the character through them.
-export const OCCLUDER_LAYER=2;
-// ground, plants and anything walked on (decks, floors, treads, bunds): a sprite's feet reach a little below its anchor
-const NOT_OCCLUDER=/ground|terrain|water|grass|meadow|path|track|road|court|paving|shoulder|moss|leaf|leaves|foliage|reed|lotus|rice|flower|shadow|decal|deck|floor|tread|stair|step|soil|foundation|bund|dock|pier|platform|plinth/i;
-export function markOccluders(root){
- root.updateMatrixWorld(true);const box=new THREE.Box3();let n=0;
- root.traverse(o=>{
-  if(!o.isMesh||o.isInstancedMesh||o.isSkinnedMesh||NOT_OCCLUDER.test(o.name))return;
-  const ms=[].concat(o.material);if(ms.some(m=>!m||m.transparent||m.alphaTest>0||m.depthWrite===false))return;
-  if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();box.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld);
-  if(box.max.y<=1.9&&box.max.y-box.min.y>.12){o.layers.enable(OCCLUDER_LAYER);n++;}
- });
- return n;
+const GHOST=new THREE.Color('#b8eee0'),ghosts=new WeakMap();
+function ghostOf(m){
+ let g=ghosts.get(m);
+ if(!g){const o={map:m.map,color:GHOST,transparent:true,opacity:.5,alphaTest:.2,depthWrite:false,depthFunc:THREE.GreaterDepth,fog:false,toneMapped:false};
+  g=m.isSpriteMaterial?new THREE.SpriteMaterial(o):new THREE.MeshBasicMaterial({...o,side:m.side});ghosts.set(m,g);}
+ g.map=m.map;if(m.isSpriteMaterial)g.rotation=m.rotation;return g;
 }
-const depthOnly=new THREE.MeshBasicMaterial({colorWrite:false});
 export function createSoftLook({renderer,scene,camera,finish=null,mobile=false}){
- let lightsAt=-1e9;
- function withLayer(layer,draw,override=null){
-  const mask=camera.layers.mask,bg=scene.background,ov=scene.overrideMaterial;
-  camera.layers.set(layer);scene.background=null;scene.overrideMaterial=override;try{draw();}finally{camera.layers.mask=mask;scene.background=bg;scene.overrideMaterial=ov;}
+ let lightsAt=-1e9,actorsAt=-1e9,actors=[];
+ function silhouettes(draw){
+  const now=performance.now();
+  if(now-lightsAt>2000){lightsAt=now;scene.traverse(o=>{if(o.isLight)o.layers.enable(ACTOR_LAYER);});}   // lights must reach the actor pass
+  if(now-actorsAt>250){actorsAt=now;actors=[];scene.traverse(o=>{if(o.material&&!Array.isArray(o.material)&&o.layers.isEnabled(ACTOR_LAYER))actors.push(o);});}
+  const swapped=[];
+  for(const o of actors){const m=o.material;
+   // shadow blobs, rings and labels (transparent or always on top) have no silhouette
+   if(m.transparent||m.depthTest===false){if(o.visible){o.visible=false;swapped.push([o,null]);}continue;}
+   o.material=ghostOf(m);swapped.push([o,m]);}
+  const mask=camera.layers.mask,bg=scene.background;camera.layers.set(ACTOR_LAYER);scene.background=null;
+  try{draw();}finally{camera.layers.mask=mask;scene.background=bg;for(const [o,m] of swapped){if(m)o.material=m;else o.visible=true;}}
  }
- function actorsOnly(draw){
-  if(performance.now()-lightsAt>2000){lightsAt=performance.now();scene.traverse(o=>{if(o.isLight)o.layers.enable(ACTOR_LAYER);});}   // lights must reach the actor pass
-  withLayer(ACTOR_LAYER,draw);
- }
- class ActorPass extends RenderPass{
-  constructor(){super(scene,camera);this.clear=false;}
-  render(...a){
-   this.clearDepth=true;withLayer(OCCLUDER_LAYER,()=>super.render(...a),depthOnly);
-   this.clearDepth=false;actorsOnly(()=>super.render(...a));
-  }
+ class SilhouettePass extends RenderPass{
+  constructor(){super(scene,camera);this.clear=false;this.clearDepth=false;}
+  render(...a){silhouettes(()=>super.render(...a));}
  }
  const composer=new EffectComposer(renderer);
- composer.addPass(new RenderPass(scene,camera));composer.addPass(new ActorPass());
+ composer.addPass(new RenderPass(scene,camera));composer.addPass(new SilhouettePass());
  // Only genuinely bright pixels (lanterns, flames, skill effects) glow.
  const bloom=new UnrealBloomPass(new THREE.Vector2(256,256),finish?.bloom??.28,.5,finish?.threshold??.9);bloom.enabled=!mobile;composer.addPass(bloom);
  composer.addPass(new OutputPass());
@@ -82,6 +74,6 @@ export function createSoftLook({renderer,scene,camera,finish=null,mobile=false})
   get enabled(){return enabled;},
   setEnabled(value){enabled=!!value;try{localStorage.setItem(KEY,enabled?'high':'low');}catch{}},
   setSize,
-  render(){if(enabled)return composer.render();renderer.render(scene,camera);const auto=renderer.autoClear;renderer.autoClear=false;renderer.clearDepth();withLayer(OCCLUDER_LAYER,()=>renderer.render(scene,camera),depthOnly);actorsOnly(()=>renderer.render(scene,camera));renderer.autoClear=auto;}
+  render(){if(enabled)return composer.render();renderer.render(scene,camera);const auto=renderer.autoClear;renderer.autoClear=false;silhouettes(()=>renderer.render(scene,camera));renderer.autoClear=auto;}
  };
 }

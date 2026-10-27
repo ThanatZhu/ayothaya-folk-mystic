@@ -1,3 +1,5 @@
+import {characterLevels} from '../admin-levels.js';
+import {jobProgress} from '../experience.js';
 import {publicPetAccount} from '../pet-account.js';
 // 0.99.16 back-office: list the players who are online and give them items or cowries.
 // Who may use it: in production a Google sign-in whose verified email is listed in ADMIN_EMAILS (Render env);
@@ -36,8 +38,8 @@ export const canObserve=(decoded,emails=observerEmails())=>isAdmin(decoded,email
 // saved: [{uid,slotId,record,savedAt}] from the store; characters in the realm right now are shown from the realm instead
 export function adminPlayers(realm,saved=[]){
  const here=new Set([...realm.peers.values()].map(p=>p.uid+'/'+p.slotId));
- const online=[...realm.peers.values()].map(p=>({id:p.id,name:p.character.name,classId:p.character.classId,gender:p.character.gender,jobId:p.character.jobId??'',level:baseProgress(p.world).level,server:p.serverId,map:p.room?.map?.name??'',online:!p.suspended,petCollection:publicPetAccount(p.petCollection),coins:p.bag?.coins??0,items:{...(p.bag?.items??{})}}));
- const offline=saved.filter(s=>s.record?.character&&!here.has(s.uid+'/'+s.slotId)).map(({uid,slotId,record:r,savedAt})=>({id:'off:'+uid+':'+slotId,offline:true,lastSeen:savedAt??null,name:r.character.name,classId:r.character.classId,gender:r.character.gender,jobId:r.character.jobId??'',level:baseProgress(r.state?.traveler??{}).level,server:r.serverId??'',map:realm.catalog?.maps?.find(m=>m.id===r.state?.mapId)?.name??r.state?.mapId??'',online:false,petCollection:publicPetAccount(r.petCollection),coins:r.bag?.coins??0,items:{...(r.bag?.items??{})}}));
+ const online=[...realm.peers.values()].map(p=>({id:p.id,name:p.character.name,classId:p.character.classId,gender:p.character.gender,jobId:p.character.jobId??'',level:baseProgress(p.world).level,baseCap:99,jobLevel:jobProgress(p.world,p.character.classId,p.character.jobId).level,jobCap:jobProgress(p.world,p.character.classId,p.character.jobId).cap,server:p.serverId,map:p.room?.map?.name??'',online:!p.suspended,petCollection:publicPetAccount(p.petCollection),coins:p.bag?.coins??0,items:{...(p.bag?.items??{})}}));
+ const offline=saved.filter(s=>s.record?.character&&!here.has(s.uid+'/'+s.slotId)).map(({uid,slotId,record:r,savedAt})=>({id:'off:'+uid+':'+slotId,offline:true,lastSeen:savedAt??null,name:r.character.name,classId:r.character.classId,gender:r.character.gender,jobId:r.character.jobId??'',...characterLevels(r),server:r.serverId??'',map:realm.catalog?.maps?.find(m=>m.id===r.state?.mapId)?.name??r.state?.mapId??'',online:false,petCollection:publicPetAccount(r.petCollection),coins:r.bag?.coins??0,items:{...(r.bag?.items??{})}}));
  return [...online,...offline].sort((a,b)=>a.server.localeCompare(b.server)||a.name.localeCompare(b.name));
 }
 

@@ -1,6 +1,7 @@
 import {normalizeAutoTarget,autoTargetAllows} from './auto-targets.js';
-import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js';
-import {createRoleCombat,stepRoleMonsters} from './role-combat.js';
+import {skillHit} from './skill-critical.js';
+import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js?v=skill-crit1';
+import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=skill-crit1';
 import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=novice174';
 import {activeEmote,canonicalAction,EMOTE_ACTIONS,movementSpeed} from './character-action-state.js?v=life1';
@@ -244,7 +245,7 @@ export class CombatWorld{
  toggleAuto(){this.hunt=null;this.autoTarget=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0||mob.pvp)return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
-  this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a'}); // 1.09 kind for the number colour
+  this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a',...this.damageContext}); // Keep the hit's critical flag and cast identity.
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  // 0.68 a point in front of the player (toward `toward` when given): where an attack or skill lands with no target.
@@ -291,10 +292,10 @@ export class CombatWorld{
   else if(s.type==='shield'){p.shield=s.duration??8;this.notice(s.name+' · ลดความเสียหาย '+p.shield+' วินาที');}
   else if(s.type==='mana'){p.mp=Math.min(p.maxMp,p.mp+48);this.notice(s.name+' · มานา +48');}
   else if(s.type==='dash'){const n=Math.hypot(p.face.x,p.face.z)||1;moveBody(p,p.face.x/n*2.8,p.face.z/n*2.8,this.nav);this.manualGrace=.7;this.path=[];}
-  else if(s.type==='nova'){this.foes().filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
-  else if(s.type==='area'){const c=m??air;this.foes().filter(v=>v.hp>0&&distance(v,c)<=s.radius&&lineClear(c,v,this.nav)).forEach(v=>this.hurt(v,this.power(s.damage,v),s.color));}
+  else if(s.type==='nova'){this.foes().filter(v=>v.hp>0&&distance(v,p)<=s.radius&&lineClear(p,v,this.nav)).forEach(v=>skillHit(this,v,this.power(s.damage,v),s.color));}
+  else if(s.type==='area'){const c=m??air;this.foes().filter(v=>v.hp>0&&distance(v,c)<=s.radius&&lineClear(c,v,this.nav)).forEach(v=>skillHit(this,v,this.power(s.damage,v),s.color));}
   // 0.111.3 bosses take the damage but are never rooted or pushed back
-  else if(m){this.hurt(m,this.power(s.damage,m),s.color);const firm=MONSTER_TYPES[m.type]?.boss;if(s.type==='root'&&!firm)m.root=3.5;if(s.type==='push'&&!firm){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
+  else if(m){skillHit(this,m,this.power(s.damage,m),s.color);const firm=MONSTER_TYPES[m.type]?.boss;if(s.type==='root'&&!firm)m.root=3.5;if(s.type==='push'&&!firm){const n=distance(p,m)||1;moveBody(m,(m.x-p.x)/n*1.8,(m.z-p.z)/n*1.8,this.nav);}}
   };
   const event={skillIndex:index,from,to:m?{x:m.x,z:m.z}:air??{x:p.x,z:p.z},air:!!air,color:s.color,kind:s.type,radius:s.radius??1};
   if(this.roleCombat){const track=skillTrack(this.profession.id,index),scale=Math.max(1,(track?.strikes[0]??.42)*(track?.duration??.6)/.25,(track?.duration??.6)/.7),duration=(track?.duration??.6)/scale,timing={duration,impacts:[(track?.strikes[0]??.42)*duration]},castId=++this.castSerial||(this.castSerial=1);

@@ -1,5 +1,6 @@
 // 0.103 damage rules shared by the game, the realm server and the back office (owner, 2026-10-21).
-// Physical: ATK against the monster's DEF; magic: MATK against MDEF. Crits ignore DEF.
+// Physical: ATK against the monster's DEF; magic: MATK against MDEF. Basic crits ignore DEF.
+// Damaging skill impacts may crit too, multiplying their resolved damage after defence.
 // HIT/FLEE: a physical hit can miss; a monster's blow can be dodged. Magic always lands.
 // Monster DEF/MDEF/FLEE/HIT come from its level unless the monster sets its own.
 export const monsterDef=t=>t?.def??Math.round((t?.level??1)*.5);

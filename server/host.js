@@ -4,6 +4,7 @@ import {identityAction} from '../identity166.js';
 import {buyPremiumItem} from '../premium-shop-action.js';
 import {drawAmulets} from '../amulet-gacha.js';
 import {AMULETS} from '../amulets.js';
+import {raiseCharacterLevels} from '../admin-levels.js';
 const AMULET_NAMES=Object.fromEntries(AMULETS.map(a=>[a.id,a.name]));
 import {MAIL_ACTIONS,composeMail,deliverMail,mailboxAction,mailboxBulkAction,publicInbox,inboxSummary,hasMailGift} from '../mailbox.js';
 import {PET_MUTATIONS,petAccountAction,publicPetAccount} from '../pet-account.js';
@@ -134,7 +135,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let done;const pending=new Promise(r=>{done=r;});mutations.add(pending);
    mutationDone=()=>{mutations.delete(pending);done();};
   }
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,amuletGacha:1,premiumShop:1,observerMode:1,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,respawnChoice:1,revivalTalisman:200,spiritCompanion:185,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,skillRework:119,skillGcd:ROLE_GLOBAL_CD,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,skillCriticals:1,adminLevels:1,amuletGacha:1,premiumShop:1,observerMode:1,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,respawnChoice:1,revivalTalisman:200,spiritCompanion:185,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,skillRework:119,skillGcd:ROLE_GLOBAL_CD,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.117 terms/privacy acceptance after sign-in: GET the version this account accepted, POST {version} to record it.
   // Firebase mode trusts only the verified ID token's uid; the loopback dev server uses the uid it is given.
@@ -195,6 +196,29 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(url.pathname==='/admin/players'&&req.method==='GET'){
     if(store?.listProfiles&&(url.searchParams.get('fresh')==='1'||Date.now()-savedList.at>120000)){try{savedList={at:Date.now(),rows:await store.listProfiles()};}catch(e){console.error('admin-list',e.message);}}
     reply(200,{players:adminPlayers(realm,savedList.rows),savedAt:savedList.at||null});return;
+   }
+   if(url.pathname==='/admin/levels'&&req.method==='POST'){
+    if(!authoritative()){reply(503,{error:'authority-unavailable'});return;}
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>2048){reply(413,{error:'too-large'});return;}}
+    try{
+     const b=JSON.parse(data);let adjustment;
+     if(String(b.peer??'').startsWith('off:')){
+      const m=/^off:([^:]{1,128}):(slot-[1-5])$/.exec(b.peer);if(!m)throw Error('player-offline');
+      if([...sessions.values()].some(s=>s.peer.uid===m[1]))throw Error('player-online');
+      await store.giveOffline({uid:m[1],slotId:m[2]},record=>{adjustment=raiseCharacterLevels(record,b);return adjustment.record;});
+     }else{
+      const session=[...sessions.values()].find(s=>s.peer.id===b.peer&&!s.closing&&!s.peer.suspended);if(!session)throw Error('player-offline');
+      if(session.trainingBusy||session.peer.trade)throw Error('server-busy');
+      const p=session.peer;p.levelMutationBusy=true;p.suspended=true;
+      try{await persistMail(session,record=>{adjustment=raiseCharacterLevels(record,b);return adjustment.record;},record=>{
+       if(!adjustment.changed)return;
+       Object.assign(p.world,{baseXp:record.state.traveler.baseXp,jobXp:record.state.traveler.jobXp});
+       p.world.emit('experience',adjustment.event);p.world.notice('ทีมงานเพิ่มเลเวลให้แล้ว');p.saveNow=true;
+      });}finally{p.levelMutationBusy=false;if(!session.closing)p.suspended=false;}
+     }
+     savedList.at=0;audit('admin-levels',who,{to:{peer:b.peer,name:adjustment.record.character.name},before:adjustment.before,after:adjustment.after,changed:adjustment.changed});
+     reply(200,{ok:true,name:adjustment.record.character.name,...adjustment.after,changed:adjustment.changed});
+    }catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
    }
    if(['/admin/pets','/admin/give','/admin/mail'].includes(url.pathname)&&req.method==='POST'){
     if(!authoritative()){reply(503,{error:'authority-unavailable'});return;}
@@ -340,14 +364,14 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    s.peer.petCollection=result.state;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return result;
   });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;}
  }
- async function persistMail(s,apply){
+ async function persistMail(s,apply,applyLive=()=>{}){
   if(s.trainingBusy||s.closing||s.peer.trade)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;s.peer.mailMutationBusy=true;
   const job=s.queue.catch(()=>{}).then(async()=>{const before=realm.record(s.peer,s.lease.record),same=JSON.stringify(before),record=apply(before);let timer;
    if(JSON.stringify(record)===same)return record; // re-reading a read mail, deleting nothing: no write
    if(!spendWrite(s))throw Error('rate-limit');
    try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,no)=>{timer=setTimeout(()=>no(Error('save-timeout')),15000);})]);}
    catch(error){s.closing=true;s.released=true;realm.leave(s.peer.id);s.ws.close(4010,'save-failed');throw error;}finally{clearTimeout(timer);}
-   Object.assign(s.peer.character,record.character);s.peer.identityReceipts=record.identityReceipts??s.peer.identityReceipts;s.peer.mailbox=record.mailbox;realm.setBag(s.peer,record.bag);s.peer.petCollection=record.petCollection??s.peer.petCollection;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return record;
+   Object.assign(s.peer.character,record.character);s.peer.identityReceipts=record.identityReceipts??s.peer.identityReceipts;s.peer.mailbox=record.mailbox;realm.setBag(s.peer,record.bag);s.peer.petCollection=record.petCollection??s.peer.petCollection;applyLive(record);realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return record;
   });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;s.peer.mailMutationBusy=false;if(!s.closing){for(const gift of s.peer.mailLootQueue??[])realm.grantLoot(s.peer,gift.loot,gift.at);}s.peer.mailLootQueue=[];}
  }
  wss.on('connection',(ws,req)=>{

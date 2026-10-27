@@ -39,3 +39,13 @@ html body.field-hud.hud63 #account-panel:not([data-blocking=true]) .account-card
 }
 
 html body.field-hud.hud63 #mail-window[data-hud-panel][open]{height:min(660px,var(--window-height))!important;overflow:hidden}
+
+/* AUTO uses the utility-window centre, clear of the right-hand event and battle rails. */
+html body.field-hud.hud63 #auto-target-window[data-hud-panel][open]{
+ inset:calc(var(--vv-top,0px) + var(--window-top)) var(--window-right) calc(100dvh - var(--vv-top,0px) - var(--vv-h,var(--visible-height,100dvh)) + var(--window-bottom)) var(--window-left)!important;
+ margin:auto!important;
+ width:min(350px,calc(100vw - var(--window-left) - var(--window-right)))!important;
+ height:min(550px,calc(var(--vv-h,var(--visible-height,100dvh)) - var(--window-top) - var(--window-bottom)))!important;
+ max-height:calc(var(--vv-h,var(--visible-height,100dvh)) - var(--window-top) - var(--window-bottom))!important;
+ z-index:70;overflow:hidden!important;
+}

@@ -28,8 +28,7 @@ import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot,CHANNELS,normalizeChannel} from '../realm-state.js';
 import {logJoin,logLeave,logChannel,logChat,logMvp,logTrade,logMarket,logGuild,logLevelUp} from './dashboard-log.js';
 import {normalizeSkills,upgradeSkill,availablePoints,SLOTS} from '../skill-progress.js';
-import {normalizeStory,storyEvent,rewardItems} from '../story-quests.js';
-import {normalizeRebirthStory,rebirthTalk} from '../rebirth-story.js';
+import {normalizeStory,normalizeRebirthStory,storyEvent,rewardItems} from '../story-quests.js';
 import {gearLook,GRADES} from '../gear-sets.js';
 import {FRIEND_MAX,GUILD_COST,SOCIAL_ERRORS,cleanName,validGuildName,validEmblem,normalizeFriends,GUILD_HALL,DEPUTY_MAX,DONATE_MIN,DONATE_MAX,GUILD_LEVELS,guildLevel,GUILD_UPGRADES,GUILD_RITE,GUILD_GOAL,guildSeats,cleanNotice,GUILD_SEARCH_LIMIT,GUILD_APPLICATION_MAX,GUILD_APPLICATION_LIMIT,GUILD_APPLICATION_TTL} from '../social.js';
 import {claimDaily,thaiDay} from '../daily.js';
@@ -71,7 +70,7 @@ export function refineAnnouncement(who,r,before,after){
 const WALK_FREE_MS=5;
 // 0.119 observer: an invisible, untargetable spectator for allowed e-mails (guild-war streams). It may only move and look around.
 const OBSERVER_OK=new Set(['input','walkTo','walkPace','walkCancel','switchChannel','ping','bossDirectory','arenaRooms','leaderboard','guildInfo','friendList','storyCheck','inspect','returnToSpawn','respawn','observer']);
-const allowed=new Set(['observer','arenaRooms','walkTo','walkPace','walkCancel','bossDirectory','switchChannel','storyCheck','rebirthTalk','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildSearch','guildApply','guildApplicationAnswer','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','petSkill','bountyClaim','albumDeposit','weeklyClaim','rebirth','hire','selectAlly','returnToSpawn','respawn','prologue']);
+const allowed=new Set(['observer','arenaRooms','walkTo','walkPace','walkCancel','bossDirectory','switchChannel','storyCheck','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildSearch','guildApply','guildApplicationAnswer','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','petSkill','bountyClaim','albumDeposit','weeklyClaim','rebirth','hire','selectAlly','returnToSpawn','respawn','prologue']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -98,7 +97,7 @@ export class RealmServer{
    send({type:'welcome',id:existing.id,room:existing.room.id,channel:existing.channel??1,capacity:this.capacity,history:copy(existing.room.history),snapshot:(existing.bagSent=0,existing.mobRoom=null,existing.sentSig=null,this.snapshot(existing))});this.social(existing.room);return existing;
   }
   const hero=character(record.character),capital=this.catalog.maps.find(m=>m.id===this.catalog.capital);
-  let map=this.catalog.maps.find(m=>m.id===record.state.mapId)??capital;
+  let map=this.catalog.maps.find(m=>m.id===record.state.mapId)??capital;const rebirthEvicted=!!map.minRebirth&&!(record.rebirth>=map.minRebirth);if(rebirthEvicted)map=capital;
   // a brand-new character wakes in the prologue's dream meadow (its own room) until the vision is over
   const prologue=prologueJoin(this,record);if(prologue&&prologue.stage!=='done')map=prologueMap(this);else if(map.prologue)map=capital;
   const arena=map.id===ARENA_MAP?arenaReservation(this,uid+':'+slotId):null;
@@ -113,13 +112,13 @@ export class RealmServer{
   if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,serverId,channel:typeof hasChannel==='boolean'&&hasChannel?ch:null,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);this.wakeMvp(room);}
   const world=new CombatWorld({...map,classId:hero.classId,jobId:hero.jobId,roleSkills:this.roleSkills});if(this.spiritCompanions)world.spiritCompanion=true;restoreTraveler(world,record.state.traveler);if(record.xpCurve!==XP_CURVE)world.baseXp=migrateXp(world.baseXp);world.mobs=room.mobs;
   const skills=this.roleSkills?normalizeRoleSkills(record.skills,hero.classId):normalizeSkills(record.skills,hero.classId);world.skillLevels=[...skills[hero.classId]];if(this.roleSkills&&record.skills?.[ROLE_MARK]&&record.roleCooldowns?.version===1){const saved=record.roleCooldowns,elapsed=Math.max(0,(this.now()-saved.at)/1000);if(Array.isArray(saved.values)&&saved.values.length===SLOTS)world.cooldowns=saved.values.map(n=>Math.max(0,Math.min(120,Number.isFinite(n)?n:0)-elapsed));if(saved.down>0){world.player.hp=0;world.player.down=Math.max(0,saved.down-elapsed);}}
-  const position=record.state.position;if(position&&!evicted&&!arenaEvicted&&!world.roleRespawn&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
-  const peer={canObserve:canObserve===true,observer:false,roleSkillBackup:record.roleSkillBackup??(this.roleSkills&&!record.skills?.[ROLE_MARK]?copy(record.skills??{}):null),id:randomUUID(),uid,serverId,slotId,channel:ch,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),rebirthStory:normalizeRebirthStory(record.rebirthStory),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
+  const position=record.state.position;if(position&&!evicted&&!arenaEvicted&&!rebirthEvicted&&!world.roleRespawn&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
+  const peer={canObserve:canObserve===true,observer:false,roleSkillBackup:record.roleSkillBackup??(this.roleSkills&&!record.skills?.[ROLE_MARK]?copy(record.skills??{}):null),id:randomUUID(),uid,serverId,slotId,channel:ch,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
   peer.equipment=normalizeEquipment(record.equipment,hero.classId);
   peer.bag=normalizeBag(record.bag);peer.bagVersion=1;peer.bagSent=0;peer.itemAt=-Infinity;
   peer.key=uid+':'+slotId;peer.tradeXp=Number.isSafeInteger(record.trade?.xp)&&record.trade.xp>0?record.trade.xp:0;if(map.id===MARKET_ZONE.mapId)peer.world.emit('shops',{list:this.shopList(serverId)});
   peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;if(peer.guildId)world.emit('guild',{guild:this.guildView(this.guilds.get(peer.guildId),peer.key)}); // 1.01 hall props + NPC know the guild at once
-  peer.daily=record.daily??null;peer.weekly=record.weekly??null;peer.rebirth=Math.min(REBIRTH_MAX,Math.max(0,record.rebirth|0));peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.pet=null;peer.mailbox=normalizeMailbox(record.mailbox);peer.petCollection=normalizePetAccount(record.petCollection);peer.bounty=record.bounty??null;Object.assign(peer,normalizeAlbumState(record));
+  peer.daily=record.daily??null;peer.weekly=record.weekly??null;peer.rebirth=Math.min(REBIRTH_MAX,Math.max(0,record.rebirth|0));peer.rebirthStory=normalizeRebirthStory(record.rebirthStory,peer.rebirth);peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.pet=null;peer.mailbox=normalizeMailbox(record.mailbox);peer.petCollection=normalizePetAccount(record.petCollection);peer.bounty=record.bounty??null;Object.assign(peer,normalizeAlbumState(record));
   if(party){party.pending.delete(uid);party.members.add(peer.id);peer.partyId=party.id;if(party.leaderPending===uid||!party.members.has(party.leader)){party.leader=peer.id;if(party.leaderPending===uid)party.leaderPending=null;}}
   peer.prologue=prologue;peer.storage=normalizeStorage(record.storage);peer.trade=null;peer.stall=null;peer.saveNow=false;
   peer.stats=normalizeStats(record.stats);peer.gear=normalizeGear(record.gear);peer.statSig='';peer.gearAt=-Infinity;this.refreshStats(peer);if(world.roleRespawn){world.player.hp=world.player.maxHp;world.player.mp=world.player.maxMp;}
@@ -252,7 +251,7 @@ export class RealmServer{
    if(!p.room.map.safe)return this.itemFail(p,'rebirth-town');
    if(baseProgress(w).level<99)return this.itemFail(p,'rebirth-level');
    if((p.rebirth??0)>=REBIRTH_MAX)return this.itemFail(p,'rebirth-max');
-   p.rebirth=(p.rebirth??0)+1;w.baseXp=0;p.stats=normalizeStats(null);p.statSig=null;this.refreshStats(p);w.player.hp=w.player.maxHp;w.player.mp=w.player.maxMp;
+   p.rebirth=(p.rebirth??0)+1;p.rebirthStory=normalizeRebirthStory(null,p.rebirth);w.baseXp=0;p.stats=normalizeStats(null);p.statSig=null;this.refreshStats(p);w.player.hp=w.player.maxHp;w.player.mp=w.player.maxMp;
    p.saveNow=true;w.notice('เกิดใหม่ครั้งที่ '+p.rebirth+' · กลับสู่ Lv.1 พร้อมแต้มสเตตัสโบนัส +'+p.rebirth*40+' · ทุกค่าสถานะถาวร +'+rebirthStatBonus(p.rebirth));
    this.announce(p.serverId,'🌟 '+p.character.name+' เกิดใหม่เป็นครั้งที่ '+p.rebirth+'!');return true;
   }
@@ -314,21 +313,14 @@ export class RealmServer{
    try{const before=p.bag.coins,next=m.type==='buy'?buy(p.bag,npc.name,m.item,qty):sell(p.bag,m.item,qty),spent=m.type==='buy'?before-next.coins:0,off=Math.floor(spent*tradePerks(p.tradeXp).npcDiscount);this.setBag(p,off?{...next,coins:next.coins+off}:next);}catch(e){return this.itemFail(p,e.message);}
    w.emit('trade',{kind:m.type,item:m.item,count:qty,coins:p.bag.coins});this.storyProgress(p,{type:'do',action:'shop'});return true;
   }
-  // 0.122 rebirth story: only reborn characters, only next to that NPC in this room; the shared rules decide the rest.
-  if(m.type==='rebirthTalk'){
-   const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null;
-   if(!npc||distance(npc,w.player)>3.6)return this.error(p,'quest-too-far');
-   const r=rebirthTalk(p.rebirthStory,{npc:npc.name,mapId:p.room.map.id},p.rebirth??0);if(!r.changed)return false;
-   p.rebirthStory=r.state;return true;
-  }
   if(m.type==='prologue')return prologueCommand(this,p,m);
   if(m.type==='upgradeSkill'&&p.trial)return this.error(p,'prologue-trial');
   if(m.type==='questTalk'){
-   if(m.expected&&(m.expected.quest!==p.story.quest||m.expected.step!==p.story.step))return false;
+   const campaign=m.expected?.campaign==='rebirth'?'rebirth':'main',progress=campaign==='rebirth'?p.rebirthStory:p.story;if(!progress||campaign==='rebirth'&&p.rebirth<1)return false;if(m.expected&&(m.expected.quest!==progress.quest||m.expected.step!==progress.step||campaign==='rebirth'&&m.expected.cycle!==progress.cycle))return false;
    // Story talk only counts next to that NPC in this room; the shared rules decide whether it advances anything.
    const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null;
    if(!npc||distance(npc,w.player)>3.6)return this.error(p,'quest-too-far');
-   return this.storyProgress(p,{type:'talk',npc:npc.name,mapId:p.room.map.id});
+   return this.storyProgress(p,{type:'talk',npc:npc.name,mapId:p.room.map.id,campaign});
   }
   if(m.type==='upgradeSkill'){
    try{p.skills=w.roleCombat&&!w.roleCombat.legacy?upgradeRoleSkill(p.skills,p.character.classId,m.index,this.progress(p)):upgradeSkill(p.skills,p.character.classId,m.index,this.progress(p));}catch(e){return this.error(p,e.message);}
@@ -603,15 +595,16 @@ export class RealmServer{
   }
  }
  storyProgress(p,event){
-  const r=storyEvent(p.story,event);if(!r.changed)return false;p.story=r.state;
-  p.world.emit('story',{npc:event.npc??null,say:r.say??null,completed:r.completed?.title??null,story:r.state});
-  if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:rewardItems(r.reward,p.character.classId,p.character.gender)});p.saveNow=true;}
-  return true;
+  let changed=false;const tracks=event.campaign==='rebirth'?['rebirthStory']:event.campaign==='main'?['story']:['story',...(p.rebirth>=1?['rebirthStory']:[])];
+  for(const key of tracks){if(key==='rebirthStory'&&!(p.rebirth>=1))continue;const r=storyEvent(p[key],event);if(!r.changed)continue;p[key]=r.state;changed=true;
+   p.world.emit('story',{...(key==='rebirthStory'?{campaign:'rebirth'}:{}),npc:event.npc??null,say:r.say??null,completed:r.completed?.title??null,story:r.state});
+   if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:rewardItems(r.reward,p.character.classId,p.character.gender)});}p.saveNow=true;
+  }return changed;
  }
  // 0.98 tutorial steps that are already true (wearing a weapon, a refined or carded piece, a class, a level, AUTO on,
  // a guild) finish on their own; checked once a second and right after joining.
  storyContext(p){const g=p.gear??{},worn=Object.values(g).filter(Boolean).map(id=>itemDef(id));
-  return {level:this.who(p).level,weapon:!!g.weapon,refined:worn.some(d=>d?.refine>0),carded:worn.some(d=>d?.card),job:p.character.classId!=='novice',
+  return {mapId:p.room.map.id,level:this.who(p).level,weapon:!!g.weapon,refined:worn.some(d=>d?.refine>0),carded:worn.some(d=>d?.card),job:p.character.classId!=='novice',
    skilled:(p.world.skillLevels??[]).reduce((n,v)=>n+v,0)>(p.character.classId==='novice'?2:0), // 0.119 class skills start at zero
    auto:!!p.world.auto,guild:!!this.guildOf(p)};}
  storyCheck(p){for(let i=0;i<30&&this.storyProgress(p,{type:'check',ctx:this.storyContext(p)});i++);}
@@ -1018,6 +1011,7 @@ export class RealmServer{
   }
   const portal=p.room.map.portals?.find(v=>v.to===id&&distance(v,p.world.player)<2.6);
   const destination=this.catalog.maps.find(m=>m.id===id);
+  if(destination?.minRebirth&&p.rebirth<destination.minRebirth)throw Error('rebirth-required');if(destination?.minRebirth&&this.who(p).level<(destination.minLevel??1))throw Error('rebirth-level-gate');
   if(id===ARENA_MAP){const room=arenaReservation(this,p.key);if(!destination||!room||p.duel||p.trade||p.world.player.hp<=0)throw Error('arena-not-ready');return destination;}
   if(p.room.map.id===ARENA_MAP&&id===this.catalog.capital){if(p.duel)this.endDuel(this.peers.get(p.duel.foe),p,'ออกจากสนาม');return destination;}
   // 0.46 ธูปกลับเมือง: from any map straight to the capital, spending one incense.

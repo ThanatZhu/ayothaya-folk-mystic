@@ -22,6 +22,7 @@ const FLAT=/^(Ground|Soil foundation|Water surface|Damp canal|Streets|Tracks|Cou
 const LAYERS=[[/^(Soil|Cellar)[ _]foundation/,-1],[/^(Ground|Island meadow)/,0],[/^(Damp canal|Wetland islands|Earthen rice)/,1],[/^Tracks/,2],[/^Feathered/,3],[/^(Courtyard|Raised flagstone|Spirit arena paved)/,4],[/^Streets/,5],[/^(Dense low rice|Stone moss|Arena inlays)/,6]];
 const TOP_RANK=Math.max(...LAYERS.map(([,r])=>r));
 export function prepareSceneV2({scene,model,map,waterEnabled=true}){
+ if(map.waterType==='cooled-lava')waterEnabled=false;
  const mood=MOODS[moodOf(map)],converted=new Map(),water=[],wind={value:0};
  // glTF can share one atlas texture between roofs, timber, foliage and water.
  // Sliding that atlas changes every material's tile, even if the Texture is cloned.

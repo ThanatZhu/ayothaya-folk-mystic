@@ -1,8 +1,7 @@
-import {storyScene} from './quest-cinematic-data155.js?v=story163';
+import {storyScene} from './quest-cinematic-data155.js?v=rebirth196';
 import {normalizeAlbumState,depositAlbumCard,ALBUM_ERRORS} from './card-album.js?v=152';
 import {STORY,currentObjective,normalizeStory} from './story-quests.js?v=pets125';
 import {STORY_RECAP,storyArt} from './story-dialogue.js?v=chuk175';
-import {REBIRTH_TITLE,rebirthUnlocked,rebirthScene} from './rebirth-story.js?v=rebirth198';
 // 0.60 "ภารกิจ" window: daily bounty board (claim in a town) and the card album. Online the realm server owns both;
 // offline guests keep them in localStorage and pay out through the same 'reward' / experience events.
 import {itemDef} from './items.js?v=107';
@@ -26,7 +25,7 @@ const TIER=['ง่าย','กลาง','ยาก','หัวหน้า'];
 export function createQuestsUI({game,account,map,bagUI}){
  const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./quests-journal.css?v=story163',import.meta.url).href;document.head.append(css);
  const desktop=matchMedia('(min-width:901px) and (pointer:fine)');
- let selectedQuest=null,lastQuest=-1;
+ let selectedQuest=null,lastQuest=-1;addEventListener('rebirth-campaign-change',()=>{selectedQuest=null;lastQuest=-1;shown='';render(true);});
  const world=game.world,slot=(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const load=k=>{try{return JSON.parse(localStorage.getItem(k+slot));}catch{return null;}},keep=(k,v)=>{try{localStorage.setItem(k+slot,JSON.stringify(v));}catch{}};
  let localBounty=load('ayothaya-bounty:'),localAlbum=normalizeAlbumState(load('ayothaya-album-deposits:')??{album:load('ayothaya-album:')}),tab='story',shown='';
@@ -54,10 +53,11 @@ export function createQuestsUI({game,account,map,bagUI}){
  dialog.querySelector('#quests-close').onclick=()=>dialog.close();
  dialog.querySelectorAll('[data-qt]').forEach(b=>b.onclick=()=>{tab=b.dataset.qt;render(true);});
  bagUI.talkHooks.push(n=>{$('npc-bounty')?.remove();if(n.name!=='ขุนอินทร์')return;const b=document.createElement('button');b.id='npc-bounty';b.type='button';b.textContent='📜 กระดานค่าหัวประจำวัน';b.onclick=()=>{$('close-npc').click();open('bounty');};$('close-npc').before(b);});
- const storyState=()=>{if(!storyReady(game,account,map.id))return null;if(game.online)return normalizeStory(world.story);try{return normalizeStory(JSON.parse(localStorage.getItem('ayothaya-story:'+slot)));}catch{return normalizeStory(null);}};
+ const storyState=()=>{if(!storyReady(game,account,map.id))return null;if(game.online)return storyForWorld(world);try{const rb=world.rebirth>0&&world.storyCampaign!=='main',raw=JSON.parse(localStorage.getItem('ayothaya-story:'+slot+(rb?':rebirth':'')));return rb?normalizeRebirthStory(raw,world.rebirth):normalizeStory(raw);}catch{return normalizeStory(null);}};
  // Browsing a recap never sends a quest action or changes authoritative progress.
  function renderStory(body,state){
   if(!state){body.innerHTML='<p class="social-note" role="status">กำลังโหลดเควสจากเซิร์ฟเวอร์…</p>';return;}
+  const STORY=storyQuests(state);
   const obj=currentObjective(state),previousScroll=lastQuest===state.quest?(body.querySelector('.quest-journal-list')?.scrollTop??0):0;
   const focused=body.contains(document.activeElement)?document.activeElement?.dataset.questIndex:null;
   if(lastQuest!==state.quest){selectedQuest=state.quest;lastQuest=state.quest;}
@@ -82,8 +82,8 @@ export function createQuestsUI({game,account,map,bagUI}){
   const heading=document.createElement('h3');heading.id='quest-detail-title';heading.textContent=quest?.title??'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';section.append(heading);
   if(quest){const art=storyArt(quest.id,active&&obj?obj.stepNumber:1),image=document.createElement('img');image.src=art.src;image.alt=art.alt;image.className='story-recap-art';image.width=640;image.height=360;image.decoding='async';image.onerror=()=>image.remove();section.append(image);}
   if(quest){const clips=document.createElement('div');clips.className='quest-cinematic-links';const lastStep=active&&obj?state.step:quest.steps.length-1;
-   for(const s of [lastStep]){const watch=document.createElement('button');watch.type='button';watch.className='quest-watch';watch.textContent='ดูเรื่องราวเควสนี้';watch.dataset.cinematicStep=s;watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:storyScene(index,s)}}));clips.append(watch);}section.append(clips);}
-  const recap=document.createElement('p');recap.textContent=quest?STORY_RECAP[quest.id]:'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';section.append(recap);
+   for(const s of [lastStep]){const watch=document.createElement('button');watch.type='button';watch.className='quest-watch';watch.textContent='ดูเรื่องราวเควสนี้';watch.dataset.cinematicStep=s;watch.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:storyScene(index,s,state.campaign,state.cycle)}}));clips.append(watch);}section.append(clips);}
+  const recap=document.createElement('p');recap.textContent=quest?(STORY_RECAP[quest.id]??quest.beats?.map(b=>b[0]).join(' · ')):'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';section.append(recap);
   if(active&&obj){
    const goal=document.createElement('div');goal.className='quest-journal-goal';
    const label=document.createElement('small');label.textContent=`ขั้น ${obj.stepNumber}/${obj.steps}`;
@@ -91,17 +91,12 @@ export function createQuestsUI({game,account,map,bagUI}){
    if(obj.step.count){const progress=document.createElement('small');progress.textContent=`${obj.count}/${obj.step.count}`;goal.append(progress);}
    section.insertBefore(goal,section.querySelector('.story-recap-art')??recap);
   }
-  // 0.122 rebirth intros already met: replay only, never progress or rewards
-  const reborn=rebirthUnlocked(world.rebirthStory,world.rebirth??0);
-  if(reborn.length){const box=document.createElement('div');box.className='quest-cinematic-links rebirth-replays';const label=document.createElement('small');label.textContent=REBIRTH_TITLE;box.append(label);
-   for(const q of reborn){const b=document.createElement('button');b.type='button';b.className='quest-watch';b.textContent='ดูอีกครั้ง · '+q.title;b.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:rebirthScene(q.id,account?.character?.name??world.heroName??'')}}));box.append(b);}
-   section.append(box);}
   layout.append(section);body.append(layout);list.scrollTop=previousScroll;
   if(focused!=null)list.querySelector(`[data-quest-index="${focused}"]`)?.focus({preventScroll:true});
  }
  desktop.addEventListener('change',()=>{const list=dialog.querySelector('.quest-journal-list');if(list){list.hidden=!desktop.matches;dialog.querySelector('.quest-journal-toggle').setAttribute('aria-expanded',String(desktop.matches));}});
  function render(force=false){
-  if(!dialog.open)return;const s=bounty(),al=album(),wk=normalizeWeekly(world.weekly,Date.now()),sig=JSON.stringify([tab,s,al,wk,storyState(),world.rebirthStory,world.rebirth,tab==='album'?bagUI.bag():null,world.albumRewards]);if(!force&&sig===shown)return;shown=sig;
+  if(!dialog.open)return;const s=bounty(),al=album(),wk=normalizeWeekly(world.weekly,Date.now()),sig=JSON.stringify([tab,s,al,wk,storyState(),tab==='album'?bagUI.bag():null,world.albumRewards]);if(!force&&sig===shown)return;shown=sig;
   dialog.querySelectorAll('[data-qt]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.qt===tab)));
   const body=$('quests-body'),scroll=body.scrollTop;dialog.dataset.questTab=tab;
   if(tab==='story'){

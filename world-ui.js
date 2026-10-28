@@ -1,3 +1,5 @@
+import {baseProgress} from './experience.js';
+import {rebirthAccess} from './rebirth-content196.js';
 import {createNPCConversation} from './npc-conversation155.js?v=hire177';
 import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
@@ -9,7 +11,7 @@ import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=novice174';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=death178';
-import {nextHop} from './story-quests.js?v=weapon188';
+import {nextHop} from './story-quests.js?v=rebirth196';
 
 export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
  const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
@@ -34,6 +36,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
  async function travel(id,recall=false,warp=false,respawn=false){
+  if(!rebirthAccess(lookup(id),world.rebirth??0,baseProgress(world).level)){world.notice('ต้องจุติและมีเลเวลถึงเกณฑ์ก่อนเดินทางข้ามภพ');return false;}
   if(traveling||!(reachable.has(id)||recall||warp||respawn||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||(!respawn&&world.player.hp<=0))return false;
   if(lookup(id)?.guildHall&&!game.online){world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');return false;}
   if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return false;}
@@ -135,8 +138,9 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   if(e.code==='KeyR'&&!atlas.open&&!dialog.open&&!conversation&&!mentors.paused){e.preventDefault();$('interact').click();}
  });
  const mini=$('mini-map');
- const markers=()=>({mobs:world.mobs,npcs:map.npcs});
- const drawCityMap=()=>drawMap($('city-map'),map,world.player,{detailed:true,photo:mapPhoto(),...markers()});
+ const markers=()=>({mobs:world.mobs,npcs:map.npcs.filter(n=>!n.minRebirth||(world.rebirth??0)>=n.minRebirth)});
+ const visibleMap=()=>({...map,portals:map.portals.filter(p=>!p.minRebirth||(world.rebirth??0)>=p.minRebirth)});
+ const drawCityMap=()=>drawMap($('city-map'),visibleMap(),world.player,{detailed:true,photo:mapPhoto(),...markers()});
  let mapZoom=1;const viewport=$('city-map-viewport');
  function zoomMap(step){const old=mapZoom;mapZoom=Math.max(1,Math.min(3,mapZoom+step));const x=(viewport.scrollLeft+viewport.clientWidth/2)*mapZoom/old-viewport.clientWidth/2,y=(viewport.scrollTop+viewport.clientHeight/2)*mapZoom/old-viewport.clientHeight/2;viewport.style.setProperty('--map-zoom',mapZoom);viewport.scrollTo(x,y);$('map-minus').disabled=mapZoom===1;$('map-plus').disabled=mapZoom===3;}
  // 0.112.4 click (or tap) a spot on the big map to walk there; the same transform drawMap uses (detailed: 48 px margin)
@@ -147,15 +151,15 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   game.clearInput();game.walkTo({x,z},{radius:.5,kind:'map',onFail:()=>world.notice('เดินไปจุดนั้นไม่ได้ · ลองแตะบนทางเดินหรือพื้นโล่ง')});
  });
  $('map-plus').onclick=()=>zoomMap(.5);$('map-minus').onclick=()=>zoomMap(-.5);
- function minimap(){drawMap(mini,map,world.player,{photo:photo||null,...markers()});}
+ function minimap(){drawMap(mini,visibleMap(),world.player,{photo:photo||null,...markers()});}
  function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function npcPosition(label,n){const e=camera.matrixWorld.elements,h=(n.visualHeight??WORLD_BODY_HEIGHT)+.14;point.set(n.x+e[4]*h,groundHeight(map.nav,n.x,n.z)+.07+e[5]*h,n.z+e[6]*h).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
  function update(t){
   const p=world.player;nearest=null;nearNPC=null;let best=2;
   const area=(map.districts??[]).find(d=>Math.hypot(p.x-d.x,p.z-d.z)<14);$('district-description').textContent=area?area.name+' · '+(map.safe?'เขตปลอดภัย':'นอกเมือง'):map.subtitle;
   $('mini-area').textContent=(area?.name??'ระหว่างทาง')+' · '+(map.safe?'ปลอดภัย':'นอกเมือง');
-  for(const v of views){const d=Math.hypot(p.x-v.p.x,p.z-v.p.z);if(d<best){best=d;nearest=v.p;}v.ring.material.opacity=.52+Math.sin(t*2)*.2;position(v.label,v.p.x,v.p.z,.36);v.label.classList.toggle('near',d<2);}
-  let npcDistance=2.3;for(const v of npcViews){if(v.n.unavailable){v.label.hidden=true;continue;}v.label.hidden=false;const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(document.body.classList.contains('mobile-play')?6:v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
+  for(const v of views){const locked=v.p.minRebirth>(world.rebirth??0);v.ring.visible=!locked;v.label.hidden=locked;if(locked)continue;const d=Math.hypot(p.x-v.p.x,p.z-v.p.z);if(d<best){best=d;nearest=v.p;}v.ring.material.opacity=.52+Math.sin(t*2)*.2;position(v.label,v.p.x,v.p.z,.36);v.label.classList.toggle('near',d<2);}
+  let npcDistance=2.3;for(const v of npcViews){if(v.n.minRebirth){v.n.unavailable=(world.rebirth??0)<v.n.minRebirth;for(const s of npcSprites)if(s.userData.npc===v.n)s.visible=!v.n.unavailable;}if(v.n.unavailable){v.label.hidden=true;continue;}v.label.hidden=false;const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(document.body.classList.contains('mobile-play')?6:v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
   mentors.update();conversationUI.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!atlas.open&&!mentors.paused;
   $('interact').hidden=!canInteract;
   if(canInteract){const button=$('interact'),mobile=document.body.classList.contains('mobile-play');button.dataset.kind=nearNPC?'npc':'portal';const text=nearNPC?(mobile?'พูดคุย':'กด Space เพื่อพูดคุย · หรือคลิก NPC'):'เดินทางไป '+lookup(nearest.to).name;if(button.textContent!==text)button.textContent=text;button.title=nearNPC?'คุยกับ '+nearNPC.name:text;button.setAttribute('aria-label',button.title);}

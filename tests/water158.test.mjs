@@ -7,9 +7,9 @@ import {isWaterMaterial,waterProfile,shoreDistances,createWaterSurface} from '..
 test('all catalogued water, including troughs/cellars/waterfalls, is classified without the water buffalo',()=>{
  const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url)));let maps=0;
  for(const map of catalog.maps){if(!map.scene){assert.equal(map.procedural,'arena');assert.equal(map.id,'duel-arena');assert.deepEqual(map.waterAreas,[]);continue;}const b=fs.readFileSync(new URL('../'+map.scene,import.meta.url)),glb=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)));const water=glb.materials.filter(isWaterMaterial);if(water.length)maps++;
-  assert.equal(water.length,['kailash-peak','duel-arena','prologue-vision'].includes(map.id)?0:['rice-fields','himmapan-edge'].includes(map.id)?2:1,map.id);
+  assert.equal(water.length,['kailash-peak','duel-arena','prologue-vision','rebirth-gandharva','rebirth-rahu'].includes(map.id)?0:['rice-fields','himmapan-edge'].includes(map.id)?2:1,map.id);
  }
- assert.equal(maps,12);assert.equal(isWaterMaterial({name:'Props_water_buffalo'}),false);assert.equal(isWaterMaterial({name:'Waterfall_rock_face'}),false);
+ assert.equal(maps,15);assert.equal(isWaterMaterial({name:'Props_water_buffalo'}),false);assert.equal(isWaterMaterial({name:'Waterfall_rock_face'}),false);
 });
 test('flow profiles distinguish slow pools/paddies, river axes and falling water',()=>{
  const river=waterProfile({id:'ayutthaya',waterAreas:[{w:100,d:8}]});assert.deepEqual(river.direction,[1,0]);

@@ -3,6 +3,11 @@
 // Shared by the client (offline guests + UI) and the realm server (authoritative online progress and rewards).
 // Progress state: {v, quest: index of the current quest, step: index inside it, count: kills toward a defeat step, done}.
 
+import {REBIRTH_STORY} from './rebirth-content196.js';
+export {REBIRTH_STORY};
+export const storyQuests=state=>state?.campaign==='rebirth'?REBIRTH_STORY:STORY;
+export function normalizeRebirthStory(raw,cycle){if(!(cycle>=1))return null;return normalizeStory(raw?.cycle===cycle?{...raw,campaign:'rebirth',v:STORY_VERSION}:{v:STORY_VERSION,campaign:'rebirth',cycle,quest:0});}
+export const storyForWorld=world=>world.rebirth>0&&world.storyCampaign!=='main'?normalizeRebirthStory(world.rebirthStory,world.rebirth):normalizeStory(world.story);
 import {WEAPON_CLASSES,weaponId,pieceId,gearLook} from './gear-sets.js';
 export const STORY_TITLE='บทที่ 1 · ประทีปที่ดับพร้อมกัน';
 export const STORY_VERSION=4; // v4 adds the class-weapon crafting lesson after t17; older saves retain their current quest.
@@ -115,21 +120,22 @@ export const rewardItems=(reward,classId,gender)=>(reward?.items??[]).map(i=>i.i
 
 export function normalizeStory(state){
  const s=state&&typeof state==='object'&&[2,3,STORY_VERSION].includes(state.v)?state:{};
+ const series=storyQuests(s),rebirth=s.campaign==='rebirth';
  const legacy=STORY.filter(q=>q.id!=='t17-craft'),old=Number.isInteger(s.quest)?Math.max(s.quest,0):0;
  const legacyIndex=s.v===2&&old>12?old-1:old;
- const quest=s.v===2||s.v===3?(legacyIndex>=legacy.length?STORY.length:STORY.findIndex(q=>q.id===legacy[legacyIndex].id)):Math.min(old,STORY.length);
- const done=quest>=STORY.length;
- const steps=done?0:STORY[quest].steps.length;
+ const quest=!rebirth&&(s.v===2||s.v===3)?(legacyIndex>=legacy.length?STORY.length:STORY.findIndex(q=>q.id===legacy[legacyIndex].id)):Math.min(old,series.length);
+ const done=quest>=series.length;
+ const steps=done?0:series[quest].steps.length;
  const step=!done&&Number.isInteger(s.step)?Math.min(Math.max(s.step,0),steps-1):0;
- const goal=done?0:STORY[quest].steps[step].count??0;
+ const goal=done?0:series[quest].steps[step].count??0;
  const count=Number.isInteger(s.count)?Math.min(Math.max(s.count,0),goal):0;
- return {v:STORY_VERSION,quest,step,count,done};
+ return {...(rebirth?{campaign:'rebirth',cycle:Number.isSafeInteger(s.cycle)&&s.cycle>0?s.cycle:1}:{}),v:STORY_VERSION,quest,step,count,done};
 }
 
 // What the player should do now: {quest, step, index:{quest,step}, progress} or null when the story is finished.
 export function currentObjective(state){
  const s=normalizeStory(state);if(s.done)return null;
- const quest=STORY[s.quest],step=quest.steps[s.step];
+ const quest=storyQuests(s)[s.quest],step=quest.steps[s.step];
  return {quest,step,count:s.count,stepNumber:s.step+1,steps:quest.steps.length};
 }
 
@@ -146,8 +152,8 @@ export function storySatisfied(step,ctx){
 // | {type:'check', ctx} (completes a do/level step that is already true). Returns {state, changed, say?, completed?, reward?}.
 export function storyEvent(state,event){
  const s=normalizeStory(state);if(s.done||!event)return {state:s,changed:false};
- const quest=STORY[s.quest],step=quest.steps[s.step];
- if(event.type==='check'){if(!storySatisfied(step,event.ctx))return {state:s,changed:false};}
+ const quest=storyQuests(s)[s.quest],step=quest.steps[s.step];
+ if(event.type==='check'){if(!(s.campaign==='rebirth'&&step.type==='enter'&&event.ctx?.mapId===step.mapId)&&!storySatisfied(step,event.ctx))return {state:s,changed:false};}
  else if(step.type==='do'){if(event.type!=='do'||event.action!==step.action)return {state:s,changed:false};}
  else{
   if(event.type!==step.type||event.mapId!==step.mapId)return {state:s,changed:false};
@@ -162,7 +168,7 @@ export function storyEvent(state,event){
  const say=step.say;
  if(s.step+1<quest.steps.length)return {state:{...s,step:s.step+1,count:0},changed:true,say};
  const next=s.quest+1;
- return {state:normalizeStory({v:STORY_VERSION,quest:next,step:0,count:0}),changed:true,say,completed:quest,reward:quest.reward};
+ return {state:normalizeStory({...s,v:STORY_VERSION,quest:next,step:0,count:0}),changed:true,say,completed:quest,reward:quest.reward};
 }
 
 // Next map to walk to on the way from `from` to `to`, following portals (breadth-first). null if unreachable.

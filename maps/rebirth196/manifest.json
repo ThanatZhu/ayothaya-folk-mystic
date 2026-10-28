@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "draft": true,
+  "maps": [
+    {
+      "id": "rebirth-ferry",
+      "name": "ท่าน้ำข้ามภพ",
+      "scene": "maps/rebirth196/rebirth-ferry.glb",
+      "source": "maps/rebirth196/rebirth-ferry.blend",
+      "layout": "maps/rebirth196/rebirth-ferry.layout.json",
+      "triangles": 15240,
+      "bytes": 511360,
+      "walkableCells": 18714,
+      "orphanCellsBlocked": 0,
+      "sourceLayout": "scripts/rebirth196/layouts/rebirth-ferry.json"
+    },
+    {
+      "id": "rebirth-kalpa",
+      "name": "ป่ากัลปพฤกษ์",
+      "scene": "maps/rebirth196/rebirth-kalpa.glb",
+      "source": "maps/rebirth196/rebirth-kalpa.blend",
+      "layout": "maps/rebirth196/rebirth-kalpa.layout.json",
+      "triangles": 14012,
+      "bytes": 446264,
+      "walkableCells": 18685,
+      "orphanCellsBlocked": 0,
+      "sourceLayout": "scripts/rebirth196/layouts/rebirth-kalpa.json"
+    },
+    {
+      "id": "rebirth-gandharva",
+      "name": "นครคนธรรพ์ลอยฟ้า",
+      "scene": "maps/rebirth196/rebirth-gandharva.glb",
+      "source": "maps/rebirth196/rebirth-gandharva.blend",
+      "layout": "maps/rebirth196/rebirth-gandharva.layout.json",
+      "triangles": 6288,
+      "bytes": 101376,
+      "walkableCells": 6708,
+      "orphanCellsBlocked": 0,
+      "sourceLayout": "scripts/rebirth196/layouts/rebirth-gandharva.json"
+    },
+    {
+      "id": "rebirth-rahu",
+      "name": "แดนอสูรราหู",
+      "scene": "maps/rebirth196/rebirth-rahu.glb",
+      "source": "maps/rebirth196/rebirth-rahu.blend",
+      "layout": "maps/rebirth196/rebirth-rahu.layout.json",
+      "triangles": 3240,
+      "bytes": 131964,
+      "walkableCells": 16648,
+      "orphanCellsBlocked": 1515,
+      "sourceLayout": "scripts/rebirth196/layouts/rebirth-rahu.json"
+    },
+    {
+      "id": "rebirth-sithandon",
+      "name": "ฝั่งทะเลสีทันดร",
+      "scene": "maps/rebirth196/rebirth-sithandon.glb",
+      "source": "maps/rebirth196/rebirth-sithandon.blend",
+      "layout": "maps/rebirth196/rebirth-sithandon.layout.json",
+      "triangles": 4204,
+      "bytes": 98376,
+      "walkableCells": 15024,
+      "orphanCellsBlocked": 1512,
+      "sourceLayout": "scripts/rebirth196/layouts/rebirth-sithandon.json"
+    }
+  ]
+}

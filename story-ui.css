@@ -45,3 +45,5 @@
 #quest-tracker #quest-chapter,#quest-tracker #quest-title,#quest-tracker #quest-hint{grid-column:1}
 #quest-tracker #quest-how{grid-column:1/-1;grid-row:4}
 #coach .coach-tip[hidden]{display:none!important}
+
+#quest-campaign{font:inherit;font-size:12px;max-width:100%;padding:5px 8px;margin-bottom:7px;color:#ffe2a1;border:1px solid #b99b5b;border-radius:5px;background:#153a2d}

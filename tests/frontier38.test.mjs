@@ -7,7 +7,7 @@ import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url)));
 test('starter region has reciprocal reachable portals and safe monster-free capital',()=>{
- assert.equal(catalog.maps.length,15); // 0.49 mill-cellar instance, 0.60 lotus-marsh, 1.01 guild-hall, prologue-vision
+ assert.equal(catalog.maps.length,20); // 0.49 mill-cellar instance, 0.60 lotus-marsh, 1.01 guild-hall, prologue-vision, 5 rebirth maps
  for(const m of catalog.maps){assert.ok(walkable(m.spawn.x,m.spawn.z,.32,m.nav),m.id+' spawn');if(m.safe)assert.equal(new CombatWorld(m).mobs.length,0);
   for(const p of m.portals){const to=catalog.maps.find(v=>v.id===p.to);if(!m.guildHall)assert.ok(to.portals.some(v=>v.to===m.id)); /* 1.01 the hall is entered from the guild page / NPC, not a portal */assert.ok(walkable(p.x,p.z,.32,m.nav));assert.ok(findPath(m.spawn,p,m.nav).length,m.id+' portal');}
   for(const [x,z,type]of m.mobs){assert.ok(MONSTER_TYPES[type]);assert.ok(walkable(x,z,.32,m.nav),m.id+' mob '+type+' at '+x+','+z);assert.ok(findPath(m.spawn,{x,z},m.nav).length,m.id+' accessible mob');}

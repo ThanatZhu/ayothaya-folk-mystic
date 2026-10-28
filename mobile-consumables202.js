@@ -4,7 +4,7 @@ import {itemDef} from './items.js?v=class-reward192';
 import {iconStyle} from './bag-ui.js?v=class-reward192';
 const labels={hp:'HP',mp:'MP',cure:'แก้สถานะ'},categories=Object.keys(labels);
 export function createMobileConsumables202({game,bag=()=>game.world.bag,use=id=>game.world.useItem?.(id),placement='top-right',storageKey=null}){
- const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-consumables202.css?v=potion203';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-consumables202.css?v=potion206';document.head.append(css);
  const node=document.createElement('section');node.id='mobile-consumables202';node.setAttribute('aria-label','ยาใช้ด่วน');node.dataset.placement=placement;
  const buttons=new Map(),assigned={};let signature='';
  if(storageKey)try{const saved=JSON.parse(localStorage.getItem(storageKey));for(const category of categories)if(consumableCategory(saved?.[category])===category)assigned[category]=saved[category];}catch{}

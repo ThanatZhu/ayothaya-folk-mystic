@@ -25,3 +25,5 @@ body:not(.mobile-play) #mobile-consumables202{display:none}
 #mobile-consumables202 .rapid-use202 i{position:absolute;left:9px;top:7px;width:26px;height:26px}
 #mobile-consumables202 .rapid-use202 b{right:8px;bottom:7px;font-size:8px}
 #mobile-consumables202 .rapid-use202>span{top:39px;font-size:8px}
+/* Very small landscape phones keep the battlefield clear; use inventory or AUTO potions. */
+@media(max-width:600px) and (max-height:360px){#mobile-consumables202{display:none!important}}

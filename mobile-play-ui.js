@@ -82,7 +82,7 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  if(skills)new MutationObserver(records=>{if(records.some(r=>r.type==='childList'&&r.target===skills)||[...skills.querySelectorAll('.skill')].map(b=>b.hidden?'0':'1').join('')!==skillSignature)refresh();}).observe(skills,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
  let blocked=false;
  function overlay(){
-  const menu=query.matches&&nav?.classList.contains('phone-open'),panel=query.matches&&!!document.querySelector('dialog[open],#npc-dialog:not([hidden]),#account-panel:not([hidden]),#channel-popover:not([hidden])'),chat=query.matches&&dock&&!dock.classList.contains('collapsed');
+  const menu=query.matches&&nav?.classList.contains('phone-open'),panel=query.matches&&!!document.querySelector('dialog[open]:not([data-compact-hud]),#npc-dialog:not([hidden]),#account-panel:not([hidden]),#channel-popover:not([hidden])'),chat=query.matches&&dock&&!dock.classList.contains('collapsed');
   if(backdrop.hidden!==!menu)backdrop.hidden=!menu;if(panelBlock.hidden!==!(panel||chat))panelBlock.hidden=!(panel||chat);body.classList.toggle('mobile-menu-open',!!menu);body.classList.toggle('mobile-panel-open',!!panel);body.classList.toggle('mobile-chat-open',!!chat);
   const next=!!(menu||panel||chat);if(next&&!blocked){clearInput();closeQuest();}blocked=next;
   if(dockToggle&&dock){const expanded=!dock.classList.contains('collapsed');dockToggle.setAttribute('aria-label',expanded?'ย่อแชต':'เปิดแชต');dockToggle.setAttribute('aria-expanded',String(expanded));}

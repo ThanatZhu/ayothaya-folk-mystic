@@ -370,7 +370,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  });
  addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='Space')spaceTalkHeld=false;});
  const joystick=$('joystick'),knob=$('stick');
- function updateStick(e){const b=joystick.getBoundingClientRect(),r=b.width*.34;let x=(e.clientX-b.left-b.width/2)/r,y=(b.top+b.height/2-e.clientY)/r,n=Math.max(1,Math.hypot(x,y));joy.x=x/n;joy.y=y/n;knob.style.transform=`translate(${joy.x*r}px,${-joy.y*r}px)`;}
+ function updateStick(e){const b=joystick.getBoundingClientRect(),r=b.width*.34,scale=Number(getComputedStyle(joystick).zoom)||1;let x=(e.clientX-b.left-b.width/2)/r,y=(b.top+b.height/2-e.clientY)/r,n=Math.max(1,Math.hypot(x,y));joy.x=x/n;joy.y=y/n;knob.style.transform=`translate(${joy.x*r/scale}px,${-joy.y*r/scale}px)`;}
  function clearStick(){joy.id=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)';joystick.classList.remove('held');}
  joystick.addEventListener('pointerdown',e=>{if(isPaused()||joy.id!==null)return;e.preventDefault();cancelWalk();joy.id=e.pointerId;joystick.setPointerCapture(e.pointerId);joystick.classList.add('held');updateStick(e);});
  joystick.addEventListener('pointermove',e=>{if(e.pointerId===joy.id){e.preventDefault();updateStick(e);}});

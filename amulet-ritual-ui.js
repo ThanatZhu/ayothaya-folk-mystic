@@ -1,3 +1,4 @@
+import {GACHA_MOTION,createRitualFocus} from './gacha-motion201.js';
 import {amuletRevealBatch,revealAmulet,revealAllAmulets,amuletRevealComplete,amuletRevealTier} from './amulet-ritual-state.js';
 import {itemDef} from './items.js';
 import {iconStyle} from './bag-ui.js?v=amulet-aura1';
@@ -6,10 +7,12 @@ const ART='assets/gacha-neutral/';
 export function createAmuletRitual({root,dialog,onDone}){
  for(const href of ['amulet-ritual.css?v=amulet-aura1','amulet-ritual-v2.css?v=1']){const link=document.createElement('link');link.rel='stylesheet';link.href=href;document.head.append(link);}
  const stage=document.createElement('section');stage.className='amulet-ceremony';stage.hidden=true;stage.dataset.phase='idle';stage.dataset.tier='material';stage.setAttribute('aria-label','พิธีเปิดกรุและเผยของรางวัล');
+ const artAttribute=root.dataset.presentation==='banner'?'data-inactive-src':'src';
  stage.innerHTML=`<header class="relic-heading"><div><small>AYOTHAYA · SEALED REWARDS</small><h3>พิธีเปิดผนึก</h3></div><label><input class="relic-skip-choice" type="checkbox">ข้ามแอนิเมชัน</label><button type="button" class="relic-skip">ข้ามพิธี</button></header>
- <div class="relic-scene"><div class="relic-effects" aria-hidden="true"><div class="relic-rays" aria-hidden="true"></div><div class="relic-orbit" aria-hidden="true"></div><div class="relic-sparks" aria-hidden="true">${Array.from({length:12},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div></div><div class="relic-vault" aria-hidden="true"><span class="relic-vault-halo"></span><img class="relic-vault-closed" src="${ART}sealed.webp" alt="" draggable="false"><img class="relic-vault-awakening" src="${ART}awakening.webp" alt="" draggable="false"><img class="relic-vault-open" src="${ART}revealed.webp" alt="" draggable="false"></div><div class="relic-impact" aria-hidden="true"><img src="assets/amulet-ritual-v2/flash.webp" alt="" draggable="false"></div><div class="relic-invocation"><small>ผนึกแห่งอโยธยา</small><strong>กำลังอัญเชิญ…</strong></div><div class="relic-grid" aria-label="ของรางวัลที่บันทึกแล้ว"></div></div>
+ <div class="relic-scene"><div class="relic-effects" aria-hidden="true"><div class="relic-rays" aria-hidden="true"></div><div class="relic-orbit" aria-hidden="true"></div><div class="relic-sparks" aria-hidden="true">${Array.from({length:12},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div></div><div class="relic-vault" aria-hidden="true"><span class="relic-vault-halo"></span><img class="relic-vault-closed" ${artAttribute}="${ART}sealed.webp" alt="" draggable="false"><img class="relic-vault-awakening" ${artAttribute}="${ART}awakening.webp" alt="" draggable="false"><img class="relic-vault-open" ${artAttribute}="${ART}revealed.webp" alt="" draggable="false"></div><div class="relic-impact" aria-hidden="true"><img ${artAttribute}="assets/amulet-ritual-v2/flash.webp" alt="" draggable="false"></div><div class="relic-invocation"><small>ผนึกแห่งอโยธยา</small><strong>กำลังอัญเชิญ…</strong></div><div class="relic-grid" aria-label="ของรางวัลที่บันทึกแล้ว"></div></div>
  <footer class="relic-footer"><p class="relic-hint" role="status" aria-live="polite"></p><div><button type="button" class="relic-open-all">เปิดทั้งหมด</button><button type="button" class="relic-done">เสร็จสิ้น</button></div></footer>`;
  root.querySelector('.amulet-actions').before(stage);
+ if(root.dataset.presentation==='banner')createRitualFocus(stage.querySelector('.relic-scene'),ART+'sealed.webp');
  const $=s=>stage.querySelector(s),catalog=root.querySelector('.amulet-scroll'),actions=root.querySelector('.amulet-actions'),grid=$('.relic-grid'),media=matchMedia('(prefers-reduced-motion: reduce)');
  let batch=null,phase='idle',timer=null,skip=false;try{skip=localStorage.getItem('ayothaya-amulet-skip-animation')==='1';}catch{}
  $('.relic-skip-choice').checked=skip;
@@ -28,9 +31,9 @@ export function createAmuletRitual({root,dialog,onDone}){
   $('.relic-hint').textContent=phase==='waiting'?'รอการบันทึกจากเซิร์ฟเวอร์ · ยังไม่เปิดเผยผล':!ready?'พิธีกำลังดำเนิน · กดข้ามพิธีได้':complete?'เปิดครบแล้ว · ของทั้งหมดบันทึกเข้ากระเป๋าเรียบร้อย':`เปิดแล้ว ${batch.opened.filter(Boolean).length}/${batch.results.length} ชิ้น · แตะผนึกเพื่อเปิดทีละชิ้น`;
  }
  function ready(focus=false){if(!batch)return;stop();stage.dataset.tier=amuletRevealTier(batch);setPhase('ready');if(focus&&visible())grid.querySelector('button:not(:disabled)')?.focus({preventScroll:true});}
- function arrive(){if(!batch)return;setPhase('arriving');timer=setTimeout(()=>ready(),450+(batch.results.length-1)*50);}
- function burst(){if(!batch)return;setPhase('burst');timer=setTimeout(arrive,620);}
- function openVault(){if(!batch)return;stage.dataset.tier=amuletRevealTier(batch);setPhase('opening');timer=setTimeout(burst,900);}
+ function arrive(){if(!batch)return;setPhase('arriving');timer=setTimeout(()=>ready(),GACHA_MOTION.arrival+(batch.results.length-1)*GACHA_MOTION.stagger);}
+ function burst(){if(!batch)return;setPhase('burst');timer=setTimeout(arrive,GACHA_MOTION.impact);}
+ function openVault(){if(!batch)return;stage.dataset.tier=amuletRevealTier(batch);setPhase('opening');timer=setTimeout(burst,GACHA_MOTION.anticipation);}
  function paintCards(){
   grid.dataset.count=batch.results.length;
   grid.innerHTML=batch.results.map((_,i)=>`<button type="button" class="relic-prize" data-relic="${i}" style="--i:${i}" aria-label="เปิดผนึกชิ้นที่ ${i+1}" disabled><span class="relic-prize-art"><span class="relic-prize-halo" aria-hidden="true"></span><img class="relic-seal" src="${ART}sealed.webp" alt="" draggable="false"><i class="relic-item-art" aria-hidden="true"></i></span><b>ผนึก ${i+1}</b><small>แตะเพื่อเปิด</small></button>`).join('');
@@ -49,5 +52,5 @@ export function createAmuletRitual({root,dialog,onDone}){
  function settle(){if(batch&&phase!=='ready')ready();}
  dialog?.addEventListener('close',settle);document.addEventListener('visibilitychange',()=>{if(document.hidden)settle();});new MutationObserver(()=>{if(root.hidden)settle();}).observe(root,{attributes:true,attributeFilter:['hidden']});media.addEventListener('change',()=>{stage.dataset.reduced=String(reduced());if(reduced())settle();});
  function hide(){stop();batch=null;grid.replaceChildren();stage.hidden=true;catalog.hidden=false;actions.hidden=false;delete root.dataset.ritualActive;setPhase('idle');}
- return {get active(){return phase!=='idle';},waiting(){stop();batch=null;grid.replaceChildren();show();setPhase('waiting');},play(results){stop();batch=amuletRevealBatch(results);show();paintCards();if(reduced()||!visible())ready();else{setPhase('channeling');timer=setTimeout(openVault,900);}},fail(){hide();}};
+ return {get active(){return phase!=='idle';},waiting(){stop();batch=null;grid.replaceChildren();show();setPhase('waiting');},play(results){stop();batch=amuletRevealBatch(results);show();paintCards();if(reduced()||!visible())ready();else{setPhase('channeling');timer=setTimeout(openVault,GACHA_MOTION.gather);}},fail(){hide();}};
 }

@@ -56,3 +56,8 @@
 ## Release validation
 
 Integrated against production main, preserving observer mode, revival purchases, spirit companions and skill timing. Full suite: 754 passed, 14 skipped, 0 failed (768 total). Static Vercel build and native Edge checks pass on desktop and phone sizes. Equipment guide sources include the actual amulet gacha pool; all 167 new player-facing strings have English translations.
+
+
+## Approved banner redesign
+
+Read docs/gacha-design-system199.md before future gacha work. Buttons use generated transparent capsule images; item art never gets a button backplate. Registry: gacha-banners199.js. Shared style: gacha-banner199.css. Main wallet/costs/pity remain live authority data. Session history is labeled and only shows confirmed, revealed results.

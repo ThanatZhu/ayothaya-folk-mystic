@@ -2,6 +2,7 @@ import {storyScene} from './quest-cinematic-data155.js?v=story163';
 import {normalizeAlbumState,depositAlbumCard,ALBUM_ERRORS} from './card-album.js?v=152';
 import {STORY,currentObjective,normalizeStory} from './story-quests.js?v=pets125';
 import {STORY_RECAP,storyArt} from './story-dialogue.js?v=chuk175';
+import {REBIRTH_TITLE,rebirthUnlocked,rebirthScene} from './rebirth-story.js?v=rebirth198';
 // 0.60 "ภารกิจ" window: daily bounty board (claim in a town) and the card album. Online the realm server owns both;
 // offline guests keep them in localStorage and pay out through the same 'reward' / experience events.
 import {itemDef} from './items.js?v=107';
@@ -90,12 +91,17 @@ export function createQuestsUI({game,account,map,bagUI}){
    if(obj.step.count){const progress=document.createElement('small');progress.textContent=`${obj.count}/${obj.step.count}`;goal.append(progress);}
    section.insertBefore(goal,section.querySelector('.story-recap-art')??recap);
   }
+  // 0.122 rebirth intros already met: replay only, never progress or rewards
+  const reborn=rebirthUnlocked(world.rebirthStory,world.rebirth??0);
+  if(reborn.length){const box=document.createElement('div');box.className='quest-cinematic-links rebirth-replays';const label=document.createElement('small');label.textContent=REBIRTH_TITLE;box.append(label);
+   for(const q of reborn){const b=document.createElement('button');b.type='button';b.className='quest-watch';b.textContent='ดูอีกครั้ง · '+q.title;b.onclick=()=>dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:rebirthScene(q.id,account?.character?.name??world.heroName??'')}}));box.append(b);}
+   section.append(box);}
   layout.append(section);body.append(layout);list.scrollTop=previousScroll;
   if(focused!=null)list.querySelector(`[data-quest-index="${focused}"]`)?.focus({preventScroll:true});
  }
  desktop.addEventListener('change',()=>{const list=dialog.querySelector('.quest-journal-list');if(list){list.hidden=!desktop.matches;dialog.querySelector('.quest-journal-toggle').setAttribute('aria-expanded',String(desktop.matches));}});
  function render(force=false){
-  if(!dialog.open)return;const s=bounty(),al=album(),wk=normalizeWeekly(world.weekly,Date.now()),sig=JSON.stringify([tab,s,al,wk,storyState(),tab==='album'?bagUI.bag():null,world.albumRewards]);if(!force&&sig===shown)return;shown=sig;
+  if(!dialog.open)return;const s=bounty(),al=album(),wk=normalizeWeekly(world.weekly,Date.now()),sig=JSON.stringify([tab,s,al,wk,storyState(),world.rebirthStory,world.rebirth,tab==='album'?bagUI.bag():null,world.albumRewards]);if(!force&&sig===shown)return;shown=sig;
   dialog.querySelectorAll('[data-qt]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.qt===tab)));
   const body=$('quests-body'),scroll=body.scrollTop;dialog.dataset.questTab=tab;
   if(tab==='story'){

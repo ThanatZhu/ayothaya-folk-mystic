@@ -13,10 +13,11 @@ export function mailAttachments(raw={}){
  if(!Number.isSafeInteger(coins)||coins<0||coins>MAX_COINS||!Number.isSafeInteger(goldBars)||goldBars<0||goldBars>1000000)throw Error('bad-mail-currency');
  if(!Array.isArray(items)||items.length>20||!Array.isArray(pets)||pets.length>10)throw Error('bad-mail-items');
  // 0.116.2 graded / refined gear ('id^4', 'id+7') resolves through itemDef like the rest of the game
- const seen=new Set(),clean=items.map(x=>{const def=itemDef(x?.id);if(!def||!['loot','potion','gear','card','scroll','wing'].includes(def.kind)||legacyPetItem(x.id)||seen.has(x.id))throw Error('bad-item');seen.add(x.id);if(!Number.isSafeInteger(x.count)||x.count<1||x.count>999)throw Error('bad-count');return {id:x.id,count:x.count};});
+ const seen=new Set(),clean=items.map(x=>{const def=itemDef(x?.id);if(!def||!MAILABLE.has(def.kind)||legacyPetItem(x.id)||seen.has(x.id))throw Error('bad-item');seen.add(x.id);if(!Number.isSafeInteger(x.count)||x.count<1||x.count>999)throw Error('bad-count');return {id:x.id,count:x.count};});
  for(const id of pets)premiumPet(id);
  return {coins,goldBars,items:clean,pets:[...pets]};
 }
+const MAILABLE=new Set(['loot','potion','gear','card','scroll','wing']);
 export const hasMailGift=a=>!!(a?.coins||a?.goldBars||a?.items?.length||a?.pets?.length);
 export function composeMail({id,title,body,sender='ทีมงานอโยธยา',attachments={},serverId='all'},now=Date.now()){
  if(!idOK(id))throw Error('bad-request-id');
@@ -87,4 +88,23 @@ export function mailboxBulkAction(record,action,broadcasts=[],now=Date.now()){
  }
  summary.remaining=publicInbox(next.mailbox,broadcasts,next.serverId).filter(m=>!m.claimedAt&&hasMailGift(m.attachments)).length;
  return {record:next,summary};
+}
+// 0.122 loot that does not fit a full bag waits in one "bag full" mail (topped up until claimed) instead of being lost.
+// Returns {mailbox, mailed, left}: left is what still could not go anywhere (mailbox full, item that cannot be mailed).
+export const OVERFLOW_PREFIX='bagfull-';
+export function mailOverflow(raw,items,{id,now=Date.now(),serverId='all'}={}){
+ const box=normalizeMailbox(raw),open=box.messages.find(m=>m.id.startsWith(OVERFLOW_PREFIX)&&!m.claimedAt);
+ const list=(open?.attachments.items??[]).map(i=>({...i})),mailed=[],left=[];
+ for(const {id:itemId,count} of items??[]){
+  const def=itemDef(itemId);let slot=list.find(i=>i.id===itemId);
+  if(!def||!MAILABLE.has(def.kind)||legacyPetItem(itemId)||!slot&&list.length>=20){left.push({id:itemId,count});continue;}
+  if(!slot)list.push(slot={id:itemId,count:0});
+  const take=Math.min(999-slot.count,count);if(take>0)mailed.push({id:itemId,count:take});slot.count+=take;if(take<count)left.push({id:itemId,count:count-take});
+ }
+ const none={mailbox:box,mailed:[],left:items??[]};
+ if(!mailed.length||!open&&box.messages.length>=MAIL_LIMIT)return none;
+ const mail={...composeMail({id:open?.id??id,title:'กระเป๋าเต็ม · ของที่เก็บไม่ได้',body:'ของที่ได้ตอนกระเป๋าเต็มถูกเก็บไว้ที่นี่ · ทำช่องว่างในกระเป๋าแล้วกดรับ',sender:'ระบบอโยธยา',attachments:{items:list.filter(i=>i.count>0)},serverId},open?.createdAt??now)};
+ const next={...box,messages:open?box.messages.map(m=>m.id===open.id?mail:m):[...box.messages,mail]};
+ if(new TextEncoder().encode(JSON.stringify(next)).length>MAIL_BYTES)return none;
+ return {mailbox:next,mailed,left};
 }

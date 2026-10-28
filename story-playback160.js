@@ -1,7 +1,8 @@
 // Pure Thai-grapheme-safe presentation clock, with no quest or reward dependencies.
 const segmenter=typeof Intl.Segmenter==='function'?new Intl.Segmenter('th',{granularity:'grapheme'}):null;
 export const storyGraphemes=text=>segmenter?[...segmenter.segment(text)].map(x=>x.segment):Array.from(text);
-export function createPlayback(lines){return {lines:lines.map(storyGraphemes),shot:0,revealed:0,speed:30,hold:0,age:0,done:false};}
+// tap:'complete' (rebirth intros): a tap shows the whole line at once instead of speeding the letters up.
+export function createPlayback(lines,{tap='speed'}={}){return {lines:lines.map(storyGraphemes),tap,shot:0,revealed:0,speed:30,hold:0,age:0,done:false};}
 export function advancePlayback(p,seconds){
  if(p.done||!Number.isFinite(seconds)||seconds<=0)return;
  const length=p.lines[p.shot].length;p.age+=seconds;
@@ -13,7 +14,7 @@ function nextShot(p){if(p.shot>=p.lines.length-1){p.done=true;return;}p.shot++;p
 export function acceleratePlayback(p){
  if(p.done)return;
  // Initial taps accelerate letters; only a later tap on a fully read shot advances.
- if(p.revealed<p.lines[p.shot].length)p.speed=Math.min(240,p.speed*4);
+ if(p.revealed<p.lines[p.shot].length){if(p.tap==='complete')p.revealed=p.lines[p.shot].length;else p.speed=Math.min(240,p.speed*4);}
  else if(p.age>.35)nextShot(p);
 }
 export function playbackFrame(p,reduced=false){

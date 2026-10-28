@@ -1,11 +1,12 @@
 import {storyScene,sceneUnlocked,sceneForNPCTalk,taskScene} from './quest-cinematic-data155.js?v=weapon188';
 import {sceneImage} from './npc-portrait155.js?v=chuk175';
-import {createPlayback,advancePlayback,acceleratePlayback,playbackFrame} from './story-playback160.js?v=story160';
+import {createPlayback,advancePlayback,acceleratePlayback,playbackFrame} from './story-playback160.js?v=rebirth198';
+import {rebirthSceneForNPCTalk,rebirthPreload,normalizeRebirthStory,REBIRTH_STORY} from './rebirth-story.js?v=rebirth198';
 import {loadPaintedStanding} from './painted-character.js?v=size1';
 import {FRAME_SIZE,FRAME_FOOT} from './character-size.js?v=size1';
 
 export function createQuestCinematics({game,account,map,state}){
- const css=document.createElement('link');css.rel='stylesheet';css.href='./quest-cinematic155.css?v=prologue1';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./quest-cinematic155.css?v=rebirth198';document.head.append(css);
  const dialog=document.createElement('dialog');dialog.id='quest-cinematic';dialog.setAttribute('aria-labelledby','cinematic-title');
  dialog.innerHTML='<header><h2 id="cinematic-title"></h2><button type="button" id="cinematic-skip">ข้าม</button></header><div class="cinematic-stage" tabindex="0" aria-label="แตะฉากหรือกด Space เพื่อเร่งข้อความ"><canvas width="1280" height="640" aria-hidden="true"></canvas><p class="cinematic-loading" role="status">กำลังเตรียมฉาก…</p><div class="cinematic-caption"><p id="cinematic-caption" aria-hidden="true"><span></span><span></span></p><p class="cinematic-accessible" role="status" aria-live="polite"></p></div></div>';
  (document.getElementById('game-shell')??document.body).append(dialog);
@@ -50,7 +51,9 @@ export function createQuestCinematics({game,account,map,state}){
    ctx.globalAlpha=s.opacity;
    // Generated triptychs can have unequal panel boundaries. Use measured crops
    // when supplied, retaining the original equal-panel contract for story atlases.
-   const crop=active.art.frames?.[s.shot]??[0,s.shot*height,image.width,height];
+   let crop=active.art.frames?.[s.shot]??[0,s.shot*height,image.width,height];
+   // rebirth intros drift in by a few percent around the centre of each shot, so faces stay in frame
+   if(active.art.zoom&&!reduced.matches){const k=1+active.art.zoom*Math.min(1,playback.age/7),[x,y,w,h]=crop;crop=[x+w*(1-1/k)/2,y+h*(1-1/k)/2,w/k,h/k];}
    ctx.drawImage(image,...crop,0,0,W,H);ctx.globalAlpha=1;
   }
   if(s.shot!==lastShot){lastShot=s.shot;accessible.textContent=playback.lines[s.shot].join('');}
@@ -75,7 +78,7 @@ export function createQuestCinematics({game,account,map,state}){
   dialog.dataset.shot='0';dialog.dataset.textSpeed='30';dialog.dataset.textComplete='false';
   loading.hidden=false;loading.textContent='กำลังเตรียมฉาก…';dialog.showModal();fit();ctx.clearRect(0,0,canvas.width,canvas.height);stage.focus({preventScroll:true});
   try{const [art,sprite]=await Promise.all([sceneImage(scene.art.src),scene.hero?.classId?loadPaintedStanding(scene.hero.classId,scene.hero.gender,scene.hero.appearance??{},scene.hero.equipment??null).catch(()=>null):null]);if(token!==generation||!dialog.open)return false;
-   image=art;hero=sprite;playback=createPlayback(scene.captions.map(translate));loading.hidden=true;dialog.dataset.artState='ready';dialog.dataset.hero=hero?'ready':'none';openedAt=performance.now();saveSeen(scene);paint();resume();return true;
+   image=art;hero=sprite;playback=createPlayback(scene.captions.map(s=>translate(s).replace('{0}',()=>scene.name??'')),{tap:scene.tap});loading.hidden=true;dialog.dataset.artState='ready';dialog.dataset.hero=hero?'ready':'none';openedAt=performance.now();saveSeen(scene);paint();resume();return true;
   }catch{if(token===generation){loading.textContent='โหลดฉากไม่สำเร็จ · กดข้ามเพื่อกลับไปคุยต่อ';dialog.dataset.artState='error';}return false;}
  }
  function skip(){if(active)saveSeen(active);close('skip');}
@@ -89,9 +92,15 @@ export function createQuestCinematics({game,account,map,state}){
  function onTalk(npc){
   // world-ui calls this only AFTER its distance guard and conversation.open().
   if(!document.querySelector('#npc-dialog[open],#mentor-panel[open]')||game.walking||Math.hypot(game.world.player.x-npc.x,game.world.player.z-npc.z)>3)return;
-  const scene=sceneForNPCTalk(state(),npc,map.id);if(!scene||seen.has(scene.seenId))return;
+  const world=game.world,main=sceneForNPCTalk(state(),npc,map.id);
+  // 0.122 rebirth story (reborn characters only): meeting the current quest's NPC starts it on the server
+  const reborn=!main&&rebirthSceneForNPCTalk(world.rebirthStory,npc,map.id,world.rebirth??0,account?.character?.name??world.heroName??'');
+  if(reborn&&!normalizeRebirthStory(world.rebirthStory).started)world.rebirthTalk?.(npc.name);
+  const scene=main||reborn;if(!scene||seen.has(scene.seenId))return;
   open(scene,{automatic:true});
  }
  // World updates only protect a viewer taking damage; they cannot launch a scene.
- return {open,onTalk,observe(){if(dialog.open)stopDamage();},close,story:(q,s)=>open(storyScene(q,s)),get isOpen(){return dialog.open;}};
+ // Warm the current and next rebirth intro while the player is on that quest's map.
+ let warmed='';function warm(){const w=game.world;if((w.rebirth??0)<1)return;const s=normalizeRebirthStory(w.rebirthStory),sig=s.quest+':'+map.id;if(sig===warmed)return;warmed=sig;if(REBIRTH_STORY[s.quest]?.mapId===map.id)for(const src of rebirthPreload(s))sceneImage(src).catch(()=>{});}
+ return {open,onTalk,observe(){if(dialog.open)stopDamage();warm();},close,story:(q,s)=>open(storyScene(q,s)),get isOpen(){return dialog.open;}};
 }

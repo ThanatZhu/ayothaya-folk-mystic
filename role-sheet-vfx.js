@@ -3,6 +3,7 @@ import {VFX_SHEETS} from './assets/skills-next/vfx-2026-10/vfx-map.js';
 import {ALL_SKILLS} from './assets/skills-next/catalog.js';
 import {groundHeight} from './combat-core.js?v=novice174';
 import {atlasUv} from './assets/skill-polish/timing.js';
+import {effectDirection,sheetFacing,mirroredFrame} from './skill-effect-facing200.js';
 // 0.119 painted skill sheets (4×2 frames, frame 3 = peak). One clip per cast, timed by the cast's own release beats
 // (event.timing.impacts) and nudged onto the real damage events, so it follows the authority, not a fixed speed.
 const BASE='./assets/skills-next/vfx-2026-10/game/';
@@ -30,7 +31,7 @@ export function sheetFrame(impacts,tail,t){
 }
 // The fade scales with the cast's own length: quick jabs vanish fast, ultimates linger.
 export const sheetTail=(timing,ultimate)=>clamp((timing?.duration??.6)*.9,.4,1.3)+(ultimate?.5:0);
-export function createSheetVfx(scene,world,{tier:forced=null}={}){
+export function createSheetVfx(scene,world,{tier:forced=null,camera=null}={}){
  const compact=matchMedia('(pointer:coarse),(max-width:900px)'),reduced=matchMedia('(prefers-reduced-motion:reduce)');
  const tier=()=>forced??(compact.matches?'sd':'hd'),caps=()=>tier()==='sd'?{clips:5,sheets:6}:{clips:10,sheets:10};
  const loader=new THREE.TextureLoader(),cache=new Map(),pool=[],clips=[],plane=new THREE.PlaneGeometry(1,1),fetched=new Set();
@@ -43,14 +44,14 @@ export function createSheetVfx(scene,world,{tier:forced=null}={}){
    if(disposed||cache.get(key)!==c){base.dispose();return;}
    base.colorSpace=THREE.SRGBColorSpace;base.minFilter=base.magFilter=THREE.LinearFilter;base.generateMipmaps=false;c.base=base;
    // Eight UV windows over one image: the clones share its Source, so the GPU holds the sheet once.
-   c.frames=Array.from({length:8},(_,i)=>{const t=base.clone(),uv=atlasUv(i);t.offset.set(uv.x,uv.y);t.repeat.set(uv.w,uv.h);t.needsUpdate=true;return t;});trim();
+   c.frames=Array.from({length:8},(_,i)=>{const t=base.clone(),uv=atlasUv(i);t.offset.set(uv.x,uv.y);t.repeat.set(uv.w,uv.h);t.needsUpdate=true;return t;});c.mirrored=c.frames.map(mirroredFrame);trim();
   }).catch(()=>{c.failed=true;});
   trim();return c;
  }
  function trim(){
   const live=new Set(clips.flatMap(c=>[c.entry.effect,c.entry.ground]));
   const old=[...cache.values()].filter(c=>!live.has(c.key)&&(c.frames||c.failed)).sort((a,b)=>a.used-b.used);
-  while(cache.size>caps().sheets&&old.length){const c=old.shift();c.frames?.forEach(t=>t.dispose());c.base?.dispose();cache.delete(c.key);}
+  while(cache.size>caps().sheets&&old.length){const c=old.shift();c.frames?.forEach(t=>t.dispose());c.mirrored?.forEach(t=>t.dispose());c.base?.dispose();cache.delete(c.key);}
  }
  function holder(){
   let h=pool.find(h=>!h.busy);
@@ -65,12 +66,12 @@ export function createSheetVfx(scene,world,{tier:forced=null}={}){
   const id=e.roleSkillId,entry=VFX_SHEETS[id];if(disposed||!entry?.effect||!e.from||!e.to)return false;
   const actor=e.actor??self(),own=actor===self(),key=e.castId!=null?actor+'|'+e.castId:null;
   if(key&&clips.some(c=>c.key===key))return true; // the same cast delivered twice
-  const p=world.player;if(!own&&p&&Math.hypot(e.from.x-p.x,e.from.z-p.z)>32)return true; // too far to read
+  const p=world.player,direction=effectDirection(e.from,e.to,e.direction??(own?p:locate?.(actor))?.face);if(!own&&p&&Math.hypot(e.from.x-p.x,e.from.z-p.z)>32)return true; // too far to read
   const cap=caps().clips;while(clips.length>=cap)release(clips.find(c=>!c.own)??clips[0]);
   const skill=skills.get(id),kind=skill?.kind??NOVICE_KIND[id]??e.kind,place=vfxPlacement(kind),ultimate=!!(skill?.ultimate??entry.ultimate);
   const impacts=e.timing?.impacts?.length?[...e.timing.impacts]:[skill?.windup??.36],radius=skill?.radius??2.8;
   const wide=place==='around'||place==='area';
-  const clip={key,actor,own,id,entry,place,ultimate,from:{...e.from},to:{...e.to},start:clock-Math.max(0,e.lag??0),impacts,tail:sheetTail(e.timing,ultimate),hits:new Set(),holder:holder(),
+  const clip={key,actor,own,id,entry,place,ultimate,direction,from:{...e.from},to:{...e.to},start:clock-Math.max(0,e.lag??0),impacts,tail:sheetTail(e.timing,ultimate),hits:new Set(),holder:holder(),
    size:wide?clamp(radius*1.9,2.6,ultimate?8:6.5):ultimate?3.4:place==='shot'?1.9:2.3,ground:clamp(radius*2.5,2.4,ultimate?9:7)};
   sheet(entry.effect);if(entry.ground)sheet(entry.ground);clips.push(clip);return true;
  }
@@ -83,21 +84,21 @@ export function createSheetVfx(scene,world,{tier:forced=null}={}){
  }
  function where(clip,t){
   const caster=locate?.(clip.actor)??(clip.own?world.player:null)??clip.from,from=clip.place==='self'||clip.place==='around'?caster:clip.from;
-  const dx=clip.to.x-from.x,dz=clip.to.z-from.z,d=Math.hypot(dx,dz),ux=d>.01?dx/d:1,uz=d>.01?dz/d:0;
+  const dx=clip.to.x-from.x,dz=clip.to.z-from.z,d=Math.hypot(dx,dz),ux=clip.direction.x,uz=clip.direction.z;
   if(clip.place==='self'||clip.place==='around')return {x:from.x,z:from.z,ux,uz};
   if(clip.place==='line'){const len=clamp(d,2.4,7);return {x:from.x+ux*len*.5,z:from.z+uz*len*.5,ux,uz,len};}
   if(clip.place==='shot'){const first=clip.impacts[0],flight=Math.min(first*.7,.45),q=smooth((t-(first-flight))/Math.max(.01,flight));return {x:from.x+dx*q,z:from.z+dz*q,ux,uz};}
   return {x:clip.to.x,z:clip.to.z,ux,uz};
  }
  function update(dt){
-  clock+=clamp(dt,0,.25);let shake=0;
+  clock+=clamp(dt,0,.25);camera?.updateMatrixWorld();let shake=0;
   for(const clip of [...clips]){
    const t=clock-clip.start,f=sheetFrame(clip.impacts,clip.tail,t),g=clip.entry.ground?sheetFrame(clip.impacts,clip.tail*1.25,t):null;
    if(!f&&!g){release(clip);continue;}
    const {sprite,ground,smat,gmat}=clip.holder,at=where(clip,t),y=groundHeight(world.nav,at.x,at.z),fade=clip.own?1:.85,pulse=reduced.matches?0:(f?.pulse??0);
    const fx=cache.get(clip.entry.effect)?.frames,gx=clip.entry.ground?cache.get(clip.entry.ground)?.frames:null;
    sprite.visible=!!(f&&fx);
-   if(sprite.visible){const size=(clip.place==='line'?Math.max(clip.size,at.len*.9):clip.size)*(1+pulse*.1);smat.map=fx[f.frame];smat.opacity=f.alpha*fade;sprite.scale.set(size,size,1);sprite.position.set(at.x,y+(clip.place==='area'||clip.place==='around'?Math.max(1,size*.32):1),at.z);}
+   if(sprite.visible){const size=(clip.place==='line'?Math.max(clip.size,at.len*.9):clip.size)*(1+pulse*.1);const facing=sheetFacing(clip.id,camera,at,clip.direction,f.frame);smat.map=facing.mirror?cache.get(clip.entry.effect).mirrored[f.frame]:fx[f.frame];smat.rotation=facing.rotation;smat.opacity=f.alpha*fade;sprite.scale.set(size,size,1);sprite.position.set(at.x,y+(clip.place==='area'||clip.place==='around'?Math.max(1,size*.32):1),at.z);}
    ground.visible=!!(g&&gx);
    if(ground.visible){const size=clip.place==='line'?Math.max(clip.ground*.6,at.len):clip.ground;gmat.map=gx[g.frame];gmat.opacity=g.alpha*fade;ground.scale.set(size,size,1);ground.position.set(at.x,y+.05,at.z);ground.rotation.set(-Math.PI/2,0,Math.atan2(-at.uz,at.ux));}
    if(clip.own&&clip.ultimate)shake=Math.max(shake,pulse*.07);
@@ -111,7 +112,7 @@ export function createSheetVfx(scene,world,{tier:forced=null}={}){
   prefetch(ids){for(const id of ids){const e=VFX_SHEETS[id];for(const key of [e?.effect,e?.ground])if(key&&!fetched.has(key)){fetched.add(key);fetch(BASE+tier()+'/'+key+'.webp',{priority:'low'}).catch(()=>{});}}},
   set locate(fn){locate=fn;},
   clear(){for(const c of [...clips])release(c);trim();},
-  dispose(){disposed=true;for(const c of [...clips])release(c);for(const h of pool){scene.remove(h.sprite,h.ground);h.smat.dispose();h.gmat.dispose();}pool.length=0;plane.dispose();for(const c of cache.values()){c.frames?.forEach(t=>t.dispose());c.base?.dispose();}cache.clear();},
+  dispose(){disposed=true;for(const c of [...clips])release(c);for(const h of pool){scene.remove(h.sprite,h.ground);h.smat.dispose();h.gmat.dispose();}pool.length=0;plane.dispose();for(const c of cache.values()){c.frames?.forEach(t=>t.dispose());c.mirrored?.forEach(t=>t.dispose());c.base?.dispose();}cache.clear();},
   get time(){return clock;},
   get metrics(){return {clips:clips.length,pool:pool.length,sheets:cache.size,loaded:[...cache.values()].filter(c=>c.frames).length,tier:tier()};}};
 }

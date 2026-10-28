@@ -2,7 +2,7 @@ import {createSkillLibraryRenderer} from './assets/skill-polish/library-renderer
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleEffectTime,sampleRoleEffect} from './combat-animation165.js?v=pose119';
 import {groundHeight} from './combat-core.js?v=novice174';
-import {createSheetVfx,hasSheet} from './role-sheet-vfx.js?v=pose119';
+import {createSheetVfx,hasSheet} from './role-sheet-vfx.js?v=facing200';
 export function roleEffectSpace(from,to,nav,canonicalFrom=-2,canonicalTo=1.55){
  const dx=to.x-from.x,dz=to.z-from.z,d=Math.hypot(dx,dz),ux=d>.01?dx/d:1,uz=d>.01?dz/d:0;
  return {yaw:Math.atan2(uz,ux),point(p,origin=null){
@@ -17,7 +17,7 @@ export function roleEffectSpace(from,to,nav,canonicalFrom=-2,canonicalTo=1.55){
 }
 // Reusable bounded pools; remote combat can never allocate an unbounded number of sprites.
 export function createLiveRoleVfx(scene,camera,world){
- const compact=matchMedia('(pointer:coarse),(max-width:900px)'),reduced=matchMedia('(prefers-reduced-motion:reduce)'),slots=[],sheets=createSheetVfx(scene,world);let clock=0,serial=0,disposed=false;
+ const compact=matchMedia('(pointer:coarse),(max-width:900px)'),reduced=matchMedia('(prefers-reduced-motion:reduce)'),slots=[],sheets=createSheetVfx(scene,world,{camera});let clock=0,serial=0,disposed=false;
 // Skills with a 0.119 painted sheet play it; pets, passives and anything without one keep the library profile.
  function spawn(e){
   if(world.spiritCompanion&&['spirit','spirit-lord','sm-lord','spirit-force','sm-servant'].includes(e.roleSkillId))return;

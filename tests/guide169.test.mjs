@@ -16,7 +16,7 @@ test('public reference is a deterministic export of gameplay data, not a hand-ma
  assert.deepEqual(data.rules.refine.rates,REFINE_RATE);assert.deepEqual(data.rules.refine.tiers,REFINE_TIERS);
  assert.equal(data.skills.length,ROLES.reduce((sum,r)=>sum+r.base.length+r.passives.length+r.branches.reduce((n,b)=>n+b.active.length+b.passives.length,0),0));
  assert.equal(data.pets.length,PREMIUM_PETS.length);
- assert.ok(data.items.length>350);assert.ok(data.recipes.length>90);assert.equal(data.maps.length,14);
+ assert.ok(data.items.length>350);assert.ok(data.recipes.length>90);assert.equal(data.maps.length,19);
  for(const it of data.items){assert.ok(!ITEMS[it.id].retired);assert.notEqual(it.kind,'reserved');}
 });
 test('every reference image and authored crop exists and fits its atlas',()=>{

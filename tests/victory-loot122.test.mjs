@@ -84,8 +84,9 @@ test('two bosses dying back to back keep separate reports and rewards',()=>{
 test('every boss has a card: 6 painted, 9 world-boss cards, 4 awakened auras; unknown ids fall back to the sprite',()=>{
  // rat/monkey/marsh chiefs are elites (no report) but their awakened forms are bosses and reuse the painted card
  const painted=['mill-keeper','lantern-lord','straw-king','rat-chief','monkey-chief','marsh-ape'];
- const bosses=MONSTER_TYPES.filter(t=>t.boss).map(t=>t.id),cards=[...new Set([...painted,...bosses])].map(bossCard);
- assert.equal(bosses.length,16);
+ // rebirth draft bosses (rb-*) have no card yet and show their sprite
+ const all=MONSTER_TYPES.filter(t=>t.boss).map(t=>t.id),bosses=all.filter(id=>!id.startsWith('rb-')),cards=[...new Set([...painted,...bosses])].map(bossCard);
+ assert.equal(bosses.length,16);for(const id of all.filter(id=>id.startsWith('rb-')))assert.equal(bossCard(id).src,null,id);
  assert.equal(cards.filter(c=>c.src?.startsWith('assets/victory/')&&!c.awakened).length,6);
  assert.equal(cards.filter(c=>c.src?.startsWith('assets/cards147/')).length,9);
  assert.equal(cards.filter(c=>c.awakened&&c.src?.startsWith('assets/victory/')).length,4);

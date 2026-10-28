@@ -1,8 +1,8 @@
 import {dialogueFor} from './story-dialogue.js?v=weapon188';
-import {createQuestCinematics} from './quest-cinematic155.js?v=rebirth198';
+import {createQuestCinematics} from './quest-cinematic155.js?v=rebirth199';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
-import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=weapon188';
+import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,normalizeRebirthStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=rebirth196';
 import {createCoach} from './coach.js?v=weapon188';
 import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
@@ -15,16 +15,18 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  const baseLevel=()=>baseProgress(game.world).level;
  const world=game.world,key='ayothaya-story:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const read=()=>{try{return normalizeStory(JSON.parse(localStorage.getItem(key)));}catch{return normalizeStory(null);}};
- let local=read();
+ let local=read(),localRebirth=null;try{localRebirth=JSON.parse(localStorage.getItem(key+':rebirth'));}catch{}
+ try{world.storyCampaign=localStorage.getItem(key+':campaign')??undefined;}catch{}
+ const isRebirth=()=>world.rebirth>0&&world.storyCampaign!=='main';
  const ready=()=>storyReady(game,account,map.id);
- const state=()=>game.online?normalizeStory(world.story):local;
- const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};
+ const state=()=>isRebirth()?normalizeRebirthStory(game.online?world.rebirthStory:localRebirth,world.rebirth):game.online?normalizeStory(world.story):local;
+ const save=()=>{try{localStorage.setItem(isRebirth()?key+':rebirth':key,JSON.stringify(isRebirth()?localRebirth:local));}catch{}};
 
  // Offline: apply the shared rules here and pay rewards into the local world (online the server does both).
  function offline(event){
   if(game.online||game.networkExpected||account?.cloud)return null;
-  const r=storyEvent(local,event);if(!r.changed)return r;
-  local=r.state;save();
+  const r=storyEvent(state(),event);if(!r.changed)return r;
+  if(isRebirth()){localRebirth=r.state;world.rebirthStory=r.state;}else local=r.state;save();
   if(r.reward){world.emit('experience',awardExperience(world,r.reward.baseXp,r.reward.jobXp));world.emit('reward',{coins:r.reward.coins??0,items:rewardItems(r.reward,account?.character?.classId??world.profession.id,account?.character?.gender)});}
   if(r.completed)world.notice('เควสสำเร็จ · '+r.completed.title);
   render();return r;
@@ -33,32 +35,33 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(e.type==='walkIntent'&&e.kind!=='quest')cancelResume();
   if(e.type==='defeat'&&!game.online){const mob=world.mobs.find(m=>m.id===e.id);const id=mob&&MONSTER_TYPES[mob.type]?.id;if(id)offline({type:'defeat',monster:id,mapId:map.id});}
   if(e.type==='storyDo'&&!game.online)offline({type:'do',action:e.action}); // 0.98 offline tutorial actions (craft, pet, shop)
-  if(e.type==='story'){if(e.story)world.story=e.story;if(e.completed)world.notice('เควสสำเร็จ · '+e.completed);render();}
+  if(e.type==='story'){if(e.story){if(e.campaign==='rebirth')world.rebirthStory=e.story;else world.story=e.story;}if(e.completed)world.notice('เควสสำเร็จ · '+e.completed);render();}
  });
  const cinematics=createQuestCinematics({game,account,catalog,map,state});
  worldUI.onConversationOpened=n=>{if(ready())cinematics.onTalk(n);};
- const sameState=index=>state().quest===index.quest&&state().step===index.step&&!state().done;
+ const sameState=index=>state().quest===index.quest&&state().step===index.step&&(state().campaign??'main')===(index.campaign??'main')&&state().cycle===index.cycle&&!state().done;
  // A normal NPC click opens the story; opening/closing/asking cannot finish a talk step.
  worldUI.onTalk=n=>{
   if(!ready())return null;
   const obj=currentObjective(state()),step=obj?.step;
   if(step?.type!=='talk'||step.npc!==n.name||step.mapId!==map.id)return null;
-  const index={quest:state().quest,step:state().step},data=dialogueFor(obj);
-  return {...data,valid:()=>sameState(index),play:()=>cinematics.story(index.quest,index.step),complete(){if(!sameState(index))return;if(game.online)world.questTalk?.(n.name,index);else offline({type:'talk',npc:n.name,mapId:map.id});}};
+  const index={quest:state().quest,step:state().step,...(state().campaign?{campaign:state().campaign,cycle:state().cycle}:{})},data=dialogueFor(obj);
+  return {...data,valid:()=>sameState(index),play:()=>cinematics.story(index.quest,index.step),complete(){if(!sameState(index))return;if(game.online)world.questTalk?.(n.name,index);else offline({type:'talk',npc:n.name,mapId:map.id,campaign:state().campaign});}};
  };
 
  // Tracker panel (own stylesheet, so game.html needs no edit).
- if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=walk149';css.dataset.storyUi='';document.head.append(css);}
+ if(!document.querySelector('link[data-story-ui]')){const css=document.createElement('link');css.rel='stylesheet';css.href='story-ui.css?v=rebirth196';css.dataset.storyUi='';document.head.append(css);}
  const panel=document.createElement('section');panel.id='quest-tracker';panel.setAttribute('aria-label','เควสเนื้อเรื่อง');
- panel.innerHTML='<button id="quest-coach" type="button" aria-pressed="true" title="ไกด์"><b aria-hidden="true">💡</b><span>ไกด์</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><span id="quest-distance" hidden></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
+ panel.innerHTML='<select id="quest-campaign" aria-label="เลือกเนื้อเรื่อง" hidden><option value="main">เนื้อเรื่องเดิม</option><option value="rebirth">ภาคจุติ · ห้าภพ</option></select><button id="quest-coach" type="button" aria-pressed="true" title="ไกด์"><b aria-hidden="true">💡</b><span>ไกด์</span></button><small id="quest-chapter"></small><strong id="quest-title"></strong><span id="quest-hint"></span><span id="quest-distance" hidden></span><em id="quest-how"></em><button id="quest-go" type="button"></button>';
  document.body.append(panel);
+ $('quest-campaign').onchange=e=>{world.storyCampaign=e.target.value;try{localStorage.setItem(key+':campaign',world.storyCampaign);}catch{}cinematics.close();game.cancelWalk?.();walking=false;shown='';render();dispatchEvent(new CustomEvent('rebirth-campaign-change'));};
  // 0.99 arrows that point at the next button to press, and a welcome card for a brand-new character
  const coach=createCoach({game,account,objective:()=>ready()?currentObjective(state()):null,paused:()=>!!document.querySelector('#welcome-card[open],#job-ready[open],#world-atlas-dialog[open]')||[...document.querySelectorAll('.journey-loading,#travel-loading')].some(e=>!e.classList.contains('leaving')&&e.checkVisibility?.({checkVisibilityCSS:true}))});
  const coachButton=()=>{$('quest-coach').setAttribute('aria-pressed',String(!coach.off));$('quest-coach').title=coach.off?'เปิดไกด์':'ปิดไกด์';$('quest-coach').classList.toggle('off',coach.off);};
  $('quest-coach').onclick=e=>{e.stopPropagation();coach.setOff(!coach.off);coachButton();world.notice(coach.off?'ปิดไกด์แล้ว · กด 💡 ในกล่องเควสเพื่อเปิดใหม่':'เปิดไกด์แล้ว');};coachButton();
  const welcomeKey='ayothaya-welcome:'+key;
  function welcome(){
-  const s=state();if(s.quest!==0||s.step!==0)return;try{if(localStorage.getItem(welcomeKey))return;localStorage.setItem(welcomeKey,'1');}catch{}
+  const s=state();if(s.campaign==='rebirth'||s.quest!==0||s.step!==0)return;try{if(localStorage.getItem(welcomeKey))return;localStorage.setItem(welcomeKey,'1');}catch{}
   const card=document.createElement('dialog');card.id='welcome-card';card.setAttribute('aria-labelledby','welcome-title');
   card.innerHTML='<small>ยินดีต้อนรับสู่อโยธยา</small><h2 id="welcome-title">เริ่มการเดินทางของคุณ</h2><ul>'+
    '<li><b>เดิน</b> กด WASD / ปุ่มลูกศร หรือแตะพื้นที่อยากไป · มือถือใช้จอยด้านซ้าย</li>'+
@@ -117,9 +120,9 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
    $('quest-go').hidden=false;$('quest-go').textContent='กำลังเชื่อมต่อ…';
    worldUI.npcLabel(markedNpc)?.classList.remove('quest-npc');markedNpc=null;return;
   }
-  $('quest-chapter').textContent=obj?.quest?.chapter??STORY_TITLE;
+  $('quest-chapter').textContent=obj?.quest?.chapter??(isRebirth()?'ภาคจุติ · ห้าภพ':STORY_TITLE);
   const stepLabel=obj&&obj.steps>1?` (ขั้น ${obj.stepNumber}/${obj.steps})`:'';
-  $('quest-title').textContent=obj?obj.quest.title+stepLabel:'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';
+  $('quest-title').textContent=obj?obj.quest.title+stepLabel:isRebirth()?'จบภาคจุติ · ห้าภพแห่งไฟต้นแสง':'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';
   $('quest-hint').textContent=obj?hintText(obj):'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';
   $('quest-how').textContent=obj?.step.how??'';$('quest-how').hidden=!obj?.step.how;
   $('quest-go').hidden=!obj;
@@ -275,7 +278,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   render();
  }
  $('quest-go').onclick=()=>{if(walking&&game.walking){game.cancelWalk();walking=false;render();}else go();};
- panel.addEventListener('click',e=>{if(e.target.id==='quest-coach')return;if(e.target===panel||e.target.closest('#quest-title,#quest-hint'))$('quest-go').click();});
+ panel.addEventListener('click',e=>{if(e.target.closest('#quest-coach,#quest-campaign'))return;if(e.target===panel||e.target.closest('#quest-title,#quest-hint'))$('quest-go').click();});
 
  offline({type:'enter',mapId:map.id});
  render();
@@ -301,7 +304,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  const api={context:null,cinematics,get override(){return hooks.override;},set override(v){hooks.override=v;},get holdWelcome(){return hooks.holdWelcome;},set holdWelcome(v){hooks.holdWelcome=v;},update(){if(walking&&!game.walking)walking=false;cinematics.observe();if(hooks.override){render();return;}
   if(ready()&&!document.hidden){if(resume){resume=false;clearResume();go();}if(welcomePending&&performance.now()>=welcomeAt&&!hooks.holdWelcome&&!cinematics.isOpen){welcomePending=false;welcome();}}
   coach.update();distanceHint();
-  if(ready()&&!game.online&&api.context&&performance.now()-checked>1000){checked=performance.now();for(let i=0;i<30&&offline({type:'check',ctx:api.context()})?.changed;i++);}
+  if(ready()&&!game.online&&api.context&&performance.now()-checked>1000){checked=performance.now();for(let i=0;i<30&&offline({type:'check',ctx:{...api.context(),mapId:map.id}})?.changed;i++);}
   render();}};
  return api;
 }

@@ -1,5 +1,5 @@
 {
-  "version": 195,
+  "version": 196,
   "capital": "ayutthaya",
   "retiredMaps": [
     "ayutthaya-wilds",
@@ -118,6 +118,11 @@
             -7.5,
             -1,
             0.45
+          ],
+          [
+            4,
+            43,
+            0.4
           ]
         ],
         "grid": {
@@ -434,6 +439,15 @@
           "text": "เมตตาคือการลงมือช่วยผู้อื่น พระและแม่ชีเรียนบททดสอบเดียวกัน เลือกเส้นทางที่ใจเจ้าพร้อมเถิด",
           "mentorId": "nun-master",
           "texture": 0
+        },
+        {
+          "name": "ยายจันทร์",
+          "x": 4,
+          "z": 43,
+          "texture": 2,
+          "minRebirth": 1,
+          "rebirthNPC": true,
+          "text": "หากเคยข้ามความตาย จงมาพายเรือข้ามภพไปด้วยกัน"
         }
       ],
       "mobs": [],
@@ -442,6 +456,12 @@
           "to": "rice-fields",
           "x": 0.5,
           "z": 66
+        },
+        {
+          "to": "rebirth-ferry",
+          "x": 2,
+          "z": 43,
+          "minRebirth": 1
         }
       ],
       "landmarks": [
@@ -11597,7 +11617,12 @@
       ],
       "scene": "maps/v7/ayutthaya.glb",
       "decor": [],
-      "layoutRevision": "capital-v3-0.101"
+      "layoutRevision": "capital-v3-0.101",
+      "rebirthNPCObstacle": [
+        4,
+        43,
+        0.4
+      ]
     },
     {
       "id": "rice-fields",
@@ -18969,6 +18994,2991 @@
         5
       ],
       "scene": "maps/v7/prologue-vision.glb"
+    },
+    {
+      "id": "rebirth-ferry",
+      "name": "ท่าน้ำข้ามภพ",
+      "subtitle": "ภาคจุติ · Lv.1–20",
+      "scene": "maps/rebirth196/rebirth-ferry.glb",
+      "draft": true,
+      "rebirthChapter": 1,
+      "minRebirth": 1,
+      "minLevel": 1,
+      "mood": "dusk",
+      "bounds": {
+        "x": -70,
+        "z": -70,
+        "w": 140,
+        "d": 140
+      },
+      "nav": {
+        "zones": [
+          {
+            "x": -70,
+            "z": -70,
+            "w": 140,
+            "d": 140
+          }
+        ],
+        "obstacles": [],
+        "props": [],
+        "grid": {
+          "x0": -70,
+          "z0": -70,
+          "cell": 1,
+          "w": 141,
+          "h": 141,
+          "rows": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaamaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaalaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaal.aaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaa.aaaaaa.aa",
+            "aaaaaaaa..aaaaaaa.aaaaaaaaaaaaaaeaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaa.aaaaaaa.aaaaaaaaaaaaaaaaaa.aa",
+            "aaaaaaaa..aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaa..aaaaaaaaaa.aaaa..aaaaaae.aaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaiaaaaaaaaa..aaaaaaaaaaaa.laaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaa..aaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaa",
+            "aaaaaa.aaaa..aaaaaaaaaal.aaaaaaaaaaaaa.gaaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaa.aaaah.aaaaaaaaaaa.aaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....aa.aaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....aa.aaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaammmaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaa",
+            "aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.kkkkk.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaa",
+            "aaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakkkkkaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaakkkkkaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakkkkkaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.kkkkk.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakkkkkaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.kkkkk.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaa.aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.eaaaaaaaaaa",
+            "aaaaaaaaaamaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaa",
+            "aaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaa.aaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaa",
+            "aaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaa",
+            "aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "a..aaaaaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa.aaaaaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaad.aaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaa..aaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaaaa..aaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "a.aaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa..aaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "a.aaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa..aaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaa.aaaaa.aaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaa.gaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaa.......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaafaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaa..aaaaa.............aaaaaaaaaa.aaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaa.aaaa",
+            "aaaaaa..aaa..aaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaae.aaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa................aaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa................aaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaa.haaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaajaaaa",
+            "aaaaaaaaaaaaaaaaa................aaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaa..aaaa",
+            "aaaaaaaaaa..aaaaa................aaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaa..aaaaaaaaa",
+            "aaaaaaaaaa..aaaaaaaaaaaaaaaa.jee.aaaaaaaaaaaaaaaaaaaaaaaa.......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaa.aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............aaaaaaaaaaaaaaa",
+            "aaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaf.aaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaa..aaaaaaaa.iaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaa",
+            "aaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaj.aaa",
+            "aaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllll.lllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllll.lllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................aaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.......................aa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.......................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa....aaaaaaaaaaaaa....aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaa.laaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.maaaaa",
+            "aa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaai.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aa",
+            "aaaaaaaaa.aaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aa",
+            "aaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaa..aaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaa",
+            "aaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaa.aaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaa",
+            "aaa.aaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aa...aaaaaaaaaaaa",
+            "aaaaaaa..aaaaaaaaaaaaaaa.aaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaa",
+            "aaaaaaa.aaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa.kaaaaaaaaaaaaaaa.aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa..aaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaa..aaaaaaa.jaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaa",
+            "aaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaa.kaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaa..haaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ]
+        }
+      },
+      "spawn": {
+        "x": 0,
+        "z": -60
+      },
+      "portals": [
+        {
+          "to": "ayutthaya",
+          "x": 0,
+          "z": -66
+        },
+        {
+          "to": "rebirth-kalpa",
+          "x": 1.5,
+          "z": 66
+        }
+      ],
+      "npcs": [
+        {
+          "name": "ยายจันทร์",
+          "x": 5.8,
+          "z": -58.4,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · ท่าน้ำข้ามภพ",
+          "rebirthNPC": true
+        }
+      ],
+      "citizens": [],
+      "mobs": [
+        [
+          -34,
+          -25,
+          53
+        ],
+        [
+          -28,
+          -25,
+          53
+        ],
+        [
+          -31,
+          -27,
+          53
+        ],
+        [
+          -34,
+          -30,
+          53
+        ],
+        [
+          -28,
+          -30,
+          53
+        ],
+        [
+          28,
+          -25,
+          54
+        ],
+        [
+          34,
+          -25,
+          54
+        ],
+        [
+          31,
+          -27,
+          54
+        ],
+        [
+          28,
+          -30,
+          54
+        ],
+        [
+          34,
+          -30,
+          54
+        ],
+        [
+          -34,
+          25,
+          55
+        ],
+        [
+          -28,
+          25,
+          55
+        ],
+        [
+          -31,
+          23,
+          55
+        ],
+        [
+          -34,
+          20,
+          55
+        ],
+        [
+          -28,
+          20,
+          55
+        ],
+        [
+          28,
+          25,
+          56
+        ],
+        [
+          34,
+          25,
+          56
+        ],
+        [
+          31,
+          23,
+          56
+        ],
+        [
+          28,
+          20,
+          56
+        ],
+        [
+          34,
+          20,
+          56
+        ],
+        [
+          31,
+          -21,
+          57
+        ],
+        [
+          0,
+          49,
+          58
+        ]
+      ],
+      "plants": [],
+      "decor": [],
+      "packs": false,
+      "mobPopulation": 1,
+      "safe": false,
+      "waterType": "water",
+      "waterAreas": [
+        {
+          "x": -12.92,
+          "z": 27.2,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -13.4,
+          "z": 21.7,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -13.48,
+          "z": 16.2,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -13.14,
+          "z": 10.7,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -12.45,
+          "z": 5.2,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -11.51,
+          "z": -0.2999999999999998,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -10.49,
+          "z": -5.8,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -9.55,
+          "z": -11.3,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -8.86,
+          "z": -16.8,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -8.52,
+          "z": -22.3,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -8.6,
+          "z": -27.8,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -9.08,
+          "z": -33.3,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -9.89,
+          "z": -38.8,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -10.88,
+          "z": -44.3,
+          "w": 22,
+          "d": 6.1
+        },
+        {
+          "x": -54,
+          "z": -13,
+          "w": 14,
+          "d": 24
+        },
+        {
+          "x": 42,
+          "z": -6,
+          "w": 14,
+          "d": 20
+        }
+      ],
+      "bridges": [
+        {
+          "x": -19.5,
+          "z": -31.5,
+          "w": 39,
+          "d": 9
+        },
+        {
+          "x": -19.5,
+          "z": 20.5,
+          "w": 39,
+          "d": 9
+        }
+      ],
+      "roads": [
+        {
+          "a": [
+            0,
+            -68
+          ],
+          "b": [
+            -28,
+            -48
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -28,
+            -48
+          ],
+          "b": [
+            -30,
+            -15
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -30,
+            -15
+          ],
+          "b": [
+            -30,
+            27
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -30,
+            27
+          ],
+          "b": [
+            0,
+            51
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            51
+          ],
+          "b": [
+            0,
+            68
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            -55
+          ],
+          "b": [
+            30,
+            -44
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            -44
+          ],
+          "b": [
+            32,
+            -7
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            32,
+            -7
+          ],
+          "b": [
+            30,
+            29
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            29
+          ],
+          "b": [
+            0,
+            51
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -44,
+            -27
+          ],
+          "b": [
+            -30,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -30,
+            -27
+          ],
+          "b": [
+            30,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            -27
+          ],
+          "b": [
+            45,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -44,
+            25
+          ],
+          "b": [
+            -30,
+            25
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -30,
+            25
+          ],
+          "b": [
+            30,
+            25
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            25
+          ],
+          "b": [
+            44,
+            25
+          ],
+          "width": 8
+        }
+      ],
+      "plazas": [
+        [
+          -31,
+          28,
+          18,
+          18
+        ],
+        [
+          31,
+          28,
+          18,
+          18
+        ],
+        [
+          -31,
+          -24,
+          18,
+          18
+        ],
+        [
+          31,
+          -24,
+          18,
+          18
+        ],
+        [
+          0,
+          58,
+          18,
+          16
+        ],
+        [
+          0,
+          -49,
+          36,
+          32
+        ]
+      ],
+      "districts": [
+        {
+          "name": "ท่ายายจันทร์",
+          "x": 0,
+          "z": -57
+        },
+        {
+          "name": "เรือนแพร้าง",
+          "x": -31,
+          "z": -4
+        },
+        {
+          "name": "ดงกกริมตลิ่ง",
+          "x": 33,
+          "z": 5
+        },
+        {
+          "name": "ท่าน้ำโบราณ",
+          "x": 0,
+          "z": 49
+        }
+      ],
+      "landmarks": [
+        [
+          "ท่ายายจันทร์",
+          0,
+          -57
+        ],
+        [
+          "เรือนแพร้าง",
+          -31,
+          -4
+        ],
+        [
+          "ดงกกริมตลิ่ง",
+          33,
+          5
+        ],
+        [
+          "ท่าน้ำโบราณ",
+          0,
+          49
+        ]
+      ]
+    },
+    {
+      "id": "rebirth-kalpa",
+      "name": "ป่ากัลปพฤกษ์",
+      "subtitle": "ภาคจุติ · Lv.20–40",
+      "scene": "maps/rebirth196/rebirth-kalpa.glb",
+      "draft": true,
+      "rebirthChapter": 2,
+      "minRebirth": 1,
+      "minLevel": 20,
+      "mood": "day",
+      "bounds": {
+        "x": -70,
+        "z": -70,
+        "w": 140,
+        "d": 140
+      },
+      "nav": {
+        "zones": [
+          {
+            "x": -70,
+            "z": -70,
+            "w": 140,
+            "d": 140
+          }
+        ],
+        "obstacles": [],
+        "props": [],
+        "grid": {
+          "x0": -70,
+          "z0": -70,
+          "cell": 1,
+          "w": 141,
+          "h": 141,
+          "rows": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaa.iaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaa",
+            "aaaaaam.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa.aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaa",
+            "aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaa.aaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa.aaaaaaaaaaa",
+            "aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaa",
+            "aaaaak.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaajaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa",
+            "aaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaa",
+            "aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa",
+            "aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaa",
+            "aaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaa.aaaa",
+            "aa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....aaaaaaaaaaaaaaaaaaaaa..aaa",
+            "aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaa.faaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...........aaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaa..aaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaa..........aaaaaaaa.aaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaa.aaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaa.a..........aaaaaa.aaaaaaa.aaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaa.a..........aaaaaa.gaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................aaaaaaaaaaaaa.a",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a.aaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaa..aaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaa.aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaa..aaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaa",
+            "aa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafkllll...llllllllllllll.lllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..a..........aaaj.laaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.a..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaa.aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa.aaaaa.aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaa.aaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.maaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaa",
+            "aahaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "a..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaam..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah.iaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaa",
+            "aaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaa....aaa.....aaaaaaaaaa",
+            "aaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......jaaaaaaaaa.aaaa..a................aaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaa.aaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......a.ja.......aa....aaaa.......................aaaa.aaa",
+            "aaaaaaaaaaaaaaaaaa.aaaaa.jeh...aaaaaaaaaaaa........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa.aa........a......aa.........................aaaaaaa",
+            "aaaaaa.aaaa...aaaaaaaaa....aaah..aaaaaa...a............aaaaaaaaaaaaaaaaaaaaaaaaa......aa...................a...........................aaaaaa",
+            "aaaaaa.aaa.aaaa.aaa...a..............aa................aaaaaaaaaaaaaaaaaaaaaaaaa......................................................aaaaaaa",
+            "aaaaaaaaaaaaaaaa.a.........................................aaaaaaaaaaaaaaaaaaaa..............................................a........aaaaaaa",
+            "aaaaaaaaa.aaaaaa.a.....................................aaaag.aaaaaaaaaaaaaaaaaa............................................a.aa...aaa.aaaaaaa",
+            "aaaaaaaaaaaaaaaa.......................................aaaaaf.aaaaaaaaaaaaaaaaaa.........................................aaa.aaaaaaaa.aaaaaaa",
+            "aaaaaaaaaa.aaaa.a......................................aaaaaa.aaaaaaaaaaaaaaaaaaaa.........................................aaaaaaaaaa.aaaaaaa",
+            "aaaaaaaaaa.aaaaaa......................................aaaaa.aaaaaaaaaaaaaaaaaaaaaa.....aa................................aaa.aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaa.a..aa.......................................aaa.aaaaaaaaaaaaaaaaaaaaaaaa...aaaa..aa.a...................a....aaaaa.aaaaa.aaaaaaaa",
+            "aaaaaaaaaaaaaaaaaa......................................f..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.................aaaaaaaaaaaa.....aaaaaaaaa"
+          ]
+        }
+      },
+      "spawn": {
+        "x": 0,
+        "z": -60
+      },
+      "portals": [
+        {
+          "to": "rebirth-ferry",
+          "x": 0,
+          "z": -66
+        },
+        {
+          "to": "rebirth-gandharva",
+          "x": 0,
+          "z": 66
+        }
+      ],
+      "npcs": [
+        {
+          "name": "ยายจันทร์",
+          "x": 6,
+          "z": -58,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · ป่ากัลปพฤกษ์",
+          "rebirthNPC": true
+        },
+        {
+          "name": "มาลัย",
+          "x": 29,
+          "z": -9,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · ป่ากัลปพฤกษ์",
+          "rebirthNPC": true
+        }
+      ],
+      "citizens": [],
+      "mobs": [
+        [
+          -34,
+          -25,
+          59
+        ],
+        [
+          -28,
+          -25,
+          59
+        ],
+        [
+          -31,
+          -27,
+          59
+        ],
+        [
+          -34,
+          -30,
+          59
+        ],
+        [
+          -28,
+          -30,
+          59
+        ],
+        [
+          28,
+          -25,
+          60
+        ],
+        [
+          34,
+          -25,
+          60
+        ],
+        [
+          31,
+          -27,
+          60
+        ],
+        [
+          28,
+          -30,
+          60
+        ],
+        [
+          34,
+          -30,
+          60
+        ],
+        [
+          -34,
+          25,
+          61
+        ],
+        [
+          -28,
+          25,
+          61
+        ],
+        [
+          -31,
+          23,
+          61
+        ],
+        [
+          -34,
+          20,
+          61
+        ],
+        [
+          -28,
+          20,
+          61
+        ],
+        [
+          28,
+          25,
+          62
+        ],
+        [
+          34,
+          25,
+          62
+        ],
+        [
+          31,
+          23,
+          62
+        ],
+        [
+          28,
+          20,
+          62
+        ],
+        [
+          34,
+          20,
+          62
+        ],
+        [
+          31,
+          -21,
+          63
+        ],
+        [
+          0,
+          49,
+          64
+        ]
+      ],
+      "plants": [],
+      "decor": [],
+      "packs": false,
+      "mobPopulation": 1,
+      "safe": false,
+      "waterType": "water",
+      "waterAreas": [
+        {
+          "x": -6.92,
+          "z": 27.2,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -7.4,
+          "z": 21.7,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -7.48,
+          "z": 16.2,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -7.140000000000001,
+          "z": 10.7,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -6.45,
+          "z": 5.2,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -5.51,
+          "z": -0.2999999999999998,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -4.49,
+          "z": -5.8,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -3.55,
+          "z": -11.3,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -2.86,
+          "z": -16.8,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -2.52,
+          "z": -22.3,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -2.6,
+          "z": -27.8,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -3.08,
+          "z": -33.3,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -3.8899999999999997,
+          "z": -38.8,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": -4.88,
+          "z": -44.3,
+          "w": 10,
+          "d": 6.1
+        },
+        {
+          "x": 36.5,
+          "z": -18.5,
+          "w": 19,
+          "d": 23
+        }
+      ],
+      "bridges": [
+        {
+          "x": -19.5,
+          "z": -31.5,
+          "w": 39,
+          "d": 9
+        },
+        {
+          "x": -19.5,
+          "z": 20.5,
+          "w": 39,
+          "d": 9
+        }
+      ],
+      "roads": [
+        {
+          "a": [
+            0,
+            -68
+          ],
+          "b": [
+            -28,
+            -48
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -28,
+            -48
+          ],
+          "b": [
+            -30,
+            -15
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -30,
+            -15
+          ],
+          "b": [
+            -30,
+            27
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -30,
+            27
+          ],
+          "b": [
+            0,
+            51
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            51
+          ],
+          "b": [
+            0,
+            68
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            -55
+          ],
+          "b": [
+            30,
+            -44
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            -44
+          ],
+          "b": [
+            32,
+            -7
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            32,
+            -7
+          ],
+          "b": [
+            30,
+            29
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            29
+          ],
+          "b": [
+            0,
+            51
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -44,
+            -27
+          ],
+          "b": [
+            -30,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -30,
+            -27
+          ],
+          "b": [
+            30,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            -27
+          ],
+          "b": [
+            45,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -44,
+            25
+          ],
+          "b": [
+            -30,
+            25
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -30,
+            25
+          ],
+          "b": [
+            30,
+            25
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            25
+          ],
+          "b": [
+            44,
+            25
+          ],
+          "width": 8
+        }
+      ],
+      "plazas": [
+        [
+          -31,
+          28,
+          18,
+          18
+        ],
+        [
+          31,
+          28,
+          18,
+          18
+        ],
+        [
+          -31,
+          -24,
+          18,
+          18
+        ],
+        [
+          31,
+          -24,
+          18,
+          18
+        ],
+        [
+          0,
+          58,
+          18,
+          16
+        ],
+        [
+          0,
+          -49,
+          36,
+          32
+        ]
+      ],
+      "districts": [
+        {
+          "name": "สระบัวกินรี",
+          "x": 30,
+          "z": -10
+        },
+        {
+          "name": "ต้นกัลปพฤกษ์",
+          "x": 0,
+          "z": 0
+        },
+        {
+          "name": "ทุ่งดอกไม้",
+          "x": -31,
+          "z": -27
+        },
+        {
+          "name": "หน้าผารังหัสดีลิงค์",
+          "x": 0,
+          "z": 49
+        }
+      ],
+      "landmarks": [
+        [
+          "สระบัวกินรี",
+          30,
+          -10
+        ],
+        [
+          "ต้นกัลปพฤกษ์",
+          0,
+          0
+        ],
+        [
+          "ทุ่งดอกไม้",
+          -31,
+          -27
+        ],
+        [
+          "หน้าผารังหัสดีลิงค์",
+          0,
+          49
+        ]
+      ]
+    },
+    {
+      "id": "rebirth-gandharva",
+      "name": "นครคนธรรพ์ลอยฟ้า",
+      "subtitle": "ภาคจุติ · Lv.40–60",
+      "scene": "maps/rebirth196/rebirth-gandharva.glb",
+      "draft": true,
+      "rebirthChapter": 3,
+      "minRebirth": 1,
+      "minLevel": 40,
+      "mood": "summit",
+      "bounds": {
+        "x": -70,
+        "z": -70,
+        "w": 140,
+        "d": 140
+      },
+      "nav": {
+        "zones": [
+          {
+            "x": -70,
+            "z": -70,
+            "w": 140,
+            "d": 140
+          }
+        ],
+        "obstacles": [],
+        "props": [],
+        "grid": {
+          "x0": -70,
+          "z0": -70,
+          "cell": 1,
+          "w": 141,
+          "h": 141,
+          "rows": [
+            ".............................................................................................................................................",
+            ".............................................................................................................................................",
+            "................................................................aaaaaaaaaaaaa................................................................",
+            ".............................................................aaaaaaaaaaaaaaaaaaa.............................................................",
+            "............................................................aaaaaaaaaaaaaaaaaaaaa............................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaa...........................................................",
+            "..........................................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            ".........................................................aaaa.aaaaaaaaaaaaaaaaa.aaaa.........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            "........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaa........................................................",
+            "........................................................aaa.aaaaaaaaaaaaaaaaaaaaaaaaa........................................................",
+            "........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaa........................................................",
+            "........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaa........................................................",
+            "........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaa........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            ".........................................................aaa.aaaaaaaaaaaaaaaaaaa.aaa.........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            "..........................................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................................................",
+            "...........................................................haaaaaaaa.aaaaaaaaaaaah...........................................................",
+            "..........................................................lkhfaaaaaa.aaaaaaaaaafhkl..........................................................",
+            ".........................................................lllkhfaaaaaaaaaaaaaaafhklll.........................................................",
+            "........................................................lllllkjfaaaaaaaaaaaaafiklllll........................................................",
+            "........................................................llllllk...............kllllll........................................................",
+            ".......................................................lkllllll...............llllllll.......................................................",
+            "......................................................llllllll.................llllllll......................................................",
+            ".....................................................llllllll...................llllllll.....................................................",
+            "...................................................lllllllll.....................lllllllll...................................................",
+            "...................................................llllllll.......................llllllll...................................................",
+            ".................................................lllllllll.........................lllllllll.................................................",
+            "................................................lllllllll...........................lllllllll................................................",
+            "...............................................llllllll...............................llllllll...............................................",
+            "...............................................lllllll.................................lllllll...............................................",
+            "..................................aaaaaaaaa...kklllll...................................lllllkk...aaaaaaaaa..................................",
+            "...............................aaaaaaaaaaaaaaahklllll...................................lllllkhaaaaaaaaaaaaaaa...............................",
+            ".............................aaaaaaaaaaaaaaaaaahklll.....................................lllkhaaaaaaaaaaaaaaaaaa.............................",
+            "............................aaaaaaaaaaaaaaaaaaaahjl.......................................ljhaaaaaaaaaaaa.aaaaaaa............................",
+            "...........................aaaaaaaaaaaaaaaaaaaaaah.........................................haaaaaaaaaaaaaaaaaaaaaa...........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa.......................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa.......................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaa..aaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaa..aaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaa..aaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaafj.....................................jfaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaahkl...................................lkhaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "...........................aaaaaaaaaaaaaaaaaaaaaahkllll...............................llllkhaaaaaaaaaaaaaaaaaaaaaa...........................",
+            "............................aaaaaaaaaaaaaaaaaaaafjllllll.............................lllllljfaaaaaaaaaaaaaaaaaaaa............................",
+            ".............................aaaaaaaaaaaaaaaaaaailllllllll.........................llllllllljaaaaaaaaaaaaaaaaaaa.............................",
+            "...............................aaaaaaaaaaaaaaa..klllllllll.........................lllllllllk..aaaaaaaaaaaaaaa...............................",
+            "..................................ahhhhhhha........lllllllll......aaaaaaaaa......lllllllll........ahhhhhhha..................................",
+            "....................................lllll..........llllllllllk.aaaaaaaaaaaaaaa.kllllllllll..........lllll....................................",
+            "...................................lllllll...........llllllllhaaaaaaaaaa.aaaaaahllllllll...........lllllll...................................",
+            "...................................llllll.............lllllljfaaaaaaaaaaaaaaaaafjllllll............llllll....................................",
+            "....................................lllll...............lllkhaaaaaaaaaaaaaaaaaaahklll...............lllll....................................",
+            "...................................llllll.................khaaaa.aaaaaaaaaaaaaaaahk................llllll....................................",
+            "...................................llllll.................jfaaaaaaaaaaaaaaaaaaaaafj................llllll....................................",
+            "....................................lllll..................aaaaaaaaaaaaaaaaaaaaaaa..................lllll....................................",
+            "...................................llllll.................aaaaaaaaaaaaaaaaaaaaaaaaa................llllll....................................",
+            "...................................llllll.................aaaaaaaaaaaaaaaaaaaaaaaaa................llllll....................................",
+            "...................................llllll.................aaaaaaaaaaaaaaaaaaaaaaaaa................llllll....................................",
+            "...................................llllll.................aaaaaaaaaaaaaaaaaaaaaaaaa................llllll....................................",
+            "....................................lllll.................aaaaaaaaaaaaaaaaaaaaaaaaa.................lllll....................................",
+            "...................................llllll.................aaaaaaaaaaaaaaaaaaaaaaaaa................llllll....................................",
+            "...................................llllll.................aaaa.aaaa.......aaaaaaaaa................llllll....................................",
+            "....................................lllll.................haaaaaaaa.......aaaaaaaah.................lllll....................................",
+            "...................................llllll................lifaaaaaaa.......aaaaaaafil...............llllll....................................",
+            "...................................lllllll..............lllhaaaaaaa.......aaa.aaahlll..............lllllll...................................",
+            "....................................lllll.............lllllkhaaaaaa.......aaaaaahklllll.............lllll....................................",
+            "..................................ahhhhhhha..........lllllllifaaaaa.......aaaaafilllllll..........ahhhhhhha..................................",
+            "...............................aaaaaaaaaaaaaaa....llllllllllkhaaaaa.......aaaaahkllllllllll....aaaaaaaaaaaaaaa...............................",
+            ".............................aaaaaaaaaaaaaaaaaaa.kllllllllll...aaaa.......aaaa...llllllllllk.aaaaaaaaaaaaaaaaaaa.............................",
+            "............................aaaaaaa.aaaaa.aaaaaafilllllllll.......a.......a.......lllllllllifaaaaaaaaaaaaaaaaaaaa............................",
+            "..............................aaaaaaaaaaaaaaaaaaahklllll.............................lllllkhaaaaaaaaaaaaaaaaaaaaaa...........................",
+            "..........................a...aaaaaaaaaaaaaaaaaaaaillll...............................lllliaaaaaaaaaaaaaaaaaa.aaaaa..........................",
+            "..........................a...aaaaaaaaaaaaaaaaa.aafill.................................llifaaaaaaaaaaaaaaaaaa.aaaaa..........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaah.....................................haaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aa...aaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aa...aaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aa.aaaaaaaaaaaaaaaaaaa...aa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaa...aa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaa..aaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            "..........................aaa.aaaaaaaaaaaaaaaaa.aaa.......................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaa..aaaaaaaaaaaaaaaah.......................................haaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "...........................aaaaa...aaaaaaaaaaaaaahkk.....................................kkhaaaaaaaaaaaaaaaaaaaaaa...........................",
+            "............................aaaaaaa.aaaaa.aaaaaafill.....................................llifaaaaaaaaaaaaaa..aaaa............................",
+            ".............................aaaaaaaaaaaaaaaaaafilllll.................................lllllifaaaaaaaaaaaaaaaaaa.............................",
+            "...............................aaaaaaaaaaaaaaafilllllll...............................lllllllifaaaaaaaaaaaaaaa...............................",
+            "..................................aaaaaaaaa....lllllllll......aa..aaaaaaaaa..aa......lllllllll....aaaaaaaaa..................................",
+            "................................................lllllllli..aaaaaaaaaaaaaaaaaaaaaaa..illllllll................................................",
+            "..................................................llllkkhaaaaaaaaaaaaaaaaaaaaaaaaaaahkkllll..................................................",
+            "...................................................lllkhaaaaaaaaaaaaaaaaaaaaaaaaaaaaahklll...................................................",
+            "....................................................lkhaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaahkl....................................................",
+            ".....................................................haaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah.....................................................",
+            ".....................................................aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaa.....................................................",
+            "....................................................aaa..aaaaaaaa.aaaaaaaaaaaaaaaaaa..aaa....................................................",
+            "....................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa....................................................",
+            "...................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................................................",
+            "...................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................................................",
+            "...................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................................................",
+            "...................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................................................",
+            "..................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..................................................",
+            "..................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..................................................",
+            "..................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..................................................",
+            "..................................................aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..................................................",
+            "..................................................aa..aaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aa..................................................",
+            "..................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..................................................",
+            "..................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..................................................",
+            "..................................................aa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..................................................",
+            "..................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aa..................................................",
+            "...................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................................................",
+            "...................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................................................",
+            "...................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa...................................................",
+            "...................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa...................................................",
+            "....................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa....................................................",
+            "....................................................aaa..aaaaaaaaaaaaaaaaaaaaaaaaaaa..aaa....................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaa......................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.......................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaa...........................................................",
+            "..............................................................aa..aaaaaaaaa..aa..............................................................",
+            ".............................................................................................................................................",
+            ".............................................................................................................................................",
+            ".............................................................................................................................................",
+            "............................................................................................................................................."
+          ]
+        }
+      },
+      "spawn": {
+        "x": 0,
+        "z": -60
+      },
+      "portals": [
+        {
+          "to": "rebirth-kalpa",
+          "x": 0,
+          "z": -66
+        },
+        {
+          "to": "rebirth-rahu",
+          "x": -0.3,
+          "z": 65.6
+        }
+      ],
+      "npcs": [
+        {
+          "name": "ยายจันทร์",
+          "x": 6,
+          "z": -58,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · นครคนธรรพ์ลอยฟ้า",
+          "rebirthNPC": true
+        },
+        {
+          "name": "ทิพย์สุวรรณ",
+          "x": 5,
+          "z": -5,
+          "texture": 0,
+          "text": "ห้าภพแห่งไฟต้นแสง · นครคนธรรพ์ลอยฟ้า",
+          "rebirthNPC": true
+        }
+      ],
+      "citizens": [],
+      "mobs": [
+        [
+          -35,
+          -21,
+          65
+        ],
+        [
+          -29,
+          -21,
+          65
+        ],
+        [
+          -32,
+          -23,
+          65
+        ],
+        [
+          -35,
+          -26,
+          65
+        ],
+        [
+          -29,
+          -26,
+          65
+        ],
+        [
+          29,
+          -21,
+          66
+        ],
+        [
+          35,
+          -21,
+          66
+        ],
+        [
+          32,
+          -23,
+          66
+        ],
+        [
+          29,
+          -26,
+          66
+        ],
+        [
+          35,
+          -26,
+          66
+        ],
+        [
+          -35,
+          22,
+          67
+        ],
+        [
+          -29,
+          22,
+          67
+        ],
+        [
+          -32,
+          20,
+          67
+        ],
+        [
+          -35,
+          17,
+          67
+        ],
+        [
+          -29,
+          17,
+          67
+        ],
+        [
+          29,
+          22,
+          68
+        ],
+        [
+          35,
+          22,
+          68
+        ],
+        [
+          32,
+          20,
+          68
+        ],
+        [
+          29,
+          17,
+          68
+        ],
+        [
+          35,
+          17,
+          68
+        ],
+        [
+          32,
+          -17,
+          69
+        ],
+        [
+          0,
+          49,
+          70
+        ]
+      ],
+      "plants": [],
+      "decor": [],
+      "packs": false,
+      "mobPopulation": 1,
+      "safe": false,
+      "waterType": "water",
+      "waterAreas": [],
+      "bridges": [
+        {
+          "x": -36,
+          "z": -61,
+          "w": 40,
+          "d": 42
+        },
+        {
+          "x": -4,
+          "z": -61,
+          "w": 40,
+          "d": 42
+        },
+        {
+          "x": -36,
+          "z": -27,
+          "w": 8,
+          "d": 51
+        },
+        {
+          "x": 28,
+          "z": -27,
+          "w": 8,
+          "d": 51
+        },
+        {
+          "x": -36,
+          "z": 16,
+          "w": 40,
+          "d": 37
+        },
+        {
+          "x": -4,
+          "z": 16,
+          "w": 40,
+          "d": 37
+        },
+        {
+          "x": -36,
+          "z": -27,
+          "w": 40,
+          "d": 31
+        },
+        {
+          "x": -4,
+          "z": -4,
+          "w": 40,
+          "d": 28
+        },
+        {
+          "x": -4,
+          "z": -27,
+          "w": 40,
+          "d": 31
+        },
+        {
+          "x": -36,
+          "z": -4,
+          "w": 40,
+          "d": 28
+        }
+      ],
+      "roads": [
+        {
+          "a": [
+            0,
+            -68
+          ],
+          "b": [
+            0,
+            -57
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            49
+          ],
+          "b": [
+            0,
+            68
+          ],
+          "width": 9
+        }
+      ],
+      "plazas": [
+        [
+          -32,
+          23,
+          15,
+          15
+        ],
+        [
+          32,
+          23,
+          15,
+          15
+        ],
+        [
+          -32,
+          -20,
+          15,
+          15
+        ],
+        [
+          32,
+          -20,
+          15,
+          15
+        ],
+        [
+          0,
+          0,
+          15,
+          15
+        ]
+      ],
+      "districts": [
+        {
+          "name": "เกาะกระดิ่งลม",
+          "x": 0,
+          "z": -57
+        },
+        {
+          "name": "หอดนตรี",
+          "x": 0,
+          "z": 0
+        },
+        {
+          "name": "สวนเมฆ",
+          "x": -32,
+          "z": 20
+        },
+        {
+          "name": "หอระฆังใหญ่",
+          "x": 0,
+          "z": 49
+        }
+      ],
+      "landmarks": [
+        [
+          "เกาะกระดิ่งลม",
+          0,
+          -57
+        ],
+        [
+          "หอดนตรี",
+          0,
+          0
+        ],
+        [
+          "สวนเมฆ",
+          -32,
+          20
+        ],
+        [
+          "หอระฆังใหญ่",
+          0,
+          49
+        ]
+      ]
+    },
+    {
+      "id": "rebirth-rahu",
+      "name": "แดนอสูรราหู",
+      "subtitle": "ภาคจุติ · Lv.60–80",
+      "scene": "maps/rebirth196/rebirth-rahu.glb",
+      "draft": true,
+      "rebirthChapter": 4,
+      "minRebirth": 1,
+      "minLevel": 60,
+      "mood": "night",
+      "bounds": {
+        "x": -70,
+        "z": -70,
+        "w": 140,
+        "d": 140
+      },
+      "nav": {
+        "zones": [
+          {
+            "x": -70,
+            "z": -70,
+            "w": 140,
+            "d": 140
+          }
+        ],
+        "obstacles": [],
+        "props": [],
+        "grid": {
+          "x0": -70,
+          "z0": -70,
+          "cell": 1,
+          "w": 141,
+          "h": 141,
+          "rows": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaa.aaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaa.aaaaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaae.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaafaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakkkkaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaajaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaa..aaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaai.aaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaa..aaa.aaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaa.aaaa.aaaaaaaaaa.aaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaa.aa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaak.aaaaaa..............aaaaaaaaaaa.gaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaa..aaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadaaaa..aaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.eaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaa..............aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaa..aaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaa..aaaaaaaaaaaaaaaaaaaa.kaaa..aaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaajaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaa..aaaaaaaaaaaaaaaaaaaaaaa.iaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaag.aaa",
+            "aaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaa..aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaa",
+            "aaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaa.faaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaa.aaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaeaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaailhaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaa.aaaahaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaa.aaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaafaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaa.aaaa.....aa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaa.aaaa.....aa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaa.agea.....aaa.aaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaa.aaaa......aaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaak.aaaa.......aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaah.aaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaa.aaaaaefaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaa...............aaaaaaaaaaaaaaaaaa..aaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaa........aaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaa.........aage...aaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaa........aa..eaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaa.aaaaa...akkaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaa..aaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakkaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa..............aaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllll.lllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk..lllllllllllllllllllllllllkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllllll.lkfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafklllllllllllllllllllllll.lll..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafk...........................kfa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa..............aaaaaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaa..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaa..............aaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa.a..............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaamaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaa..gaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaa.aaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.daahaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaam.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaajaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaajdaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaaa.maaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaalaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaf.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaa..aaaaaaaa.aaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaakaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaamaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaa..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aa.aaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ]
+        }
+      },
+      "spawn": {
+        "x": 0,
+        "z": -60
+      },
+      "portals": [
+        {
+          "to": "rebirth-gandharva",
+          "x": 0,
+          "z": -66
+        },
+        {
+          "to": "rebirth-sithandon",
+          "x": 0,
+          "z": 66
+        }
+      ],
+      "npcs": [
+        {
+          "name": "ยายจันทร์",
+          "x": 6.5,
+          "z": -58,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · แดนอสูรราหู",
+          "rebirthNPC": true
+        },
+        {
+          "name": "นางจันทรา",
+          "x": -6,
+          "z": -57,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · แดนอสูรราหู",
+          "rebirthNPC": true
+        }
+      ],
+      "citizens": [],
+      "mobs": [
+        [
+          -34,
+          -25,
+          71
+        ],
+        [
+          -28,
+          -25,
+          71
+        ],
+        [
+          -31,
+          -27,
+          71
+        ],
+        [
+          -34,
+          -30,
+          71
+        ],
+        [
+          -28,
+          -30,
+          71
+        ],
+        [
+          28,
+          -25,
+          72
+        ],
+        [
+          34,
+          -25,
+          72
+        ],
+        [
+          31,
+          -27,
+          72
+        ],
+        [
+          28,
+          -30,
+          72
+        ],
+        [
+          34,
+          -30,
+          72
+        ],
+        [
+          -34,
+          25,
+          73
+        ],
+        [
+          -28,
+          25,
+          73
+        ],
+        [
+          -31,
+          23,
+          73
+        ],
+        [
+          -34,
+          20,
+          73
+        ],
+        [
+          -28,
+          20,
+          73
+        ],
+        [
+          28,
+          25,
+          74
+        ],
+        [
+          34,
+          25,
+          74
+        ],
+        [
+          31,
+          23,
+          74
+        ],
+        [
+          28,
+          20,
+          74
+        ],
+        [
+          34,
+          20,
+          74
+        ],
+        [
+          31,
+          -21,
+          75
+        ],
+        [
+          0,
+          49,
+          76
+        ]
+      ],
+      "plants": [],
+      "decor": [],
+      "packs": false,
+      "mobPopulation": 1,
+      "safe": false,
+      "waterType": "cooled-lava",
+      "waterAreas": [],
+      "bridges": [
+        {
+          "x": -19.5,
+          "z": -31.5,
+          "w": 39,
+          "d": 9
+        },
+        {
+          "x": -19.5,
+          "z": 20.5,
+          "w": 39,
+          "d": 9
+        }
+      ],
+      "roads": [
+        {
+          "a": [
+            0,
+            -68
+          ],
+          "b": [
+            -28,
+            -48
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -28,
+            -48
+          ],
+          "b": [
+            -30,
+            -15
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -30,
+            -15
+          ],
+          "b": [
+            -30,
+            27
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            -30,
+            27
+          ],
+          "b": [
+            0,
+            51
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            51
+          ],
+          "b": [
+            0,
+            68
+          ],
+          "width": 9
+        },
+        {
+          "a": [
+            0,
+            -55
+          ],
+          "b": [
+            30,
+            -44
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            -44
+          ],
+          "b": [
+            32,
+            -7
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            32,
+            -7
+          ],
+          "b": [
+            30,
+            29
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            29
+          ],
+          "b": [
+            0,
+            51
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -44,
+            -27
+          ],
+          "b": [
+            -30,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -30,
+            -27
+          ],
+          "b": [
+            30,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            -27
+          ],
+          "b": [
+            45,
+            -27
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -44,
+            25
+          ],
+          "b": [
+            -30,
+            25
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            -30,
+            25
+          ],
+          "b": [
+            30,
+            25
+          ],
+          "width": 8
+        },
+        {
+          "a": [
+            30,
+            25
+          ],
+          "b": [
+            44,
+            25
+          ],
+          "width": 8
+        }
+      ],
+      "plazas": [
+        [
+          -31,
+          28,
+          18,
+          18
+        ],
+        [
+          31,
+          28,
+          18,
+          18
+        ],
+        [
+          -31,
+          -24,
+          18,
+          18
+        ],
+        [
+          31,
+          -24,
+          18,
+          18
+        ],
+        [
+          0,
+          58,
+          18,
+          16
+        ],
+        [
+          0,
+          -49,
+          36,
+          32
+        ]
+      ],
+      "districts": [
+        {
+          "name": "ศาลานางจันทรา",
+          "x": 0,
+          "z": -57
+        },
+        {
+          "name": "ซากวิหารอสูร",
+          "x": -31,
+          "z": 6
+        },
+        {
+          "name": "ทุ่งเสาหินแตก",
+          "x": 32,
+          "z": -27
+        },
+        {
+          "name": "หลุมราหู",
+          "x": 0,
+          "z": 49
+        }
+      ],
+      "landmarks": [
+        [
+          "ศาลานางจันทรา",
+          0,
+          -57
+        ],
+        [
+          "ซากวิหารอสูร",
+          -31,
+          6
+        ],
+        [
+          "ทุ่งเสาหินแตก",
+          32,
+          -27
+        ],
+        [
+          "หลุมราหู",
+          0,
+          49
+        ]
+      ]
+    },
+    {
+      "id": "rebirth-sithandon",
+      "name": "ฝั่งทะเลสีทันดร",
+      "subtitle": "ภาคจุติ · Lv.80–99",
+      "scene": "maps/rebirth196/rebirth-sithandon.glb",
+      "draft": true,
+      "rebirthChapter": 5,
+      "minRebirth": 1,
+      "minLevel": 80,
+      "mood": "day",
+      "bounds": {
+        "x": -70,
+        "z": -70,
+        "w": 140,
+        "d": 140
+      },
+      "nav": {
+        "zones": [
+          {
+            "x": -70,
+            "z": -70,
+            "w": 140,
+            "d": 140
+          }
+        ],
+        "obstacles": [],
+        "props": [],
+        "grid": {
+          "x0": -70,
+          "z0": -70,
+          "cell": 1,
+          "w": 141,
+          "h": 141,
+          "rows": [
+            ".............................................................................................................................................",
+            ".................................................................aaaaaaaaaaa.................................................................",
+            "..............................................................aaaaaaaaaaaaaaaaa..............................................................",
+            ".............................................................aaaaaaaaaaaaaaaaaaa.............................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaa...........................................................",
+            "...........................................................aaaaaaaaaaaaaaaaaaaaaaa...........................................................",
+            "..........................................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................................................",
+            "..........................................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................................................",
+            "..........................................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            ".........................................................aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................................................",
+            "..........................................................aaaaaa.aaaaaaaaaaa.aaaaaa..........................................................",
+            "..........................................................aaaaaaaaaaaaaaaaaaaaaaaaa..........................................................",
+            "..........................................................eaaaaaaaaaaaaaaaaaaaaaaae..........................................................",
+            ".........................................................jgeaaaaaaaaaaaaaaaaaaaaaegj.........................................................",
+            "........................................................jjjieaaaaaaaaaaaaaaaaaaaeijjj........................................................",
+            "........................................................jjjjigaaaaaaaaaaaaaaaaagijjjj........................................................",
+            ".......................................................jjjjjjigaaaaaaaaaaaaaaagijjjjjj.......................................................",
+            "......................................................jjjjjjjj...aeeeeeeeeea...jjjjjjjj......................................................",
+            ".....................................................jjjjjjjj......iiiiiii......jjjjjjjj.....................................................",
+            "....................................................jjjjjjjj.......jjjjjjj.......jjjjjjjj....................................................",
+            "...................................................jjjjjjjj........jjjjjjj........jjjjjjjj...................................................",
+            "...................................................jjjjjjj.........jjjjjjj.........jjjjjjj...................................................",
+            "..................................................jjjjjjjj.........jjjjjjj.........jjjjjjjj..................................................",
+            ".................................................jjjjjjj...........jjjjjjj...........jjjjjjj.................................................",
+            "................................................jjjjjjjj...........jjjjjjj...........jjjjjjjj................................................",
+            "...............................................jjjjjjjj............jjjjjjj............jjjjjjjj...............................................",
+            "..............................................jjjjjjjj.............jjjjjjj.............jjjjjjjj..............................................",
+            ".............................................jjjjjjjj..............jjjjjjj..............jjjjjjjj.............................................",
+            "..................................aaaaaaaaa.eijjjjjj...............jjjjjjj...............jjjjjjie.aaaaaaaaa..................................",
+            "...............................aaaaaaaaaaaaaaegjjjj................jjjjjjj................jjjjgeaaaaaaaaaaaaaa...............................",
+            ".............................aaaaaaaaaaaaaaaaaegjjj................jjjjjjj................jjjgeaaaaaaaaaaaaaaaaa.............................",
+            "............................aaaaaaaaaaaaaaaaaaaegi.................jjjjjjj.................igeaaaaaaaaaaaaaaaaaaa............................",
+            "...........................aaaaaaaaaaaaaaaaaaaaaee.................jjjjjjj.................eeaaaaaaaaaaaaaaaaaaaaa...........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaa.aaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            "..........................aaaaaa.aaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaa.aaa..........................",
+            "..........................aaaaaaaaaaaaaaaa.aaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "...........................aaaaaaaaaaaaaaaaaaaaaaegi...............jjjjjjj...............igeaaaaaaaaaaaaaaaaaaaaaa...........................",
+            "............................aaaaaaaaaaaaaaaaaaaegijjj..............jjjjjjj..............jjjigeaaaaaaaaaaaaaaaaaaa............................",
+            ".............................aaaaaaaaaaaaaaaaagijjjjj..............jjjjjjj..............jjjjjigaaaaaaaaaaaaaaaaa.............................",
+            "...............................aaaaaaaaaaaaaaa.jjjjjj..............jjjjjjj..............jjjjjj.aaaaaaaaaaaaaaa...............................",
+            "..................................aaaaaaaaa.....jjjjjj.............jjjjjjj.............jjjjjj.....aaaaaaaaa..................................",
+            "................................................jjjjjjj............ggggggg............jjjjjjj................................................",
+            "................................................jjjjjjj.......aaaaa.......aaaaa.......jjjjjjj................................................",
+            ".................................................jjjjjjj....aaaaaaa.......aaaaaaa....jjjjjjj.................................................",
+            "..................................................jjjjjjj.aaaaaaaaa.......aaaaaaaaa.jjjjjjj..................................................",
+            "..................................................jjjjjjj.aaaaaaaaa.......aaaaaaaaa.jjjjjjj..................................................",
+            "...................................................jjjjjigaaaaaaaaa.......aaaaaaaaagijjjjj...................................................",
+            "....................................................jjjigaaaaa.aaaa.......aaaaa.aaaagijjj....................................................",
+            "....................................................jigeaaaaaa.aaaa.......aaaaa.aaaaaegij....................................................",
+            "....................................................geaaaaaaaaaaaaa.......aaaaaaaaaaaaaeg....................................................",
+            ".....................................................aaaaaaaaaaaaaa.......aaaaaaaaaaaaaa.....................................................",
+            "......................................................aaaaaaaaaaaaaaa...aaaaaaaaaaaaaaa......................................................",
+            "......................................................aaaaaaaaaaaaaaaeeeaaaaaaaaaaaaaaa......................................................",
+            "......................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................................................",
+            "......................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................................................",
+            "......................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................................................",
+            "......................................................aaaa.aaaaaaaaaaaaaaaaaaaaaaa..aaa......................................................",
+            "......................................................aaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaa......................................................",
+            "......................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa......................................................",
+            "......................................................aaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaa......................................................",
+            ".....................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.....................................................",
+            "....................................................eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae....................................................",
+            "....................................................geaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaeg....................................................",
+            "...................................................jjigaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagijj...................................................",
+            "..................................................jjjjigeaaaaa.aaaaaaaaaaaaaaaa.aaaaegijjjj..................................................",
+            "..................................................jjjjjjieaaaa.aaaaaaaaaaaaaaaa.aaaeijjjjjj..................................................",
+            ".................................................jjjjjjj.aaaaaaaaaaaaaaaaaaaaaaaaaaa.jjjjjjj.................................................",
+            ".................................................jjjjjj..aaaaaaaaaaaaaaaaaaaaaaaaaaa..jjjjjj.................................................",
+            "..................................aaaaaaaaa.....jjjjjjj...aaaaaaaaaaaa.aaaaaaaaaaaa...jjjjjjj.....aaaaaaaaa..................................",
+            "...............................aaaaaaaaaaaaaaa.jjjjjjj......aaaaaaaaaaaaaaaaaaaaa......jjjjjjj.aaaaaaaaaaaaaaa...............................",
+            ".............................aaaaaaaaaaaaaaaaaegjjjjjj........aaaaaaaaaaaaaaaaa........jjjjjjgeaaaaaaaaaaaaaaaaa.............................",
+            "............................aaaaaaaaaaaaaaaaaaaegijjj..............ggggggg..............jjjigeaaaaaaaaaaaaaaaaaaa............................",
+            "...........................aaaaaaaaaaaaaaaaaaaaaaeij...............jjjjjjj...............jieaaaaaaaaaaaaaaaaaaaaaa...........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaeg...............jjjjjjj...............geaaaaaaaa.aaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaa.aaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaa.aaaaaaaaaaaaaaaaaaaaaaa.........................",
+            ".........................aaaaaaaaaaaaaaaaaaaaaaaaaaa...............jjjjjjj...............aaaaaaaaaaaaaaaaaaaaaaaaaaa.........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaaa................jjjjjjj................aaaaaaaaaaaaaaaaaaaaaaaaa..........................",
+            "..........................aaaaaaaaaaaaaaaaaaaaaaaae................jjjjjjj................eaaaaaaaaaaaaaaaa..aaaaaa..........................",
+            "...........................aaaaaaaaaaaaaaaaaaaaaai.................iiiiiii.................iaaaaaaaaaaaaaaaaaaaaaa...........................",
+            "............................aaaaaaaaaaaaaaaaaaaaijj................eeeeeee................jjiaaaaaaaaaaaaaaaaaaaa............................",
+            ".............................aaaaaaaaaaaaaaaaaaijjjj.......aaaaaaaaaaaaaaaaaaaaaaa.......jjjjiaaaaaaaaaaaaaaaaaa.............................",
+            "...............................aaaaaaaaaaaaaaaijjjjjje..aaaaaaaaaaaaaaaaaaaaaaaaaaaaa..ejjjjjjiaaaaaaaaaaaaaaa...............................",
+            "..................................aaaaaaaaa....jjjjjeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaejjjjj....aaaaaaaaa..................................",
+            "................................................jjjeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaejjj................................................",
+            ".................................................jeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaej.................................................",
+            ".................................................eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae.................................................",
+            "................................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa................................................",
+            "...............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...............................................",
+            "..............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............................................",
+            "..............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............................................",
+            ".............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............................................",
+            ".............................................aa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............................................",
+            ".............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............................................",
+            ".............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............................................",
+            "............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aa............................................",
+            "............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa............................................",
+            "............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa............................................",
+            "............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa............................................",
+            "............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa............................................",
+            "............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa............................................",
+            "............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa............................................",
+            "............................................aaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaa............................................",
+            "............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa............................................",
+            ".............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............................................",
+            ".............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............................................",
+            ".............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............................................",
+            ".............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.............................................",
+            "..............................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..............................................",
+            "..............................................aaaaaaaaaaaaaaaaaaaag.ggggg.gaaaaaaaaaaaaaaaaaaaa..............................................",
+            "...............................................aaaaaaaaaaaaaaaaaaag.......gaaaaaaaaaaaaaaaaaaa...............................................",
+            "................................................aaaaaaaaaaaaaaaaaagm.....mgaaaaaaaaaaaaaaaaaa................................................",
+            ".................................................aaaaaaaaaaaaaaaaagm.....mgaaaaaaaaaaaaaaaaa.................................................",
+            "..................................................aaaaaaaaaaaaaaaagm.....mgaaaaaaaaaaaaaaaa..................................................",
+            ".......................................................aaaaaaaaaaag.......ga.aaaaaaa...aaa...................................................",
+            "..........................................................aaaaaaaag.mmmmm..aa...aaa..........................................................",
+            ".............................................................aaaaaaaaaaaaa.aaaaa.a...........................................................",
+            "..............................................................aaaaaaaaaaaa.aaaa.aa...........................................................",
+            ".............................................................................................................................................",
+            "............................................................................................................................................."
+          ]
+        }
+      },
+      "spawn": {
+        "x": 0,
+        "z": -60
+      },
+      "portals": [
+        {
+          "to": "rebirth-rahu",
+          "x": 0,
+          "z": -66
+        }
+      ],
+      "npcs": [
+        {
+          "name": "ยายจันทร์",
+          "x": 6,
+          "z": -58,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · ฝั่งทะเลสีทันดร",
+          "rebirthNPC": true
+        },
+        {
+          "name": "พระปัญญา",
+          "x": 5,
+          "z": -5,
+          "texture": 1,
+          "text": "ห้าภพแห่งไฟต้นแสง · ฝั่งทะเลสีทันดร",
+          "rebirthNPC": true
+        },
+        {
+          "name": "มาลัย",
+          "x": -6,
+          "z": -5,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · ฝั่งทะเลสีทันดร",
+          "rebirthNPC": true
+        },
+        {
+          "name": "ทิพย์สุวรรณ",
+          "x": 7.5,
+          "z": 6,
+          "texture": 0,
+          "text": "ห้าภพแห่งไฟต้นแสง · ฝั่งทะเลสีทันดร",
+          "rebirthNPC": true
+        },
+        {
+          "name": "นางจันทรา",
+          "x": -6,
+          "z": 6,
+          "texture": 2,
+          "text": "ห้าภพแห่งไฟต้นแสง · ฝั่งทะเลสีทันดร",
+          "rebirthNPC": true
+        }
+      ],
+      "citizens": [],
+      "mobs": [
+        [
+          -35,
+          -25,
+          77
+        ],
+        [
+          -29,
+          -25,
+          77
+        ],
+        [
+          -32,
+          -27,
+          77
+        ],
+        [
+          -35,
+          -30,
+          77
+        ],
+        [
+          -29,
+          -30,
+          77
+        ],
+        [
+          29,
+          -25,
+          78
+        ],
+        [
+          35,
+          -25,
+          78
+        ],
+        [
+          32,
+          -27,
+          78
+        ],
+        [
+          29,
+          -30,
+          78
+        ],
+        [
+          35,
+          -30,
+          78
+        ],
+        [
+          -35,
+          25,
+          79
+        ],
+        [
+          -29,
+          25,
+          79
+        ],
+        [
+          -32,
+          23,
+          79
+        ],
+        [
+          -35,
+          20,
+          79
+        ],
+        [
+          -29,
+          20,
+          79
+        ],
+        [
+          29,
+          25,
+          80
+        ],
+        [
+          35,
+          25,
+          80
+        ],
+        [
+          32,
+          23,
+          80
+        ],
+        [
+          29,
+          20,
+          80
+        ],
+        [
+          35,
+          20,
+          80
+        ],
+        [
+          32,
+          -21,
+          81
+        ],
+        [
+          0,
+          49,
+          82
+        ]
+      ],
+      "plants": [],
+      "decor": [],
+      "packs": false,
+      "mobPopulation": 1,
+      "safe": false,
+      "waterType": "water",
+      "waterAreas": [
+        {
+          "x": -70,
+          "z": -70,
+          "w": 140,
+          "d": 140
+        }
+      ],
+      "bridges": [
+        {
+          "x": -4.5,
+          "z": -53.5,
+          "w": 9,
+          "d": 44
+        },
+        {
+          "x": -4.5,
+          "z": 9.5,
+          "w": 9,
+          "d": 26
+        },
+        {
+          "x": -26,
+          "z": -24,
+          "w": 16,
+          "d": 22
+        },
+        {
+          "x": 10,
+          "z": -24,
+          "w": 16,
+          "d": 22
+        },
+        {
+          "x": -26,
+          "z": 2,
+          "w": 15,
+          "d": 18
+        },
+        {
+          "x": 11,
+          "z": 2,
+          "w": 15,
+          "d": 18
+        },
+        {
+          "x": -28,
+          "z": -56,
+          "w": 22,
+          "d": 24
+        },
+        {
+          "x": 6,
+          "z": -56,
+          "w": 22,
+          "d": 24
+        },
+        {
+          "x": -28,
+          "z": 26,
+          "w": 15,
+          "d": 15
+        },
+        {
+          "x": 13,
+          "z": 26,
+          "w": 15,
+          "d": 15
+        }
+      ],
+      "roads": [
+        {
+          "a": [
+            0,
+            -68
+          ],
+          "b": [
+            0,
+            -51
+          ],
+          "width": 7
+        }
+      ],
+      "plazas": [
+        [
+          -32,
+          27,
+          14,
+          13
+        ],
+        [
+          32,
+          27,
+          14,
+          13
+        ],
+        [
+          -32,
+          -23,
+          14,
+          13
+        ],
+        [
+          32,
+          -23,
+          14,
+          13
+        ],
+        [
+          0,
+          0,
+          18,
+          15
+        ],
+        [
+          0,
+          -49,
+          40,
+          30
+        ],
+        [
+          0,
+          59,
+          13,
+          11
+        ]
+      ],
+      "districts": [
+        {
+          "name": "ท่าเรือทอง",
+          "x": 0,
+          "z": -59
+        },
+        {
+          "name": "ศาลารวมขวัญ",
+          "x": 0,
+          "z": 0
+        },
+        {
+          "name": "สะพานแก้ว",
+          "x": 0,
+          "z": -26
+        },
+        {
+          "name": "ศาลาไฟต้นแสง",
+          "x": 0,
+          "z": 49
+        }
+      ],
+      "landmarks": [
+        [
+          "ท่าเรือทอง",
+          0,
+          -59
+        ],
+        [
+          "ศาลารวมขวัญ",
+          0,
+          0
+        ],
+        [
+          "สะพานแก้ว",
+          0,
+          -26
+        ],
+        [
+          "ศาลาไฟต้นแสง",
+          0,
+          49
+        ]
+      ]
     }
   ]
 }

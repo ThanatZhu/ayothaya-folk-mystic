@@ -1,3 +1,4 @@
+import {REBIRTH_MONSTER_SPECS} from './rebirth-content196.js';
 import {CHAPTER2_MONSTERS,CHAPTER2_BEHAVIOUR} from './chapter2-monsters.js';
 // Append-only IDs preserve existing saves and test fixtures (legacy IDs 0–3).
 export const FRONTIER_MONSTERS=[
@@ -27,6 +28,7 @@ export const FRONTIER_MONSTERS=[
  {id:'marsh-ape-awakened',name:'ร่างทรงพญาวานรบึง',hp:60000,speed:1.9,damage:190,baseXp:3000,jobXp:1800,level:95,sheet:'elite-monsters',row:1,height:3.6,boss:true,awakened:true,respawn:1800,reach:2.4,windup:.8}
 ];
 FRONTIER_MONSTERS.push(...CHAPTER2_MONSTERS);
+for(const spec of REBIRTH_MONSTER_SPECS){const art=FRONTIER_MONSTERS.find(m=>m.id===spec.proxyId);if(!art)throw Error('Missing rebirth art proxy '+spec.proxyId);FRONTIER_MONSTERS.push({...spec,sheet:art.sheet,row:art.row,chapter2Art:art.chapter2Art,artProxy:spec.proxyId});}
 // Presentation timing is independent of frame rate and authoritative world position.
 export function monsterFrame(m,time){
  if(m.hp<=0)return 7;
@@ -55,6 +57,7 @@ export const MONSTER_BEHAVIOUR={'bog-hopper':{leap:true},'bog-lantern':{aoe:2.4,
  'rat-chief-awakened':{enrage:true,slam:slam(4,3.2,1.4,.08,9,7)},'monkey-chief-awakened':{skirmish:1.2,enrage:true,slam:slam(4.2,3.4,1.5,.09,8,6.5)},'mill-keeper-awakened':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.6,1.6,.1,8,6.5)},'marsh-ape-awakened':{skirmish:1.2,enrage:true,slam:slam(4.6,3.8,1.6,.1,8,6)}};
 export const BOSS_SIGHT=10,BOSS_GIVE_UP=25;
 Object.assign(MONSTER_BEHAVIOUR,CHAPTER2_BEHAVIOUR);
+for(const m of REBIRTH_MONSTER_SPECS)MONSTER_BEHAVIOUR[m.id]=m.boss?{enrage:true,slam:slam(5,3,1.4,.08,9,8)}:m.elite?{enrage:true}:{};
 // 0.122 territory and strolling (owner-approved numbers): a monster 15+ levels above the player attacks anyone who
 // comes within 5 m of it while inside its 9 m leash; an idle ordinary monster strolls within 4 m of home at 40% speed,
 // resting 3–7 s between walks. `level` is the target player's base level (null: no territory check).

@@ -165,6 +165,13 @@ test('server simulation keeps pace with real time even when timers fire late',as
   db.docs.get(ref).petCollection={balance:9000000};session=await store.acquire(identity,'pets-second');assert.equal(session.record.petCollection.balance,800);assert.equal(session.record.mailbox.broadcastRead['news-000001'],1000);assert.equal(session.record.petCollection.collection['rice-rabbit'].copies,1);await store.checkpoint(session,session.record,{release:true});assert.equal(db.docs.get(ref).petCollection,undefined);assert.equal(db.docs.get(ref).mailbox,undefined);
  });
 
+test('rebirth quest rewards and progress can only be restored from the private server profile',async()=>{
+ const db=transactionDB(),store=new FirebaseStore(db),identity={uid:'rebirth-user',serverId:'server-1',slotId:'slot-1'},ref='players/rebirth-user/characters/slot-1';
+ db.docs.set(ref,{serverId:'server-1',revision:1,character:{name:'RebirthUser',gender:'male',classId:'novice'},state:initialSave(),rebirthStory:{campaign:'rebirth',cycle:1,quest:20,done:true}});await store.renewAuthority();let session=await store.acquire(identity,'rebirth-first');assert.equal(session.record.rebirthStory,undefined);
+ session.record.rebirthStory={v:4,campaign:'rebirth',cycle:1,quest:3,step:2,count:0,done:false};await store.checkpoint(session,session.record,{release:true});assert.equal(db.docs.get(ref).rebirthStory,undefined);
+ db.docs.get(ref).rebirthStory={campaign:'rebirth',cycle:1,quest:0};session=await store.acquire(identity,'rebirth-second');assert.equal(session.record.rebirthStory.quest,3);assert.equal(session.record.rebirthStory.step,2);await store.checkpoint(session,session.record,{release:true});assert.equal(db.docs.get(ref).rebirthStory,undefined);
+});
+
 test('walk destinations persist only in the authoritative private profile',async()=>{
  const db=transactionDB(),store=new FirebaseStore(db),identity={uid:'route-user',serverId:'server-1',slotId:'slot-1'},ref='players/route-user/characters/slot-1';
  db.docs.set(ref,{serverId:'server-1',revision:1,character:{name:'RouteUser',gender:'male',classId:'novice'},state:initialSave(),walkRoute:{id:'forged-route',x:999,z:999}});await store.renewAuthority();let session=await store.acquire(identity,'route-first');assert.equal(session.record.walkRoute,undefined);session.record.walkRoute={id:'server-route',mapId:'ayutthaya',x:4,z:5,radius:.5};await store.checkpoint(session,session.record,{release:true});assert.equal(db.docs.get(ref).walkRoute,undefined);db.docs.get(ref).walkRoute={id:'forged-again'};session=await store.acquire(identity,'route-second');assert.equal(session.record.walkRoute.id,'server-route');await store.checkpoint(session,session.record,{release:true});assert.equal(db.docs.get(ref).walkRoute,undefined);

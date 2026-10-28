@@ -72,7 +72,7 @@ test('weapons and boss sets are crafted; crafting starts with guaranteed blue we
  assert.equal(craft({coins:1000000,items:{'shard-soul':20,'shard-gem':12,'shard-divine':5,'conquest-shard':100}},bossId('armor','monk')).items[0].id,bossId('armor','monk'));
  assert.deepEqual(rewardItems({items:[{id:'@weapon',count:1},{id:'@armor',count:1}]},'acolyte','female').map(i=>i.id),[weaponId('acolyte',1),pieceId('wall','armor','nun',2)]);
  assert.equal(rewardItems({items:[{id:'@weapon',count:1}]},'novice')[0].id,'starter-wraps');
- assert.equal(canWear(weaponId('lancer',1),{classId:'lancer',level:9}),'low-level');assert.equal(canWear(pieceId('pierce','head','monk',1),{classId:'lancer',level:10}),null,'any class wears any look');
+ assert.equal(canWear(weaponId('lancer',1),{classId:'lancer',level:9}),'low-level');assert.equal(canWear(pieceId('pierce','head','monk',1),{classId:'lancer',level:10}),'wrong-class','28 Oct: a look fits its own class only');assert.equal(canWear(pieceId('pierce','head','monk',1),{classId:'acolyte',level:10}),null);assert.equal(canWear(pieceId('pierce','head','monk',1),{classId:'novice',level:10}),null,'a Novice may wear any look');
  assert.equal(canWear(weaponId('lancer',1),{classId:'hunter',level:99}),'wrong-class');
 });
 

@@ -57,7 +57,9 @@ export const STORY_ART={
  'lotus-thread':{src:'./assets/story124/lotus-thread.webp',alt:'สายใยขวัญและโคมกลางบึงบัว'},
  'city-home':{src:'./assets/story124/city-home.webp',alt:'ผู้คนและบ้านเรือนในอโยธยา'},
 };
+import {REBIRTH_STORY} from './rebirth-content196.js';
 export function storyArt(questId,stepNumber=1){
+ if(questId?.startsWith('rb'))return {src:'./assets/rebirth196/story/'+questId+'.webp?v=owner199',alt:REBIRTH_STORY.find(q=>q.id===questId)?.title??questId};
  if(questId==='t17-craft')return {src:'./assets/story124/craft-workshop.webp',alt:'ครูแสนดาบสอนคราฟต์อาวุธที่โรงตีเหล็ก'};
  const n=Number(questId?.slice(1));
  const id=n<=3?'dark-pier':n<=9?'straw-thread':n<=14?'orchard-lanterns':n===15?(stepNumber>=5?'city-home':'moonlit-mill'):n===16?'moonlit-mill':n===17?'city-home':n<=20?'lotus-thread':n===21&&stepNumber===1?'lotus-thread':'city-home';
@@ -65,6 +67,7 @@ export function storyArt(questId,stepNumber=1){
 }
 export function dialogueFor(objective){
  if(objective?.step?.type!=='talk')return null;
+ if(objective.quest.campaign==='rebirth')return {art:storyArt(objective.quest.id),pages:objective.quest.beats.map(b=>b[0]),question:'ขอทราบเรื่องราวเพิ่มเติม',answer:objective.step.say,accept:'พร้อมออกเดินทาง'};
  const d=STORY_DIALOGUE[objective.quest.id+':'+(objective.stepNumber-1)];
  if(!d)return null;
  return {...d,art:storyArt(objective.quest.id,objective.stepNumber),pages:[...d.pages,objective.step.say]};

@@ -37,9 +37,12 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   if(a.damageDealt)n*=1+a.damageDealt;
   w.roleSecondary=kind!=='skill';try{skillHit(w,m,w.power(n,m)+resolved,role.color,kind==='skill'?{}:{source:kind});}finally{w.roleSecondary=false;}
  }
- function area(at,r=3){return enemies().filter(m=>dist(m,at)<=r&&visible(at,m));}
+ // Match basic attacks: offensive reach ends at the body's edge, not its centre.
+ // Ground points and friendly/self targets keep their original centre-based range.
+ const radius=m=>Math.max(0,w.bodyRadius?.(m)??0),reach=(at,m)=>dist(at,m)-radius(m);
+ function area(at,r=3){return enemies().filter(m=>reach(at,m)<=r&&visible(at,m));}
  function team(at,r=4.5){return allies().filter(a=>a.player.hp>0&&dist(a.player,at)<=r&&visible(at,a.player));}
- function line(at,range=8){const dx=at.x-p.x,dz=at.z-p.z,len=Math.hypot(dx,dz)||1;return enemies().filter(m=>{const x=m.x-p.x,z=m.z-p.z,t=(x*dx+z*dz)/len,c=Math.abs(x*dz-z*dx)/len;return t>=0&&t<=range&&c<1.25&&visible(p,m);});}
+ function line(at,range=8){const dx=at.x-p.x,dz=at.z-p.z,len=Math.hypot(dx,dz)||1;return enemies().filter(m=>{const x=m.x-p.x,z=m.z-p.z,t=(x*dx+z*dz)/len,c=Math.abs(x*dz-z*dx)/len;return Math.hypot(Math.max(0,-t,t-range),Math.max(0,c-1.25))<=radius(m)&&visible(p,m);});}
  function pet(s,kind){
   state.pets=state.pets.filter(a=>a.kind!==kind);
   const owner=w.roleOwnerId??'self',tier=s.kind.startsWith('great')?'master':'base',id=owner+':'+kind+':'+(++state.petSerial),a={id,owner,kind,tier,x:p.x+.7,z:p.z+.4,left:s.seconds,power:s.kind.startsWith('great')?48:28,tick:.4,skillId:s.roleSkillId,spawnedAt:w.time,endsAt:w.time+s.seconds,maxLeft:s.seconds,face:{...p.face},attackAt:null};
@@ -92,7 +95,7 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
    case 'spirit':case 'greatSpirit':pet(s,'spirit');shield(me(),kind==='greatSpirit'?130:70);break;
    case 'peck':{const bird=state.pets.find(p=>p.kind==='rooster');if(!bird)return;bird.x=at.x-.5;bird.z=at.z;damage(target,n*(1+(m.summonPower??0)));crowd(target,1.5);break;}
    case 'mark':damage(target,n);enemyStatus(target,'mark',s.seconds);break;
-   case 'cone':{const dx=at.x-p.x,dz=at.z-p.z,d=Math.hypot(dx,dz)||1;for(const enemy of enemies()){const x=enemy.x-p.x,z=enemy.z-p.z,l=Math.hypot(x,z)||1;if(l<=s.range&&(x*dx+z*dz)/(l*d)>.65)damage(enemy,n);}break;}
+   case 'cone':{const dx=at.x-p.x,dz=at.z-p.z,d=Math.hypot(dx,dz)||1;for(const enemy of enemies()){const x=enemy.x-p.x,z=enemy.z-p.z,l=Math.hypot(x,z)||1;if(l-radius(enemy)<=s.range&&(x*dx+z*dz)/(l*d)>.65)damage(enemy,n);}break;}
    case 'ambush':damage(target,n*(target.roleStatus?.mark?1.25:1));status(me(),'stealth',3);break;
    case 'crow':for(const ally of team(p)){status(ally,'inspired',s.seconds,.2);delete ally.world.status.fear;}break;
    case 'jab':damage(target,n);state.combo=Math.min(3,state.combo+1);break;
@@ -126,7 +129,8 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   if(friends.has(s.type)){if(!allies().some(a=>a.id===target.id))return 'เลือกเพื่อนในปาร์ตี้เดียวกัน';if(['revive','greatRevive'].includes(s.type)?at.hp>0:at.hp<=0)return 'เป้าหมายไม่ตรงกับสกิล';}
   else if(!selfKinds.has(s.type)&&target.hp<=0)return 'เป้าหมายหมดแรงแล้ว';
   // A friend or foe that steps away during the wind-up still receives the release (2 m grace).
-  if(dist(p,at)>(s.range??7)+(release?2.6:.6)||!visible(p,at))return 'เป้าหมายไกลหรือมีสิ่งกีดขวาง';
+  const hostile=!friends.has(s.type)&&!selfKinds.has(s.type)&&!(groundKinds.has(s.type)&&target===w.roleGround);
+  if((hostile?reach(p,at):dist(p,at))>(s.range??7)+(release?2.6:.6)||!visible(p,at))return 'เป้าหมายไกลหรือมีสิ่งกีดขวาง';
   if(w.safe&&!selfKinds.has(s.type)&&!friends.has(s.type))return 'เขตปลอดภัย';
   if(['peck','flock'].includes(s.type)&&!state.pets.some(a=>a.kind==='rooster'))return 'เรียกไก่ชนก่อน';
   if(s.type==='detonatePoison'&&!poisonFor(target.roleStatus,w.roleOwnerId??'self'))return 'เป้าหมายต้องติดพิษก่อน';

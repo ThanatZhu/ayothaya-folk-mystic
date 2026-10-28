@@ -4850,6 +4850,17 @@ Object.assign(globalThis.I18N_EN,{
  "ยินดีด้วยกับการเปลี่ยนอาชีพ! รับกล่องยุทธภัณฑ์แดง Lv.55 แล้วเปิดจากกระเป๋า เลือก 1 สายเซ็ต: ทะลวง เพชฌฆาต มนตรา กำแพงเพชร หรือวายุ ได้ครบ 5 ชิ้น ได้แก่ อาวุธ หมวก เสื้อ ผ้าคลุม และรองเท้า ตรงกับอาชีพและรูปลักษณ์ตัวละครขณะเปิดกล่อง ทุกชิ้นสีแดง สวมใส่เมื่อเลเวล 55 และร่วมโบนัสเซ็ตสายเดียวกัน": "Congratulations on advancing your class! Claim the Red Lv.55 Equipment Set Choice Box and open it from your bag. Choose Pierce, Executioner, Mantra, Diamond Wall or Wind to receive five pieces: weapon, headgear, armor, cloak and shoes. All pieces match your class and appearance when you open the box, are red grade, require Lv.55 to equip and count toward the matching set bonus.",
  "เปลี่ยนอาชีพ · กล่องเลือกเซ็ตแดง Lv.55": "Class advancement · Red Lv.55 equipment set choice box"
 });
+// Party and solo boss damage reports.
+Object.assign(globalThis.I18N_EN,{
+ "สัดส่วนเทียบดาเมจบอสทั้งหมด · DPS = ดาเมจ ÷ เวลาต่อสู้เดียวกันทุกทีม · รวมพิษและสัตว์เลี้ยง · นับให้ปาร์ตี้ที่อยู่ตอนโจมตี": "Share is relative to all boss damage. DPS uses the same encounter duration for every team. Includes poison and pets. Each hit counts for the party joined at that time.",
+ "อันดับดาเมจปาร์ตี้และผู้เล่น": "Party and solo damage rankings",
+ "MVP · ผู้ทำดาเมจสูงสุด": "MVP / Highest individual damage",
+ "อันดับรวมปาร์ตี้และผู้เล่นเดี่ยว · กดแถวปาร์ตี้เพื่อดูสมาชิก": "Party and solo rankings. Select a party to view its members.",
+ "ปาร์ตี้ / ผู้เล่น": "Party / Player",
+ "{0} คน · กดดูสมาชิก": "{0} members / View members",
+ "สมาชิกปาร์ตี้": "Party members",
+ "ปาร์ตี้ของ": "Party of"
+});
 // 0.122 quest cards, world-map walking, portrait HUD
 Object.assign(globalThis.I18N_EN,{
   "เนื้อเรื่อง": "Story",

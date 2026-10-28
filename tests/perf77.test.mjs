@@ -34,3 +34,16 @@ test('GPU name is read from the ANGLE string and built-in GPUs are recognised',a
  assert.equal(intel,'Intel(R) UHD Graphics 630');assert.equal(nvidia,'NVIDIA GeForce GTX 1660 Ti');
  assert.ok(integratedGpu(intel));assert.ok(!integratedGpu(nvidia));assert.ok(integratedGpu('AMD Radeon(TM) Graphics'));assert.ok(!integratedGpu('AMD Radeon RX 6600'));
 });
+
+test('mid quality omits bloom; high drops bloom after slow frames without changing saved quality',()=>{
+ store.set('ayothaya-perf',JSON.stringify({fps:60,quality:'mid'}));let budgets=[];
+ createPerfSettings({renderer:fake(),scene:{traverse(){}},sun:{},softLook:{setEnabled(){},setPerformanceBudget(v){budgets.push(v);}},resize(){}});
+ assert.deepEqual(budgets,['reduced']);
+ store.set('ayothaya-perf',JSON.stringify({fps:60,quality:'high'}));budgets=[];const renderer=fake(),sun={castShadow:true};
+ const perf=createPerfSettings({renderer,scene:{traverse(){}},sun,softLook:{setEnabled(){},setPerformanceBudget(v){budgets.push(v);}},resize(){}});
+ assert.deepEqual(budgets,['full']);for(let t=0;t<=6000;t+=50)perf.shouldDraw(t);
+ assert.ok(budgets.includes('reduced'));assert.equal(perf.quality,'high');assert.equal(sun.castShadow,true);assert.equal(renderer.shadowMap.enabled,true);
+ const fullCount=budgets.filter(v=>v==='full').length;for(let t=6016;t<20000;t+=1000/60)perf.shouldDraw(t);
+ assert.equal(budgets.filter(v=>v==='full').length,fullCount,'recovery must not oscillate bloom on/off');
+ assert.deepEqual(readPerf(),{fps:60,quality:'high'});
+});

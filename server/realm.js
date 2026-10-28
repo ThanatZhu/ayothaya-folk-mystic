@@ -1,3 +1,4 @@
+import {isRankingExcluded} from './ranking-eligibility197.js';
 import {fieldAdventurers,adventurerAt,adventurerViews,adventurerContract,ADVENTURER_TIME} from '../field-adventurers177.js';
 import {ARENA_MAP,arenaReservation,arenaView,arenaCommand,cleanArenaRooms,leaveArena,finishArena} from './arena-rooms166.js';
 import {checkWalk,startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} from './auto-walk.js';
@@ -456,7 +457,7 @@ export class RealmServer{
  // ---- 0.96 weekly duel tournament (arena.js), stored beside the power board as leaders['arena:'+serverId].
  arena(serverId){const id='arena:'+serverId,week=arenaWeek(this.now());let a=this.leaders.get(id);if(!a||a.week!==week)a=this.arenaRollover(serverId,a,week);return a;}
  arenaRollover(serverId,old,week){
-  const top=Object.entries(old?.rows??{}).filter(([,v])=>v.points>0).sort(byPoints).slice(0,3),prizes={...(old?.prizes??{})};
+  const top=Object.entries(old?.rows??{}).filter(([k,v])=>v.points>0&&!this.rankingExcluded(serverId,k,v)).sort(byPoints).slice(0,3),prizes=Object.fromEntries(Object.entries(old?.prizes??{}).filter(([k])=>!this.rankingExcluded(serverId,k,old?.rows?.[k])));
   top.forEach(([k],i)=>{prizes[k]={place:i+1,week:old.week};});
   const a={week,rows:{},last:top.map(([,v],i)=>({place:i+1,name:v.name,classId:v.classId,points:v.points,wins:v.wins})),prizes};
   this.leaders.set('arena:'+serverId,a);this.leadersDirty.add('arena:'+serverId);this.arenaPairs.clear();
@@ -466,10 +467,14 @@ export class RealmServer{
  }
  arenaClaim(p,a=this.arena(p.serverId)){
   const z=a.prizes?.[p.key];if(!z)return;delete a.prizes[p.key];this.leadersDirty.add('arena:'+p.serverId);
+  if(isRankingExcluded(p.character)||this.rankingExcluded(p.serverId,p.key,a.rows?.[p.key]))return;
   this.grantLoot(p,structuredClone(ARENA.prizes[z.place-1]));p.saveNow=true;p.world.notice('🏆 รางวัลทัวร์นาเมนต์ประลอง อันดับ '+z.place+' · ได้รับแล้ว');
  }
  arenaScore(w,l,draw){
-  if(!w||!l||w.uid===l.uid)return;const a=this.arena(w.serverId),pair=[w.key,l.key].sort().join('|')+'|'+arenaDay(this.now()),n=this.arenaPairs.get(pair)??0;
+  if(!w||!l||w.uid===l.uid)return;
+  // Tester bouts award neither side competitive points.
+  if(isRankingExcluded(w.character,l.character)||this.rankingExcluded(w.serverId,w.key)||this.rankingExcluded(l.serverId,l.key))return;
+  const a=this.arena(w.serverId),pair=[w.key,l.key].sort().join('|')+'|'+arenaDay(this.now()),n=this.arenaPairs.get(pair)??0;
   if(n>=ARENA.pairDaily){for(const x of [w,l])x.world.notice('คู่นี้นับแต้มทัวร์นาเมนต์ครบ '+ARENA.pairDaily+' ครั้งของวันนี้แล้ว');return;}
   this.arenaPairs.set(pair,n+1);
   const row=x=>a.rows[x.key]??={name:x.character.name,classId:x.character.classId,points:0,wins:0,losses:0,draws:0,t:this.now()};
@@ -477,8 +482,8 @@ export class RealmServer{
   else{row(w).points+=ARENA.win;row(w).wins++;row(w).t=this.now();row(l).losses++;w.world.notice('ทัวร์นาเมนต์ +'+ARENA.win+' แต้ม · รวม '+row(w).points);}
   this.leadersDirty.add('arena:'+w.serverId);
  }
- arenaView(p){const a=this.arena(p.serverId),rows=Object.entries(a.rows).sort(byPoints),mine=rows.findIndex(([k])=>k===p.key);
-  return {rows:rows.slice(0,10).map(([k,v],i)=>{const look=this.leaders.get(p.serverId)?.[k]??v;return {rank:i+1,me:k===p.key,name:v.name,classId:look.classId,gender:look.gender,jobId:look.jobId,appearance:look.appearance,equipment:look.equipment,level:look.level,points:v.points,wins:v.wins,losses:v.losses,draws:v.draws};}),me:mine<0?null:{rank:mine+1,points:rows[mine][1].points},last:a.last,endsAt:arenaEnds(this.now())};}
+ arenaView(p){const a=this.arena(p.serverId),rows=Object.entries(a.rows).filter(([k,v])=>!this.rankingExcluded(p.serverId,k,v)).sort(byPoints),mine=rows.findIndex(([k])=>k===p.key);
+  return {rows:rows.slice(0,10).map(([k,v],i)=>{const look=this.leaders.get(p.serverId)?.[k]??v;return {rank:i+1,me:k===p.key,name:v.name,classId:look.classId,gender:look.gender,jobId:look.jobId,appearance:look.appearance,equipment:look.equipment,level:look.level,points:v.points,wins:v.wins,losses:v.losses,draws:v.draws};}),me:mine<0?null:{rank:mine+1,points:rows[mine][1].points},last:a.last?.filter(v=>!isRankingExcluded(v)).map((v,i)=>({...v,place:i+1})),endsAt:arenaEnds(this.now())};}
  warView(p){
   const s=this.wars.get(p.serverId),owner=this.castleOwner(p.serverId),here=p.room.map.id===WAR.map;
   return {active:!!s?.active,next:warLabel(this.now()),owner:owner?.name??null,holder:s?.active&&s.holder?this.guilds.get(s.holder)?.name??null:null,rankings:s?.active?warRankings(s.round).slice(0,3):this.leaders.get(warBoardKey(p.serverId))?.last?.rankings??[],
@@ -521,7 +526,7 @@ export class RealmServer{
   if(!Number.isFinite(damage)||damage<=0)return;
   const amount=Math.min(mob.hp,Math.round(damage*petBlessing(p.world)));mob.hp-=amount;markMonsterHit(mob,p.world.player);rallyPack(p.room.mobs,mob);
   let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
-  if(MONSTER_TYPES[mob.type]?.boss)recordBossDamage(p.room,mob,p,amount,this.clock);
+  if(MONSTER_TYPES[mob.type]?.boss){const party=this.parties.get(p.partyId);recordBossDamage(p.room,mob,p,amount,this.clock,party?{id:party.id,leaderName:this.peers.get(party.leader)?.character.name??p.character.name,members:[...party.members].map(id=>this.peers.get(id)).filter(a=>a&&!a.observer&&a.room===p.room)}:null);}
   if(mob.summoned){const all=(p.room.bossDamage??=new Map()),d=all.get(mob.id)??new Map();all.set(mob.id,d);d.set(p.id,(d.get(p.id)??0)+amount);} // each summoned boss keeps its own damage table
   else if(MONSTER_TYPES[mob.type].mvp){const d=(p.room.mvpDamage??=new Map());d.set(p.id,(d.get(p.id)??0)+amount);}
   p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color,magic:!!p.world.derived?.magic,crit:color==='#ffd27a',synced:!!p.world.roleCombat,...p.world.damageContext});
@@ -719,16 +724,18 @@ export class RealmServer{
  who(p){return {classId:p.character.classId,level:baseProgress(p.world).level,reborn:p.rebirth??0};}
  // Status + worn gear → combat numbers; cheap no-op unless level, class, stats or gear changed.
  // 0.72 leaderboard: best combat power per character (offline characters keep their last entry); top 200 kept.
+ rankingExcluded(serverId,key,row){return isRankingExcluded(row,this.leaders.get(serverId)?.[key]);}
  rank(p){const power=combatPower(p.derived,this.who(p).level),board=this.leaders.get(p.serverId)??{},old=board[p.key];
   const look={name:p.character.name,classId:p.character.classId,gender:p.character.gender,jobId:p.character.jobId??'',appearance:copy(p.character.appearance??{}),equipment:normalizeEquipment(p.equipment,p.character.classId)};
-  const next={...look,level:this.who(p).level,power};
+  // Preserve the exclusion by character key after a rename or a server restart.
+  const next={...look,level:this.who(p).level,power,...(isRankingExcluded(p.character,old)?{excludedFromRankings:true}:{})};
   if(old&&JSON.stringify({...old,t:undefined})===JSON.stringify({...next,t:undefined}))return;
   board[p.key]={...next,t:this.now()};
-  const keep=Object.entries(board).sort((a,b)=>b[1].power-a[1].power).slice(0,200);this.leaders.set(p.serverId,Object.fromEntries(keep));this.leadersDirty.add(p.serverId);}
+  const entries=Object.entries(board),keep=[...entries.filter(([,v])=>isRankingExcluded(v)),...entries.filter(([,v])=>!isRankingExcluded(v)).sort((a,b)=>b[1].power-a[1].power).slice(0,200)];this.leaders.set(p.serverId,Object.fromEntries(keep));this.leadersDirty.add(p.serverId);}
  leaderboard(p){
   // Refresh online cosmetics too: changing clothes does not change combat power.
   for(const peer of this.peers.values())if(peer.serverId===p.serverId)this.rank(peer);
-  const rows=Object.entries(this.leaders.get(p.serverId)??{}).sort((a,b)=>b[1].power-a[1].power);
+  const rows=Object.entries(this.leaders.get(p.serverId)??{}).filter(([,v])=>!isRankingExcluded(v)).sort((a,b)=>b[1].power-a[1].power);
   const mine=rows.findIndex(([k])=>k===p.key);return {rows:rows.slice(0,10).map(([k,v],i)=>({rank:i+1,me:k===p.key,...v})),me:mine<0?null:{rank:mine+1,...rows[mine][1]},arena:this.arenaView(p)};}
 
  refreshStats(p){

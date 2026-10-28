@@ -37,6 +37,7 @@ export function createPerfSettings({renderer,scene,sun,softLook,resize,onApply=(
  function apply(initial=false){
   if(!initial)scale=1;
   const q=QUALITY[state.quality];lightMaterials(!!q.light);
+  softLook.setPerformanceBudget?.(state.quality==='high'?'full':'reduced');
   renderer.setPixelRatio(ratio());
   if(renderer.shadowMap.enabled!==q.shadows){renderer.shadowMap.enabled=q.shadows;sun.castShadow=q.shadows;scene.traverse(o=>{for(const m of [].concat(o.material??[]))m.needsUpdate=true;});}
   // On load only the low level forces the soft-look pass off; otherwise the player's own toggle is kept.
@@ -47,6 +48,10 @@ export function createPerfSettings({renderer,scene,sun,softLook,resize,onApply=(
  function adapt(ms){
   if(windowStart<0){windowStart=ms;drawn=0;return;}drawn++;if(ms-windowStart<2000)return;
   const fps=drawn*1000/(ms-windowStart),goal=state.fps===30?28:55,before=ratio();windowStart=ms;drawn=0;
+  // Bloom adds thirteen full-screen passes. Drop it first after a slow window;
+  // keep the selected lighting, colour grade and player preference unchanged.
+  // Re-enable only on explicit quality selection, avoiding an on/off FPS loop.
+  if(fps<goal*.75)softLook.setPerformanceBudget?.('reduced');
   if(fps<goal*.9)scale=Math.max(.3,scale-.1);else if(fps>=goal&&scale<1)scale=Math.min(1,scale+.05);
   if(ratio()!==before){renderer.setPixelRatio(ratio());resize();}
  }

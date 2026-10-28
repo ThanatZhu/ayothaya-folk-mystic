@@ -54,8 +54,11 @@ export function createSoftLook({renderer,scene,camera,finish=null,mobile=false})
    // shadow blobs, rings and labels (transparent or always on top) have no silhouette
    if(m.transparent||m.depthTest===false){if(o.visible){o.visible=false;swapped.push([o,null]);}continue;}
    o.material=ghostOf(m);swapped.push([o,m]);}
-  const mask=camera.layers.mask,bg=scene.background;camera.layers.set(ACTOR_LAYER);scene.background=null;
-  try{draw();}finally{camera.layers.mask=mask;scene.background=bg;for(const [o,m] of swapped){if(m)o.material=m;else o.visible=true;}}
+  const mask=camera.layers.mask,bg=scene.background,shadowAuto=renderer.shadowMap.autoUpdate,shadowDirty=renderer.shadowMap.needsUpdate;camera.layers.set(ACTOR_LAYER);scene.background=null;
+  // The scenery pass already rendered this frame's shadows. The ghost overlay
+  // must reuse them instead of redrawing the entire shadow map with ghost materials.
+  renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=false;
+  try{draw();}finally{renderer.shadowMap.autoUpdate=shadowAuto;renderer.shadowMap.needsUpdate=shadowDirty;camera.layers.mask=mask;scene.background=bg;for(const [o,m] of swapped){if(m)o.material=m;else o.visible=true;}}
  }
  class SilhouettePass extends RenderPass{
   constructor(){super(scene,camera);this.clear=false;this.clearDepth=false;}
@@ -72,6 +75,8 @@ export function createSoftLook({renderer,scene,camera,finish=null,mobile=false})
  function setSize(width,height){const ratio=renderer.getPixelRatio();composer.setPixelRatio(ratio);composer.setSize(width,height);look.uniforms.resolution.value.set(width*ratio,height*ratio);}
  return {
   get enabled(){return enabled;},
+  get bloomEnabled(){return bloom.enabled;},
+  setPerformanceBudget(budget){bloom.enabled=!mobile&&budget==='full';},
   setEnabled(value){enabled=!!value;try{localStorage.setItem(KEY,enabled?'high':'low');}catch{}},
   setSize,
   render(){if(enabled)return composer.render();renderer.render(scene,camera);const auto=renderer.autoClear;renderer.autoClear=false;silhouettes(()=>renderer.render(scene,camera));renderer.autoClear=auto;}

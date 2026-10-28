@@ -5042,3 +5042,24 @@ Object.assign(globalThis.I18N_EN,{
  "ชื่อเว็บไซต์หลักของเกม (ต่ออายุรายปี)": "The game's main website name (renewed yearly)",
  "โฮสต์ตัวเกม HTML/JS, แผนที่ และภาพสไปรต์ · แผนฟรี Hobby ห้ามใช้เชิงพาณิชย์ ถ้าเกมขายของจริงควรเป็น Pro $20/เดือน": "Hosts the game HTML/JS, maps and sprites · the free Hobby plan is non-commercial; a game that sells items should be on Pro ($20/month)"
 });
+
+// Approved illustrated gacha banner UI.
+Object.assign(globalThis.I18N_EN,{
+ "ประวัติการสุ่ม": "Summon history",
+ "ผลสุ่มที่ยืนยันแล้วในหน้านี้ · เมื่อออกจากเกมรายการนี้จะเริ่มใหม่": "Confirmed results in this page session. This list resets when you leave the game.",
+ "ยังไม่มีรายการสุ่มในหน้านี้": "No summons in this page session yet.",
+ "รายละเอียดพระเครื่อง": "Amulet details",
+ "ดูสเตตัส": "View stats",
+ "ตัวอย่างของรางวัล · แตะไอเท็มเพื่อดูสเตตัส": "Reward previews. Select an item to view its stats.",
+ "การันตีรุ้งภายใน": "Rainbow guaranteed within",
+ "ข้อมูลสัตว์เลี้ยง": "Pet details",
+ "ระดับ": "Tier",
+ "{4} ทองแท่ง": "{4} Gold Bars",
+ "ดูเรท": "Rates"
+});
+
+Object.assign(globalThis.I18N_EN,{"รายละเอียดคู่ขวัญที่เลือก":"Selected companion details","คู่ขวัญร่วมผจญภัย · {2}":"Adventure companion · {2}","สเตตัสที่ได้รับ":"Granted stats","พลังในไข่ขวัญกำลังตื่นขึ้น…":"The spirit within the egg is awakening…"});
+
+Object.assign(globalThis.I18N_EN,{"คู่ขวัญร่วมผจญภัย · {3}":"Adventure companion · {3}","{9} · คูลดาวน์ {10} วิ":"{9} · Cooldown {10} sec"});
+
+Object.assign(globalThis.I18N_EN,{"สายใยหิมพานต์":"Bonds of Himmapan","อัญเชิญเพื่อนร่วมผจญภัย · มีสัตว์เลี้ยง":"Summon an adventure companion · Pets available:","แบบในตู้":"designs in this pool","อัปดาว":"Upgrade stars","อัญเชิญเพื่อนร่วมผจญภัย แล้วเลือกพาติดตามได้ที่นี่":"Summon a companion, then choose one to follow you here.","สกิล AUTO ปิด":"Skill AUTO off","เลือกคู่ขวัญ":"Choose a companion","ตัวซ้ำสำหรับอัปดาว":"Copies for star upgrade","คู่ขวัญร่วมผจญภัย ·":"Adventure companion ·","· คูลดาวน์":"· Cooldown","ตัวซ้ำสำหรับดาวถัดไป":"Copies for next star","อัปดาว ·":"Upgrade ·","สกิล AUTO":"Skill AUTO"});

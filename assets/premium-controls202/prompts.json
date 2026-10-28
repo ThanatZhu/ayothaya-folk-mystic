@@ -1,0 +1,32 @@
+[
+  {
+    "file": "assets/premium-controls202/button-jade.webp",
+    "width": 724,
+    "height": 145,
+    "corners": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "aa5fefcdf65f19ddbde21f9f6573088f142d83f480d92f2376a40e8ba6afda55",
+    "source": "C:/Users/WIN 11 PRO/.codex/generated_images/01a14e11-5749-71b2-a037-d1a49b0f8496/exec-e3013a2f-c154-4ff8-b7d5-1175a1fcce20.png",
+    "prompt": "Use case: precise-object-edit. Edit the supplied game UI button into a more restrained premium Thai fantasy control. Keep the deep emerald jade and antique gold palette, truly transparent exterior, long horizontal capsule silhouette. Replace the massive curling flame wings at both ends with tiny refined Thai lotus clasps, a single thin sculpted gold rim, softly curved pill ends. Much calmer, no spikes or oversized scrollwork, no busy marbling in the text area. Wide blank jade center, no text or icons. Orthographic front view, symmetrical, isolated. The button should occupy about 90% of a wide 4.5:1 canvas, with transparent margins all around. Crisp small-scale readability. Existing image is the edit target, maintain its premium hand-painted game material style, simplify ornament only. No rectangular plate or background and no extra objects.",
+    "mode": "built-in imagegen edit"
+  },
+  {
+    "file": "assets/premium-controls202/button-gold.webp",
+    "width": 724,
+    "height": 146,
+    "corners": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "dbdddedc94d97f4cad8b6e9ed9d6e24b1528cc554f915cdfe4daa28e0d3cccda",
+    "source": "C:/Users/WIN 11 PRO/.codex/generated_images/01a14e11-5749-71b2-a037-d1a49b0f8496/exec-9acca9cd-ab3b-4303-98b3-718ed9bda807.png",
+    "prompt": "Use case: precise-object-edit. Edit only the center material/color of this supplied Thai fantasy UI capsule button: replace emerald jade center with softly brushed warm champagne gold, a calm subtle satin highlight for readable dark text. Preserve exactly the same long pill silhouette, thin antique gold rim, small lotus clasps, dimensions and truly transparent outside. Do not add decoration, text, symbols, shadows extending beyond the asset, background, wings or spikes. This is the selected/primary state of precisely the same control, not a new shape. Preserve the transparent background.",
+    "mode": "built-in imagegen edit"
+  }
+]

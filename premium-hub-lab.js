@@ -1,5 +1,5 @@
 import {createPremiumHub,premiumDialog} from './premium-hub-ui.js';
-import {createPremiumPetPanel} from './pet-collection-ui.js?v=premium1';
+import {createPremiumPetPanel} from './pet-collection-ui.js?v=design202';
 import {buyPremiumItem} from './premium-shop-action.js';
 import {drawAmulets} from './amulet-gacha.js';
 import {normalizePetAccount,publicPetAccount,petAccountAction} from './pet-account.js';
@@ -23,4 +23,4 @@ const petMenu=document.createElement('button');petMenu.id='menu-pet';petMenu.inn
 document.getElementById('lab-funds').onclick=()=>{record.petCollection.balance+=1000;game.world.petCollection=publicPetAccount(record.petCollection);hub.render(true);};
 document.getElementById('lab-offline').onclick=e=>{game.online=!game.online;e.currentTarget.setAttribute('aria-pressed',String(!game.online));hub.render(true);};
 document.getElementById('lab-bag').onclick=()=>{document.getElementById('lab-inventory').textContent=Object.entries(game.world.bag.items).map(([id,n])=>itemDef(id).name+' ×'+n).join(' · ')||'กระเป๋าว่าง';};
-setInterval(()=>{panel.render();hub.render();},250);hub.openGacha();
+setInterval(()=>{panel.render();hub.render();},250);const previewView=new URLSearchParams(location.search).get('view');if(previewView==='companions')showCollection();else hub.openGacha(previewView==='pets'?'pets':'amulets');

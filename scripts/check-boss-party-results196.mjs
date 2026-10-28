@@ -27,7 +27,7 @@ try{
  for(const [width,height] of [[1440,900],[844,390],[390,844],[320,568]]){
   const mobile=width<1000,context=await browser.newContext({viewport:{width,height},isMobile:mobile,hasTouch:mobile}),page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));await page.goto(base);await page.waitForFunction(()=>window.review);await page.evaluate(()=>document.fonts.ready);
-  await page.evaluate(report=>window.review.emit(report),report);await page.locator('#boss-browser[open]').waitFor();await page.locator('.boss-result-row').first().waitFor();
+  await page.evaluate(report=>window.review.emit(report),report);assert.equal(await page.locator('#boss-browser').evaluate(n=>n.open),false,'Victory owns auto-opening; the history report stays closed');await page.evaluate(()=>window.review.ui.results.open());await page.locator('#boss-browser[open]').waitFor();await page.locator('.boss-result-row').first().waitFor();
   assert.equal(await page.locator('.boss-result-entry').count(),2);assert.equal(await page.locator('.boss-result-entry[data-kind=solo] .boss-result-player strong').textContent(),'นักรบเดี่ยว');
   assert.equal(await page.locator('.boss-winner').textContent(),'นักรบเดี่ยว','MVP is still the highest individual');
   assert.equal(await page.locator('.boss-party-members').isVisible(),false);

@@ -1,4 +1,4 @@
-import {createMobileConsumables202} from './mobile-consumables202.js?v=potion203';
+import {createMobileConsumables202} from './mobile-consumables202.js?v=potion205';
 import {storyNPCIdentity,storyNPCPlacement} from './npc-identity175.js';
 import {createArenaStage} from './arena-stage166.js';
 import {createArenaUI} from './arena-ui166.js?v=profile171';

@@ -23,7 +23,7 @@ export function createMobileConsumables202({game,bag=()=>game.world.bag,use=id=>
    // Short landscape screens can bring the skill arc up under the menu. Slide the
    // row left only as much as needed, preserving the approved vertical anchor.
    const blockers=[...document.querySelectorAll('#skills .skill:not([hidden]),#attack,#skill-bank,#auto-control,#mobile-target-next,#emote-open,#run-toggle,#quest-tracker')].filter(n=>{const r=n.getBoundingClientRect(),style=getComputedStyle(n);return r.width>0&&style.display!=='none'&&style.visibility!=='hidden';}).map(n=>n.getBoundingClientRect());
-   const collides=left=>blockers.some(r=>left<r.right+2&&left+groupWidth>r.left-2&&y<r.bottom+2&&y+groupHeight>r.top-2);
+   const collides=left=>blockers.some(r=>left<r.right&&left+groupWidth>r.left&&y<r.bottom&&y+groupHeight>r.top);
    const limit=Math.max(8,width*.3);while(x>limit&&collides(x))x-=8;
   }
   else if(portrait){x=placement==='left'?20:Math.max(20,(width-groupWidth)/2);y=(j?.y??height-140)-groupHeight-18;}

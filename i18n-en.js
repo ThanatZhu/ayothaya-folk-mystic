@@ -5032,5 +5032,13 @@ Object.assign(globalThis.I18N_EN,{
   "{0} ยืนที่หัวสะพานพร้อมมาลัย ทิพย์สุวรรณ และนางจันทรา ถ้าสะพานแตก ไฟต้นแสงจะไม่มีใครปกป้อง": "{0} stands at the bridgehead with Malai, Thipsuwan and Nang Chantra. If the bridge breaks, no one will guard the First Flame.",
   "ท้องฟ้าเหนือศาลาไฟต้นแสงมืดลง เงามหึมาสิบเศียรผุดขึ้นหลังภูเขาทอง เปลวไฟกลางศาลาสั่นไหว": "The sky above the flame pavilion darkens. A vast ten-headed shadow rises behind the golden mountain and the flame trembles.",
   "ทศกัณฐ์ตนจริงปรากฏกาย ไม่ใช่เงาอย่างที่เคยพบ สิบพักตร์ยี่สิบกรถืออาวุธครบมือ มาเพื่อดับไฟต้นแสง": "The true Thotsakan appears, not the shadow met before: ten faces and twenty arms full of weapons, come to put out the First Flame.",
-  "{0} ยืนอยู่ลำพังหน้าเปลวไฟ ทุกคนที่เคยช่วยกันยืนเป็นแนวโค้งอยู่เบื้องหลัง ไฟต้นแสงกลับนิ่งสงบอีกครั้ง": "{0} stands alone before the flame, every ally in a protective arc behind, and the First Flame burns steady once more."
+  "{0} ยืนอยู่ลำพังหน้าเปลวไฟ ทุกคนที่เคยช่วยกันยืนเป็นแนวโค้งอยู่เบื้องหลัง ไฟต้นแสงกลับนิ่งสงบอีกครั้ง": "{0} stands alone before the flame, every ally in a protective arc behind, and the First Flame burns steady once more.",
+ "ผู้ช่วยเขียนโค้ดเกม แผนที่ ระบบเซิร์ฟเวอร์ · แผน 5x = $100 · แผน 20x = $200 (แก้ยอดตามแผนที่ใช้จริง)": "Coding assistant for the game, maps and server · 5x plan = $100 · 20x plan = $200 (edit to the plan you pay for)",
+ "เจนภาพคัทซีน ภาพประกอบ และอาร์ตเวิร์ก": "Generates cutscene paintings, illustrations and artwork",
+ "DigitalOcean Managed PostgreSQL (แผนย้ายฐานข้อมูล)": "DigitalOcean Managed PostgreSQL (planned database move)",
+ "ฐานข้อมูลเซฟผู้เล่นแทน Firestore · ไม่มีเพดานรายวัน · backup รายวัน · แผนเล็กสุด ~$15 (ยังไม่ได้ซื้อ เปลี่ยนเป็น \"ใช้อยู่\" เมื่อเปิดใช้)": "Player-save database replacing Firestore · no daily cap · daily backups · smallest plan ~$15 (not bought yet; set to \"in use\" once enabled)",
+ "ระบบล็อกอิน Google + เซฟตัวละคร · แผนฟรี Spark: อ่าน 50,000 / เขียน 20,000 ครั้งต่อวัน (เขียนเกินเมื่อ 28 ต.ค. ทำให้เซิร์ฟล่ม)": "Google login + character saves · free Spark plan: 50,000 reads / 20,000 writes a day (writes ran over on 28 Oct and took the server down)",
+ "โดเมน ayothayaonline.com": "Domain ayothayaonline.com",
+ "ชื่อเว็บไซต์หลักของเกม (ต่ออายุรายปี)": "The game's main website name (renewed yearly)",
+ "โฮสต์ตัวเกม HTML/JS, แผนที่ และภาพสไปรต์ · แผนฟรี Hobby ห้ามใช้เชิงพาณิชย์ ถ้าเกมขายของจริงควรเป็น Pro $20/เดือน": "Hosts the game HTML/JS, maps and sprites · the free Hobby plan is non-commercial; a game that sells items should be on Pro ($20/month)"
 });

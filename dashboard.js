@@ -52,6 +52,27 @@ const DEFAULT_COSTS=[
  {id:'c-domain',name:'ค่าจดโดเมนเนมส่วนตัว (.com / .gg)',category:'โดเมน / อื่นๆ',role:'ชื่อเว็บไซต์ส่วนตัว (ไม่บังคับ · ใช้ลิงก์ .vercel.app ฟรีได้ตลอด)',cycle:'yearly',usd:10,thb:350,status:'optional'}
 ];
 
+// 28 Oct 2569 cost review (Firestore quota outage): the AI subscriptions, the planned Postgres and the facts that changed.
+// Added once to the saved list (the cloud copy too); rows the owner edited or deleted afterwards stay as they are.
+const COST_REVIEW='20261028';
+const COST_REVIEW_ROWS=[
+ {id:'c-claude-max',name:'Claude Max (Claude Code)',category:'พัฒนาเกม / อาร์ต / AI',role:'ผู้ช่วยเขียนโค้ดเกม แผนที่ ระบบเซิร์ฟเวอร์ · แผน 5x = $100 · แผน 20x = $200 (แก้ยอดตามแผนที่ใช้จริง)',cycle:'monthly',usd:100,thb:3400,status:'active'},
+ {id:'c-chatgpt-pro',name:'ChatGPT Pro',category:'พัฒนาเกม / อาร์ต / AI',role:'เจนภาพคัทซีน ภาพประกอบ และอาร์ตเวิร์ก',cycle:'monthly',usd:200,thb:6800,status:'active'},
+ {id:'c-postgres',name:'DigitalOcean Managed PostgreSQL (แผนย้ายฐานข้อมูล)',category:'ฐานข้อมูล (Database)',role:'ฐานข้อมูลเซฟผู้เล่นแทน Firestore · ไม่มีเพดานรายวัน · backup รายวัน · แผนเล็กสุด ~$15 (ยังไม่ได้ซื้อ เปลี่ยนเป็น "ใช้อยู่" เมื่อเปิดใช้)',cycle:'monthly',usd:15,thb:510,status:'optional'}
+];
+// earlier defaults whose facts changed: only rows still holding the old text are corrected
+const COST_REVIEW_FIXES={
+ 'c-firebase':{from:'ระบบล็อกอิน Google + เซฟตัวละคร 5 ช่อง (ฟรีอ่าน 50,000 ครั้ง/วัน)',role:'ระบบล็อกอิน Google + เซฟตัวละคร · แผนฟรี Spark: อ่าน 50,000 / เขียน 20,000 ครั้งต่อวัน (เขียนเกินเมื่อ 28 ต.ค. ทำให้เซิร์ฟล่ม)'},
+ 'c-domain':{from:'ชื่อเว็บไซต์ส่วนตัว (ไม่บังคับ · ใช้ลิงก์ .vercel.app ฟรีได้ตลอด)',name:'โดเมน ayothayaonline.com',role:'ชื่อเว็บไซต์หลักของเกม (ต่ออายุรายปี)',status:'active'},
+ 'c-vercel':{from:'โฮสต์ตัวเกม HTML/JS, แผนที่ และภาพสไปรต์ · ฟรี Bandwidth 100 GB/เดือน',role:'โฮสต์ตัวเกม HTML/JS, แผนที่ และภาพสไปรต์ · แผนฟรี Hobby ห้ามใช้เชิงพาณิชย์ ถ้าเกมขายของจริงควรเป็น Pro $20/เดือน'}
+};
+function reviewCosts(list){
+ if(list.some(r=>r?.review===COST_REVIEW))return false;
+ for(const r of list){const fix=COST_REVIEW_FIXES[r?.id];if(fix&&r.role===fix.from){const {from,...next}=fix;Object.assign(r,next);}r.review=COST_REVIEW;}
+ const have=new Set(list.map(r=>r?.id));for(const r of COST_REVIEW_ROWS)if(!have.has(r.id))list.push({...structuredClone(r),review:COST_REVIEW});
+ return true;
+}
+
 const DEFAULT_LEDGER=[
  {id:'tx-1',type:'expense',date:new Date().toISOString().slice(0,10),category:'ค่าเซิร์ฟเวอร์ (DigitalOcean/Render)',title:'ตั้งงบเซิร์ฟเวอร์ DigitalOcean App Platform (50 GB)',amount:170,note:'แพ็กเกจ $5/เดือน เปิดเซิร์ฟเวอร์ 24 ชม. รองรับ 1 เซิร์ฟ 5 แนล'}
 ];
@@ -284,7 +305,7 @@ function loadCosts(){
 function saveCosts(list){
  localStorage.setItem(COSTS_KEY,JSON.stringify(list));queueCloud();
 }
-let costs=loadCosts();
+let costs=loadCosts();if(reviewCosts(costs))localStorage.setItem(COSTS_KEY,JSON.stringify(costs));
 
 const CYCLE_LABELS={
  monthly:'รายเดือน (/เดือน)',
@@ -660,9 +681,10 @@ async function connectCloud(){
   if(!books){cloudRev=0;costs=merge([],costs);}
   else if(!joined){adopt({...books,costs:merge(books.costs,mine(COSTS_KEY)),ledger:merge(books.ledger,mine(LEDGER_KEY))});}
   else adopt(books);
+  const reviewed=reviewCosts(costs);if(reviewed)renderCosts(); // the 28 Oct cost review reaches the cloud copy once
   localStorage.setItem(JOIN_KEY,'1');
   await uploadPendingSlips();
-  if(!books||!joined)await pushCloud();else setSync('☁ ข้อมูลจากคลาวด์ · ทุกเครื่องเห็นตรงกัน · '+clock(books.updatedAt));
+  if(!books||!joined||reviewed)await pushCloud();else setSync('☁ ข้อมูลจากคลาวด์ · ทุกเครื่องเห็นตรงกัน · '+clock(books.updatedAt));
  }catch(e){cloudRev=null;setSync('เชื่อมคลาวด์ไม่ได้ ('+e.message+') · ตอนนี้ใช้ข้อมูลในเครื่องนี้','bad');}
 }
 // Pick up edits made on another machine while this page sits open.

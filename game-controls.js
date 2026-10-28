@@ -5,7 +5,7 @@ import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progr
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
 import {prefetchPoses} from './skill-pose-art.js?v=pose119';
-import {createLiveRoleVfx} from './role-skill-vfx.js?v=live185';
+import {createLiveRoleVfx} from './role-skill-vfx.js?v=facing200';
 import {revivalCount} from './revival-item.js?v=live185';
 import {createRolePlayUI} from './role-play-ui.js?v=live185';
 import {itemDef} from './items.js?v=107';

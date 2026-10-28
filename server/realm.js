@@ -1,3 +1,4 @@
+import {rapidConsumable} from '../rapid-consumables202.js';
 import {isRankingExcluded} from './ranking-eligibility197.js';
 import {fieldAdventurers,adventurerAt,adventurerViews,adventurerContract,ADVENTURER_TIME} from '../field-adventurers177.js';
 import {prologueJoin,prologueMap,prologueStart,prologueKill,prologueTick,prologueCommand,prologueExit,prologueView,prologueRecord} from './prologue-realm.js?v=1';
@@ -71,11 +72,11 @@ const WALK_FREE_MS=5;
 // 0.119 observer: an invisible, untargetable spectator for allowed e-mails (guild-war streams). It may only move and look around.
 const OBSERVER_OK=new Set(['input','walkTo','walkPace','walkCancel','switchChannel','ping','bossDirectory','arenaRooms','leaderboard','guildInfo','friendList','storyCheck','inspect','returnToSpawn','respawn','observer']);
 const allowed=new Set(['observer','arenaRooms','walkTo','walkPace','walkCancel','bossDirectory','switchChannel','storyCheck','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildSearch','guildApply','guildApplicationAnswer','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','petSkill','bountyClaim','albumDeposit','weeklyClaim','rebirth','hire','selectAlly','returnToSpawn','respawn','prologue']);
-// 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
+// Autonomous drinking is paced; manual HP/MP/remedy taps have no item cooldown.
 function autoPotionFor(realm,p){
- const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
+ const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.autoPotionAt??-Infinity)<800)return;
  const id=pickPotion(p.bag,w.player,w.autoConfig);if(!id)return;
- try{const r=useItem(p.bag,id,w.player,w.status);p.itemAt=realm.now();w.player.hp=r.hp;w.player.mp=r.mp;w.status=r.status;realm.setBag(p,r.bag);w.emit('used',{item:id});}catch{}
+ try{const r=useItem(p.bag,id,w.player,w.status);p.autoPotionAt=realm.now();w.player.hp=r.hp;w.player.mp=r.mp;w.status=r.status;realm.setBag(p,r.bag);w.emit('used',{item:id});}catch{}
 }
 export class RealmServer{
  petCast(p,automatic=false){
@@ -278,7 +279,7 @@ export class RealmServer{
    this.refreshStats(p);this.storyCheck(p);return true;
   }
   if(m.type==='useItem'){
-   if(now-p.itemAt<800)return this.itemFail(p,'item-rate');
+   if(!rapidConsumable(m.item)&&now-p.itemAt<800)return this.itemFail(p,'item-rate');
    // 0.109.4 wind wing (like RO's Fly Wing): a random walkable spot on this map, not in instances, the guild hall,
    // the war map while the war is on, or a duel; the client snaps to the jump on the next snapshot
    if(itemDef(m.item)?.kind==='wing'){
@@ -290,7 +291,7 @@ export class RealmServer{
     Object.assign(w.player,spot,{moving:false});w.path=[];w.notice('ปีกเหินลมพาวาร์ปไปจุดใหม่');w.emit('used',{item:m.item});return true;
    }
    let r;try{r=useItem(p.bag,m.item,w.player,w.status);}catch(e){return this.itemFail(p,e.message);}
-   p.itemAt=now;w.player.hp=r.hp;w.player.mp=r.mp;w.status=r.status;this.setBag(p,r.bag);if(r.food){w.food=r.food;w.notice('อิ่มอร่อย · '+itemDef(m.item).text);}w.emit('used',{item:m.item});return true;
+   if(!rapidConsumable(m.item))p.itemAt=now;w.player.hp=r.hp;w.player.mp=r.mp;w.status=r.status;this.setBag(p,r.bag);if(r.food){w.food=r.food;w.notice('อิ่มอร่อย · '+itemDef(m.item).text);}w.emit('used',{item:m.item});return true;
   }
   if(m.type==='discard'){
    // Items offered in a locked trade stay put; equipped gear lives in p.gear, not the bag, so it cannot be thrown away.
@@ -347,7 +348,7 @@ export class RealmServer{
    p.send({type:'snapshot',...this.snapshot(p)});p.send({type:'respawned',id:m.id});return true;
   }
   if(m.type==='selectAlly'){const ally=w.roleAllies?.().find(a=>a.id===m.target);if(!ally)return this.error(p,'invalid-target');w.supportTargetId=ally.id;return true;}
-  if(m.type==='autoConfig'){w.autoConfig=normalizeAuto(m);return true;} // 0.90 skills + potion thresholds for AUTO
+  if(m.type==='autoConfig'){const next=normalizeAuto(m);if(JSON.stringify(next)!==JSON.stringify(w.autoConfig)){w.autoRotation=null;w.autoSkillReach=null;}w.autoConfig=next;return true;} // 0.90 skills + potion thresholds for AUTO
   if(['skill','attack','select','auto','emote'].includes(m.type)){
    if(m.type!=='auto'){if(now-p.actionAt<70)return this.error(p,'action-rate');p.actionAt=now;} // 0.97 the AUTO switch is a state, never dropped behind a swing
    if(m.type==='select'){if(!integer(m.target,0,9999))return this.error(p,'invalid-target');w.select(m.target);return true;}
@@ -524,7 +525,7 @@ export class RealmServer{
   if(v.hp===1)this.endDuel(p,y,'น็อก '+y.character.name);
  }
  hurt(p,mob,damage,color='#fff0a6'){
-  if(p.levelMutationBusy||!Number.isFinite(damage)||damage<=0)return;damage=p.world.roleCombat?.outgoing(mob,damage)??damage;
+  if(p.levelMutationBusy||!p.world.autoDamageAllows(mob)||!Number.isFinite(damage)||damage<=0)return;damage=p.world.roleCombat?.outgoing(mob,damage)??damage;
   if(mob?.pvp)return String(mob.id).startsWith('war:')?this.warHit(p,mob,damage,color):this.duelHit(p,mob,damage,color);
   if(!mob||mob.hp<=0||p.room.map.safe)return;
   if(MONSTER_TYPES[mob.type]?.worldBoss&&!mob.summoned&&this.mapBosses.remaining(p.room)>0){mob.hp=0;mob.dead=this.mapBosses.remaining(p.room);return;}

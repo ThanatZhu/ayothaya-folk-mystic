@@ -9,7 +9,7 @@ import {consumeRevival,revivalCount} from './revival-item.js?v=revival180';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=class-reward192';
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=novice174';
 import {openHudPanel} from './hud-panels.js?v=34';
-import {pickPotion} from './auto-play.js?v=novice174';
+import {pickPotion} from './auto-play.js?v=auto202';
 import {normalizePetAccount} from './pet-account.js';
 
 const $=id=>document.getElementById(id);

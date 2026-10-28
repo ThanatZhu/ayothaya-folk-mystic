@@ -21,13 +21,13 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=novice174';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=boss201';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=auto202';
 import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,NOVICE_SLOTS,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=novice174';
 import {createRouteWalker} from './route-walk.js?v=bridge164';
 
 import {className} from './classes.js?v=novice174';
 import {rebirthRank} from './character-stats.js?v=107';
-import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=novice174';
+import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=auto202';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
  const world=new CombatWorld(config);world.spiritCompanion=true;const SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
@@ -164,12 +164,12 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  let predictions=[],predCD=[],predAutoCast=0,nextBasicAt=0,cooldownsAt=0,netLag=.1;const wall=()=>performance.now()/1000; // a steady clock: world.time resyncs to the server
  function attackInterval(){return world.profession.delay*(((network&&world.derivedView)||world.derived)?.delay??1);}
  function predictAuto(dt){
-  if(world.roleCombat)return;
+  if(world.roleCombat||world.autoConfig.rotation==='sequence')return;
   for(let i=0;i<predCD.length;i++)predCD[i]=Math.max(0,predCD[i]-dt);predAutoCast=Math.max(0,predAutoCast-dt);
   predictions=predictions.filter(q=>wall()-q.at<.7);
   const p=world.player;let m=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null;
   // the target just died: the server takes the nearest live monster in the same tick, so take it here too
-  if(!m||m.hp<=0)m=world.mobs.filter(x=>x.hp>0&&(world.hunt==null||x.type===world.hunt)).sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0]??null;
+  if(!m||m.hp<=0||!world.prey(m))m=world.mobs.filter(x=>x.hp>0&&world.prey(x)).sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0]??null;
   if(m&&Math.hypot(m.x-p.x,m.z-p.z)>8)m=null;
   if(!m||p.hp<=0)return;
   const cast=(index,kind,color)=>{p.face={x:m.x-p.x,z:m.z-p.z};playCast({type:'cast',skillIndex:index,predicted:true,kind,color,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z}});};
@@ -337,7 +337,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function paintHotbar(){skillButtons.forEach((b,i)=>{const s=world.skills[hotbar[i]];if(!s)return;b.querySelector('strong').textContent=s.icon;b.querySelector('span').textContent=s.short??s.name;b.setAttribute('aria-label',`สกิล ${HOTBAR_KEYS[i]} ${s.name}`);b.title=`${HOTBAR_KEYS[i]} · ${s.name} · MP ${s.cost} · ${s.cd} วินาที`;b.style.setProperty('--skill-color',s.color);});applySkillArt(skillButtons,world.profession.id,hotbar,world.skills);}
  paintHotbar();
  function setHotbar(order){if(!isOrder(order))return;hotbar=[...order];try{localStorage.setItem(HOT_KEY,JSON.stringify(hotbar));}catch{}paintHotbar();}
- function setAutoConfig(cfg){world.autoConfig=normalizeAuto(cfg);try{localStorage.setItem(AUTO_KEY,JSON.stringify(world.autoConfig));}catch{}autoSent='';}
+ function setAutoConfig(cfg){world.autoRotation=null;world.autoSkillReach=null;world.autoConfig=normalizeAuto(cfg);try{localStorage.setItem(AUTO_KEY,JSON.stringify(world.autoConfig));}catch{}autoSent=network?.command('autoConfig',world.autoConfig)?JSON.stringify(world.autoConfig):'';}
 
  let autoPicker=null;
  $('auto-attack').addEventListener('click',()=>{if(!isPaused()){if(autoPicker)autoPicker();else world.toggleAuto();}});

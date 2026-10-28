@@ -1,9 +1,9 @@
-import {normalizeAutoTarget,autoTargetAllows} from './auto-targets.js';
+import {normalizeAutoTarget,autoTargetAllows,autoRankAllows} from './auto-targets.js?v=auto202';
 import {skillHit} from './skill-critical.js';
 import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js?v=skill-crit1';
-import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=boss201';
+import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=auto202';
 import {patch,monsterKey} from './balance.js';
-import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=novice174';
+import {normalizeAuto,pickAutoSkill,advanceAutoSequence} from './auto-play.js?v=auto202';
 import {activeEmote,canonicalAction,EMOTE_ACTIONS,movementSpeed} from './character-action-state.js?v=life1';
 import {FRONTIER_MONSTERS,markMonsterHit,advanceMonster,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=110.8';
 import {skillTrack} from './skill-choreography.js?v=novice174';
@@ -278,11 +278,12 @@ export class CombatWorld{
  // 0.91 explicit on/off (the button and quests send the state they want, so two quick taps can no longer cross).
  // 0.99.7 hunt = a monster type index: AUTO started by a quest only goes after that kind (cleared by any other switch).
  bodyRadius(m){return bodyRadius(m);}
- prey(m){return !this.auto||autoTargetAllows(this.autoTarget,m,this.hunt);}
- setAuto(on,hunt=null,target=null){const filter=normalizeAutoTarget(target);if(on&&filter?.kind==='entity'&&!this.foes().some(m=>m.id===filter.id&&m.hp>0)){this.notice('เป้าหมายนี้ไม่อยู่หรือไม่สามารถต่อสู้ได้');return false;}if(on&&filter?.kind==='type'&&!MONSTER_TYPES[filter.type])return false;const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;this.autoTarget=this.auto?filter:null;if(this.auto&&filter?.kind==='entity')this.select(filter.id);return ok;}
- toggleAuto(){this.hunt=null;this.autoTarget=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
+ autoDamageAllows(m){return !this.auto||autoRankAllows(this.autoConfig,m,MONSTER_TYPES);}
+ prey(m){return !this.auto||(autoTargetAllows(this.autoTarget,m,this.hunt)&&this.autoDamageAllows(m));}
+ setAuto(on,hunt=null,target=null){const filter=normalizeAutoTarget(target);if(on&&filter?.kind==='entity'&&!this.foes().some(m=>m.id===filter.id&&m.hp>0)){this.notice('เป้าหมายนี้ไม่อยู่หรือไม่สามารถต่อสู้ได้');return false;}if(on&&filter?.kind==='type'&&!MONSTER_TYPES[filter.type]||on&&filter?.kind==='types'&&filter.types.some(t=>!MONSTER_TYPES[t]))return false;const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;this.autoTarget=this.auto?filter:null;if(this.auto&&filter?.kind==='entity')this.select(filter.id);return ok;}
+ toggleAuto(){this.autoRotation=null;this.autoSkillReach=null;this.hunt=null;this.autoTarget=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0||mob.pvp)return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
+  if(!mob||mob.hp<=0||mob.pvp||!this.autoDamageAllows(mob))return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a',...this.damageContext}); // Keep the hit's critical flag and cast identity.
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
@@ -362,7 +363,7 @@ export class CombatWorld{
   if(this.auto&&!stop&&!knocked&&!manual&&this.manualGrace===0){
    // 0.122 a kind picked in the AUTO window (or a quest hunt) is looked for across the whole map: with the 30 m limit
    // a picked kind living further away left the hero standing among other monsters until AUTO switched off.
-   const seek=['type','entity'].includes(this.autoTarget?.kind)||Number.isInteger(this.hunt)?Infinity:AUTO_SEEK;
+   const seek=['type','types','entity'].includes(this.autoTarget?.kind)||Number.isInteger(this.hunt)?Infinity:AUTO_SEEK;
    let m=this.target;if(!m||!this.prey(m)||distance(m,this.anchor)>AUTO_RANGE+1||distance(m,p)>seek+2){m=this.nearest(AUTO_RANGE);
     // 0.91 nothing left near where AUTO was switched on (e.g. turned on at the respawn yard): take the closest monster
     // within 30 m of the player and move the hunting spot there.
@@ -375,8 +376,9 @@ export class CombatWorld{
    if(m){
     // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
     this.autoCast=Math.max(0,this.autoCast-dt);
-    if(this.autoCast===0&&!this.basicPending&&!this.legacyPending&&lineClear(p,m,this.nav)){const i=this.roleCombat&&!this.roleCombat.legacy?this.roleCombat.autoIndex(this.autoConfig):pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0){this.autoCast=.5;this.skill(i);}}
-    if(reachTo(p,m)<=this.profession.range-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
+    if(this.autoCast===0&&!this.basicPending&&!this.legacyPending&&lineClear(p,m,this.nav)){this.roleGround=null;const i=this.roleCombat&&!this.roleCombat.legacy?this.roleCombat.autoIndex(this.autoConfig):pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0&&this.skill(i)){this.autoCast=.5;advanceAutoSequence(this,this.autoConfig,i);}}
+    const attackReach=this.autoConfig.rotation==='sequence'?Math.min(this.profession.range,this.autoSkillReach??Infinity):this.profession.range;
+    if(reachTo(p,m)<=attackReach-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      // 0.99.11 open ground (nothing between us): walk straight at it and skip the grid search, which is the costly part
      if(this.pathTimer<=0){this.path=walkLineClear(p,m,this.nav)?[{x:m.x,z:m.z}]:findPath(p,m,this.nav);this.pathTimer=.65;}

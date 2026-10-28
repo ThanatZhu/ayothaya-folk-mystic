@@ -8,13 +8,44 @@ const SELF=new Set(['heal','shield','mana','focus','blessing']);
 export function normalizeAuto(raw){
  const skills=Array.isArray(raw?.skills)?[...new Set(raw.skills.filter(i=>Number.isInteger(i)&&i>=0&&i<SLOTS))]:AUTO_DEFAULT.skills;
  const pct=v=>Number.isFinite(v)?Math.max(0,Math.min(90,Math.round(v))):0;
- return {skills,hp:raw&&'hp' in raw?pct(raw.hp):AUTO_DEFAULT.hp,mp:raw&&'mp' in raw?pct(raw.mp):AUTO_DEFAULT.mp};
+ return {skills,hp:raw&&'hp' in raw?pct(raw.hp):AUTO_DEFAULT.hp,mp:raw&&'mp' in raw?pct(raw.mp):AUTO_DEFAULT.mp,...(raw?.rotation==='sequence'?{rotation:'sequence'}:{}),...(raw?.bosses===false?{bosses:false}:{}),...(raw?.minis===false?{minis:false}:{})};
+}
+function sequenceState(world,cfg){
+ const key=JSON.stringify([cfg.skills,world.target?.id??null,world.target?.type??null]);
+ if(world.autoRotation?.key!==key)world.autoRotation={key,cursor:0};
+ return world.autoRotation;
+}
+// A combo waits for its next skill's cooldown, MP and reach. Inapplicable utility/locked
+// skills are skipped; a successful cast alone advances the sequence. No damage bonus is invented.
+export function pickSequenceSkill(world,cfg,assess){
+ const state=sequenceState(world,cfg),count=cfg.skills.length;world.autoSkillReach=null;
+ for(let n=0;n<count;n++){
+  const pos=(state.cursor+n)%count,i=cfg.skills[pos],candidate=assess(i);
+  if(candidate.skip)continue;
+  world.autoSkillReach=candidate.reach??null;
+  return candidate.ready?i:-1;
+ }
+ return -1;
+}
+export function advanceAutoSequence(world,cfg,index){
+ if(cfg.rotation!=='sequence'||!cfg.skills.length)return;
+ sequenceState(world,cfg).cursor=(cfg.skills.indexOf(index)+1)%cfg.skills.length;
 }
 // The first chosen skill that is learned, off cooldown, affordable and useful right now; -1 = none.
 // Self skills wait for a reason: recover under 60 % HP, guard when unshielded, focus under 40 % MP.
 // 0.119 a needed heal / shield / mana skill at once; otherwise the ready attack with the longest cooldown (ties: hotbar order)
 export function pickAutoSkill(world,cfg,scaled){
  const p=world.player,m=world.target;if(!cfg?.skills?.length||p.hp<=0)return -1;
+ if(cfg.rotation==='sequence')return pickSequenceSkill(world,cfg,i=>{
+  const base=world.skills[i],level=world.skillLevels?.[i]??1;
+  if(!base||base.reserved||base.passive||level<1)return {skip:true};
+  const s=scaled(base,level);if(!s)return {skip:true};
+  if(s.type==='heal'&&p.hp>=p.maxHp*.6||s.type==='shield'&&(p.shield>0||!m)||(s.type==='mana'||s.type==='focus')&&p.mp>=p.maxMp*.4)return {skip:true};
+  const self=['heal','shield','mana','focus'].includes(s.type);
+  if(!self&&(SELF.has(s.type)||s.type==='dash'||!m||m.hp<=0))return {skip:true};
+  const reach=self?null:s.range??s.radius??world.profession.range;
+  return {reach,ready:!(world.cooldowns[i]>0)&&p.mp>=(s.cost??0)&&(self||Math.hypot(m.x-p.x,m.z-p.z)-(world.bodyRadius?.(m)??0)<=reach)};
+ });
  let best=-1,bestCd=-1;
  for(const i of cfg.skills){
   const base=world.skills[i],level=world.skillLevels?.[i]??1;if(!base||base.reserved||base.passive||level<1||world.cooldowns[i]>0)continue;

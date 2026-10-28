@@ -1,0 +1,10 @@
+#auto-target-options{display:flex;gap:8px;padding:8px 12px 0;flex-wrap:wrap}
+#auto-target-options label{display:flex;align-items:center;justify-content:center;gap:7px;flex:1;min-height:44px;padding:0 7px;border:1px solid #8b784a;border-radius:7px;background:#132f28;font-size:12px;cursor:pointer;white-space:nowrap;box-sizing:border-box}
+#auto-target-options input{width:20px;height:20px;accent-color:#dec37c;flex-shrink:0}
+#auto-target-window .auto-target-choice:disabled{opacity:.45;cursor:default}
+#auto-target-window .auto-target-radio{border-radius:4px;display:grid;place-items:center;font-size:13px;color:#163c2b;flex-shrink:0}
+#auto-target-window footer{flex-wrap:wrap;gap:6px}
+#auto-target-window #auto-target-state{flex:1;min-width:70px;font-size:11px}
+#auto-target-start{min-height:44px;padding:7px 13px;border:1px solid #f4d78d;border-radius:7px;background:linear-gradient(#eed390,#b38a3a);color:#17382b;font-weight:800;font-size:12px}
+#auto-target-start:disabled{opacity:.4;cursor:default}
+@media(max-height:440px){#auto-target-window header{padding-block:5px}#auto-target-window h2{font-size:15px}#auto-target-options{padding-top:4px}#auto-target-help{margin-block:4px}#auto-target-window footer{margin-top:4px;padding-block:5px}}

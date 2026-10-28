@@ -108,7 +108,8 @@ node scripts/rebirth196/check-browser.mjs 'C:/Users/WIN 11 PRO/.cache/codex-runt
 
 ## v7 pass (Claude, 2026-10-28)
 
-rebirth-ferry ถูกสร้างใหม่ด้วยชุดเครื่องมือ v7 ของแมพเดิม (outputs/maps-v7: common/flora/water/houses) แทน blockout:
+ทั้ง 5 แมพถูกสร้างใหม่ด้วยชุดเครื่องมือ v7 ของแมพเดิม (outputs/maps-v7: common/flora/water/houses) แทน blockout
+(ท่าน้ำ/ป่า/ราหู = ทุ่งกับแม่น้ำ (ราหูเป็นลาวา) · นครลอยฟ้า = เกาะลอยเหนือทะเลเมฆ · สีทันดร = เกาะทองในทะเลวงแหวน + สะพานแก้ว):
 `scripts/rebirth196/rebirth.py` (สำเนา) + `rebirth-web.sh` (export GLB, bake nav) + `rebirth-nav.mjs` (กันช่องน้ำ, ตัดช่องที่เดินไม่ถึง)
 แล้วรัน `node scripts/rebirth196/build_catalog.mjs` ต้องรันจาก outputs/maps-v7 เพราะใช้ maps-v5/common.py และวัสดุจาก blender-maps-v2
 แมพที่ผ่าน v7 แล้วไม่มี .blend ใน repo (ไฟล์ทำงานอยู่ที่ outputs/maps-v7/<id>/<id>-v7.blend)

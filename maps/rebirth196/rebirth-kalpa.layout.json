@@ -1,7 +1,6 @@
 {
   "id": "rebirth-kalpa",
   "name": "ป่ากัลปพฤกษ์",
-  "draft": true,
   "units": "metres",
   "coordinateSystem": "Blender XY, Z up; game x=X,z=-Y",
   "spawn": [
@@ -24,10 +23,88 @@
   ],
   "water": [
     [
-      0,
-      0,
+      -1.92,
+      -30.25,
       10,
-      88
+      6.1
+    ],
+    [
+      -2.4,
+      -24.75,
+      10,
+      6.1
+    ],
+    [
+      -2.48,
+      -19.25,
+      10,
+      6.1
+    ],
+    [
+      -2.14,
+      -13.75,
+      10,
+      6.1
+    ],
+    [
+      -1.45,
+      -8.25,
+      10,
+      6.1
+    ],
+    [
+      -0.51,
+      -2.75,
+      10,
+      6.1
+    ],
+    [
+      0.51,
+      2.75,
+      10,
+      6.1
+    ],
+    [
+      1.45,
+      8.25,
+      10,
+      6.1
+    ],
+    [
+      2.14,
+      13.75,
+      10,
+      6.1
+    ],
+    [
+      2.48,
+      19.25,
+      10,
+      6.1
+    ],
+    [
+      2.4,
+      24.75,
+      10,
+      6.1
+    ],
+    [
+      1.92,
+      30.25,
+      10,
+      6.1
+    ],
+    [
+      1.11,
+      35.75,
+      10,
+      6.1
+    ],
+    [
+      0.12,
+      41.25,
+      10,
+      6.1
     ],
     [
       46,
@@ -260,7 +337,7 @@
     20
   ],
   "notes": [
-    "Rough layout for Claude to refine. Preserve connected gameplay routes and portal coordinates."
+    "v7 pass: the stream winds and ends at the nest cliffs; the wish tree stands on the west bank; Malai's pond (east)."
   ],
   "nav": "maps/rebirth196/rebirth-kalpa.nav.json"
 }

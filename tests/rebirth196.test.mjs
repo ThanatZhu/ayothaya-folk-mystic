@@ -14,7 +14,7 @@ test('all twenty quests reference reachable real NPCs, monsters and real rewards
  for(const m of REBIRTH_MONSTER_SPECS)assert.ok(DROPS[m.id]);
 });
 test('river, lava, sky gaps and sea rings block feet while bridges remain connected',()=>{
- for(const [id,x,z]of [['rebirth-ferry',0,0],['rebirth-kalpa',0,16],['rebirth-gandharva',0,-30],['rebirth-rahu',0,0],['rebirth-sithandon',13,0]])assert.equal(walkable(x,z,.4,catalog.maps.find(m=>m.id===id).nav),false,id+' cannot walk through a gap');
+ for(const [id,x,z]of [['rebirth-ferry',0,0],['rebirth-kalpa',0,16],['rebirth-gandharva',0,-30],['rebirth-rahu',0,0],['rebirth-sithandon',15,-30]])assert.equal(walkable(x,z,.4,catalog.maps.find(m=>m.id===id).nav),false,id+' cannot walk through a gap');
 });
 test('rebirth progress is independent, every quest pays once and a later rebirth keeps the finished arc',()=>{
  const original=normalizeStory({v:STORY_VERSION,quest:7,step:0}),copy=structuredClone(original);let progress=normalizeRebirthStory(null,1),paid=0,guard=0;

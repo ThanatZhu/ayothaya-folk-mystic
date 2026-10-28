@@ -1,5 +1,6 @@
 // node rebirth-nav.mjs <repo> <map-id>: the baked grid (maps-v7/<id>/nav-new.json) -> <repo>/maps/rebirth196/<id>.nav.json
-// The bake sees the river bed as floor, so the layout's water cells are blocked unless a bridge deck covers them;
+// The bake sees the river bed as floor, so the layout's water cells (and, on island maps, every cell off the islands)
+// are blocked unless a bridge deck covers them;
 // cells the spawn cannot reach are blocked too (no pockets behind trees or across water).
 import fs from 'node:fs';
 const [repo,id]=process.argv.slice(2),here=new URL('.',import.meta.url).pathname.replace(/^\/([A-Z]:)/,'$1');
@@ -10,7 +11,9 @@ const seg=(p,a,c)=>{const vx=c[0]-a[0],vy=c[1]-a[1],t=Math.max(0,Math.min(1,((p[
 let water=0;
 for(let j=0;j<nav.h;j++)for(let i=0;i<nav.w;i++){
  const x=nav.x0+i*nav.cell,y=-(nav.z0+j*nav.cell);   // Blender x, y
- const wet=(L.water??[]).some(([a,c,wd,d])=>Math.abs(x-a)<wd/2&&Math.abs(y-c)<d/2);
+ // island maps (sky, sea): only the islands are land, the same rounded squares rebirth.py draws, shrunk 6%
+ const island=(L.islands??[]).some(([a,c,wd,d])=>(Math.abs(x-a)/(wd/2*.94))**2.6+(Math.abs(y-c)/(d/2*.94))**2.6<1);
+ const wet=L.islands?.length?!island:(L.water??[]).some(([a,c,wd,d])=>Math.abs(x-a)<wd/2&&Math.abs(y-c)<d/2);
  const deck=(L.bridges??[]).some(([p,q,wd])=>seg([x,y],p,q)<wd/2-.9);
  if(wet&&!deck&&rows[j][i]!=='.'){rows[j][i]='.';water++;}
 }

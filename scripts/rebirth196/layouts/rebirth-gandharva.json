@@ -1,7 +1,6 @@
 {
   "id": "rebirth-gandharva",
   "name": "นครคนธรรพ์ลอยฟ้า",
-  "draft": true,
   "units": "metres",
   "coordinateSystem": "Blender XY, Z up; game x=X,z=-Y",
   "spawn": [
@@ -163,32 +162,32 @@
     [
       -32,
       23,
-      18,
-      18
+      15,
+      15
     ],
     [
       32,
       23,
-      18,
-      18
+      15,
+      15
     ],
     [
       -32,
       -20,
-      18,
-      18
+      15,
+      15
     ],
     [
       32,
       -20,
-      18,
-      18
+      15,
+      15
     ],
     [
       0,
       0,
-      18,
-      18
+      15,
+      15
     ]
   ],
   "districts": {
@@ -263,7 +262,7 @@
     20
   ],
   "notes": [
-    "Rough layout for Claude to refine. Preserve connected gameplay routes and portal coordinates."
+    "v7 pass: rounded floating islands over a cloud sea, rope bridges only across the gaps."
   ],
   "islands": [
     [

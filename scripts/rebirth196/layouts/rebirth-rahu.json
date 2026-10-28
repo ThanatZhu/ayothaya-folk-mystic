@@ -1,7 +1,6 @@
 {
   "id": "rebirth-rahu",
   "name": "แดนอสูรราหู",
-  "draft": true,
   "units": "metres",
   "coordinateSystem": "Blender XY, Z up; game x=X,z=-Y",
   "spawn": [
@@ -24,10 +23,88 @@
   ],
   "water": [
     [
-      0,
-      0,
+      -1.92,
+      -30.25,
       14,
-      88
+      6.1
+    ],
+    [
+      -2.4,
+      -24.75,
+      14,
+      6.1
+    ],
+    [
+      -2.48,
+      -19.25,
+      14,
+      6.1
+    ],
+    [
+      -2.14,
+      -13.75,
+      14,
+      6.1
+    ],
+    [
+      -1.45,
+      -8.25,
+      14,
+      6.1
+    ],
+    [
+      -0.51,
+      -2.75,
+      14,
+      6.1
+    ],
+    [
+      0.51,
+      2.75,
+      14,
+      6.1
+    ],
+    [
+      1.45,
+      8.25,
+      14,
+      6.1
+    ],
+    [
+      2.14,
+      13.75,
+      14,
+      6.1
+    ],
+    [
+      2.48,
+      19.25,
+      14,
+      6.1
+    ],
+    [
+      2.4,
+      24.75,
+      14,
+      6.1
+    ],
+    [
+      1.92,
+      30.25,
+      14,
+      6.1
+    ],
+    [
+      1.11,
+      35.75,
+      14,
+      6.1
+    ],
+    [
+      0.12,
+      41.25,
+      14,
+      6.1
     ]
   ],
   "bridges": [
@@ -254,7 +331,7 @@
     22
   ],
   "notes": [
-    "Rough layout for Claude to refine. Preserve connected gameplay routes and portal coordinates."
+    "v7 pass: the lava river winds and ends at the crater rim (boss ground)."
   ],
   "waterType": "cooled-lava",
   "nav": "maps/rebirth196/rebirth-rahu.nav.json"

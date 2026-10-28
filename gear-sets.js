@@ -13,6 +13,8 @@ export const SET_SLOTS=['head','armor','garment','shoes'];
 const SLOT_WORD={head:'หมวก',armor:'เสื้อ',garment:'ผ้าคลุม',shoes:'รองเท้า'};
 // 8 looks. monk and nun are the acolyte class drawn for each gender (not new classes); nun has no weapon of her own.
 export const LOOKS=[['swordsman','นักดาบ'],['lancer','นักทวน'],['hunter','นายพราน'],['boxer','นักมวย'],['rogue','จอมโจร'],['shaman','หมอผี'],['monk','พระ'],['nun','แม่ชี']];
+// the class a look's armor belongs to (monk and nun are both the acolyte)
+export const lookClass=look=>look==='monk'||look==='nun'?'acolyte':look;
 export const gearLook=(classId,gender)=>classId==='acolyte'?(gender==='female'?'nun':'monk'):LOOKS.some(([l])=>l===classId)?classId:null;
 // [class, weapon word, stat, power, look whose sheet holds the weapon]
 export const WEAPON_CLASSES=[['swordsman','ดาบ','atk',1,'swordsman'],['lancer','ทวน','atk',1.07,'lancer'],['hunter','ธนู','atk',.93,'hunter'],

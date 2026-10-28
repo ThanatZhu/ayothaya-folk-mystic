@@ -4,7 +4,7 @@
 import {BAG_SLOTS,bagCap,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=tier167';
 import {dodgeChance,monsterHit} from './combat-formulas.js';
 import {effectiveGearStats,roundGearStat} from './refine-tiers.js';
-import {setBonuses,STAT_CAPS} from './gear-sets.js';
+import {setBonuses,STAT_CAPS,lookClass} from './gear-sets.js';
 
 export const STATS=['str','agi','vit','int','dex','luk'];
 export const STAT_LABEL={str:'STR',agi:'AGI',vit:'VIT',int:'INT',dex:'DEX',luk:'LUK'};
@@ -51,6 +51,8 @@ export function normalizeGear(gear){
 export function canWear(id,{classId,level,reborn=0}){
  const it=itemDef(id);if(it?.kind!=='gear')return 'not-gear';
  if(it.classes&&!it.classes.includes(classId))return 'wrong-class';
+ // class-look set and boss armor ("... (นายพราน)") fits its own class; a Novice may wear any look until it picks one
+ if(it.look&&classId!=='novice'&&lookClass(it.look)!==classId)return 'wrong-class';
  // a reborn character keeps wearing the gear it earned before going back to Lv.1
  if(!reborn&&(it.level??1)>level)return 'low-level';
  return null;

@@ -759,7 +759,7 @@ export class RealmServer{
 
  refreshStats(p){
   const who=this.who(p),pet=activePremiumPet(p.petCollection)?.bonus??{},food=foodBuff(p.world),sig=JSON.stringify([who,p.stats,p.gear,pet,food]);if(sig===p.statSig)return;
-  const fit=dropInvalidGear(p.bag,p.gear,who);if(JSON.stringify(fit.gear)!==JSON.stringify(p.gear)){p.gear=fit.gear;this.setBag(p,fit.bag);}
+  const fit=dropInvalidGear(p.bag,p.gear,who);if(JSON.stringify(fit.gear)!==JSON.stringify(p.gear)){const off=Object.keys(p.gear).filter(k=>p.gear[k]&&!fit.gear[k]).map(k=>itemDef(p.gear[k])?.name).filter(Boolean);p.gear=fit.gear;this.setBag(p,fit.bag);if(off.length)p.world.notice('ถอด '+off.join(', ')+' เก็บเข้ากระเป๋า · อาชีพนี้ใช้ไม่ได้');}
   p.statSig=JSON.stringify([who,p.stats,p.gear,pet,food]);p.derived=deriveStats({...who,stats:p.stats,gear:p.gear,pet,food});p.world.applyDerived(p.derived);this.rank(p);
  }
  itemFail(p,code){p.world.emit('notice',{text:ALBUM_ERRORS[code]??PET_SKILL_ERRORS[code]??ITEM_ERRORS[code]??SOCIAL_ERRORS[code]??code});return false;}

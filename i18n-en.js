@@ -5040,5 +5040,8 @@ Object.assign(globalThis.I18N_EN,{
  "ระบบล็อกอิน Google + เซฟตัวละคร · แผนฟรี Spark: อ่าน 50,000 / เขียน 20,000 ครั้งต่อวัน (เขียนเกินเมื่อ 28 ต.ค. ทำให้เซิร์ฟล่ม)": "Google login + character saves · free Spark plan: 50,000 reads / 20,000 writes a day (writes ran over on 28 Oct and took the server down)",
  "โดเมน ayothayaonline.com": "Domain ayothayaonline.com",
  "ชื่อเว็บไซต์หลักของเกม (ต่ออายุรายปี)": "The game's main website name (renewed yearly)",
- "โฮสต์ตัวเกม HTML/JS, แผนที่ และภาพสไปรต์ · แผนฟรี Hobby ห้ามใช้เชิงพาณิชย์ ถ้าเกมขายของจริงควรเป็น Pro $20/เดือน": "Hosts the game HTML/JS, maps and sprites · the free Hobby plan is non-commercial; a game that sells items should be on Pro ($20/month)"
+ "โฮสต์ตัวเกม HTML/JS, แผนที่ และภาพสไปรต์ · แผนฟรี Hobby ห้ามใช้เชิงพาณิชย์ ถ้าเกมขายของจริงควรเป็น Pro $20/เดือน": "Hosts the game HTML/JS, maps and sprites · the free Hobby plan is non-commercial; a game that sells items should be on Pro ($20/month)",
+ "ถอด ": "Took off ",
+ "เก็บเข้ากระเป๋า · อาชีพนี้ใช้ไม่ได้": "into the bag · this class cannot use it",
+ " เก็บเข้ากระเป๋า · อาชีพนี้ใช้ไม่ได้": " into the bag · this class cannot use it"
 });

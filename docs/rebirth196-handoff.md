@@ -105,3 +105,10 @@ node scripts/rebirth196/check-browser.mjs 'C:/Users/WIN 11 PRO/.cache/codex-runt
 ## Prompt ส่งต่อได้เลย
 
 > ช่วยทำภาคจุติ ห้าภพแห่งไฟต้นแสง ต่อจากต้นแบบนี้ อ่าน docs/rebirth196-handoff.md และ docs/rebirth-chapters-plan.md ก่อน เริ่มจากเกลาแมพร่างทั้ง 5 ให้สวยเข้ากับเกมเรา โดยคง map ID, ทิศพอร์ทัล, เส้นทางเควสและจุดที่เดินถึงได้ อย่าเขียนทับงานที่ยังไม่ commit ใน checkout อื่น มีภาพคัตซีนครบ 20 และระบบเควสออนไลน์ครบ 20 แล้ว ให้รักษา rebirthStory/cycle แยกจาก story เดิมและการตรวจรางวัลฝั่งเซิร์ฟเวอร์ หลังเปลี่ยน geometry ต้อง bake nav ใหม่ ตรวจไม่ให้เดินผ่านน้ำหรือตกเกาะ อย่าเปลี่ยนบาลานซ์/PvP หรือพุชขึ้นจริงจนกว่าจะตรวจขอบเขตกับผม
+
+## v7 pass (Claude, 2026-10-28)
+
+rebirth-ferry ถูกสร้างใหม่ด้วยชุดเครื่องมือ v7 ของแมพเดิม (outputs/maps-v7: common/flora/water/houses) แทน blockout:
+`scripts/rebirth196/rebirth.py` (สำเนา) + `rebirth-web.sh` (export GLB, bake nav) + `rebirth-nav.mjs` (กันช่องน้ำ, ตัดช่องที่เดินไม่ถึง)
+แล้วรัน `node scripts/rebirth196/build_catalog.mjs` ต้องรันจาก outputs/maps-v7 เพราะใช้ maps-v5/common.py และวัสดุจาก blender-maps-v2
+แมพที่ผ่าน v7 แล้วไม่มี .blend ใน repo (ไฟล์ทำงานอยู่ที่ outputs/maps-v7/<id>/<id>-v7.blend)

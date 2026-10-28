@@ -1,7 +1,6 @@
 {
   "id": "rebirth-ferry",
   "name": "ท่าน้ำข้ามภพ",
-  "draft": true,
   "units": "metres",
   "coordinateSystem": "Blender XY, Z up; game x=X,z=-Y",
   "spawn": [
@@ -24,10 +23,100 @@
   ],
   "water": [
     [
-      0,
-      0,
+      -1.92,
+      -30.25,
       22,
-      88
+      6.1
+    ],
+    [
+      -2.4,
+      -24.75,
+      22,
+      6.1
+    ],
+    [
+      -2.48,
+      -19.25,
+      22,
+      6.1
+    ],
+    [
+      -2.14,
+      -13.75,
+      22,
+      6.1
+    ],
+    [
+      -1.45,
+      -8.25,
+      22,
+      6.1
+    ],
+    [
+      -0.51,
+      -2.75,
+      22,
+      6.1
+    ],
+    [
+      0.51,
+      2.75,
+      22,
+      6.1
+    ],
+    [
+      1.45,
+      8.25,
+      22,
+      6.1
+    ],
+    [
+      2.14,
+      13.75,
+      22,
+      6.1
+    ],
+    [
+      2.48,
+      19.25,
+      22,
+      6.1
+    ],
+    [
+      2.4,
+      24.75,
+      22,
+      6.1
+    ],
+    [
+      1.92,
+      30.25,
+      22,
+      6.1
+    ],
+    [
+      1.11,
+      35.75,
+      22,
+      6.1
+    ],
+    [
+      0.12,
+      41.25,
+      22,
+      6.1
+    ],
+    [
+      -47,
+      1,
+      14,
+      24
+    ],
+    [
+      49,
+      -4,
+      14,
+      20
     ]
   ],
   "bridges": [
@@ -250,7 +339,7 @@
     20
   ],
   "notes": [
-    "Rough layout for Claude to refine. Preserve connected gameplay routes and portal coordinates."
+    "v7 pass: river ends at the boss ground (ancient water gate), a backwater for the raft houses (west) and a reed marsh (east)."
   ],
   "nav": "maps/rebirth196/rebirth-ferry.nav.json"
 }

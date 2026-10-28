@@ -5255,3 +5255,5 @@ Object.assign(globalThis.I18N_EN,{"รายละเอียดคู่ขว
 Object.assign(globalThis.I18N_EN,{"คู่ขวัญร่วมผจญภัย · {3}":"Adventure companion · {3}","{9} · คูลดาวน์ {10} วิ":"{9} · Cooldown {10} sec"});
 
 Object.assign(globalThis.I18N_EN,{"สายใยหิมพานต์":"Bonds of Himmapan","อัญเชิญเพื่อนร่วมผจญภัย · มีสัตว์เลี้ยง":"Summon an adventure companion · Pets available:","แบบในตู้":"designs in this pool","อัปดาว":"Upgrade stars","อัญเชิญเพื่อนร่วมผจญภัย แล้วเลือกพาติดตามได้ที่นี่":"Summon a companion, then choose one to follow you here.","สกิล AUTO ปิด":"Skill AUTO off","เลือกคู่ขวัญ":"Choose a companion","ตัวซ้ำสำหรับอัปดาว":"Copies for star upgrade","คู่ขวัญร่วมผจญภัย ·":"Adventure companion ·","· คูลดาวน์":"· Cooldown","ตัวซ้ำสำหรับดาวถัดไป":"Copies for next star","อัปดาว ·":"Upgrade ·","สกิล AUTO":"Skill AUTO"});
+
+Object.assign(globalThis.I18N_EN,{"{7} ทองแท่ง":"{7} gold bars","{8} ทองแท่ง":"{8} gold bars"});

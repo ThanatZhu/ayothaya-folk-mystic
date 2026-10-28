@@ -1,7 +1,8 @@
+import {createMobileHudFit208} from './mobile-hud-fit208.js?v=fit208';
 import {mobileHudMedia} from './hud-mode204.js';
-import {createMobileCombatLayout} from './mobile-combat-ui.js?v=151';
+import {createMobileCombatLayout} from './mobile-combat-ui.js?v=fit208';
 import {createMobileReferenceUI} from './mobile-reference-ui.js?v=148';
-import {createMobileHudEditor} from './mobile-hud-editor.js?v=151';
+import {createMobileHudEditor} from './mobile-hud-editor.js?v=fit208';
 // A single owner for the touch HUD. Reuse live buttons so cooldowns and saved
 // hotbar order stay with game-controls / auto-settings rather than a second UI.
 export function skillPage(slots,page=0,size=4){
@@ -97,5 +98,5 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  addEventListener('resize',refresh);window.visualViewport?.addEventListener('resize',refresh);
  query.addEventListener('change',()=>{page=0;closeQuest();refresh();});
  document.addEventListener('pointerdown',e=>{if(query.matches&&body.classList.contains('mobile-quest-open')&&!e.target.closest?.('#hud-right,#mobile-quest-summary'))closeQuest();},{passive:true});
- refresh();createMobileReferenceUI({clearInput,selectTarget});combatLayout=createMobileCombatLayout();combatLayout.refresh();const hudEditor=createMobileHudEditor({clearInput});return {refresh,hudEditor};
+ refresh();createMobileReferenceUI({clearInput,selectTarget});combatLayout=createMobileCombatLayout();combatLayout.refresh();const hudEditor=createMobileHudEditor({clearInput});const hudFit=createMobileHudFit208();return {refresh,hudEditor,hudFit};
 }

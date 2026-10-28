@@ -2,6 +2,7 @@
 const $=id=>document.getElementById(id),frame=$('game'),stage=document.querySelector('.stage');let game=null,quick=null;
 function fit(){const [w,h]=$('device').value.split(',').map(Number),scale=Math.min(1,stage.clientWidth/w);frame.style.width=w+'px';frame.style.height=h+'px';frame.style.transform='scale('+scale+')';stage.style.height=h*scale+'px';}
 new ResizeObserver(fit).observe(stage);$('device').onchange=fit;fit();
+const requestedSize=new URL(location.href).searchParams.get('size');if([...$('device').options].some(o=>o.value===requestedSize)){$('device').value=requestedSize;fit();}
 const data=await (await fetch('/auto202-bootstrap.json')).json();sessionStorage.setItem('ayothaya-entry-v1',JSON.stringify({owner:'guest',serverId:'server-1',slotId:'slot-1'}));sessionStorage.setItem('ayothaya-local-network:slot-1',JSON.stringify({token:data.token,serverId:'server-1',slotId:'slot-1'}));localStorage.setItem('ayothaya-character-v2:slot-1',JSON.stringify(data.record));localStorage.setItem('ayothaya.lang','th');localStorage.setItem('ayothaya-coach-off','1');localStorage.setItem('ayothaya-perf',JSON.stringify({quality:'low',fps:30}));localStorage.setItem('ayothaya-welcome:ayothaya-story:server-1:slot-1','1');
 const {cbtEntryKey}=await import('./cbt-event.js?v=162.1');sessionStorage.setItem(cbtEntryKey({owner:'guest',serverId:'server-1',slotId:'slot-1'}),'1');
 frame.src='/game.html?server=server-1&map=rice-fields';

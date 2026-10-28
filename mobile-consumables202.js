@@ -1,3 +1,4 @@
+import {mobileHudScale208} from './mobile-hud-scale208.js';
 // Mobile quick-use buttons, placed below the right menu as approved by the owner.
 import {consumableChoices,consumableCategory} from './rapid-consumables202.js';
 import {itemDef} from './items.js?v=class-reward192';
@@ -15,7 +16,7 @@ export function createMobileConsumables202({game,bag=()=>game.world.bag,use=id=>
  function refresh(){
   const items=bag()?.items??{},dead=game.world.player.hp<=0,sig=JSON.stringify([items,dead]);if(sig!==signature){signature=sig;for(const [category,b]of buttons){const id=assigned[category]&&(items[assigned[category]]??0)>0&&consumableCategory(assigned[category])===category?assigned[category]:consumableChoices({items},category)[0];const count=items[id]??0;b.dataset.item=id??'';b.querySelector('i').style.cssText=id?iconStyle(id):'';b.querySelector('b').textContent=count;b.disabled=dead||!count;b.setAttribute('aria-label',id?itemDef(id).name+' คงเหลือ '+count:labels[category]+' ยังไม่มียา');}}
   const j=document.getElementById('joystick')?.getBoundingClientRect(),width=innerWidth,height=innerHeight,portrait=height>width;
-  const groupWidth=132,groupHeight=52;
+  const scale=document.body.classList.contains('mobile-play')?mobileHudScale208({width,height}):1;node.style.zoom=scale;const groupWidth=132*scale,groupHeight=52*scale;
   let x,y;
   if(placement==='top-right'){
    const anchors=['mobile-bag-shortcut','menu-toggle'].map(id=>document.getElementById(id)).filter(n=>n&&n.getBoundingClientRect().width>0&&getComputedStyle(n).visibility!=='hidden').map(n=>n.getBoundingClientRect());
@@ -29,7 +30,7 @@ export function createMobileConsumables202({game,bag=()=>game.world.bag,use=id=>
   else if(portrait){x=placement==='left'?20:Math.max(20,(width-groupWidth)/2);y=(j?.y??height-140)-groupHeight-18;}
   else if(placement==='left'){x=width<760?180:(j?.right??140)+8;y=width<760?height-180:Math.min(height-groupHeight-40,(j?.y??height-130)+10);}
   else{x=(width-groupWidth)/2;y=height-180;}
-  node.style.left=Math.max(8,Math.min(width-groupWidth-8,x))+'px';node.style.top=Math.max(80,Math.min(height-groupHeight-8,y))+'px';
+  node.style.left=Math.max(8,Math.min(width-groupWidth-8,x))/scale+'px';node.style.top=Math.max(60,Math.min(height-groupHeight-8,y))/scale+'px';
  }
  const configure=e=>{if(categories.includes(e.detail))choose(e.detail);};addEventListener('configure-mobile-consumable202',configure);
  const timer=setInterval(refresh,150);addEventListener('resize',refresh);refresh();

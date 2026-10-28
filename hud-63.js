@@ -6,7 +6,7 @@ import {mobileHudMedia} from './hud-mode204.js';
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
 import {createActivityDock} from './activity-dock.js?v=hud204';
-import {createMobilePlayUI} from './mobile-play-ui.js?v=auto207';
+import {createMobilePlayUI} from './mobile-play-ui.js?v=fit208';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet','menu-gacha','menu-premium-store','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];

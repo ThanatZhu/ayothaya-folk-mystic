@@ -19,7 +19,7 @@ export function createAnnouncementUI(shell){
   if(mini&&overlaps(mini))right=Math.min(right,mini.left-12);
   const width=Math.min(innerWidth*(compact.matches ? .5 : .52),1000,Math.max(100,right-left));
   const start=Math.max(left,Math.min((innerWidth-width)/2,right-width));
-  ribbon.style.width=width+'px';ribbon.style.left=(start+width/2)+'px';
+  const scale=Number(document.body.style.getPropertyValue('--mobile-ui-scale208'))||1;ribbon.style.width=width/scale+'px';ribbon.style.left=(start+width/2)/scale+'px';
  }
  function start(){
   current=queue.next();if(!current){ribbon.hidden=true;frame=0;return;}

@@ -1,3 +1,4 @@
+import {mobileHudScale208} from './mobile-hud-scale208.js';
 // One template measured from the approved 2796 x 1290 screenshot (932 x 430 logical pixels).
 // Centres are anchored to the right/bottom; the cluster always scales uniformly, never per button/class.
 export const COMBAT_REFERENCE={width:932,height:430,controls:{
@@ -15,7 +16,7 @@ export function standardCombatLayout({width,height}){
  const extentX=Math.max(...controls.map(p=>ref.width-p.x+p.size/2)),extentY=Math.max(...controls.map(p=>ref.height-p.y+p.size/2));
  // Small landscapes keep the same silhouette without crowding the existing centre toolbar.
  // The renderer supplies at least 44px touch areas independently of visual scale.
- const scale=Math.min(Math.max(.85,Math.min(width/ref.width,height/ref.height)),(width-4)/extentX,(height-4)/extentY);
+ const scale=Math.min(Math.max(.85,Math.min(width/ref.width,height/ref.height))*mobileHudScale208({width,height}),(width-4)/extentX,(height-4)/extentY);
  return {scale,controls:Object.fromEntries(Object.entries(ref.controls).map(([id,p])=>{
   const size=p.size*scale,cx=width-(ref.width-p.x)*scale,cy=height-(ref.height-p.y)*scale;
   return [id,{x:cx-size/2,y:cy-size/2,width:size,height:size}];

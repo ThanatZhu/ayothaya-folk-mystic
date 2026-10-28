@@ -1,3 +1,4 @@
+import {mobileHudScale208} from '../mobile-hud-scale208.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {standardCombatLayout,keepNonCombatPreferences} from '../mobile-combat-layout.js';
 test('approved screenshot centres map to the same logical pixels, including attack, bank and targeting',()=>{
@@ -7,9 +8,9 @@ test('approved screenshot centres map to the same logical pixels, including atta
 });
 test('one uniform cluster keeps order, circle gaps, touch sizes and screen bounds across phone aspect ratios',()=>{
  for(const [width,height]of [[568,320],[667,375],[740,360],[812,375],[844,390],[852,393],[896,414],[915,412],[932,430],[960,432],[1024,768],[320,568],[390,844],[180,170]]){
-  const {controls,scale}=standardCombatLayout({width,height}),rows=Object.entries(controls);
+  const {controls,scale}=standardCombatLayout({width,height}),rows=Object.entries(controls),minimum=mobileHudScale208({width,height})<1?32:44;
   for(const [id,r]of rows)assert.ok(r.x>=3.9&&r.y>=3.9&&r.x+r.width<=width&&r.y+r.height<=height,id+JSON.stringify({width,height,r}));
-  for(let i=0;i<rows.length;i++)for(let j=i+1;j<rows.length;j++){const [a,b]=[rows[i][1],rows[j][1]],distance=Math.hypot(a.x+a.width/2-b.x-b.width/2,a.y+a.height/2-b.y-b.height/2),hitA=width>=320?Math.max(44,a.width):a.width,hitB=width>=320?Math.max(44,b.width):b.width;assert.ok(distance>=(hitA+hitB)/2,JSON.stringify({width,height,one:rows[i][0],two:rows[j][0],distance,scale}));}
+  for(let i=0;i<rows.length;i++)for(let j=i+1;j<rows.length;j++){const [a,b]=[rows[i][1],rows[j][1]],distance=Math.hypot(a.x+a.width/2-b.x-b.width/2,a.y+a.height/2-b.y-b.height/2),hitA=width>=320?Math.max(minimum,a.width):a.width,hitB=width>=320?Math.max(minimum,b.width):b.width;assert.ok(distance>=(hitA+hitB)/2,JSON.stringify({width,height,one:rows[i][0],two:rows[j][0],distance,scale}));}
  }
 });
 test('old dragged combat positions are removed without changing joystick or AUTO settings in either orientation',()=>{

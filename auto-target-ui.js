@@ -1,3 +1,4 @@
+import {mobileHudScale208} from './mobile-hud-scale208.js';
 import {mobileHudMedia} from './hud-mode204.js';
 import {MONSTER_TYPES} from './combat-core.js?v=auto202';
 import {normalizeAutoTarget,autoMonsterRank} from './auto-targets.js?v=auto202';
@@ -43,13 +44,13 @@ export function createAutoTargetUI({game}){
  function position(){
   const compact=phone.matches;dialog.toggleAttribute('data-compact-hud',compact);
   if(!compact){for(const key of ['inset','margin','width','height','max-height','max-width'])dialog.style.removeProperty(key);return;}
-  const width=Math.min(168,innerWidth-16),height=Math.min(196,innerHeight-16),anchor=document.getElementById('auto-control')?.getBoundingClientRect()??document.getElementById('auto-attack')?.getBoundingClientRect();
+  const scale=mobileHudScale208({width:innerWidth,height:innerHeight}),width=Math.min(168*scale,innerWidth-16),height=Math.min(196*scale,innerHeight-16),anchor=document.getElementById('auto-control')?.getBoundingClientRect()??document.getElementById('auto-attack')?.getBoundingClientRect();
   const top=Math.max(8,Math.min(innerHeight-height-8,(anchor?.top??innerHeight-12)-height-6));
   let left=(anchor?anchor.left+anchor.width/2:innerWidth*.62)-width/2;
   const arc=[...document.querySelectorAll('#skills .skill:not([hidden]):not([data-mobile-away])')].map(n=>n.getBoundingClientRect()).filter(r=>r.width&&r.top<top+height&&r.bottom>top);
   if(arc.length)left=Math.min(left,Math.min(...arc.map(r=>r.left))-width-6);
   left=Math.max(8,Math.min(innerWidth-width-8,left));
-  for(const [key,value]of Object.entries({inset:top+'px auto auto '+left+'px',margin:'0',width:width+'px',height:height+'px','max-height':height+'px','max-width':width+'px'}))dialog.style.setProperty(key,value,'important');
+  for(const [key,value]of Object.entries({inset:top/scale+'px auto auto '+left/scale+'px',margin:'0',width:width/scale+'px',height:height/scale+'px','max-height':height/scale+'px','max-width':width/scale+'px'}))dialog.style.setProperty(key,value,'important');
  }
  addEventListener('resize',()=>{if(dialog.open)position();});phone.addEventListener('change',()=>{if(dialog.open)position();});
  function open(){game.clearInput();let saved=null;try{saved=normalizeAutoTarget(JSON.parse(localStorage.getItem(storageKey)));}catch{}

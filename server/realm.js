@@ -545,9 +545,11 @@ export class RealmServer{
  }
  step(dt=.05){
   dt=Math.max(0,Math.min(.05,dt));this.clock+=dt;this.tickId++;
-  if(this.tickId%1200===0&&this.onLeaders)for(const id of this.leadersDirty){this.leadersDirty.delete(id);Promise.resolve(this.onLeaders(id,this.leaders.get(id))).catch(e=>console.error('leader-save',e.message));}
-  if(this.tickId%1200===0&&this.onPrices)for(const id of this.pricesDirty){this.pricesDirty.delete(id);Promise.resolve(this.onPrices(id,this.prices.get(id))).catch(e=>console.error('price-save',e.message));}
-  if(this.tickId%1200===0)for(const g of this.guildsDirty){this.guildsDirty.delete(g);if(this.guilds.get(g.id)===g)this.onGuild?.(g,false);} // 1.01 kill counts, once a minute
+  // leaderboards, market prices and guild kill counts are saved every 5 min (was 1): they change all the time, and each
+  // save is a Firestore write against the daily quota; shutdown still saves whatever is pending
+  if(this.tickId%6000===0&&this.onLeaders)for(const id of this.leadersDirty){this.leadersDirty.delete(id);Promise.resolve(this.onLeaders(id,this.leaders.get(id))).catch(e=>console.error('leader-save',e.message));}
+  if(this.tickId%6000===0&&this.onPrices)for(const id of this.pricesDirty){this.pricesDirty.delete(id);Promise.resolve(this.onPrices(id,this.prices.get(id))).catch(e=>console.error('price-save',e.message));}
+  if(this.tickId%6000===0)for(const g of this.guildsDirty){this.guildsDirty.delete(g);if(this.guilds.get(g.id)===g)this.onGuild?.(g,false);} // 1.01 kill counts, every 5 min
   {const s=surge(this.now()); // 0.64 announce each field surge once, on every channel
    if(s.active&&this.surgeSlot!==s.slot){this.surgeSlot=s.slot;const name=this.catalog.maps.find(m=>m.id===s.map)?.name??s.map;for(const id of new Set([...this.peers.values()].map(p=>p.serverId)))this.announce(id,`🔥 ฝูงคลั่งที่ ${name}! · EXP ×2 และดรอป ×2 อีก 5 นาที`);}}
   cleanArenaRooms(this);

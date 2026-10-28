@@ -7,8 +7,10 @@ import {validateCharacterChange} from '../realm-store.js';
 export const MIRROR_CUTOFF=Date.parse('2026-10-26T00:00:00+07:00');
 // Firestore Spark allows 20k writes/day. 0.41.1 budget: world authority renews every 40 s (~90 writes/h) and a
 // player saves only when changed, at most once a minute (lease kept alive at least every 100 s).
-export const AUTHORITY_TTL=120000,AUTHORITY_RENEW=40000,SAVE_MIN_GAP=60000,SAVE_MAX_GAP=100000;
-const copy=v=>structuredClone(v),ttl=150000;
+// Firestore Spark allows 20k writes a day: every save is 3 writes, so players save every 150-240 s (things that must not
+// be lost - trades, sales, quest steps, leaving - still save at once) and the authority lease renews once a minute.
+export const AUTHORITY_TTL=120000,AUTHORITY_RENEW=60000,SAVE_MIN_GAP=150000,SAVE_MAX_GAP=240000;
+const copy=v=>structuredClone(v),ttl=300000; // a player's lease outlives the longest save gap
 // 0.116 back-office finance: one revisioned document (a save names the revision it started from) plus one row per slip.
 const staleFinance=current=>Object.assign(new Error('finance-stale'),{current});
 // Local mode never accepts Firebase users and is bound to loopback by the host.

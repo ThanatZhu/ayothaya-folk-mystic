@@ -85,7 +85,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   finally{renewing=false;}
  };
  if(!Number.isInteger(capacity)||capacity<2||capacity>100)throw new Error('ROOM_CAPACITY must be 2–100');
- let savedList={at:0,rows:[]},lastLogSaveCount=0;
+ let savedList={at:0,rows:[]},lastLogSaveCount=0,lastLogSaveAt=0;
  const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,roleSkills:process.env.ROLE_SKILLS!=='off',spiritCompanions:true,prologue,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set(),metrics={bytesSent:0,messagesSent:0,startedAt:Date.now()};let closing=false;
  if(mode==='local'&&store?.loadMailAnnouncements){realm.mailAnnouncements=await store.loadMailAnnouncements();mailReady=true;}
  if(mode==='local'&&store?.loadMapBosses)realm.mapBosses.restore(await store.loadMapBosses());
@@ -549,7 +549,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const backgroundWalks=setInterval(()=>{if(reset?.maintenance)return;for(const s of sessions.values())if(s.background&&!s.closing&&(!s.peer.routeWalker?.active||Date.now()>=s.backgroundUntil))finishBackground(s);},250);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
   lastLogSaveCount=realm.logs.length;
-  const logSaver=setInterval(()=>{if(reset?.maintenance)return;drainWarMail();drainClassRewards();if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount){lastLogSaveCount=realm.logs.length;trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
+  const logSaver=setInterval(()=>{if(reset?.maintenance)return;drainWarMail();drainClassRewards();if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount&&Date.now()-lastLogSaveAt>=300000){lastLogSaveCount=realm.logs.length;lastLogSaveAt=Date.now(); // dashboard logs: one write per 5 min, not per 10 s
+trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
  return {server,realm,wss,evidence,async close(){closing=true;await evidence?.stop();clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
   // 0.114.2 a redeploy gives us ~9 s: players' progress first (all at once, 6 s cap), then shops, bosses, guild/leader/
   // price changes and logs together, and the authority release last so the next host can start at once.

@@ -29,3 +29,5 @@ html body #auto-settings-window{position:fixed!important;inset:0!important;margi
 #auto-settings-window .auto-combo-arrows button:disabled{opacity:.3;cursor:default}
 #auto-settings-window .auto-combo-arrows button:focus-visible{outline:2px solid #c5ffd8;outline-offset:1px}
 @media(max-width:480px){#auto-sequence li{gap:6px}#auto-sequence li>strong{width:32px;height:32px}.auto-combo-arrows{flex-direction:column}.auto-rotation-label{gap:5px}}
+.auto-quick-items203{border-top:1px solid #ae914855;padding-top:14px;margin-top:12px}
+#auto-settings-window .auto-quick-items203 button{min-height:44px;padding:8px 12px;margin:4px;border:1px solid #aa9059;border-radius:8px;background:#214a3a;color:#ffe8b8;font:inherit}

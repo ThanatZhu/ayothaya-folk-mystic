@@ -5290,3 +5290,11 @@ Object.assign(globalThis.I18N_EN,{
  "ยังไม่มียา": "No potions",
  "AUTO ปิดโจมตีกลุ่มนี้ไว้": "AUTO attacks are disabled for this group."
 });
+
+Object.assign(globalThis.I18N_EN,{
+ "ปุ่มยาใช้ด่วนบนมือถือ": "Mobile Quick Consumables",
+ "เลือกยา MP": "Choose MP Potion",
+ "ตัวละครทดสอบพร้อม · ปุ่มยาอยู่ใต้เมนูฝั่งขวา": "Test character ready. Potion buttons are below the right menu.",
+ "ปุ่มยาขนาดเล็กใต้เมนูฝั่งขวา · ใช้ตัวละครทดสอบแยกจากบัญชีจริง": "Small potion buttons below the right menu. Uses a separate test character.",
+ "ตำแหน่งที่เลือก · ใต้เมนูฝั่งขวา": "Selected placement: below the right menu"
+});

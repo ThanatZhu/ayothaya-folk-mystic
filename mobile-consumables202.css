@@ -17,3 +17,11 @@
 #mobile-consumable-picker202 i{display:block;width:36px;height:36px;flex-shrink:0}
 body:is(.mobile-panel-open,.mobile-menu-open,.mobile-chat-open,.chat-typing) #mobile-consumables202{visibility:hidden;pointer-events:none}
 body:not(.mobile-play) #mobile-consumables202{display:none}
+/* The painted button is 32 px; the transparent touch area stays 44 px. */
+#mobile-consumables202{width:132px;gap:0}
+#mobile-consumables202 .rapid-slot202{width:44px;padding-bottom:8px}
+#mobile-consumables202 .rapid-use202{display:block;min-width:44px;min-height:44px;max-height:44px;width:44px;height:44px;padding:0;border:0;background:transparent;box-shadow:none}
+#mobile-consumables202 .rapid-use202:before{content:'';position:absolute;left:6px;top:3px;width:32px;height:34px;box-sizing:border-box;border:1px solid #d6b265;border-radius:6px;background:linear-gradient(145deg,#274d3b,#10291f);box-shadow:0 2px 4px #0009,inset 0 0 0 1px #87662b55}
+#mobile-consumables202 .rapid-use202 i{position:absolute;left:9px;top:7px;width:26px;height:26px}
+#mobile-consumables202 .rapid-use202 b{right:8px;bottom:7px;font-size:8px}
+#mobile-consumables202 .rapid-use202>span{top:39px;font-size:8px}

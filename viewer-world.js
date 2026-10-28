@@ -1,3 +1,4 @@
+import {createMobileConsumables202} from './mobile-consumables202.js?v=potion203';
 import {storyNPCIdentity,storyNPCPlacement} from './npc-identity175.js';
 import {createArenaStage} from './arena-stage166.js';
 import {createArenaUI} from './arena-ui166.js?v=profile171';
@@ -19,7 +20,7 @@ import {createCityLife,clearCourtTrees} from './city-life.js?v=talk137';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=chuk175';
 import {createGameMenu} from './game-menu.js?v=34';
 import {createSkillWindow} from './skill-window.js?v=ult1194';
-import {createAutoSettings} from './auto-settings.js?v=auto202';
+import {createAutoSettings} from './auto-settings.js?v=potion203';
 import {createMmoHud} from './mmo-hud.js?v=dot1191';
 import {createSoftLook} from './soft-look.js?v=perf199';
 import {lightingProfile,applyWorldLighting,applyMeadowLighting,createActorLighting,contactShadowTexture} from './world-lighting159.js?v=shadow160';
@@ -237,6 +238,8 @@ try {
  addEventListener('keydown',e=>{if(!document.querySelector('dialog:modal')&&$('account-panel').dataset.blocking!=='true'&&e.code==='KeyV'&&!e.repeat&&!worldUI?.paused&&!e.ctrlKey&&!e.metaKey&&!e.target.closest?.('input,textarea,select'))toggleOverview();});
  const resetCamera=$('reset').onclick;$('reset').onclick=()=>{overview=false;controls.minZoom=.65;$('overview').textContent='V · ดูทั้งเมือง';$('overview').setAttribute('aria-pressed','false');resetCamera();};
  worldUI=createWorldUI({catalog,map,game,scene,camera,controls,account,renderer,citizens:cityLife.citizens,onLocalTravel:()=>{if(overview)toggleOverview();}});const storyUI=createStoryUI({game,worldUI,map,catalog,account});createPrologueUI({game,worldUI,storyUI,map,account,trial});const bagUI=createBagUI({game,worldUI,map,account,equipmentUI});createClassRewardUI({game,bagUI,account});const statusUI=createStatusUI({game,account,bagUI});storyUI.context=statusUI.storyContext;const profileUI=createProfileUI({game,account,statusUI,equipmentUI});const refineUI=createRefineUI({game,map,bagUI,statusUI});const craftUI=createCraftUI({game,bagUI,catalog,account});const marketUI=createMarketUI({game,map,account,bagUI});const boardUI=createMarketBoardUI({game,map,scene,camera,bagUI});window.__ayothayaRank=createLeaderboardUI({game});const socialUI=createSocialUI({game,account,worldUI,map,hall:sceneMotion});const lifeUI=createLifeUI({game,account,camera});createBossBrowserUI({game,catalog,map,worldUI});createVictoryUI({game});const petUI=createPetUI({game,account,scene,bagUI});createControlsUI({game});const questsUI=createQuestsUI({game,account,map,bagUI});const lifeNPC=createLifeNPC({game,map,scene,camera,controls,bagUI,worldUI});createFeedback({game,map});createHud63({game,partyUI:multiplayer});
+ const mobileConsumables=createMobileConsumables202({game,bag:bagUI.bag,use:id=>bagUI.activateShortcut(id),storageKey:'ayothaya-mobile-items202:'+account.serverId+':'+account.slotId+':'+(account.character.name??'')});
+ if(window.__ayothaya)window.__ayothaya.mobileConsumables=mobileConsumables;
  createCbtEventUI({game,account,loading,autoOpen:!map.pvpArena});
  const arenaUI=createArenaUI({game,account,map,catalog,worldUI});
  createActionbar({game,bagUI,account});

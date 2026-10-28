@@ -1,3 +1,4 @@
+import {mobileHudMedia} from './hud-mode204.js';
 import {createAnnouncementQueue} from './announcement-state.js?v=149';
 
 export function announce(text,options={}){
@@ -8,7 +9,7 @@ export function createAnnouncementUI(shell){
  const ribbon=document.createElement('aside');ribbon.id='realm-announcement';ribbon.hidden=true;
  ribbon.innerHTML='<img class="announcement-owl" src="assets/ui-announce149/owl.webp" alt="" draggable="false"><div class="announcement-window"><span class="announcement-text" aria-hidden="true"></span></div><span class="announcement-accessible" role="status" aria-live="polite" aria-atomic="true"></span>';
  shell.append(ribbon);
- const queue=createAnnouncementQueue(),text=ribbon.querySelector('.announcement-text'),viewport=ribbon.querySelector('.announcement-window'),status=ribbon.querySelector('[role=status]'),reduced=matchMedia('(prefers-reduced-motion:reduce)'),compact=matchMedia('(pointer:coarse),(max-width:900px)');
+ const queue=createAnnouncementQueue(),text=ribbon.querySelector('.announcement-text'),viewport=ribbon.querySelector('.announcement-window'),status=ribbon.querySelector('[role=status]'),reduced=matchMedia('(prefers-reduced-motion:reduce)'),compact=mobileHudMedia();
  let current=null,x=0,elapsed=0,last=0,frame=0,layoutAt=0;
  function layout(){
   const r=ribbon.getBoundingClientRect(),owl=ribbon.querySelector('img').getBoundingClientRect();let left=16,right=innerWidth-16;

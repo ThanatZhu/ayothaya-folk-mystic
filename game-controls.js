@@ -1,3 +1,4 @@
+import {mobileHudMedia} from './hud-mode204.js';
 import {characterHead} from './character-label.js?v=149';
 import {createRoleWorldDecor} from './role-world-decor.js?v=live185';
 import {loadMonsterFrames} from './monster-art.js?v=rebirth196';
@@ -554,7 +555,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    skillButtons.forEach((b,i)=>{const cd=world.cooldowns[hotbar[i]],lv=world.skillLevels[hotbar[i]]??1;const s=world.skills[hotbar[i]];b.hidden=!!s.reserved||!!s.passive||isMaster(i)&&!lv;b.querySelector('.skill-level').textContent=lv?'Lv'+lv:'—';b.classList.toggle('locked',!lv);b.querySelector('em').textContent=cd>.05?String(Math.ceil(cd)):'';b.classList.toggle('cooling',cd>.05);b.classList.toggle('no-mana',p.mp<s.cost);b.style.setProperty('--cooldown',`${cd/s.cd*100}%`);});
   }
  }
- function mobileLayout(){return innerWidth<=800||matchMedia('(pointer:coarse)').matches;}
+ const hudMedia=mobileHudMedia();
+ function mobileLayout(){return hudMedia.matches;}
  function updateHelp(){
   document.querySelector('.control-hint').textContent=mobileLayout()?'ลากจอยซ้ายเพื่อเดิน'+(supportsAction('run')?' · แตะปุ่มวิ่งเพื่อสลับจังหวะ':'')+' · แตะมอนเลือกเป้า · ลากด้านขวาหมุนกล้อง':'WASD เดิน'+(supportsAction('run')?' · Shift วิ่ง':'')+' · Space คุยกับ NPC / โจมตี · F ออโต้ · 1–9 / 0 สกิล · Q / E ใช้ยา';
   document.querySelector('.player-foot span:last-child').textContent=mobileLayout()?'จอยซ้าย · เดิน':'W A S D · เดิน';

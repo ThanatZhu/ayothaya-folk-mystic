@@ -43,16 +43,16 @@ body.field-hud.hud63 #activity-dock #quest-distance{font-size:11px!important;col
 #activity-dock #activity-fold[aria-expanded=false]::before{transform:rotate(180deg)}
 html body.mobile-play #activity-dock #activity-fold{font-size:0!important}
 @media(min-width:901px) and (pointer:fine){
- #activity-dock:not([data-horizontal=true]):not([data-collapsed=true]){grid-template-columns:84px minmax(0,1fr)}
- #activity-dock:not([data-horizontal=true]) nav button[role=tab]{width:84px;height:84px;min-height:84px;flex-shrink:0;border:0;border-radius:0;background:none;box-shadow:none;padding:0;filter:drop-shadow(0 2px 3px #0008)}
- #activity-dock:not([data-horizontal=true]) nav i{position:absolute;inset:0;width:100%;height:100%;filter:none;pointer-events:none}
- #activity-dock:not([data-horizontal=true]) nav button[role=tab] span{position:absolute;left:8px;right:8px;top:79%;transform:translateY(-50%);z-index:1;font-size:12px;line-height:18px;white-space:nowrap;text-align:center;color:#fff0c1;text-shadow:0 1px 2px #000}
- #activity-dock:not([data-horizontal=true]) #activity-party-tab span{top:76%}
- #activity-dock:not([data-horizontal=true]) nav button[aria-selected=true] i{filter:brightness(1.25) drop-shadow(0 0 2px #ffe49188)}
+ body:not(.mobile-play) #activity-dock:not([data-horizontal=true]):not([data-collapsed=true]){grid-template-columns:84px minmax(0,1fr)}
+ body:not(.mobile-play) #activity-dock:not([data-horizontal=true]) nav button[role=tab]{width:84px;height:84px;min-height:84px;flex-shrink:0;border:0;border-radius:0;background:none;box-shadow:none;padding:0;filter:drop-shadow(0 2px 3px #0008)}
+ body:not(.mobile-play) #activity-dock:not([data-horizontal=true]) nav i{position:absolute;inset:0;width:100%;height:100%;filter:none;pointer-events:none}
+ body:not(.mobile-play) #activity-dock:not([data-horizontal=true]) nav button[role=tab] span{position:absolute;left:8px;right:8px;top:79%;transform:translateY(-50%);z-index:1;font-size:12px;line-height:18px;white-space:nowrap;text-align:center;color:#fff0c1;text-shadow:0 1px 2px #000}
+ body:not(.mobile-play) #activity-dock:not([data-horizontal=true]) #activity-party-tab span{top:76%}
+ body:not(.mobile-play) #activity-dock:not([data-horizontal=true]) nav button[aria-selected=true] i{filter:brightness(1.25) drop-shadow(0 0 2px #ffe49188)}
 }
 
-@media(min-width:901px) and (pointer:fine){#activity-dock:not([data-horizontal=true]) #activity-fold{display:block;width:64px;min-width:64px;height:44px;min-height:44px;padding:0;flex-shrink:0}
- #activity-dock:not([data-horizontal=true]) #activity-fold::before{width:64px;height:44px}}
+@media(min-width:901px) and (pointer:fine){body:not(.mobile-play) #activity-dock:not([data-horizontal=true]) #activity-fold{display:block;width:64px;min-width:64px;height:44px;min-height:44px;padding:0;flex-shrink:0}
+ body:not(.mobile-play) #activity-dock:not([data-horizontal=true]) #activity-fold::before{width:64px;height:44px}}
 /* 0.122 ROX-style quest cards (desktop and phone): every quest is its own card with a kind badge; the pane scrolls */
 #activity-quest-pane{display:flex;flex-direction:column;gap:6px;padding:6px}
 html body.field-hud.hud63 #activity-dock #activity-quest-pane>:is(#quest-tracker,#training-journal){margin:0!important;padding:7px 9px!important;border:1px solid #c6a16466!important;border-radius:8px!important;background:#0c2620d9!important;box-shadow:none!important}

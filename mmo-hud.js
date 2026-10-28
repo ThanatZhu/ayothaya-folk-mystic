@@ -1,7 +1,8 @@
+import {mobileHudMedia} from './hud-mode204.js';
 // 0.32 MMO HUD: radial skill wheel around the attack button, a status line (ping, FPS, server time, realm),
 // notification dots on the menu, and coordinates under the minimap. Reuses the existing buttons and state.
 const $=id=>document.getElementById(id);
-const compactQuery=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)');
+const compactQuery=mobileHudMedia();
 // Inner arc holds skills 1-4, outer arc 5-0, evenly spread from left of the attack button to above it.
 // 0.101 a third arc outside both holds the Master slots (Alt+1-5), shown once a Master skill is learned.
 // 0.103.7 the Master arc starts just above AUTO (which sits at ~185° on the same radius) and curves up to the top

@@ -1,3 +1,4 @@
+import {mobileHudMedia} from './hud-mode204.js';
 import {createMobileCombatLayout} from './mobile-combat-ui.js?v=151';
 import {createMobileReferenceUI} from './mobile-reference-ui.js?v=148';
 import {createMobileHudEditor} from './mobile-hud-editor.js?v=151';
@@ -8,7 +9,7 @@ export function skillPage(slots,page=0,size=4){
  return {index,pages,slots:slots.slice(index*size,(index+1)*size)};
 }
 export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
- const body=document.body,$=id=>document.getElementById(id),query=matchMedia('(any-pointer:coarse),(max-width:900px)');
+ const body=document.body,$=id=>document.getElementById(id),query=mobileHudMedia();
  const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-play-ui.css?v=rail1161d';document.head.append(css);
  const skills=$('skills'),bank=$('skill-bank'),nav=$('game-menu'),toggle=$('menu-toggle'),quest=$('quest-tracker');
  const oldBank=bank?.onclick;let page=0,refreshing=false,skillSignature='',combatLayout=null;

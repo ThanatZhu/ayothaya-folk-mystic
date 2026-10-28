@@ -1,11 +1,12 @@
+import {mobileHudMedia} from './hud-mode204.js';
 // 0.66 HUD layout pass: groups the existing live HUD (DOM/canvas made by the other modules) into a standard MMORPG
 // arrangement and adds the wood-gold-jade frames (assets/ui63/frames) as pointer-events:none decoration.
 // Nothing here replaces a control: buttons, shortcuts and data stay owned by their modules.
 // 0.67 follows the approved desktop mockup (outputs/ui-hud63-desktop-mockup.png): four main buttons + เมนู.
 // 0.70.1 owner: the market gets its own button; character (tap the portrait), players (the online chip) and chat
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
-import {createActivityDock} from './activity-dock.js?v=quest-scroll190';
-import {createMobilePlayUI} from './mobile-play-ui.js?v=1161d';
+import {createActivityDock} from './activity-dock.js?v=hud204';
+import {createMobilePlayUI} from './mobile-play-ui.js?v=hud204';
 const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
 const SECONDARY=['menu-social','menu-status','menu-pet','menu-gacha','menu-premium-store','menu-mail','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
@@ -29,7 +30,7 @@ export function createHud63({game,partyUI}={}){
  if($('war-line'))right.append($('war-line')); // war status stays available without a selected enemy
  if(quest){
   const fold=document.createElement('button');fold.type='button';fold.id='quest-fold';fold.setAttribute('aria-label','ย่อหรือขยายรายการภารกิจ');
-  const compact=matchMedia('(pointer:coarse),(max-width:900px),(max-height:600px)').matches,key='ayothaya-quest-fold68:'+(compact?'phone':'desktop'),saved=store(key);
+  const compact=mobileHudMedia().matches,key='ayothaya-quest-fold68:'+(compact?'phone':'desktop'),saved=store(key);
   const set=v=>{quest.classList.toggle('folded',v);fold.textContent=v?'▸':'▾';fold.setAttribute('aria-expanded',String(!v));store(key,v?'1':'0');};
   set(saved==='1'); // 0.68 the list is compact now, so it starts open everywhere
   fold.onclick=e=>{e.stopPropagation();set(!quest.classList.contains('folded'));};quest.append(fold);

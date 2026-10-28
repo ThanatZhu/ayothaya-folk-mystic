@@ -1,9 +1,10 @@
-import {announce} from './announcement-ui.js?v=149';
+import {mobileHudMedia} from './hud-mode204.js';
+import {announce} from './announcement-ui.js?v=hud204';
 import {realmAnnouncement} from './announcement-state.js?v=149';
 import {chatStream,chatVisible} from './chat-channels191.js';
 import {characterHead} from './character-label.js?v=149';
 import {createPartyLayout} from './party-layout.js?v=overlay143';
-import {createDesktopChat} from './desktop-chat-ui.js?v=channel144';
+import {createDesktopChat} from './desktop-chat-ui.js?v=hud204';
 import {partyActions,partyRoster} from './party-ui-state.js?v=130';
 import {createCombatPresentation,presentationDelta} from './combat-timing.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
@@ -37,7 +38,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  if(game.roleEffects)game.roleEffects.locate=id=>views.get(id)?.state?.player??null; // self and around effects follow the caster
  const presentation=createCombatPresentation();
  const partyStyle=document.createElement('link');partyStyle.rel='stylesheet';partyStyle.href='party-ui.css?v=130';document.head.append(partyStyle);let rosterMode='all';
- const shell=document.getElementById('game-shell'),labels=document.getElementById('world-labels'),compact=matchMedia('(pointer:coarse),(max-width:900px)');
+ const shell=document.getElementById('game-shell'),labels=document.getElementById('world-labels'),compact=mobileHudMedia();
  let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0,currentChannel=normalizeChannel(new URLSearchParams(location.search).get('channel')||(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1)),channelCounts=[];const seenMessages=new Set(),bubbles=new Map();
  // HUD chip: connection state dot + label. Opens the room/party roster.
  const button=el('button');button.id='online-button';button.dataset.state='offline';button.innerHTML='<i class="mp-dot" aria-hidden="true"></i><span id="online-label">ผู้เล่นออนไลน์</span>';shell.append(button);

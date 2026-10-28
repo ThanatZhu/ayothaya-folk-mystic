@@ -1,10 +1,11 @@
+import {mobileHudMedia} from './hud-mode204.js';
 import {ACTION_COLUMNS,ACTION_MAX_ROWS,actionEntry,defaultActionbar,normalizeActionbar,resizeActionbar,actionKey} from './actionbar-state.js';
 import {itemDef} from './items.js?v=107';
 import {iconStyle} from './bag-ui.js?v=107';
 import {applySkillArt} from './skill-art.js?v=icons117';
 
 export function createActionbar({game,bagUI,account={}}){
- const world=game.world,body=document.body,$=id=>document.getElementById(id),phone=matchMedia('(any-pointer:coarse),(max-width:900px)');
+ const world=game.world,body=document.body,$=id=>document.getElementById(id),phone=mobileHudMedia();
  const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=overlay143';document.head.append(css);
  const key='ayothaya-actionbar-v1:'+[(account.serverId??'local'),(account.slotId??'guest'),world.profession.id,world.jobId??'',world.roleCombat?'role':'legacy'].join(':');
  const fallback=defaultActionbar(world.skills,game.hotbar,bagUI.quickItems);

@@ -6,7 +6,10 @@
 import {REBIRTH_STORY} from './rebirth-content196.js';
 export {REBIRTH_STORY};
 export const storyQuests=state=>state?.campaign==='rebirth'?REBIRTH_STORY:STORY;
-export function normalizeRebirthStory(raw,cycle){if(!(cycle>=1))return null;return normalizeStory(raw?.cycle===cycle?{...raw,campaign:'rebirth',v:STORY_VERSION}:{v:STORY_VERSION,campaign:'rebirth',cycle,quest:0});}
+// 0.122 the rebirth story is played once: 'cycle' is the arc number (arc 1 = ห้าภพแห่งไฟต้นแสง), not the rebirth
+// count, so a later rebirth keeps the progress (and never pays a quest twice). docs/world-roadmap.md
+export const REBIRTH_ARC=1;
+export function normalizeRebirthStory(raw,rebirth){if(!(rebirth>=1))return null;return normalizeStory(raw?.campaign==='rebirth'&&raw?.cycle===REBIRTH_ARC?{...raw,campaign:'rebirth',v:STORY_VERSION}:{v:STORY_VERSION,campaign:'rebirth',cycle:REBIRTH_ARC,quest:0});}
 export const storyForWorld=world=>world.rebirth>0&&world.storyCampaign!=='main'?normalizeRebirthStory(world.rebirthStory,world.rebirth):normalizeStory(world.story);
 import {WEAPON_CLASSES,weaponId,pieceId,gearLook} from './gear-sets.js';
 export const STORY_TITLE='บทที่ 1 · ประทีปที่ดับพร้อมกัน';

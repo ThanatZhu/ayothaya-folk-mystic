@@ -251,7 +251,7 @@ export class RealmServer{
    if(!p.room.map.safe)return this.itemFail(p,'rebirth-town');
    if(baseProgress(w).level<99)return this.itemFail(p,'rebirth-level');
    if((p.rebirth??0)>=REBIRTH_MAX)return this.itemFail(p,'rebirth-max');
-   p.rebirth=(p.rebirth??0)+1;p.rebirthStory=normalizeRebirthStory(null,p.rebirth);w.baseXp=0;p.stats=normalizeStats(null);p.statSig=null;this.refreshStats(p);w.player.hp=w.player.maxHp;w.player.mp=w.player.maxMp;
+   p.rebirth=(p.rebirth??0)+1;p.rebirthStory=normalizeRebirthStory(p.rebirthStory,p.rebirth);w.baseXp=0;p.stats=normalizeStats(null);p.statSig=null;this.refreshStats(p);w.player.hp=w.player.maxHp;w.player.mp=w.player.maxMp;
    p.saveNow=true;w.notice('เกิดใหม่ครั้งที่ '+p.rebirth+' · กลับสู่ Lv.1 พร้อมแต้มสเตตัสโบนัส +'+p.rebirth*40+' · ทุกค่าสถานะถาวร +'+rebirthStatBonus(p.rebirth));
    this.announce(p.serverId,'🌟 '+p.character.name+' เกิดใหม่เป็นครั้งที่ '+p.rebirth+'!');return true;
   }

@@ -6,13 +6,14 @@
       "id": "rebirth-ferry",
       "name": "ท่าน้ำข้ามภพ",
       "scene": "maps/rebirth196/rebirth-ferry.glb",
-      "source": "maps/rebirth196/rebirth-ferry.blend",
+      "source": "scripts/rebirth196/rebirth.py",
       "layout": "maps/rebirth196/rebirth-ferry.layout.json",
-      "triangles": 15240,
-      "bytes": 511360,
-      "walkableCells": 18714,
-      "orphanCellsBlocked": 0,
-      "sourceLayout": "scripts/rebirth196/layouts/rebirth-ferry.json"
+      "triangles": 347884,
+      "bytes": 2796112,
+      "walkableCells": 17491,
+      "orphanCellsBlocked": 10,
+      "sourceLayout": "scripts/rebirth196/layouts/rebirth-ferry.json",
+      "v7": true
     },
     {
       "id": "rebirth-kalpa",

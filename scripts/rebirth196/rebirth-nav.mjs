@@ -22,4 +22,8 @@ let orphan=0;
 for(let j=0;j<nav.h;j++)for(let i=0;i<nav.w;i++)if(rows[j][i]!=='.'&&!seen.has(i+','+j)){rows[j][i]='.';orphan++;}
 for(const [name,p] of [...Object.entries(L.portals),...Object.entries(L.npcs),['boss',L.bossArena.slice(0,2)],...L.monsterAreas.map(m=>[m.name,m.center])]){const [i,j]=at(p);let ok=false;for(let r=0;r<=4&&!ok;r++)for(let di=-r;di<=r;di++)for(let dj=-r;dj<=r;dj++)if(seen.has((i+di)+','+(j+dj)))ok=true;if(!ok)throw Error(name+' not reachable');}
 fs.writeFileSync(`${repo}/maps/rebirth196/${id}.nav.json`,JSON.stringify({...nav,rows:rows.map(r=>r.join(''))}));
+// keep the manifest honest: this map is built by rebirth.py, with this grid and this GLB
+const mp=`${repo}/maps/rebirth196/manifest.json`,man=JSON.parse(fs.readFileSync(mp,'utf8')),info=man.maps.find(m=>m.id===id),glb=fs.readFileSync(`${repo}/maps/rebirth196/${id}.glb`),gj=JSON.parse(glb.subarray(20,20+glb.readUInt32LE(12)).toString());
+let tris=0;for(const me of gj.meshes)for(const pr of me.primitives)tris+=(pr.indices!=null?gj.accessors[pr.indices].count:gj.accessors[pr.attributes.POSITION].count)/3;
+Object.assign(info,{source:'scripts/rebirth196/rebirth.py',triangles:Math.round(tris),bytes:glb.length,walkableCells:seen.size,orphanCellsBlocked:orphan,v7:true});fs.writeFileSync(mp,JSON.stringify(man,null,2));
 console.log('NAVPOST',id,'walkable',seen.size,'water blocked',water,'orphans blocked',orphan);

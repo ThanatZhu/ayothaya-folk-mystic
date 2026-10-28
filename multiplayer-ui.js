@@ -204,7 +204,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  }
  function presentEvent(e){
    if(e.type==='presentationSnapshot'){applySnapshot(e.snapshot);return;}
-   if(e.type==='bossResult'||e.type==='bossDirectory'){game.world.events.push(e);return;}
+   if(e.type==='bossResult'||e.type==='bossLoot'||e.type==='bossDirectory'){game.world.events.push(e);return;}
    if(e.type.startsWith('spirit')){game.world.events.push({...e,presentationQueuedAt:performance.now()/1000});return;}
    if(e.actor===client.id){game.world.events.push({...e,presentationQueuedAt:performance.now()/1000});return;}
    const v=views.get(e.actor);if(!v||v.loading)return;

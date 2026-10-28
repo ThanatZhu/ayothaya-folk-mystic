@@ -106,7 +106,7 @@ test('member kills feed guild EXP, contribution and the shared daily goal (paid 
  assert.equal(g.goal.done,true);assert.equal(g.treasury,GUILD_GOAL.treasury,'goal paid once');
  assert.equal(g.exp,GUILD_GOAL.kills+1+GUILD_GOAL.exp);
  assert.equal(g.members.reduce((s,m)=>s+(m.contrib??0),0),GUILD_GOAL.kills+1);
- const n=saved.length;r.guildsDirty.add(g);for(let i=0;i<1200;i++)r.step(.05);assert.ok(saved.length>n,'dirty guild flushed');
+ const n=saved.length;r.guildsDirty.add(g);for(let i=0;i<6000;i++)r.step(.05);assert.ok(saved.length>n,'dirty guild flushed within 5 min');
 });
 
 test('guild hall: members travel in for free, each guild gets its own room, outsiders cannot enter', () => {

@@ -1,12 +1,13 @@
 import {isRankingExcluded} from './ranking-eligibility197.js';
 import {fieldAdventurers,adventurerAt,adventurerViews,adventurerContract,ADVENTURER_TIME} from '../field-adventurers177.js';
+import {prologueJoin,prologueMap,prologueStart,prologueKill,prologueTick,prologueCommand,prologueExit,prologueView,prologueRecord} from './prologue-realm.js?v=1';
 import {ARENA_MAP,arenaReservation,arenaView,arenaCommand,cleanArenaRooms,leaveArena,finishArena} from './arena-rooms166.js';
 import {checkWalk,startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} from './auto-walk.js';
 import {normalizeAutoTarget} from '../auto-targets.js';
 import {publicBossDirectory} from './boss-directory.js';
-import {recordBossDamage,finishBossDamage} from '../boss-results.js';
+import {recordBossDamage,finishBossDamage,bossLootRows} from '../boss-results.js';
 import {warBoardKey,warRound,warContribution,warRankings,finishWarRound} from '../guild-war-rewards.js';
-import {normalizeMailbox,inboxSummary} from '../mailbox.js';
+import {normalizeMailbox,inboxSummary,mailOverflow,OVERFLOW_PREFIX} from '../mailbox.js';
 import {normalizePetAccount,activePremiumPet,publicPetAccount} from '../pet-account.js';
 import {castPremiumPet,petIncoming,petBlessing,PET_SKILL_ERRORS} from '../pet-combat.js';
 import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from '../role-skill-progress.js';
@@ -28,6 +29,7 @@ import {character,isServer,isSlot,CHANNELS,normalizeChannel} from '../realm-stat
 import {logJoin,logLeave,logChannel,logChat,logMvp,logTrade,logMarket,logGuild,logLevelUp} from './dashboard-log.js';
 import {normalizeSkills,upgradeSkill,availablePoints,SLOTS} from '../skill-progress.js';
 import {normalizeStory,storyEvent,rewardItems} from '../story-quests.js';
+import {normalizeRebirthStory,rebirthTalk} from '../rebirth-story.js';
 import {gearLook,GRADES} from '../gear-sets.js';
 import {FRIEND_MAX,GUILD_COST,SOCIAL_ERRORS,cleanName,validGuildName,validEmblem,normalizeFriends,GUILD_HALL,DEPUTY_MAX,DONATE_MIN,DONATE_MAX,GUILD_LEVELS,guildLevel,GUILD_UPGRADES,GUILD_RITE,GUILD_GOAL,guildSeats,cleanNotice,GUILD_SEARCH_LIMIT,GUILD_APPLICATION_MAX,GUILD_APPLICATION_LIMIT,GUILD_APPLICATION_TTL} from '../social.js';
 import {claimDaily,thaiDay} from '../daily.js';
@@ -69,7 +71,7 @@ export function refineAnnouncement(who,r,before,after){
 const WALK_FREE_MS=5;
 // 0.119 observer: an invisible, untargetable spectator for allowed e-mails (guild-war streams). It may only move and look around.
 const OBSERVER_OK=new Set(['input','walkTo','walkPace','walkCancel','switchChannel','ping','bossDirectory','arenaRooms','leaderboard','guildInfo','friendList','storyCheck','inspect','returnToSpawn','respawn','observer']);
-const allowed=new Set(['observer','arenaRooms','walkTo','walkPace','walkCancel','bossDirectory','switchChannel','storyCheck','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildSearch','guildApply','guildApplicationAnswer','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','petSkill','bountyClaim','albumDeposit','weeklyClaim','rebirth','hire','selectAlly','returnToSpawn','respawn']);
+const allowed=new Set(['observer','arenaRooms','walkTo','walkPace','walkCancel','bossDirectory','switchChannel','storyCheck','rebirthTalk','craft','duel','duelQuit','input','skill','attack','select','auto','autoConfig','emote','chat','invite','answer','leaveParty','kick','leader','ping','upgradeSkill','questTalk','useItem','buy','sell','bagExpand','discard','statUp','equip','unequip','refine','insertCard','storageOpen','store','retrieve','tradeRequest','tradeAnswer','tradeOffer','tradeLock','inspect','tradeConfirm','tradeCancel','tradeList','stallOpen','stallClose','stallList','stallBuy','leaderboard','shopOpen','shopClose','shopCollect','shopBuy','shopSell','shopMine','shopList','marketSearch','friendList','friendAdd','friendAnswer','friendRemove','guildInfo','guildSearch','guildApply','guildApplicationAnswer','guildCreate','guildInvite','guildAnswer','guildLeave','guildKick','guildEmblem','guildDonate','guildRank','guildNotice','guildUpgrade','guildRite','bubble','petSkill','bountyClaim','albumDeposit','weeklyClaim','rebirth','hire','selectAlly','returnToSpawn','respawn','prologue']);
 // 0.90 AUTO drinks the best potion when HP / MP falls under the player's threshold (same 0.8 s gap as a manual use).
 function autoPotionFor(realm,p){
  const w=p.world;if(!w.auto||w.player.hp<=0||realm.now()-(p.itemAt??0)<800)return;
@@ -83,7 +85,7 @@ export class RealmServer{
   castPremiumPet(w,pet,{lineClear,types:MONSTER_TYPES});p.petCollection.readyAt=this.now()+pet.skill.cooldown*1000;p.saveNow=true;return true;
  }
  autoPotion(p){autoPotionFor(this,p);}
- constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false,roleSkills=false,spiritCompanions=false}={}){this.roleSkills=roleSkills===true;this.spiritCompanions=spiritCompanions===true;this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];this.mapBosses=new MapBossClock({now});}
+ constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false,roleSkills=false,spiritCompanions=false,prologue=false}={}){this.roleSkills=roleSkills===true;this.prologue=prologue===true;this.spiritCompanions=spiritCompanions===true;this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];this.mapBosses=new MapBossClock({now});}
  channelCounts(mapId){return CHANNELS.map(c=>{let n=0;for(const p of this.peers.values())if((!p.suspended||(p.resumeUntil&&p.resumeUntil>this.now()))&&(p.channel??1)===c.id&&(!mapId||p.room?.map?.id===mapId)&&!p.observer)n++;return {channel:c.id,name:c.name,subtitle:c.subtitle,players:n};});}
  join({uid,serverId,slotId,channel,record,send,canObserve=false}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
@@ -97,6 +99,8 @@ export class RealmServer{
   }
   const hero=character(record.character),capital=this.catalog.maps.find(m=>m.id===this.catalog.capital);
   let map=this.catalog.maps.find(m=>m.id===record.state.mapId)??capital;
+  // a brand-new character wakes in the prologue's dream meadow (its own room) until the vision is over
+  const prologue=prologueJoin(this,record);if(prologue&&prologue.stage!=='done')map=prologueMap(this);else if(map.prologue)map=capital;
   const arena=map.id===ARENA_MAP?arenaReservation(this,uid+':'+slotId):null;
   const arenaEvicted=map.id===ARENA_MAP&&!arena;if(arenaEvicted)map=capital;
   // 1.01 each guild has its own hall room; someone no longer in a guild (kicked while offline) wakes up in the capital.
@@ -104,25 +108,25 @@ export class RealmServer{
   if(evicted)map=capital;
   // A party that travelled keeps its seat for a minute (0.49), so it can walk into the same dungeon instance together.
   const party=[...this.parties.values()].find(v=>v.pending?.has(uid));
-  const hasChannel=channel!==undefined&&channel!==null;let ch=hasChannel?normalizeChannel(channel):(serverId==='server-2'?2:1);const makeRoomId=c=>arena?`${serverId}:ch${arena.channel}:${map.id}:${arena.id}`:hasChannel?`${serverId}:ch${c}:${map.id}${map.instance?':'+(party?.id??'solo-'+uid):''}${hallGuild?':'+hallGuild.id:''}`:serverId+':'+map.id+(map.instance?':'+(party?.id??'solo-'+uid):'')+(hallGuild?':'+hallGuild.id:'');let roomId=makeRoomId(ch);if(arena)ch=arena.channel;
-  let room=this.rooms.get(roomId);if(room&&room.peers.size>=this.capacity&&hasChannel&&!map.instance&&!hallGuild){const alt=CHANNELS.find(c=>(this.rooms.get(makeRoomId(c.id))?.peers.size??0)<this.capacity);if(alt){ch=alt.id;roomId=makeRoomId(ch);room=this.rooms.get(roomId);}}if(room&&room.peers.size>=this.capacity)throw new Error('room-full');
+  const hasChannel=channel!==undefined&&channel!==null;let ch=hasChannel?normalizeChannel(channel):(serverId==='server-2'?2:1);const makeRoomId=c=>arena?`${serverId}:ch${arena.channel}:${map.id}:${arena.id}`:hasChannel?`${serverId}:ch${c}:${map.id}${map.prologue?':solo-'+uid:map.instance?':'+(party?.id??'solo-'+uid):''}${hallGuild?':'+hallGuild.id:''}`:serverId+':'+map.id+(map.prologue?':solo-'+uid:map.instance?':'+(party?.id??'solo-'+uid):'')+(hallGuild?':'+hallGuild.id:'');let roomId=makeRoomId(ch);if(arena)ch=arena.channel;
+  let room=this.rooms.get(roomId);if(room&&room.peers.size>=this.capacity&&hasChannel&&!map.instance&&!map.prologue&&!hallGuild){const alt=CHANNELS.find(c=>(this.rooms.get(makeRoomId(c.id))?.peers.size??0)<this.capacity);if(alt){ch=alt.id;roomId=makeRoomId(ch);room=this.rooms.get(roomId);}}if(room&&room.peers.size>=this.capacity)throw new Error('room-full');
   if(!room){const simulation=new CombatWorld({...map});room={id:roomId,map,serverId,channel:typeof hasChannel==='boolean'&&hasChannel?ch:null,peers:new Set(),mobs:simulation.mobs,events:[],history:[],contributors:new Map()};this.rooms.set(roomId,room);this.wakeMvp(room);}
   const world=new CombatWorld({...map,classId:hero.classId,jobId:hero.jobId,roleSkills:this.roleSkills});if(this.spiritCompanions)world.spiritCompanion=true;restoreTraveler(world,record.state.traveler);if(record.xpCurve!==XP_CURVE)world.baseXp=migrateXp(world.baseXp);world.mobs=room.mobs;
   const skills=this.roleSkills?normalizeRoleSkills(record.skills,hero.classId):normalizeSkills(record.skills,hero.classId);world.skillLevels=[...skills[hero.classId]];if(this.roleSkills&&record.skills?.[ROLE_MARK]&&record.roleCooldowns?.version===1){const saved=record.roleCooldowns,elapsed=Math.max(0,(this.now()-saved.at)/1000);if(Array.isArray(saved.values)&&saved.values.length===SLOTS)world.cooldowns=saved.values.map(n=>Math.max(0,Math.min(120,Number.isFinite(n)?n:0)-elapsed));if(saved.down>0){world.player.hp=0;world.player.down=Math.max(0,saved.down-elapsed);}}
   const position=record.state.position;if(position&&!evicted&&!arenaEvicted&&!world.roleRespawn&&walkable(position.x,position.z,.32,map.nav))Object.assign(world.player,position);
-  const peer={canObserve:canObserve===true,observer:false,roleSkillBackup:record.roleSkillBackup??(this.roleSkills&&!record.skills?.[ROLE_MARK]?copy(record.skills??{}):null),id:randomUUID(),uid,serverId,slotId,channel:ch,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
+  const peer={canObserve:canObserve===true,observer:false,roleSkillBackup:record.roleSkillBackup??(this.roleSkills&&!record.skills?.[ROLE_MARK]?copy(record.skills??{}):null),id:randomUUID(),uid,serverId,slotId,channel:ch,character:hero,training:copy(record.training??null),skills,settings:copy(record.state.settings??{}),story:normalizeStory(record.story),rebirthStory:normalizeRebirthStory(record.rebirthStory),world,room,send,seq:0,known:new Set(),input:{x:0,z:0,attack:false},inputAt:this.now(),partyId:null,bucket:40,chatAt:-Infinity,inviteAt:-Infinity,actionAt:-Infinity,emote:null};
   peer.equipment=normalizeEquipment(record.equipment,hero.classId);
   peer.bag=normalizeBag(record.bag);peer.bagVersion=1;peer.bagSent=0;peer.itemAt=-Infinity;
   peer.key=uid+':'+slotId;peer.tradeXp=Number.isSafeInteger(record.trade?.xp)&&record.trade.xp>0?record.trade.xp:0;if(map.id===MARKET_ZONE.mapId)peer.world.emit('shops',{list:this.shopList(serverId)});
   peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;if(peer.guildId)world.emit('guild',{guild:this.guildView(this.guilds.get(peer.guildId),peer.key)}); // 1.01 hall props + NPC know the guild at once
   peer.daily=record.daily??null;peer.weekly=record.weekly??null;peer.rebirth=Math.min(REBIRTH_MAX,Math.max(0,record.rebirth|0));peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.pet=null;peer.mailbox=normalizeMailbox(record.mailbox);peer.petCollection=normalizePetAccount(record.petCollection);peer.bounty=record.bounty??null;Object.assign(peer,normalizeAlbumState(record));
   if(party){party.pending.delete(uid);party.members.add(peer.id);peer.partyId=party.id;if(party.leaderPending===uid||!party.members.has(party.leader)){party.leader=peer.id;if(party.leaderPending===uid)party.leaderPending=null;}}
-  peer.storage=normalizeStorage(record.storage);peer.trade=null;peer.stall=null;peer.saveNow=false;
+  peer.prologue=prologue;peer.storage=normalizeStorage(record.storage);peer.trade=null;peer.stall=null;peer.saveNow=false;
   peer.stats=normalizeStats(record.stats);peer.gear=normalizeGear(record.gear);peer.statSig='';peer.gearAt=-Infinity;this.refreshStats(peer);if(world.roleRespawn){world.player.hp=world.player.maxHp;world.player.mp=world.player.maxMp;}
   world.hurt=(mob,damage,color)=>this.hurt(peer,mob,damage,color);world.roleOwnerId=peer.id;world.roleResolveOwner=id=>this.peers.get(id)?.room===peer.room?this.peers.get(id).world:null;world.roleEnemy=m=>{const id=String(m.id).split(':').at(-1),other=this.peers.get(id);return other?.room===peer.room&&world.foes().some(e=>e.id===m.id)?other.world:null;};world.roleAllies=()=>[...peer.room.peers].map(id=>this.peers.get(id)).filter(a=>a&&!a.suspended&&(a===peer||!a.observer)&&(a===peer||peer.partyId&&a.partyId===peer.partyId)&&(!peer.duel&&!a.duel||a===peer)&&(!world.rivals.some(r=>r.id==='war:'+a.id))).map(a=>({id:a.id,world:a.world,player:a.world.player}));
   if(arena){const seat=arena.members.findIndex(m=>m.key===peer.key);Object.assign(world.player,{x:seat?5:-5,z:0});arena.members[seat].until=this.now()+120000;}
   peer.identityReceipts=copy(record.identityReceipts??[]);
-  this.peers.set(peer.id,peer);if(record.walkRoute?.mapId===map.id){try{startWalk(peer,record.walkRoute,this.runEnabled);}catch{}} room.peers.add(peer.id);
+  this.peers.set(peer.id,peer);if(record.walkRoute?.mapId===map.id){try{startWalk(peer,record.walkRoute,this.runEnabled);}catch{}} room.peers.add(peer.id);prologueStart(this,peer);
   if(this.roleSkills&&!record.skills?.[ROLE_MARK]&&hero.classId!=='novice')world.notice('อัปเดตสกิลประจำอาชีพแล้ว · คืนแต้มสกิลเดิมให้จัดใหม่ที่เมนูสกิล');
   this.storyProgress(peer,{type:'enter',mapId:map.id});this.storyCheck(peer);this.arenaClaim(peer);
   // 0.48 daily login: first join of the Thai day grants the next reward of the 7-day cycle.
@@ -310,6 +314,15 @@ export class RealmServer{
    try{const before=p.bag.coins,next=m.type==='buy'?buy(p.bag,npc.name,m.item,qty):sell(p.bag,m.item,qty),spent=m.type==='buy'?before-next.coins:0,off=Math.floor(spent*tradePerks(p.tradeXp).npcDiscount);this.setBag(p,off?{...next,coins:next.coins+off}:next);}catch(e){return this.itemFail(p,e.message);}
    w.emit('trade',{kind:m.type,item:m.item,count:qty,coins:p.bag.coins});this.storyProgress(p,{type:'do',action:'shop'});return true;
   }
+  // 0.122 rebirth story: only reborn characters, only next to that NPC in this room; the shared rules decide the rest.
+  if(m.type==='rebirthTalk'){
+   const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null;
+   if(!npc||distance(npc,w.player)>3.6)return this.error(p,'quest-too-far');
+   const r=rebirthTalk(p.rebirthStory,{npc:npc.name,mapId:p.room.map.id},p.rebirth??0);if(!r.changed)return false;
+   p.rebirthStory=r.state;return true;
+  }
+  if(m.type==='prologue')return prologueCommand(this,p,m);
+  if(m.type==='upgradeSkill'&&p.trial)return this.error(p,'prologue-trial');
   if(m.type==='questTalk'){
    if(m.expected&&(m.expected.quest!==p.story.quest||m.expected.step!==p.story.step))return false;
    // Story talk only counts next to that NPC in this room; the shared rules decide whether it advances anything.
@@ -531,22 +544,27 @@ export class RealmServer{
   else if(MONSTER_TYPES[mob.type].mvp){const d=(p.room.mvpDamage??=new Map());d.set(p.id,(d.get(p.id)??0)+amount);}
   p.world.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount,color,magic:!!p.world.derived?.magic,crit:color==='#ffd27a',synced:!!p.world.roleCombat,...p.world.damageContext});
   if(mob.hp>0)return;mob.dead=p.room.map.instance?1e9:mobRespawn(mob);mob.aggro=false;
-  if(mob.summoned)this.summonDown(p.room,mob);else if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob);
+  // 0.122 the boss report goes out after every grant of this kill, with the real receipts (Victory screen rewards)
+  const report=MONSTER_TYPES[mob.type]?.boss?finishBossDamage(p.room,mob,MONSTER_TYPES[mob.type],this.clock):null,receipt=report?{encounterId:report.encounterId,rows:[]}:null;
+  if(mob.summoned)this.summonDown(p.room,mob,receipt);else if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob,receipt);
   if(MONSTER_TYPES[mob.type].worldBoss&&!mob.summoned){this.mapBosses.killed(p.room,mob,MONSTER_TYPES);const type=MONSTER_TYPES[mob.type];logMvp(this.logs,this.now(),type.name,p.room.channel??1,p.room.map.id,p.character.name);this.announce(p.serverId,'👑 '+type.name+' ถูกปราบที่ '+p.room.map.name+' · CH '+(p.room.channel??1)+' · เกิดใหม่อีก 60 นาที');}
-  if(MONSTER_TYPES[mob.type]?.boss){const result=finishBossDamage(p.room,mob,MONSTER_TYPES[mob.type],this.clock);if(result)p.room.events.push({...result,at:this.clock,actor:p.id});}
   if(p.room.map.instance&&MONSTER_TYPES[mob.type].boss)this.dungeonClear(p.room);
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
   const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort(),rate=expRate(this.now(),p.room.map.id)*mobXp(mob),event=activeEvent(this.now()),rolls=(mob.leader?LEADER.loot:1)*(surgeOn(this.now(),p.room.map.id)?2:1); // 0.50 event/weekend EXP + token drops
-  ids.forEach((id,i)=>{const a=this.peers.get(id),gx=1+this.guildBonus(a).exp;a.world.kills++;this.guildKill(a);if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,Math.round(split(Math.round(reward.baseXp*rate))*gx),Math.round(split(Math.round(reward.jobXp*rate))*gx)));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});a.weekly=weeklyDefeat(a.weekly,this.now(),{leader:!!mob.leader,boss:!!reward.boss});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls,gearLook(a.character.classId,a.character.gender));loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)+this.guildBonus(a).coins));this.grantLoot(a,loot,mob);}});
+  ids.forEach((id,i)=>{const a=this.peers.get(id),gx=1+this.guildBonus(a).exp;a.world.kills++;this.guildKill(a);if(a.training&&!a.training.bossDone&&(a.training.boss??TRIAL[a.training.tier]?.boss)===reward.id){a.training={...a.training,bossDone:true};a.saveNow=true;a.world.notice('⚔️ ล้มบอสบททดสอบแล้ว! · กลับไปส่งบททดสอบที่ลานครู');}const split=n=>Math.floor(n/ids.length)+(i<n%ids.length?1:0);a.world.emit('experience',awardExperience(a.world,Math.round(split(Math.round(reward.baseXp*rate))*gx),Math.round(split(Math.round(reward.jobXp*rate))*gx)));a.world.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});this.storyProgress(a,{type:'defeat',monster:reward.id,mapId:p.room.map.id});a.weekly=weeklyDefeat(a.weekly,this.now(),{leader:!!mob.leader,boss:!!reward.boss});{const bd=bountyDefeat(a.bounty,this.now(),reward.id,mob.leader);if(bd.changed)a.bounty=bd.state;}{const loot=rollLoot(reward.id,Math.random,event,rolls,gearLook(a.character.classId,a.character.gender));loot.coins=Math.round(loot.coins*(1+(a.derived?.coinPct??0)+this.guildBonus(a).coins));this.grantLoot(a,loot,mob,receipt);}});
+  for(const id of ids)prologueKill(this,this.peers.get(id),mob);
+  if(report)p.room.events.push({...report,rewards:receipt.rows,at:this.clock,actor:p.id});
   p.room.contributors.delete(mob.id);
   for(const id of p.room.peers){const a=this.peers.get(id);if(a.world.targetId===mob.id){a.world.targetId=null;a.world.path=[];}}
  }
  step(dt=.05){
   dt=Math.max(0,Math.min(.05,dt));this.clock+=dt;this.tickId++;
-  if(this.tickId%1200===0&&this.onLeaders)for(const id of this.leadersDirty){this.leadersDirty.delete(id);Promise.resolve(this.onLeaders(id,this.leaders.get(id))).catch(e=>console.error('leader-save',e.message));}
-  if(this.tickId%1200===0&&this.onPrices)for(const id of this.pricesDirty){this.pricesDirty.delete(id);Promise.resolve(this.onPrices(id,this.prices.get(id))).catch(e=>console.error('price-save',e.message));}
-  if(this.tickId%1200===0)for(const g of this.guildsDirty){this.guildsDirty.delete(g);if(this.guilds.get(g.id)===g)this.onGuild?.(g,false);} // 1.01 kill counts, once a minute
+  // leaderboards, market prices and guild kill counts are saved every 5 min (was 1): they change all the time, and each
+  // save is a Firestore write against the daily quota; shutdown still saves whatever is pending
+  if(this.tickId%6000===0&&this.onLeaders)for(const id of this.leadersDirty){this.leadersDirty.delete(id);Promise.resolve(this.onLeaders(id,this.leaders.get(id))).catch(e=>console.error('leader-save',e.message));}
+  if(this.tickId%6000===0&&this.onPrices)for(const id of this.pricesDirty){this.pricesDirty.delete(id);Promise.resolve(this.onPrices(id,this.prices.get(id))).catch(e=>console.error('price-save',e.message));}
+  if(this.tickId%6000===0)for(const g of this.guildsDirty){this.guildsDirty.delete(g);if(this.guilds.get(g.id)===g)this.onGuild?.(g,false);} // 1.01 kill counts, every 5 min
   {const s=surge(this.now()); // 0.64 announce each field surge once, on every channel
    if(s.active&&this.surgeSlot!==s.slot){this.surgeSlot=s.slot;const name=this.catalog.maps.find(m=>m.id===s.map)?.name??s.map;for(const id of new Set([...this.peers.values()].map(p=>p.serverId)))this.announce(id,`🔥 ฝูงคลั่งที่ ${name}! · EXP ×2 และดรอป ×2 อีก 5 นาที`);}}
   cleanArenaRooms(this);
@@ -555,13 +573,14 @@ export class RealmServer{
   for(const party of [...this.parties.values()])for(const [uid,until] of party.pending??[])if(until<this.now()){party.pending.delete(uid);if(party.members.size+party.pending.size<2){for(const id of party.members){const a=this.peers.get(id);a.partyId=null;this.social(a.room);}this.parties.delete(party.id);}}
   if(this.tickId%20===1){this.expireShops();for(const p of this.peers.values())this.expireStall(p);this.flushMarketBrowsers();}
   this.warTick();
-  if(this.tickId%20===0)for(const p of this.peers.values())if(!p.suspended)this.storyCheck(p);
+  if(this.tickId%20===0)for(const p of this.peers.values())if(!p.suspended){this.storyCheck(p);prologueTick(this,p);}
   if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
   for(const p of this.peers.values()){if(p.suspended)continue;p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);if(p.walkQueued&&this.now()>=p.walkAt)this.walkNow(p,p.walkQueued);p.world.update(dt,walkInput(p,dt),{monsters:false});p.appliedInputSeq=p.inputSeq??0;if(!p.mailMutationBusy)this.autoPotion(p);if(!p.petMutationBusy&&p.petCollection.auto&&p.world.auto){try{this.petCast(p,true);}catch{}}}
   for(const room of this.rooms.values()){
    if(this.roleSkills)stepRoleMonsters(room.mobs,dt,id=>this.peers.get(id)?.room===room?this.peers.get(id).world:null);
    // 0.99.11 the living players of the room once per tick; each monster just takes the closest (no per-monster sort)
    const alive=[...room.peers].map(id=>this.peers.get(id)).filter(p=>!p.suspended&&!p.observer&&p.world.player.hp>0);
+   const levels=new Map(alive.map(p=>[p,baseProgress(p.world).level])); // 0.122 territory aggro (monster-catalog.js)
    for(const m of room.mobs){
     m.petSlow=Math.max(0,(m.petSlow??0)-dt);if(m.petArmor)m.petArmor.left=Math.max(0,m.petArmor.left-dt);if(m.hp<=0){m.petSlow=0;delete m.petArmor;}
     let target=null,near=Infinity;for(const p of alive){const d=distance(p.world.player,m);if(d<near){near=d;target=p;}}
@@ -570,7 +589,7 @@ export class RealmServer{
     if(type.mvp&&m.hp<=0&&!m.summoned)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
     if(type.worldBoss&&!m.summoned){const left=this.mapBosses.remaining(room);if(left>0){m.hp=0;m.dead=left;room.contributors.delete(m.id);continue;}if(m.hp<=0)m.dead=0;}
     const decoyOwner=this.peers.get(m.roleStatus?.decoy?.owner);if(decoyOwner?.room===room)target={world:{player:{...decoyOwner.world.player,x:decoyOwner.world.player.x+1.2,hp:1},takeMonsterHit(){}}};
-    const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear});
+    const result=advanceMonster(m,target?.world.player,type,dt,room.map.nav,{moveBody,lineClear,level:levels.get(target)??null});
     if(result==='respawn'){room.damageEncounters?.delete(m.id);room.contributors.delete(m.id);if(type.worldBoss)this.announce(room.serverId,'👑 บอสประจำแมพ '+type.name+' ปรากฏที่ '+room.map.name+' · CH '+(room.channel??1));else if(type.mvp)this.announce(room.serverId,`👑 MVP ${type.name} ปรากฏตัวที่ ${room.map.name}!`);else if(type.awakened)this.announce(room.serverId,`⚡ ${type.name} (Lv.${type.level}) ตื่นขึ้นที่ ${room.map.name}!`);}
     if(m.justEnraged){m.justEnraged=false;for(const id of room.peers)this.peers.get(id).world.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
     if(result==='burst')for(const id of room.peers){const a=this.peers.get(id);if(!a.suspended&&!a.observer&&a.world.player.hp>0&&distance(a.world.player,m)<=MONSTER_BEHAVIOUR[type.id].aoe)a.world.takeMonsterHit(type,type.damage,m);}
@@ -785,18 +804,18 @@ export class RealmServer{
   this.announce(serverId,`👑 บอสโลก ${type.name}${n>1?' ×'+n:''} ปรากฏตัวที่ ${map.name}!`);
   return {name:type.name,map:map.name,count:n,x:Math.round(placed[0].x),y:Math.round(-placed[0].z)};
  }
- summonDown(room,mob){
+ summonDown(room,mob,receipt=null){
   const type=MONSTER_TYPES[mob.type];mob.dead=1e9;
   const damage=[...(room.bossDamage?.get(mob.id)??[])].filter(([id])=>this.peers.get(id)?.room===room).sort((a,b)=>b[1]-a[1]);room.bossDamage?.delete(mob.id);
   const winner=damage[0]&&this.peers.get(damage[0][0]);
-  if(winner){this.grantLoot(winner,{coins:0,items:[{id:'king-ember',count:1}]});winner.saveNow=true;winner.world.emit('mvp',{name:type.name});}
+  if(winner){this.grantLoot(winner,{coins:0,items:[{id:'king-ember',count:1}]},null,receipt);winner.saveNow=true;winner.world.emit('mvp',{name:type.name});}
   this.herald(room.serverId,winner?`👑 ${winner.character.name} ปราบบอสโลก ${type.name} ได้!`:`บอสโลก ${type.name} ถูกปราบแล้ว`);
  }
- mvpDown(room,mob){
+ mvpDown(room,mob,receipt=null){
   const s=this.mvpState(room.serverId),type=MONSTER_TYPES[mob.type];s.nextAt=this.now()+MVP_INTERVAL;mob.dead=MVP_INTERVAL/1000;
   const damage=[...(room.mvpDamage??[])].filter(([id])=>this.peers.get(id)?.room===room).sort((a,b)=>b[1]-a[1]);room.mvpDamage=new Map();
   const winner=damage[0]&&this.peers.get(damage[0][0]);
-  if(winner){this.grantLoot(winner,{coins:0,items:[{id:'king-ember',count:1}]});winner.saveNow=true;winner.world.emit('mvp',{name:type.name});}
+  if(winner){this.grantLoot(winner,{coins:0,items:[{id:'king-ember',count:1}]},null,receipt);winner.saveNow=true;winner.world.emit('mvp',{name:type.name});}
   logMvp(this.logs,this.now(),type.name,room.channel??1,room.map.id,winner?.character?.name);
   this.herald(room.serverId,winner?`👑 ${winner.character.name} ได้ MVP ${type.name}! · กลับมาอีกใน 60 นาที`:`${type.name} ถูกปราบแล้ว · กลับมาอีกใน 60 นาที`);
  }
@@ -931,11 +950,20 @@ export class RealmServer{
  }
 
  // Auto-loot: coins and items go straight into the bag; anything that does not fit is reported, not dropped.
- grantLoot(p,loot,at=null){
-  if(p.mailMutationBusy){(p.mailLootQueue??=[]).push({loot:copy(loot),at:at?copy(at):null});return;}
+ // 0.122 receipt (boss kills only): {encounterId, rows?}. During the kill its rows collect what really landed in the
+ // bag (received) or did not fit (lost); a grant queued behind a mail action is listed as pending and, once the queue
+ // drains (host.js), confirmed to the room with a bossLoot event carrying the same grantId.
+ grantLoot(p,loot,at=null,receipt=null){
+  if(receipt&&!receipt.grantId)receipt={...receipt,grantId:p.id+':'+(this.lootGrants=(this.lootGrants??0)+1)};
+  if(p.mailMutationBusy){(p.mailLootQueue??=[]).push({loot:copy(loot),at:at?copy(at):null,receipt:receipt&&{encounterId:receipt.encounterId,grantId:receipt.grantId}});receipt?.rows?.push(...bossLootRows(p,loot.items,'pending',receipt.grantId));return;}
   if(!loot.coins&&!loot.items.length)return;
   const r=addLoot(p.bag,loot);this.setBag(p,r.bag);
-  p.world.emit('loot',{coins:r.coins,items:r.added,lost:r.lost,x:at?.x??null,z:at?.z??null});
+  // 0.122 what a full bag cannot take goes to the "bag full" mail; only what the mailbox cannot take is lost
+  const mail=r.lost.length?mailOverflow(p.mailbox,r.lost,{id:OVERFLOW_PREFIX+randomUUID(),now:this.now(),serverId:['server-1','server-2'].includes(p.serverId)?p.serverId:'all'}):{mailed:[],left:[]};
+  if(mail.mailed.length)p.mailbox=mail.mailbox;r.lost=mail.left;
+  if(receipt){const rows=[...bossLootRows(p,r.added,'received',receipt.grantId),...bossLootRows(p,mail.mailed,'mailed',receipt.grantId),...bossLootRows(p,r.lost,'lost',receipt.grantId)];
+   if(receipt.rows)receipt.rows.push(...rows);else p.room?.events.push({type:'bossLoot',encounterId:receipt.encounterId,grantId:receipt.grantId,rows,at:this.clock,actor:p.id});}
+  p.world.emit('loot',{coins:r.coins,items:r.added,lost:r.lost,mailed:mail.mailed,x:at?.x??null,z:at?.z??null});
   // 0.64 a purple or gold drop from a monster is announced to the whole channel.
   // 0.117 graded gear: only orange and red grades (not an affix bump) are announced, with the grade's name.
   const loud=d=>d?.graded?(d.grade??0)>=3:d?.rarity>=3;
@@ -962,10 +990,10 @@ export class RealmServer{
    for(const k of PLAYER_STATIC)if(last[k]!==a.entryKeys[k]){last[k]=a.entryKeys[k];d[k]=e[k];}
    return d;});
   p.known=seen;
-  const prev=p.sentSig??={},nextSig={character:JSON.stringify(p.character),equipment:JSON.stringify(p.equipment),training:JSON.stringify(p.training),skillLevels:JSON.stringify(p.world.skillLevels),skillPoints:availablePoints(p.skills,this.progress(p)),story:JSON.stringify(p.story),bounty:JSON.stringify(normalizeBounty(p.bounty,this.now())),weekly:JSON.stringify(normalizeWeekly(p.weekly,this.now())),album:JSON.stringify([p.album,p.albumRewards]),pet:JSON.stringify(p.pet),mailbox:JSON.stringify(inboxSummary(p.mailbox,this.mailAnnouncements??[],p.serverId)),petCollection:JSON.stringify(publicPetAccount(p.petCollection)),mvp:JSON.stringify(this.mvpInfo(p.serverId)),stall:p.stall?.title??null,guild:JSON.stringify(this.guildTag(p)),stats:JSON.stringify([p.stats,p.gear,p.statSig])};
+  const prev=p.sentSig??={},nextSig={character:JSON.stringify(p.character),equipment:JSON.stringify(p.equipment),training:JSON.stringify(p.training),skillLevels:JSON.stringify(p.world.skillLevels),skillPoints:availablePoints(p.skills,this.progress(p)),story:JSON.stringify(p.story),rebirthStory:JSON.stringify((p.rebirth??0)>=1?p.rebirthStory:null),prologue:JSON.stringify(prologueView(p)),bounty:JSON.stringify(normalizeBounty(p.bounty,this.now())),weekly:JSON.stringify(normalizeWeekly(p.weekly,this.now())),album:JSON.stringify([p.album,p.albumRewards]),pet:JSON.stringify(p.pet),mailbox:JSON.stringify(inboxSummary(p.mailbox,this.mailAnnouncements??[],p.serverId)),petCollection:JSON.stringify(publicPetAccount(p.petCollection)),mvp:JSON.stringify(this.mvpInfo(p.serverId)),stall:p.stall?.title??null,guild:JSON.stringify(this.guildTag(p)),stats:JSON.stringify([p.stats,p.gear,p.statSig])};
   const chg=k=>!delta||prev[k]!==nextSig[k];
   const sp={...p.world.player,x:round(p.world.player.x),z:round(p.world.player.z),face:{x:round(p.world.player.face.x),z:round(p.world.player.face.z)}};
-  const self={observer:p.observer===true,canObserve:p.canObserve===true,id:p.id,mapId:p.room.map.id,arenaRoom:p.room.map.id===ARENA_MAP?arenaView(this,p).mine:null,walkSchema:1,walkRunSchema:this.runEnabled?1:0,walkRoute:walkView(p),inputAck:p.appliedInputSeq??0,player:sp,emote:this.emoteView(p),partyId:p.partyId,cooldowns:p.world.cooldowns.map(round),kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,autoTarget:p.world.autoTarget??null,hunt:p.world.hunt??null,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,adventurerSchema:1,adventurers:adventurerViews(p.room.map,this.now()/1000),mercenary:p.world.merc?.id?adventurerContract(p.world.merc):null,merc:p.world.merc?Math.ceil(p.world.merc.left):0,rebirth:p.rebirth??0,status:p.world.status,roleSchema:this.roleSkills?1:0,spiritCompanionSchema:this.spiritCompanions?1:0,supportTargetId:p.world.supportTargetId??p.id,supportRoster:p.world.roleAllies?.().map(a=>({id:a.id,name:this.peers.get(a.id)?.character.name??p.character.name,x:a.player.x,z:a.player.z,hp:a.player.hp,maxHp:a.player.maxHp,down:a.player.down})),rolePets:p.world.roleCombat?.state.pets.map(a=>({kind:a.kind,x:a.x,z:a.z,left:a.left,power:a.power})),food:p.world.food?.left>0?{id:p.world.food.id,left:Math.ceil(p.world.food.left)}:null,...(chg('character')?{character:p.character}:{}),...(chg('equipment')?{equipment:p.equipment}:{}),...(chg('training')?{training:p.training}:{}),...(chg('skillLevels')?{skillLevels:p.world.skillLevels}:{}),...(chg('skillPoints')?{skillPoints:nextSig.skillPoints}:{}),...(chg('story')?{story:p.story}:{}),...(chg('bounty')?{bounty:normalizeBounty(p.bounty,this.now())}:{}),...(chg('weekly')?{weekly:normalizeWeekly(p.weekly,this.now())}:{}),...(chg('album')?{album:p.album,albumRewards:p.albumRewards,albumSchema:2}:{}),...(chg('pet')?{pet:p.pet}:{}),...(chg('mailbox')?{mailbox:inboxSummary(p.mailbox,this.mailAnnouncements??[],p.serverId)}:{}),...(chg('petCollection')?{petCollection:publicPetAccount(p.petCollection)}:{}),...(chg('mvp')?{mvp:this.mvpInfo(p.serverId)}:{}),...(chg('stall')?{stall:nextSig.stall}:{}),...(chg('guild')?{guild:this.guildTag(p)}:{}),...(chg('stats')?{stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level,p.rebirth??0),derived:p.derived}:{}),...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})};
+  const self={observer:p.observer===true,canObserve:p.canObserve===true,id:p.id,mapId:p.room.map.id,arenaRoom:p.room.map.id===ARENA_MAP?arenaView(this,p).mine:null,walkSchema:1,walkRunSchema:this.runEnabled?1:0,walkRoute:walkView(p),inputAck:p.appliedInputSeq??0,player:sp,emote:this.emoteView(p),partyId:p.partyId,cooldowns:p.world.cooldowns.map(round),kills:p.world.kills,baseXp:p.world.baseXp,jobXp:p.world.jobXp,targetId:p.world.targetId,auto:p.world.auto,autoTarget:p.world.autoTarget??null,hunt:p.world.hunt??null,war:this.warView(p),duel:p.duel?{foe:p.world.foe,left:Math.max(0,Math.ceil((p.duel.until-this.now())/1000))}:null,adventurerSchema:1,adventurers:adventurerViews(p.room.map,this.now()/1000),mercenary:p.world.merc?.id?adventurerContract(p.world.merc):null,merc:p.world.merc?Math.ceil(p.world.merc.left):0,rebirth:p.rebirth??0,status:p.world.status,roleSchema:this.roleSkills?1:0,spiritCompanionSchema:this.spiritCompanions?1:0,supportTargetId:p.world.supportTargetId??p.id,supportRoster:p.world.roleAllies?.().map(a=>({id:a.id,name:this.peers.get(a.id)?.character.name??p.character.name,x:a.player.x,z:a.player.z,hp:a.player.hp,maxHp:a.player.maxHp,down:a.player.down})),rolePets:p.world.roleCombat?.state.pets.map(a=>({kind:a.kind,x:a.x,z:a.z,left:a.left,power:a.power})),food:p.world.food?.left>0?{id:p.world.food.id,left:Math.ceil(p.world.food.left)}:null,...(chg('character')?{character:p.character}:{}),...(chg('equipment')?{equipment:p.equipment}:{}),...(chg('training')?{training:p.training}:{}),...(chg('skillLevels')?{skillLevels:p.world.skillLevels}:{}),...(chg('skillPoints')?{skillPoints:nextSig.skillPoints}:{}),...(chg('story')?{story:p.story}:{}),...(chg('rebirthStory')?{rebirthStory:(p.rebirth??0)>=1?p.rebirthStory:null}:{}),...(chg('prologue')&&p.prologue?{prologue:prologueView(p)}:{}),...(chg('bounty')?{bounty:normalizeBounty(p.bounty,this.now())}:{}),...(chg('weekly')?{weekly:normalizeWeekly(p.weekly,this.now())}:{}),...(chg('album')?{album:p.album,albumRewards:p.albumRewards,albumSchema:2}:{}),...(chg('pet')?{pet:p.pet}:{}),...(chg('mailbox')?{mailbox:inboxSummary(p.mailbox,this.mailAnnouncements??[],p.serverId)}:{}),...(chg('petCollection')?{petCollection:publicPetAccount(p.petCollection)}:{}),...(chg('mvp')?{mvp:this.mvpInfo(p.serverId)}:{}),...(chg('stall')?{stall:nextSig.stall}:{}),...(chg('guild')?{guild:this.guildTag(p)}:{}),...(chg('stats')?{stats:p.stats,gear:p.gear,statPoints:statPoints(p.stats,this.who(p).level,p.rebirth??0),derived:p.derived}:{}),...(p.bagSent!==p.bagVersion?(p.bagSent=p.bagVersion,{bag:p.bag}):{})};
   Object.assign(prev,nextSig);
   return {...copy({tick:this.tickId,time:round(this.clock),weather:this.weatherState(p.serverId),self,roleFields:[...p.room.peers].flatMap(id=>{const a=this.peers.get(id);return !a||a.suspended?[]:(a.world.roleCombat?.state.fields??[]).filter(f=>distance(f,p.world.player)<35).map(f=>({owner:id,x:f.x,z:f.z,left:round(f.left),radius:f.radius,kind:f.kind,skillId:f.skillId}));}),rolePets:[...p.room.peers].flatMap(id=>{const a=this.peers.get(id);return !a||a.suspended?[]:(a.world.roleCombat?.state.pets??[]).filter(t=>distance(t,p.world.player)<25).map(t=>({owner:id,id:t.id,kind:t.kind,skillId:t.skillId,tier:t.tier,spawnedAt:Number.isFinite(t.spawnedAt)?t.spawnedAt+this.clock-a.world.time:undefined,endsAt:Number.isFinite(t.endsAt)?t.endsAt+this.clock-a.world.time:undefined,maxLeft:t.maxLeft,attackAt:Number.isFinite(t.attackAt)?t.attackAt+this.clock-a.world.time:null,targetId:t.targetId,face:t.face?{x:round(t.face.x),z:round(t.face.z)}:null,x:round(t.x),z:round(t.z),attacking:t.tick>.85,left:round(t.left)}));})}),players,mobs:copy(this.mobDelta(p))};
  }
@@ -1000,14 +1028,15 @@ export class RealmServer{
   // 1.01 guild hall: members only, free, from anywhere outside a duel or the running guild war.
   const hall=destination?.guildHall===true;
   if(hall){if(!this.guildOf(p))throw new Error('guild-hall');if(p.duel||(this.wars.get(p.serverId)?.active&&p.room.map.id===WAR.map))throw new Error('guild-busy');warp=false;}
+  const home=prologueExit(this,p,id);if(home)warp=false; // the prologue's way home
   const fare=warp?warpCost(this.catalog,p.room.map.id,id):null;if(warp&&fare===null)throw new Error('travel-invalid');
   if(warp&&p.bag.coins<fare)throw new Error('no-coins');
-  if((!portal&&!recall&&!townHop&&!warp&&!hall)||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
+  if((!portal&&!recall&&!townHop&&!warp&&!hall&&!home)||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
   if(warp){const b=normalizeBag(p.bag);b.coins-=fare;this.setBag(p,b);}
   else if(recall&&!jobRecall){const b=normalizeBag(p.bag);b.items['return-incense']--;if(!b.items['return-incense'])delete b.items['return-incense'];this.setBag(p,b);}
   this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();p.world.player.running=false;
   return destination;
  }
- record(p,original){this.rank(p);return {...copy(original),identityReceipts:copy(p.identityReceipts??[]),walkRoute:walkSave(p),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),roleSkillBackup:copy(p.roleSkillBackup??original.roleSkillBackup??null),...(this.roleSkills?{roleCooldowns:{version:1,at:this.now(),values:p.world.cooldowns.map(v=>Math.max(0,v)),down:p.world.player.hp<=0?p.world.player.down:0}}:{}),story:copy(p.story),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),weekly:copy(p.weekly),rebirth:p.rebirth??0,xpCurve:XP_CURVE,album:copy(p.album),albumRewards:copy(p.albumRewards),albumSchema:2,trade:{xp:p.tradeXp??0},pet:null,mailbox:copy(p.mailbox),petCollection:copy(p.petCollection),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}};}
+ record(p,original){this.rank(p);return prologueRecord(this,p,{...copy(original),identityReceipts:copy(p.identityReceipts??[]),walkRoute:walkSave(p),character:copy(p.character),equipment:normalizeEquipment(p.equipment,p.character.classId),training:copy(p.training),skills:copy(p.skills),roleSkillBackup:copy(p.roleSkillBackup??original.roleSkillBackup??null),...(this.roleSkills?{roleCooldowns:{version:1,at:this.now(),values:p.world.cooldowns.map(v=>Math.max(0,v)),down:p.world.player.hp<=0?p.world.player.down:0}}:{}),story:copy(p.story),rebirthStory:copy(p.rebirthStory),bag:copy(p.bag),storage:copy(p.storage),friends:copy(p.friends),daily:copy(p.daily),dungeonDay:p.dungeonDay,bounty:copy(p.bounty),weekly:copy(p.weekly),rebirth:p.rebirth??0,xpCurve:XP_CURVE,album:copy(p.album),albumRewards:copy(p.albumRewards),albumSchema:2,trade:{xp:p.tradeXp??0},pet:null,mailbox:copy(p.mailbox),petCollection:copy(p.petCollection),stats:copy(p.stats),gear:copy(p.gear),state:{...copy(original.state),settings:copy(p.settings),mapId:p.room.map.id,position:{x:p.world.player.x,z:p.world.player.z},traveler:serializeTraveler(p.world)}});}
 }

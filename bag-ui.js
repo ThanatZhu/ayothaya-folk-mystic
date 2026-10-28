@@ -76,9 +76,10 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
   const revived=world.respawn(true);render();return revived;
  }};
  const fail=code=>world.notice(ITEM_ERRORS[code]??code);
- function showLoot({coins=0,items=[],lost=[]}){
+ function showLoot({coins=0,items=[],lost=[],mailed=[]}){
   const parts=[];if(items.length)parts.push('ได้รับ '+itemLabel(items));if(coins)parts.push('เบี้ย +'+coins);
   if(parts.length)world.notice(parts.join(' · '));
+  if(mailed.length)world.notice(`กระเป๋าเต็ม · ส่ง ${itemLabel(mailed)} ไปที่จดหมายแล้ว`);
   if(lost.length)world.notice('กระเป๋าเต็ม · '+itemLabel(lost)+' หายไป');
  }
  function grantLocal(loot,at=null){const r=addLoot(local,loot);local=r.bag;save();showLoot({coins:r.coins,items:r.added,lost:r.lost});if(at&&r.added.length)world.emit('drop',{items:r.added,x:at.x,z:at.z});render();}

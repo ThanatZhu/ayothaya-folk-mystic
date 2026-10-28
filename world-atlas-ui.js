@@ -33,7 +33,7 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onWalk,onClose}
  document.body.append(dialog);
  const $=s=>dialog.querySelector(s),viewport=$('.atlas-viewport'),surface=$('.atlas-surface'),select=$('#atlas-destination'),warp=$('#atlas-warp'),walk=$('#atlas-walk');
  const pins=new Map();let selected=currentId,zoom=1,busy=false,drag=null,suppressClick=false;
- for(const map of catalog.maps){if(map.pvpArena&&map.id!==currentId)continue;
+ for(const map of catalog.maps){if((map.pvpArena||map.prologue)&&map.id!==currentId)continue;
   const option=document.createElement('option');option.value=map.id;option.textContent=map.name;select.append(option);
   if(!PLACES[map.id])continue;const anchor=at(PLACES[map.id]);
   const pin=document.createElement('button');pin.type='button';pin.className='atlas-place';pin.dataset.mapId=map.id;

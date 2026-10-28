@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="th"><head><script src="i18n-en.js?v=victory197"></script><script src="i18n.js?v=100"></script><meta charset="utf-8"><script type="importmap">{"imports":{"three":"./vendor/build/three.module.js","three/addons/":"./vendor/addons/"}}</script><meta name="viewport" content="width=device-width,initial-scale=1"><title>ภาคจุติ · ห้าภพแห่งไฟต้นแสง · ตรวจฉาก</title>
+<link rel="stylesheet" href="typography.css?v=10">
+<style>
+body{margin:0;background:#0b1a16;color:#fff0ce;font-family:var(--font-game);font-weight:500}
+header,main{max-width:1100px;margin:0 auto;padding:16px}
+h1,h2,h3{font-weight:700;margin:.4em 0}h1{font-size:22px}h2{font-size:18px;color:#e3bc68}h3{font-size:15px}
+label{display:inline-flex;gap:8px;align-items:center}input{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid #c6a16488;background:#152925;color:#fff0ce}
+.maps{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:12px 0}
+.maps div{padding:10px;border:1px solid #c6a16488;border-radius:8px;background:linear-gradient(135deg,#24382bf4,#152925f0);font-size:13px}
+.maps b{display:block}.ok{color:#8fe0a6}.wait{color:#f0c27a}
+.quest{margin:18px 0;padding:12px;border:1px solid #c6a16466;border-radius:10px;background:#11221d}
+.quest p.meta{margin:0 0 8px;font-size:12px;color:#b6c8b9}
+.shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.shots figure{margin:0}.shots canvas{width:100%;aspect-ratio:2;display:block;border-radius:6px;background:#061510}
+.shots figcaption{font-size:12px;line-height:1.6;margin-top:4px}
+button{font:inherit;font-weight:700;min-height:40px;padding:6px 14px;border-radius:6px;border:1px solid #c6a164;background:#173d30;color:#f2da99;cursor:pointer}
+@media(max-width:700px){.shots{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>ภาคจุติ · ห้าภพแห่งไฟต้นแสง</h1>
+<p>ตรวจภาพเปิดเรื่อง 20 เควส · 60 ฉาก และลองเล่นคัตซีนจริง (ข้าม / แตะเร่ง / ดูซ้ำ) โดยไม่แตะความคืบหน้าของตัวละคร</p>
+<label>ชื่อผู้เล่นตัวอย่าง <input id="name" value="Mayji" maxlength="24"></label>
+<div class="maps" id="maps"></div></header>
+<main id="list"></main>
+<script type="module">
+import {REBIRTH_STORY,REBIRTH_MAPS,rebirthScene,chapterName} from './rebirth-story.js?v=rebirth198';
+import {createQuestCinematics} from './quest-cinematic155.js?v=rebirth198';
+const $=id=>document.getElementById(id),el=(tag,text)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;return n;};
+// Which rebirth maps the game already has: only those can host the intros in play.
+const world=await fetch('maps/world.json').then(r=>r.json()).catch(()=>({maps:[]})),have=new Set((world.maps??[]).map(m=>m.id));
+for(const m of REBIRTH_MAPS){const box=el('div');box.append(el('b',chapterName(m.chapter)),el('span',`Lv.${m.levels[0]}–${m.levels[1]} · ${m.id} · `));const s=el('span',have.has(m.id)?'มีแมพแล้ว':'รอแมพ');s.className=have.has(m.id)?'ok':'wait';box.append(s);$('maps').append(box);}
+// A stand-in game: no player danger, no quest state, so playing here never grants anything.
+const game={world:{player:{hp:1,x:0,z:0},mobs:[],notice(){},auto:false},clearInput(){},cancelWalk(){},walking:false};
+const cinematics=createQuestCinematics({game,account:{serverId:'preview',slotId:'gallery'},map:{id:'preview',safe:true},state:()=>null});
+const name=()=>$('name').value.trim()||'ผู้จุติ';
+for(const q of REBIRTH_STORY){
+ const box=el('section');box.className='quest';box.append(el('h3',`${q.id} · ${q.title}`));
+ const ready=q.mapId==='ayutthaya'||have.has(q.mapId),meta=el('p',`${chapterName(q.chapter)} · คุยกับ ${q.npc} · ${q.mapId}${ready?'':' (ต้องมีแมพก่อนจึงเล่นในเกมได้)'}`);meta.className='meta';box.append(meta);
+ const shots=el('div');shots.className='shots';const img=new Image();img.src=rebirthScene(q.id).art.src;
+ const captions=q.frames.map((f,i)=>{const fig=el('figure'),c=el('canvas'),cap=el('figcaption');c.width=640;c.height=320;fig.append(c,cap);shots.append(fig);img.decode().then(()=>c.getContext('2d').drawImage(img,...f,0,0,640,320)).catch(()=>{});return cap;});
+ const fill=()=>q.lines.forEach((l,i)=>captions[i].textContent=l.replace('{0}',()=>name()));fill();$('name').addEventListener('input',fill);
+ const play=el('button','▶ เล่นคัตซีน');play.onclick=()=>cinematics.open(rebirthScene(q.id,name()));
+ box.append(shots,play);$('list').append(box);
+}
+</script></body></html>

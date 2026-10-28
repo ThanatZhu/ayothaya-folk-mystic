@@ -165,7 +165,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   if(dialog.open&&now-lastBig>250){lastBig=now;drawCityMap();} // 0.64.1 the open map follows you live
  }
  // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
- const api={update,endTalk,registerNPC(n,sprite,label){npcViews.push({n,label});sprite.traverse(o=>{o.userData.npc=n;});npcSprites.push(sprite);label.onclick=()=>talk(n);return ()=>talk(n);},get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,onConversationOpened:null,travelTo:id=>travel(id),
+ const api={update,endTalk,registerNPC(n,sprite,label){npcViews.push({n,label});sprite.traverse(o=>{o.userData.npc=n;});npcSprites.push(sprite);label.onclick=()=>talk(n);return ()=>talk(n);},get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,onConversationOpened:null,travelTo:id=>travel(id),travelHome:()=>travel(catalog.capital,true),
   // Directory destinations can be several maps away. Preserve free gate travel when
   // permitted; otherwise let the existing atlas show the fare and confirm the warp.
   travelToMap(id){

@@ -3,7 +3,8 @@
 // kept 90 days, and 'admin' (every back-office action, including who searched this log) kept 3 years.
 // Events are buffered and written as one batch document every 30 s (or every 400 events), so Firestore pays one
 // write per batch, not per message. A failed write keeps the batch in memory and retries.
-// ponytail: a server crash loses up to 30 s of events; shorten flushMs if that window matters.
+// ponytail: a server crash loses up to 3 min of events (one write per 3 min per stream keeps Firestore Spark's daily
+// write quota for player saves); shorten flushMs if that window matters.
 export const EVIDENCE_DAYS={players:90,admin:1095},EVIDENCE_STREAMS=Object.keys(EVIDENCE_DAYS),EVIDENCE_RANGE_DAYS=31;
 const BACKLOG=20000;
 // Thailand day (UTC+7, no DST) so a day in the log is a day on the admin's calendar.
@@ -20,7 +21,7 @@ const who=o=>o?{uid:o.uid??null,name:o.character?.name??null,ip:o.ip??null}:null
 export const counterpart=who;
 
 export class EvidenceLog{
- constructor(store,{now=Date.now,flushMs=30000,batch=400}={}){this.store=store;this.now=now;this.flushMs=flushMs;this.batch=batch;this.buffers={players:[],admin:[]};this.flushing=null;}
+ constructor(store,{now=Date.now,flushMs=180000,batch=400}={}){this.store=store;this.now=now;this.flushMs=flushMs;this.batch=batch;this.buffers={players:[],admin:[]};this.flushing=null;}
  add(stream,event){
   const list=this.buffers[stream];if(!list)return;
   list.push({t:this.now(),...event});if(list.length>BACKLOG)list.splice(0,list.length-BACKLOG); // a long outage keeps the newest

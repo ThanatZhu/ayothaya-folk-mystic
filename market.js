@@ -1,6 +1,6 @@
 // Storage, player trade and vending stalls (0.46). Pure rules shared by client and realm server.
 // Offers are {coins, items:{[id]:count}}; every move is all-or-nothing and never creates or loses items.
-import {BAG_SLOTS,bagCap,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
+import {BAG_SLOTS,bagCap,stackLimit,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
 
 export const STORAGE_SLOTS=100,STORAGE_NPC='ลุงเรือง',STALL_MAX=8,PRICE_MAX=9999999;
 export const TRADABLE=id=>['loot','potion','gear','card','scroll'].includes(itemDef(id)?.kind);
@@ -8,7 +8,7 @@ export const TRADABLE=id=>['loot','potion','gear','card','scroll'].includes(item
 export function normalizeStorage(s){return normalizeBag(s,STORAGE_SLOTS);}
 export function normalizeOffer(o){
  const out={coins:Number.isSafeInteger(o?.coins)?Math.min(Math.max(o.coins,0),MAX_COINS):0,items:{}};
- for(const [id,n] of Object.entries(o?.items&&typeof o.items==='object'?o.items:{}))if(TRADABLE(id)&&Number.isSafeInteger(n)&&n>0&&Object.keys(out.items).length<12)out.items[id]=Math.min(n,MAX_STACK);
+ for(const [id,n] of Object.entries(o?.items&&typeof o.items==='object'?o.items:{}))if(TRADABLE(id)&&Number.isSafeInteger(n)&&n>0&&Object.keys(out.items).length<12)out.items[id]=Math.min(n,stackLimit(id));
  return out;
 }
 const slots=(bag,cap)=>id=>id in bag.items||Object.keys(bag.items).length<cap;
@@ -19,7 +19,7 @@ export function moveOffer(from,to,offer,{fromCap=bagCap(from),toCap=bagCap(to)}=
  if(b.coins+o.coins>MAX_COINS)throw new Error('coin-cap');
  for(const [id,n] of Object.entries(o.items)){
   if((a.items[id]??0)<n)throw new Error('no-item');
-  if(!slots(b,toCap)(id)||(b.items[id]??0)+n>MAX_STACK)throw new Error('bag-full');
+  if(!slots(b,toCap)(id)||(b.items[id]??0)+n>stackLimit(id))throw new Error('bag-full');
   a.items[id]-=n;if(!a.items[id])delete a.items[id];b.items[id]=(b.items[id]??0)+n;
  }
  a.coins-=o.coins;b.coins+=o.coins;return [a,b];

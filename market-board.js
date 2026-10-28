@@ -2,7 +2,7 @@
 // stores, server-wide search (RO @whosell), sales tax, reference prices and the trade skill (merchant perks).
 // Pure rules shared by the realm server and the UI. A shop holds its goods (sell) or its coins (buy) in escrow,
 // so a purchase never touches an offline player's save: proceeds wait in the shop's pouch until collected.
-import {BAG_SLOTS,bagCap,MAX_STACK,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
+import {BAG_SLOTS,bagCap,stackLimit,MAX_COINS,normalizeBag,itemDef} from './items.js?v=107';
 import {TRADABLE,PRICE_MAX,moveOffer} from './market.js?v=107';
 
 // Shops may only stand on the market street of the capital, a few metres apart, so roads stay clear.
@@ -39,7 +39,7 @@ export function normalizeListing(req,bag,perks){
  for(const [id,v] of Object.entries(req?.items??{})){
   if(Object.keys(items).length>=perks.slots||!TRADABLE(id)||!itemDef(id))continue;
   const price=Number.isSafeInteger(v?.price)?Math.min(Math.max(v.price,1),PRICE_MAX):0;
-  let count=Number.isSafeInteger(v?.count)?Math.min(Math.max(v.count,0),MAX_STACK):0;
+  let count=Number.isSafeInteger(v?.count)?Math.min(Math.max(v.count,0),stackLimit(id)):0;
   if(kind==='sell')count=Math.min(count,b.items[id]??0);
   if(count>0&&price>0)items[id]={count,price};
  }
@@ -58,7 +58,7 @@ export function openShop({bag,req,perks,owner,x,z,mapId,now,id,existing=[]}){
  const [rest]=moveOffer(bag,{coins:0,items:{}},offer,{toCap:Infinity});
  return {bag:rest,shop:{id,serverId:owner.serverId,ownerKey:owner.key,ownerName:owner.name,kind:l.kind,title:l.title,x:Math.round(x*10)/10,z:Math.round(z*10)/10,items:l.items,escrow:l.escrow,pouch:{coins:0,items:{}},log:[],createdAt:now,expiresAt:now+SHOP_DURATION,status:'open'}};
 }
-const addPouch=(pouch,coins,id,n)=>{const p={coins:Math.min(MAX_COINS,(pouch?.coins??0)+coins),items:{...(pouch?.items??{})}};if(id)p.items[id]=Math.min(MAX_STACK,(p.items[id]??0)+n);return p;};
+const addPouch=(pouch,coins,id,n)=>{const p={coins:Math.min(MAX_COINS,(pouch?.coins??0)+coins),items:{...(pouch?.items??{})}};if(id)p.items[id]=Math.min(stackLimit(id),(p.items[id]??0)+n);return p;};
 const logged=(shop,entry)=>[entry,...(shop.log??[])].slice(0,LOG_MAX);
 // A customer buys `qty` of `id` from a sell shop: coins go to the shop pouch (less tax), goods to the buyer.
 export function buyFromShop(shop,buyerBag,id,qty,perks,{who='',now=0}={}){

@@ -2,7 +2,7 @@ import {warpCost,hops} from './world-state.js?v=101.5';
 
 // 0.112.4 the world map is Thailand (models3d/world-thailand/build_thailand.py renders it in Blender from Natural Earth
 // data). Every place is pinned at a real longitude / latitude, in the same frame the render uses.
-const OPEN_ZOOM=2.5,MAX_ZOOM=5,FRAME={lon0:96.6,lon1:106.4,lat0:5.2,lat1:21.0},IMG='assets/world112/thailand.jpg',ASPECT=1240/2052;
+const OPEN_ZOOM=2.5,MAX_ZOOM=5,FRAME={lon0:96.6,lon1:106.4,lat0:5.2,lat1:21.0},IMG='assets/world112/thailand-painted.webp',ASPECT=1240/2052;
 const at=([lon,lat])=>[(lon-FRAME.lon0)/(FRAME.lon1-FRAME.lon0),(FRAME.lat1-lat)/(FRAME.lat1-FRAME.lat0)];
 // Open maps: where each one sits in the real country (the place it is drawn from).
 const PLACES={
@@ -18,8 +18,11 @@ const PLACES={
  'naga-cave':[102.75,17.88],          // ริมโขง หนองคาย (ตำนานบั้งไฟพญานาค)
  'kailash-peak':[99.85,20.30]         // ยอดดอยเชียงราย
 };
+// 0.123 owner's painted map (outputs/world-map-prompt-2026-10-29.md): each pin sits on its painted vignette, given as a
+// fraction of the image; the painter moved them a little off the real places in PLACES.
+const PAINTED={'kailash-peak':[0.349,0.062],'himmapan-edge':[0.251,0.161],'lablae':[0.421,0.229],'ruined-temple':[0.333,0.273],'bamboo-grove':[0.508,0.298],'naga-cave':[0.708,0.214],'lotus-marsh':[0.390,0.347],'moonlit-mill':[0.446,0.403],'rice-fields':[0.308,0.453],'ayutthaya':[0.456,0.449],'old-orchard':[0.487,0.493]};
 // Which side of the pin the name sits on, so the crowded central plain stays readable (default below).
-const SIDE={'ayutthaya':'r','bamboo-grove':'r','rice-fields':'l','moonlit-mill':'t','old-orchard':'b','lotus-marsh':'r','ruined-temple':'l','lablae':'r','naga-cave':'r','himmapan-edge':'l'};
+const SIDE={'ayutthaya':'r','bamboo-grove':'r','rice-fields':'l','moonlit-mill':'r','old-orchard':'l','lotus-marsh':'l','ruined-temple':'l','lablae':'r','naga-cave':'r','himmapan-edge':'b'};
 // Historic cities shown on the map but not open for travel yet.
 const LATER=[['เชียงใหม่ · ล้านนา',[98.99,18.79]],['พิษณุโลก',[100.26,16.82]],['พิมาย',[102.49,15.22]],['ด่านเจดีย์สามองค์',[98.38,15.30]],
  ['จันทบูร',[102.10,12.61]],['นครศรีธรรมราช',[99.96,8.43]],['ปัตตานี',[101.25,6.87]],['ตะนาวศรี',[98.85,12.10]]];
@@ -35,7 +38,7 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onWalk,onClose}
  const pins=new Map();let selected=currentId,zoom=1,busy=false,drag=null,suppressClick=false;
  for(const map of catalog.maps){if((map.pvpArena||map.prologue)&&map.id!==currentId)continue;
   const option=document.createElement('option');option.value=map.id;option.textContent=map.name;select.append(option);
-  if(!PLACES[map.id])continue;const anchor=at(PLACES[map.id]);
+  if(!PLACES[map.id])continue;const anchor=PAINTED[map.id]??at(PLACES[map.id]);
   const pin=document.createElement('button');pin.type='button';pin.className='atlas-place';pin.dataset.mapId=map.id;
   pin.style.left=anchor[0]*100+'%';pin.style.top=anchor[1]*100+'%';pin.setAttribute('aria-label',map.name);pin.title=map.name;
   const name=document.createElement('span');name.className='atlas-name side-'+(SIDE[map.id]??'b');name.textContent=map.name;if(map.levels){const lv=document.createElement('small');lv.className='atlas-lv';lv.textContent='Lv.'+map.levels.join('–');name.append(lv);}pin.append(name);   // 0.123 owner: every map says its level on the map

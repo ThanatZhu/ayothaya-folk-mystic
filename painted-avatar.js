@@ -1,4 +1,4 @@
-import {createRiggedSprite} from './rigged-sprite.js?v=pose119';
+import {createRiggedSprite} from './rigged-sprite.js?v=gait217';
 import {loadDirectionalArt} from './directional-sprite.js?v=size1';
 import {createDirectionalActor} from './directional-actor.js?v=size1';
 import {stableViewDirection} from './directional-motion.js';
@@ -62,7 +62,7 @@ export function createPaintedAvatar(texture,options={}){
   if(typeof pose.mode==='string')context={...context,mode:pose.mode,time:pose.time??context.time,phase:pose.phase,reduced:pose.reduced??false};
   // Update the base posture state even while the optional directional actor is
   // visible. Leaving sit for idle must finish standUp before returning to it.
-  mesh.userData.directional=false;base.pose(pose,flip);
+  mesh.userData.directional=false;base.pose({...pose,viewDirection:context.direction},flip);
   if(visible()){
    actor.material.color.copy(mesh.material.color);
    actor.userData.pose(pose,context);

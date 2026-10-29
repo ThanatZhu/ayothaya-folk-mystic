@@ -493,7 +493,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const heroSize=hero.height??1.8;
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   const floor=groundHeight(world.nav,p.x,p.z);
-  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);drawCastBar(p,floor);
+  hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.usesAuthoredGround?.(mode)||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);drawCastBar(p,floor);
   hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);ghost(hero.sprite,world.status?.stealth>0);
   const azimuth=controls.getAzimuthalAngle(),poseFace=rolePose?(roleClip.facing??p.face):t<castUntil?(castFace??p.face):p.face;
   if(hero.frames)hero.sprite.material.map=hero.frames[0];

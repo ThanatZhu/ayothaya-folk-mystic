@@ -10,6 +10,8 @@ import {liveRoleSkills,PASSIVE_SLOTS,MASTER_PASSIVE_SLOTS} from './role-skill-pr
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z),harmful=['poison','curse','fear','root','slow','break','brand','mark'];
 const groundKinds=new Set(['zone','wall','storm','trap','rain','thorns','holyField','mine','meteor']);
 const friends=new Set(['heal','cleanse','revive','greatRevive','link','intercept','reflect']);
+// 0.123 stealth: normal monsters lose sight of a hidden player (bosses still see), the next hit deals x1.5 and ends it
+export const STEALTH_HIT=1.5;
 const selfKinds=new Set(['taunt','anchor','guard','counter','evade','stealth','clones','summon','greatSummon','spirit','greatSpirit','crow','smoke','ward','sanctuary','regen','lifeTree','yantra','groupHeal','lastStand','purify']);
 export {groundKinds as ROLE_GROUND_KINDS,friends as ROLE_FRIEND_KINDS,selfKinds as ROLE_SELF_KINDS};
 // 0.119 owner: one second between skills. After a skill's last release every active skill waits at least this long.
@@ -104,7 +106,7 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
    case 'comboFinish':case 'comboBurst':for(const enemy of kind==='comboBurst'?near():[target])damage(enemy,n*(1+state.combo*.35)*(1+(m.comboBonus??0)));state.combo=0;if(firstHit&&m.comboMana)p.mp=Math.min(p.maxMp,p.mp+m.comboMana);trigger('comboBonus');trigger('comboMana');break;
    case 'leap':{const d=dist(p,at)||1;moveBody(p,(at.x-p.x)/d*Math.max(0,d-1),(at.z-p.z)/d*Math.max(0,d-1),w.nav);damage(target,n);crowd(target,1);break;}
    case 'stealth':status(me(),'stealth',s.seconds+(m.stealthDuration??0));trigger('stealthDuration');break;
-   case 'backstab':{const hidden=!!w.status.stealth,d=dist(p,at)||1;moveBody(p,(at.x-p.x)/d*Math.max(0,d-.9),(at.z-p.z)/d*Math.max(0,d-.9),w.nav);damage(target,n*(hidden?1.6:1));delete w.status.stealth;if(hidden&&m.stealthMana){p.mp=Math.min(p.maxMp,p.mp+m.stealthMana);trigger('stealthMana');}break;}
+   case 'backstab':{const hidden=!!w.status.stealth,d=dist(p,at)||1;moveBody(p,(at.x-p.x)/d*Math.max(0,d-.9),(at.z-p.z)/d*Math.max(0,d-.9),w.nav);delete w.status.stealth;damage(target,n*(hidden?1.6:1));if(hidden&&m.stealthMana){p.mp=Math.min(p.maxMp,p.mp+m.stealthMana);trigger('stealthMana');}break;}
    case 'slow':damage(target,n);enemyStatus(target,'slow',s.seconds);break;
    case 'poison':case 'venom':damage(target,n*.5);enemyStatus(target,'poison',s.seconds+(m.poisonDuration??0),w.power(n,target));trigger('poisonDuration');break;
    case 'detonatePoison':{const poison=poisonFor(target.roleStatus,w.roleOwnerId??'self');damage(target,n,'skill',Math.round((poison?.left??0)*(poison?.power??0)*.7));takePoison(target.roleStatus??{},w.roleOwnerId??'self');if(target.pvp&&!target.roleStatus?.poison){const victim=w.roleEnemy?.(target);if(victim)delete victim.status.poison;}break;}
@@ -151,7 +153,8 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   if(st.shield){const absorbed=Math.min(n,state.shield);state.shield-=absorbed;n-=absorbed;if(state.shield<=0)delete st.shield;}
   if(m.damageTaken)n*=1-Math.min(.5,m.damageTaken);return Math.max(0,Math.round(n));
  }
- return {state,mods,trigger,incoming,damage,outgoing(m,n){if(!m)return n;const bonus=mods().venomFinish??0;if(bonus&&poisonFor(m.roleStatus,w.roleOwnerId??'self')&&m.hp/m.maxHp<.35){trigger('venomFinish',m);return n*(1+bonus);}return n;},legacy:!specific,skills:liveRoleSkills(w.profession.id,w.jobId)??w.skills,
+ return {state,mods,trigger,incoming,damage,outgoing(m,n){if(!m)return n;if(w.status.stealth>0&&w.damageContext?.source!=='poison'){delete w.status.stealth;n*=STEALTH_HIT;}   // 0.123 the first hit out of stealth is stronger and reveals you
+  const bonus=mods().venomFinish??0;if(bonus&&poisonFor(m.roleStatus,w.roleOwnerId??'self')&&m.hp/m.maxHp<.35){trigger('venomFinish',m);return n*(1+bonus);}return n;},legacy:!specific,skills:liveRoleSkills(w.profession.id,w.jobId)??w.skills,
   cast(index){const s=scaledSkill(w.skills[index],w.skillLevels[index]??0);if(!s||s.reserved||s.passive||p.hp<=0||state.pending||w.basicPending||w.status.stun||w.status.sleep)return false;if(w.status.silence){w.notice('ใบ้ · ใช้สกิลไม่ได้');return false;}const cost=Math.round(s.cost*(1-(w.derived?.mpCut??0)));if(w.cooldowns[index]>0||p.mp<cost)return false;const target=targetFor(s),error=valid(s,target);if(error){w.notice(error);return false;}const at=target.player??target,profile=SKILL_PROFILES[s.roleSkillId];const aim=selfKinds.has(s.type)?w.target??at:at;if(dist(p,aim)>.01)p.face={x:aim.x-p.x,z:aim.z-p.z};p.mp-=cost;w.cooldowns[index]=s.cd*(1-Math.min(.5,(w.derived?.cdr??0)+(mods().cdr??0)))*(role.id==='hunter'&&['rain','cone','ambush','retreatShot'].includes(s.type)?1-(mods().arrowCooldown??0):1);if(mods().arrowCooldown)trigger('arrowCooldown');const timing=roleTiming(s,profile),castId=++w.castSerial||(w.castSerial=1);state.pending={s,index,cost,target,hit:0,combo:state.combo,times:timing.impacts,left:timing.impacts[0],castId,origin:{x:p.x,z:p.z}};w.emit('cast',{skillIndex:index,roleSkillId:s.roleSkillId,castId,timing,from:{x:p.x,z:p.z},to:{x:at.x,z:at.z},color:role.color,kind:s.type});return true;},
   // 0.119 AUTO: rescue skills (revive, a needed heal or cleanse, last stand) at once; otherwise the ready skill with the
   // longest cooldown, so the big ones fire as they come back and a short one (หมัดนำ) fills the gaps instead of

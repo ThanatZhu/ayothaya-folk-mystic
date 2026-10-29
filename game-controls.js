@@ -127,6 +127,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // Characters and monsters also join the actor layer, which soft-look.js draws again over the scenery with the depth
  // cleared, so every part of the sprite keeps its depth (0.116.4 switched depth off and parts of the body vanished).
  function xray(sprite){sprite.traverse(o=>o.layers.enable(1));}
+ // 0.123 a stealthed player (own world.status.stealth, or a remote player's snapshot `hidden`) is drawn at 35%
+ function ghost(sprite,hidden){const a=hidden?.35:1;if(sprite.userData.ghost===a)return;sprite.userData.ghost=a;sprite.traverse(o=>{for(const m of [].concat(o.material??[])){m.userData.baseOpacity??=m.opacity;m.userData.baseTransparent??=m.transparent;m.opacity=m.userData.baseOpacity*a;m.transparent=hidden||m.userData.baseTransparent;m.needsUpdate=true;}});}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
  // 0.99.3 numbers rise from the head of whoever was hit and stack: each new one pushes the older ones of that
  // target up a line, they drift upward together and fade out. Anchors follow the target while it moves.
@@ -492,7 +494,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const faceLength=Math.hypot(p.face.x,p.face.z)||1,rootOffset=skillActive&&SKILLS[activeSkill].type!=='dash'?visualPose.x:0;
   const floor=groundHeight(world.nav,p.x,p.z);
   hero.sprite.position.set(p.x+p.face.x/faceLength*rootOffset,floor+.06+(hero.sprite.userData.directionalActive&&mode==='walk'||hero.sprite.userData.skillArt?0:visualPose.y),p.z+p.face.z/faceLength*rootOffset);drawCastBar(p,floor);
-  hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);
+  hero.sprite.scale.set(heroSize,heroSize,1);xray(hero.sprite,floor);ghost(hero.sprite,world.status?.stealth>0);
   const azimuth=controls.getAzimuthalAngle(),poseFace=rolePose?(roleClip.facing??p.face):t<castUntil?(castFace??p.face):p.face;
   if(hero.frames)hero.sprite.material.map=hero.frames[0];
   hero.sprite.userData.setFacing?.(poseFace,azimuth,{mode,time:poseTime,phase:locomotion?gait:null,reduced});
@@ -578,5 +580,5 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // Warm the HTTP cache with this character's own skill sheets once the map has settled.
  setTimeout(()=>{const ids=world.skills.map((s,i)=>s.roleSkillId??'novice:'+i);roleEffects.prefetch(ids);prefetchPoses(ids);},4000);
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
- return {set respawnInventory(value){respawnInventory=value;},set respawnTravel(fn){respawnTravel=fn;},roleEffects,roleDecor,get canUseActions(){return !isPaused();},selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
+ return {set respawnInventory(value){respawnInventory=value;},set respawnTravel(fn){respawnTravel=fn;},roleEffects,roleDecor,get canUseActions(){return !isPaused();},ghost,selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

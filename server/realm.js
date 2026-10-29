@@ -575,8 +575,8 @@ export class RealmServer{
    const levels=new Map(alive.map(p=>[p,baseProgress(p.world).level])); // 0.122 territory aggro (monster-catalog.js)
    for(const m of room.mobs){
     m.petSlow=Math.max(0,(m.petSlow??0)-dt);if(m.petArmor)m.petArmor.left=Math.max(0,m.petArmor.left-dt);if(m.hp<=0){m.petSlow=0;delete m.petArmor;}
-    let target=null,near=Infinity;for(const p of alive){const d=distance(p.world.player,m);if(d<near){near=d;target=p;}}
-    let type=MONSTER_TYPES[m.type];if(m.roleStatus?.slow||m.petSlow>0)type={...type,speed:type.speed*(type.boss?.8:.5)};
+    let type=MONSTER_TYPES[m.type];
+    let target=null,near=Infinity;for(const p of alive){if(p.world.status?.stealth>0&&!type.boss)continue;const d=distance(p.world.player,m);if(d<near){near=d;target=p;}}   // 0.123 stealth hides you from normal monstersif(m.roleStatus?.slow||m.petSlow>0)type={...type,speed:type.speed*(type.boss?.8:.5)};
     const taunter=this.peers.get(m.roleStatus?.taunt?.owner);if(taunter?.room===room&&taunter.world.player.hp>0&&distance(taunter.world.player,m)<15)target=taunter;
     if(type.mvp&&m.hp<=0&&!m.summoned)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
     if(type.worldBoss&&!m.summoned){const left=this.mapBosses.remaining(room);if(left>0){m.hp=0;m.dead=left;room.contributors.delete(m.id);continue;}if(m.hp<=0)m.dead=0;}
@@ -974,7 +974,7 @@ export class RealmServer{
   const publicPlayer=a=>({id:a.id,character:a.character,equipment:a.equipment,player:a.world.player,emote:this.emoteView(a),partyId:a.partyId});
   const visible=[...p.room.peers].map(id=>this.peers.get(id)).filter(a=>a!==p&&!a.observer&&(distance(a.world.player,p.world.player)<45||a.partyId&&a.partyId===p.partyId)),seen=new Set(visible.map(a=>a.id)),round=n=>Math.round(n*1000)/1000;
   // 0.99.11 during the snapshot broadcast each player's public entry is built and cloned once, then shared by every viewer
-  const entry=a=>{if(!this.broadcasting||a.entryTick!==this.tickId){const v=a.world.player;a.entryTick=this.tickId;a.entry=copy({id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,down:Math.max(0,Math.ceil(v.down??0)),moving:v.moving,running:v.running===true,face:{x:round(v.face.x),z:round(v.face.z)}},emote:this.emoteView(a),partyId:a.partyId,connected:!a.suspended,pet:activePremiumPet(a.petCollection)?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a),rebirth:a.rebirth??0});a.entryKeys=Object.fromEntries(PLAYER_STATIC.map(k=>[k,JSON.stringify(a.entry[k]??null)]));}return a.entry;};
+  const entry=a=>{if(!this.broadcasting||a.entryTick!==this.tickId){const v=a.world.player;a.entryTick=this.tickId;a.entry=copy({id:a.id,equipment:a.equipment,player:{x:round(v.x),z:round(v.z),hp:v.hp,maxHp:v.maxHp,down:Math.max(0,Math.ceil(v.down??0)),moving:v.moving,running:v.running===true,face:{x:round(v.face.x),z:round(v.face.z)},hidden:a.world.status?.stealth>0},emote:this.emoteView(a),partyId:a.partyId,connected:!a.suspended,pet:activePremiumPet(a.petCollection)?.id??null,stall:a.stall?.title??null,guild:this.guildTag(a),rebirth:a.rebirth??0});a.entryKeys=Object.fromEntries(PLAYER_STATIC.map(k=>[k,JSON.stringify(a.entry[k]??null)]));}return a.entry;};
   // a player already on this viewer's screen gets its position every time and its look (gear, party, pet, stall, guild)
   // only when that changed; the client merges entries into the remote player's state
   const sent=p.playerSent??=new Map();

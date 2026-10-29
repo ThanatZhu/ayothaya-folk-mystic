@@ -56,7 +56,7 @@ export function monsterFrame(m,time){
  return 0;
 }
 export function markMonsterHit(m,source){
- m.aggro=true;m.pressure=(m.pressure??0)+1;
+ m.aggro=true;m.pressure=(m.pressure??0)+1;m.engaged=ENGAGED;
  // 0.111 bosses wear super armor: a short flash, no hurt pose, no recoil and no lost turn, so a party can't stun-lock them.
  if(m.armor){m.hit=.12;m.recoil=null;return;}
  const dx=m.x-source.x,dz=m.z-source.z,d=Math.hypot(dx,dz)||1;
@@ -64,7 +64,7 @@ export function markMonsterHit(m,source){
 }
 // 0.58 behaviours (shared by the offline world and the realm server), set per monster in MONSTER_BEHAVIOUR:
 //  aoe: the wind-up ends in a burst around the monster ('burst' outcome, every player inside is hit; step out to dodge)
-//  skirmish: after landing a hit it runs away for a moment · leap: jumps in when the target is 3–6 away
+//  skirmish: after landing a hit it hops back (0.123: at most SKIRMISH_HOP s, it used to run off for 1–1.4 s) · leap: jumps in when the target is 3–6 away
 //  enrage: below 40% HP it moves faster and winds up sooner
 //  slam (0.111 bosses): after `hits` hits taken it answers with a ground slam: a wider red ring, then everyone inside
 //   is hit for max(damage×power, maxHp×pct) and knocked `push` m away from it ('slam' outcome). `cd` s between slams.
@@ -79,10 +79,12 @@ for(const m of REBIRTH_MONSTER_SPECS)MONSTER_BEHAVIOUR[m.id]=m.boss?{enrage:true
 // 0.122 territory and strolling (owner-approved numbers): a monster 15+ levels above the player attacks anyone who
 // comes within 5 m of it while inside its 9 m leash; an idle ordinary monster strolls within 4 m of home at 40% speed,
 // resting 3–7 s between walks. `level` is the target player's base level (null: no territory check).
-export const TERRITORY={gap:15,range:5,leash:9},STROLL={radius:4,pace:.4,rest:[3,7],timeout:6};
+// 0.123 a monster hit in the last ENGAGED seconds keeps fighting out to `chase` m from home (owner: they walked off mid-fight)
+export const ENGAGED=5,SKIRMISH_HOP=.5;
+export const TERRITORY={gap:15,range:5,leash:9,chase:20},STROLL={radius:4,pace:.4,rest:[3,7],timeout:6};
 export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear,level=null}){
  m.hit=Math.max(0,m.hit-dt);m.root=Math.max(0,m.root-dt);m.attackCD=Math.max(0,m.attackCD-dt);m.strike=Math.max(0,(m.strike??0)-dt);m.moving=false;
- m.flee=Math.max(0,(m.flee??0)-dt);m.leapCD=Math.max(0,(m.leapCD??0)-dt);
+ m.flee=Math.max(0,(m.flee??0)-dt);m.engaged=Math.max(0,(m.engaged??0)-dt);m.leapCD=Math.max(0,(m.leapCD??0)-dt);
  m.slamCD=Math.max(0,(m.slamCD??0)-dt);m.pressure=Math.max(0,(m.pressure??0)-dt*.4);if(type.boss)m.armor=true;
  const b=MONSTER_BEHAVIOUR[type.id]??{},rage=b.enrage&&m.hp>0&&m.hp<m.maxHp*.4;
  if(rage&&!m.enraged){m.enraged=true;m.justEnraged=true;}if(m.hp>=m.maxHp*.4)m.enraged=false;
@@ -92,7 +94,7 @@ export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear,level=nu
  if(type.boss){if(!target)m.aggro=false;else{const td=Math.hypot(m.x-target.x,m.z-target.z);if(td<=BOSS_SIGHT)m.aggro=true;else if(td>BOSS_GIVE_UP)m.aggro=false;}}
  else{
   if(!m.aggro&&target&&Number.isFinite(level)&&(type.level??1)-level>=TERRITORY.gap&&Math.hypot(m.x-target.x,m.z-target.z)<=TERRITORY.range&&Math.hypot(target.x-m.home.x,target.z-m.home.z)<=TERRITORY.leash)m.aggro=true;
-  if(!target||Math.hypot(m.x-m.home.x,m.z-m.home.z)>TERRITORY.leash)m.aggro=false;
+  if(!target||Math.hypot(m.x-m.home.x,m.z-m.home.z)>(m.engaged>0?TERRITORY.chase:TERRITORY.leash))m.aggro=false;
  }
  if(m.hit>.26&&!(m.windup>0))return;
  let goal=m.aggro&&target?target:m.home;
@@ -107,7 +109,7 @@ export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear,level=nu
  const dx=goal.x-m.x,dz=goal.z-m.z,d=Math.hypot(dx,dz),reach=type.reach??1.35;
  // Hit often enough, a boss drops whatever it was winding up and answers with a slam (enraged: sooner, every 2/3 of the cooldown).
  if(b.slam&&m.aggro&&target&&m.slamCD===0&&!m.slamming&&m.pressure>=b.slam.hits*(rage?.6:1)){m.slamming=true;m.windup=b.slam.windup;m.pressure=0;m.slamCD=b.slam.cd*(rage?.67:1);return;}
- if(m.windup>0){m.windup=Math.max(0,m.windup-dt*(rage?1.4:1));if(m.windup===0){m.strike=.24;m.attackCD=rage?1:1.4;if(m.slamming){m.slamming=false;return 'slam';}if(b.aoe)return 'burst';if(target&&Math.hypot(m.x-target.x,m.z-target.z)<=reach&&lineClear(m,target,nav)){if(b.skirmish)m.flee=b.skirmish;return 'hit';}}return;}
+ if(m.windup>0){m.windup=Math.max(0,m.windup-dt*(rage?1.4:1));if(m.windup===0){m.strike=.24;m.attackCD=rage?1:1.4;if(m.slamming){m.slamming=false;return 'slam';}if(b.aoe)return 'burst';if(target&&Math.hypot(m.x-target.x,m.z-target.z)<=reach&&lineClear(m,target,nav)){if(b.skirmish)m.flee=Math.min(b.skirmish,SKIRMISH_HOP);return 'hit';}}return;}
  const speed=type.speed*(rage?1.35:1);
  if(m.flee>0&&target&&m.root===0){const away=Math.hypot(m.x-target.x,m.z-target.z)||1;moveBody(m,(m.x-target.x)/away*speed*1.2*dt,(m.z-target.z)/away*speed*1.2*dt,nav);m.step+=dt*9;m.moving=true;return;}
  if(b.leap&&m.aggro&&target&&m.root===0&&m.leapCD===0&&d>3&&d<6&&lineClear(m,target,nav)){moveBody(m,dx/d*(d-reach*.8),dz/d*(d-reach*.8),nav);m.leapCD=4;m.attackCD=Math.min(m.attackCD,.3);return 'leap';}

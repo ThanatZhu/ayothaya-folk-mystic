@@ -1,7 +1,7 @@
 import {normalizeAutoTarget,autoTargetAllows,autoRankAllows} from './auto-targets.js?v=auto202';
 import {skillHit} from './skill-critical.js';
 import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js?v=skill-crit1';
-import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=auto202';
+import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=farm213';
 import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill,advanceAutoSequence} from './auto-play.js?v=auto202';
 import {activeEmote,canonicalAction,EMOTE_ACTIONS,movementSpeed} from './character-action-state.js?v=life1';
@@ -391,7 +391,7 @@ export class CombatWorld{
   if(!monsters)return; // Shared-room servers advance each monster exactly once per tick.
   const level=baseProgress(this).level; // 0.122 territory: a monster 15+ levels above attacks on approach
   for(const m of this.mobs){
-   const baseType=MONSTER_TYPES[m.type],type=m.roleStatus?.slow||m.petSlow>0?{...baseType,speed:baseType.speed*(baseType.boss?.8:.5)}:baseType,decoy=m.roleStatus?.decoy,aim=decoy?{...p,x:p.x+1.2,hp:1}:p,outcome=advanceMonster(m,aim,type,dt,this.nav,{moveBody,lineClear,level});
+   const baseType=MONSTER_TYPES[m.type],type=m.roleStatus?.slow||m.petSlow>0?{...baseType,speed:baseType.speed*(baseType.boss?.8:.5)}:baseType,decoy=m.roleStatus?.decoy,aim=decoy?{...p,x:p.x+1.2,hp:1}:this.status?.stealth>0&&!baseType.boss?null:p,outcome=advanceMonster(m,aim,type,dt,this.nav,{moveBody,lineClear,level});
    if(outcome==='respawn')this.emit('respawn',{id:m.id});
    if(m.justEnraged){m.justEnraged=false;this.notice(type.name+' โกรธจัด! · เร็วและแรงขึ้น');}
    if(outcome==='burst'&&Math.hypot(p.x-m.x,p.z-m.z)<=MONSTER_BEHAVIOUR[type.id].aoe&&this.takeMonsterHit(type,type.damage,m)&&p.hp===0){this.mobs.forEach(v=>v.aggro=false);break;}

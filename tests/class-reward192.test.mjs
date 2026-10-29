@@ -2,14 +2,14 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {ITEMS,itemDef,useItem} from '../items.js';
 import {FAMILIES,WEAPON_CLASSES,pieceId,setBonuses} from '../gear-sets.js';
 import {canWear} from '../character-stats.js';
-import {CLASS_REWARD_BOX,CLASS_REWARD_MAIL_ID,familyWeaponId,familySetItemIds} from '../class-reward-items192.js';
+import {CLASS_REWARD_BOX,CLASS_REWARD_MAIL_ID,CLASS_REWARD_BOX_25,CLASS_REWARD_MAIL_ID_25,familyWeaponId,familySetItemIds} from '../class-reward-items192.js';
 import {grantClassReward,chooseClassSet} from '../class-reward192.js';
 import {mailboxAction} from '../mailbox.js';
 import {classRewardBackfill} from '../server/class-reward-backfill192.js';
 const record=(classId='shaman')=>({serverId:'server-1',character:{name:'Reward Test',classId},bag:{coins:123,slots:100,items:{[CLASS_REWARD_BOX]:1}}});
-test('all 35 family weapons are red Lv55 class weapons and join the selected set',()=>{
- assert.equal(Object.values(ITEMS).filter(x=>x.classReward).length,35);
- for(const f of FAMILIES)for(const [cls] of WEAPON_CLASSES){const it=itemDef(familyWeaponId(f.key,cls)+'^4');assert.equal(it.kind,'gear');assert.equal(it.level,55);assert.equal(it.grade,4);assert.deepEqual(it.classes,[cls]);assert.deepEqual(it.set,{family:f.key,tier:4});assert.deepEqual(it.pct,f.piece);assert.ok(it.image);}
+test('all 35 family weapons are red class weapons at Lv55 and (0.123) Lv25, and join the selected set',()=>{
+ assert.equal(Object.values(ITEMS).filter(x=>x.classReward).length,70);
+ for(const [tier,level] of [[4,55],[2,25]])for(const f of FAMILIES)for(const [cls] of WEAPON_CLASSES){const it=itemDef(familyWeaponId(f.key,cls,tier)+'^4');assert.equal(it.kind,'gear');assert.equal(it.level,level);assert.equal(it.grade,4);assert.deepEqual(it.classes,[cls]);assert.deepEqual(it.set,{family:f.key,tier});assert.deepEqual(it.pct,f.piece);assert.ok(it.image);}
 });
 test('reward weapon activates a four-piece family bonus with three armor pieces and requires Lv55',()=>{
  const id=familyWeaponId('mantra','shaman')+'^4',pieces=[id,...['head','armor','shoes'].map(slot=>pieceId('mantra',slot,'shaman',4))].map(itemDef);
@@ -18,9 +18,9 @@ test('reward weapon activates a four-piece family bonus with three armor pieces 
 });
 test('only changed classes receive one mail, including old characters; claiming and deletion do not regrant',()=>{
  const novice=record('novice');assert.equal(grantClassReward(novice),novice);
- let r=grantClassReward({...record(),bag:{coins:0,items:{}}},1000);assert.equal(r.mailbox.messages.length,1);assert.equal(r.mailbox.messages[0].attachments.items[0].id,CLASS_REWARD_BOX);assert.equal(grantClassReward(r),r);
- r=mailboxAction(r,{type:'mailClaim',mailId:CLASS_REWARD_MAIL_ID},[],2000);assert.equal(r.bag.items[CLASS_REWARD_BOX],1);assert.equal(grantClassReward(r),r);
- r=mailboxAction(r,{type:'mailDeleteAll'},[],3000);assert.equal(r.mailbox.messages.length,0);assert.ok(r.mailbox.deleted[CLASS_REWARD_MAIL_ID]);assert.equal(grantClassReward(r),r);
+ let r=grantClassReward({...record(),bag:{coins:0,items:{}}},1000);assert.equal(r.mailbox.messages.length,1);assert.equal(r.mailbox.messages[0].attachments.items[0].id,CLASS_REWARD_BOX_25);assert.equal(grantClassReward(r),r);
+ r=mailboxAction(r,{type:'mailClaim',mailId:CLASS_REWARD_MAIL_ID_25},[],2000);assert.equal(r.bag.items[CLASS_REWARD_BOX_25],1);assert.equal(grantClassReward(r),r);
+ r=mailboxAction(r,{type:'mailDeleteAll'},[],3000);assert.equal(r.mailbox.messages.length,0);assert.ok(r.mailbox.deleted[CLASS_REWARD_MAIL_ID_25]);assert.equal(grantClassReward(r),r);
  r.character.jobId='spirit-master';assert.equal(grantClassReward(r),r);
 });
 test('every family/class opens exactly one box; client item/class/grade fields cannot choose another reward',()=>{
@@ -53,4 +53,15 @@ test('backfill pages beyond 2000 profiles, resumes after restart and retries bus
 test('backfill stops without moving cursor when authority is lost',async()=>{
  let saved=false;const store={loadClassRewardState:async()=>null,classRewardPage:async()=>({rows:[{record:record()}],after:'next',done:true}),saveClassRewardState:async()=>{saved=true;}};
  await assert.rejects(classRewardBackfill({store,deliver:async()=>{},canWrite:()=>false}),/authority-lost/);assert.equal(saved,false);
+});
+test('0.123 a character that already had the Lv55 mail gets no Lv25 one; the Lv25 box opens the Lv25 set',()=>{
+ for(const mailbox of [{messages:[{id:CLASS_REWARD_MAIL_ID}]},{messages:[],deleted:{[CLASS_REWARD_MAIL_ID]:1}}]){const r={...record(),mailbox};assert.equal(grantClassReward(r),r);}
+ for(const [cls] of WEAPON_CLASSES)for(const gender of ['male','female']){
+  const before={...record(cls),bag:{coins:0,slots:100,items:{[CLASS_REWARD_BOX_25]:1,[CLASS_REWARD_BOX]:1}}};before.character.gender=gender;
+  const next=chooseClassSet(before,{id:'open-two-'+cls+gender,family:'wall',box:CLASS_REWARD_BOX_25});
+  assert.equal(next.bag.items[CLASS_REWARD_BOX_25],undefined);assert.equal(next.bag.items[CLASS_REWARD_BOX],1,'the Lv55 box stays');
+  const ids=familySetItemIds('wall',before.character,2);assert.ok(ids.every(id=>next.bag.items[id]===1&&itemDef(id).level===25&&itemDef(id).grade===4),cls);
+ }
+ assert.throws(()=>chooseClassSet(record(),{id:'open-two-none',family:'wall',box:CLASS_REWARD_BOX_25}),/no-set-box/);
+ assert.throws(()=>chooseClassSet(record(),{id:'open-bad-box',family:'wall',box:'hp-small'}),/invalid-request/);
 });

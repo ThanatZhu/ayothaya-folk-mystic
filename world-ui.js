@@ -6,7 +6,7 @@ import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=arena166';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
-import {createMentorUI} from './mentor-ui.js?v=quest-scroll190';
+import {createMentorUI} from './mentor-ui.js?v=farm211';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=novice174';
@@ -102,10 +102,11 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{game.clearInput();$('mini-open').focus();});
  const views=map.portals.map(p=>{
-  const name=lookup(p.to).name;
+  const name=lookup(p.to).name,lv=lookup(p.to).levels;
   const ring=new THREE.Mesh(new THREE.RingGeometry(.72,.84,40),new THREE.MeshBasicMaterial({color:'#edcf83',side:THREE.DoubleSide,transparent:true,opacity:.7,depthWrite:false}));
   ring.rotation.x=-Math.PI/2;ring.position.set(p.x,.095,p.z);scene.add(ring);
-  const label=document.createElement('button');label.className='portal-label';label.textContent='↗ '+name;label.setAttribute('aria-label','จุดเดินทางไป '+name);labels.append(label);
+  const label=document.createElement('button');label.className='portal-label';label.textContent='↗ '+name+(lv?` · Lv.${lv[0]}–${lv[1]}`:'');   // 0.122 every way out names its level range
+  label.setAttribute('aria-label','จุดเดินทางไป '+name);labels.append(label);
   // 0.53: inside a town the gates are a cart ride away — no walk to the gate first.
   label.onclick=()=>{if(map.safe||Math.hypot(world.player.x-p.x,world.player.z-p.z)<2)travel(p.to);else game.walkTo({x:p.x,z:p.z},{radius:1.2,kind:'portal',onArrive:()=>travel(p.to)});};
   return {p,ring,label};

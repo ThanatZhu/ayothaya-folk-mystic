@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {CombatWorld,MONSTER_TYPES} from '../combat-core.js';
+import {CombatWorld,MONSTER_TYPES,earlyXp} from '../combat-core.js';
 import {baseProgress,jobProgress,experienceOf,MAX_XP,levelStart} from '../experience.js';
 import {serializeTraveler,restoreTraveler} from '../world-state.js';
 import {validateSave} from '../save-state.js';
@@ -13,7 +13,7 @@ const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.met
 const memory=()=>{const data=new Map();return {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};};
 test('defeats award independent base/job rewards exactly once, including multi-level carry and save reload',()=>{
  const w=new CombatWorld({classId:'novice'});w.baseXp=45;w.jobXp=58;const mob=w.mobs[0],reward=MONSTER_TYPES[mob.type];
- w.hurt(mob,999);w.hurt(mob,999);assert.equal(w.kills,1);assert.equal(w.baseXp,45+reward.baseXp);assert.equal(w.jobXp,58+reward.jobXp);
+ w.hurt(mob,999);w.hurt(mob,999);assert.equal(w.kills,1);assert.equal(w.baseXp,45+Math.round(reward.baseXp*earlyXp(reward.level)));assert.equal(w.jobXp,58+Math.round(reward.jobXp*earlyXp(reward.level)));
  assert.equal(baseProgress(w).level,2);assert.equal(jobProgress(w,'novice').level,2);
  assert.equal(w.events.filter(e=>e.type==='experience').length,1);
  const loaded=new CombatWorld({classId:'novice'});restoreTraveler(loaded,JSON.parse(JSON.stringify(serializeTraveler(w))));assert.equal(loaded.baseXp,w.baseXp);assert.equal(loaded.jobXp,w.jobXp);

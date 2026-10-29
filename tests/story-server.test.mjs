@@ -18,41 +18,18 @@ function setup(map,story){
  return {realm,peer,send,record};
 }
 
-test('story talk only counts next to the right NPC, then pays the quest reward and is saved', () => {
- const {realm,peer,send,record}=setup(city);
- assert.deepEqual(realm.snapshot(peer).self.story,{v:4,quest:0,step:0,count:0,done:false});
- Object.assign(peer.world.player,{x:-8,z:0});
- assert.equal(send('questTalk',{npc:'ลุงเรือง'}),false,'too far from ลุงเรือง');
- assert.equal(send('questTalk',{npc:'ครูแสนดาบ'}),false,'right place, wrong step');
- assert.equal(send('questTalk',{npc:'ไม่มีจริง'}),false);
- Object.assign(peer.world.player,{x:3,z:0});
- assert.equal(send('questTalk',{npc:'ลุงเรือง'}),true);
- const xp=peer.world.baseXp;
- Object.assign(peer.world.player,{x:-9,z:0});
- assert.equal(send('questTalk',{npc:'ครูแสนดาบ'}),true);
- assert.ok(peer.world.baseXp>xp,'quest reward paid');
- assert.equal(peer.bag.items['starter-wraps'],1,'the starter weapon for this class');
- assert.equal(realm.snapshot(peer).self.story.quest,1);
- assert.deepEqual(realm.record(peer,record).story,{v:4,quest:1,step:0,count:0,done:false});
- assert.ok(peer.world.events.some(e=>e.type==='story'&&e.completed==='คืนที่ประทีปดับ'));
- // the next quest teaches equipping: wearing the weapon finishes it on the next check and pays the armor
- assert.equal(send('equip',{item:'starter-wraps'}),true);for(let i=0;i<20;i++)realm.step(.05);
- assert.equal(realm.snapshot(peer).self.story.quest,2);assert.equal(peer.bag.items['starter-shirt'],1);
+// 0.123 chapter 1 is retired: any saved main-campaign progress is held as finished, so no talk, map or kill can
+// advance it or pay a chapter-1 reward again
+test('the realm holds every main-campaign save as finished and pays nothing for it', () => {
+ for(const story of [undefined,{v:4,quest:0,step:0},{v:4,quest:4,step:0},{v:3,quest:12,step:1},{v:4,quest:99,done:true}]){
+  const {realm,peer,send,record}=setup(story?.quest===4?fields:city,story);
+  const done={v:4,quest:23,step:0,count:0,done:true};
+  assert.deepEqual(realm.snapshot(peer).self.story,done);
+  const xp=peer.world.baseXp,coins=peer.bag.coins;
+  Object.assign(peer.world.player,{x:3,z:0});assert.equal(send('questTalk',{npc:'ลุงเรือง'}),false);
+  assert.equal(peer.bag.coins,coins);assert.equal(peer.world.baseXp,xp);assert.ok(!peer.bag.items['starter-wraps']);
+  for(const mob of peer.room.mobs){Object.assign(peer.world.player,{x:mob.x,z:mob.z+1});realm.hurt(peer,mob,9999);}
+  assert.deepEqual(realm.record(peer,record).story,done);
+ }
 });
 
-test('entering a map completes an "enter" step; kills count toward a defeat step on the server', () => {
- const {realm,peer}=setup(fields,{v:4,quest:3,step:0});
- assert.equal(realm.snapshot(peer).self.story.step,1,'arriving in rice-fields completed the enter step');
- const hunt=setup(fields,{v:4,quest:4,step:0});
- for(const mob of hunt.peer.room.mobs){Object.assign(hunt.peer.world.player,{x:mob.x,z:mob.z+1});hunt.realm.hurt(hunt.peer,mob,9999);}
- assert.deepEqual(hunt.realm.snapshot(hunt.peer).self.story,{v:4,quest:4,step:1,count:0,done:false});
-});
-
-test('a delayed dialogue confirmation cannot advance a different quest or pay a reward twice',()=>{
- const {peer,send}=setup(city);Object.assign(peer.world.player,{x:4,z:0});
- assert.equal(send('questTalk',{npc:'ลุงเรือง',expected:{quest:0,step:0}}),true);
- assert.equal(send('questTalk',{npc:'ลุงเรือง',expected:{quest:0,step:0}}),false);
- Object.assign(peer.world.player,{x:-10,z:0});assert.equal(send('questTalk',{npc:'ครูแสนดาบ',expected:{quest:0,step:0}}),false);
- assert.equal(send('questTalk',{npc:'ครูแสนดาบ',expected:{quest:0,step:1}}),true);const xp=peer.world.baseXp,coins=peer.bag.coins;
- assert.equal(send('questTalk',{npc:'ครูแสนดาบ',expected:{quest:0,step:1}}),false);assert.equal(peer.world.baseXp,xp);assert.equal(peer.bag.coins,coins);
-});

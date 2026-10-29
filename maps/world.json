@@ -12164,7 +12164,11 @@
         "hp": 500000,
         "respawn": 3600
       },
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        1,
+        12
+      ]
     },
     {
       "id": "old-orchard",
@@ -12733,7 +12737,11 @@
         "hp": 1000000,
         "respawn": 3600
       },
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        10,
+        22
+      ]
     },
     {
       "id": "moonlit-mill",
@@ -13169,12 +13177,16 @@
         "hp": 1500000,
         "respawn": 3600
       },
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        15,
+        25
+      ]
     },
     {
       "id": "mill-cellar",
       "name": "ใต้ถุนโรงสีต้องสาป",
-      "subtitle": "ดันเจี้ยนปาร์ตี้ · Lv. 20+ · แยกห้องต่อปาร์ตี้ · มอนไม่เกิดใหม่",
+      "subtitle": "Lv. 20–30 · ดันเจี้ยนปาร์ตี้ · แยกห้องต่อปาร์ตี้ · มอนไม่เกิดใหม่",
       "safe": false,
       "kind": "instance",
       "region": "ayutthaya",
@@ -13500,7 +13512,11 @@
       ],
       "instance": true,
       "scene": "maps/v7/mill-cellar.glb",
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        20,
+        30
+      ]
     },
     {
       "id": "lotus-marsh",
@@ -13908,7 +13924,11 @@
         "hp": 2000000,
         "respawn": 3600
       },
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        25,
+        35
+      ]
     },
     {
       "id": "guild-hall",
@@ -14242,7 +14262,7 @@
       "id": "bamboo-grove",
       "name": "ป่าไผ่ผีปอบ",
       "nameEn": "Bamboo Ghost Grove",
-      "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
+      "subtitle": "Lv. 36–45 · ป่าไผ่หนาทึบและศาลผีปอบ",
       "exploration": false,
       "safe": false,
       "kind": "field",
@@ -15101,13 +15121,17 @@
         "respawn": 3600
       },
       "packs": true,
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        36,
+        45
+      ]
     },
     {
       "id": "ruined-temple",
       "name": "วัดร้างริมกรุงเก่า",
       "nameEn": "Old Capital Temple Ruins",
-      "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
+      "subtitle": "Lv. 46–55 · วัดร้าง กำแพงศิลา และระฆังต้องสาป",
       "exploration": false,
       "safe": false,
       "kind": "field",
@@ -15676,7 +15700,11 @@
         "respawn": 3600
       },
       "packs": true,
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        46,
+        55
+      ]
     },
     {
       "id": "lablae",
@@ -16946,7 +16974,7 @@
       "id": "himmapan-edge",
       "name": "ชายป่าหิมพานต์",
       "nameEn": "Himmapan Forest Edge",
-      "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
+      "subtitle": "Lv. 56–70 · ชายป่าหิมพานต์ สัตว์ป่าและสระน้ำ",
       "exploration": false,
       "safe": false,
       "kind": "field",
@@ -17549,13 +17577,17 @@
         "respawn": 3600
       },
       "packs": true,
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        56,
+        70
+      ]
     },
     {
       "id": "naga-cave",
       "name": "ถ้ำพญานาค",
       "nameEn": "Naga Cave",
-      "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
+      "subtitle": "Lv. 71–85 · ถ้ำลึก ธารน้ำใต้ดิน และองครักษ์นาค",
       "exploration": false,
       "safe": false,
       "indoor": true,
@@ -18088,13 +18120,17 @@
         "respawn": 3600
       },
       "packs": true,
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        71,
+        85
+      ]
     },
     {
       "id": "kailash-peak",
       "name": "ยอดเขาไกรลาส",
       "nameEn": "Kailash Peak",
-      "subtitle": "พื้นที่สำรวจ · มอนสเตอร์และเควสบทใหม่ยังไม่เปิด",
+      "subtitle": "Lv. 86–99 · ยอดเขาเหนือเมฆ ครุฑศิลาและยักษ์เมฆา",
       "exploration": false,
       "safe": false,
       "kind": "field",
@@ -18640,7 +18676,11 @@
         "respawn": 3600
       },
       "packs": true,
-      "mobPopulation": 2
+      "mobPopulation": 2,
+      "levels": [
+        86,
+        99
+      ]
     },
     {
       "id": "duel-arena",
@@ -18998,7 +19038,7 @@
     {
       "id": "rebirth-ferry",
       "name": "ท่าน้ำข้ามภพ",
-      "subtitle": "ภาคจุติ · Lv.1–20",
+      "subtitle": "Lv. 1–20 · ภาคจุติ",
       "scene": "maps/rebirth196/rebirth-ferry.glb",
       "draft": true,
       "rebirthChapter": 1,
@@ -19678,12 +19718,16 @@
           0,
           49
         ]
+      ],
+      "levels": [
+        1,
+        20
       ]
     },
     {
       "id": "rebirth-kalpa",
       "name": "ป่ากัลปพฤกษ์",
-      "subtitle": "ภาคจุติ · Lv.20–40",
+      "subtitle": "Lv. 20–40 · ภาคจุติ",
       "scene": "maps/rebirth196/rebirth-kalpa.glb",
       "draft": true,
       "rebirthChapter": 2,
@@ -20365,12 +20409,16 @@
           0,
           49
         ]
+      ],
+      "levels": [
+        20,
+        40
       ]
     },
     {
       "id": "rebirth-gandharva",
       "name": "นครคนธรรพ์ลอยฟ้า",
-      "subtitle": "ภาคจุติ · Lv.40–60",
+      "subtitle": "Lv. 40–60 · ภาคจุติ",
       "scene": "maps/rebirth196/rebirth-gandharva.glb",
       "draft": true,
       "rebirthChapter": 3,
@@ -20860,12 +20908,16 @@
           0,
           49
         ]
+      ],
+      "levels": [
+        40,
+        60
       ]
     },
     {
       "id": "rebirth-rahu",
       "name": "แดนอสูรราหู",
-      "subtitle": "ภาคจุติ · Lv.60–80",
+      "subtitle": "Lv. 60–80 · ภาคจุติ",
       "scene": "maps/rebirth196/rebirth-rahu.glb",
       "draft": true,
       "rebirthChapter": 4,
@@ -21456,12 +21508,16 @@
           0,
           49
         ]
+      ],
+      "levels": [
+        60,
+        80
       ]
     },
     {
       "id": "rebirth-sithandon",
       "name": "ฝั่งทะเลสีทันดร",
-      "subtitle": "ภาคจุติ · Lv.80–99",
+      "subtitle": "Lv. 80–99 · ภาคจุติ",
       "scene": "maps/rebirth196/rebirth-sithandon.glb",
       "draft": true,
       "rebirthChapter": 5,
@@ -21978,6 +22034,10 @@
           0,
           49
         ]
+      ],
+      "levels": [
+        80,
+        99
       ]
     }
   ]

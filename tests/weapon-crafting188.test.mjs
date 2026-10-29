@@ -33,10 +33,10 @@ test('inserting the crafting lesson preserves every v3 objective and completed s
  assert.equal(normalizeStory({v:3,quest:old.length,done:true}).done,true);assert.equal(normalizeStory({v:2,quest:old.length+1,done:true}).done,true);
  const t17=STORY.findIndex(q=>q.id==='t17'),r=storyEvent({v:STORY_VERSION,quest:t17,step:0},{type:'do',action:'job'});assert.equal(currentObjective(r.state).quest.id,'t17-craft');assert.ok(r.reward.items.some(i=>i.id==='weapon-fragment-rice'&&i.count===15));
 });
-test('realm crafting completes only the blue class-weapon objective; potions, inventory ownership and forged foreign recipes do not',()=>{
- let now=10000;const map={id:'ayutthaya',safe:true,nav:{zones:[{x:-30,z:-30,w:60,d:60}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[],npcs:[{name:'ครูแสนดาบ',x:0,z:0}]},realm=new RealmServer({catalog:{capital:map.id,maps:[map]},now:()=>now}),index=STORY.findIndex(q=>q.id==='t17-craft');
- const p=realm.join({uid:'crafter',slotId:'slot-1',serverId:'server-1',record:{character:{name:'Crafter',classId:'swordsman',gender:'male'},state:initialSave(),story:{v:STORY_VERSION,quest:index,step:1},bag:{coins:100000,items:{'weapon-fragment-rice':30,'iron-ore':4,'straw-bundle':3,'weapon-swordsman-one':1}}},send:()=>{}});
- realm.storyCheck(p);assert.equal(p.story.step,1);const send=item=>{now+=1000;return realm.receive(p.id,{type:'craft',item,seq:p.seq+1,times:1});};assert.equal(send('hp-small'),true);assert.equal(p.story.step,1);
- const bag=structuredClone(p.bag);assert.equal(send('weapon-hunter-one'),false);assert.deepEqual(p.bag,bag);assert.equal(send('weapon-swordsman-one'),true);assert.equal(p.story.step,2);assert.equal(p.story.quest,index);assert.equal(p.bag.items['weapon-swordsman-one'],2);
- realm.storyProgress(p,{type:'do',action:'craftWeapon'});assert.equal(p.story.step,2,'reporting to the NPC is still required');
+// 0.123 chapter 1 (and its crafting lesson) is retired; the realm still checks ownership and class on every craft
+test('realm crafting makes potions and the own class weapon, refuses forged foreign recipes and leaves the bag alone',()=>{
+ let now=10000;const map={id:'ayutthaya',safe:true,nav:{zones:[{x:-30,z:-30,w:60,d:60}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[],npcs:[{name:'ครูแสนดาบ',x:0,z:0}]},realm=new RealmServer({catalog:{capital:map.id,maps:[map]},now:()=>now});
+ const p=realm.join({uid:'crafter',slotId:'slot-1',serverId:'server-1',record:{character:{name:'Crafter',classId:'swordsman',gender:'male'},state:initialSave(),bag:{coins:100000,items:{'weapon-fragment-rice':30,'iron-ore':4,'straw-bundle':3,'weapon-swordsman-one':1}}},send:()=>{}});
+ const send=item=>{now+=1000;return realm.receive(p.id,{type:'craft',item,seq:p.seq+1,times:1});};assert.equal(send('hp-small'),true);
+ const bag=structuredClone(p.bag);assert.equal(send('weapon-hunter-one'),false);assert.deepEqual(p.bag,bag);assert.equal(send('weapon-swordsman-one'),true);assert.equal(p.story.done,true);assert.equal(p.bag.items['weapon-swordsman-one'],2);
 });

@@ -151,7 +151,16 @@ body.field-hud.hud63 .exp-track>span{inset:auto auto 6px 0;font-size:10px;line-h
 @media (orientation:portrait) and (max-width:600px){#online-dock.collapsed #dock-preview:empty::before{content:var(--chat-label,"แชต");color:var(--ink,#fff3d6)}}
 
 /* 0.71 owner: desktop uses the same HUD as phones (framed profile/minimap, full menu row, skill wheel). */
-@media (pointer:fine) and (min-width:901px){body.field-hud.hud63 #menu-more{display:none!important}body.field-hud.hud63 #menu-drawer{display:contents!important}}
+/* 0.123 owner: seven buttons on top, everything else on the เมนู page: a framed grid under the button (existing tooltip frame) */
+@media (pointer:fine) and (min-width:901px){
+ body.field-hud.hud63 #game-menu.more-open{overflow:visible;z-index:31}   /* the row scrolls sideways, which would clip the page; sit over the announcement (30) */
+ body.field-hud.hud63 #game-menu.more-open #menu-drawer{display:grid;grid-template-columns:repeat(4,64px);justify-items:center;align-items:start;gap:4px 6px;padding:8px 10px;
+  background:linear-gradient(135deg,#24382bf4,#152925f0);border:12px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 12px / 0 stretch;border-radius:0;box-shadow:0 8px 24px #0009}
+ body.field-hud.hud63 #menu-drawer>button[hidden]{display:none}
+}
+/* the เมนู button wears the golden lotus from the existing menu sheet */
+body.field-hud.hud63 #menu-more i{position:relative}
+body.field-hud.hud63 #menu-more i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 40% 66.667%/600% 400% no-repeat}
 
 /* ===== 0.68 owner feedback: event chips = icon + time (tap for details), target top-centre, tighter quest, fixed-width chat ===== */
 body.field-hud.hud63 #hud-right #hud-chips{flex-direction:row;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px}

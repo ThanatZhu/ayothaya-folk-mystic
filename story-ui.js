@@ -2,7 +2,7 @@ import {dialogueFor} from './story-dialogue.js?v=weapon188';
 import {createQuestCinematics} from './quest-cinematic155.js?v=rebirth199';
 // Story quest tracker + auto-walk ("กดแล้วเดินไปเอง"). Online: the realm server owns progress and rewards; the client
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
-import {STORY_TITLE,currentObjective,storyEvent,normalizeStory,normalizeRebirthStory,nextHop,rewardItems,STARTER_WEAPON} from './story-quests.js?v=rebirth196';
+import {currentObjective,storyEvent,retiredStory,normalizeStory,normalizeRebirthStory,nextHop,rewardItems,STARTER_WEAPON,farmMapFor} from './story-quests.js?v=farm211';
 import {createCoach} from './coach.js?v=weapon188';
 import {MONSTER_TYPES} from './combat-core.js?v=novice174';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
@@ -14,7 +14,7 @@ const $=id=>document.getElementById(id);
 export function createStoryUI({game,worldUI,map,catalog,account}){
  const baseLevel=()=>baseProgress(game.world).level;
  const world=game.world,key='ayothaya-story:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
- const read=()=>{try{return normalizeStory(JSON.parse(localStorage.getItem(key)));}catch{return normalizeStory(null);}};
+ const read=retiredStory;   // 0.123 chapter 1 retired (story-quests.js)
  let local=read(),localRebirth=null;try{localRebirth=JSON.parse(localStorage.getItem(key+':rebirth'));}catch{}
  try{world.storyCampaign=localStorage.getItem(key+':campaign')??undefined;}catch{}
  const isRebirth=()=>world.rebirth>0&&world.storyCampaign!=='main';
@@ -104,13 +104,15 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   return '▶ เดินไป';
  }
  let markedNpc=null,shown='';
+ const farmHere=()=>farmMapFor(catalog.maps,baseLevel(),{rebirth:world.rebirth,campaign:isRebirth()?'rebirth':'main'});
  // the prologue (prologue-ui.js) can take over the tracker and hold the welcome card back
  const hooks={override:null,holdWelcome:false};
  function render(){
   if(hooks.override){const o=hooks.override(),sig='prologue'+JSON.stringify(o);if(sig===shown)return;shown=sig;panel.setAttribute('aria-busy','false');$('quest-chapter').textContent=o.chapter;$('quest-title').textContent=o.title;$('quest-hint').textContent=o.hint;$('quest-how').hidden=true;$('quest-distance').hidden=true;$('quest-go').hidden=true;return;}
   const story=state(),synced=ready(),obj=synced?currentObjective(story):null;
+  const kind=panel.querySelector(':scope>.quest-kind'),kindText=synced&&!obj?'แนะนำฟาร์ม':'เนื้อเรื่อง';if(kind&&kind.textContent!==kindText)kind.textContent=kindText;   // badge from activity-dock.js
   // A level-up below the goal changes EXP, not the quest step. Include the displayed level in the cache.
-  const sig=JSON.stringify([synced,story,game.walking&&walking,obj?.step.type==='level'?baseLevel():null]);
+  const sig=JSON.stringify([synced,story,game.walking&&walking,!obj||obj.step.type==='level'?baseLevel():null]);
   if(sig===shown)return;shown=sig;
   $('quest-go').disabled=!synced;
   panel.setAttribute('aria-busy',String(!synced));
@@ -120,7 +122,17 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
    $('quest-go').hidden=false;$('quest-go').textContent='กำลังเชื่อมต่อ…';
    worldUI.npcLabel(markedNpc)?.classList.remove('quest-npc');markedNpc=null;return;
   }
-  $('quest-chapter').textContent=obj?.quest?.chapter??(isRebirth()?'ภาคจุติ · ห้าภพ':STORY_TITLE);
+  // 0.123 no story left (chapter 1 is retired, or the rebirth arc is over): suggest where to farm at this level
+  const farm=obj?null:farmHere();
+  if(farm){
+   const here=farm.id===map.id;
+   $('quest-chapter').textContent='แนะนำแมพฟาร์ม · Lv.'+baseLevel();$('quest-title').textContent=farm.name+' · Lv.'+farm.levels[0]+'–'+farm.levels[1];
+   $('quest-hint').textContent=here?'คุณอยู่ในแมพที่เหมาะกับเลเวลแล้ว':'แมพที่เหมาะกับเลเวลของคุณตอนนี้';
+   $('quest-how').textContent=here?'กดเพื่อเดินไปหามอนแล้วเปิด AUTO':'กดเพื่อเดินไปเอง ถึงแล้วเปิด AUTO ให้';$('quest-how').hidden=false;
+   $('quest-go').hidden=false;$('quest-go').textContent=game.walking&&walking?'■ หยุด':here?'▶ ฟาร์มเลย':'▶ เดินไป';
+   worldUI.npcLabel(markedNpc)?.classList.remove('quest-npc');markedNpc=null;return;
+  }
+  $('quest-chapter').textContent=obj?.quest?.chapter??'ภาคจุติ · ห้าภพ';
   const stepLabel=obj&&obj.steps>1?` (ขั้น ${obj.stepNumber}/${obj.steps})`:'';
   $('quest-title').textContent=obj?obj.quest.title+stepLabel:isRebirth()?'จบภาคจุติ · ห้าภพแห่งไฟต้นแสง':'จบเนื้อเรื่องที่มีในตอนนี้แล้ว';
   $('quest-hint').textContent=obj?hintText(obj):'รอเนื้อเรื่องบทต่อไปเร็ว ๆ นี้';
@@ -136,8 +148,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  let walking=false;
  function go(){
   if(!ready())return;
-  const obj=currentObjective(state());if(!obj){world.notice('จบเนื้อเรื่องบทที่ 1 แล้ว');return;}
-  const s={...obj.step};
+  const obj=currentObjective(state()),s=obj?{...obj.step}:{type:'level',farm:farmHere()?.id};if(!obj&&!s.farm)return;
   if(s.type==='do'){
    switch(s.action){
     case 'equip':{
@@ -242,7 +253,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
    }
   }
   if(s.type==='level'){
-   const farmMap=s.level<=10?'rice-fields':'old-orchard';
+   const farmMap=s.farm??farmMapFor(catalog.maps,s.level,{rebirth:world.rebirth}).id;
    if(map.id===farmMap){
     world.setAuto?.(true);
     world.notice('เปิด AUTO ฟาร์มเลเวล');

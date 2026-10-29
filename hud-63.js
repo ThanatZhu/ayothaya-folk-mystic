@@ -7,13 +7,15 @@ import {mobileHudMedia} from './hud-mode204.js';
 // (the chat box) are reachable elsewhere, so those three buttons are hidden.
 import {createActivityDock} from './activity-dock.js?v=hud204';
 import {createMobilePlayUI} from './mobile-play-ui.js?v=fit208';
-const PRIMARY=['menu-bag','menu-skills','menu-quests','menu-market','menu-rank'];
-const SECONDARY=['menu-social','menu-status','menu-pet','menu-gacha','menu-premium-store','menu-mail','menu-boss-result','menu-party'];
+// 0.123 owner: only the seven everyday buttons stay on top (สถานะ สกิล กระเป๋า ภารกิจ ร้านค้า จดหมาย + เมนู); the rest
+// open from the เมนู page (a framed grid, assets/ui63/frames/tooltip.png) on every screen.
+const PRIMARY=['menu-status','menu-skills','menu-bag','menu-quests','menu-premium-store','menu-mail'];
+const SECONDARY=['menu-market','menu-rank','menu-social','menu-pet','menu-gacha','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};
 export function createHud63({game,partyUI}={}){
  const $=id=>document.getElementById(id),body=document.body;
- const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=112.4';document.head.append(link); // last sheet wins ties
+ const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=farm211';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
  const minimalStyle=document.createElement('link');minimalStyle.rel='stylesheet';minimalStyle.href='./minimal-combat-hud.css?v=shadow119';document.head.append(minimalStyle);
  const mobileStyle=document.createElement('link');mobileStyle.rel='stylesheet';mobileStyle.href='./mobile-hud-stability.css?v=4';document.head.append(mobileStyle);

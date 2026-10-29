@@ -135,6 +135,11 @@ export function normalizeStory(state){
  return {...(rebirth?{campaign:'rebirth',cycle:Number.isSafeInteger(s.cycle)&&s.cycle>0?s.cycle:1}:{}),v:STORY_VERSION,quest,step,count,done};
 }
 
+// 0.123 owner: chapter 1 is retired. The prologue teaches the buttons and hands out the starter kit, so the realm
+// (join) and offline guests (story-ui) hold every main-campaign save as finished and the tracker suggests a farm map
+// instead (farmMapFor). The engine and STORY stay for the rebirth arc, the quest recaps and the cinematics.
+export const retiredStory=()=>({v:STORY_VERSION,quest:STORY.length,step:0,count:0,done:true});
+
 // What the player should do now: {quest, step, index:{quest,step}, progress} or null when the story is finished.
 export function currentObjective(state){
  const s=normalizeStory(state);if(s.done)return null;
@@ -172,6 +177,14 @@ export function storyEvent(state,event){
  if(s.step+1<quest.steps.length)return {state:{...s,step:s.step+1,count:0},changed:true,say};
  const next=s.quest+1;
  return {state:normalizeStory({...s,v:STORY_VERSION,quest:next,step:0,count:0}),changed:true,say,completed:quest,reward:quest.reward};
+}
+
+// 0.123 the map to farm at this level: the hardest one whose Lv. range still holds it (the rebirth maps only
+// for a reborn player on the rebirth campaign); off the top of every range, the closest one.
+export function farmMapFor(maps,level,{rebirth=0,campaign}={}){
+ const rb=campaign==='rebirth'&&rebirth>=1,open=maps.filter(m=>m.levels&&!m.prologue&&!!m.minRebirth===rb&&!(rebirth<m.minRebirth));
+ const fits=open.filter(m=>level>=m.levels[0]&&level<=m.levels[1]).sort((a,b)=>b.levels[0]-a.levels[0]);
+ return fits[0]??open.sort((a,b)=>Math.min(Math.abs(level-a.levels[0]),Math.abs(level-a.levels[1]))-Math.min(Math.abs(level-b.levels[0]),Math.abs(level-b.levels[1])))[0]??null;
 }
 
 // Next map to walk to on the way from `from` to `to`, following portals (breadth-first). null if unreachable.

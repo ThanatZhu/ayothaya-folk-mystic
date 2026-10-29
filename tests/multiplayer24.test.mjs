@@ -8,7 +8,7 @@ import {LocalStore,FirebaseStore} from '../server/storage.js';
 import {createHost} from '../server/host.js';
 import {initialSave} from '../realm-state.js';
 import {CLASSES,NOVICE} from '../classes.js';
-import {MONSTER_TYPES,TOWN_PACE} from '../combat-core.js';
+import {MONSTER_TYPES,TOWN_PACE,earlyXp} from '../combat-core.js';
 const tempRoot=path.resolve('.local-multiplayer');
 await mkdir(tempRoot,{recursive:true});
 async function cleanup(directory){assert.ok(path.resolve(directory).startsWith(tempRoot+path.sep));await rm(directory,{recursive:true,force:true});}
@@ -64,7 +64,7 @@ test('party XP rewards are awarded once, split without inflation, and exclude di
  const {realm,add,send,advance}=fixture({safe:false});const a=add('playerOne'),b=add('playerTwo'),far=add('playerFar');
  for(const target of [b,far]){advance(2100);send(a.peer,'invite',{target:target.peer.id});const invite=target.messages.findLast(m=>m.type==='invite');send(target.peer,'answer',{invite:invite.id,accept:true});}
  Object.assign(far.peer.world.player,{x:-19,z:-19});const mob=a.peer.world.mobs[0];a.peer.world.hurt(mob,100);a.peer.world.hurt(mob,100);
- assert.equal(a.peer.world.baseXp+b.peer.world.baseXp,MONSTER_TYPES[0].baseXp);assert.equal(a.peer.world.jobXp+b.peer.world.jobXp,MONSTER_TYPES[0].jobXp);assert.equal(far.peer.world.baseXp,0);
+ assert.equal(a.peer.world.baseXp+b.peer.world.baseXp,MONSTER_TYPES[0].baseXp*earlyXp(MONSTER_TYPES[0].level));assert.equal(a.peer.world.jobXp+b.peer.world.jobXp,MONSTER_TYPES[0].jobXp*earlyXp(MONSTER_TYPES[0].level));assert.equal(far.peer.world.baseXp,0);
  assert.equal(a.peer.world.kills,1);assert.equal(b.peer.world.kills,1);assert.equal(realm.snapshot(b.peer).mobs.find(m=>m.id===0).hp,0);
 });
 test('chat and command floods are bounded; empty/oversized text rejected',()=>{

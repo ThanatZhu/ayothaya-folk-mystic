@@ -4,7 +4,7 @@ import {readFile,access} from 'node:fs/promises';
 import {ITEMS,CHAPTERS,CLASSES,RECIPES,WORLD_MAP_BOSSES,levelChapter,chapterGear,featuredGear,createItemGuide,searchItems,cardSlots,itemEffects,fitsClass} from '../equipment-journey-data170.js';
 import {DROPS} from '../items.js';
 import {AMULET_REWARDS} from '../amulets.js';
-const gearCount=1062+35+AMULET_REWARDS.filter(r=>r.tier!=='material').length;
+const gearCount=1062+35+35+AMULET_REWARDS.filter(r=>r.tier!=='material').length;
 import {weaponId,pieceId} from '../gear-sets.js';
 const catalog=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8')),guide=createItemGuide(catalog);
 test('all Base levels and all regular and gacha gear items belong to exactly one progression chapter',()=>{

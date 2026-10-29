@@ -153,6 +153,9 @@ const PACK=[[0,0],[2.2,.7],[-1.8,1.6],[-.9,-2.2],[2,-1.6]];
 // 0.64 camp leader (slot 0): 3x HP, 2x EXP, 3 loot rolls, 3x respawn time, drawn 35% larger. Members give 0.6x EXP.
 export const LEADER={hp:3,xp:2,loot:3,respawn:3,scale:1.35,member:.6};
 export const mobXp=m=>m.leader?LEADER.xp:m.pack!==undefined?LEADER.member:1;
+// 0.123 owner: chapter-1 quests paid ~80% of the EXP to Lv.23 (2003 of 2486 base, 1008 Job). They are retired, so
+// monsters up to Lv.20 give x4 EXP, easing back to x1 by Lv.35.
+export const earlyXp=(level=1)=>level>=35?1:level<=20?4:4-3*(level-20)/15;
 export const mobRespawn=m=>(MONSTER_TYPES[m.type].respawn??12)*(m.leader?LEADER.respawn:1);
 // 0.122 spread out (tester: "two groups on one spot"): each camp monster gets its own home 6–14 m around the camp
 // point, at least 3 m from every other monster, and a doubled camp gets its own point at least 12 m from every camp
@@ -285,7 +288,7 @@ export class CombatWorld{
  hurt(mob,damage,color='#fff0a6'){
   if(!mob||mob.hp<=0||mob.pvp||!this.autoDamageAllows(mob))return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a',...this.damageContext}); // Keep the hit's critical flag and cast identity.
-  if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
+  if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob)*earlyXp(reward.level);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
  // 0.68 a point in front of the player (toward `toward` when given): where an attack or skill lands with no target.
  airPoint(range,toward=null){const p=this.player;if(toward){const dx=toward.x-p.x,dz=toward.z-p.z;if(Math.hypot(dx,dz)>.01)p.face={x:dx,z:dz};}const n=Math.hypot(p.face.x,p.face.z)||1;return {x:p.x+p.face.x/n*range,z:p.z+p.face.z/n*range};}

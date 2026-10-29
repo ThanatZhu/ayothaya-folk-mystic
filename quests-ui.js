@@ -97,6 +97,8 @@ export function createQuestsUI({game,account,map,bagUI}){
  desktop.addEventListener('change',()=>{const list=dialog.querySelector('.quest-journal-list');if(list){list.hidden=!desktop.matches;dialog.querySelector('.quest-journal-toggle').setAttribute('aria-expanded',String(desktop.matches));}});
  function render(force=false){
   if(!dialog.open)return;const s=bounty(),al=album(),wk=normalizeWeekly(world.weekly,Date.now()),sig=JSON.stringify([tab,s,al,wk,storyState(),tab==='album'?bagUI.bag():null,world.albumRewards]);if(!force&&sig===shown)return;shown=sig;
+  // 0.123 chapter 1 is retired: the story tab only shows the rebirth arc (the tracker suggests farm maps instead)
+  const storyTab=world.rebirth>0&&world.storyCampaign!=='main';if(!storyTab&&tab==='story')tab='bounty';dialog.querySelector('[data-qt="story"]').hidden=!storyTab;
   dialog.querySelectorAll('[data-qt]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.qt===tab)));
   const body=$('quests-body'),scroll=body.scrollTop;dialog.dataset.questTab=tab;
   if(tab==='story'){

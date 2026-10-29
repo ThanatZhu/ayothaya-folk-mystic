@@ -88,15 +88,18 @@ export function createMentorUI({game,account,catalog,map,inTown=()=>false,recall
   catch(e){$('mentor-result').textContent=errors[e.message]??'บันทึกไม่สำเร็จ กรุณาลองอีกครั้ง';}finally{busy=false;for(const b of panel.querySelectorAll('button'))b.disabled=false;render();}
  }
  $('mentor-accept').onclick=()=>act('accept');$('mentor-complete').onclick=()=>act('complete');$('mentor-cancel').onclick=()=>act('cancel');
- function render(){if(!current)return;const s=trainingStatus(account.character,account.training,game.world,current.mentorId),ready=trialReady(s,game.world.bag,game.online);
+ function render(){if(!current)return;const s=trainingStatus(account.character,account.training,game.world,current.mentorId);
   $('mentor-stat-note').hidden=s.completed||s.wrongClass;
   $('mentor-role').textContent=current.title+' · '+className(current.classId,account.character.gender);
   $('mentor-quest').textContent=s.tier==='class'?'บททดสอบฝากตัวเป็นศิษย์':'บททดสอบสู่ Master';
-  $('mentor-objective').textContent=s.completed?'คุณผ่านการเลื่อนขั้นแล้ว ยินดีต้อนรับกลับมาฝึกฝนเสมอ':s.wrongClass?'กลับไปหาครูประจำสายอาชีพของคุณเพื่อเลื่อนขั้น':!s.eligible?'ฝึก Job ให้ตัน ('+s.jobLevel+' / '+s.jobCap+')'+' ก่อนกลับมารับบททดสอบ':s.training&&!s.own?'คุณรับบททดสอบของสาย '+className(s.training.classId,account.character.gender)+' ไว้แล้ว':(s.own?trialLines(s,game.world.bag,game.online).join(' · '):'บททดสอบ: ล่ามอนสเตอร์ '+s.target+' ตัว'+(game.online?' · ล้ม'+s.trial.bossName+' · นำ'+s.trial.items.map(([id,n])=>itemDef(id).name+' '+n).join(' ')+' และ '+s.trial.coins.toLocaleString('th-TH')+' เบี้ย':''))+' · กลับมาหาครูเพื่อ'+(s.tier==='class'?'เปลี่ยนอาชีพ':'เลื่อนขั้น')+(ready?' · พร้อมส่งแล้ว':'');
   const allowed=!s.completed&&!s.wrongClass&&s.eligible;
-  $('mentor-progress').hidden=!s.own;$('mentor-progress').max=s.target;$('mentor-progress').value=s.progress;
-  $('mentor-accept').hidden=!allowed||!!s.training;$('mentor-cancel').hidden=!s.own||s.completed;$('mentor-complete').hidden=!s.own||s.completed;$('mentor-complete').disabled=busy||!ready;
-  $('mentor-branch-label').hidden=!allowed||!s.own||s.tier!=='master';
+  // 0.123 one click: the button changes class straight away (city-life-data.js trainingAction)
+  if(allowed){$('mentor-quest').textContent=s.tier==='class'?'เปลี่ยนอาชีพ':'สู่ Master';$('mentor-objective').textContent=s.tier==='class'?'Job ตันแล้ว · เปลี่ยนเป็น'+className(current.classId,account.character.gender)+'ได้ทันทีด้วยปุ่มเดียว · รับกล่องเซ็ตสีแดง Lv.25 ทางจดหมาย':'เลือกสาย Master แล้วกดปุ่มเลื่อนขั้นได้ทันที';}
+  else $('mentor-objective').textContent=s.completed?'คุณผ่านการเลื่อนขั้นแล้ว ยินดีต้อนรับกลับมาฝึกฝนเสมอ':s.wrongClass?'กลับไปหาครูประจำสายอาชีพของคุณเพื่อเลื่อนขั้น':!s.eligible?'ฝึก Job ให้ตัน ('+s.jobLevel+' / '+s.jobCap+')'+' ก่อนกลับมารับบททดสอบ':s.training&&!s.own?'คุณรับบททดสอบของสาย '+className(s.training.classId,account.character.gender)+' ไว้แล้ว':(s.own?trialLines(s,game.world.bag,game.online).join(' · '):'บททดสอบ: ล่ามอนสเตอร์ '+s.target+' ตัว'+(game.online?' · ล้ม'+s.trial.bossName+' · นำ'+s.trial.items.map(([id,n])=>itemDef(id).name+' '+n).join(' ')+' และ '+s.trial.coins.toLocaleString('th-TH')+' เบี้ย':''))+' · กลับมาหาครูเพื่อ'+(s.tier==='class'?'เปลี่ยนอาชีพ':'เลื่อนขั้น')+(ready?' · พร้อมส่งแล้ว':'');
+  $('mentor-progress').hidden=true;
+  $('mentor-accept').hidden=true;$('mentor-cancel').hidden=!s.own||s.completed;$('mentor-complete').hidden=!allowed;$('mentor-complete').disabled=busy;
+  $('mentor-complete').textContent=s.tier==='class'?'เปลี่ยนเป็น'+className(current.classId,account.character.gender):'เลื่อนเป็น Master';
+  $('mentor-branch-label').hidden=!allowed||s.tier!=='master';
  }
  function open(n){if(busy)return;if(current)current.talking=false;current=n;n.talking=true;game.clearInput();$('mentor-name').textContent=n.name;$('mentor-story').textContent=n.text;$('mentor-result').textContent='';
   paintNPCPortrait(panel.querySelector('.npc-speaker canvas'),n);
@@ -114,9 +117,9 @@ export function createMentorUI({game,account,catalog,map,inTown=()=>false,recall
  let readyFor=null;
  function jobReady(){const c=account?.character;if(!c||c.jobId||account.training)return;const r=advanceReady(game.world,c.classId,c.jobId??'');if(!r.job.maxed)return;
   const key='ayothaya-job-ready:'+c.classId+':'+r.base+':'+r.ok;if(readyFor===key)return;readyFor=key;try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1');}catch{}
-  const t=TRIAL[r.tier],first=r.tier==='class';ready.querySelector('#job-ready-title').textContent=first?'Job ตันแล้ว! ถึงเวลาเลือกอาชีพ':'Job ตันแล้ว! ถึงเวลาสู่ Master';
-  ready.querySelector('#job-ready-text').textContent=r.ok?'ไปหาครูประจำสายที่ลานครูแห่งอโยธยา รับบททดสอบ แล้วทำให้ครบทั้ง 3 ด่าน':'ต้อง Base Lv.'+r.min+' ก่อน (ตอนนี้ Lv.'+r.base+') ระหว่างนี้เตรียมของสำหรับบททดสอบไว้ได้เลย';
-  ready.querySelector('#job-ready-steps').innerHTML=['ล่ามอนสเตอร์ '+t.kills+' ตัว','ล้ม'+t.bossName,'นำ '+t.items.map(([id,n])=>itemDef(id).name+' '+n).join(' · ')+' และ '+t.coins.toLocaleString('th-TH')+' เบี้ย'].map(x=>'<li>'+x+'</li>').join('');
+  const first=r.tier==='class';ready.querySelector('#job-ready-title').textContent=first?'Job ตันแล้ว! ถึงเวลาเลือกอาชีพ':'Job ตันแล้ว! ถึงเวลาสู่ Master';
+  ready.querySelector('#job-ready-text').textContent=r.ok?'ไปหาครูประจำสายที่ลานครูแห่งอโยธยา แล้วกดเปลี่ยนอาชีพได้ทันที ไม่ต้องทำบททดสอบ':'ต้อง Base Lv.'+r.min+' ก่อน (ตอนนี้ Lv.'+r.base+') แล้วกลับไปหาครูที่ลานครู';
+  ready.querySelector('#job-ready-steps').innerHTML=(first?['เลือกครูสายที่อยากเป็น แล้วกดปุ่มเดียว','รับกล่องเซ็ตสีแดง Lv.25 ครบ 5 ชิ้นทางจดหมาย']:['เลือกสาย Master แล้วกดปุ่มเดียว']).map(x=>'<li>'+x+'</li>').join('');
   ready.querySelector('#job-ready-go').textContent=inTown()?'▶ เดินไปหา Master':'▶ กลับอยุธยา ไปหา Master';if(!ready.open)ready.showModal();}
  // Position from actual visible rectangles, including the profile and online chip. Long lists scroll below the header.
  function stackJournal(){
@@ -145,7 +148,7 @@ export function createMentorUI({game,account,catalog,map,inTown=()=>false,recall
   if(trainingWalk.resuming){const loading=[...document.querySelectorAll('.journey-loading,#travel-loading')].some(n=>!n.classList.contains('leaving')&&n.checkVisibility?.({checkVisibilityCSS:true}));
    trainingWalk.update(!loading&&(!game.online||!!game.world.bag)&&!document.querySelector('#orientation-gate[open]'));
   }
-  const q=account.training,key=JSON.stringify([q,game.world.kills,game.world.bag,game.online]);if(key===last)return;last=key;journal.hidden=!q;
+  const q=account.training,key=JSON.stringify([q,game.world.kills,game.world.bag,game.online]);if(key===last)return;last=key;journal.hidden=true;   // 0.123 no trial to track any more
   const s=status();if(s)renderJournal(s);stackJournal();render();
  }
  return {open,update,get paused(){return panel.open;}};

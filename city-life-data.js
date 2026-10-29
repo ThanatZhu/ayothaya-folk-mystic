@@ -27,20 +27,17 @@ export function trainingStatus(character,training,traveler,mentorId){
 }
 // Shared quest rules. Online callers supply only an action and mentor/branch IDs;
 // the realm supplies position, level, kill count and the saved quest baseline.
-export function trainingAction({character,training,state},mentorId,action,jobId='',bag=null){
+export function trainingAction({character,training,state},mentorId,action,jobId=''){
  const s=trainingStatus(character,training,state.traveler,mentorId),m=s.mentor,p=state.position;
  if(state.mapId!=='ayutthaya'||!p||Math.hypot(p.x-m.x,p.z-m.z)>3||state.traveler.hp<=0)throw new Error('trainer-distance');
  if(!['accept','cancel','complete'].includes(action))throw new Error('trainer-action');
  if(s.completed)throw new Error('trainer-finished');if(s.wrongClass)throw new Error('trainer-class');if(!s.eligible)throw new Error('trainer-level');
  if(action==='accept'){if(training)throw new Error('trainer-active');return {character,training:{classId:m.classId,tier:s.tier,startKills:state.traveler.kills,boss:s.trial.boss},advanced:false};}
- if(!s.own)throw new Error('trainer-quest');
- if(action==='cancel')return {character,training:null,advanced:false};
- if(s.progress<s.target)throw new Error('trainer-incomplete');
- let paid=null;
- if(bag){if(!training.bossDone)throw new Error('trainer-boss');if(trialItemsShort(bag,s.trial).length)throw new Error('trainer-items');
-  paid={...bag,coins:bag.coins-s.trial.coins,items:{...bag.items}};for(const [id,n] of s.trial.items){paid.items[id]-=n;if(!paid.items[id])delete paid.items[id];}}
+ if(action==='cancel'){if(!s.own)throw new Error('trainer-quest');return {character,training:null,advanced:false};}
+ // 0.123 owner: changing class is one click at the mentor once the Job bar is full: no hunt, boss, materials or
+ // cowries any more (an old accepted trial is simply dropped). 'accept' stays for clients still on the old panel.
  if(s.tier==='master'&&!s.branches.some(j=>j.id===jobId))throw new Error('invalid-job');
- return {character:{...character,classId:m.classId,jobId:s.tier==='master'?jobId:''},training:null,advanced:true,...(paid?{bag:paid}:{})};
+ return {character:{...character,classId:m.classId,jobId:s.tier==='master'?jobId:''},training:null,advanced:true};
 }
 
 export const CITIZEN_STYLES=[

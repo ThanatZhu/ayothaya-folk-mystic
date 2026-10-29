@@ -12,9 +12,9 @@ export const STAGES=['wake','teacher','trial','arena','boss','fading','done'];
 export const SCENE_IDS=['dream','teacher','boss','fading','awake'];
 // stage -> what to do next (shown in the objective line)
 export const OBJECTIVES={wake:'ปราบมอนสเตอร์ในทุ่งนิมิต',teacher:'ไปคุยกับวิญญาณครูที่ต้นไทร',trial:'ไปที่ลานศิลาโบราณทางเหนือ',arena:'ลานศิลากำลังตื่น',boss:'ปราบอสูรฟางนิมิต',fading:'นิมิตกำลังจางหาย',done:''};
-// 0.122 the lent Lv.80 build hits for hundreds: the guardian holds out long enough to try every skill and hits back
+// 0.122 the lent Lv.80 build (x3 blessing) hits for a thousand and more: the guardian holds out long enough to try every skill and hits back
 // hard enough to show numbers, never enough to fell the dreamer (about 30–50 a blow against the trial set)
-export const PROLOGUE_BOSS={id:'vision-straw-guardian',name:'อสูรฟางนิมิต',hp:38000,speed:.75,damage:260,baseXp:60,jobXp:40,level:5,
+export const PROLOGUE_BOSS={id:'vision-straw-guardian',name:'อสูรฟางนิมิต',hp:90000,speed:.75,damage:260,baseXp:60,jobXp:40,level:5,
  sheet:'elite-monsters',row:2,height:3.3,elite:true,prologue:true,respawn:1e9,reach:2.6,windup:1};
 
 const rank=s=>STAGES.indexOf(s);

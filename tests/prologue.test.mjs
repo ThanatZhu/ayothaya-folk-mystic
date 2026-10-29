@@ -5,7 +5,7 @@ import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 import {MONSTER_TYPES} from '../combat-core.js';
 import {PROLOGUE_MAP,PROLOGUE_KILLS,TERRACE,TRIAL_CLASSES,PROLOGUE_BOSS,dueScene,prologueDue,normalizePrologue} from '../prologue.js';
-import {trialKit,TRIAL_LEVEL} from '../server/prologue-realm.js';
+import {trialKit,trialStats,TRIAL_LEVEL,TRIAL_POWER} from '../server/prologue-realm.js';
 import {itemDef} from '../items.js';
 import {deriveStats} from '../character-stats.js';
 
@@ -81,7 +81,7 @@ test('the lent class can actually beat the guardian with its own skills',()=>{
   send(realm,p,{type:'auto',on:true});let t=0,low=1;for(;t<240&&boss.hp>0&&p.world.player.hp>0;t+=.05){realm.step(.05);low=Math.min(low,p.world.player.hp/p.world.player.maxHp);}
   console.log('fight',classId,Math.round(t)+' s','lowest HP',Math.round(low*100)+'%');assert.ok(p.world.player.hp>0,classId+' fell to the guardian');
   assert.ok(boss.hp<=0,classId+' did not win in 4 min (hp '+boss.hp+')');
-  assert.ok(t>=20&&t<120,classId+' took '+Math.round(t)+' s');
+  assert.ok(t>=12&&t<90,classId+' took '+Math.round(t)+' s');   // 0.122 a short, overwhelming fight (owner: hit harder)
  }
 });
 test('every lent class fights at its height (Lv.80, full boss set) and goes home with nothing of it kept (0.122)',()=>{
@@ -89,7 +89,8 @@ test('every lent class fights at its height (Lv.80, full boss set) and goes home
   const kit=trialKit(classId,gender);assert.equal(kit.level,TRIAL_LEVEL);
   assert.deepEqual(Object.keys(kit.gear).sort(),['armor','garment','head','shoes','weapon']);
   for(const id of Object.values(kit.gear))assert.ok(itemDef(id),classId+' '+gender+' '+id);
-  const d=deriveStats({classId,level:kit.level,stats:kit.stats,gear:kit.gear});assert.ok(Math.max(d.atk,d.matk)>=400,classId+' hits hard');assert.ok(d.maxHp>1400);
+  const base=deriveStats({classId,level:kit.level,stats:kit.stats,gear:kit.gear}),d=trialStats(classId,gender);assert.ok(Math.max(base.atk,base.matk)>=400,classId+' hits hard');assert.ok(d.maxHp>1400);
+  assert.equal(d.basicBonus,base.basicBonus*TRIAL_POWER);assert.ok(d.skillPower>base.skillPower*2.5);
   const realm=realmOf(),record=fresh({character:{name:'Dreamer',gender,classId:'novice'}}),bagBefore=null;let {p}=join(realm,record,'u-'+classId+gender);
   const gearBefore=JSON.stringify(p.gear),statsBefore=JSON.stringify(p.stats);
   killTraining(realm,p,PROLOGUE_KILLS);Object.assign(p.world.player,{x:teacher().x+1,z:teacher().z});say(realm,p,{action:'class',classId});

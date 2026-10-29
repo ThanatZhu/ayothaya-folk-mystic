@@ -2,7 +2,7 @@
 // class, the terrace, the guardian and the way home. Cutscenes only report "seen"; skipping one never skips a step.
 import {MONSTER_TYPES} from '../combat-core.js';
 import {PROLOGUE_MAP,PROLOGUE_KILLS,TEACHER,TERRACE,BOSS_SPOT,TRIAL_CLASSES,SCENE_IDS,PROLOGUE_BOSS,prologueDue,inTrial,onTerrace} from '../prologue.js?v=2';
-import {raiseStat} from '../character-stats.js';
+import {raiseStat,deriveStats} from '../character-stats.js';
 import {gearLook,bossId,SET_SLOTS} from '../gear-sets.js';
 const BOSS_TYPE=MONSTER_TYPES.findIndex(t=>t.id===PROLOGUE_BOSS.id);
 const ACTIVE_LEVEL=5;   // every active skill of the lent class (ultimate included) at its top rank
@@ -17,6 +17,12 @@ export function trialKit(classId,gender){
   while((stats?.[k]??1)<to){try{stats=raiseStat(stats,k,TRIAL_LEVEL);}catch{break;}}
  const look=gearLook(classId,gender);
  return {level:TRIAL_LEVEL,stats,gear:{weapon:bossId('weapon',classId),...Object.fromEntries(SET_SLOTS.map(slot=>[slot,bossId(slot,look)]))}};
+}
+// owner: hit harder still. The vision's blessing triples what the build deals (basic hits and every skill).
+export const TRIAL_POWER=3;
+export function trialStats(classId,gender){
+ const kit=trialKit(classId,gender),d=deriveStats({classId,level:kit.level,stats:kit.stats,gear:kit.gear}),k=TRIAL_POWER;
+ return {...d,atk:d.atk*k,matk:d.matk*k,basicBonus:d.basicBonus*k,skillPower:1+(d.magic?d.matk:d.atk)*k/40};
 }
 
 // the state a joining record is in, or null (prologue off, finished long ago, or an existing character)

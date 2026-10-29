@@ -108,7 +108,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
  // the prologue (prologue-ui.js) can take over the tracker and hold the welcome card back
  const hooks={override:null,holdWelcome:false};
  function render(){
-  if(hooks.override){const o=hooks.override(),sig='prologue'+JSON.stringify(o);if(sig===shown)return;shown=sig;panel.setAttribute('aria-busy','false');$('quest-chapter').textContent=o.chapter;$('quest-title').textContent=o.title;$('quest-hint').textContent=o.hint;$('quest-how').hidden=true;$('quest-distance').hidden=true;$('quest-go').hidden=true;return;}
+  if(hooks.override){const o=hooks.override(),sig='prologue'+JSON.stringify([o,game.walking&&walking]);if(sig===shown)return;shown=sig;panel.setAttribute('aria-busy','false');$('quest-chapter').textContent=o.chapter;$('quest-title').textContent=o.title;$('quest-hint').textContent=o.hint;$('quest-how').hidden=true;$('quest-distance').hidden=true;$('quest-go').hidden=!o.go;$('quest-go').disabled=false;$('quest-go').textContent=game.walking&&walking?'■ หยุด':o.go?.kind==='mob'?'▶ ไปตี':'▶ เดินไป';return;}
   const story=state(),synced=ready(),obj=synced?currentObjective(story):null;
   const kind=panel.querySelector(':scope>.quest-kind'),kindText=synced&&!obj?'แนะนำฟาร์ม':'เนื้อเรื่อง';if(kind&&kind.textContent!==kindText)kind.textContent=kindText;   // badge from activity-dock.js
   // A level-up below the goal changes EXP, not the quest step. Include the displayed level in the cache.
@@ -288,7 +288,18 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   }else done();
   render();
  }
- $('quest-go').onclick=()=>{if(walking&&game.walking){game.cancelWalk();walking=false;render();}else go();};
+ // 0.123 the prologue's cards walk too: to a monster (then AUTO), the teacher, or the terrace
+ function goPrologue(g){
+  const done=()=>{walking=false;render();};walking=true;
+  if(g.kind==='npc'){if(!worldUI.talkTo(g.npc))world.notice('ไม่พบ '+g.npc+' ในแผนที่นี้');walking=game.walking;render();return;}
+  if(g.kind==='spot'){game.walkTo({x:g.x,z:g.z},{radius:1.5,kind:'quest',onArrive:done,onFail:done});render();return;}
+  const type=MONSTER_TYPES.findIndex(t=>t.id===(g.monster??g.not)),fits=m=>m.hp>0&&(g.monster?m.type===type:m.type!==type);
+  const first=world.mobs.filter(fits).sort((a,b)=>Math.hypot(a.x-world.player.x,a.z-world.player.z)-Math.hypot(b.x-world.player.x,b.z-world.player.z))[0];
+  if(!first){done();world.notice('รอมอนสเตอร์เกิดใหม่สักครู่');return;}
+  game.walkTo(()=>{const m=world.mobs.find(m=>m.id===first.id&&m.hp>0);return m&&{x:m.x,z:m.z};},{radius:2.4,kind:'quest',mobId:first.id,onArrive:()=>{done();world.select(first.id);setTimeout(()=>world.setAuto?.(true),150);},onFail:done});
+  render();
+ }
+ $('quest-go').onclick=()=>{if(walking&&game.walking){game.cancelWalk();walking=false;render();}else if(hooks.override){const g=hooks.override().go;if(g)goPrologue(g);}else go();};
  panel.addEventListener('click',e=>{if(e.target.closest('#quest-coach,#quest-campaign'))return;if(e.target===panel||e.target.closest('#quest-title,#quest-hint'))$('quest-go').click();});
 
  offline({type:'enter',mapId:map.id});

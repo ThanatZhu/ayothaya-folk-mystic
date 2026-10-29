@@ -5406,6 +5406,7 @@ Object.assign(globalThis.I18N_EN,{
  "กดเพื่อเดินไปหามอนแล้วเปิด AUTO": "Press to walk to a monster and turn on AUTO",
  "กดเพื่อเดินไปเอง ถึงแล้วเปิด AUTO ให้": "Press to walk there; AUTO turns on when you arrive",
  "▶ ฟาร์มเลย": "▶ Farm now",
+ "▶ ไปตี": "▶ Fight",
  "แนะนำฟาร์ม": "Farm tip",
  "🎒 ได้รับชุดเริ่มต้น ยา และเบี้ย · สวมให้แล้ว พร้อมออกฟาร์ม": "🎒 Starter gear, potions and cowries received · gear equipped, ready to farm",
  "Lv. 20–30 · ดันเจี้ยนปาร์ตี้ · แยกห้องต่อปาร์ตี้ · มอนไม่เกิดใหม่": "Lv. 20–30 · Party dungeon · one room per party · monsters do not respawn",

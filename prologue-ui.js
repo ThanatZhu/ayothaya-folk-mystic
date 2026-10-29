@@ -1,7 +1,7 @@
 // Client side of the ทุ่งนิมิต prologue: plays each cutscene when the realm says the story has reached it, offers the
 // teacher's seven paths inside the NPC conversation, keeps the objective in the quest tracker, and walks the player home.
 // The realm owns every step (server/prologue-realm.js); this file only shows them and reports what was watched.
-import {PROLOGUE_MAP,PROLOGUE_SCENES,TEACHER,TRIAL_CLASSES,OBJECTIVES,dueScene,inTrial} from './prologue.js?v=2';
+import {PROLOGUE_MAP,PROLOGUE_SCENES,TEACHER,TRIAL_CLASSES,OBJECTIVES,TERRACE,PROLOGUE_BOSS,dueScene,inTrial} from './prologue.js?v=2';
 import {classPortrait} from './portraits.js?v=at1';
 import {getClass} from './classes.js?v=novice174';
 
@@ -41,9 +41,11 @@ export function createPrologueUI({game,worldUI,storyUI,map,account,trial:trialPa
   const text=document.getElementById('npc-text');if(text)text.textContent='วิญญาณครู: เจ้าผ่านการฝึกแล้ว เลือกวิถีหนึ่งวิถี ข้าจะให้เจ้ายืมพลังของมันไปเผชิญสิ่งที่รออยู่บนลานศิลา';
   // the scene starts only now, after the player has walked up and the conversation is open
   if(!state().seen.includes('teacher'))play('teacher',choices);else choices();};
+ // 0.123 owner: every prologue card has a ▶ button that takes the player there (story-ui.js runs it)
+ const GO={wake:{kind:'mob',not:PROLOGUE_BOSS.id},teacher:{kind:'npc',npc:TEACHER},trial:{kind:'spot',x:TERRACE.x,z:TERRACE.z+TERRACE.r-2},boss:{kind:'mob',monster:PROLOGUE_BOSS.id}};
  function objective(){
   const s=state();if(!s)return {chapter:'บทนำ · ทุ่งนิมิต',title:'กำลังเชื่อมต่อกับนิมิต…',hint:'บทนำเล่นได้เมื่อออนไลน์'};
-  return {chapter:'บทนำ · ทุ่งนิมิต',title:OBJECTIVES[s.stage]||'นิมิตจบลงแล้ว',hint:(HINTS[s.stage]??(()=>''))(s)};
+  return {chapter:'บทนำ · ทุ่งนิมิต',title:OBJECTIVES[s.stage]||'นิมิตจบลงแล้ว',hint:(HINTS[s.stage]??(()=>''))(s),go:GO[s.stage]??null};
  }
  if(here&&storyUI){storyUI.override=objective;storyUI.holdWelcome=true;}
  function step(){

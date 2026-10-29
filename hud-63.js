@@ -18,7 +18,7 @@ export function createHud63({game,partyUI}={}){
  const link=document.createElement('link');link.rel='stylesheet';link.href='./hud-63.css?v=farm211';document.head.append(link); // last sheet wins ties
  body.classList.add('hud63');
  const minimalStyle=document.createElement('link');minimalStyle.rel='stylesheet';minimalStyle.href='./minimal-combat-hud.css?v=shadow119';document.head.append(minimalStyle);
- const mobileStyle=document.createElement('link');mobileStyle.rel='stylesheet';mobileStyle.href='./mobile-hud-stability.css?v=4';document.head.append(mobileStyle);
+ const mobileStyle=document.createElement('link');mobileStyle.rel='stylesheet';mobileStyle.href='./mobile-hud-stability.css?v=farm212';document.head.append(mobileStyle);
  const deco=(parent,cls)=>{if(!parent||parent.querySelector(':scope>.'+cls))return;const d=document.createElement('i');d.className='hud63-frame '+cls;d.setAttribute('aria-hidden','true');parent.prepend(d);};
  const profile=document.querySelector('.player-panel');deco(profile,'f-profile');
  if(profile)new ResizeObserver(()=>document.documentElement.style.setProperty('--profile-height',profile.getBoundingClientRect().height+'px')).observe(profile);

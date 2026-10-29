@@ -1,8 +1,9 @@
 /* Mobile HUD ownership: loaded after the legacy HUD sheets by createHud63. */
 /* Desktop has a reserved strip between the profile and minimap. When space is
-   short, scroll the strip instead of letting buttons spill over either panel. */
+   short, scroll the strip instead of letting buttons spill over either panel.
+   0.123 owner: the seven buttons line up at the right end, next to the minimap. */
 @media (pointer:fine) and (min-width:901px) and (min-height:601px){
- body.field-hud.hud63 #game-menu{left:calc(var(--edge) + 286px);right:calc(var(--edge-r) + 216px);top:var(--edge-t);width:auto;transform:none;display:flex;flex-wrap:nowrap;justify-content:flex-start;justify-content:safe center;overflow-x:auto;overflow-y:hidden;max-height:92px;padding:0 4px 4px;box-sizing:border-box;scrollbar-width:thin;overscroll-behavior-x:contain;touch-action:pan-x}
+ body.field-hud.hud63 #game-menu{left:calc(var(--edge) + 286px);right:calc(var(--edge-r) + 216px);top:var(--edge-t);width:auto;transform:none;display:flex;flex-wrap:nowrap;justify-content:flex-end;justify-content:safe flex-end;overflow-x:auto;overflow-y:hidden;max-height:92px;padding:0 4px 4px;box-sizing:border-box;scrollbar-width:thin;overscroll-behavior-x:contain;touch-action:pan-x}
  body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{flex:0 0 60px}
 }
 @media (pointer:coarse),(max-width:900px),(max-height:600px){

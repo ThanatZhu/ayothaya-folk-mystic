@@ -5,7 +5,7 @@ import {roleTiming} from './combat-timing.js';
 import {NOVICE} from './classes.js?v=novice174';
 import {VFX_SHEETS,VFX_UNMATCHED} from './assets/skills-next/vfx-2026-10/vfx-map.js';
 import {POSE_SHEETS} from './assets/skills-next/poses-2026-10/pose-map.js';
-import {createSheetVfx,vfxPlacement} from './role-sheet-vfx.js?v=pose119';
+import {createSheetVfx,vfxPlacement} from './role-sheet-vfx.js?v=surfaces222';
 import {createPaintedAvatar} from './painted-avatar.js?v=pose119';
 import {createRoleAnimation,sampleRolePose,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
 import {characterMotion} from './character-motion.js?v=novice174';

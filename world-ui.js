@@ -5,11 +5,11 @@ import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createWorldAtlas} from './world-atlas-ui.js?v=farm218';
 import {openHudPanel} from './hud-panels.js?v=34';
-import {drawMap} from './city-map.js?v=107';
-import {createMentorUI} from './mentor-ui.js?v=farm211';
+import {drawMap} from './city-map.js?v=surfaces222';
+import {createMentorUI} from './mentor-ui.js?v=surfaces222';
 import * as THREE from 'three';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
-import {groundHeight} from './combat-core.js?v=novice174';
+import {groundHeight} from './combat-core.js?v=surfaces222';
 import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=death178';
 import {nextHop} from './story-quests.js?v=rebirth196';
 
@@ -46,7 +46,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
    if(!await account.travel(lookup(id),{warp,respawn})){traveling=false;getLoadingScreen().hide();world.notice(warp?'วาร์ปไม่สำเร็จ · เบี้ยไม่พอหรือเชื่อมต่อขัดข้อง':'เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return false;}
   }else try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
   getLoadingScreen().stage(1,'กำลังเดินทางไป '+lookup(id).name+'…');
-  location.assign('?server='+(account?.serverId??'server-1')+'&map='+encodeURIComponent(id));
+  location.assign('/game.html?server='+(account?.serverId??'server-1')+'&map='+encodeURIComponent(id));
   return true;
  }
  // 0.59 realistic map: render the real scene straight down once (sprites hidden, no fog) and draw labels over it.
@@ -115,10 +115,10 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   const label=document.createElement('button');label.className='npc-label'+(n.mentorId?' mentor-label':n.citizen?' citizen-label':'');label.textContent=n.mentorId?n.title+' · '+n.name:n.name;label.setAttribute('aria-label','คุยกับ '+n.name);labels.append(label);
   label.onclick=()=>talk(n);return {n,label};
  });
- function talk(n){
+ function talk(n,opts={}){
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
   if(world.player.hp<=0||traveling||n.unavailable)return;
-  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:'npc',npc:n.name,onArrive:()=>talk(n),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
+  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:opts.quest?'quest':'npc',npc:n.name,onArrive:()=>talk(n,opts),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
   endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);api.onConversationOpened?.(n);return;}conversation=n;n.talking=true;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);api.onConversationOpened?.(n);
  }
  const npcSprites=[];scene.traverse(o=>{if(o.isSprite&&o.userData.npc)npcSprites.push(o);});
@@ -184,7 +184,7 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
   guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
   // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
   recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},
-  talkTo:name=>{const n=npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.n;if(n)talk(n);return !!n;},
+  talkTo:(name,opts={})=>{const n=npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.n;if(n)talk(n,opts);return !!n;},
   npcLabel:name=>npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.label??null};
  minimap();return api;
 }

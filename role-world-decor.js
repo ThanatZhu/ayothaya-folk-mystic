@@ -1,6 +1,6 @@
 import * as THREE from './vendor/build/three.module.js';
-import {groundHeight} from './combat-core.js?v=novice174';
-import {createSpiritCompanionVfx} from './spirit-companion-vfx.js?v=live185';
+import {groundHeight} from './combat-core.js?v=surfaces222';
+import {createSpiritCompanionVfx} from './spirit-companion-vfx.js?v=surfaces222';
 import {CHARACTER_WORLD_SCALE} from './character-size.js';
 import {atlasUv} from './assets/skill-polish/timing.js';
 const urls={rooster:'./assets/skill-polish/rooster-dash-v1.png',spirit:'./assets/skill-polish/library/spirit-v1.png'};

@@ -1,7 +1,7 @@
 import {PREMIUM_SHOP_PRODUCTS} from './premium-shop-catalog.js';
 import {normalizePetAccount} from './pet-account.js';
 import {itemDef} from './items.js';
-import {iconStyle} from './bag-ui.js';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 
 const errors={'no-gems':'ทองแท่งไม่พอ','bag-full':'กระเป๋าเต็ม · ยังไม่หักทอง กรุณาจัดช่องว่างก่อน','server-busy':'กำลังบันทึกรายการอื่น กรุณาลองใหม่','not-connected':'เชื่อมต่อเกมออนไลน์ก่อนซื้อสินค้า','rate-limit':'ส่งคำขอเร็วเกินไป รอสักครู่แล้วลองใหม่'};
 export function createPremiumShopPanel({game,dialog}){

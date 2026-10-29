@@ -1,15 +1,16 @@
-import {createAmuletGachaPanel} from './amulet-gacha-ui.js?v=design202';
-import {createPetSummonPanel} from './pet-summon-ui.js?v=design202';
-import {createPremiumShopPanel} from './premium-shop-ui.js?v=stat-reset189';
+import {installJadeSurfaces} from './jade-surfaces222.js?v=surfaces222';
+import {createAmuletGachaPanel} from './amulet-gacha-ui.js?v=surfaces222';
+import {createPetSummonPanel} from './pet-summon-ui.js?v=surfaces222';
+import {createPremiumShopPanel} from './premium-shop-ui.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js';
-import {createGachaRatesHelp} from './gacha-rates-ui.js';
+import {createGachaRatesHelp} from './gacha-rates-ui.js?v=surfaces222';
 import {normalizePetAccount} from './pet-account.js';
 import {GACHA_BANNERS} from './gacha-banners199.js';
 
 const styleLoads=new Map();let artworkReady;
 function loadControlArtwork(){return artworkReady??=Promise.all(['assets/premium-controls202/button-jade.webp','assets/premium-controls202/button-gold.webp',matchMedia('(max-width:600px) and (orientation:portrait)').matches?'assets/gacha-banner199/sanctuary-mobile.webp':'assets/gacha-banner199/sanctuary.webp'].map(src=>new Promise(resolve=>{const image=new Image();image.onload=()=>resolve(true);image.onerror=()=>resolve(false);image.src=src;})));}
-export function loadPremiumStyles(){
- return Promise.all([loadControlArtwork(),...['pet-ui.css?v=premium1','pet-ritual148.css?v=premium1','premium-hub.css?v=menu-icons3','gacha-banner199.css?v=202','pet-companion201.css?v=petbuild220','gacha-motion201.css?v=202','premium-controls202.css?v=1'].map(href=>{
+export function loadPremiumStyles(){installJadeSurfaces();
+ return Promise.all([loadControlArtwork(),...['pet-ui.css?v=premium1','pet-ritual148.css?v=premium1','premium-hub.css?v=surfaces222','gacha-banner199.css?v=surfaces222','pet-companion201.css?v=petbuild220','gacha-motion201.css?v=202','premium-controls202.css?v=1'].map(href=>{
   if(styleLoads.has(href))return styleLoads.get(href);
   const existing=document.querySelector('link[href="'+href+'"]');
   if(existing?.sheet)return Promise.resolve(true);

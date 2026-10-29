@@ -1,5 +1,5 @@
 // Portraits cut from the exact in-game art (monster sheets, class atlases); no substitute artwork.
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {atlasPath} from './classes.js?v=novice174';
 const images=new Map(),metadata=new Map(),portraits=new Map();
 function loadImage(url){if(!images.has(url)){const image=new Image();image.src=url;images.set(url,image.decode().then(()=>image).catch(e=>{images.delete(url);throw e;}));}return images.get(url);}

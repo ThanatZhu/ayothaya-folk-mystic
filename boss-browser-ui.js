@@ -1,10 +1,10 @@
 import {paintedPanels} from './painted-panels.js?v=150';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {MONSTER_BEHAVIOUR} from './monster-catalog.js';
 import {bossEntries,bossCountdown,bossClock} from './boss-directory.js?v=138';
 import {DROPS,itemDef} from './items.js?v=107';
-import {iconStyle} from './bag-ui.js';
-import {createBossResultsUI} from './boss-results-ui.js?v=victory197';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
+import {createBossResultsUI} from './boss-results-ui.js?v=surfaces222';
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;};
 const format=n=>Math.round(n??0).toLocaleString();
 export function createBossBrowserUI({game,catalog,map,worldUI}){

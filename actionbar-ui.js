@@ -1,7 +1,7 @@
 import {mobileHudMedia} from './hud-mode204.js';
 import {ACTION_COLUMNS,ACTION_MAX_ROWS,actionEntry,defaultActionbar,normalizeActionbar,resizeActionbar,actionKey} from './actionbar-state.js';
 import {itemDef} from './items.js?v=107';
-import {iconStyle} from './bag-ui.js?v=107';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {applySkillArt} from './skill-art.js?v=icons117';
 
 export function createActionbar({game,bagUI,account={}}){

@@ -1,12 +1,12 @@
 import {bindStatHold} from './stat-hold.js';
-import {createStatResetUI} from './stat-reset-ui.js';
+import {createStatResetUI} from './stat-reset-ui.js?v=surfaces222';
 import {refineTierBadge} from './refine-tier-ui.js';
 // Status window (สถานะ · C): STR AGI VIT INT DEX LUK with status points, combat numbers, and the three
 // stat-gear slots. Online the server validates and owns everything; offline guests keep it in this browser.
 import {statPath,STATS,STAT_MAX,STAT_LABEL,STAT_HINT,GEAR_SLOTS,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=tier167';
 import {ITEMS,ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=stat-reset189';
 import {baseProgress} from './experience.js?v=105.3';
-import {iconStyle} from './bag-ui.js?v=107';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {createCardSlotUI,cardArt,cardEffectText} from './card-slot-ui.js?v=cards156';
 import {statTip} from './stat-tips.js?v=tips210';
@@ -54,6 +54,7 @@ export function createStatusUI({game,account,bagUI}){
   if(game.online){world.unequipGear?.(slot);return;}
   try{const r=unequipGear(bagUI.bag(),local.gear,slot);local.gear=r.gear;bagUI.setLocal(r.bag);save();applyOffline();render(true);}catch(e){fail(e.message);}
  }
+ bagUI.onReplaceGear=g=>{local.gear=normalizeGear(g);save();applyOffline();render(true);};
  bagUI.onWear=wear;bagUI.gearView=()=>view().gear;bagUI.onTakeOff=takeOff; // 0.83 the bag shows and removes worn gear
 
  const menuButton=document.createElement('button');menuButton.id='menu-status';menuButton.type='button';menuButton.title='สถานะ';menuButton.setAttribute('aria-label','สถานะ');
@@ -114,9 +115,10 @@ export function createStatusUI({game,account,bagUI}){
   const bagItems=bagUI.bag().items??{};
   $('status-gear').innerHTML=GEAR_SLOTS.map(slot=>{const id=v.gear[slot],it=id&&itemDef(id);
    const cards=Object.keys(bagItems).filter(c=>itemDef(c)?.kind==='card'&&itemDef(c).slot===slot);
-   const cardRow=it&&it.slots!==0?(it.card?`<div class="card-equipped">${cardArt(it.card)}<span><strong>${itemDef(it.card).name}</strong><small>${cardEffectText(it.card)}</small></span></div>`:`<span class="card-pick"><button type="button" data-slotcard="${slot}">เลือกการ์ด${cards.length?' · '+cards.length+' ชนิด':''}</button></span>`):'';
+   const cardRow=it&&it.slots!==0?(it.card?`<div class="card-equipped">${cardArt(it.card)}<span><strong>${itemDef(it.card).name}</strong><small>${cardEffectText(it.card)}</small></span><button type="button" data-remove-card="${slot}">ถอดการ์ด</button></div>`:`<span class="card-pick"><button type="button" data-slotcard="${slot}">เลือกการ์ด${cards.length?' · '+cards.length+' ชนิด':''}</button></span>`):'';
    const name=it?.card?it.name.replace(' ['+itemDef(it.card).name+']',''):it?.name;
    return `<li><i class="item-icon" style="${it?iconStyle(id):''}"></i><div><small>${SLOT_LABEL[slot]}</small><strong>${it?name:'— ว่าง —'}</strong>${refineTierBadge(it)}<em>${it?it.text:'แตะอุปกรณ์ในกระเป๋าแล้วกด สวมใส่'}</em>${cardRow}</div>${it?`<button type="button" data-off="${slot}">ถอด</button>`:''}</li>`;}).join('');
+  $('status-gear').querySelectorAll('[data-remove-card]').forEach(b=>b.onclick=()=>bagUI.openCardRemoval(b.dataset.removeCard,b));
   $('status-gear').querySelectorAll('[data-slotcard]').forEach(b=>b.onclick=()=>cardPicker.open(b.dataset.slotcard,b));
   $('status-gear').querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>takeOff(b.dataset.off));
  }

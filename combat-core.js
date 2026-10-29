@@ -1,5 +1,6 @@
 import {normalizeAutoTarget,autoTargetAllows,autoRankAllows} from './auto-targets.js?v=auto202';
 import {skillHit} from './skill-critical.js';
+import {startAttackOrder,stepAttackOrder} from './combat-attack-order221.js?v=surfaces222';
 import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js?v=petbuild220';
 import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=farm213';
 import {patch,monsterKey} from './balance.js';
@@ -289,6 +290,7 @@ export class CombatWorld{
  }
  // 0.68 a point in front of the player (toward `toward` when given): where an attack or skill lands with no target.
  airPoint(range,toward=null){const p=this.player;if(toward){const dx=toward.x-p.x,dz=toward.z-p.z;if(Math.hypot(dx,dz)>.01)p.face={x:dx,z:dz};}const n=Math.hypot(p.face.x,p.face.z)||1;return {x:p.x+p.face.x/n*range,z:p.z+p.face.z/n*range};}
+ requestAttack(){return startAttackOrder(this);}
  basicAttack(quiet=false){
   if(this.roleCombat?.state.pending||this.basicPending||this.legacyPending)return false;
   this.clearEmote();const p=this.player;if(p.hp<=0||p.attackCD>0||held(this.status))return false;
@@ -303,7 +305,7 @@ export class CombatWorld{
  basicHit(m,castId){
   const p=this.player;if(!m||m.hp<=0||p.hp<=0||held(this.status)||reachTo(p,m)>this.profession.range+.35||!lineClear(p,m,this.nav)){this.emit('castCancel',{castId});return;}
   const d=this.derived,crit=!!d&&Math.random()<d.crit,magic=!!d?.magic,t=MONSTER_TYPES[m.type];
-  this.damageContext={castId,hitIndex:0,source:'basic'};
+  this.damageContext={castId,hitIndex:0,source:'basic',crit,magic};
   try{if(d&&!magic&&!m.pvp&&d.hit!=null&&Math.random()>=hitChance(d.hit,monsterFlee(t))){this.emit('miss',{id:m.id,x:m.x,z:m.z});return;}
    this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?d.critMult??CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),crit?'#ffd27a':magic?'#c9a8ff':undefined);
   }finally{this.damageContext=null;}
@@ -359,7 +361,9 @@ export class CombatWorld{
   if(p.hp>0&&p.hp<p.maxHp&&(this.safe||this.calm>6))p.hp=Math.min(p.maxHp,p.hp+Math.max(8,p.maxHp*(this.safe?.04:.01))*dt);
   const ox=p.x,oz=p.z,knocked=this.knockStep(dt),manual=!stop&&!knocked&&Math.hypot(input.x,input.z)>.08;
   if(manual){const n=Math.max(1,Math.hypot(input.x,input.z));moveBody(p,input.x/n*speed*dt,input.z/n*speed*dt,this.nav);p.face={x:input.x,z:input.z};this.path=[];this.manualGrace=.8;}
-  if(input.attack)this.basicAttack(true);
+  if(input.attack&&!manual)this.requestAttack();
+  if(!stop&&!knocked)stepAttackOrder(this,dt,{reachTo,lineClear,walkLineClear,findPath,moveBody},manual);
+  else if(manual)this.attackOrder=null;
   if(this.auto&&!stop&&!knocked&&!manual&&this.manualGrace===0){
    // 0.122 a kind picked in the AUTO window (or a quest hunt) is looked for across the whole map: with the 30 m limit
    // a picked kind living further away left the hero standing among other monsters until AUTO switched off.
@@ -377,7 +381,7 @@ export class CombatWorld{
     // 0.90 AUTO casts the skills ticked in the skill window when they are ready and in reach (one try every 0.5 s).
     this.autoCast=Math.max(0,this.autoCast-dt);
     if(this.autoCast===0&&!this.basicPending&&!this.legacyPending&&lineClear(p,m,this.nav)){this.roleGround=null;const i=this.roleCombat&&!this.roleCombat.legacy?this.roleCombat.autoIndex(this.autoConfig):pickAutoSkill(this,this.autoConfig,scaledSkill);if(i>=0&&this.skill(i)){this.autoCast=.5;advanceAutoSequence(this,this.autoConfig,i);}}
-    const attackReach=this.autoConfig.rotation==='sequence'?Math.min(this.profession.range,this.autoSkillReach??Infinity):this.profession.range;
+    const attackReach=Math.min(this.profession.range,this.autoSkillReach??Infinity);
     if(reachTo(p,m)<=attackReach-.1&&lineClear(p,m,this.nav)){this.path=[];this.basicAttack(true);}
     else{
      // 0.99.11 open ground (nothing between us): walk straight at it and skip the grid search, which is the costly part

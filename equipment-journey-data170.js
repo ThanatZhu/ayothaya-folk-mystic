@@ -1,7 +1,7 @@
 import {ITEMS,DROPS,SHOPS,itemDef} from './items.js?v=tier167';
 import {WEAPON_CLASSES,FAMILIES,LOOKS,TIERS,STARTER,GRADES as GEAR_GRADES,gearLook,weaponId,pieceId,bossId,familyName} from './gear-sets.js';
 import {RECIPES} from './crafting.js?v=107';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {STORY,STARTER_WEAPON} from './story-quests.js';
 import {WORLD_MAP_BOSSES} from './chapter2-monsters.js';
 import {REFINE_MAX,REFINE_TIERS} from './refine-tiers.js';

@@ -1,12 +1,13 @@
+import{rankedRound}from'./helpers/ranked223.mjs';import{ARENA_MAP}from'../server/arena-rooms166.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 import {ARENA,arenaWeek} from '../arena.js';
 import {isRankingExcluded} from '../server/ranking-eligibility197.js';
-const map={id:'f',safe:false,nav:{zones:[{x:-40,z:-40,w:80,d:80}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[]};
+const map={id:'f',safe:true,nav:{zones:[{x:-40,z:-40,w:80,d:80}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[]};
 const names=['PowerRanger','Chok fag web web','ThanatZhu','Chok teohman'];
-function fixture(){let now=Date.UTC(2026,9,19,12);const realm=new RealmServer({catalog:{capital:'f',maps:[map]},now:()=>now});
+function fixture(){let now=Date.UTC(2026,9,19,12);const realm=new RealmServer({catalog:{capital:'f',maps:[map,{...map,id:ARENA_MAP,safe:false}]},now:()=>now});
  const join=(uid,name,slot='slot-1')=>realm.join({uid,serverId:'server-1',slotId:slot,record:{character:{name,gender:'male',classId:'swordsman'},state:initialSave(),bag:{coins:0,items:{}}},send(){}});
  return {realm,join,advance:ms=>now+=ms};
 }
@@ -51,7 +52,7 @@ test('staff bouts cannot award either side tournament points; real players still
  const {realm,join}=fixture(),s=join('s','ThanatZhu'),a=join('a','Alice'),b=join('b','Bob');
  realm.arenaScore(s,a,false);realm.arenaScore(a,s,false);realm.arenaScore(s,a,true);assert.equal(realm.arenaView(a).rows.length,0);
  s.character.name='TesterRenamed';realm.rank(s);realm.arenaScore(a,s,false);assert.equal(realm.arenaView(a).rows.length,0);
- realm.arenaScore(a,b,false);assert.equal(realm.arenaView(a).me.points,ARENA.win);
+ const match=rankedRound(realm,a,b);assert.equal(realm.arenaView(match.a).me.points,ARENA.win);
 });
 test('weekly payouts skip staff and promote eligible players, including persisted staff prizes',()=>{
  const {realm,join,advance}=fixture(),s=join('s','Chok teohman'),a=join('a','Alice'),b=join('b','Bob'),arena=realm.arena('server-1');

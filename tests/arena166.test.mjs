@@ -19,7 +19,7 @@ test('lobby membership, realm isolation, 2-seat capacity and private instances a
  a=enter(a);b=enter(b);c=enter(c);d=enter(d);assert.equal(a.room,b.room);assert.equal(c.room,d.room);assert.notEqual(a.room,c.room);assert.equal(a.world.mobs.length,0);assert.equal(a.world.player.x,-5);assert.equal(b.world.player.x,5);
  assert.equal(r.receive(a.id,{type:'duel',seq:1,target:b.id}),false);assert.equal(a.duel,undefined);
  arenaCommand(r,a,{action:'ready'});assert.equal(a.duel,undefined);arenaCommand(r,b,{action:'ready'});assert.equal(a.duel.foe,b.id);assert.equal(c.duel,undefined);
- r.hurt(a,a.world.foe,1e6);assert.equal(b.world.player.hp,1);assert.equal(a.duel,null);assert.match(arenaReservation(r,a.key).result,/Alice/);
+ const random=Math.random;try{Math.random=()=>.99;r.hurt(a,a.world.foe,1e6);}finally{Math.random=random;}assert.equal(b.world.player.hp,1);assert.equal(a.duel,null);assert.match(arenaReservation(r,a.key).result,/Alice/);
  arenaCommand(r,a,{action:'ready'});arenaCommand(r,b,{action:'ready'});assert.ok(a.duel);r.travelDestination(b,'ayutthaya');assert.equal(a.duel,null);r.leave(b.id,{travel:true});assert.equal(arenaReservation(r,a.key).members.length,1);assert.throws(()=>arenaCommand(r,a,{action:'ready'}),/arena-not-ready/);
 });
 test('pending seats expire, disconnected seats clean up, restart returns stranded players to capital',()=>{

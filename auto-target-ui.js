@@ -1,9 +1,9 @@
 import {mobileHudScale208} from './mobile-hud-scale208.js';
 import {mobileHudMedia} from './hud-mode204.js';
-import {MONSTER_TYPES} from './combat-core.js?v=auto202';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {normalizeAutoTarget,autoMonsterRank} from './auto-targets.js?v=auto202';
 import {openHudPanel} from './hud-panels.js?v=auto207';
-import {monsterPortrait,classPortrait} from './portraits.js?v=at1';
+import {monsterPortrait,classPortrait} from './portraits.js?v=surfaces222';
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;};
 export function createAutoTargetUI({game}){
  if(!document.querySelector('[data-auto-target202]')){const css=el('link');css.rel='stylesheet';css.href='./auto-target202.css?v=auto207';css.dataset.autoTarget202='';document.head.append(css);}

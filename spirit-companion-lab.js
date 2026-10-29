@@ -1,9 +1,9 @@
 import * as THREE from './vendor/build/three.module.js';
-import {CombatWorld} from './combat-core.js?v=spirit182';
+import {CombatWorld} from './combat-core.js?v=surfaces222';
 import {createRiggedSprite} from './rigged-sprite.js?v=novice174';
 import {characterMotion} from './character-motion.js?v=novice174';
 import {skillPose,skillTrack} from './skill-choreography.js?v=novice174';
-import {createSpiritCompanionVfx} from './spirit-companion-vfx.js?v=live185';
+import {createSpiritCompanionVfx} from './spirit-companion-vfx.js?v=surfaces222';
 
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion:reduce)'),stage=$('stage');
 const nav={zones:[{x:-18,z:-16,w:36,d:32}],obstacles:[],props:[]};

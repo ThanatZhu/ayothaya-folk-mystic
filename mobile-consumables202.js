@@ -2,7 +2,7 @@ import {mobileHudScale208} from './mobile-hud-scale208.js';
 // Mobile quick-use buttons, placed below the right menu as approved by the owner.
 import {consumableChoices,consumableCategory} from './rapid-consumables202.js';
 import {itemDef} from './items.js?v=class-reward192';
-import {iconStyle} from './bag-ui.js?v=class-reward192';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 const labels={hp:'HP',mp:'MP',cure:'แก้สถานะ'},categories=Object.keys(labels);
 export function createMobileConsumables202({game,bag=()=>game.world.bag,use=id=>game.world.useItem?.(id),placement='top-right',storageKey=null}){
  const css=document.createElement('link');css.rel='stylesheet';css.href='./mobile-consumables202.css?v=potion206';document.head.append(css);

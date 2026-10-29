@@ -10,7 +10,7 @@ import {previewPose} from './sprite-motion.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=login158';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
-import {createRealmStore} from './realm-store.js?v=114';
+import {createRealmStore} from './realm-store.js?v=surfaces222';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
 import {ensureConsent} from './consent.js?v=1';
 wakeServer();

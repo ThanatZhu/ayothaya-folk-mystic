@@ -1,10 +1,10 @@
-import {presentAmuletBanner} from './gacha-presentation199.js?v=202';
+import {presentAmuletBanner} from './gacha-presentation199.js?v=surfaces222';
 import {AMULETS,AMULET_TIERS,AMULET_MATERIALS,AMULET_PRICE,AMULET_PITY,AMULET_REWARDS,amuletArt,amuletAtTier} from './amulets.js';
 import {normalizePetAccount} from './pet-account.js';
 import {itemDef} from './items.js';
-import {iconStyle,gradeFrame} from './bag-ui.js?v=amulet-aura1';
-import {createAmuletRitual} from './amulet-ritual-ui.js?v=design202';
-import {createGachaRatesHelp} from './gacha-rates-ui.js';
+import {iconStyle,gradeFrame} from './bag-ui.js?v=surfaces222';
+import {createAmuletRitual} from './amulet-ritual-ui.js?v=surfaces222';
+import {createGachaRatesHelp} from './gacha-rates-ui.js?v=surfaces222';
 
 const errors={'no-gems':'ทองแท่งไม่พอ','bag-full':'กระเป๋าหรือกองไอเท็มเต็ม · ยังไม่หักทอง กรุณาจัดกระเป๋าก่อน',
  'not-connected':'เชื่อมต่อออนไลน์ก่อนสุ่มพระเครื่อง','server-busy':'เซิร์ฟเวอร์กำลังบันทึก ลองอีกครั้งด้วยคำขอเดิม',

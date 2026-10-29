@@ -6,7 +6,7 @@ import {CLASSES,NOVICE,getClass,className,classSkills} from './classes.js?v=novi
 import {DIRECTIONS,loadDirectionalArt} from './directional-sprite.js?v=63';
 import {createDirectionalActor} from './directional-actor.js?v=63';
 import {stableViewDirection} from './directional-motion.js';
-import {SKILLS,screenDirection,groundHeight} from './combat-core.js?v=novice174';
+import {SKILLS,screenDirection,groundHeight} from './combat-core.js?v=surfaces222';
 import {attackDuration} from './character-motion.js?v=novice174';
 import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
 import {createSkillEffects} from './skill-effects.js?v=novice174';

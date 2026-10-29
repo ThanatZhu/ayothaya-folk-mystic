@@ -3,7 +3,7 @@ import {normalizeEquipment} from './equipment.js?v=41';
 import {trainingAction} from './city-life-data.js?v=98';
 import {CLASS_LEVEL,progression,validateJob,advanceReady} from './advancement.js?v=73';
 import {CHARACTER_SLOTS,isSlot,guestKey,isServer,character,initialSave,validateRecord} from './realm-state.js?v=62';
-import {validateSave,nextRevision} from './save-state.js?v=101.5';
+import {validateSave,nextRevision} from './save-state.js?v=surfaces222';
 import {multiplayerURL} from './multiplayer-config.js?v=28';
 
 export function validateCharacterChange(before,after,state){

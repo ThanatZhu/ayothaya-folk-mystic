@@ -1,4 +1,4 @@
-import {createAmuletGachaPanel} from './amulet-gacha-ui.js';
+import {createAmuletGachaPanel} from './amulet-gacha-ui.js?v=surfaces222';
 import {drawAmulets} from './amulet-gacha.js';
 import {normalizePetAccount} from './pet-account.js';
 import {publicPetAccount} from './pet-account.js';

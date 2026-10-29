@@ -1,5 +1,5 @@
 import * as THREE from './vendor/build/three.module.js';
-import {groundHeight} from './combat-core.js?v=novice174';
+import {groundHeight} from './combat-core.js?v=surfaces222';
 
 const clamp=v=>Math.max(0,Math.min(1,v)),smooth=v=>{v=clamp(v);return v*v*(3-2*v);},mix=(a,b,t)=>a+(b-a)*t;
 const jade='#72ffe2',gold='#e7c47a';

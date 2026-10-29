@@ -4,7 +4,7 @@ import {createQuestCinematics} from './quest-cinematic155.js?v=rebirth199';
 // only sends questTalk and shows world.story from snapshots. Offline guests keep progress in this browser.
 import {currentObjective,storyEvent,retiredStory,normalizeStory,normalizeRebirthStory,nextHop,rewardItems,STARTER_WEAPON,farmMapFor} from './story-quests.js?v=farm211';
 import {createCoach} from './coach.js?v=weapon188';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {awardExperience,baseProgress} from './experience.js?v=105.3';
 import {storyReady} from './story-navigation173.js';
 
@@ -127,7 +127,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   if(farm){
    const here=farm.id===map.id;
    $('quest-chapter').textContent='แนะนำแมพฟาร์ม · Lv.'+baseLevel();$('quest-title').textContent=farm.name+' · Lv.'+farm.levels[0]+'–'+farm.levels[1];
-   $('quest-hint').textContent=here?'คุณอยู่ในแมพที่เหมาะกับเลเวลแล้ว':'แมพที่เหมาะกับเลเวลของคุณตอนนี้';
+   $('quest-hint').textContent=here?'ฟาร์มวัสดุ → คราฟต์ → ล่าบอส → อัปของ':'แมพที่เหมาะกับเลเวลของคุณตอนนี้';
    $('quest-how').textContent=here?'กดเพื่อเดินไปหามอนแล้วเปิด AUTO':'กดเพื่อเดินไปเอง ถึงแล้วเปิด AUTO ให้';$('quest-how').hidden=false;
    $('quest-go').hidden=false;$('quest-go').textContent=game.walking&&walking?'■ หยุด':here?'▶ ฟาร์มเลย':'▶ เดินไป';
    worldUI.npcLabel(markedNpc)?.classList.remove('quest-npc');markedNpc=null;return;
@@ -278,7 +278,7 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
    if(map.safe){travel();return;}
    game.walkTo({x:portal.x,z:portal.z},{radius:1.2,kind:'quest',onArrive:travel,onFail:()=>{done();world.notice('เดินไปจุดเดินทางไม่ได้');}});
   }else if(s.type==='talk'||s.type==='do'){
-   if(!worldUI.talkTo(s.npc))world.notice('ไม่พบ '+s.npc+' ในแผนที่นี้');
+   if(!worldUI.talkTo(s.npc,{quest:true}))world.notice('ไม่พบ '+s.npc+' ในแผนที่นี้');
    walking=game.walking;
   }else if(s.type==='defeat'){
    const index=MONSTER_TYPES.findIndex(t=>t.id===s.monster);

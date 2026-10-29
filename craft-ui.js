@@ -1,8 +1,8 @@
 // Crafting authority stays with the realm; this window only previews and sends a request.
 import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=amulet-craft193';
 import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=amulet-craft193';
-import {craftRecipes,craftQuote,craftSources,craftRecipeLabel} from './craft-view176.js?v=amulet-craft193';
-import {iconStyle} from './bag-ui.js?v=107';
+import {craftRecipes,craftQuote,craftSources,craftRecipeLabel} from './craft-view176.js?v=surfaces222';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {recipeAllowed} from './weapon-crafting.js';
 import {GRADES} from './gear-sets.js';

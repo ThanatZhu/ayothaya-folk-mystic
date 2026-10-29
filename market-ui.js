@@ -2,7 +2,7 @@
 // Online every move is a realm-server command; offline only storage works (kept in localStorage beside the bag).
 import {ITEM_ERRORS,itemDef} from './items.js?v=107';
 import {STORAGE_NPC,STORAGE_SLOTS,STALL_MAX,TRADABLE,normalizeStorage,moveOffer} from './market.js?v=107';
-import {iconStyle} from './bag-ui.js?v=107';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
 
 const $=id=>document.getElementById(id);

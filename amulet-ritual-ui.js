@@ -1,7 +1,7 @@
 import {GACHA_MOTION,createRitualFocus} from './gacha-motion201.js';
 import {amuletRevealBatch,revealAmulet,revealAllAmulets,amuletRevealComplete,amuletRevealTier} from './amulet-ritual-state.js';
 import {itemDef} from './items.js';
-import {iconStyle} from './bag-ui.js?v=amulet-aura1';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 const ART='assets/gacha-neutral/';
 
 export function createAmuletRitual({root,dialog,onDone}){

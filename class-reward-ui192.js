@@ -2,7 +2,7 @@ import {FAMILIES,setLines} from './gear-sets.js';
 import {itemDef} from './items.js?v=class-reward192';
 import {CLASS_REWARD_BOX,REWARD_BOX_TIER,familySetItemIds} from './class-reward-items192.js?v=farm211';
 import {TIERS} from './gear-sets.js';
-import {iconStyle} from './bag-ui.js?v=mailfull198';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {paintedPanels} from './painted-panels.js';
 
 const tips={pierce:'เจาะเกราะสำหรับรับมือศัตรูป้องกันสูง',exec:'เน้นโอกาสคริติคอลและความแรงคริติคอล',mantra:'ลดคูลดาวน์และประหยัด MP',wall:'เพิ่มความอึดและลดความเสียหาย',wind:'โจมตีและเคลื่อนที่คล่องตัว'};

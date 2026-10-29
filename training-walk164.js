@@ -1,5 +1,5 @@
-import {trainingMapPaths} from './training-targets164.js';
-import {nearestWalkable,planRoute} from './route-walk.js?v=run153';
+import {trainingMapPaths} from './training-targets164.js?v=surfaces222';
+import {nearestWalkable,planRoute} from './route-walk.js?v=surfaces222';
 
 // Use ordinary, server-authoritative walking and free map gates. A scoped, short-lived
 // continuation carries only the objective across a map load, never coordinates or rewards.

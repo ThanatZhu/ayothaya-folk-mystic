@@ -1,4 +1,4 @@
-import {ITEMS,CLASSES,SLOTS,GRADES,FAMILIES,familyName,CHAPTERS,REFINE_MAX,REFINE_TIERS,WORLD_MAP_BOSSES,levelChapter,cardSlots,featuredGear,bossGear,chapterGear,itemEffects,createItemGuide,searchItems} from './equipment-journey-data170.js?v=117';
+import {ITEMS,CLASSES,SLOTS,GRADES,FAMILIES,familyName,CHAPTERS,REFINE_MAX,REFINE_TIERS,WORLD_MAP_BOSSES,levelChapter,cardSlots,featuredGear,bossGear,chapterGear,itemEffects,createItemGuide,searchItems} from './equipment-journey-data170.js?v=surfaces222';
 import {itemDef,ATLASES,ITEM_ATLAS,ATLAS_LAYOUTS} from './items.js?v=tier167';
 const $=id=>document.getElementById(id),node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!=null)el.textContent=text;return el;};
 const params=new URLSearchParams(location.search),selected=CLASSES.find(c=>c.id===params.get('class'))?.id??'swordsman';

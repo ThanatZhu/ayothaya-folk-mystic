@@ -1,10 +1,10 @@
 import {GACHA_MOTION,createRitualFocus} from './gacha-motion201.js';
-import {presentPetBanner} from './gacha-presentation199.js?v=202';
+import {presentPetBanner} from './gacha-presentation199.js?v=surfaces222';
 import {petAtStars} from './premium-pets.js';
 import {normalizePetAccount} from './pet-account.js';
 import {PET_PRICE,PET_PITY} from './pet-gacha.js';
 import {summonBatch,openSummonEgg,openAllSummonEggs,allSummonEggsOpen,summonTier} from './pet-summon-state.js?v=ritual148';
-import {createGachaRatesHelp} from './gacha-rates-ui.js';
+import {createGachaRatesHelp} from './gacha-rates-ui.js?v=surfaces222';
 const ART='assets/summon147/';
 const errors={'no-gems':'ทองแท่งไม่พอ','pet-not-owned':'ยังไม่มีสัตว์เลี้ยงตัวนี้','max-stars':'ถึง 5 ดาวแล้ว','not-enough-copies':'ตัวซ้ำยังไม่ครบ','not-connected':'ต้องเชื่อมต่อออนไลน์ก่อน','server-busy':'เซิร์ฟเวอร์กำลังบันทึก กรุณาลองอีกครั้ง'};
 export function createPetSummonPanel({game,parent,dialog,ratesHelp=true,presentation='standard'}){

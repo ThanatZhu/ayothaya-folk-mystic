@@ -1,7 +1,7 @@
 // Presentation rules share the real recipes and atomic crafting validation.
 import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=amulet-craft193';
 import {ITEMS,DROPS,SHOPS,normalizeBag,itemDef} from './items.js?v=amulet-craft193';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {CONQUEST_SHARD} from './rainbow-crafting.js';
 import {recipeAllowed,WEAPON_COLOURS} from './weapon-crafting.js';
 export const craftRecipeLabel=r=>itemDef(r.out).name+(r.weaponGrade!=null?' · '+WEAPON_COLOURS[r.weaponGrade]:'');

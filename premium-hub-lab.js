@@ -1,4 +1,4 @@
-import {createPremiumHub,premiumDialog} from './premium-hub-ui.js?v=petbuild220';
+import {createPremiumHub,premiumDialog} from './premium-hub-ui.js?v=surfaces222';
 import {createPremiumPetPanel} from './pet-collection-ui.js?v=petbuild220';
 import {buyPremiumItem} from './premium-shop-action.js';
 import {drawAmulets} from './amulet-gacha.js';

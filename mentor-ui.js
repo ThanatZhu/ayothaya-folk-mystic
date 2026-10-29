@@ -4,8 +4,8 @@ import {paintNPCPortrait} from './npc-portrait155.js?v=chuk175';
 import {trainingStatus,mentorById,trialItemsShort,MASTER_COURT,TRIAL} from './city-life-data.js?v=98';
 import {advanceReady} from './advancement.js?v=73';
 import {itemDef} from './items.js?v=107';
-import {trainingMonsterSources,trainingNextGoal,trainingGoalKey} from './training-targets164.js';
-import {createTrainingWalk} from './training-walk164.js';
+import {trainingMonsterSources,trainingNextGoal,trainingGoalKey} from './training-targets164.js?v=surfaces222';
+import {createTrainingWalk} from './training-walk164.js?v=surfaces222';
 // 0.98 the three parts of a trial (hunt · boss · materials); online the server checks the last two.
 const trialLines=(s,bag,online)=>{const t=s.trial,items=bag?.items??{};return ['มอนสเตอร์ '+s.progress+'/'+s.target,...(online?[(s.bossDone?'✔ ':'✘ ')+'ล้ม'+t.bossName,...t.items.map(([id,n])=>((items[id]??0)>=n?'✔ ':'✘ ')+itemDef(id).name+' '+Math.min(items[id]??0,n)+'/'+n),((bag?.coins??0)>=t.coins?'✔ ':'✘ ')+t.coins.toLocaleString('th-TH')+' เบี้ย']:[])];};
 const trialReady=(s,bag,online)=>s.own&&s.progress>=s.target&&(!online||s.bossDone&&!trialItemsShort(bag,s.trial).length);

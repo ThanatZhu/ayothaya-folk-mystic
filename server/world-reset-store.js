@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 
 const RUNTIME=['mailAnnouncements','mapBossTimers','dashboardLogs'];
-const SHARED=['multiplayerGuilds','multiplayerShops','multiplayerLeaders','multiplayerPrices','multiplayerLeases'];
+const SHARED=['multiplayerAuctions','multiplayerGuilds','multiplayerShops','multiplayerLeaders','multiplayerPrices','multiplayerLeases'];
 const LOCAL_FILES={'guilds.json':[],'shops.json':[],'leaders.json':{},'prices.json':{},'mail-announcements.json':[],'map-bosses.json':[],'dashboard-logs.json':[]};
 const active=s=>s&&s.status!=='completed';
 const jobId=id=>{if(!/^[a-f0-9-]{36}$/.test(id))throw Error('reset-id');return id;};
@@ -28,6 +28,7 @@ export class LocalResetStore{
  async mark(job){await atomic(this.stateFile,job);return job;}
  async inventory(){
   await this.store.queue;const docs=[...this.store.rows].map(([uid,data])=>({path:'localProfiles/'+uid,data:copy(data)}));
+  if(Object.keys(this.store.auctions??{}).length)docs.push({path:'localRuntime/auctions223',data:copy(this.store.auctions)});
   for(const name of Object.keys(LOCAL_FILES)){const data=await json(path.join(this.store.directory,name),null);if(data&&Object.keys(data).length)docs.push({path:'localRuntime/'+name,data});}
   return docs;
  }
@@ -40,7 +41,7 @@ export class LocalResetStore{
  async remove(job,docs){
   const backup=await json(path.join(this.store.directory,'reset-backups',jobId(job.id)+'.json'),null);
   if(!backup||docs.some(d=>!(d.path in backup.documents)))throw Error('reset-backup-missing');
-  for(const d of docs){const [type,id]=d.path.split('/');if(type==='localProfiles')this.store.rows.delete(id);else if(type==='localRuntime'&&id in LOCAL_FILES)await atomic(path.join(this.store.directory,id),LOCAL_FILES[id]);else throw Error('reset-target');}
+  for(const d of docs){const [type,id]=d.path.split('/');if(type==='localProfiles')this.store.rows.delete(id);else if(type==='localRuntime'&&id==='auctions223')this.store.auctions={};else if(type==='localRuntime'&&id in LOCAL_FILES)await atomic(path.join(this.store.directory,id),LOCAL_FILES[id]);else throw Error('reset-target');}
   this.store.leases.clear();await this.store.flush();
  }
 }

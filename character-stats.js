@@ -132,7 +132,7 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
   sets:sets.active,
  };
 }
-// Slot a card into a worn piece (permanent, like Ragnarok). The card leaves the bag.
+// Slot a card into a worn piece. The card leaves the bag; paid extraction returns the full card.
 export function insertCard(bag,gear,slot,cardId){
  const b=normalizeBag(bag),g=normalizeGear(gear),card=ITEMS[cardId],worn=g[slot]&&itemDef(g[slot]);
  if(card?.kind!=='card')throw new Error('not-card');if(!worn)throw new Error('slot-empty');

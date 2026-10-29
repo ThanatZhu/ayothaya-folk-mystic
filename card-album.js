@@ -1,5 +1,5 @@
 // Deposits are distinct from the old automatically recorded discovery list.
-import {ALBUM_CARDS,ALBUM_MILESTONES,normalizeAlbum} from './bounty.js?v=107';
+import {ALBUM_CARDS,ALBUM_MILESTONES,normalizeAlbum} from './bounty.js?v=surfaces222';
 import {normalizeBag,addLoot,MAX_COINS} from './items.js?v=107';
 
 export const ALBUM_ERRORS={

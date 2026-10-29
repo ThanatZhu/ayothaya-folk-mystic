@@ -23,3 +23,10 @@ Read docs/ground-loot219.md before changing drops, AUTO collection or companion 
 ## S companion build rule (30 October 2026)
 
 Read docs/pet-stat-build220.md before changing S pet bonuses. Keep player-chosen primary/secondary/support stats character-wide, preserve each star rank’s total bonus and pet-specific skills, and keep server-owned durable/idempotent saves. Never replace this with class-locked presets. Ground collection remains independent of combat AUTO.
+
+## Illustrated window surfaces (owner requirement, 30 October 2026)
+
+Read docs/ui-surfaces222.md before adding or changing window backgrounds. Use the generated jade surfaces; preserve gold frame edges and transparent corners, remove the old dark center fill, and keep cover sizing without pattern repetition. Inspect actual desktop and phone screenshots after images load.
+
+## Frontend update continuity (223)
+Never auto-reload on release discovery. Preserve active WebSockets and retained runtime/asset URLs. Follow docs/releases223.md: choose a new release ID, commit source/assets, freeze, commit archives, then build and push. Never edit archived files or publish modified runtime under an old ID. Backend container replacement is separate and cannot be described as zero-disconnect without hosting evidence. Premium benefits and profanity filtering remain deferred by the owner.

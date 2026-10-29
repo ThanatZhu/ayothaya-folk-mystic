@@ -1,6 +1,6 @@
 // Ground rewards are transient room state. Inventory changes happen only after an authority-owned pickup.
-import {nearestWalkable,planRoute} from './route-walk.js';
-import {walkLineClear} from './combat-core.js';
+import {nearestWalkable,planRoute} from './route-walk.js?v=surfaces222';
+import {walkLineClear} from './combat-core.js?v=surfaces222';
 export const GROUND_LOOT=Object.freeze({priority:8,lifetime:90,manualReach:1.8,petRange:12,petSpeed:6,petReach:.55,maxDrops:512,viewRange:40});
 export const GROUND_PICKUP_ERRORS={gone:'ของชิ้นนี้ถูกเก็บหรือหายไปแล้ว',unavailable:'ยังเก็บของตอนนี้ไม่ได้',busy:'กำลังทำรายการ · ลองเก็บอีกครั้ง',reserved:'ผู้ฆ่าและปาร์ตี้มีสิทธิ์เก็บก่อน',far:'เดินเข้าใกล้ของก่อนเก็บ'};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);

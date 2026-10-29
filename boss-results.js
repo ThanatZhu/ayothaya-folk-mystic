@@ -18,8 +18,8 @@ export function recordBossDamage(room,mob,peer,amount,time,party=null){
  }
  group.members.get(key).damage+=amount;
 }
-export function finishBossDamage(room,mob,type,time){
- const fight=room.damageEncounters?.get(mob.id);room.damageEncounters?.delete(mob.id);if(!fight)return null;
+export function snapshotBossDamage(room,mob,type,time){
+ const fight=room.damageEncounters?.get(mob.id);if(!fight)return null;
  const duration=Math.max(.05,time-fight.started),total=[...fight.rows.values()].reduce((n,r)=>n+r.damage,0);
  const publicRows=entries=>[...entries].sort((a,b)=>b[1].damage-a[1].damage||a[1].order-b[1].order).map(([key,r],i)=>{
   const who=fight.people.get(key);return {rank:i+1,...who,damage:r.damage,share:total?r.damage/total:0,dps:Math.round(r.damage/duration),connected:room.peers.has(who.id)};
@@ -28,8 +28,10 @@ export function finishBossDamage(room,mob,type,time){
   const members=publicRows(g.members),damage=members.reduce((n,r)=>n+r.damage,0);
   return {id:'group-'+g.order,kind:g.partyId?'party':'solo',partyId:g.partyId,leaderName:g.partyId?g.leaderName:null,name:g.partyId?'ปาร์ตี้ของ '+g.leaderName:members[0].name,damage,share:total?damage/total:0,dps:Math.round(damage/duration),members,order:g.order};
  }).sort((a,b)=>b.damage-a.damage||a.order-b.order).map(({order,...g},i)=>({...g,rank:i+1}));
- return {type:'bossResult',groupSchema:1,encounterId:room.id+':'+mob.id+':'+fight.started,bossId:type.id,bossName:type.name,mapId:room.map.id,mapName:room.map.name,channel:room.channel??1,duration,total,rows,groups};
+ return {type:'bossResult',groupSchema:1,encounterId:fight.publicId??=crypto.randomUUID(),bossId:type.id,bossName:type.name,mapId:room.map.id,mapName:room.map.name,channel:room.channel??1,duration,total,rows,groups};
 }
+
+export function finishBossDamage(room,mob,type,time){const view=snapshotBossDamage(room,mob,type,time);room.damageEncounters?.delete(mob.id);return view;}
 
 // Old reports remain readable while the frontend/backend versions roll over.
 export function bossResultGroups(result){

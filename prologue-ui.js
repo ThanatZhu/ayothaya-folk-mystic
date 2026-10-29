@@ -2,7 +2,7 @@
 // teacher's seven paths inside the NPC conversation, keeps the objective in the quest tracker, and walks the player home.
 // The realm owns every step (server/prologue-realm.js); this file only shows them and reports what was watched.
 import {PROLOGUE_MAP,PROLOGUE_SCENES,TEACHER,TRIAL_CLASSES,OBJECTIVES,TERRACE,PROLOGUE_BOSS,dueScene,inTrial} from './prologue.js?v=2';
-import {classPortrait} from './portraits.js?v=at1';
+import {classPortrait} from './portraits.js?v=surfaces222';
 import {getClass} from './classes.js?v=novice174';
 
 const HINTS={

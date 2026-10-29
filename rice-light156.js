@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import {groundHeight} from './combat-core.js?v=novice174';
-import {stabilizeBillboardLighting} from './world-lighting159.js?v=shadow160';
+import {groundHeight} from './combat-core.js?v=surfaces222';
+import {stabilizeBillboardLighting} from './world-lighting159.js?v=surfaces222';
 
 // Only horizontal receiver layers are excluded: every raised prop, leaf,
 // flower, reed and blade casts. Water/terrain must not shadow the entire map.

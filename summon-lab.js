@@ -1,4 +1,4 @@
-import {createPetSummonPanel} from './pet-summon-ui.js';
+import {createPetSummonPanel} from './pet-summon-ui.js?v=surfaces222';
 import {petAccountAction,normalizePetAccount} from './pet-account.js';
 import {PREMIUM_PETS} from './premium-pets.js';
 const dialog=document.getElementById('pet-window'),game={world:{petCollection:normalizePetAccount(null)}};let sequence=0;

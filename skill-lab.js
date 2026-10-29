@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {CLASSES,NOVICE,atlasPath,classSkills,className} from './classes.js?v=novice174';
-import {SKILLS} from './combat-core.js?v=novice174';
+import {SKILLS} from './combat-core.js?v=surfaces222';
 import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
 import {createRiggedSprite} from './rigged-sprite.js?v=pose119';
 import {createSkillEffects} from './skill-effects.js?v=novice174';

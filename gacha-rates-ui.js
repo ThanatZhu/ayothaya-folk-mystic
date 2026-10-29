@@ -1,6 +1,6 @@
 import {gachaRateInfo,gachaRatePercent as percent} from './gacha-rate-info.js';
 import {normalizePetAccount} from './pet-account.js';
-import {iconStyle} from './bag-ui.js';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 
 export function createGachaRatesHelp({dialog,game,getCategory=()=> 'amulets'}){
  if(!document.querySelector('link[data-gacha-rates]')){const link=document.createElement('link');link.rel='stylesheet';link.href='gacha-rates.css?v=1';link.dataset.gachaRates='';document.head.append(link);}

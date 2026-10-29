@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {CITIZEN_STYLES} from './city-life-data.js?v=98';
 import {createCitizenMotion,stepCitizenMotion} from './citizen-motion.js?v=42.1';
-import {groundHeight} from './combat-core.js?v=novice174';
+import {groundHeight} from './combat-core.js?v=surfaces222';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {citizenBodyHeight} from './npc-size.js?v=size1';
 import {lazyFrames} from './character-life-art.js?v=106.0';

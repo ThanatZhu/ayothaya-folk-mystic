@@ -1,7 +1,7 @@
 import {AMULETS,AMULET_TIERS,AMULET_PITY,amuletAtTier} from './amulets.js';
 import {PREMIUM_PETS,petAtStars} from './premium-pets.js';
 import {itemDef} from './items.js';
-import {iconStyle} from './bag-ui.js';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {createGachaOverlay,createGachaHistory} from './gacha-overlay199.js?v=202';
 const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text)n.textContent=text;return n;};
 export function presentAmuletBanner({root,dialog,onTier}){

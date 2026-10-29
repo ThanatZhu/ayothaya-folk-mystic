@@ -30,7 +30,7 @@ test('detailed handbook covers live systems and distinguishes preview rewards',(
  const articles=book.trim().split(/\n@/);assert.ok(articles.length>=30);assert.ok(book.length>22000);
  const ids=articles.map(s=>s.replace(/^@/,'').split('|')[0]);assert.equal(new Set(ids).size,ids.length);
  for(const id of ['account','masters','refine','cards','album','gacha','quests','bosses','party','war','arena','rebirth','mail','events','faq'])assert.ok(ids.includes(id),id);
- assert.match(book,/ต้องฝาก|กดฝาก/);assert.match(book,/200 ฉบับ/);assert.match(book,/ยังไม่เปิด ranked queue/);assert.match(book,/ยังไม่กำหนดวันสิ้นสุด/);
+ assert.match(book,/ต้องฝาก|กดฝาก/);assert.match(book,/200 ฉบับ/);assert.match(book,/ระบบจับคู่เปิดใช้งานแล้ว/);assert.match(book,/ยังไม่กำหนดวันสิ้นสุด/);
  assert.equal(data.rules.cbt.claimEnabled,false);assert.equal(data.rules.cbt.rankedQueueEnabled,false);
  for(const s of data.skills)assert.equal(s.max,s.passive?3:5); // 0.119 ranks
 });

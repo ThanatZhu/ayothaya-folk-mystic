@@ -1,4 +1,5 @@
-import {cp,mkdir,readdir,lstat,rm,stat} from 'node:fs/promises';
+import {verifyReleases} from './scripts/verify-releases223.mjs';
+import {cp,mkdir,readdir,lstat,rm,stat,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -6,6 +7,7 @@ const root=path.dirname(fileURLToPath(import.meta.url));
 await import('./scripts/sync-site-header171.mjs');
 // Freeze public reference data from the same gameplay modules shipped by this build.
 await import('./scripts/build-guide169.mjs');
+await verifyReleases(root);
 const output=path.resolve(root,'dist');
 // Only remove this repository's generated directory, never a linked directory.
 if(path.dirname(output)!==root||path.basename(output)!=='dist')throw new Error('Invalid build output');
@@ -29,4 +31,10 @@ for(const name of ['index.html','game.html','lobby.js','viewer-world.js','fireba
  if(!(await stat(path.join(output,name))).isFile())throw new Error('Missing runtime file: '+name);
 }
 await import('./scripts/build-asset-index180.mjs');
+const release=JSON.parse(await readFile(path.join(root,'release.json'),'utf8'));
+await cp(path.join(root,'release.json'),path.join(output,'release.json'));
+if(!/^r[a-zA-Z0-9_-]{1,80}$/.test(release.id))throw Error('Invalid release ID');
+let frozen=false;try{await stat(path.join(root,'releases',release.id,'release.json'));await stat(path.join(root,'releases',release.id,'runtime-manifest.json'));frozen=true;}catch(error){if(error.code!=='ENOENT')throw error;}
+if(!frozen&&process.env.VERCEL==='1')throw Error('Freeze the release before publishing to Vercel.');
+if(frozen){await cp(path.join(root,'releases'),path.join(output,'releases'),{recursive:true});let html=await readFile(path.join(output,'game.html'),'utf8');if(!html.includes('<head>'))throw Error('Missing HTML head');html=html.replace('<head>','<head><base href="/releases/'+release.id+'/"><meta name="ayothaya-release" content="'+release.id+'">');await writeFile(path.join(output,'game.html'),html);}else console.log('Development build: runtime is not frozen yet');
 console.log('Vercel static game ready in dist/');

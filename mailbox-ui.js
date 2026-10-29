@@ -1,6 +1,6 @@
 import {ITEMS} from './items.js';
 import {PREMIUM_PET_IDS} from './premium-pets.js';
-import {iconStyle} from './bag-ui.js';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {hasMailGift,canDeleteMail} from './mailbox.js?v=150';
 import {paintedPanels} from './painted-panels.js?v=150';
 import {openHudPanel} from './hud-panels.js';

@@ -1,3 +1,6 @@
+import{XP_CURVE}from'../experience.js';
+import{readPublicFile,releaseRedirect}from'./public-files223.js';
+import {AUCTION_ACTIONS,AUCTION_ERRORS,auctionAction,publicAuctions,settleAuctions} from '../auctions223.js';
 import {NOVICE_SLOTS,NOVICE_MAX} from '../skill-progress.js';
 import {arenaReservation} from './arena-rooms166.js';
 import {identityAction} from '../identity166.js';
@@ -11,12 +14,13 @@ import {raiseCharacterLevels} from '../admin-levels.js';
 import {drainWarMailbox} from './war-mail.js';
 const AMULET_NAMES=Object.fromEntries(AMULETS.map(a=>[a.id,a.name]));
 import {MAIL_ACTIONS,composeMail,deliverMail,mailboxAction,mailboxBulkAction,publicInbox,inboxSummary,hasMailGift} from '../mailbox.js';
+import {UTILITY_MUTATIONS,utilityAction,CARD_REMOVAL_FEE} from '../farm-utility221.js';
 import {petBuildStatus} from '../pet-stat-build220.js';
 import {PET_MUTATIONS,petAccountAction,publicPetAccount} from '../pet-account.js';
 import {STORY_VERSION} from '../story-quests.js';
-import {normalizeStats,statPoints,statsAfterClassChange} from '../character-stats.js';
+import {normalizeGear,normalizeStats,statPoints,statsAfterClassChange} from '../character-stats.js';
 import {MONSTER_TYPES} from '../combat-core.js';
-import {DROPS} from '../items.js';
+import {DROPS,SHOPS,ITEM_ERRORS} from '../items.js';
 import http from 'node:http';
 import {discordPoster} from './discord-webhook.js';
 import {randomUUID,randomInt} from 'node:crypto';
@@ -46,12 +50,13 @@ const JOIN_CODES=['world-reset','already-online','room-full','character-not-foun
 export const joinError=e=>JOIN_CODES.includes(e?.message)?e.message:['authentication-required','invalid-token','invalid-identity'].includes(e?.message)||/^auth\/(?!internal|network)/.test(String(e?.code??''))?'authentication-failed':'server-busy';
 // The drops a client reports with its join (multiplayer-client.js), trimmed to known fields.
 export const cleanDiag=list=>(Array.isArray(list)?list.slice(-5):[]).filter(d=>d&&typeof d==='object').map(d=>({kind:d.kind==='page'?'page':'socket',at:Number.isFinite(d.at)?d.at:0,close:Number.isInteger(d.close)?d.close:0,reason:String(d.reason??'').slice(0,60),code:String(d.code??'').slice(0,40),online:Number.isFinite(d.online)?Math.round(d.online):0,hidden:d.hidden===true,net:String(d.net??'').slice(0,16)}));
-export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false,classRewards=mode==='firebase',prologue=mode!=='local'||process.env.PROLOGUE==='on'}={}){
+export async function createHost({mode='firebase',store,catalog,origins=[],capacity=50,authenticate,serveStatic=false,classRewards=mode==='firebase',prologue=mode!=='local'||process.env.PROLOGUE==='on',auctionNow=()=>Date.now()}={}){
  if(!['local','firebase'].includes(mode))throw new Error('invalid-auth-mode');
  if(!catalog)catalog=JSON.parse(await readFile(path.join(root,'maps/world.json'),'utf8'));
  // A replacement instance (zero-downtime redeploy) starts while the old one still owns the world.
  // It serves /health and answers sockets with 503 until the old lease is released or expires, then takes over.
  let reset=null,resetReady=true;
+ const auctionBooks=new Map();let auctionQueue=Promise.resolve();
  const writes=new Set(),mutations=new Set();
  const trackWrite=p=>{const task=Promise.resolve(p);writes.add(task);task.finally(()=>writes.delete(task)).catch(()=>{});return task;};
  let mailReady=!store?.loadMailAnnouncements;
@@ -129,6 +134,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  if(repository)reset=await new WorldReset({repository,quiesce:quiesceWorld,finish:clearWorld,online:()=>sessions.size}).init();
 
  async function quiesceWorld(){
+  await auctionQueue;
   const until=Date.now()+20000;
   while(mutations.size||joinPending.size){if(Date.now()>until)throw Error('reset-drain-timeout');await new Promise(r=>setTimeout(r,25));}
   const active=[...sessions.values()];
@@ -146,7 +152,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  }
  async function clearWorld(){
   for(const key of ['peers','rooms','parties','invites','guilds','leaders','shops','prices','mvps','wars','arenaPairs','arenaRooms','weatherOverrides','guildsDirty','leadersDirty','pricesDirty'])realm[key]?.clear();
-  realm.mailAnnouncements=[];realm.logs=[];realm.mapBosses.restore([]);realm.mapBosses.dirty=false;
+  auctionBooks.clear();store.auctions={};realm.mailAnnouncements=[];realm.logs=[];realm.mapBosses.restore([]);realm.mapBosses.dirty=false;
   store.allPrices={};store.allLeaders={};store.leases?.clear();savedList={at:0,rows:[]};lastLogSaveCount=0;
  }
  // 0.118 evidence log (see evidence.js): players' sign-ins, chat, trades and mail; every admin action, kept for disputes
@@ -168,7 +174,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    let done;const pending=new Promise(r=>{done=r;});mutations.add(pending);
    mutationDone=()=>{mutations.delete(pending);done();};
   }
-  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,marketBrowse:1,marketDemand:1,classReward:classRewards?192:0,classRewardBackfill:classRewardState?{scanned:classRewardState.scanned,eligible:classRewardState.eligible,delivered:classRewardState.delivered,scanComplete:classRewardState.scanComplete,pending:classRewardState.pending.length}:null,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,petStatBuild:1,skillCriticals:1,adminLevels:1,rainbowCrafting:1,guildWarPodium:1,weaponCrafting:188,statResetItem:189,statHold:189,amuletGacha:1,amuletCraftShards:AMULET_CRAFT_SHARDS,premiumShop:1,observerMode:1,dropReports:1,victoryLoot:1,groundLoot:1,petGroundLoot:1,conquestYakshaOnly:1,autoPickedAnywhere:1,monsterTerritory:1,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,respawnChoice:1,revivalTalisman:200,spiritCompanion:185,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,skillRework:119,skillGcd:ROLE_GLOBAL_CD,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
+  if(url.pathname==='/health'){reply(200,{contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),protocol:1,movementPrediction:1,autoWalkSchema:1,adventurerHire:1,bridgeRouting:1,worldReset:1,maintenance:!!reset?.maintenance,shopLifecycle:1,marketBrowse:1,marketDemand:1,classReward:classRewards?192:0,classRewardBackfill:classRewardState?{scanned:classRewardState.scanned,eligible:classRewardState.eligible,delivered:classRewardState.delivered,scanComplete:classRewardState.scanComplete,pending:classRewardState.pending.length}:null,routeRunSchema:1,mapBossSchema:1,evidenceLog:1,consentSchema:1,financeBooks:1,mailGradedGear:1,monsterTypes:MONSTER_TYPES.length,questDialogue:1,storySchema:STORY_VERSION,petPreview:1,petSystem:2,petStatBuild:1,farmUtility:221,auctionSchema:1,rankedMatchmaking:223,progressionCurve:XP_CURVE,pvpBalance:223,cardRemovalFee:CARD_REMOVAL_FEE,skillCriticals:1,adminLevels:1,rainbowCrafting:1,guildWarPodium:1,weaponCrafting:188,statResetItem:189,statHold:189,amuletGacha:1,amuletCraftShards:AMULET_CRAFT_SHARDS,premiumShop:1,observerMode:1,dropReports:1,victoryLoot:1,groundLoot:1,petGroundLoot:1,conquestYakshaOnly:1,autoPickedAnywhere:1,monsterTerritory:1,combatTiming:2,bossResults:1,bossDirectory:1,guildDirectory:1,arenaRooms:1,renameCard:1,respawnChoice:1,revivalTalisman:200,spiritCompanion:185,autoTargeting:1,refineSlots:6,refineMax:20,refineTiers:4,refineSequence:1,mailboxSchema:1,mailboxBulk:1,albumDeposits:2,leaderboardAvatars:1,premiumCurrency:'gold-bar',classStatReset:true,noviceTraining:{skills:NOVICE_SLOTS.length,maxRank:NOVICE_MAX},roleSchema:realm.roleSkills?1:0,skillRework:119,skillGcd:ROLE_GLOBAL_CD,mode,players:realm.peers.size,rooms:realm.rooms.size,capacity,admins:adminEmails().size,configKeys:configKeys(process.env),channels:realm.channelCounts(),bandwidth:metrics});return;}
   if(url.pathname==='/dashboard'){reply(200,{status:'ok',contentVersion:catalog.version??0,commit:process.env.RENDER_GIT_COMMIT?.slice(0,7)??null,ok:!closing,authority:authoritative(),mode,players:realm.peers.size,totalPlayers:realm.peers.size,uptimeSeconds:Math.max(1,Math.round((Date.now()-metrics.startedAt)/1000)),capacity,channels:realm.channelCounts(),rooms:[...realm.rooms.values()].map(r=>({id:r.id,map:r.map.id,mapId:r.map.id,mapName:r.map.name,channel:r.channel??1,players:r.peers.size})),bandwidth:metrics,logs:realm.logs.slice(-100).reverse()});return;}
   // 0.117 terms/privacy acceptance after sign-in: GET the version this account accepted, POST {version} to record it.
   // Firebase mode trusts only the verified ID token's uid; the loopback dev server uses the uid it is given.
@@ -359,7 +365,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   }
   if(serveStatic&&mode==='local'&&req.method==='GET'){
    try{const decoded=decodeURIComponent(url.pathname),relative=decoded==='/'?'index.html':decoded.slice(1),base=path.join(root,'dist'),file=path.resolve(base,relative);
-    if(!file.startsWith(base+path.sep)||relative.includes('..'))throw new Error('path');const body=await readFile(file),ext=path.extname(file);const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.glb':'model/gltf-binary','.woff2':'font/woff2','.ttf':'font/ttf','.webp':'image/webp','.webmanifest':'application/manifest+json'}[ext]??'application/octet-stream';res.writeHead(200,{'Content-Type':mime});res.end(body);
+    if(!file.startsWith(base+path.sep)||relative.includes('..'))throw new Error('path');const redirect=releaseRedirect(relative);if(redirect){res.writeHead(307,{Location:redirect+url.search,'Cache-Control':'no-store'}).end();return;}const body=await readPublicFile(base,relative),ext=path.extname(file);const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.glb':'model/gltf-binary','.woff2':'font/woff2','.ttf':'font/ttf','.webp':'image/webp','.webmanifest':'application/manifest+json'}[ext]??'application/octet-stream';res.writeHead(200,{'Content-Type':mime,'Cache-Control':relative.startsWith('releases/')?'public, max-age=31536000, immutable':'no-store'});res.end(body);
    }catch{res.writeHead(404).end();}return;
   }
   reply(404,{error:'not-found'});
@@ -408,6 +414,19 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    Object.assign(s.peer.character,record.character);s.peer.identityReceipts=record.identityReceipts??s.peer.identityReceipts;s.peer.mailbox=record.mailbox;realm.setBag(s.peer,record.bag);s.peer.petCollection=record.petCollection??s.peer.petCollection;applyLive(record);realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return record;
   });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;s.peer.mailMutationBusy=false;if(!s.closing){for(const gift of s.peer.mailLootQueue??[])realm.grantLoot(s.peer,gift.loot,gift.at,gift.receipt??null);}s.peer.mailLootQueue=[];}
  }
+ const auctionActor=p=>({uid:p.uid,slotId:p.slotId,serverId:p.serverId,name:p.character.name});
+ const auctionSerial=fn=>{const task=auctionQueue.catch(()=>{}).then(fn);auctionQueue=task.catch(()=>{});return task;};
+ const readAuctions=serverId=>auctionSerial(async()=>{const source=auctionBooks.has(serverId)?auctionBooks.get(serverId):await store.loadAuction(serverId),closed=settleAuctions(source,auctionNow());const book=closed.changed?await store.mutateAuctionBook(serverId,b=>settleAuctions(b,auctionNow())):closed.book;auctionBooks.set(serverId,book);return book;});
+ async function persistAuction(s,m){
+  if(s.trainingBusy||s.closing||s.peer.trade)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;s.peer.mailMutationBusy=true;
+  const lotId=randomUUID(),p=s.peer;
+  const task=s.queue.catch(()=>{}).then(()=>auctionSerial(async()=>{
+   if(!spendWrite(s))throw Error('rate-limit');const before=realm.record(p,s.lease.record);
+   let out;try{out=await store.auctionTransaction(s.lease,before,book=>auctionAction(book,before,m,auctionActor(p),auctionNow(),lotId));}
+   catch(error){if(!AUCTION_ERRORS[error.message]&&!ITEM_ERRORS[error.message]&&!['rate-limit','no-item','no-coins','bag-full','coin-cap'].includes(error.message)){s.closing=true;s.released=true;p.suspended=true;realm.leave(p.id);s.ws.close(4010,'save-failed');}throw error;}
+   auctionBooks.set(p.serverId,out.book);realm.setBag(p,out.record.bag);s.autoSavedAt=Date.now();s.savedJson=null;realm.evidence(p,'auction',{action:m.type,request:m.id,lot:out.result.lotId??null,replayed:out.replayed});return out;
+  }));s.queue=task.catch(()=>{});try{return await task;}finally{s.trainingBusy=false;p.petMutationBusy=false;p.mailMutationBusy=false;if(!s.closing)for(const gift of p.mailLootQueue??[])realm.grantLoot(p,gift.loot,gift.at,gift.receipt??null);p.mailLootQueue=[];}
+ }
  wss.on('connection',(ws,req)=>{
   let session=null,authenticating=false;ws.alive=true;
   const settled=req.settled;
@@ -419,7 +438,14 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(!message||typeof message!=='object'||Array.isArray(message)){ws.close(4002,'invalid-message');return;}
    if(reset?.maintenance){send({type:'error',code:'world-reset'});ws.close(4012,'world-reset');return;}
    if(session){if(session.closing||session.trainingBusy){if(message.type==='save'&&typeof message.id==='string'){const id=message.id.slice(0,50);session.queue.then(()=>send({type:'saved',id}),()=>{});return;} // the busy job checkpoints; answer once it lands
-    if(!['input','ping'].includes(message.type)){const reply=message.type==='classSetChoose'?'classSetError':message.type==='premiumBuy'?'shopError':message.type==='amuletDraw'?'amuletError':['renameBuy','renameUse','revivalBuy','statResetUse'].includes(message.type)?'identityError':MAIL_ACTIONS.includes(message.type)?'mailError':PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error',walkTo:'walkError',walkPace:'walkError'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(!['input','ping'].includes(message.type)){const reply=(message.type==='auctionList'||AUCTION_ACTIONS.includes(message.type))?'auctionError':message.type==='classSetChoose'?'classSetError':message.type==='premiumBuy'?'shopError':message.type==='amuletDraw'?'amuletError':['renameBuy','renameUse','revivalBuy','statResetUse'].includes(message.type)?'identityError':MAIL_ACTIONS.includes(message.type)?'mailError':UTILITY_MUTATIONS.includes(message.type)?'utilityError':PET_MUTATIONS.includes(message.type)?'petError':{equip:'equipment-error',train:'training-error',walkTo:'walkError',walkPace:'walkError'}[message.type];send(reply&&typeof message.id==='string'?{type:reply,id:message.id,code:'server-busy'}:{type:'error',code:'server-busy'});}return;}if(Date.now()>session.expires){ws.close(4001,'token-expired');return;}
+    if(message.type==='auctionList'||AUCTION_ACTIONS.includes(message.type)){
+     const p=session.peer,id=message.id;if(typeof id!=='string'||id.length>80||!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'auctionError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
+     if(!store?.auctionTransaction){send({type:'auctionError',id,code:'auction-unavailable'});return;}
+     try{let book,out;if(message.type==='auctionList')book=await readAuctions(p.serverId);else{if(p.observer||p.duel||p.world.player.hp<=0||!p.room.map.safe)throw Error('auction-city');out=await persistAuction(session,message);book=out.book;}
+      send({type:'auctionChanged',id,view:publicAuctions(book,auctionActor(p),auctionNow()),...(out?{bag:p.bag,result:out.result,replayed:out.replayed}:{})});
+     }catch(e){send({type:'auctionError',id,code:e.message});}return;
+    }
     if(message.type==='classSetChoose'){
      const p=session.peer,id=message.id;
      if(!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'classSetError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
@@ -458,6 +484,19 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
      if(message.type!=='mailList')realm.evidence(p,'mail',{action:message.type,mail:typeof message.mailId==='string'?message.mailId.slice(0,80):null});
      try{let bulk;if(message.type!=='mailList')await persistMail(session,r=>{if(['mailClaimAll','mailDeleteAll'].includes(message.type)){const result=mailboxBulkAction(r,message,realm.mailAnnouncements??[]);bulk=result.summary;return result.record;}return mailboxAction(r,message,realm.mailAnnouncements??[]);});send({type:'mailChanged',id,mails:publicInbox(p.mailbox,realm.mailAnnouncements??[],p.serverId),summary:inboxSummary(p.mailbox,realm.mailAnnouncements??[],p.serverId),petCollection:publicPetAccount(p.petCollection),bag:p.bag,...(bulk?{bulk}:{})});}
      catch(e){send({type:'mailError',id,code:e.message});}return;
+    }
+    if(UTILITY_MUTATIONS.includes(message.type)){
+     const p=session.peer,id=message.id;
+     if(!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'utilityError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
+     if(p.observer||p.world.player.hp<=0||p.duel){send({type:'utilityError',id,code:'defeated'});return;}
+     let result,replayed=false;
+     try{await persistMail(session,r=>{
+      const out=utilityAction(r,message);result=out.result;replayed=out.replayed;
+      if(!replayed&&message.type==='sellBatch'){const npc=p.room.map.npcs?.find(n=>n.name===message.npc),shop=npc&&SHOPS[npc.name];if(!shop||shop.mapId!==p.room.map.id||Math.hypot(npc.x-p.world.player.x,npc.z-p.world.player.z)>3.6)throw Error('shop-too-far');}
+      return out.record;
+     },r=>{p.gear=normalizeGear(r.gear);p.utilityReceipts=r.utilityReceipts??[];});
+     send({type:'utilityChanged',id,result,replayed,bag:p.bag,gear:p.gear});realm.evidence(p,'utility',{action:message.type,request:id});
+     }catch(e){send({type:'utilityError',id,code:e.message});}return;
     }
     if(PET_MUTATIONS.includes(message.type)){
      const p=session.peer,id=message.id;
@@ -551,9 +590,9 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const backgroundWalks=setInterval(()=>{if(reset?.maintenance)return;for(const s of sessions.values())if(s.background&&!s.closing&&(!s.peer.routeWalker?.active||Date.now()>=s.backgroundUntil))finishBackground(s);},250);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
   lastLogSaveCount=realm.logs.length;
-  const logSaver=setInterval(()=>{if(reset?.maintenance)return;drainWarMail();drainClassRewards();if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount&&Date.now()-lastLogSaveAt>=300000){lastLogSaveCount=realm.logs.length;lastLogSaveAt=Date.now(); // dashboard logs: one write per 5 min, not per 10 s
+  const logSaver=setInterval(()=>{if(reset?.maintenance)return;drainWarMail();drainClassRewards();for(const [serverId,book]of auctionBooks)if(book.lots.some(l=>l.status==='open'&&l.endsAt<=auctionNow()))trackWrite(readAuctions(serverId)).catch(e=>console.error('auction-expiry',e.message));if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount&&Date.now()-lastLogSaveAt>=300000){lastLogSaveCount=realm.logs.length;lastLogSaveAt=Date.now(); // dashboard logs: one write per 5 min, not per 10 s
 trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
- return {server,realm,wss,evidence,async close(){closing=true;await evidence?.stop();clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
+ return {server,realm,wss,evidence,async close(){closing=true;await auctionQueue;await evidence?.stop();clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
   // 0.114.2 a redeploy gives us ~9 s: players' progress first (all at once, 6 s cap), then shops, bosses, guild/leader/
   // price changes and logs together, and the authority release last so the next host can start at once.
   const capped=(p,ms)=>{let t;return Promise.race([Promise.resolve(p).catch(()=>{}),new Promise(r=>{t=setTimeout(r,ms);})]).finally(()=>clearTimeout(t));};

@@ -1,7 +1,7 @@
 import * as THREE from './vendor/build/three.module.js';
 import {VFX_SHEETS} from './assets/skills-next/vfx-2026-10/vfx-map.js';
 import {ALL_SKILLS} from './assets/skills-next/catalog.js';
-import {groundHeight} from './combat-core.js?v=novice174';
+import {groundHeight} from './combat-core.js?v=surfaces222';
 import {atlasUv} from './assets/skill-polish/timing.js';
 import {effectDirection,sheetFacing,mirroredFrame} from './skill-effect-facing200.js';
 // 0.119 painted skill sheets (4×2 frames, frame 3 = peak). One clip per cast, timed by the cast's own release beats

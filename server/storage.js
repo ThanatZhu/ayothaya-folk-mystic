@@ -15,8 +15,8 @@ const copy=v=>structuredClone(v),ttl=300000; // a player's lease outlives the lo
 const staleFinance=current=>Object.assign(new Error('finance-stale'),{current});
 // Local mode never accepts Firebase users and is bound to loopback by the host.
 export class LocalStore{
- constructor(directory){this.directory=directory;this.rows=new Map();this.leases=new Map();this.queue=Promise.resolve();}
- async init(){await mkdir(this.directory,{recursive:true});try{this.rows=new Map(JSON.parse(await readFile(path.join(this.directory,'profiles.json'),'utf8')));}catch(e){if(e.code!=='ENOENT')throw e;}return this;}
+ constructor(directory){this.directory=directory;this.rows=new Map();this.auctions={};this.leases=new Map();this.queue=Promise.resolve();}
+ async init(){await mkdir(this.directory,{recursive:true});try{const saved=JSON.parse(await readFile(path.join(this.directory,'profiles.json'),'utf8'));this.rows=new Map(Array.isArray(saved)?saved:saved.rows);this.auctions=Array.isArray(saved)?{}:saved.auctions??{};}catch(e){if(e.code!=='ENOENT')throw e;}return this;}
  async createLocal({name,gender='male'}){const uid='dev-'+randomUUID(),token=randomUUID()+randomUUID(),record={serverId:'server-1',slotId:'slot-1',revision:1,character:character({name,gender,classId:'novice'}),state:initialSave(),localTokenHash:createHash('sha256').update(token).digest('hex')};this.rows.set(uid,record);await this.flush();return {uid,token,record:copy(record)};}
  verifyLocal(token){const hash=createHash('sha256').update(token).digest('hex');return [...this.rows].find(([,v])=>v.localTokenHash===hash)?.[0];}
  async acquire(identity,leaseId,{takeover=false}={}){
@@ -31,12 +31,22 @@ export class LocalStore{
  async loadMapBosses(){try{return JSON.parse(await readFile(path.join(this.directory,'map-bosses.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return [];throw e;}}
  saveMapBosses(rows){const data=JSON.stringify(rows);this.bossQueue=(this.bossQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'map-bosses.json'),tmp=file+'.tmp';await writeFile(tmp,data,{mode:0o600});await rename(tmp,file);});return this.bossQueue;}
  async saveDashboardLogs(logs){try{const recent=Array.isArray(logs)?logs.slice(-200):[];await writeFile(path.join(this.directory,'dashboard-logs.json'),JSON.stringify(recent),{mode:0o600});}catch{}}
- async checkpoint(session,record,{release=false}={}){
-  const lock=this.leases.get(session.identity.uid);if(!lock||lock.id!==session.leaseId||lock.expires<Date.now())throw new Error('session-lost');
-  this.rows.set(session.identity.uid,copy({...record,revision:(this.rows.get(session.identity.uid)?.revision??0)+1,savedAt:Date.now()}));
-  if(release)this.leases.delete(session.identity.uid);else lock.expires=Date.now()+ttl;
-  await this.flush();
+ async checkpoint(session,record,{release=false,auctionApply=null}={}){
+  const task=this.queue.catch(()=>{}).then(async()=>{
+   const lock=this.leases.get(session.identity.uid);if(!lock||lock.id!==session.leaseId||lock.expires<Date.now())throw Error('session-lost');
+   const out=auctionApply?.(copy(this.auctions[session.identity.serverId]??null),copy(record)),next={...copy(out?.record??record),revision:(this.rows.get(session.identity.uid)?.revision??0)+1,savedAt:Date.now()},rows=new Map(this.rows);rows.set(session.identity.uid,next);
+   const auctions=out?{...this.auctions,[session.identity.serverId]:out.book}:this.auctions;
+   await this.writeProfiles(rows,auctions);this.rows.set(session.identity.uid,next);this.auctions=auctions;
+   if(release)this.leases.delete(session.identity.uid);else lock.expires=Date.now()+ttl;return out;
+  });this.queue=task.catch(()=>{});return task;
  }
+ auctionTransaction(session,record,apply){return this.checkpoint(session,record,{auctionApply:apply});}
+ async loadAuction(serverId){await this.queue;return copy(this.auctions[serverId]??null);}
+ mutateAuctionBook(serverId,apply){
+  const task=this.queue.catch(()=>{}).then(async()=>{const out=apply(copy(this.auctions[serverId]??null));if(out.changed){const books={...this.auctions,[serverId]:out.book};await this.writeProfiles(this.rows,books);this.auctions=books;}return out.book;});this.queue=task.catch(()=>{});return task;
+ }
+ async writeProfiles(rows=this.rows,auctions=this.auctions){const file=path.join(this.directory,'profiles.json');await writeFile(file+'.tmp',JSON.stringify({format:223,rows:[...rows],auctions}),{mode:0o600});await rename(file+'.tmp',file);}
+
  // 0.103 back office: every saved character, and a gift written into one that is not in a game right now.
  async listProfiles(){return [...this.rows].map(([uid,r])=>({uid,slotId:'slot-1',record:copy(r),savedAt:r.savedAt??null}));}
  async classRewardPage({after=null,limit=100}={}){const rows=(await this.listProfiles()).sort((a,b)=>a.uid.localeCompare(b.uid)).filter(r=>after===null||r.uid.localeCompare(after)>0),page=rows.slice(0,limit);return {rows:page,after:page.at(-1)?.uid??after,done:rows.length<=limit};}
@@ -82,7 +92,7 @@ export class LocalStore{
  savePrices(serverId,prices){this.allPrices={...(this.allPrices??{}),[serverId]:prices};return writeFile(path.join(this.directory,'prices.json'),JSON.stringify(this.allPrices),{mode:0o600});}
  deleteGuild(){return this.flushGuilds();}
  flushGuilds(){const data=JSON.stringify([...(this.realmGuilds?.values()??[])]);return writeFile(path.join(this.directory,'guilds.json'),data,{mode:0o600});}
- flush(){const data=JSON.stringify([...this.rows]);this.queue=this.queue.catch(()=>{}).then(async()=>{const file=path.join(this.directory,'profiles.json'),tmp=file+'.tmp';await writeFile(tmp,data,{mode:0o600});await rename(tmp,file);});return this.queue;}
+ flush(){this.queue=this.queue.catch(()=>{}).then(()=>this.writeProfiles());return this.queue;}
 }
 export class FirebaseStore{
  constructor(db){this.db=db;this.authorityId=randomUUID();this.authorityRef=db.collection('multiplayerRuntime').doc('authority');this.authorityUntil=0;}
@@ -169,7 +179,7 @@ export class FirebaseStore{
    const [online,legacy,lease]=await Promise.all([tx.get(refs.profile),tx.get(refs.legacy),tx.get(refs.lease)]);
    if(!takeover&&lease.exists&&lease.data().expires>Date.now())throw new Error('already-online');
    if(!legacy.exists)throw new Error('character-not-found');
-   const record=online.exists?online.data().record:legacy.data();if(!online.exists){delete record.rebirthStory;delete record.identityReceipts;delete record.petCollection;delete record.mailbox;delete record.walkRoute;delete record.albumSchema;delete record.albumRewards;} // Never import a premium wallet from the client-writable mirror.
+   const record=online.exists?online.data().record:legacy.data();if(!online.exists){delete record.rebirthStory;delete record.identityReceipts;delete record.utilityReceipts;delete record.petCollection;delete record.mailbox;delete record.walkRoute;delete record.albumSchema;delete record.albumRewards;} // Never import a premium wallet from the client-writable mirror.
    if(record.serverId!==identity.serverId||legacy.data().serverId!==identity.serverId)throw new Error('character-server');
    // 0.114.1 the mirror is client-writable, so a first join only trusts its progress if it was last written before the
    // cutoff (rules pin updatedAt to request.time). Anything newer starts as a Lv.1 novice with just its name and looks.
@@ -181,17 +191,21 @@ export class FirebaseStore{
    return {identity,leaseId,refs,record:copy(record),mirrorRevision:legacy.data().revision};
   });
  }
- async checkpoint(session,record,{release=false}={}){
-  const revision=await this.db.runTransaction(async tx=>{
+ auctionTransaction(session,record,apply){return this.checkpoint(session,record,{auctionApply:apply});}
+ async loadAuction(serverId){const snap=await this.db.collection('multiplayerAuctions').doc(serverId).get();return snap.exists?snap.data().book:null;}
+ mutateAuctionBook(serverId,apply){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);const ref=this.db.collection('multiplayerAuctions').doc(serverId),snap=await tx.get(ref),out=apply(snap.exists?snap.data().book:null);if(out.changed)tx.set(ref,{book:out.book,updatedAt:Date.now()});return out.book;});}
+ async checkpoint(session,record,{release=false,auctionApply=null}={}){
+  const saved=await this.db.runTransaction(async tx=>{
    await this.checkAuthority(tx);
    const [lease,legacy]=await Promise.all([tx.get(session.refs.lease),tx.get(session.refs.legacy)]);
    if(!lease.exists||lease.data().leaseId!==session.leaseId||lease.data().expires<Date.now())throw new Error('session-lost');
    if(!legacy.exists||legacy.data().revision!==session.mirrorRevision)throw new Error('save-conflict');
-   const next={...copy(record),revision:session.mirrorRevision+1};delete next.slotId;
+   let proposed=record,auctionResult=null;if(auctionApply){const ref=this.db.collection('multiplayerAuctions').doc(session.identity.serverId),snap=await tx.get(ref);auctionResult=auctionApply(snap.exists?snap.data().book:null,copy(record));proposed=auctionResult.record;tx.set(ref,{book:auctionResult.book,updatedAt:Date.now()});}
+   const next={...copy(proposed),revision:session.mirrorRevision+1};delete next.slotId;
    // Skill levels stay in the private profile; the client-readable mirror keeps its rule-checked shape.
-   const mirror={...next};delete mirror.rebirthStory;delete mirror.identityReceipts;delete mirror.walkRoute;delete mirror.skills;delete mirror.roleSkillBackup;delete mirror.roleCooldowns;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.daily;delete mirror.dungeonDay;delete mirror.pet;delete mirror.petCollection;delete mirror.mailbox;delete mirror.bounty;delete mirror.weekly;delete mirror.rebirth;delete mirror.xpCurve;delete mirror.album;delete mirror.albumSchema;delete mirror.albumRewards;delete mirror.trade;delete mirror.stats;delete mirror.gear;
+   const mirror={...next};delete mirror.rebirthStory;delete mirror.identityReceipts;delete mirror.utilityReceipts;delete mirror.walkRoute;delete mirror.skills;delete mirror.roleSkillBackup;delete mirror.roleCooldowns;delete mirror.training;delete mirror.story;delete mirror.equipment;delete mirror.bag;delete mirror.storage;delete mirror.friends;delete mirror.daily;delete mirror.dungeonDay;delete mirror.pet;delete mirror.petCollection;delete mirror.mailbox;delete mirror.bounty;delete mirror.weekly;delete mirror.rebirth;delete mirror.xpCurve;delete mirror.album;delete mirror.albumSchema;delete mirror.albumRewards;delete mirror.trade;delete mirror.stats;delete mirror.gear;
    tx.set(session.refs.profile,{record:next,updatedAt:Date.now()});tx.set(session.refs.legacy,{...mirror,updatedAt:new Date()});
-   if(release)tx.delete(session.refs.lease);else tx.update(session.refs.lease,{expires:Date.now()+ttl});return next.revision;
-  });session.mirrorRevision=revision;
+   if(release)tx.delete(session.refs.lease);else tx.update(session.refs.lease,{expires:Date.now()+ttl});return {revision:next.revision,auction:auctionResult};
+  });session.mirrorRevision=saved.revision;return saved.auction;
  }
 }

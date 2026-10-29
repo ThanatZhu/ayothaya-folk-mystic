@@ -1,6 +1,6 @@
 import {STAT_RESET_ITEM} from './stat-reset-item.js';
 import {spentStatPoints} from './character-stats.js';
-import {iconStyle} from './bag-ui.js?v=stat-reset189';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 
 const errors={'no-stat-reset':'ไม่มียันต์คืนวิถีในกระเป๋า','no-allocated-stats':'ยังไม่ได้ลงแต้มสถานะ','server-busy':'กำลังบันทึกรายการอื่น กรุณาลองใหม่','arena-busy':'ออกจากลานประลองก่อนรีเซ็ตสถานะ','rate-limit':'ส่งคำขอเร็วเกินไป รอสักครู่แล้วลองใหม่','not-connected':'เชื่อมต่อเกมออนไลน์ก่อนใช้ไอเท็ม'};
 export function createStatResetUI({game,bagUI,stats,onOpen,resetOffline}){

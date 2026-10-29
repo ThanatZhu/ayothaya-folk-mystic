@@ -9,23 +9,28 @@ export function validExperience(saved){
  return !present||(safe(saved.baseXp)&&safe(saved.jobXp));
 }
 // 0.57 growing curve: level L→L+1 needs 50 + 6·(L−1) EXP (Lv.1 50, Lv.24 188). Early levels come quicker
-// than the old flat 100 and later ones mean more. Lv.25 = 2,856 and Lv.60 = 13,216 total stay above the Firestore
-// class/job thresholds (2,400 / 5,900), so the rules need no change.
-// 0.105.2 owner rule: Lv.1-50 easy (the 0.57 curve as it was), reaching 51-70 costs ×5 and 71-99 ×15 per level.
-// [highest level reached, multiplier]: tune here.
-export const LEVEL_BANDS=[[50,1],[70,5],[99,15]];
+// than the old flat 100 and later ones mean more. Lv.25 = 2,856 total stays above the Firestore
+// class threshold (2,400); existing class/job rules need no change.
+// 0.223 measured farming target: about 31–44 active hours with level-appropriate gear.
+// Levels 1–50 retain their existing pace; later bands pace the first Lv.99 over roughly 4–7 days.
+export const LEVEL_BANDS=[[50,1],[70,100],[99,400]];
 const baseNeed=l=>50+6*(l-1);
 export const levelNeed=l=>baseNeed(l)*LEVEL_BANDS.find(([top])=>l+1<=top)[1];
-const START=[0,0];for(let l=1;l<99;l++)START[l+1]=START[l]+levelNeed(l); // START[l] = total EXP at the start of level l
-// Saves from before 0.105.2 (record.xpCurve missing) keep their level and the share of it they had filled.
-export const XP_CURVE=2;
-const OLD_START=[0,0];for(let l=1;l<99;l++)OLD_START[l+1]=OLD_START[l]+baseNeed(l);
-export function migrateXp(total){
- if(!safe(total))return 0;if(total>=OLD_START[99])return START[99]+(total-OLD_START[99]);
- let l=1;while(l<99&&total>=OLD_START[l+1])l++;
- return START[l]+Math.floor((total-OLD_START[l])/baseNeed(l)*levelNeed(l));
+const START=[0,0];for(let l=1;l<99;l++)START[l+1]=START[l]+levelNeed(l);
+export const XP_CURVE=3;
+export const FARM_TARGET={hoursPerDay:[6,8],capDays:[4,7],activeHours:[24,56],nearEndgameDays:30};
+const starts=bands=>{const out=[0,0];for(let l=1;l<99;l++)out[l+1]=out[l]+baseNeed(l)*bands.find(([top])=>l+1<=top)[1];return out;};
+const PREVIOUS={1:starts([[99,1]]),2:starts([[50,1],[70,5],[99,15]])};
+// Preserve earned level and fractional progress; never re-award level gifts or refill resources.
+export function migrateXp(total,fromCurve=1){
+ if(!safe(total))return 0;if(fromCurve>=XP_CURVE)return total;
+ const source=PREVIOUS[fromCurve]??PREVIOUS[1];
+ if(total>=source[99])return Math.min(MAX_XP,START[99]+total-source[99]);
+ let l=1;while(l<99&&total>=source[l+1])l++;
+ return Math.min(MAX_XP,START[l]+Math.floor((total-source[l])/(source[l+1]-source[l])*levelNeed(l)));
 }
 export function baseProgress(saved){
+ const live=saved?.serverBaseProgress;if(live&&Number.isInteger(live.level)&&live.level>=1&&live.level<=99&&Number.isSafeInteger(live.required)&&live.required>0&&Number.isSafeInteger(live.current)&&live.current>=0&&live.current<=live.required){const maxed=live.level===99;return{level:live.level,xp:experienceOf(saved).baseXp,current:live.current,required:live.required,next:maxed?0:live.required-live.current,percent:maxed?100:live.current/live.required*100,maxed};}
  const total=experienceOf(typeof saved==='number'?{kills:saved}:saved).baseXp;
  let level=1;while(level<99&&total>=START[level+1])level++;
  const maxed=level===99,required=maxed?levelNeed(98):levelNeed(level),current=maxed?required:total-START[level];

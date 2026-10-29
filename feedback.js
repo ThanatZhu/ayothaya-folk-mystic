@@ -3,7 +3,7 @@
 // own looping track, a boss in a fight nearby crossfades to the boss track. Effects follow the game events.
 import {itemDef,RARITY_NAME} from './items.js?v=107';
 import {createLevelUpNotice} from './level-up-notice.js?v=1';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {BGM,SFX,themeOf,audioUrl,COMBAT_CLASSES,COMBAT_FAMILIES,combatFile,combatUrl} from './audio-catalog180.js?v=180';
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS} from './role-combat.js';

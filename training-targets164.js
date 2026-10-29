@@ -1,6 +1,6 @@
 // Resolve training objectives from the same drops and spawn catalogue used by combat.
 import {DROPS} from './items.js?v=107';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 
 export function trainingMapPaths(catalog,from){
  const paths=new Map([[from,[]]]),queue=[from],maps=catalog?.maps??[];

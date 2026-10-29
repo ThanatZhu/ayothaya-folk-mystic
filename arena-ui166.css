@@ -6,3 +6,5 @@
 body.field-hud.hud63 #game-menu #menu-arena i::after,body.field-hud.hud63 #game-menu #menu-arena i::before{display:none!important}body.field-hud.hud63 #game-menu #menu-arena i{background:url('assets/arena166/arena.webp') center/74% 74% no-repeat!important}body.field-hud.hud63 #game-menu #menu-arena i img{display:none!important}
 
 body.field-hud.hud63[data-map="duel-arena"] #activity-dock{display:none!important}#arena-status[data-fighting="true"] #arena-members,#arena-status[data-fighting="true"] #arena-ready{display:none}#arena-status[data-fighting="true"]{display:flex;align-items:center;gap:12px;padding:5px 12px}#arena-status[data-fighting="true"]>b{display:none}#arena-status[data-fighting="true"] #arena-result{margin:0}#arena-status[data-fighting="true"] #arena-exit{min-height:32px;margin:0}@media(max-width:900px){#arena-status[data-fighting="true"]{top:76px;max-width:70vw;gap:8px}#arena-status[data-fighting="true"] #arena-exit{padding:4px 8px;font-size:11px}}
+
+#arena-lobby .arena-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px}#arena-find{grid-column:1/-1;min-height:44px}

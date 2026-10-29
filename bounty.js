@@ -2,7 +2,7 @@
 // Bounties: three per Thai day (easy · middle · hard), the same for everyone, paid out in a town.
 // Legacy album helpers; explicit deposits and the reward ledger live in card-album.js.
 import {ITEMS} from './items.js?v=107';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {thaiDay} from './daily.js?v=01';
 export const BOUNTY_POOL=[
  [{monster:'straw',count:15},{monster:'rat',count:15},{monster:'hopper',count:12}],

@@ -1,5 +1,5 @@
 import {className} from './classes.js?v=novice174';
-import {bossResultGroups,mergeBossLoot} from './boss-results.js?v=victory197';
+import {bossResultGroups,mergeBossLoot} from './boss-results.js?v=surfaces222';
 const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;};
 export const format=n=>Math.max(0,Math.round(Number(n)||0)).toLocaleString();
 // 0.122 one party/solo ranking renderer for the report and the Victory screen: [hint, labels, list] nodes.

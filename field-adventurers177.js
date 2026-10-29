@@ -1,5 +1,5 @@
 // Shared identities, patrols and prices. Clients never choose a price, power or duration.
-import {MONSTER_TYPES,walkable} from './combat-core.js?v=hire177';
+import {MONSTER_TYPES,walkable} from './combat-core.js?v=surfaces222';
 const NAMES=['นายแก่น','แม่จันทร์','ทิดคำ','อ้ายพรม','นางแก้ว','ขุนทอง','อีแป้น','ตาผล'];
 const CLASSES=['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
 export const ADVENTURER_TIME=1200;

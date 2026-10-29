@@ -1,3 +1,4 @@
+import{CARD_REMOVAL_FEE}from'./farm-utility221.js';
 import {itemDef,ITEM_ERRORS} from './items.js?v=refine136';
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Use the same authored card artwork and crop as the card album, at a consistent 3:4 size.
@@ -21,7 +22,7 @@ export function createCardSlotUI({game,bag,gear,onInsert}){
   if(!selected){note.textContent='เลือกการ์ดเพื่อดูรายละเอียดก่อนยืนยัน';list.innerHTML=cards.length?cards.map(([id,n])=>{const d=itemDef(id);return `<article class="slot-card-row">${cardArt(id)}<div><strong>${escape(d.name)}</strong><p>${escape(cardEffectText(id))}</p><small>มี ${n} ใบ</small></div><button type="button" data-pick-card="${escape(id)}">เลือก</button></article>`;}).join(''):'<p class="slot-card-empty">ยังไม่มีการ์ดที่ใส่กับอุปกรณ์นี้ได้ในกระเป๋า</p>';
    list.querySelectorAll('[data-pick-card]').forEach(b=>b.onclick=()=>pick(b.dataset.pickCard));return;
   }
-  const d=itemDef(selected);note.textContent='ใส่แล้วถอดไม่ได้ · ใช้การ์ดจากกระเป๋า 1 ใบ';review.innerHTML=`<div class="slot-card-selected">${cardArt(selected)}<div><h3>${escape(d.name)}</h3><p>${escape(cardEffectText(selected))}</p></div></div><p class="slot-card-permanent">ใช้การ์ด 1 ใบ ใส่ในอุปกรณ์นี้ถาวร</p><div class="slot-card-actions"><button type="button" data-card-back>เลือกใบอื่น</button><button type="button" data-confirm-card>ยืนยันใส่การ์ด</button></div>`;
+  const d=itemDef(selected);note.textContent='ใช้การ์ดจากกระเป๋า 1 ใบ · ถอดคืนได้ที่สถานะอุปกรณ์';review.innerHTML=`<div class="slot-card-selected">${cardArt(selected)}<div><h3>${escape(d.name)}</h3><p>${escape(cardEffectText(selected))}</p></div></div><p class="slot-card-permanent">ใช้การ์ด 1 ใบ · ถอดคืนเต็มใบได้ ค่าถอด ${CARD_REMOVAL_FEE.toLocaleString('th-TH')} เบี้ย</p><div class="slot-card-actions"><button type="button" data-card-back>เลือกใบอื่น</button><button type="button" data-confirm-card>ยืนยันใส่การ์ด</button></div>`;
   review.querySelector('[data-card-back]').onclick=()=>{selected=null;render(true);list.querySelector('[data-pick-card]')?.focus();};
   review.querySelector('[data-confirm-card]').onclick=()=>{if(sent)return;if(!valid())return update();if(!available().some(([id])=>id===selected)){selected=null;render(true);return;}
    sent=true;review.querySelector('[data-confirm-card]').disabled=true;

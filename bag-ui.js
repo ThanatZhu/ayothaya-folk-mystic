@@ -1,3 +1,5 @@
+import {createFarmUtilityUI} from './farm-utility-ui221.js?v=surfaces222';
+import {bindItemHover} from './item-hover221.js?v=surfaces222';
 import {refineTierBadge} from './refine-tier-ui.js';
 // Bag (กระเป๋า · B), NPC shops, two quick-use slots (Q / E) and loot notices.
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
@@ -7,7 +9,7 @@ import {GRADES,gearLook,setLines,bossLines,familyName,BOSS_SETS,SET_SLOTS} from 
 import {levelGifts} from './experience.js?v=105.3';
 import {consumeRevival,revivalCount} from './revival-item.js?v=revival180';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=class-reward192';
-import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {pickPotion} from './auto-play.js?v=auto202';
 import {normalizePetAccount} from './pet-account.js';
@@ -205,6 +207,10 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  const api={bag,get quickItems(){return [...quick];},activateShortcut(id){if(!bag().items[id])return fail('no-item');const kind=itemDef(id)?.kind;if(itemDef(id)?.setChoice){api.onSetChoice?.(id);return;}if(quickable(id)||kind==='food')quickUse(id);else if(kind==='gear')api.onWear?.(id);else{selected=id;worn=null;open();}},setLocal(b){local=normalizeBag(b);save();render(true);},onWear:null,render:()=>render(true),talkHooks:[]};
  // World-map warp: shows the purse, and pays offline (online the realm server charges).
  worldUI.coins=()=>bag().coins;worldUI.payWarp=cost=>{if(local.coins<cost)return false;local={...local,coins:local.coins-cost};save();return true;};
+ const utilityUI=createFarmUtilityUI({game,bag,gear:()=>api.gearView?.()??{},itemIcon:id=>icon(id),applyLocal:r=>{if(r.gear)api.onReplaceGear?.(r.gear);api.setLocal(r.bag);}});
+ api.openCardRemoval=(slot,button)=>utilityUI.card(slot,button);
+ bindItemHover(dialog,node=>node.dataset.id??api.gearView?.()[node.dataset.gear]);
+ const batch=document.createElement('button');batch.type='button';batch.className='qol-btn';batch.textContent='ขายหลายชิ้น / ทั้งหมด';batch.hidden=true;shopDialog.querySelector('.shop-tabs').append(batch);batch.onclick=()=>utilityUI.sale(shopNpc.name,batch);
  let shown='',shownGear='';
  function render(force=false){
   const b=bag(),gear=api.gearView?.()??{},sig=JSON.stringify([b,world.petCollection?.balance,gear,selected,worn,category,quick,tab,shopNpc?.name,dialog.open,shopDialog.open]);
@@ -228,16 +234,16 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    }
    $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.classList.toggle('on',el.dataset.gear===worn));
    $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:bagCap(b),Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${gradeTone(itemDef(id))}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
-   $('bag-grid').querySelectorAll('[data-id]').forEach(el=>{el.onclick=()=>{if(dragged)return;selected=el.dataset.id;worn=null;render(true);};el.onpointerdown=e=>dragStart(e,el.dataset.id);});
+   $('bag-grid').querySelectorAll('[data-id]').forEach(el=>{el.onclick=()=>{if(dragged)return;selected=el.dataset.id;worn=null;render(true);};el.onpointerdown=e=>dragStart(e,el.dataset.id);el.oncontextmenu=e=>{const id=el.dataset.id;if(e.pointerType==='touch'||itemDef(id)?.kind!=='gear')return;e.preventDefault();cancelDrag();api.onWear?.(id);};});
    const wornId=worn&&gear[worn],wornIt=wornId&&itemDef(wornId);
    if(worn){$('bag-detail').innerHTML=wornIt?`${icon(wornId,'item-icon big')}<div><strong class="r${wornIt.rarity??0}${gradeTone(wornIt)}">${wornIt.name}</strong>${refineTierBadge(wornIt)}<p>${wornIt.text??''}</p>${setInfo(wornIt,gear)}${wornIt.card?`<small>การ์ด: ${itemDef(wornIt.card)?.text??''}</small>`:''}<div class="bag-actions"><button type="button" data-act="off">ถอด</button><button type="button" data-act="status">ใส่การ์ด · หน้าสถานะ</button></div></div>`:`<p class="bag-hint">ช่อง${GEAR_PLACES.find(g=>g[0]===worn)[1]}ว่าง · แตะอุปกรณ์ในแท็บ อุปกรณ์ แล้วกด สวมใส่</p>`;
     $('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{if(el.dataset.act==='off'){api.onTakeOff?.(worn);}else{dialog.close();$('menu-status')?.click();}});}
    const it=!worn&&selected&&itemDef(selected);
-   if(!worn)$('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong class="r${it.rarity??0}${gradeTone(it)}">${it.name} ×${b.items[selected]}</strong>${refineTierBadge(it)}<p>${it.text??''}</p>${setInfo(it,gear)}<small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'||it.kind==='wing'?'<button type="button" data-act="use">'+(it.kind==='wing'?'ใช้ · วาร์ปสุ่ม':'ใช้')+'</button>':''}${game.actionBar?.desktop?'<small>ลากไอเท็มไปวางในตารางปุ่มลัดด้านล่าง</small>':quickable(selected)?QUICK_KEYS.map((k,i)=>'<button type="button" data-act="q'+i+'">'+'ปุ่มลัด '+k+'</button>').join(''):''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${it.setChoice?'<button type="button" data-act="weapon-choice">'+it.name.replace('กล่องยุทธภัณฑ์แดง','เลือกเซ็ตสีแดง')+'</button>':selected==='stat-reset-scroll'?'<button type="button" data-act="stat-reset">รีเซ็ตสถานะ</button>':selected==='rename-card'?'<button type="button" data-act="rename">เปลี่ยนชื่อ</button>':it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}<button type="button" data-act="discard" class="danger">ทิ้ง</button></div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์เข้ากระเป๋าเอง · ขายได้ที่ร้านแม่บัวในเมือง</p>';
+   if(!worn)$('bag-detail').innerHTML=it?`${icon(selected,'item-icon big')}<div><strong class="r${it.rarity??0}${gradeTone(it)}">${it.name} ×${b.items[selected]}</strong>${refineTierBadge(it)}<p>${it.text??''}</p>${setInfo(it,gear)}<small>ขายได้ ${it.sell??0} เบี้ย</small><div class="bag-actions">${it.kind==='potion'||it.kind==='wing'?'<button type="button" data-act="use">'+(it.kind==='wing'?'ใช้ · วาร์ปสุ่ม':'ใช้')+'</button>':''}${game.actionBar?.desktop?'<small>ลากไอเท็มไปวางในตารางปุ่มลัดด้านล่าง</small>':quickable(selected)?QUICK_KEYS.map((k,i)=>'<button type="button" data-act="q'+i+'">'+'ปุ่มลัด '+k+'</button>').join(''):''}${it.kind==='gear'?'<button type="button" data-act="wear">สวมใส่</button>':''}${it.setChoice?'<button type="button" data-act="weapon-choice">'+it.name.replace('กล่องยุทธภัณฑ์แดง','เลือกเซ็ตสีแดง')+'</button>':selected==='stat-reset-scroll'?'<button type="button" data-act="stat-reset">รีเซ็ตสถานะ</button>':selected==='rename-card'?'<button type="button" data-act="rename">เปลี่ยนชื่อ</button>':it.kind==='scroll'?'<button type="button" data-act="recall">จุดธูป · กลับเมือง</button>':''}${it.kind==='card'?'<small>ใส่การ์ดได้ที่หน้า สถานะ (C) ในช่องอุปกรณ์ที่สวมอยู่</small>':''}<button type="button" data-act="discard" class="danger">ทิ้ง</button></div></div>`:'<p class="bag-hint">แตะไอเทมเพื่อดูรายละเอียด · ของจากมอนสเตอร์ตกพื้น · สัตว์เลี้ยงที่ติดตามช่วยเก็บ · ขายได้ที่ร้านแม่บัวในเมือง</p>';
    if(!worn)$('bag-detail').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;if(a==='weapon-choice'){dialog.close();api.onSetChoice?.(selected);}else if(a==='stat-reset'){dialog.close();api.onStatReset?.();}else if(a==='rename')document.getElementById('rename-pen')?.click();else if(a==='use')use(selected);else if(a==='discard')askDiscard(selected);else if(a==='wear')api.onWear?.(selected);else if(a==='recall'){if(worldUI.recall()&&!game.online){const b=normalizeBag(local);b.items[selected]--;if(!b.items[selected])delete b.items[selected];local=b;save();}}else{quick[+a[1]]=selected;try{localStorage.setItem(QUICK_KEY,JSON.stringify(quick));}catch{}render(true);}});
   }
   if(shopDialog.open&&shopNpc){
-   const shop=SHOPS[shopNpc.name];$('shop-title').textContent=shop.title;$('shop-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');
+   const shop=SHOPS[shopNpc.name];batch.hidden=tab!=='sell';$('shop-title').textContent=shop.title;$('shop-coins').innerHTML=icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH');
    shopDialog.querySelectorAll('[data-tab]').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===tab)));
    // 0.109.6 bag expansion at shops that offer it: +BAG_STEP slots for a price that rises each time, up to BAG_MAX
    {const box=$('shop-expand'),cost=expandCost(b),cap=bagCap(b);box.hidden=!shop.expand||tab!=='buy';if(box.hidden)box.innerHTML=''; // never keep another shop's button
@@ -263,7 +269,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  render(true);
  let autoDrink=0;
  api.collectGroundLoot=(loot,at)=>{const r=addLoot(local,loot);local=r.bag;save();showLoot({coins:r.coins,items:r.added,lost:[]});if(r.lost.length)world.notice('กระเป๋าเต็ม');if(r.added.length)world.emit('drop',{items:r.added,x:at.x,z:at.z});render();return {coins:0,items:r.lost};};
- api.update=()=>{
+ api.update=()=>{utilityUI.update();
   // 0.90 offline AUTO drinks potions under the thresholds set in the skill window (the server does this online).
   if(!game.online&&world.auto&&performance.now()-autoDrink>800){const id=pickPotion(local,world.player,world.autoConfig);if(id){autoDrink=performance.now();use(id);}}
   if(dialog.open)try{equipmentUI?.paint(heroCtx);}catch{} // a preview must never stop the game loop

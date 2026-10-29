@@ -4,5 +4,69 @@
   "buildCommand": "npm run build",
   "installCommand": "node --version",
   "outputDirectory": "dist",
-  "cleanUrls": false
+  "cleanUrls": false,
+  "headers": [
+    {
+      "source": "/game.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/play.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/release.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/releases/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/releases/:release/:page.html",
+      "destination": "/:page.html",
+      "permanent": false
+    },
+    {
+      "source": "/releases/:release",
+      "destination": "/game.html",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/releases/:release/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
+      "source": "/releases/:release/maps/:path*",
+      "destination": "/maps/:path*"
+    },
+    {
+      "source": "/releases/:release/vendor/:path*",
+      "destination": "/vendor/:path*"
+    }
+  ]
 }

@@ -1,10 +1,11 @@
+import {createAuctionUI} from './auction-ui223.js';
 // 0.70 ตลาดกลาง: search every shop and stall on the server, open consignment / buying shops that stay open while
 // you are offline, collect proceeds, and see shop signs on the market street. Every action is a realm command.
 import * as THREE from 'three';
 import {ITEMS,ITEM_ERRORS,itemDef} from './items.js?v=107';
 import {TRADABLE} from './market.js?v=107';
 import {MARKET_ZONE,tradePerks,priceHint,priceKey,inMarket,shopHasListings,MARKET_PAGE_SIZE} from './market-board.js?v=market188';
-import {iconStyle} from './bag-ui.js?v=107';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
 const tr=s=>globalThis.I18N?.t(s)??s;
 
@@ -27,6 +28,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
   <nav class="board-tabs" role="tablist"><button type="button" data-tab="search">สินค้าทั้งหมด</button><button type="button" data-tab="open">เปิดร้าน</button><button type="button" data-tab="mine">ร้านของฉัน</button></nav><div id="board-body"></div>`;
  ($('game-shell')??document.body).append(dialog);
  dialog.querySelector('#board-close').onclick=()=>dialog.close();
+ const auctions=createAuctionUI({game});const auctionButton=document.createElement('button');auctionButton.type='button';auctionButton.className='qol-btn';auctionButton.textContent='ประมูล';auctionButton.onclick=()=>{dialog.close();auctions.open();};dialog.querySelector('.board-tabs').append(auctionButton);
  dialog.addEventListener('close',stopBrowse);
  dialog.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;if(tab==='search')requestBrowse();else{stopBrowse();if(tab==='mine')cmd('shopMine');render(true);}});
  function open(t='search'){if(!game.online)return world.notice('ตลาดกลางต้องเข้าโหมดออนไลน์');tab=t;cmd('shopMine');openHudPanel(dialog);dialog.focus({preventScroll:true});if(tab==='search')requestBrowse();else render(true);}

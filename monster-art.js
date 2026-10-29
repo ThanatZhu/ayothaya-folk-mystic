@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {loadChapter2Monster,drawChapter2Monster} from './chapter2-monster-art.js';
 const authored=new Map();
 function loadAuthored(type){

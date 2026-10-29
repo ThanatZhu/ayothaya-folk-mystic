@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import {GROUND_LOOT,GROUND_PICKUP_ERRORS,makeGroundDrop,groundDropView,groundEligible,stepGroundPet,groundPetView} from './ground-loot.js';
+import {GROUND_LOOT,GROUND_PICKUP_ERRORS,makeGroundDrop,groundDropView,groundEligible,stepGroundPet,groundPetView} from './ground-loot.js?v=surfaces222';
 import {activePremiumPet} from './pet-account.js';
-import {groundHeight,walkLineClear} from './combat-core.js';
+import {groundHeight,walkLineClear} from './combat-core.js?v=surfaces222';
 import {itemLabel} from './items.js';
-import {iconStyle} from './bag-ui.js?v=loot219';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 export function createGroundLootUI({game,camera,map,bagUI}){
  const world=game.world,layer=document.createElement('div'),views=new Map(),local=new Map(),point=new THREE.Vector3();let serial=0,wasOnline=false;
  layer.className='ground-loot-layer';layer.setAttribute('aria-label','ไอเท็มบนพื้น');document.getElementById('game-shell').append(layer);

@@ -17,7 +17,7 @@ export function startWalk(p,m,runEnabled=false){
  const target=()=>{if(typeof m.npc==='string')return p.room.map.npcs?.find(n=>n.name===m.npc)??null;if(Number.isInteger(m.mob))return p.room.mobs.find(a=>a.id===m.mob&&a.hp>0)??null;return goal;};
  if(!target())throw Error('walk-target-gone');
  p.routeWalker??=createRouteWalker(()=>p.room.map.nav);
- p.walkRoute={id:m.id,mapId:m.mapId,goal,radius,kind:['quest','npc','map','portal','ground'].includes(m.kind)?m.kind:'ground',status:'walking',run:runEnabled===true&&m.run===true,...(typeof m.npc==='string'?{npc:m.npc}:{}),...(Number.isInteger(m.mob)?{mob:m.mob}:{})};
+ p.walkRoute={id:m.id,mapId:m.mapId,goal,radius,kind:['quest','npc','map','portal','ground'].includes(m.kind)?m.kind:'ground',status:'walking',run:runEnabled===true&&(m.run===true||m.kind==='quest'),...(typeof m.npc==='string'?{npc:m.npc}:{}),...(Number.isInteger(m.mob)?{mob:m.mob}:{})};
  p.world.auto=false;p.world.path=[];p.input={x:0,z:0,attack:false,run:false};p.world.clearEmote();
  const id=m.id;p.routeWalker.go(target,{radius,kind:p.walkRoute.kind,onArrive:()=>{if(p.walkRoute?.id===id)p.walkRoute={...p.walkRoute,status:'arrived'};},onFail:reason=>{if(p.walkRoute?.id===id)p.walkRoute={...p.walkRoute,status:'failed',reason};}});
  return p.walkRoute;
@@ -25,7 +25,7 @@ export function startWalk(p,m,runEnabled=false){
 export function setWalkPace(p,m,runEnabled=false){
  if(!validId(m.id)||typeof m.run!=='boolean')throw Error('invalid-walk');
  if(!p.routeWalker?.active||p.walkRoute?.id!==m.id||p.walkRoute.status!=='walking')return false;
- p.walkRoute={...p.walkRoute,run:runEnabled===true&&m.run};return true;
+ p.walkRoute={...p.walkRoute,run:runEnabled===true&&(m.run||p.walkRoute.kind==='quest')};return true;
 }
 export function walkInput(p,dt){
  if(!p.routeWalker?.active)return p.input;

@@ -3,7 +3,7 @@ import {composeMail,deliverMail} from './mailbox.js';
 
 export function characterLevels(record){
  const raw=record.state?.traveler??{},xp=experienceOf(raw);
- if(record.xpCurve!==XP_CURVE)xp.baseXp=migrateXp(xp.baseXp);
+ if(record.xpCurve!==XP_CURVE)xp.baseXp=migrateXp(xp.baseXp,record.xpCurve??1);
  const base=baseProgress(xp),job=jobProgress(xp,record.character?.classId,record.character?.jobId);
  return {level:base.level,baseCap:99,jobLevel:job.level,jobCap:job.cap};
 }
@@ -17,7 +17,7 @@ export function raiseCharacterLevels(record,{baseLevel,jobLevel}={}){
  if(baseLevel===undefined&&jobLevel===undefined)throw Error('bad-level');
  for(const [n,cap] of [[baseLevel,99],[jobLevel,before.jobCap]])if(n!==undefined&&(!Number.isInteger(n)||n<1||n>cap))throw Error('bad-level');
  const raw=record.state?.traveler??{},xp=experienceOf(raw);
- if(record.xpCurve!==XP_CURVE)xp.baseXp=migrateXp(xp.baseXp);
+ if(record.xpCurve!==XP_CURVE)xp.baseXp=migrateXp(xp.baseXp,record.xpCurve??1);
  const nextBase=Math.max(before.level,baseLevel??before.level),nextJob=Math.max(before.jobLevel,jobLevel??before.jobLevel);
  const nextXp={baseXp:Math.max(xp.baseXp,levelStart(nextBase)),jobXp:Math.max(xp.jobXp,jobStart(nextJob))};
  const event={base:nextXp.baseXp-xp.baseXp,job:nextXp.jobXp-xp.jobXp,baseFrom:before.level,baseLevel:nextBase,jobLevel:nextJob,baseUp:nextBase>before.level,jobUp:nextJob>before.jobLevel,levelGiftsGranted:true};

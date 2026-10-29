@@ -1,13 +1,13 @@
 // 0.122 Victory screen after a boss kill (ROX-inspired, our own art): crest + fight time, the boss card, MVP (top
 // individual damage) with crown, rare drops the authority really handed out, and the party/solo ranking. Pops up once
 // per encounter for the people in the report only, closes itself after 8 s unless the player starts using it.
-import {bossResultGroups,mergeBossLoot,bossCard,involves} from './boss-results.js?v=loot219';
-import {bossRanking,format} from './boss-results-ui.js?v=victory197';
-import {classPortrait,monsterPortrait} from './portraits.js?v=at1';
+import {bossResultGroups,mergeBossLoot,bossCard,involves} from './boss-results.js?v=surfaces222';
+import {bossRanking,format} from './boss-results-ui.js?v=surfaces222';
+import {classPortrait,monsterPortrait} from './portraits.js?v=surfaces222';
 import {className} from './classes.js?v=novice174';
-import {MONSTER_TYPES} from './combat-core.js?v=novice174';
+import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {itemDef} from './items.js?v=class-reward192';
-import {iconStyle} from './bag-ui.js?v=mailfull198';
+import {iconStyle} from './bag-ui.js?v=surfaces222';
 
 const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;};
 export const AUTO_CLOSE=8000;

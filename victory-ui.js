@@ -1,7 +1,7 @@
 // 0.122 Victory screen after a boss kill (ROX-inspired, our own art): crest + fight time, the boss card, MVP (top
 // individual damage) with crown, rare drops the authority really handed out, and the party/solo ranking. Pops up once
 // per encounter for the people in the report only, closes itself after 8 s unless the player starts using it.
-import {bossResultGroups,mergeBossLoot,bossCard,involves} from './boss-results.js?v=victory197';
+import {bossResultGroups,mergeBossLoot,bossCard,involves} from './boss-results.js?v=loot219';
 import {bossRanking,format} from './boss-results-ui.js?v=victory197';
 import {classPortrait,monsterPortrait} from './portraits.js?v=at1';
 import {className} from './classes.js?v=novice174';
@@ -58,7 +58,7 @@ export function createVictoryUI({game}){
    const icon=el('i','victory-icon');icon.setAttribute('style',iconStyle(row.itemId));icon.setAttribute('aria-hidden','true');
    const text=el('div','victory-drop-text'),winner=el('small','',row.name);winner.dataset.i18nSkip='';
    text.append(el('strong','',(def?.name??row.itemId)+' ×'+row.count),winner);
-   const note={pending:'รอยืนยันจากเซิร์ฟเวอร์',mailed:'กระเป๋าเต็ม · ส่งไปที่จดหมาย',lost:'กระเป๋าเต็ม · ไม่ได้รับ'}[row.status];if(note)text.append(el('em','',note));
+   const note={ground:'ตกอยู่บนพื้น · รอเก็บ',expired:'หมดเวลาเก็บ',pending:'รอยืนยันจากเซิร์ฟเวอร์',mailed:'กระเป๋าเต็ม · ส่งไปที่จดหมาย',lost:'กระเป๋าเต็ม · ไม่ได้รับ'}[row.status];if(note)text.append(el('em','',note));
    item.append(icon,text);list.append(item);
   });
   rewards.append(list);

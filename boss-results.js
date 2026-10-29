@@ -48,7 +48,7 @@ export function bossLootRows(peer,items,status,grantId){
 // A later bossLoot update (one queued grant) replaces exactly that grant's pending rows in a stored report.
 export function mergeBossLoot(result,update){
  if(!result||!update||result.encounterId!==update.encounterId||!Array.isArray(update.rows))return result;
- const kept=(result.rewards??[]).filter(r=>!(r.status==='pending'&&r.grantId===update.grantId));
+ const kept=(result.rewards??[]).filter(r=>!(['pending','ground'].includes(r.status)&&r.grantId===update.grantId));
  return {...result,rewards:[...kept,...update.rows]};
 }
 // Boss cards by id: the 6 painted for this screen, the 9 world-boss monster cards, then the in-game sprite. Awakened

@@ -1,7 +1,7 @@
-import {createPremiumPetPanel} from './pet-collection-ui.js?v=design202';
+import {createPremiumPetPanel} from './pet-collection-ui.js?v=loot219';
 import {createPremiumHub,loadPremiumStyles,premiumDialog} from './premium-hub-ui.js?v=design203';
 import {activePremiumPet} from './pet-account.js';
-import {createAnimatedPet} from './pet-motion.js?v=128';
+import {createAnimatedPet} from './pet-motion.js?v=loot219';
 import {createMailboxUI} from './mailbox-ui.js?v=150';
 import {groundHeight} from './combat-core.js?v=novice174';
 import {iconStyle} from './bag-ui.js';
@@ -16,5 +16,5 @@ export function createPetUI({game,scene}){
  const hub=createPremiumHub({game}),panel=createPremiumPetPanel({game,dialog,onSummon:()=>hub.openGacha('pets')}),mail=createMailboxUI({game});let view=null;
  menu.onclick=()=>dialog.open?dialog.close():showCollection();
  game.onEvent(e=>{if(e.type==='petSkill'&&(!e.actor||e.actor===world.networkSelfId))view?.attack(e.to,e.lag??0);});
- return {update(dt){const pet=activePremiumPet(world.petCollection);panel.render();hub.render();mail.update();world.petBonus=pet?.bonus??{};if(view&&view.id!==pet?.id){view.dispose();view=null;}if(pet&&!view)view=createAnimatedPet(scene,pet.id);view?.follow({x:world.player.x,z:world.player.z,y:groundHeight(world.nav,world.player.x,world.player.z)},dt);if(view?.sprite)view.sprite.visible=!world.observer;}};
+ return {update(dt){const pet=activePremiumPet(world.petCollection);panel.render();hub.render();mail.update();world.petBonus=pet?.bonus??{};if(view&&view.id!==pet?.id){view.dispose();view=null;}if(pet&&!view)view=createAnimatedPet(scene,pet.id);const motion=world.groundPet?.id===pet?.id?world.groundPet:null;view?.follow({x:world.player.x,z:world.player.z,y:groundHeight(world.nav,world.player.x,world.player.z)},dt,motion?{...motion,y:groundHeight(world.nav,motion.x,motion.z)}:null);if(view?.sprite)view.sprite.visible=!world.observer;}};
 }

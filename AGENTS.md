@@ -15,3 +15,7 @@ Companion UI and ritual motion: read docs/game-ui-review201.md. Use its shared m
 For game UI/UX design, implementation and review, use the installed game-ui-design skill at ~/.codex/skills/game-ui-design/SKILL.md. For interaction animation and motion review, also use ui-animation at ~/.codex/skills/ui-animation/SKILL.md. Load their relevant references and keep this project's approved visual rules and gameplay authority requirements. These skills were installed at the owner's request on 28 October 2026.
 
 For the current UI structure and validation evidence, read docs/game-ui-review202.md. Shared generated controls are owned by premium-controls202.css; keep decorative ends proportional using nine-slice rendering.
+
+## Ground loot (owner requirement, 30 October 2026)
+
+Read docs/ground-loot219.md before changing drops, AUTO collection or companion movement. Automatic ground pickup starts as soon as an owned pet is equipped/following, even with combat AUTO and pet skill AUTO OFF; no pickup switch or key is required. That pet must physically travel to the drop. Merely owning a pet or enabling combat AUTO is insufficient. Keep server authority, manual pickup, party priority, overflow mail and existing drop rates intact.

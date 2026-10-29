@@ -5443,3 +5443,7 @@ Object.assign(globalThis.I18N_EN,{
  "Lv. 66–78 · ชายป่าหิมพานต์ สัตว์ป่าและสระน้ำ": "Lv. 66–78 · Himmapan forest edge, wild beasts and ponds",
  "Lv. 76–88 · ถ้ำลึก ธารน้ำใต้ดิน และองครักษ์นาค": "Lv. 76–88 · Deep caves, underground streams and naga guards"
 });
+
+Object.assign(globalThis.I18N_EN, {"ไอเท็มบนพื้น":"Ground items","เก็บของ ·":"Pick up ·","แตะ / F · เก็บของ":"Tap / F · Pick up","สิทธิ์ของ":"Reserved for","ของชิ้นนี้ถูกเก็บหรือหายไปแล้ว":"This drop has been collected or expired","ยังเก็บของตอนนี้ไม่ได้":"Cannot collect items right now","กำลังทำรายการ · ลองเก็บอีกครั้ง":"Transaction in progress · Try collecting again","ผู้ฆ่าและปาร์ตี้มีสิทธิ์เก็บก่อน":"The killer and their party have pickup priority","เดินเข้าใกล้ของก่อนเก็บ":"Move closer to the drop first","ตกอยู่บนพื้น · รอเก็บ":"On the ground · Awaiting pickup","หมดเวลาเก็บ":"Pickup expired","สัตว์เลี้ยงที่พาติดตามจะวิ่งเก็บของให้เมื่อเปิด AUTO":"A following companion runs to collect drops while AUTO is enabled"});
+
+Object.assign(globalThis.I18N_EN, {"พาติดตามแล้วสัตว์เลี้ยงจะวิ่งเก็บของให้อัตโนมัติ ไม่ต้องเปิด AUTO ต่อสู้":"A following companion automatically collects drops without combat AUTO"});

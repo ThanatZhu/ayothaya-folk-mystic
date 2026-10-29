@@ -43,10 +43,12 @@ test('potions heal on the server and are spent; the bag rides in the snapshot on
  assert.equal(send('useItem',{item:'hp-small'}),false,'already full');
 });
 
-test('defeating a monster auto-loots coins and its drops into the bag', () => {
+test('defeating a monster drops loot on the ground until a validated pickup', () => {
  const {realm,peer}=setup(mill);
  const mob=peer.room.mobs[0];Object.assign(peer.world.player,{x:mob.x+1,z:mob.z});
  realm.hurt(peer,mob,99999);
+ assert.equal(peer.bag.coins,0);assert.equal(peer.bag.items['spirit-rope'],undefined);
+ for(const d of [...peer.room.groundLoot.values()]){Object.assign(peer.world.player,{x:d.x,z:d.z});assert.equal(realm.receive(peer.id,{type:'pickupLoot',seq:peer.seq+1,dropId:d.id}),true);}
  assert.ok(peer.bag.coins>=400,'boss coins');assert.equal(peer.bag.items['spirit-rope'],1,'boss always drops its rope');
  assert.ok(peer.world.events.some(e=>e.type==='loot'&&e.items.some(i=>i.id==='spirit-rope')));
 });

@@ -1,3 +1,4 @@
+import {pickGroundLoot} from '../server/ground-loot.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ITEMS,DROPS,itemDef} from '../items.js';
@@ -48,6 +49,8 @@ test('server: insertCard validates and saves; coin card raises monster coins', (
  assert.equal(send('insertCard',{slot:'accessory',card:'card-rat-chief'}),true);
  assert.equal(realm.record(peer,record).gear.accessory,'ring-ruby~card-rat-chief');
  assert.equal(peer.derived.coinPct,.25);
- const mob=peer.room.mobs[0];Object.assign(peer.world.player,{x:mob.x+1,z:mob.z});realm.hurt(peer,mob,99999);
+ const mob=peer.room.mobs[0];Object.assign(peer.world.player,{x:mob.x+1,z:mob.z});realm.hurt(peer,mob,99999);collectGround(realm,peer);
  assert.ok(peer.bag.coins>=500,'boss coins 400-600 × 1.25');
 });
+
+const collectGround=(realm,p)=>{for(const d of [...(p.room.groundLoot?.values()??[])])if(d.ownerKey===p.key){Object.assign(p.world.player,{x:d.x,z:d.z});assert.equal(pickGroundLoot(realm,p,d.id),null);}};

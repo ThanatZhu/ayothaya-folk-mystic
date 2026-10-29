@@ -1,3 +1,4 @@
+import {pickGroundLoot} from '../server/ground-loot.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,mkdtemp} from 'node:fs/promises';
@@ -73,7 +74,7 @@ test('all 29 production monsters have authored eight-pose assets with shared sca
 });
 test('death deadline survives empty rooms, respects exact wall time and is independent per CH/realm',()=>{
  const s=setup(),p=s.join(),killed=s.kill(p);assert.equal(killed.hp,0);assert.equal(killed.dead,3600);
- assert.ok(p.bag.items['relic-bamboo']>=5,'guaranteed material paid once');
+ collectGround(s.realm,p);assert.ok(p.bag.items['relic-bamboo']>=5,'guaranteed material paid once');
  s.realm.leave(p.id);assert.equal(s.realm.rooms.size,0);
  const again=s.join();assert.equal(s.boss(again).hp,0);assert.equal(s.boss(s.join('bamboo-grove',2)).hp,2500000);assert.equal(s.boss(s.join('bamboo-grove',1,'server-2')).hp,2500000);
  s.advance(3599999);s.realm.step(.05);assert.equal(s.boss(again).hp,0,'must not respawn one millisecond early');
@@ -123,3 +124,5 @@ test('admin summons appear in the chosen channel and never reset natural boss ti
  s.realm.hurt(b,extra,extra.hp+1);assert.equal(s.realm.mapBosses.remaining(a.room),deadline);assert.equal(s.realm.mapBosses.remaining(b.room),0);
  assert.throws(()=>s.realm.summonBoss({mapId:'rice-fields',channel:6}),/bad-channel/);
 });
+
+const collectGround=(realm,p)=>{for(const d of [...(p.room.groundLoot?.values()??[])])if(d.ownerKey===p.key){Object.assign(p.world.player,{x:d.x,z:d.z});assert.equal(pickGroundLoot(realm,p,d.id),null);}};

@@ -10,9 +10,9 @@ import {createCombatPresentation,presentationDelta} from './combat-timing.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {createInspectUI} from './inspect-ui.js?v=108.1';
-import {iconStyle} from './bag-ui.js?v=107';
+import {iconStyle} from './bag-ui.js?v=loot219';
 import {emblemId,emoteId} from './items.js?v=107';
-import {createPetView} from './pet-ui.js?v=pets128';
+import {createPetView} from './pet-ui.js?v=loot219';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=novice174';
@@ -326,7 +326,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    const tag=state.guild?state.guild.emblem+':'+(state.guild.castle?'👑 ':'')+state.guild.name:'';if(v.guildShown!==tag){v.guildShown=tag;v.label.querySelector('.mp-guild')?.remove();if(tag){const g=el('small','mp-guild');g.innerHTML=`<i class="item-icon small" style="${iconStyle(emblemId(state.guild.emblem))}"></i>`;g.append((state.guild.castle?'👑 ':'')+state.guild.name);v.label.append(g);}}
    const head=characterHead(v.sprite,camera);
    v.label.hidden=p.hp<=0||!place(v.label,head.x,head.y,head.z);
-   if((state.pet??null)!==(v.pet?.id??null)){v.pet?.dispose();v.pet=state.pet?createPetView(scene,state.pet):null;}v.pet?.follow(v.sprite.position,Math.min(.05,dt));
+   if((state.pet??null)!==(v.pet?.id??null)){v.pet?.dispose();v.pet=state.pet?createPetView(scene,state.pet):null;}const motion=state.petMotion?.id===state.pet?state.petMotion:null;v.pet?.follow(v.sprite.position,Math.min(.05,dt),motion?{...motion,y:groundHeight(game.world.nav,motion.x,motion.z)}:null);
    if(v.emoteBubble)v.emoteBubble.hidden=performance.now()>v.emoteUntil||!v.sprite.visible||!place(v.emoteBubble,v.sprite.position.x,v.sprite.position.y+2.9,v.sprite.position.z);
   }
   const now=performance.now();

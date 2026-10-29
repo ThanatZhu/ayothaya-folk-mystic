@@ -9,7 +9,7 @@ export function createPremiumPetPanel({game,dialog,onSummon}){
  <img class="pet-hero-art" alt=""><div class="pet-inspect-copy"><small class="pet-detail-kicker"></small><h3 class="pet-detail-name"></h3><p class="pet-stars"></p><div class="pet-bonus" aria-label="สเตตัสที่ได้รับ"></div>
  <details class="pet-ability"><summary class="pet-skill-title"><img class="pet-skill-art" alt=""><span></span><i aria-hidden="true">⌄</i></summary><p class="pet-skill-tip"></p></details>
  <div class="pet-star-progress"><span></span><progress value="0" max="1" aria-label="ตัวซ้ำสำหรับอัปดาว"></progress></div>
- <div class="pet-manage-actions"><button type="button" class="pet-primary" id="pet-equip-new">พาติดตาม</button><button type="button" id="pet-upgrade-new">อัปดาว</button></div></div></article></div>
+ <div class="pet-manage-actions"><button type="button" class="pet-primary" id="pet-equip-new" title="พาติดตามแล้วสัตว์เลี้ยงจะวิ่งเก็บของให้อัตโนมัติ ไม่ต้องเปิด AUTO ต่อสู้">พาติดตาม</button><button type="button" id="pet-upgrade-new">อัปดาว</button></div></div></article></div>
  <div class="pet-empty" hidden><img src="assets/summon147/spirit-egg.webp" alt=""><h3>ยังไม่มีคู่ขวัญ</h3><p>อัญเชิญเพื่อนร่วมผจญภัย แล้วเลือกพาติดตามได้ที่นี่</p><button type="button" id="pet-find-companion">ไปอัญเชิญคู่ขวัญ</button></div></section>
  <div class="pet-live-skill"><img class="pet-active-art" alt=""><strong></strong><button type="button" id="pet-use-live">ใช้สกิลคู่ขวัญ</button><button type="button" id="pet-auto-live">สกิล AUTO ปิด</button></div>
  <p class="pet-account-message" role="status"></p><button class="pet-retry" type="button" hidden>ตรวจสอบคำขอเดิม</button>`;

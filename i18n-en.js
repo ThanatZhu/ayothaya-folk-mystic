@@ -5371,5 +5371,10 @@ Object.assign(globalThis.I18N_EN,{
  "หลบได้ 50%": "50% dodge",
  "หลบได้ 70% (สูงสุด)": "70% dodge (max)",
  "ดู HIT และ FLEE ของตัวเองได้ที่หน้าสเตตัสในเกม · ค่า LUK ช่วยหลบเพิ่มได้อีกเล็กน้อย": "Your own HIT and FLEE are on the in-game status window · LUK adds a little more dodge",
- "เลือกแผนที่": "Choose a map"
+ "เลือกแผนที่": "Choose a map",
+ "ฐานข้อมูลอโยธยา ค้นหาสกิล ไอเท็ม การ์ด มอนสเตอร์ แผนที่ ของดรอป สูตรคราฟต์ และสัตว์เลี้ยง": "Ayothaya database: search skills, items, cards, monsters, maps, drops, crafting recipes and pets",
+ "ฐานข้อมูลเกม · Ayothaya Folk Mystic": "Game database · Ayothaya Folk Mystic",
+ "ค้นหาสกิล ไอเท็ม การ์ด มอนสเตอร์ แผนที่ สูตรคราฟต์ และสัตว์เลี้ยง · ตัวเลขเป็นค่าพื้นฐาน ราคาในตลาด เป้าหมายรายวัน และเวลาบอสสดให้ดูในเกม": "Search skills, items, cards, monsters, maps, recipes and pets · numbers are base values; live market prices, daily goals and boss timers are in the game",
+ "อ่านคู่มือเกม →": "Read the game guide →",
+ "กำลังเปิดฐานข้อมูล…": "Opening the database…"
 });

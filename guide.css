@@ -88,3 +88,10 @@
 /* desktop: icon-over-label tiles so the 7 tabs sit evenly in one row without wrapping words */
 @media(min-width:761px){.library-tabs button{flex-direction:column;gap:4px;min-height:84px;padding:10px 6px;white-space:nowrap}.library-tabs .gi{width:40px;height:40px;margin:0}.library-tabs button small{margin:0;color:inherit;opacity:.75}}
 @media(max-width:760px){.library-tabs button:last-child:nth-child(odd){grid-column:1/-1}}
+
+/* 29 Oct: database.html - the reference library on its own page, full width, no handbook sidebar */
+.db-hero{padding:46px var(--site-gutter,5vw) 34px;background:linear-gradient(90deg,#081c18f2 30%,#081c18b3),url("assets/landing98/hero.webp") center 60%/cover;border-bottom:1px solid var(--line)}
+.db-hero h1{margin:6px 0 10px;font-size:38px;color:var(--ink)}.db-hero p:not(.eyebrow){max-width:760px;color:var(--muted);margin:0 0 18px}
+.db-main{padding:34px var(--site-gutter,5vw) 80px}.db-main .database{margin-top:0;padding-top:0;border-top:0}
+@media(max-width:760px){.db-hero{padding:30px 20px 24px}.db-hero h1{font-size:28px}.db-main{padding:20px 16px 50px}.database-page .searchbar form button{margin-right:0}}
+.db-main .library-tabs{margin-top:0}

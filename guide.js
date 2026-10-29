@@ -7,6 +7,8 @@ const normalize=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,
 const matches=(text,q)=>normalize(q).split(' ').every(t=>normalize(text).includes(t));
 let data,ui,pictures=[],articles=[],index=[],current='skills',limit=16,searchLimit=30,focused=null,searchTimer,toastTimer,pictureDialog,pictureOpener;
 const kinds=['skills','items','monsters','maps','recipes','pets','story'];
+// database.html is the reference library alone: no handbook chapters, sidebar or overview
+const dbOnly=document.body.classList.contains('database-page');
 const label=k=>ui?.[k]??k,name=id=>data.items.find(i=>i.id===id)?.name??id;
 const className=id=>data.classes.find(c=>c.id===id)?.name??label(id);
 const mapName=id=>data.maps.find(m=>m.id===id)?.name??id;
@@ -219,7 +221,7 @@ function search(){
  $('#result-list').innerHTML=found.slice(0,searchLimit).map(i=>`<a class="result-item" href="#${i.kind==='articles'?esc(i.id):'ref-'+i.kind+'-'+esc(i.id)}"><small>${esc(label(i.kind))}</small><strong>${esc(i.title)}</strong><p>${esc(i.snippet.slice(0,150))}</p></a>`).join('')+(found.length>searchLimit?`<button id="more-search" type="button">${esc(label('more'))}</button>`:'');
 }
 function closeContents(){
- $('#contents').classList.remove('open');$('#contents-toggle').setAttribute('aria-expanded','false');
+ $('#contents')?.classList.remove('open');$('#contents-toggle')?.setAttribute('aria-expanded','false');
 }
 function route(){
  let hash;try{hash=decodeURIComponent(location.hash.slice(1));}catch{return;}
@@ -232,16 +234,16 @@ async function copyLink(hash){
  $('#toast').textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2600);
 }
 async function load(){
- const [snapshot,words,book,visuals]=await Promise.all([fetch('assets/guide169/game-data.json?v=skills119').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=skills119').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),fetch('assets/guide169/handbook.md?v=skills119').then(r=>{if(!r.ok)throw Error('book');return r.text();}),fetch('assets/guide169/visuals.json?v=skills119').then(r=>{if(!r.ok)throw Error('visuals');return r.json();})]);
+ const [snapshot,words,book,visuals]=await Promise.all([fetch('assets/guide169/game-data.json?v=skills119').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=skills119').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),(dbOnly?Promise.resolve({ok:true,text:()=>''}):fetch('assets/guide169/handbook.md?v=skills119')).then(r=>{if(!r.ok)throw Error('book');return r.text();}),fetch('assets/guide169/visuals.json?v=skills119').then(r=>{if(!r.ok)throw Error('visuals');return r.json();})]);
  data=snapshot;ui=words;pictures=visuals.pictures;setupPictureViewer();
  new ResizeObserver(()=>document.documentElement.style.setProperty('--guide-tools-height',Math.ceil($('.searchbar').getBoundingClientRect().height)+'px')).observe($('.searchbar'));
- articles=book.trim().split(/\n@/).map(section=>{const [head,...body]=section.replace(/^@/,'').split('\n'),[id,group,title]=head.split('|');return {id,group,title,body:body.join('\n')};});
+ articles=dbOnly?[]:book.trim().split(/\n@/).map(section=>{const [head,...body]=section.replace(/^@/,'').split('\n'),[id,group,title]=head.split('|');return {id,group,title,body:body.join('\n')};});
  // Keep the four TOC groups together without changing stable article IDs.
  const groups=[...new Set(articles.map(a=>a.group))];articles.sort((a,b)=>groups.indexOf(a.group)-groups.indexOf(b.group));
- $('#edition').textContent=`${label('updated')} · ${articles.length} ${label('articleCount')} · ${data.skills.length} ${label('skills')}`;
- renderArticles();renderOverview();$('#load-status').hidden=true;
+ if(!dbOnly)$('#edition').textContent=`${label('updated')} · ${articles.length} ${label('articleCount')} · ${data.skills.length} ${label('skills')}`;
+ if(!dbOnly){renderArticles();renderOverview();}$('#load-status').hidden=true;
  $('#library-tabs').innerHTML=kinds.map(k=>`<button type="button" data-library="${k}" aria-pressed="false">${icon(k)}${esc(label(k))} <small>${data[k].length}</small></button>`).join('');
- $('#search-scope').innerHTML=['all','articles',...kinds].map(k=>`<option value="${k}">${esc(label(k))}</option>`).join('');
+ $('#search-scope').innerHTML=['all',...(dbOnly?[]:['articles']),...kinds].map(k=>`<option value="${k}">${esc(label(k))}</option>`).join('');
  index=[...articles.map(a=>({kind:'articles',id:a.id,title:a.title,snippet:a.body,text:searchText('articles',a)})),...kinds.flatMap(kind=>data[kind].map(r=>({kind,id:r.id,title:r.name??r.title,snippet:searchText(kind,r),text:searchText(kind,r)})))];
  setLibrary('skills');route();
  $('#search-form').addEventListener('submit',e=>{e.preventDefault();searchLimit=30;search();$('#search-results').scrollIntoView({block:'start'});});
@@ -250,9 +252,9 @@ async function load(){
  $('#close-search').addEventListener('click',()=>{$('#search-results').hidden=true;$('#guide-search').focus();});
  $('#library-search').addEventListener('input',()=>{focused=null;limit=16;renderLibrary();});$('#library-filter').addEventListener('change',()=>{focused=null;limit=16;renderLibrary();});
  $('#load-more').addEventListener('click',()=>{limit+=16;renderLibrary();});
- $('#contents-toggle').addEventListener('click',()=>{const open=$('#contents').classList.toggle('open');$('#contents-toggle').setAttribute('aria-expanded',String(open));if(open)$('#toc a')?.focus();});
+ $('#contents-toggle')?.addEventListener('click',()=>{const open=$('#contents').classList.toggle('open');$('#contents-toggle').setAttribute('aria-expanded',String(open));if(open)$('#toc a')?.focus();});
  document.addEventListener('click',e=>{const chip=e.target.closest('[data-map-chip]');if(chip){$('#library-filter').value=chip.dataset.mapChip;limit=16;focused=null;renderLibrary();}const mon=e.target.closest('[data-monster]');if(mon)openMonster(mon.dataset.monster);const picture=e.target.closest('[data-picture]');if(picture)openPicture(picture.dataset.picture,picture);const button=e.target.closest('[data-copy]');if(button)copyLink(button.dataset.copy);const tab=e.target.closest('[data-library]');if(tab){if(tab.tagName==='A')e.preventDefault();setLibrary(tab.dataset.library,tab.dataset.query??'');if(tab.tagName==='A')$('#database').scrollIntoView({block:'start'});}if(e.target.closest('#more-search')){searchLimit+=30;search();}if(e.target.closest('#toc a'))closeContents();});
- document.addEventListener('keydown',e=>{if(pictureDialog.open)return;if(e.key==='Escape'){closeContents();$('#search-results').hidden=true;$('#contents-toggle').focus();}if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$('#guide-search').focus();}});
+ document.addEventListener('keydown',e=>{if(pictureDialog.open)return;if(e.key==='Escape'){closeContents();$('#search-results').hidden=true;$('#contents-toggle')?.focus();}if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$('#guide-search').focus();}});
  window.addEventListener('hashchange',route);
 }
 load().catch(()=>{const node=$('#load-status');node.className='load-error';node.textContent=ui?.error??'Unable to load the guide. Please reload this page.';});

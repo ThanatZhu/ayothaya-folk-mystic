@@ -19,7 +19,7 @@ const PLACES={
  'kailash-peak':[99.85,20.30]         // ยอดดอยเชียงราย
 };
 // Which side of the pin the name sits on, so the crowded central plain stays readable (default below).
-const SIDE={'ayutthaya':'r','rice-fields':'l','moonlit-mill':'t','old-orchard':'b','lotus-marsh':'r','ruined-temple':'l','lablae':'r','naga-cave':'r','himmapan-edge':'l'};
+const SIDE={'ayutthaya':'r','bamboo-grove':'r','rice-fields':'l','moonlit-mill':'t','old-orchard':'b','lotus-marsh':'r','ruined-temple':'l','lablae':'r','naga-cave':'r','himmapan-edge':'l'};
 // Historic cities shown on the map but not open for travel yet.
 const LATER=[['เชียงใหม่ · ล้านนา',[98.99,18.79]],['พิษณุโลก',[100.26,16.82]],['พิมาย',[102.49,15.22]],['ด่านเจดีย์สามองค์',[98.38,15.30]],
  ['จันทบูร',[102.10,12.61]],['นครศรีธรรมราช',[99.96,8.43]],['ปัตตานี',[101.25,6.87]],['ตะนาวศรี',[98.85,12.10]]];
@@ -38,7 +38,7 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onWalk,onClose}
   if(!PLACES[map.id])continue;const anchor=at(PLACES[map.id]);
   const pin=document.createElement('button');pin.type='button';pin.className='atlas-place';pin.dataset.mapId=map.id;
   pin.style.left=anchor[0]*100+'%';pin.style.top=anchor[1]*100+'%';pin.setAttribute('aria-label',map.name);pin.title=map.name;
-  const name=document.createElement('span');name.className='atlas-name side-'+(SIDE[map.id]??'b');name.textContent=map.name;pin.append(name);
+  const name=document.createElement('span');name.className='atlas-name side-'+(SIDE[map.id]??'b');name.textContent=map.name;if(map.levels){const lv=document.createElement('small');lv.className='atlas-lv';lv.textContent='Lv.'+map.levels.join('–');name.append(lv);}pin.append(name);   // 0.123 owner: every map says its level on the map
   if(map.id===currentId){pin.classList.add('is-current');pin.setAttribute('aria-current','location');pin.title=map.name+' · คุณอยู่ที่นี่';}
   pin.onclick=()=>choose(map.id);surface.append(pin);pins.set(map.id,pin);
  }

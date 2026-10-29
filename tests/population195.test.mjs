@@ -11,13 +11,15 @@ test('all ten hunting maps double each ordinary type exactly, including dungeon 
   assert.deepEqual(after.mobs.slice(0,before.mobs.length),before.mobs,'original IDs, leaders and combat stats stay stable');
   if(map.prologue){assert.deepEqual(after.mobs,before.mobs,'the prologue keeps its authored training field');continue;}
   if(!before.mobs.length){assert.equal(after.mobs.length,0);continue;}
+  // 0.123 owner: ใต้ถุนโรงสี fills its rooms with camps of 4–5 instead of doubled singles (and has no boss)
+  if(map.instance){assert.equal(map.mobPopulation,1);assert.equal(map.packs,true);assert.deepEqual(after.mobs,before.mobs);assert.ok(after.mobs.length>=40&&!after.mobs.some(m=>MONSTER_TYPES[m.type].boss),map.id);continue;}
   if(map.rebirthChapter){assert.equal(map.mobPopulation,1);assert.deepEqual(after.mobs,before.mobs,'rebirth drafts retain their authored population');continue;}
   fields++;assert.equal(map.mobPopulation,2);
   for(const type of new Set(before.mobs.map(m=>m.type))){const a=before.mobs.filter(m=>m.type===type),b=after.mobs.filter(m=>m.type===type);assert.equal(b.length,a.length*(regular(a[0])?2:1),map.id+': '+MONSTER_TYPES[type].id);}
   assert.deepEqual(after.mobs.filter(m=>!regular(m)),before.mobs.filter(m=>!regular(m)));
   assert.deepEqual(new CombatWorld(map).mobs,after.mobs,'client and server expansion is deterministic');
  }
- assert.equal(fields,10);
+ assert.equal(fields,9);
 });
 test('added monsters have unique IDs, walkable non-overlapping homes, and independent complete camp leaders',()=>{
  for(const map of catalog.maps.filter(m=>m.mobs?.length)){

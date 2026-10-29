@@ -540,7 +540,7 @@ export class RealmServer{
   const report=MONSTER_TYPES[mob.type]?.boss?finishBossDamage(p.room,mob,MONSTER_TYPES[mob.type],this.clock):null,receipt=report?{encounterId:report.encounterId,rows:[]}:null;
   if(mob.summoned)this.summonDown(p.room,mob,receipt);else if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob,receipt);
   if(MONSTER_TYPES[mob.type].worldBoss&&!mob.summoned){this.mapBosses.killed(p.room,mob,MONSTER_TYPES);const type=MONSTER_TYPES[mob.type];logMvp(this.logs,this.now(),type.name,p.room.channel??1,p.room.map.id,p.character.name);this.announce(p.serverId,'👑 '+type.name+' ถูกปราบที่ '+p.room.map.name+' · CH '+(p.room.channel??1)+' · เกิดใหม่อีก 60 นาที');}
-  if(p.room.map.instance&&MONSTER_TYPES[mob.type].boss)this.dungeonClear(p.room);
+  if(p.room.map.instance&&!p.room.mobs.some(m=>m.hp>0))this.dungeonClear(p.room);   // 0.123 owner: no dungeon boss, the last monster clears it
   const eligible=new Set([...contributors].filter(id=>{const a=this.peers.get(id);return a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18;}));
   for(const id of [...eligible]){const party=this.parties.get(this.peers.get(id).partyId);for(const member of party?.members??[]){const a=this.peers.get(member);if(a?.room===p.room&&!a.suspended&&a.world.player.hp>0&&distance(a.world.player,mob)<=18)eligible.add(member);}}
   const reward=MONSTER_TYPES[mob.type],ids=[...eligible].sort(),rate=expRate(this.now(),p.room.map.id)*mobXp(mob),event=activeEvent(this.now()),rolls=(mob.leader?LEADER.loot:1)*(surgeOn(this.now(),p.room.map.id)?2:1); // 0.50 event/weekend EXP + token drops
@@ -820,7 +820,9 @@ export class RealmServer{
   const today=thaiDay(this.now());
   for(const id of room.peers){const a=this.peers.get(id);if(a.suspended)continue;
    if(a.dungeonDay===today){a.world.notice('ล้างดันเจี้ยนสำเร็จ · วันนี้รับรางวัลไปแล้ว (รีเซ็ตเที่ยงคืน)');continue;}
-   a.dungeonDay=today;this.grantLoot(a,structuredClone(DUNGEON_REWARD));a.saveNow=true;a.world.emit('dungeonClear',{reward:DUNGEON_REWARD,map:room.map.name});}
+   const look=gearLook(a.character.classId,a.character.gender),extra=MONSTER_TYPES.filter(t=>t.clearReward===room.map.id).map(t=>rollLoot(t.id,Math.random,null,1,look));   // 0.123 the old dungeon boss's table
+   const reward={coins:DUNGEON_REWARD.coins+extra.reduce((n,r)=>n+r.coins,0),items:[...structuredClone(DUNGEON_REWARD.items),...extra.flatMap(r=>r.items)]};
+   a.dungeonDay=today;this.grantLoot(a,reward);a.saveNow=true;a.world.emit('dungeonClear',{reward,map:room.map.name});}
  }
  // ---- 0.47 friends (mutual, kept in each private profile) and guilds (one shared doc each, persisted by the host via onGuild).
  online(key,serverId=null){for(const o of this.peers.values())if(o.key===key&&(!serverId||o.serverId===serverId)&&!o.suspended)return o;return null;}

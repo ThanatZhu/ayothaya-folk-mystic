@@ -13,7 +13,8 @@ export const FRONTIER_MONSTERS=[
  {id:'mill-keeper',name:'เจ้าหุ่นฟางพันเชือก',hp:3366,speed:.75,damage:62,baseXp:1278,jobXp:767,level:38,sheet:'elite-monsters',row:2,height:3.3,boss:true,respawn:70,reach:2.6,windup:.85},
  // 0.49: party-dungeon boss (ใต้ถุนโรงสีต้องสาป, never respawns inside the instance) and the timed MVP of โรงสีใต้เงาจันทร์.
  // Own art since 0.54: assets/frontier38/boss-monsters (re-gridded from the ChatGPT bosses49 hand-off).
- {id:'lantern-lord',name:'เจ้าโคมวิญญาณ',hp:8108,speed:.9,damage:75,baseXp:2411,jobXp:1406,level:42,sheet:'boss-monsters',row:0,height:3.2,boss:true,respawn:70,reach:2.4,windup:.8},
+ // 0.123 owner: ใต้ถุนโรงสี has no boss now; clearing it rolls this table once a day (clearReward)
+ {id:'lantern-lord',clearReward:'mill-cellar',name:'เจ้าโคมวิญญาณ',hp:8108,speed:.9,damage:75,baseXp:2411,jobXp:1406,level:42,sheet:'boss-monsters',row:0,height:3.2,boss:true,respawn:70,reach:2.4,windup:.8},
  {id:'straw-king',name:'ราชาหุ่นฟางเพลิง',hp:7000,speed:.8,damage:34,baseXp:2600,jobXp:1500,level:30,sheet:'boss-monsters',row:1,height:4.4,boss:true,mvp:true,respawn:3600,reach:3,windup:.9,pctHit:{tank:.2,min:.2,max:.3}},
  // 0.60 บึงบัวต้องมนตร์ (Lv. 25–35): stronger variants drawn with existing rows, larger.
  {id:'marsh-rat',name:'หนูบึงยักษ์',hp:1108,speed:1.8,damage:45,baseXp:190,jobXp:109,level:38,sheet:'field-monsters',row:1,height:1.45},

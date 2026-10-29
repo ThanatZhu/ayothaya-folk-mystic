@@ -47,7 +47,7 @@ export function itemEffects(it){
 }
 export function createItemGuide(catalog){
  const mapById=new Map(catalog.maps.map(m=>[m.id,m]));
- function monsterMaps(id){const m=monsterById.get(id);if(!m)return [];return catalog.maps.filter(map=>map.mobs?.some(spawn=>spawn[2]===m.index)).map(map=>({id:map.id,name:map.name,instance:!!map.instance}));}
+ function monsterMaps(id){const m=monsterById.get(id);if(!m)return [];return catalog.maps.filter(map=>map.id===m.clearReward||map.mobs?.some(spawn=>spawn[2]===m.index)).map(map=>({id:map.id,name:map.name,instance:!!map.instance}));}
  function sources(id){
   const shop=Object.entries(SHOPS).filter(([,s])=>s.stock.includes(id)).map(([npc,s])=>({npc,title:s.title,mapId:s.mapId,mapName:mapById.get(s.mapId)?.name??s.mapId,currency:s.currency??'coins',price:s.currency?ITEMS[id]?.tokens:ITEMS[id]?.buy}));
   const drop=Object.entries(DROPS).flatMap(([monster,def])=>def.items.filter(([item,chance])=>item===id&&chance>0).map(([,chance,count=1])=>({monster,name:monsterById.get(monster)?.name??monster,level:monsterById.get(monster)?.level??1,chance,count,maps:monsterMaps(monster),boss:!!(monsterById.get(monster)?.boss||monsterById.get(monster)?.elite),worldBoss:!!monsterById.get(monster)?.worldBoss,respawn:monsterById.get(monster)?.respawn??null}))).sort((a,b)=>Number(a.boss)-Number(b.boss)||a.level-b.level||b.chance-a.chance);

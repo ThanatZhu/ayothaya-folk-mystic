@@ -64,3 +64,5 @@
  #atlas-wallet{flex:1;min-width:0}
  #world-atlas-dialog #atlas-walk,#world-atlas-dialog #atlas-warp{flex:1;min-width:0;min-height:40px;padding:5px 8px;font-size:13px}
 }
+/* 0.123 each place shows its level range under its name */
+.atlas-name .atlas-lv{display:block;margin-top:-1px;font:700 10px var(--font-game,Mali),sans-serif;color:#ffd77a;text-align:center;font-variant-numeric:tabular-nums}

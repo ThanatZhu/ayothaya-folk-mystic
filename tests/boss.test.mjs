@@ -23,14 +23,16 @@ test('a party keeps together across travel and shares one dungeon instance; anot
  assert.equal(a2.partyId,'party-test');assert.equal(b2.partyId,'party-test');
  assert.equal(a2.room,b2.room,'same instance');assert.notEqual(a2.room,c2.room,'solo player gets a separate instance');
  assert.equal(realm.parties.get('party-test').leader,a2.id,'leader restored');
- assert.equal(a2.room.mobs.length,19);
+ assert.equal(a2.room.mobs.length,42);   // 0.123 camps of 4–5, no boss
 });
 
-test('instance monsters stay down; the dungeon boss pays every member once per Thai day', () => {
+test('instance monsters stay down; the last monster clears the dungeon and pays every member once per Thai day', () => {
  const {realm,join,travel}=world(),a=join('เอ','moonlit-mill'),b=join('บี','moonlit-mill');party(realm,a,b);
  const a2=travel(a,'mill-cellar'),b2=travel(b,'mill-cellar');
  const mob=a2.room.mobs[0];Object.assign(a2.world.player,{x:mob.x+1,z:mob.z});realm.hurt(a2,mob,99999);assert.ok(mob.dead>1e8,'no respawn inside');
- const boss=a2.room.mobs.find(m=>MONSTER_TYPES[m.type].id==='lantern-lord'),coins=b2.bag.coins;
+ assert.ok(!a2.room.mobs.some(m=>MONSTER_TYPES[m.type].boss),'no dungeon boss');
+ const rest=a2.room.mobs.filter(m=>m.hp>0),boss=rest.pop(),coins=b2.bag.coins;
+ for(const m of rest){Object.assign(a2.world.player,{x:m.x+1,z:m.z});realm.hurt(a2,m,99999);}assert.ok(!b2.world.events.some(e=>e.type==='dungeonClear'),'not cleared while one is left');
  Object.assign(a2.world.player,{x:boss.x+1,z:boss.z});Object.assign(b2.world.player,{x:boss.x+2,z:boss.z});realm.hurt(a2,boss,99999);
  assert.ok(b2.bag.coins>=coins+DUNGEON_REWARD.coins,'member is paid');assert.equal(b2.dungeonDay,'2026-10-16');assert.ok(b2.saveNow);
  assert.ok(b2.world.events.some(e=>e.type==='dungeonClear'));

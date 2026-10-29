@@ -13420,7 +13420,7 @@
         [
           0.5,
           -30,
-          13
+          87
         ]
       ],
       "portals": [
@@ -13512,11 +13512,12 @@
       ],
       "instance": true,
       "scene": "maps/v7/mill-cellar.glb",
-      "mobPopulation": 2,
+      "mobPopulation": 1,
       "levels": [
         32,
         42
-      ]
+      ],
+      "packs": true
     },
     {
       "id": "lotus-marsh",

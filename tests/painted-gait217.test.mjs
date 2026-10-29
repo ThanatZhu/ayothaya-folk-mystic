@@ -52,7 +52,7 @@ test('missing optional gait art preserves existing renderer and class/gender cha
  await mesh.userData.ready;assert.equal(mesh.userData.artReady,true);assert.equal(mesh.userData.gaitError,'offline');
  mesh.userData.pose(characterMotion({mode:'walk',classId:'boxer',phase:.5}));assert.equal(mesh.userData.paintedGait217,null);assert.ok(mesh.material.map);
  mesh.userData.dispose();
- const changed=createRiggedSprite(null,{...loaders,classId:'boxer',gaitArtLoader:async()=>fakeGait()});await changed.userData.ready;
+ const changed=createRiggedSprite(null,{...loaders,classId:'boxer',gaitArtLoader:async(id,g)=>g==='male'?fakeGait():null});await changed.userData.ready;
  await changed.userData.setRig('boxer','female');assert.equal(changed.userData.usesAuthoredGround('run'),false);
  changed.userData.pose(characterMotion({mode:'walk',classId:'boxer',phase:.5}));assert.equal(changed.userData.paintedGait217,null);changed.userData.dispose();
 });

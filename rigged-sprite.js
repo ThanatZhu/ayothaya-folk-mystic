@@ -1,4 +1,4 @@
-import {loadPaintedGait217,gaitFits217,gaitFrame217} from './painted-gait217.js';
+import {loadPaintedGait220,gaitFits220,gaitFrame220} from './painted-gait220.js';
 import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=size1';
 import * as THREE from './vendor/build/three.module.js';
 import {loadPaintedCharacter} from './painted-character.js?v=size1';
@@ -7,7 +7,7 @@ import {loadLifeArt,lifeFrameAt,mapFrames,builtFrames} from './character-life-ar
 import {createPosturePlayback} from './character-action-state.js?v=106.0';
 import {poseTexture,poseScale,posesFit} from './skill-pose-art.js?v=pose119';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
-export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt,gaitArtLoader=loadPaintedGait217}={}){
+export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt,gaitArtLoader=loadPaintedGait220}={}){
  const geometry=new THREE.PlaneGeometry(1,1);geometry.translate(0,.5,0);
  const material=new THREE.MeshBasicMaterial({map:texture,alphaTest:.45,transparent:false,depthWrite:true,side:THREE.DoubleSide,color:'#fff1da'});
  const mesh=new THREE.Mesh(geometry,material);mesh.frustumCulled=false;
@@ -38,7 +38,7 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  }
  async function artwork(id,look,gear){
   const shown=currentGender,[art,result,nextGait]=await Promise.all([paintedArtLoader(id,look,gear),loadLife(id,look,gear,shown).then(value=>({value}),error=>({error})),
-   gaitFits217(id,shown,look,gear)?Promise.resolve().then(()=>gaitArtLoader(id,shown)).then(value=>({value}),error=>({error})):Promise.resolve({value:null})]);
+   gaitFits220(id,shown,look,gear)?Promise.resolve().then(()=>gaitArtLoader(id,shown)).then(value=>({value}),error=>({error})):Promise.resolve({value:null})]);
   return {art,shown,newLife:result.value??null,lifeError:result.error?.message??null,newGait:nextGait.value??null,gaitError:nextGait.error?.message??null};
  }
 
@@ -86,9 +86,9 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   if(frame>=20&&lifeIndex<0)flip=false; // front/back walk art is drawn facing the camera / away from it
   // 0.119 a skill with its own pose sheet draws it; until it loads, or for gear the sheet cannot show, the class frames play.
   const skill=pose.skillArt,art=skill&&poseFit&&frames&&!mesh.userData.directional&&loadedClass===currentClass?poseTexture(skill.id,currentClass,currentGender,skill.frame):null;
-  const selected=!pose.profileFrame&&!resolved.transition&&!mesh.userData.directional&&activeGait()?gaitFrame217({mode:action,phase:pose.phase,time:resolved.time,direction:pose.viewDirection,reduced:pose.reduced}):null;
+  const selected=!pose.profileFrame&&!resolved.transition&&!mesh.userData.directional&&activeGait()?gaitFrame220({mode:action,phase:pose.phase,time:resolved.time,direction:pose.viewDirection,reduced:pose.reduced}):null;
   const gaitTexture=selected?activeGait().clips[action]?.frames[selected.direction]?.[selected.index]:null;
-  mesh.userData.paintedGait217=gaitTexture?selected:null;
+  mesh.userData.paintedGait217=gaitTexture?selected:null;mesh.userData.paintedGait220=mesh.userData.paintedGait217;
   if(gaitTexture)flip=false; // All eight camera-relative views are authored in the atlas.
   mesh.userData.skillArt=art?skill.id:null;
   if(!mesh.userData.directional&&frames){

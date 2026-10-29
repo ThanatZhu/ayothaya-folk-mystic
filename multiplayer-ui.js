@@ -23,7 +23,7 @@ import {atlasPath,className} from './classes.js?v=novice174';
 import {rebirthRank} from './character-stats.js?v=107';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {atlasCell} from './sprite-motion.js';
-import {createPaintedAvatar} from './painted-avatar.js?v=gait217';
+import {createPaintedAvatar} from './painted-avatar.js?v=gait220';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,actionChoice,supportsCharacterAction} from './character-action-state.js?v=106.0';
 import {skillPose,skillTrack} from './skill-choreography.js?v=novice174';

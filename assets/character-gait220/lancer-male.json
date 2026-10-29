@@ -1,0 +1,55 @@
+{
+  "version": 220,
+  "classId": "lancer",
+  "gender": "male",
+  "cell": 256,
+  "bodyHeight": 160,
+  "anchor": [
+    128,
+    240
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "clips": {
+    "walk": {
+      "image": "lancer-male-walk.png",
+      "frames": 4,
+      "cycle_ms": 640
+    },
+    "run": {
+      "image": "lancer-male-run.png",
+      "frames": 4,
+      "cycle_ms": 480
+    }
+  },
+  "tiers": {
+    "sd": {
+      "cell": 128,
+      "bodyHeight": 80.0,
+      "anchor": [
+        64,
+        120.0
+      ],
+      "clips": {
+        "walk": {
+          "image": "lancer-male-walk-sd.png",
+          "frames": 4,
+          "cycle_ms": 640
+        },
+        "run": {
+          "image": "lancer-male-run-sd.png",
+          "frames": 4,
+          "cycle_ms": 480
+        }
+      }
+    }
+  }
+}

@@ -69,3 +69,22 @@
 .drop-list.full{grid-template-columns:1fr 1fr}
 @media(max-width:760px){.reference-grid.monster-list{grid-template-columns:1fr}.map-chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.map-chips button{white-space:nowrap}.monster-grid{grid-template-columns:1fr 1fr}.hit-box>div,.drop-list.full{grid-template-columns:1fr}}
 @media print{.map-chips,.monster-open{display:none}}
+/* 29 Oct: breathing room between the database controls, chips and cards */
+.library-tabs{gap:10px;margin:26px 0 20px}.library-tabs button{min-height:42px;padding:8px 14px;border-radius:8px;font-size:13px}
+.filters{margin:0 0 18px}
+.map-chips{gap:10px;margin:0 0 18px;padding:14px;background:#0b221c;border:1px solid var(--line);border-radius:10px}
+.map-chips button{min-height:38px;padding:8px 16px;font-size:13px;line-height:1.3}
+#library-count{margin:0 0 16px}
+.reference-grid.monster-list{gap:18px}
+.monster-card{padding:18px;gap:14px}
+.monster-stats{gap:10px 14px;padding:12px 14px}.monster-stats dd{font-size:15px}
+.monster-card .drop-list{grid-template-columns:1fr;gap:6px}.drop-list li{padding:6px 10px;gap:8px}
+.drop-list.full{gap:8px}.drop-list.full li{padding:8px 12px}
+.monster-grid{gap:10px}.monster-body{gap:18px;padding:20px 22px}
+@media(max-width:760px){.library-tabs{gap:8px}.library-tabs button{min-height:38px;padding:7px 11px;font-size:12px}.map-chips{padding:10px;gap:8px}.map-chips button{min-height:36px;padding:7px 13px}.monster-body{padding:16px}.monster-card{padding:16px}}
+/* the 7 database tabs share one even row (wraps into even columns on narrow screens) */
+.library-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}.library-tabs button{justify-content:center;text-align:center;line-height:1.3}
+@media(max-width:760px){.library-tabs{grid-template-columns:repeat(2,1fr)}}
+/* desktop: icon-over-label tiles so the 7 tabs sit evenly in one row without wrapping words */
+@media(min-width:761px){.library-tabs button{flex-direction:column;gap:4px;min-height:84px;padding:10px 6px;white-space:nowrap}.library-tabs .gi{width:40px;height:40px;margin:0}.library-tabs button small{margin:0;color:inherit;opacity:.75}}
+@media(max-width:760px){.library-tabs button:last-child:nth-child(odd){grid-column:1/-1}}

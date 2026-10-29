@@ -3,7 +3,7 @@ import {rebirthAccess} from './rebirth-content196.js';
 import {createNPCConversation} from './npc-conversation155.js?v=hire177';
 import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
-import {createWorldAtlas} from './world-atlas-ui.js?v=farm217';
+import {createWorldAtlas} from './world-atlas-ui.js?v=farm218';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {drawMap} from './city-map.js?v=107';
 import {createMentorUI} from './mentor-ui.js?v=farm211';

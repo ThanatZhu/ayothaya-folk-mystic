@@ -3,7 +3,7 @@ import {warpCost,hops} from './world-state.js?v=101.5';
 // 0.112.4 the world map is Thailand (models3d/world-thailand/build_thailand.py renders it in Blender from Natural Earth
 // data). Every place is pinned at a real longitude / latitude, in the same frame the render uses.
 // 0.123 owner: the map fills the window's width and only scrolls up and down (wheel, touch or mouse drag); no zoom
-const FRAME={lon0:96.6,lon1:106.4,lat0:5.2,lat1:21.0},IMG='assets/world112/thailand-painted.webp',ASPECT=1240/2052;
+const FRAME={lon0:96.6,lon1:106.4,lat0:5.2,lat1:21.0},IMG='assets/world112/thailand-painted.webp?v=hd',ASPECT=1240/2052;
 const at=([lon,lat])=>[(lon-FRAME.lon0)/(FRAME.lon1-FRAME.lon0),(FRAME.lat1-lat)/(FRAME.lat1-FRAME.lat0)];
 // Open maps: where each one sits in the real country (the place it is drawn from).
 const PLACES={
@@ -24,7 +24,7 @@ const PLACES={
 const PAINTED={'kailash-peak':[0.349,0.062],'himmapan-edge':[0.251,0.161],'lablae':[0.421,0.229],'ruined-temple':[0.333,0.273],'bamboo-grove':[0.508,0.298],'naga-cave':[0.708,0.214],'lotus-marsh':[0.390,0.347],'moonlit-mill':[0.446,0.403],'rice-fields':[0.308,0.453],'ayutthaya':[0.456,0.449],'old-orchard':[0.487,0.493]};
 // 0.123 owner: a second sheet for the rebirth realms (ไตรภูมิ), climbing from the ferry at the bottom to the shores at the
 // top, on the owner's painted map (each pin on its painted realm); a sheet whose art fails to load shows a night sky.
-const REBIRTH_IMG='assets/world112/rebirth-realms.webp';
+const REBIRTH_IMG='assets/world112/rebirth-realms.webp?v=hd';
 const REBIRTH_PINS={'rebirth-ferry':[.636,.856],'rebirth-kalpa':[.277,.589],'rebirth-gandharva':[.708,.434],'rebirth-rahu':[.338,.291],'rebirth-sithandon':[.615,.112]};
 // Which side of the pin the name sits on, so the crowded central plain stays readable (default below).
 const SIDE={'rebirth-ferry':'r','rebirth-kalpa':'r','rebirth-gandharva':'l','rebirth-rahu':'r','rebirth-sithandon':'r','ayutthaya':'r','bamboo-grove':'r','rice-fields':'l','moonlit-mill':'r','old-orchard':'l','lotus-marsh':'l','ruined-temple':'l','lablae':'r','naga-cave':'r','himmapan-edge':'b'};

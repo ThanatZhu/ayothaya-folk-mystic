@@ -39,7 +39,7 @@ import {createAmbientMotion} from './ambient-motion.js?v=size1';
 import {createGame} from './game-controls.js?v=farm213';
 import {atlasPath,className} from './classes.js?v=novice174';
 import {atlasCell} from './sprite-motion.js';
-import {createWorldUI} from './world-ui.js?v=farm217';
+import {createWorldUI} from './world-ui.js?v=farm218';
 import {createStoryUI} from './story-ui.js?v=farm212';
 import {createPrologueUI} from './prologue-ui.js?v=farm215';
 import {TRIAL_CLASSES} from './prologue.js?v=2';

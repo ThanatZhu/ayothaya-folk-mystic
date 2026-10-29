@@ -1,6 +1,16 @@
 // Balance overrides written by the admin dashboard (admin.html). Empty = the numbers in the code.
 export default {
- "classes": {},
+ "classes": {
+  "hunter": {
+   "range": 9
+  },
+  "shaman": {
+   "range": 9
+  },
+  "acolyte": {
+   "range": 7.5
+  }
+ },
  "skills": {},
  "items": {},
  "monsters": {

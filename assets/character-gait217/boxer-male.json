@@ -1,0 +1,34 @@
+{
+  "version": 217,
+  "classId": "boxer",
+  "gender": "male",
+  "cell": 208,
+  "bodyHeight": 168,
+  "anchor": [
+    104,
+    196
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "clips": {
+    "walk": {
+      "image": "boxer-male-walk.png",
+      "frames": 4,
+      "cycle_ms": 640
+    },
+    "run": {
+      "image": "boxer-male-run.png",
+      "frames": 4,
+      "cycle_ms": 480
+    }
+  },
+  "provenance": "Painted four-pose locomotion. SE uses the reviewed walk and new run; S/E/NE/N are authored views; SW/W/NW mirror the corresponding right-facing views. One body scale per clip, sole alignment only for support poses, preserved run flight."
+}

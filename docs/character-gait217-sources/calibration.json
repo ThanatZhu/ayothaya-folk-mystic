@@ -1,0 +1,572 @@
+{
+  "walk/S": {
+    "scale": 0.5526315789473685,
+    "frames": [
+      {
+        "translation": [
+          11,
+          23
+        ],
+        "bounds": [
+          42,
+          28,
+          145,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          13,
+          23
+        ],
+        "bounds": [
+          43,
+          29,
+          147,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          11,
+          23
+        ],
+        "bounds": [
+          42,
+          28,
+          145,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          15,
+          23
+        ],
+        "bounds": [
+          46,
+          29,
+          150,
+          197
+        ],
+        "flight": false
+      }
+    ]
+  },
+  "walk/E": {
+    "scale": 0.5454545454545454,
+    "frames": [
+      {
+        "translation": [
+          10,
+          26
+        ],
+        "bounds": [
+          37,
+          29,
+          151,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          7,
+          26
+        ],
+        "bounds": [
+          34,
+          29,
+          148,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          23,
+          26
+        ],
+        "bounds": [
+          50,
+          29,
+          164,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          10,
+          26
+        ],
+        "bounds": [
+          38,
+          29,
+          151,
+          197
+        ],
+        "flight": false
+      }
+    ]
+  },
+  "walk/NE": {
+    "scale": 0.536741214057508,
+    "frames": [
+      {
+        "translation": [
+          18,
+          29
+        ],
+        "bounds": [
+          54,
+          29,
+          160,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          20,
+          29
+        ],
+        "bounds": [
+          56,
+          29,
+          161,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          19,
+          29
+        ],
+        "bounds": [
+          55,
+          29,
+          160,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          19,
+          29
+        ],
+        "bounds": [
+          56,
+          29,
+          161,
+          197
+        ],
+        "flight": false
+      }
+    ]
+  },
+  "walk/N": {
+    "scale": 0.5618729096989966,
+    "frames": [
+      {
+        "translation": [
+          13,
+          29
+        ],
+        "bounds": [
+          58,
+          32,
+          153,
+          196
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          12,
+          21
+        ],
+        "bounds": [
+          61,
+          24,
+          152,
+          189
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          12,
+          28
+        ],
+        "bounds": [
+          57,
+          31,
+          153,
+          196
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          11,
+          28
+        ],
+        "bounds": [
+          61,
+          31,
+          151,
+          196
+        ],
+        "flight": false
+      }
+    ]
+  },
+  "walk/SE": {
+    "scale": 0.30939226519337015,
+    "frames": [
+      {
+        "translation": [
+          23,
+          10
+        ],
+        "bounds": [
+          39,
+          26,
+          150,
+          196
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          20,
+          10
+        ],
+        "bounds": [
+          35,
+          26,
+          148,
+          196
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          36,
+          11
+        ],
+        "bounds": [
+          48,
+          27,
+          169,
+          194
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          25,
+          11
+        ],
+        "bounds": [
+          39,
+          27,
+          153,
+          194
+        ],
+        "flight": false
+      }
+    ]
+  },
+  "run/S": {
+    "scale": 0.5675675675675675,
+    "frames": [
+      {
+        "translation": [
+          21,
+          19
+        ],
+        "bounds": [
+          70,
+          29,
+          173,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          19,
+          11
+        ],
+        "bounds": [
+          55,
+          20,
+          162,
+          187
+        ],
+        "flight": true
+      },
+      {
+        "translation": [
+          38,
+          19
+        ],
+        "bounds": [
+          75,
+          29,
+          180,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          17,
+          11
+        ],
+        "bounds": [
+          49,
+          21,
+          154,
+          174
+        ],
+        "flight": true
+      }
+    ]
+  },
+  "run/E": {
+    "scale": 0.5572139303482587,
+    "frames": [
+      {
+        "translation": [
+          24,
+          23
+        ],
+        "bounds": [
+          63,
+          29,
+          185,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          25,
+          15
+        ],
+        "bounds": [
+          57,
+          20,
+          177,
+          180
+        ],
+        "flight": true
+      },
+      {
+        "translation": [
+          32,
+          23
+        ],
+        "bounds": [
+          57,
+          29,
+          187,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          32,
+          15
+        ],
+        "bounds": [
+          57,
+          21,
+          179,
+          181
+        ],
+        "flight": true
+      }
+    ]
+  },
+  "run/NE": {
+    "scale": 0.5436893203883495,
+    "frames": [
+      {
+        "translation": [
+          19,
+          27
+        ],
+        "bounds": [
+          59,
+          32,
+          174,
+          195
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          14,
+          19
+        ],
+        "bounds": [
+          49,
+          23,
+          163,
+          172
+        ],
+        "flight": true
+      },
+      {
+        "translation": [
+          28,
+          27
+        ],
+        "bounds": [
+          51,
+          31,
+          169,
+          195
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          32,
+          19
+        ],
+        "bounds": [
+          58,
+          23,
+          173,
+          181
+        ],
+        "flight": true
+      }
+    ]
+  },
+  "run/N": {
+    "scale": 0.5724020442930153,
+    "frames": [
+      {
+        "translation": [
+          -16,
+          25
+        ],
+        "bounds": [
+          38,
+          28,
+          143,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          -10,
+          20
+        ],
+        "bounds": [
+          38,
+          23,
+          141,
+          184
+        ],
+        "flight": true
+      },
+      {
+        "translation": [
+          -8,
+          25
+        ],
+        "bounds": [
+          35,
+          28,
+          142,
+          197
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          2,
+          20
+        ],
+        "bounds": [
+          45,
+          23,
+          148,
+          186
+        ],
+        "flight": true
+      }
+    ]
+  },
+  "run/SE": {
+    "scale": 0.28187919463087246,
+    "frames": [
+      {
+        "translation": [
+          63,
+          -26
+        ],
+        "bounds": [
+          64,
+          27,
+          181,
+          195
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          68,
+          -43
+        ],
+        "bounds": [
+          69,
+          10,
+          182,
+          162
+        ],
+        "flight": true
+      },
+      {
+        "translation": [
+          58,
+          -40
+        ],
+        "bounds": [
+          58,
+          13,
+          175,
+          182
+        ],
+        "flight": false
+      },
+      {
+        "translation": [
+          48,
+          -38
+        ],
+        "bounds": [
+          49,
+          15,
+          164,
+          166
+        ],
+        "flight": true
+      }
+    ]
+  }
+}

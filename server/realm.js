@@ -565,7 +565,8 @@ export class RealmServer{
   for(const party of [...this.parties.values()])for(const [uid,until] of party.pending??[])if(until<this.now()){party.pending.delete(uid);if(party.members.size+party.pending.size<2){for(const id of party.members){const a=this.peers.get(id);a.partyId=null;this.social(a.room);}this.parties.delete(party.id);}}
   if(this.tickId%20===1){this.expireShops();for(const p of this.peers.values())this.expireStall(p);this.flushMarketBrowsers();}
   this.warTick();
-  if(this.tickId%20===0)for(const p of this.peers.values())if(!p.suspended){this.storyCheck(p);prologueTick(this,p);}
+  if(this.tickId%20===0)for(const p of this.peers.values())if(!p.suspended)this.storyCheck(p);
+  for(const p of this.peers.values())if(p.prologue&&!p.suspended)prologueTick(this,p);   // 0.123 every tick: stepping onto the terrace answers at once
   if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
   for(const p of this.peers.values()){if(p.suspended)continue;p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);if(p.walkQueued&&this.now()>=p.walkAt)this.walkNow(p,p.walkQueued);p.world.update(dt,walkInput(p,dt),{monsters:false});p.appliedInputSeq=p.inputSeq??0;if(!p.mailMutationBusy)this.autoPotion(p);if(!p.petMutationBusy&&p.petCollection.auto&&p.world.auto){try{this.petCast(p,true);}catch{}}}
   for(const room of this.rooms.values()){

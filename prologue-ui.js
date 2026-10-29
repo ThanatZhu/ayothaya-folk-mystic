@@ -42,7 +42,7 @@ export function createPrologueUI({game,worldUI,storyUI,map,account,trial:trialPa
   // the scene starts only now, after the player has walked up and the conversation is open
   if(!state().seen.includes('teacher'))play('teacher',choices);else choices();};
  // 0.123 owner: every prologue card has a ▶ button that takes the player there (story-ui.js runs it)
- const GO={wake:{kind:'mob',not:PROLOGUE_BOSS.id},teacher:{kind:'npc',npc:TEACHER},trial:{kind:'spot',x:TERRACE.x,z:TERRACE.z+TERRACE.r-2},boss:{kind:'mob',monster:PROLOGUE_BOSS.id}};
+ const GO={wake:{kind:'mob',not:PROLOGUE_BOSS.id},teacher:{kind:'npc',npc:TEACHER},trial:{kind:'spot',x:TERRACE.x,z:TERRACE.z+4},boss:{kind:'mob',monster:PROLOGUE_BOSS.id}};
  function objective(){
   const s=state();if(!s)return {chapter:'บทนำ · ทุ่งนิมิต',title:'กำลังเชื่อมต่อกับนิมิต…',hint:'บทนำเล่นได้เมื่อออนไลน์'};
   return {chapter:'บทนำ · ทุ่งนิมิต',title:OBJECTIVES[s.stage]||'นิมิตจบลงแล้ว',hint:(HINTS[s.stage]??(()=>''))(s),go:GO[s.stage]??null};

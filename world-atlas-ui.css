@@ -66,3 +66,5 @@
 }
 /* 0.123 each place shows its level range under its name */
 .atlas-name .atlas-lv{display:block;margin-top:-1px;font:700 10px var(--font-game,Mali),sans-serif;color:#ffd77a;text-align:center;font-variant-numeric:tabular-nums}
+/* 0.123 full-width map, vertical scroll only; dragging shows a grab hand */
+.atlas-viewport{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;cursor:grab}.atlas-viewport:active{cursor:grabbing}

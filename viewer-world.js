@@ -45,7 +45,7 @@ import {createPrologueUI} from './prologue-ui.js?v=2';
 import {TRIAL_CLASSES} from './prologue.js?v=2';
 import {createClassRewardUI} from './class-reward-ui192.js';
 import {createBagUI} from './bag-ui.js?v=mailfull198';
-import {createStatusUI} from './status-ui.js?v=stat-reset189';
+import {createStatusUI} from './status-ui.js?v=tips210';
 import {createProfileUI} from './profile-ui.js?v=profile171';
 import {createRefineUI} from './refine-ui.js?v=tier167';
 import {createCraftUI} from './craft-ui.js?v=amulet-craft193';

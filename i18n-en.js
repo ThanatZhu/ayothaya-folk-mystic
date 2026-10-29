@@ -5321,3 +5321,30 @@ Object.assign(globalThis.I18N_EN,{"คู่ขวัญร่วมผจญภ
 Object.assign(globalThis.I18N_EN,{"สายใยหิมพานต์":"Bonds of Himmapan","อัญเชิญเพื่อนร่วมผจญภัย · มีสัตว์เลี้ยง":"Summon an adventure companion · Pets available:","แบบในตู้":"designs in this pool","อัปดาว":"Upgrade stars","อัญเชิญเพื่อนร่วมผจญภัย แล้วเลือกพาติดตามได้ที่นี่":"Summon a companion, then choose one to follow you here.","สกิล AUTO ปิด":"Skill AUTO off","เลือกคู่ขวัญ":"Choose a companion","ตัวซ้ำสำหรับอัปดาว":"Copies for star upgrade","คู่ขวัญร่วมผจญภัย ·":"Adventure companion ·","· คูลดาวน์":"· Cooldown","ตัวซ้ำสำหรับดาวถัดไป":"Copies for next star","อัปดาว ·":"Upgrade ·","สกิล AUTO":"Skill AUTO"});
 
 Object.assign(globalThis.I18N_EN,{"{7} ทองแท่ง":"{7} gold bars","{8} ทองแท่ง":"{8} gold bars"});
+// 0.122 stat help
+Object.assign(globalThis.I18N_EN,{
+  "สายเวทตีด้วย MATK · STR แทบไม่มีผลกับดาเมจ": "Magic classes hit with MATK · STR barely changes their damage",
+  "ทุก 5 STR: ATK +1": "Every 5 STR: ATK +1",
+  "ATK +1 ต่อแต้ม": "ATK +1 per point",
+  "ครบทุก 10 แต้ม ATK โบนัสเพิ่ม (10 = +1 · 20 = +4 · 30 = +9 …)": "Bonus ATK at every 10 points (10 = +1 · 20 = +4 · 30 = +9 …)",
+  "FLEE +1 ต่อแต้ม (หลบหลีก)": "FLEE +1 per point (dodging)",
+  "ความเร็วโจมตี: ดีเลย์ลดลง 0.6% ต่อแต้ม": "Attack speed: 0.6% less delay per point",
+  "HP สูงสุด +2% ต่อแต้ม": "Max HP +2% per point",
+  "ทุก 2 VIT: DEF +1": "Every 2 VIT: DEF +1",
+  "MATK +1.5 ต่อแต้ม": "MATK +1.5 per point",
+  "ครบทุก 7 แต้ม MATK โบนัสเพิ่ม (7 = +1 · 14 = +4 · 21 = +9 …)": "Bonus MATK at every 7 points (7 = +1 · 14 = +4 · 21 = +9 …)",
+  "MATK +1.5 ต่อแต้ม (สายกายภาพไม่ได้ใช้ตีมอน)": "MATK +1.5 per point (physical classes do not hit with it)",
+  "MP สูงสุด +2% ต่อแต้ม · ฟื้น MP เร็วขึ้น 2% ต่อแต้ม": "Max MP +2% per point · MP regenerates 2% faster per point",
+  "ทุก 2 INT: MDEF +1": "Every 2 INT: MDEF +1",
+  "ทุก 5 DEX: ATK +1": "Every 5 DEX: ATK +1",
+  "HIT +1 ต่อแต้ม (ตีโดน)": "HIT +1 per point (accuracy)",
+  "ความเร็วโจมตี: ดีเลย์ลดลง 0.2% ต่อแต้ม": "Attack speed: 0.2% less delay per point",
+  "คริติคอล +0.4% ต่อแต้ม": "Critical +0.4% per point",
+  "ทุก 3 LUK: ATK +1": "Every 3 LUK: ATK +1",
+  "ทุก 3 LUK: HIT +1": "Every 3 LUK: HIT +1",
+  "ทุก 5 LUK: FLEE +1": "Every 5 LUK: FLEE +1",
+  "หลบหลีก +0.1% ต่อแต้ม": "Dodge +0.1% per point",
+  "เพิ่ม {0} {1} → {2} ใช้ {3} แต้ม": "Raise {0} {1} → {2} for {3} points",
+  "{0} สูงสุดแล้ว ({1})": "{0} is at its maximum ({1})",
+  "อัปอีก 1 แต้มตอนนี้ได้": "One more point now gives"
+});

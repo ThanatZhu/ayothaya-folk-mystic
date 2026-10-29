@@ -9,6 +9,7 @@ import {baseProgress} from './experience.js?v=105.3';
 import {iconStyle} from './bag-ui.js?v=107';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {createCardSlotUI,cardArt,cardEffectText} from './card-slot-ui.js?v=cards156';
+import {statTip} from './stat-tips.js?v=tips210';
 
 const $=id=>document.getElementById(id);
 const SLOT_LABEL={weapon:'อาวุธ',head:'หมวก',armor:'เสื้อเกราะ',garment:'ผ้าคลุม',shoes:'รองเท้า',accessory:'เครื่องประดับ'};
@@ -64,7 +65,29 @@ export function createStatusUI({game,account,bagUI}){
  ($('game-shell')??document.body).append(dialog);
  const resetUI=createStatResetUI({game,bagUI,stats:()=>view().stats,onOpen:()=>hold.stop(),resetOffline(){local.stats=normalizeStats(null);save();applyOffline();render(true);}});
  const hold=bindStatHold($('status-stats'),{read:stat=>({value:view().stats[stat],allowed:canRaise(stat)}),raise,enabled:()=>dialog.open&&!resetUI.busy&&(!game.online||world.netState?.().startsWith('online/'))});
- dialog.addEventListener('close',()=>hold.stop());dialog.addEventListener('cancel',()=>hold.stop());
+ dialog.addEventListener('close',()=>{hold.stop();hideTip();});dialog.addEventListener('cancel',()=>hold.stop());
+ // 0.122 what a stat does: hover (mouse), focus (keyboard) or tap the row (touch); the + button still raises
+ if(!document.querySelector('link[data-stat-tips]')){const css=document.createElement('link');css.rel='stylesheet';css.href='stat-tips.css?v=tips210';css.dataset.statTips='';document.head.append(css);}
+ const tip=document.createElement('div');tip.id='stat-tip';tip.hidden=true;tip.setAttribute('role','tooltip');dialog.append(tip);
+ let tipStat=null;
+ const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
+ function showTip(li){
+  const stat=li?.querySelector('button[data-stat]')?.dataset.stat;if(!stat)return;
+  const v=view(),t=statTip(stat,{who:who(),stats:v.stats,gear:v.gear}),rules=el('ul');
+  for(const line of t.rules)rules.append(el('li',line));
+  tip.replaceChildren(el('strong',t.title+' · '+STAT_HINT[stat]),rules);
+  if(t.gains.length){const gains=el('p',null,'stat-tip-gains');gains.append(el('small','อัปอีก 1 แต้มตอนนี้ได้'),...t.gains.map(([k,n])=>el('span',k+' '+n)));tip.append(gains);}
+  tip.append(el('p',t.raise,'stat-tip-cost'));
+  tipStat=stat;tip.hidden=false;
+  tip.style.left=li.offsetLeft+'px';tip.style.width=li.offsetWidth+'px';
+  const top=li.offsetTop+li.offsetHeight+4,room=dialog.scrollHeight-tip.offsetHeight-6;tip.style.top=Math.max(4,Math.min(top,room))+'px';
+ }
+ function hideTip(){tip.hidden=true;tipStat=null;}
+ const statList=$('status-stats');
+ statList.addEventListener('pointerover',e=>{if(e.pointerType!=='touch')showTip(e.target.closest('li'));});
+ statList.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')hideTip();});
+ statList.addEventListener('focusin',e=>showTip(e.target.closest('li')));statList.addEventListener('focusout',hideTip);
+ statList.addEventListener('click',e=>{if(e.target.closest('button'))return;const li=e.target.closest('li');if(!li)return;const stat=li.querySelector('button[data-stat]')?.dataset.stat;if(tipStat===stat)hideTip();else showTip(li);});
  const cardPicker=createCardSlotUI({game,bag:()=>bagUI.bag(),gear:()=>view().gear,onInsert:slotCard});
  dialog.querySelector('#status-close').onclick=()=>dialog.close();
  menuButton.onclick=()=>{if(dialog.open)dialog.close();else{game.clearInput();openHudPanel(dialog);render(true);}};
@@ -85,6 +108,7 @@ export function createStatusUI({game,account,bagUI}){
   const list=$('status-stats');
   if(!list.children.length)list.innerHTML=statMarkup;
   else{const template=document.createElement('template');template.innerHTML=statMarkup;[...template.content.children].forEach((row,i)=>{const target=list.children[i];target.querySelector('span').innerHTML=row.querySelector('span').innerHTML;const old=target.querySelector('button'),next=row.querySelector('button');old.disabled=next.disabled;old.innerHTML=next.innerHTML;});}
+  if(tipStat)showTip([...list.children].find(li=>li.querySelector('button[data-stat]')?.dataset.stat===tipStat));
   const d=v.derived,pct=n=>Math.round(n*100)+'%';
   $('status-derived').innerHTML=[['HP สูงสุด',d.maxHp],['MP สูงสุด',d.maxMp],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)],['ความเร็วโจมตี',Math.round(100/d.delay)+'%']].map(([k,n])=>`<div><dt>${k}</dt><dd>${n}</dd></div>`).join('');
   const bagItems=bagUI.bag().items??{};

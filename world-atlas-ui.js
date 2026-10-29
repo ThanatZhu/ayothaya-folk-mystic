@@ -22,8 +22,13 @@ const PLACES={
 // 0.123 owner's painted map (outputs/world-map-prompt-2026-10-29.md): each pin sits on its painted vignette, given as a
 // fraction of the image; the painter moved them a little off the real places in PLACES.
 const PAINTED={'kailash-peak':[0.349,0.062],'himmapan-edge':[0.251,0.161],'lablae':[0.421,0.229],'ruined-temple':[0.333,0.273],'bamboo-grove':[0.508,0.298],'naga-cave':[0.708,0.214],'lotus-marsh':[0.390,0.347],'moonlit-mill':[0.446,0.403],'rice-fields':[0.308,0.453],'ayutthaya':[0.456,0.449],'old-orchard':[0.487,0.493]};
+// 0.123 owner: a second sheet for the rebirth realms (ไตรภูมิ), climbing from the ferry at the bottom to the shores at the
+// top. outputs/rebirth-map-prompt-2026-10-30.md asks the painter to put each realm exactly here; until the art arrives
+// the sheet shows a plain night sky.
+const REBIRTH_IMG='assets/world112/rebirth-realms.webp';
+const REBIRTH_PINS={'rebirth-ferry':[.50,.86],'rebirth-kalpa':[.32,.68],'rebirth-gandharva':[.66,.50],'rebirth-rahu':[.34,.32],'rebirth-sithandon':[.58,.13]};
 // Which side of the pin the name sits on, so the crowded central plain stays readable (default below).
-const SIDE={'ayutthaya':'r','bamboo-grove':'r','rice-fields':'l','moonlit-mill':'r','old-orchard':'l','lotus-marsh':'l','ruined-temple':'l','lablae':'r','naga-cave':'r','himmapan-edge':'b'};
+const SIDE={'rebirth-ferry':'r','rebirth-kalpa':'r','rebirth-gandharva':'l','rebirth-rahu':'r','rebirth-sithandon':'r','ayutthaya':'r','bamboo-grove':'r','rice-fields':'l','moonlit-mill':'r','old-orchard':'l','lotus-marsh':'l','ruined-temple':'l','lablae':'r','naga-cave':'r','himmapan-edge':'b'};
 // Historic cities shown on the map but not open for travel yet.
 const LATER=[['เชียงใหม่ · ล้านนา',[98.99,18.79]],['พิษณุโลก',[100.26,16.82]],['พิมาย',[102.49,15.22]],['ด่านเจดีย์สามองค์',[98.38,15.30]],
  ['จันทบูร',[102.10,12.61]],['นครศรีธรรมราช',[99.96,8.43]],['ปัตตานี',[101.25,6.87]],['ตะนาวศรี',[98.85,12.10]]];
@@ -31,7 +36,7 @@ const LATER=[['เชียงใหม่ · ล้านนา',[98.99,18.79]]
 export function createWorldAtlas({catalog,currentId,coins,onWarp,onWalk,onClose}){
  const dialog=document.createElement('dialog');
  dialog.id='world-atlas-dialog';dialog.setAttribute('aria-labelledby','atlas-heading');
- dialog.innerHTML=`<header class="atlas-header"><div><h2 id="atlas-heading">แผนที่สยาม</h2><p>แตะชื่อเมืองบนแผนที่ แล้วกดเดินไปหรือวาร์ป · จุดสีเทายังไม่เปิดเดินทาง</p></div><nav aria-label="ควบคุมแผนที่โลก"><button type="button" id="atlas-close" aria-label="ปิดแผนที่โลก">✕</button></nav></header>
+ dialog.innerHTML=`<header class="atlas-header"><div><h2 id="atlas-heading">แผนที่สยาม</h2><p>แตะชื่อเมืองบนแผนที่ แล้วกดเดินไปหรือวาร์ป · จุดสีเทายังไม่เปิดเดินทาง</p></div><nav aria-label="ควบคุมแผนที่โลก"><div class="atlas-tabs" role="tablist"><button type="button" role="tab" data-sheet="siam">แผนที่สยาม</button><button type="button" role="tab" data-sheet="rebirth">แผนที่ภพจุติ</button></div><button type="button" id="atlas-close" aria-label="ปิดแผนที่โลก">✕</button></nav></header>
  <div class="atlas-viewport" tabindex="0" aria-label="ภาพแผนที่โลก เลื่อนขึ้นลงเพื่อสำรวจ"><div class="atlas-stage"><div class="atlas-surface"><img src="${IMG}" width="1536" height="1024" alt="ภาพแผนที่โลกอโยธยา" draggable="false"></div></div></div>
  <footer class="atlas-footer"><div class="atlas-destination-info"><select id="atlas-destination" aria-label="เลือกจุดหมาย"></select><p id="atlas-detail" role="status" aria-live="polite"></p></div><div class="atlas-travel"><span id="atlas-wallet"></span><button type="button" id="atlas-walk">เดินไป</button><button type="button" id="atlas-warp">วาร์ป</button></div></footer>`;
  document.body.append(dialog);
@@ -39,16 +44,21 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onWalk,onClose}
  const pins=new Map();let selected=currentId,busy=false,drag=null,suppressClick=false;
  for(const map of catalog.maps){if((map.pvpArena||map.prologue)&&map.id!==currentId)continue;
   const option=document.createElement('option');option.value=map.id;option.textContent=map.name;select.append(option);
-  if(!PLACES[map.id])continue;const anchor=PAINTED[map.id]??at(PLACES[map.id]);
-  const pin=document.createElement('button');pin.type='button';pin.className='atlas-place';pin.dataset.mapId=map.id;
+  const anchor=PAINTED[map.id]??(PLACES[map.id]&&at(PLACES[map.id]))??REBIRTH_PINS[map.id];if(!anchor)continue;
+  const pin=document.createElement('button');pin.type='button';pin.className='atlas-place';pin.dataset.mapId=map.id;pin.dataset.sheet=REBIRTH_PINS[map.id]?'rebirth':'siam';
   pin.style.left=anchor[0]*100+'%';pin.style.top=anchor[1]*100+'%';pin.setAttribute('aria-label',map.name);pin.title=map.name;
   const name=document.createElement('span');name.className='atlas-name side-'+(SIDE[map.id]??'b');name.textContent=map.name;if(map.levels){const lv=document.createElement('small');lv.className='atlas-lv';lv.textContent='Lv.'+map.levels.join('–');name.append(lv);}pin.append(name);   // 0.123 owner: every map says its level on the map
   if(map.id===currentId){pin.classList.add('is-current');pin.setAttribute('aria-current','location');pin.title=map.name+' · คุณอยู่ที่นี่';}
   pin.onclick=()=>choose(map.id);surface.append(pin);pins.set(map.id,pin);
  }
  for(const [label,ll] of LATER){const [x,y]=at(ll),d=document.createElement('span');d.className='atlas-later';d.style.left=x*100+'%';d.style.top=y*100+'%';
-  d.innerHTML='<i></i><span></span>';d.lastChild.textContent=label;d.title=label+' · ยังไม่เปิดเดินทาง';surface.append(d);}
- function choose(id){selected=id;select.value=id;refresh();}
+  d.dataset.sheet='siam';d.innerHTML='<i></i><span></span>';d.lastChild.textContent=label;d.title=label+' · ยังไม่เปิดเดินทาง';surface.append(d);}
+ const img=surface.querySelector('img');img.onerror=()=>surface.classList.add('no-art');img.onload=()=>surface.classList.remove('no-art');
+ let sheet='';
+ function setSheet(next){if(next===sheet)return;sheet=next;surface.dataset.sheet=next;surface.classList.remove('no-art');img.src=next==='rebirth'?REBIRTH_IMG:IMG;
+  $('#atlas-heading').textContent=next==='rebirth'?'แผนที่ภพจุติ':'แผนที่สยาม';for(const b of dialog.querySelectorAll('[data-sheet][role="tab"]'))b.setAttribute('aria-selected',String(b.dataset.sheet===next));viewport.scrollTop=0;}
+ for(const b of dialog.querySelectorAll('[role="tab"][data-sheet]'))b.onclick=()=>{setSheet(b.dataset.sheet);const first=[...pins.values()].find(p=>p.dataset.sheet===b.dataset.sheet&&p.classList.contains('is-current'))??[...pins.values()].find(p=>p.dataset.sheet===b.dataset.sheet);if(first){choose(first.dataset.mapId);first.scrollIntoView({block:'center'});}};
+ function choose(id){selected=id;select.value=id;const pin=pins.get(id);if(pin)setSheet(pin.dataset.sheet);refresh();}
  function refresh(){
   const map=catalog.maps.find(m=>m.id===selected),cost=warpCost(catalog,currentId,selected),money=coins();
   if(!map)return;
@@ -60,6 +70,7 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onWalk,onClose}
   else if(map.instance)detail='ดันเจี้ยนปาร์ตี้ · เข้าจากโรงสีใต้เงาจันทร์';
   else if(cost===null)detail='ยังไม่มีเส้นทางวาร์ปไปที่นี่';
   else if(money<cost)detail='เบี้ยไม่พอสำหรับการเดินทาง';
+  if(map.minRebirth&&selected!==currentId)detail+=' · ต้องจุติก่อนจึงเดินทางได้';
   if(map.levelBand)detail+=' · แนะนำ Lv.'+map.levelBand.join('–');
   if(map.worldBoss)detail+=' · บอส HP '+map.worldBoss.hp.toLocaleString('th-TH')+' · เกิดใหม่ 60 นาทีหลังตาย';
   $('#atlas-detail').textContent=detail;
@@ -86,7 +97,7 @@ export function createWorldAtlas({catalog,currentId,coins,onWarp,onWalk,onClose}
   get open(){return dialog.open;},close(){dialog.close();},
   show(destinationId=currentId){
    for(const panel of document.querySelectorAll('dialog[data-hud-panel][open]'))panel.close();
-   busy=false;choose(catalog.maps.some(m=>m.id===destinationId)?destinationId:currentId);dialog.showModal();fit();
+   busy=false;choose(catalog.maps.some(m=>m.id===destinationId)?destinationId:currentId);if(!pins.has(selected))setSheet('siam');dialog.showModal();fit();
    // Center the requested destination; ordinary map opens still start at the player.
    const pin=pins.get(selected);if(pin){const v=viewport.getBoundingClientRect(),p=pin.getBoundingClientRect();viewport.scrollTop+=p.top-v.top-v.height/2;}else viewport.scrollTo(0,0);
    $('#atlas-close').focus();

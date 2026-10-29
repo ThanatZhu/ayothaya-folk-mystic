@@ -5407,6 +5407,8 @@ Object.assign(globalThis.I18N_EN,{
  "กดเพื่อเดินไปเอง ถึงแล้วเปิด AUTO ให้": "Press to walk there; AUTO turns on when you arrive",
  "▶ ฟาร์มเลย": "▶ Farm now",
  "▶ ไปตี": "▶ Fight",
+ "แผนที่ภพจุติ": "Rebirth Realms",
+ "· ต้องจุติก่อนจึงเดินทางได้": "· Rebirth required to travel here",
  "ภาพแผนที่โลก เลื่อนขึ้นลงเพื่อสำรวจ": "World map image, scroll up and down to explore",
  "แนะนำฟาร์ม": "Farm tip",
  "🎒 ได้รับชุดเริ่มต้น ยา และเบี้ย · สวมให้แล้ว · Lv.10 พร้อมออกฟาร์ม": "🎒 Starter gear, potions and cowries received · gear equipped · Lv.10, ready to farm",

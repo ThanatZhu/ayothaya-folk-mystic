@@ -68,3 +68,9 @@
 .atlas-name .atlas-lv{display:block;margin-top:-1px;font:700 10px var(--font-game,Mali),sans-serif;color:#ffd77a;text-align:center;font-variant-numeric:tabular-nums}
 /* 0.123 full-width map, vertical scroll only; dragging shows a grab hand */
 .atlas-viewport{overflow-x:hidden;overflow-y:auto;touch-action:pan-y;cursor:grab}.atlas-viewport:active{cursor:grabbing}
+/* 0.123 two sheets (Siam / rebirth realms); a sheet without art yet shows a night sky */
+.atlas-surface[data-sheet="siam"] [data-sheet="rebirth"],.atlas-surface[data-sheet="rebirth"] [data-sheet="siam"]{display:none}
+.atlas-surface.no-art{background:radial-gradient(ellipse at 50% 15%,#3a2f5c,#141a33 55%,#070b18)}.atlas-surface.no-art>img{visibility:hidden}
+.atlas-tabs{display:flex;gap:6px;margin-right:10px}
+#world-atlas-dialog .atlas-tabs>button{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #c6a16488;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#f6edd6;font:700 13px var(--font-game,Mali),sans-serif;cursor:pointer}
+#world-atlas-dialog .atlas-tabs>button[aria-selected="true"]{background:linear-gradient(135deg,#7a5a1e,#4a3510);color:#ffe9a8;border-color:#e8c46a}

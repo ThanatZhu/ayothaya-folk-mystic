@@ -6,7 +6,7 @@ import {buildAmuletItems} from './amulets.js';
 import {buildWeaponMaterials,WEAPON_MATERIALS,weaponMaterialTier} from './weapon-crafting.js';
 import {REBIRTH_CHAPTERS,REBIRTH_MONSTER_SPECS} from './rebirth-content196.js';
 import {CONQUEST_SHARD,CONQUEST_ITEM,CONQUEST_STACK,conquestCount,conquestBoss} from './rainbow-crafting.js';
-import {FRONTIER_MONSTERS} from './monster-catalog.js';
+import {FRONTIER_MONSTERS,MAP_VARIANTS} from './monster-catalog.js';
 import {buildClassRewardItems} from './class-reward-items192.js';
 // Items, loot, coins (เบี้ย) and NPC shops. Pure rules shared by the client (offline guests + UI) and the realm
 // server (authoritative online bag). Bag state: {coins, items:{[id]:count}}.
@@ -194,6 +194,8 @@ export const DROPS={
 Object.assign(ITEMS,WORLD_DROP_ITEMS);
 Object.assign(DROPS,chapter2Drops(ITEMS));
 for(const c of REBIRTH_CHAPTERS){const id=c.id+'-relic';ITEMS[id]={name:'เศษขวัญ'+c.name,kind:'loot',icon:11,tint:'gold',sell:20*(REBIRTH_CHAPTERS.indexOf(c)+1),text:'วัตถุดิบจากภาคจุติ · ขายเป็นเบี้ยได้'};}
+// 0.123 local variants drop what their original does, except its card (each card belongs to one monster)
+for(const v of MAP_VARIANTS){const d=structuredClone(DROPS[v.variantOf]);d.items=d.items.filter(([id])=>!id.startsWith('card-'));DROPS[v.id]=d;}
 for(const m of REBIRTH_MONSTER_SPECS){const tier=[10,25,40,55,70,85].filter(l=>m.level>=l).length;DROPS[m.id]={coins:[0,0],items:[[m.mapId+'-relic',m.boss?1:.65,m.boss?5:1],[m.level<30?'hp-small':'hp-large',m.boss?.9:.1,m.boss?3:1],...(m.boss?[['lek-lai',.35]]:[])],...(tier?{sets:{tier,piece:m.boss?.15:.04,armor:m.boss?.18:0,boss:!!m.boss}}:{})};}
 
 ITEMS[CONQUEST_SHARD]=CONQUEST_ITEM;

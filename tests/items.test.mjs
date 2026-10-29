@@ -54,7 +54,7 @@ test('potions heal up to max, are consumed, and refuse when already full or defe
 
 test('loot rolls stay inside the table', () => {
  let seed=7;const rand=()=>(seed=(seed*16807)%2147483647)/2147483647;
- for(let i=0;i<300;i++){const l=rollLoot('straw',rand);assert.ok(l.coins>=3&&l.coins<=7);for(const it of l.items)assert.ok(DROPS.straw.items.some(([id])=>id===it.id));}
+ for(let i=0;i<300;i++){const l=rollLoot('vision-straw',rand);assert.ok(l.coins>=3&&l.coins<=7);for(const it of l.items)assert.ok(DROPS['vision-straw'].items.some(([id])=>id===it.id));}
  const boss=rollLoot('mill-keeper',()=>0);assert.ok(boss.items.some(i=>i.id==='spirit-rope'));
  assert.deepEqual(rollLoot('unknown'),{coins:0,items:[]});
 });

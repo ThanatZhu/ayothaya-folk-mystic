@@ -58,7 +58,7 @@ export const BOSS_SETS={
  shaman:{name:'อาคมนวหรคุณ',bonus:{2:{matkPct:.10}},soon:{3:'สกิลวงทิ้งไฟเผาพื้นไว้ 3 วิ',5:'ใช้สกิลครบ 4 ครั้ง ปล่อยวิญญาณโจมตีฟรี 1 ครั้ง'}},
  acolyte:{name:'พุทธคุณ',bonus:{},soon:{2:'ฮีลแรงขึ้น 15%',3:'ฮีลเกินหลอด กลายเป็นโล่ (สูงสุด 15% ของ HP)',5:'เพื่อนรอบตัวโดนตีเจ็บน้อยลง 10% (ออร่า)'}},
 };
-export const SHARDS=[['shard-soul','เศษวิญญาณบอส','บอสต่ำกว่า Lv.50'],['shard-gem','เศษมณีบอส','บอส Lv.50–98'],['shard-divine','เศษเทพ','บอสร่างตื่น และยักษ์เมฆา Lv.99']];
+export const SHARDS=[['shard-soul','เศษวิญญาณบอส','บอสต่ำกว่า Lv.60'],['shard-gem','เศษมณีบอส','บอส Lv.60–98'],['shard-divine','เศษเทพ','บอสร่างตื่น และยักษ์เมฆา Lv.99']];
 
 
 const L=t=>TIERS[t-1],price=(t,k)=>Math.max(100,Math.round(L(t)*L(t)*k/100)*100);
@@ -124,7 +124,8 @@ export function gearRecipes(items){
 }
 
 // Tier of set gear a monster drops (Lv.5+), by its level band in the proposal's map table.
-export const dropTier=level=>level<5?0:level>=87?6:level>=72?5:level>=57?4:level>=36?3:level>=25?2:1;
+// 0.123 maps step up from Lv.10–22: a monster drops the highest tier its level can wear (as the rebirth maps do)
+export const dropTier=level=>TIERS.filter(t=>level>=t).length;
 // Drop rules per monster: normal 2% / elite 6% for one head·garment·shoes piece; bosses add the armor and shards.
 export function setDrops(m){
  const tier=dropTier(m.level??1);if(!tier)return null;
@@ -133,7 +134,7 @@ export function setDrops(m){
 }
 export function shardDrop(m){
  if(!m.boss)return null;if(m.id.endsWith('-awakened')||(m.level??1)>=99)return ['shard-divine',.5,1];
- return (m.level??1)>=50?['shard-gem',1,2]:['shard-soul',1,3];
+ return (m.level??1)>=60?['shard-gem',1,2]:['shard-soul',1,3];   // 0.123 was 50: the ป่าไผ่ boss (now Lv.58) still drops soul shards
 }
 // Resolves a set roll for the killer's look (Novice: any look) and rolls the grade.
 export function rollSetPiece(rule,look,rand=Math.random){

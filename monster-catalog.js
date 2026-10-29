@@ -2,25 +2,25 @@ import {REBIRTH_MONSTER_SPECS} from './rebirth-content196.js';
 import {CHAPTER2_MONSTERS,CHAPTER2_BEHAVIOUR} from './chapter2-monsters.js';
 // Append-only IDs preserve existing saves and test fixtures (legacy IDs 0–3).
 export const FRONTIER_MONSTERS=[
- {id:'straw',name:'หุ่นฟางหลง',hp:52,speed:.85,damage:5,baseXp:14,jobXp:9,level:2,sheet:'field-monsters',row:0,height:1.65},
- {id:'rat',name:'หนูยุ้งข้าว',hp:38,speed:1.7,damage:4,baseXp:11,jobXp:7,level:1,sheet:'field-monsters',row:1,height:1.05},
- {id:'hopper',name:'ตั๊กแตนเกราะ',hp:70,speed:1.3,damage:6,baseXp:20,jobXp:12,level:5,sheet:'field-monsters',row:2,height:1.2},
- {id:'monkey',name:'ลูกลิงฉกของ',hp:100,speed:1.9,damage:8,baseXp:35,jobXp:21,level:10,sheet:'orchard-monsters',row:0,height:1.4},
- {id:'vine',name:'เถาวัลย์พันขา',hp:125,speed:.7,damage:9,baseXp:42,jobXp:25,level:13,sheet:'orchard-monsters',row:1,height:1.5},
- {id:'lantern',name:'โคมหลงทาง',hp:145,speed:1.1,damage:11,baseXp:52,jobXp:31,level:17,sheet:'orchard-monsters',row:2,height:1.6},
- {id:'rat-chief',name:'พญาหนูยุ้งข้าว',hp:420,speed:1.2,damage:15,baseXp:170,jobXp:95,level:12,sheet:'elite-monsters',row:0,height:2.15,elite:true,respawn:40},
- {id:'monkey-chief',name:'วานรเจ้าเล่ห์',hp:650,speed:1.65,damage:18,baseXp:260,jobXp:150,level:22,sheet:'elite-monsters',row:1,height:2.2,elite:true,respawn:45},
- {id:'mill-keeper',name:'เจ้าหุ่นฟางพันเชือก',hp:1500,speed:.75,damage:24,baseXp:700,jobXp:420,level:25,sheet:'elite-monsters',row:2,height:3.3,boss:true,respawn:70,reach:2.6,windup:.85},
+ {id:'straw',name:'หุ่นฟางหลง',hp:133,speed:.85,damage:10,baseXp:40,jobXp:26,level:12,sheet:'field-monsters',row:0,height:1.65},
+ {id:'rat',name:'หนูยุ้งข้าว',hp:100,speed:1.7,damage:8,baseXp:32,jobXp:20,level:10,sheet:'field-monsters',row:1,height:1.05},
+ {id:'hopper',name:'ตั๊กแตนเกราะ',hp:194,speed:1.3,damage:13,baseXp:53,jobXp:32,level:15,sheet:'field-monsters',row:2,height:1.2},
+ {id:'monkey',name:'ลูกลิงฉกของ',hp:325,speed:1.9,damage:19,baseXp:77,jobXp:46,level:20,sheet:'orchard-monsters',row:0,height:1.4},
+ {id:'vine',name:'เถาวัลย์พันขา',hp:422,speed:.7,damage:23,baseXp:93,jobXp:55,level:23,sheet:'orchard-monsters',row:1,height:1.5},
+ {id:'lantern',name:'โคมหลงทาง',hp:532,speed:1.1,damage:27,baseXp:110,jobXp:66,level:26,sheet:'orchard-monsters',row:2,height:1.6},
+ {id:'rat-chief',name:'พญาหนูยุ้งข้าว',hp:1026,speed:1.2,damage:29,baseXp:327,jobXp:183,level:20,sheet:'elite-monsters',row:0,height:2.15,elite:true,respawn:40},
+ {id:'monkey-chief',name:'วานรเจ้าเล่ห์',hp:1173,speed:1.65,damage:37,baseXp:401,jobXp:231,level:30,sheet:'elite-monsters',row:1,height:2.2,elite:true,respawn:45},
+ {id:'mill-keeper',name:'เจ้าหุ่นฟางพันเชือก',hp:3366,speed:.75,damage:62,baseXp:1278,jobXp:767,level:38,sheet:'elite-monsters',row:2,height:3.3,boss:true,respawn:70,reach:2.6,windup:.85},
  // 0.49: party-dungeon boss (ใต้ถุนโรงสีต้องสาป, never respawns inside the instance) and the timed MVP of โรงสีใต้เงาจันทร์.
  // Own art since 0.54: assets/frontier38/boss-monsters (re-gridded from the ChatGPT bosses49 hand-off).
- {id:'lantern-lord',name:'เจ้าโคมวิญญาณ',hp:3200,speed:.9,damage:26,baseXp:1200,jobXp:700,level:26,sheet:'boss-monsters',row:0,height:3.2,boss:true,respawn:70,reach:2.4,windup:.8},
+ {id:'lantern-lord',name:'เจ้าโคมวิญญาณ',hp:8108,speed:.9,damage:75,baseXp:2411,jobXp:1406,level:42,sheet:'boss-monsters',row:0,height:3.2,boss:true,respawn:70,reach:2.4,windup:.8},
  {id:'straw-king',name:'ราชาหุ่นฟางเพลิง',hp:7000,speed:.8,damage:34,baseXp:2600,jobXp:1500,level:30,sheet:'boss-monsters',row:1,height:4.4,boss:true,mvp:true,respawn:3600,reach:3,windup:.9,pctHit:{tank:.2,min:.2,max:.3}},
  // 0.60 บึงบัวต้องมนตร์ (Lv. 25–35): stronger variants drawn with existing rows, larger.
- {id:'marsh-rat',name:'หนูบึงยักษ์',hp:260,speed:1.8,damage:16,baseXp:70,jobXp:40,level:26,sheet:'field-monsters',row:1,height:1.45},
- {id:'bog-hopper',name:'ตั๊กแตนหนองน้ำ',hp:320,speed:1.4,damage:18,baseXp:85,jobXp:48,level:28,sheet:'field-monsters',row:2,height:1.6},
- {id:'lotus-vine',name:'เถาบัวพันขา',hp:420,speed:.8,damage:20,baseXp:105,jobXp:60,level:30,sheet:'orchard-monsters',row:1,height:1.9},
- {id:'bog-lantern',name:'โคมผีบึง',hp:380,speed:1.15,damage:22,baseXp:120,jobXp:70,level:32,sheet:'orchard-monsters',row:2,height:2},
- {id:'marsh-ape',name:'พญาวานรบึง',hp:1400,speed:1.7,damage:30,baseXp:600,jobXp:340,level:34,sheet:'elite-monsters',row:1,height:2.7,elite:true,respawn:60},
+ {id:'marsh-rat',name:'หนูบึงยักษ์',hp:1108,speed:1.8,damage:45,baseXp:190,jobXp:109,level:38,sheet:'field-monsters',row:1,height:1.45},
+ {id:'bog-hopper',name:'ตั๊กแตนหนองน้ำ',hp:1286,speed:1.4,damage:50,baseXp:213,jobXp:120,level:41,sheet:'field-monsters',row:2,height:1.6},
+ {id:'lotus-vine',name:'เถาบัวพันขา',hp:1412,speed:.8,damage:54,baseXp:229,jobXp:131,level:43,sheet:'orchard-monsters',row:1,height:1.9},
+ {id:'bog-lantern',name:'โคมผีบึง',hp:1544,speed:1.15,damage:58,baseXp:245,jobXp:143,level:45,sheet:'orchard-monsters',row:2,height:2},
+ {id:'marsh-ape',name:'พญาวานรบึง',hp:2640,speed:1.7,damage:81,baseXp:986,jobXp:559,level:47,sheet:'elite-monsters',row:1,height:2.7,elite:true,respawn:60},
  // 0.102 ร่างทรง (awakened): the old camp bosses return at Lv.60–95, one per field map, every 30 minutes, announced server-wide
  {id:'rat-chief-awakened',name:'ร่างทรงพญาหนูยุ้งข้าว',hp:20000,speed:1.4,damage:90,baseXp:1200,jobXp:700,level:60,sheet:'elite-monsters',row:0,height:3,boss:true,awakened:true,respawn:1800,reach:2.2,windup:.8},
  {id:'monkey-chief-awakened',name:'ร่างทรงวานรเจ้าเล่ห์',hp:30000,speed:1.9,damage:115,baseXp:1600,jobXp:900,level:70,sheet:'elite-monsters',row:1,height:3.1,boss:true,awakened:true,respawn:1800,reach:2.2,windup:.8},
@@ -28,7 +28,24 @@ export const FRONTIER_MONSTERS=[
  {id:'marsh-ape-awakened',name:'ร่างทรงพญาวานรบึง',hp:60000,speed:1.9,damage:190,baseXp:3000,jobXp:1800,level:95,sheet:'elite-monsters',row:1,height:3.6,boss:true,awakened:true,respawn:1800,reach:2.4,windup:.8}
 ];
 FRONTIER_MONSTERS.push(...CHAPTER2_MONSTERS);
+// 0.123 owner: the first farm map is Lv.10–22 and every map after it steps up (docs: maps/world.json levels). Maps that
+// shared a monster with an easier one get a local variant: same art, behaviour and drops, its own level and stats.
+// Append-only (spawns point at catalog indices). Stats follow one curve: HP 0.75L²+25, damage L(0.8+0.5(L-10)/36),
+// EXP 0.12L²+2L(46-L)/36, meeting the chapter-2 formula at Lv.46; elites and bosses keep their old ratio to it.
+export const MAP_VARIANTS=[
+ {variantOf:'straw',id:'mill-straw',name:'หุ่นฟางโรงสี',level:29,hp:656,damage:31,baseXp:128,jobXp:82},
+ {variantOf:'vine',id:'mill-vine',name:'เถาวัลย์โรงสี',level:32,hp:793,damage:35,baseXp:148,jobXp:88},
+ {variantOf:'lantern',id:'mill-lantern',name:'โคมโรงสีจันทร์',level:35,hp:944,damage:40,baseXp:168,jobXp:100},
+ {variantOf:'vine',id:'cellar-vine',name:'เถาวัลย์ใต้ถุน',level:34,hp:892,damage:39,baseXp:161,jobXp:96},
+ {variantOf:'lantern',id:'cellar-lantern',name:'โคมใต้ถุนโรงสี',level:37,hp:1052,damage:43,baseXp:183,jobXp:109},
+ {variantOf:'rat-chief',id:'cellar-rat-chief',name:'พญาหนูใต้ถุน',level:38,hp:3499,damage:71,baseXp:809,jobXp:452},
+ {variantOf:'monkey-chief',id:'cellar-monkey-chief',name:'วานรใต้ถุน',level:40,hp:2052,damage:56,baseXp:611,jobXp:353},
+ // the prologue's five tutorial kills keep the old Lv.1–2 field monsters
+ {variantOf:'straw',id:'vision-straw',name:'หุ่นฟางหลง',level:2,hp:52,damage:5,baseXp:14,jobXp:9},
+ {variantOf:'rat',id:'vision-rat',name:'หนูยุ้งข้าว',level:1,hp:38,damage:4,baseXp:11,jobXp:7}
+];
 for(const spec of REBIRTH_MONSTER_SPECS){const art=FRONTIER_MONSTERS.find(m=>m.id===spec.proxyId);if(!art)throw Error('Missing rebirth art proxy '+spec.proxyId);FRONTIER_MONSTERS.push({...spec,sheet:art.sheet,row:art.row,chapter2Art:art.chapter2Art,artProxy:spec.proxyId});}
+for(const v of MAP_VARIANTS)FRONTIER_MONSTERS.push({...FRONTIER_MONSTERS.find(m=>m.id===v.variantOf),...v});
 // Presentation timing is independent of frame rate and authoritative world position.
 export function monsterFrame(m,time){
  if(m.hp<=0)return 7;
@@ -57,6 +74,7 @@ export const MONSTER_BEHAVIOUR={'bog-hopper':{leap:true},'bog-lantern':{aoe:2.4,
  'rat-chief-awakened':{enrage:true,slam:slam(4,3.2,1.4,.08,9,7)},'monkey-chief-awakened':{skirmish:1.2,enrage:true,slam:slam(4.2,3.4,1.5,.09,8,6.5)},'mill-keeper-awakened':{aoe:3.2,windup:1,enrage:true,slam:slam(4.6,3.6,1.6,.1,8,6.5)},'marsh-ape-awakened':{skirmish:1.2,enrage:true,slam:slam(4.6,3.8,1.6,.1,8,6)}};
 export const BOSS_SIGHT=10,BOSS_GIVE_UP=25;
 Object.assign(MONSTER_BEHAVIOUR,CHAPTER2_BEHAVIOUR);
+for(const v of MAP_VARIANTS)if(MONSTER_BEHAVIOUR[v.variantOf])MONSTER_BEHAVIOUR[v.id]=MONSTER_BEHAVIOUR[v.variantOf];
 for(const m of REBIRTH_MONSTER_SPECS)MONSTER_BEHAVIOUR[m.id]=m.boss?{enrage:true,slam:slam(5,3,1.4,.08,9,8)}:m.elite?{enrage:true}:{};
 // 0.122 territory and strolling (owner-approved numbers): a monster 15+ levels above the player attacks anyone who
 // comes within 5 m of it while inside its 9 m leash; an idle ordinary monster strolls within 4 m of home at 40% speed,

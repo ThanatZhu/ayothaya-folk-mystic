@@ -14,7 +14,7 @@ test('all fourteen hunting maps have three deterministic hireable adventurers wi
   for(const n of rows)for(let t=0;t<80;t+=.25){const p=adventurerAt(n,t);assert.ok(walkable(p.x,p.z,.4,map.nav),map.id+' '+n.id);assert.ok(Number.isFinite(p.x));}
  }
  for(const map of maps.filter(m=>!adventurerOffer(m)))assert.deepEqual(fieldAdventurers(map),[]);
- const prices=fields.map(m=>adventurerOffer(m).cost);assert.deepEqual(prices,[200,400,400,800,1500,2500,2500,4000,4000,400,800,2500,4000,4000]);
+ const prices=fields.map(m=>adventurerOffer(m).cost);assert.deepEqual(prices,[400,800,800,1500,2500,2500,4000,4000,4000,400,800,2500,4000,4000]);
 });
 function setup(mapId='old-orchard',coins=10000){
  let now=100000;const realm=new RealmServer({catalog,now:()=>now}),state=initialSave();state.mapId=mapId;

@@ -54,12 +54,12 @@ test('grades travel as a ^1..^4 suffix, scale base stats only, and survive refin
 });
 
 test('set gear drops in the killer\'s look at the monster\'s tier; armor only from bosses; bosses drop shards',()=>{
- assert.deepEqual(DROPS['stream-serpent'].sets,{tier:5,piece:.06,armor:0,boss:false});assert.equal(DROPS['underwater-naga-guardian'].sets.armor,.25);
+ assert.deepEqual(DROPS['stream-serpent'].sets,{tier:6,piece:.06,armor:0,boss:false});   // 0.123 naga cave is Lv.76–88assert.equal(DROPS['underwater-naga-guardian'].sets.armor,.25);
  assert.ok(DROPS['rat-chief-awakened'].items.some(([id])=>id==='shard-divine'));assert.ok(DROPS['pop-grove-lord'].items.some(([id])=>id==='shard-soul'));
- assert.ok(DROPS['woodland-elephant'].items.some(([id])=>id==='shard-gem'));assert.equal(DROPS.rat.sets,undefined,'Lv.1 monsters drop no set gear');
+ assert.ok(DROPS['woodland-elephant'].items.some(([id])=>id==='shard-gem'));assert.equal(DROPS['vision-rat'].sets,undefined,'Lv.1 monsters drop no set gear');assert.equal(DROPS.rat.sets.tier,1,'the Lv.10 field rat drops tier-1 sets');
  let seed=3;const rand=()=>(seed=(seed*16807)%2147483647)/2147483647,got=[];
  for(let i=0;i<4000;i++)for(const it of rollLoot('underwater-naga-guardian',rand,null,1,'nun').items)if(itemDef(it.id)?.set)got.push(itemDef(it.id));
- assert.ok(got.length>1000);assert.ok(got.every(d=>d.look==='nun'&&d.set.tier===5));assert.ok(got.some(d=>d.slot==='armor'));assert.ok(got.some(d=>d.grade===4));
+ assert.ok(got.length>1000);assert.ok(got.every(d=>d.look==='nun'&&d.set.tier===6));assert.ok(got.some(d=>d.slot==='armor'));assert.ok(got.some(d=>d.grade===4));
  const field=[];for(let i=0;i<20000;i++)for(const it of rollLoot('stream-serpent',rand,null,1,null).items)if(itemDef(it.id)?.set)field.push(itemDef(it.id));
  assert.ok(field.every(d=>d.slot!=='armor'&&d.grade<4));assert.ok(new Set(field.map(d=>d.look)).size>4,'a Novice gets any look');
 });

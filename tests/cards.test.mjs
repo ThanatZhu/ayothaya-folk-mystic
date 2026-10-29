@@ -7,10 +7,11 @@ import {MONSTER_TYPES,CombatWorld,monsterHit} from '../combat-core.js';
 import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 
+// 0.123 local map variants (monster-catalog.js MAP_VARIANTS) share their original's card
 test('every monster with drops has exactly one card, and every card is dropped by its monster', () => {
  const cards=Object.keys(ITEMS).filter(id=>ITEMS[id].kind==='card');
- assert.equal(cards.length,Object.keys(DROPS).filter(id=>!MONSTER_TYPES.find(t=>t.id===id)?.draft).length);
- for(const [monster,d] of Object.entries(DROPS).filter(([id])=>!MONSTER_TYPES.find(t=>t.id===id)?.draft))assert.ok(d.items.some(([id])=>id==='card-'+monster),monster);
+ assert.equal(cards.length,Object.keys(DROPS).filter(id=>!(t=>t?.draft||t?.variantOf)(MONSTER_TYPES.find(t=>t.id===id))).length);
+ for(const [monster,d] of Object.entries(DROPS).filter(([id])=>!(t=>t?.draft||t?.variantOf)(MONSTER_TYPES.find(t=>t.id===id))))assert.ok(d.items.some(([id])=>id==='card-'+monster),monster);
  for(const id of cards)assert.ok(['weapon','armor','accessory'].includes(ITEMS[id].slot)&&ITEMS[id].effect);
 });
 

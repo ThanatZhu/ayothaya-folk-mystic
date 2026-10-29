@@ -11,7 +11,7 @@ import {revivalCount} from './revival-item.js?v=live185';
 import {createRolePlayUI} from './role-play-ui.js?v=live185';
 import {itemDef} from './items.js?v=107';
 import {targetHudState,paintTargetHud} from './target-hud.js';
-import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=rebirth196';
+import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=farm212';
 import {jobProgress} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=icons117';
 import {presentationDelta,roleTiming} from './combat-timing.js';

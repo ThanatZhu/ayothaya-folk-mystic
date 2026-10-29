@@ -22,7 +22,7 @@ function tracker(online){
 // 0.123 chapter 1 is retired: the tracker is a farm-map suggestion that follows the level (story-quests.js farmMapFor)
 for(const online of [true,false])test(`the farm suggestion follows the level without touching the story (${online?'online':'offline'})`,()=>{
  const {api,world,title,hint}=tracker(online),before=structuredClone(world.story);
- assert.match(title.textContent,/Lv.15–25/);assert.match(hint.textContent,/เหมาะกับเลเวล/);
+ assert.match(title.textContent,/Lv.10–22/);assert.match(hint.textContent,/เหมาะกับเลเวล/);
  world.baseXp=levelStart(22);api.update();assert.match(title.textContent,/Lv.20–30/);
  assert.deepEqual(world.story,before,'refreshing the text must not advance or pay anything');
  const writes=title.writes;world.baseXp++;api.update();assert.equal(title.writes,writes,'ordinary EXP changes must not rebuild a stable tracker');
@@ -31,12 +31,19 @@ test('reconnecting hides the suggestion until the current server state is ready'
  const {api,game,world,title}=tracker(true);
  game.networkStatus='connecting';world.baseXp=levelStart(17);api.update();
  assert.doesNotMatch(title.textContent,/Lv./);
- game.networkStatus='online';api.update();assert.match(title.textContent,/Lv.15–25/);
+ game.networkStatus='online';api.update();assert.match(title.textContent,/Lv.10–22/);
 });
 test('every level 1–99 has a farm map, rebirth maps only on the rebirth campaign',()=>{
+ assert.equal(storyRules.farmMapFor(catalog.maps,3).id,'rice-fields','below the first range: the first farm map');
  for(let lv=1;lv<=99;lv++){
-  const m=storyRules.farmMapFor(catalog.maps,lv);assert.ok(m&&lv>=m.levels[0]&&lv<=m.levels[1]&&!m.minRebirth,'Lv.'+lv);
+  const m=storyRules.farmMapFor(catalog.maps,lv);assert.ok(m&&(lv<10||lv>=m.levels[0]&&lv<=m.levels[1])&&!m.minRebirth,'Lv.'+lv);
   const r=storyRules.farmMapFor(catalog.maps,lv,{rebirth:1,campaign:'rebirth'});assert.ok(r.minRebirth&&lv>=r.levels[0]&&lv<=r.levels[1],'reborn Lv.'+lv);
   assert.ok(!storyRules.farmMapFor(catalog.maps,lv,{rebirth:0,campaign:'rebirth'}).minRebirth);
  }
+});
+test('0.123 every regular monster on a map sits inside its Lv. range (awakened and world bosses excepted)',async()=>{
+ const {MONSTER_TYPES}=await import('../combat-core.js');
+ for(const m of catalog.maps.filter(m=>m.levels))for(const t of new Set(m.mobs.map(x=>MONSTER_TYPES[x[2]])))
+  if(!t.awakened&&t.hp<500000)assert.ok(t.level>=m.levels[0]&&t.level<=m.levels[1],m.id+' '+t.id+' Lv.'+t.level);
+ assert.deepEqual(catalog.maps.find(m=>m.id==='rice-fields').levels,[10,22]);
 });

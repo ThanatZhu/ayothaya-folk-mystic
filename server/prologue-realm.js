@@ -4,6 +4,7 @@ import {MONSTER_TYPES} from '../combat-core.js';
 import {PROLOGUE_MAP,PROLOGUE_KILLS,TEACHER,TERRACE,BOSS_SPOT,TRIAL_CLASSES,SCENE_IDS,PROLOGUE_BOSS,prologueDue,inTrial,onTerrace} from '../prologue.js?v=2';
 import {raiseStat,deriveStats,equipGear} from '../character-stats.js';
 import {gearLook,bossId,SET_SLOTS,STARTER} from '../gear-sets.js';
+import {awardExperience,levelStart} from '../experience.js';
 const BOSS_TYPE=MONSTER_TYPES.findIndex(t=>t.id===PROLOGUE_BOSS.id);
 const ACTIVE_LEVEL=5;   // every active skill of the lent class (ultimate included) at its top rank
 // 0.122 the lent power is the class at its height (owner: hit hard, full set): a Lv.80 build wearing the class's full
@@ -48,10 +49,13 @@ function spawnBoss(room){
 // 0.122 owner: the first map hands out everything; the dreamer wakes in Ayutthaya worn, stocked and ready to farm
 // (the chapter-1 quests that used to give these are retired). Once, when the vision ends.
 export const STARTER_KIT={coins:1000,items:[...STARTER.map(id=>({id,count:1})),{id:'hp-small',count:15},{id:'mp-small',count:10}]};
+// 0.123 owner: the first farm map is Lv.10–22, so the vision ends at Base Lv.10 at least
+export const PROLOGUE_EXIT_LEVEL=10;
 function starterKit(realm,p){
  realm.grantLoot(p,STARTER_KIT);
+ const short=levelStart(PROLOGUE_EXIT_LEVEL)-p.world.baseXp;if(short>0)p.world.emit('experience',awardExperience(p.world,short,0));
  for(const id of STARTER){try{const r=equipGear(p.bag,p.gear,id,realm.who(p));p.gear=r.gear;realm.setBag(p,r.bag);}catch{}}
- realm.refreshStats(p);p.world.notice('🎒 ได้รับชุดเริ่มต้น ยา และเบี้ย · สวมให้แล้ว พร้อมออกฟาร์ม');
+ realm.refreshStats(p);p.world.notice('🎒 ได้รับชุดเริ่มต้น ยา และเบี้ย · สวมให้แล้ว · Lv.10 พร้อมออกฟาร์ม');
 }
 function advance(p,stage,notice){p.prologue={...p.prologue,stage};p.saveNow=true;if(notice)p.world.notice(notice);}
 

@@ -19,3 +19,7 @@ For the current UI structure and validation evidence, read docs/game-ui-review20
 ## Ground loot (owner requirement, 30 October 2026)
 
 Read docs/ground-loot219.md before changing drops, AUTO collection or companion movement. Automatic ground pickup starts as soon as an owned pet is equipped/following, even with combat AUTO and pet skill AUTO OFF; no pickup switch or key is required. That pet must physically travel to the drop. Merely owning a pet or enabling combat AUTO is insufficient. Keep server authority, manual pickup, party priority, overflow mail and existing drop rates intact.
+
+## S companion build rule (30 October 2026)
+
+Read docs/pet-stat-build220.md before changing S pet bonuses. Keep player-chosen primary/secondary/support stats character-wide, preserve each star rank’s total bonus and pet-specific skills, and keep server-owned durable/idempotent saves. Never replace this with class-locked presets. Ground collection remains independent of combat AUTO.

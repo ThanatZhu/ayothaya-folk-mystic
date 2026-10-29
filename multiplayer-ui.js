@@ -12,7 +12,7 @@ import {openHudPanel} from './hud-panels.js?v=34';
 import {createInspectUI} from './inspect-ui.js?v=108.1';
 import {iconStyle} from './bag-ui.js?v=loot219';
 import {emblemId,emoteId} from './items.js?v=107';
-import {createPetView} from './pet-ui.js?v=loot219';
+import {createPetView} from './pet-ui.js?v=petbuild220';
 import * as THREE from 'three';
 import {CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
 import {groundHeight} from './combat-core.js?v=novice174';

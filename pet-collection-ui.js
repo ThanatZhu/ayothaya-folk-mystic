@@ -1,5 +1,7 @@
+import {createPetBuildEditor} from './pet-stat-build-ui220.js?v=petbuild220';
+import {petWithBuild,PET_BUILD_ERRORS} from './pet-stat-build220.js';
 import {PREMIUM_PETS,petAtStars} from './premium-pets.js';
-import {normalizePetAccount,activePremiumPet} from './pet-account.js';
+import {normalizePetAccount,activePremiumPet} from './pet-account.js?v=petbuild220';
 import {PET_STAR_COST} from './pet-gacha.js';
 
 export function createPremiumPetPanel({game,dialog,onSummon}){
@@ -15,6 +17,7 @@ export function createPremiumPetPanel({game,dialog,onSummon}){
  <p class="pet-account-message" role="status"></p><button class="pet-retry" type="button" hidden>ตรวจสอบคำขอเดิม</button>`;
  const $=s=>root.querySelector(s),account=()=>normalizePetAccount(game.world.petCollection),roster=$('.pet-roster'),hero=$('.pet-hero-art'),rosterNodes=new Map();
  let chosen='',pending=null,message='',signature='',shownPet='';
+ const buildEditor=createPetBuildEditor({parent:$('.pet-inspect-copy'),onSave:stats=>mutate('petStatBuild',{stats})});
  $('.pet-ability').open=!matchMedia('(max-height:550px), (max-width:600px) and (orientation:portrait)').matches;
  $('#pet-go-gacha').onclick=$('#pet-find-companion').onclick=()=>onSummon?.();
 
@@ -26,7 +29,7 @@ export function createPremiumPetPanel({game,dialog,onSummon}){
   const origin=document.activeElement;
   pending??={id:crypto.randomUUID(),type,data,signature:commandSignature};pending.busy=true;message='กำลังบันทึก…';render(true);
   try{const r=await game.world.petCommand(type,data,pending.id);game.world.petCollection=r.petCollection;pending=null;message='บันทึกเรียบร้อยแล้ว';}
-  catch(e){message=({'pet-not-owned':'ยังไม่มีคู่ขวัญตัวนี้','not-enough-copies':'ตัวซ้ำยังไม่ครบ','server-busy':'เซิร์ฟเวอร์กำลังบันทึก ลองใหม่อีกครั้ง'})[e.message]??'ยังยืนยันผลไม่ได้ · กดตรวจสอบคำขอเดิม';if(['pet-not-owned','not-enough-copies','max-stars','server-busy','rate-limit','not-connected'].includes(e.message))pending=null;}
+  catch(e){message=({...PET_BUILD_ERRORS,'pet-not-owned':'ยังไม่มีคู่ขวัญตัวนี้','not-enough-copies':'ตัวซ้ำยังไม่ครบ','server-busy':'เซิร์ฟเวอร์กำลังบันทึก ลองใหม่อีกครั้ง'})[e.message]??'ยังยืนยันผลไม่ได้ · กดตรวจสอบคำขอเดิม';if(['pet-not-owned','not-enough-copies','max-stars','server-busy','rate-limit','not-connected',...Object.keys(PET_BUILD_ERRORS)].includes(e.message))pending=null;}
   finally{if(pending)pending.busy=false;render(true);if(dialog.open&&origin?.isConnected&&!origin.disabled&&origin.getClientRects().length&&[document.body,dialog].includes(document.activeElement))origin.focus({preventScroll:true});}
  }
  $('.pet-retry').onclick=()=>pending&&mutate(pending.type,pending.data);
@@ -64,7 +67,7 @@ export function createPremiumPetPanel({game,dialog,onSummon}){
     b.tabIndex=chosen===p.id?0:-1;b.setAttribute('aria-pressed',String(chosen===p.id));b.querySelector('.pet-rank').textContent=p.tier;b.querySelector('b').textContent=p.name;b.querySelector('.pet-roster-stars').textContent='★'.repeat(s.collection[p.id].stars)+(s.equipped===p.id?' · ติดตาม':'');
    }
    if(chosen){
-    const own=s.collection[chosen],pet=petAtStars(chosen,own.stars),cost=PET_STAR_COST[own.stars];
+    const own=s.collection[chosen],pet=petWithBuild(petAtStars(chosen,own.stars),s.statBuild),cost=PET_STAR_COST[own.stars];
     if(shownPet!==chosen){hero.src=pet.art;hero.alt=pet.name;shownPet=chosen;}
     $('.pet-detail-kicker').textContent='คู่ขวัญร่วมผจญภัย · '+pet.tier;$('.pet-detail-name').textContent=pet.name;$('.pet-stars').textContent='★'.repeat(own.stars)+' · ตัวซ้ำ '+own.copies+' ตัว';
     $('.pet-bonus').replaceChildren(...Object.entries(pet.bonus).map(([k,v])=>{const span=document.createElement('span');span.textContent=k.toUpperCase()+' +'+v;return span;}));
@@ -77,6 +80,7 @@ export function createPremiumPetPanel({game,dialog,onSummon}){
    $('.pet-live-skill strong').textContent=active?'คู่ขวัญ: '+active.name:'ยังไม่ได้เลือกคู่ขวัญ';
    $('#pet-auto-live').setAttribute('aria-pressed',String(s.auto));$('#pet-auto-live').disabled=busy||!connected;$('#pet-auto-live').textContent='สกิล AUTO '+(s.auto?'เปิด':'ปิด');
   }
+  buildEditor.render({account:s,pet:chosen?petAtStars(chosen,s.collection[chosen].stars):null,baseStats:game.world.stats,connected,pending,status:game.world.petBuildStatus});
   const remain=Math.max(0,Math.ceil((s.readyAt-Date.now())/1000)),use=$('#pet-use-live');use.disabled=busy||!active||!connected||remain>0;use.textContent=remain?'พร้อมอีก '+remain+' วิ':'ใช้สกิลคู่ขวัญ';
  }
  return {root,render};

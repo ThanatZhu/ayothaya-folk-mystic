@@ -134,6 +134,7 @@ function record(kind,r){
  }
  if(kind==='pets'){
   sub=r.tier+' / '+label(r.movement==='fly'?'fly':'ground');body=`<p>${esc(label('oneStar'))}: ${esc(stats({bonus:r.bonus}))}</p><p>${esc(label('fiveStar'))}: ${esc(stats({bonus:r.five.bonus}))}</p><h4>${esc(r.skill.name)}</h4><p>${esc(r.skill.tip)}</p><p class="muted">${esc(label('cooldown'))}: ${r.skill.cooldown} / ${r.five.skill.cooldown} ${esc(label('seconds'))} (1 / 5 ${esc(label('stars'))})</p>`;
+  if(r.tier==='S')body+='<p class="muted">'+esc(label('petBuildS'))+'</p>';
  }
  if(kind==='story'){
   sub=label('chapter')+' '+r.id;body=`<details><summary>${esc(label('replay'))}</summary><ol>${r.steps.map(s=>`<li>${esc(s.hint??s.how??s.type)}${s.mapId?' · '+esc(mapName(s.mapId)):''}${s.npc?' · '+esc(s.npc):''}${s.count?' ×'+s.count:''}</li>`).join('')}</ol><p>${esc(label('rewards'))}: ${esc(reward(r.reward??{}))}</p></details>`;
@@ -237,7 +238,7 @@ async function copyLink(hash){
  $('#toast').textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2600);
 }
 async function load(){
- const [snapshot,words,book,visuals]=await Promise.all([fetch('assets/guide169/game-data.json?v=skills119').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=skills119').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),(dbOnly?Promise.resolve({ok:true,text:()=>''}):fetch('assets/guide169/handbook.md?v=skills119')).then(r=>{if(!r.ok)throw Error('book');return r.text();}),fetch('assets/guide169/visuals.json?v=skills119').then(r=>{if(!r.ok)throw Error('visuals');return r.json();})]);
+ const [snapshot,words,book,visuals]=await Promise.all([fetch('assets/guide169/game-data.json?v=skills119').then(r=>{if(!r.ok)throw Error('data');return r.json();}),fetch('assets/guide169/ui.json?v=petbuild220').then(r=>{if(!r.ok)throw Error('labels');return r.json();}),(dbOnly?Promise.resolve({ok:true,text:()=>''}):fetch('assets/guide169/handbook.md?v=petbuild220')).then(r=>{if(!r.ok)throw Error('book');return r.text();}),fetch('assets/guide169/visuals.json?v=skills119').then(r=>{if(!r.ok)throw Error('visuals');return r.json();})]);
  data=snapshot;ui=words;pictures=visuals.pictures;setupPictureViewer();
  new ResizeObserver(()=>document.documentElement.style.setProperty('--guide-tools-height',Math.ceil($('.searchbar').getBoundingClientRect().height)+'px')).observe($('.searchbar'));
  articles=dbOnly?[]:book.trim().split(/\n@/).map(section=>{const [head,...body]=section.replace(/^@/,'').split('\n'),[id,group,title]=head.split('|');return {id,group,title,body:body.join('\n')};});

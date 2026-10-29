@@ -178,3 +178,24 @@
  #pet-window #pet-premium .pet-live-skill #pet-use-live{grid-column:1;grid-row:2}
  #pet-window #pet-premium .pet-live-skill #pet-auto-live{grid-column:2;grid-row:2}
 }
+
+/* Character-wide S companion stat choice. Existing generated capsule buttons remain the control owner. */
+#pet-window #pet-premium .pet-build-editor{margin:8px 0;border-block:1px solid #c6a16455;padding:8px 0}
+#pet-window #pet-premium .pet-build-editor[hidden]{display:none!important}
+#pet-window #pet-premium .pet-build-editor>summary{list-style:none;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;justify-content:space-between;min-height:44px;cursor:pointer;touch-action:manipulation;color:#f6edd6}
+#pet-window #pet-premium .pet-build-editor>summary::-webkit-details-marker{display:none}
+#pet-window #pet-premium .pet-build-editor>summary::after{content:'⌄';color:#d9bb78}
+#pet-window #pet-premium .pet-build-editor[open]>summary::after{transform:rotate(180deg)}
+#pet-window #pet-premium .pet-build-editor>summary:focus-visible{outline:2px solid #fff0b0;outline-offset:2px}
+#pet-window #pet-premium .pet-build-summary{font-size:10px;color:#d6c7a0}
+#pet-window #pet-premium .pet-build-slots,#pet-window #pet-premium .pet-build-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}
+#pet-window #pet-premium .pet-build-slots button{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;font-variant-numeric:tabular-nums}
+#pet-window #pet-premium .pet-build-slots small{font-size:9px}#pet-window #pet-premium .pet-build-slots b{font-size:11px}
+#pet-window #pet-premium .pet-build-grid button{min-width:0;font-size:11px}
+#pet-window #pet-premium .pet-build-budget{color:#e8ca83;font-variant-numeric:tabular-nums}
+#pet-window #pet-premium .pet-build-state{min-height:2em;font-size:11px}
+#pet-window #pet-premium .pet-build-actions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+#pet-window #pet-premium .pet-build-actions button{flex:1;min-width:90px;font-size:10px}
+#pet-window #pet-premium .pet-build-actions [data-build-recommend]{flex-basis:100%}
+
+#pet-window #pet-premium .pet-build-slots button,#pet-window #pet-premium .pet-build-grid button,#pet-window #pet-premium .pet-build-actions button{min-height:44px}

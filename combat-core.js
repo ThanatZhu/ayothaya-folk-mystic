@@ -1,6 +1,6 @@
 import {normalizeAutoTarget,autoTargetAllows,autoRankAllows} from './auto-targets.js?v=auto202';
 import {skillHit} from './skill-critical.js';
-import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js?v=skill-crit1';
+import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js?v=petbuild220';
 import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=farm213';
 import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill,advanceAutoSequence} from './auto-play.js?v=auto202';

@@ -1,5 +1,5 @@
-import {createPremiumHub,premiumDialog} from './premium-hub-ui.js';
-import {createPremiumPetPanel} from './pet-collection-ui.js?v=design202';
+import {createPremiumHub,premiumDialog} from './premium-hub-ui.js?v=petbuild220';
+import {createPremiumPetPanel} from './pet-collection-ui.js?v=petbuild220';
 import {buyPremiumItem} from './premium-shop-action.js';
 import {drawAmulets} from './amulet-gacha.js';
 import {normalizePetAccount,publicPetAccount,petAccountAction} from './pet-account.js';
@@ -8,7 +8,7 @@ import {itemDef} from './items.js';
 import {openHudPanel} from './hud-panels.js';
 
 let record={bag:{coins:0,items:{}},petCollection:normalizePetAccount({balance:10000,collection:Object.fromEntries(PREMIUM_PETS.slice(0,4).map(p=>[p.id,{stars:1,copies:4}]))})};
-const game={online:true,clearInput(){},world:{bag:record.bag,petCollection:publicPetAccount(record.petCollection)}};
+const game={online:true,clearInput(){},world:{stats:{str:15,agi:40,vit:1,int:1,dex:1,luk:25},petBuildStatus:{blocked:false,reason:null,remaining:0},bag:record.bag,petCollection:publicPetAccount(record.petCollection)}};
 game.world.petCommand=async(type,data,id=crypto.randomUUID())=>{
  if(!game.online)throw Error('not-connected');await new Promise(r=>setTimeout(r,180));let result;
  if(type==='premiumBuy'){const r=buyPremiumItem(record,{...data,id});record=r.record;result={purchase:r.purchase,replayed:r.replayed};}

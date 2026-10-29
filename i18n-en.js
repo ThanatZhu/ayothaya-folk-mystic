@@ -5346,5 +5346,18 @@ Object.assign(globalThis.I18N_EN,{
   "หลบหลีก +0.1% ต่อแต้ม": "Dodge +0.1% per point",
   "เพิ่ม {0} {1} → {2} ใช้ {3} แต้ม": "Raise {0} {1} → {2} for {3} points",
   "{0} สูงสุดแล้ว ({1})": "{0} is at its maximum ({1})",
-  "อัปอีก 1 แต้มตอนนี้ได้": "One more point now gives"
+  "อัปอีก 1 แต้มตอนนี้ได้": "One more point now gives",
+ "หมวดคู่มือ": "Handbook sections",
+ "เติบโตและต่อสู้": "Growth and combat",
+ "อุปกรณ์และเศรษฐกิจ": "Equipment and economy",
+ "โลกและภารกิจ": "World and quests",
+ "เปิดดู": "Open",
+ "รายการ": "entries",
+ "สกิลทุกอาชีพ ค่าพลังแต่ละเลเวล คูลดาวน์ และสกิลที่ต้องมีก่อน": "Every class skill with power per level, cooldown and required skills",
+ "อุปกรณ์ การ์ด ยา และวัตถุดิบ พร้อมค่าสเตตัส อาชีพที่ใส่ได้ และแหล่งที่มา": "Gear, cards, potions and materials with stats, usable classes and where to get them",
+ "เลเวล พลังชีวิต แผนที่ที่เกิด และของที่ดรอปของมอนสเตอร์และบอส": "Level, HP, spawn maps and drops for every monster and boss",
+ "แผนที่ทุกเขต มอนสเตอร์ประจำถิ่น NPC และทางเชื่อมระหว่างแผนที่": "Every map with its resident monsters, NPCs and warp connections",
+ "สูตรคราฟต์ วัตถุดิบที่ต้องใช้ และค่าเบี้ย": "Crafting recipes, required materials and coin cost",
+ "สัตว์เลี้ยง โบนัส และสกิลติดตัว": "Pets, their bonuses and passive skills",
+ "เควสเนื้อเรื่องทุกบท ขั้นตอน และรางวัล": "Every story quest chapter, its steps and rewards"
 });

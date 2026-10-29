@@ -11,6 +11,16 @@ const label=k=>ui?.[k]??k,name=id=>data.items.find(i=>i.id===id)?.name??id;
 const className=id=>data.classes.find(c=>c.id===id)?.name??label(id);
 const mapName=id=>data.maps.find(m=>m.id===id)?.name??id;
 const badge=s=>`<span class="badge">${esc(s)}</span>`;
+// Section icons are cells of the in-game menu sheet (assets/ui63/ui-menu63.png, 6 columns x 4 rows), not new art.
+const ICON_CELL={'เริ่มผจญภัย':[0,2],'เติบโตและต่อสู้':[5,2],'อุปกรณ์และเศรษฐกิจ':[3,2],'เพื่อนร่วมทาง':[1,1],'โลกและภารกิจ':[3,1],
+ skills:[1,0],items:[3,0],monsters:[0,3],maps:[4,1],recipes:[2,2],pets:[5,0],story:[0,1]};
+const icon=key=>{const c=ICON_CELL[key];return c?`<i class="gi" style="--cell:${c[0]*20}% ${c[1]*100/3}%" aria-hidden="true"></i>`:'';};
+function renderOverview(){
+ const groups=[...new Set(articles.map(a=>a.group))].map(g=>{const list=articles.filter(a=>a.group===g);return {icon:icon(g),title:g,count:list.length,unit:label('articles'),text:list.slice(0,4).map(a=>a.title).join(' · '),href:'#'+list[0].id,attrs:''};});
+ const db=kinds.map(k=>({icon:icon(k),title:label(k),count:data[k].length,unit:label('entries'),text:label('about_'+k),href:'#database',attrs:` data-library="${k}"`}));
+ const card=c=>`<a class="overview-card" href="${esc(c.href)}"${c.attrs}>${c.icon}<span><b>${esc(c.title)} <small>${number(c.count)} ${esc(c.unit)}</small></b><span>${esc(c.text)}</span></span><em>${esc(label('open'))} →</em></a>`;
+ $('#overview').innerHTML=`<h2>${esc(label('handbook'))}</h2><div class="overview-grid">${groups.map(card).join('')}</div><h2>${esc(label('library'))}</h2><div class="overview-grid">${db.map(card).join('')}</div>`;
+}
 const table=(headers,rows)=>`<div class="data-table"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const reward=r=>[r.coins?number(r.coins)+' '+label('coins'):'',r.baseXp?number(r.baseXp)+' Base EXP':'',r.jobXp?number(r.jobXp)+' Job EXP':'',...(r.items??[]).map(i=>name(i.id)+' ×'+i.count)].filter(Boolean).join(' · ');
 const stats=it=>[...['atk','matk','def','mdef'].filter(k=>it[k]).map(k=>k.toUpperCase()+' +'+number(it[k])),...Object.entries(it.bonus??{}).filter(([,n])=>n).map(([k,n])=>k.toUpperCase()+' +'+number(n))].join(' · ')||label('statsEmpty');
@@ -79,7 +89,7 @@ function supplemental(id){
 
 function renderArticles(){
  $('#articles').innerHTML=articles.map((a,i)=>{const body=markdown(a.body),intro=body.indexOf('</p>')+4;return `<article class="chapter" id="${esc(a.id)}"><div class="chapter-top"><span class="chapter-number">${String(i+1).padStart(2,'0')} / ${esc(a.group)}</span>${copyButton(a.id)}</div><h2>${esc(a.title)}</h2>${body.slice(0,intro)}${pictureTiles(a.id)}${visualFigures(a.id)}${body.slice(intro)}${supplemental(a.id)}</article>`;}).join('');
- let last='';$('#toc').innerHTML=articles.map(a=>{const title=a.group!==last?`<strong>${esc(a.group)}</strong>`:'';last=a.group;return title+`<a href="#${esc(a.id)}">${esc(a.title)}</a>`;}).join('');
+ let last='';$('#toc').innerHTML=articles.map(a=>{const title=a.group!==last?`<strong>${icon(a.group)}${esc(a.group)} <small>${articles.filter(x=>x.group===a.group).length}</small></strong>`:'';last=a.group;return title+`<a href="#${esc(a.id)}">${esc(a.title)}</a>`;}).join('');
  const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){$('#toc a.active')?.classList.remove('active');$(`#toc a[href="#${entry.target.id}"]`)?.classList.add('active');}},{rootMargin:'-150px 0px -55% 0px'});
  document.querySelectorAll('#articles article').forEach(a=>observer.observe(a));
  $('#calc-item').addEventListener('change',calculate);$('#calc-level').addEventListener('input',calculate);calculate();
@@ -195,8 +205,8 @@ async function load(){
  // Keep the four TOC groups together without changing stable article IDs.
  const groups=[...new Set(articles.map(a=>a.group))];articles.sort((a,b)=>groups.indexOf(a.group)-groups.indexOf(b.group));
  $('#edition').textContent=`${label('updated')} · ${articles.length} ${label('articleCount')} · ${data.skills.length} ${label('skills')}`;
- renderArticles();$('#load-status').hidden=true;
- $('#library-tabs').innerHTML=kinds.map(k=>`<button type="button" data-library="${k}" aria-pressed="false">${esc(label(k))} <small>${data[k].length}</small></button>`).join('');
+ renderArticles();renderOverview();$('#load-status').hidden=true;
+ $('#library-tabs').innerHTML=kinds.map(k=>`<button type="button" data-library="${k}" aria-pressed="false">${icon(k)}${esc(label(k))} <small>${data[k].length}</small></button>`).join('');
  $('#search-scope').innerHTML=['all','articles',...kinds].map(k=>`<option value="${k}">${esc(label(k))}</option>`).join('');
  index=[...articles.map(a=>({kind:'articles',id:a.id,title:a.title,snippet:a.body,text:searchText('articles',a)})),...kinds.flatMap(kind=>data[kind].map(r=>({kind,id:r.id,title:r.name??r.title,snippet:searchText(kind,r),text:searchText(kind,r)})))];
  setLibrary('skills');route();

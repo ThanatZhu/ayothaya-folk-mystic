@@ -20,3 +20,18 @@
 @media(max-width:760px){.guide-picture{padding:12px;margin:20px 0}.picture-pin{width:21px;height:21px;font-size:10px;border-width:1px;box-shadow:0 0 0 2px #0a241cbb}.picture-notes{grid-template-columns:1fr;gap:10px}.guide-picture figcaption h3{font-size:16px}.visual-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.visual-tile{padding:12px 9px}.visual-tile>img{height:110px}.class-tile>img{height:120px}#guide-picture-viewer{padding:10px}#guide-picture-viewer>header{flex-wrap:wrap;gap:8px}#guide-picture-title{font-size:15px;flex-basis:calc(100% - 60px)}#guide-picture-close{order:1}#guide-picture-zoom{order:2}.picture-scroll{max-height:58dvh}.picture-viewer-notes .picture-notes{font-size:12px}}
 @media(max-height:440px){#guide-picture-viewer{padding:9px}.picture-scroll{max-height:57dvh}.picture-viewer-notes .picture-notes{grid-template-columns:repeat(2,minmax(0,1fr));margin:10px 0}}
 @media print{.picture-enlarge,#guide-picture-viewer{display:none!important}.guide-picture,.visual-tile{background:transparent;color:#111;border-color:#aaa}.guide-picture figcaption p,.picture-example,.visual-tile small{color:#444}.picture-open{background:transparent}.guide-picture{break-inside:avoid}.picture-pin{print-color-adjust:exact}}
+
+/* 29 Oct: section icons are cells of the in-game menu sheet; overview cards follow the wiki-index layout */
+.gi{display:inline-block;flex:none;width:1.6em;height:1.6em;vertical-align:middle;margin-right:.45em;background:url("assets/ui63/ui-menu63.png?v=65") var(--cell,0 0)/600% 400% no-repeat}
+.contents nav strong{display:flex;align-items:center;gap:0;font-size:13px}.contents nav strong small{margin-left:auto;color:var(--muted);font-weight:500;font-variant-numeric:tabular-nums}
+.library-tabs button{display:inline-flex;align-items:center}.library-tabs button small{margin-left:.4em}.library-tabs .gi{width:1.9em;height:1.9em;margin-right:.35em}
+.overview{margin:0 0 50px}.overview h2{font-size:20px;color:var(--gold);margin:0 0 14px}.overview h2:not(:first-child){margin-top:32px}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.overview-card{display:flex;align-items:center;gap:14px;padding:16px;background:linear-gradient(135deg,#24382bf4,#152925f0);border:1px solid #c6a16488;border-radius:8px;color:var(--ink);line-height:1.55;text-decoration:none}
+.overview-card:hover{border-color:var(--gold);text-decoration:none;background:linear-gradient(135deg,#2c4433f6,#1a312bf2)}
+.overview-card .gi{width:52px;height:52px;margin:0;padding:6px;box-sizing:content-box;border-radius:8px;border:1px solid #c6a16455;background:url("assets/ui63/ui-menu63.png?v=65") var(--cell,0 0)/600% 400% no-repeat content-box,#0b221c}
+.overview-card>span{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.overview-card b{font-weight:700}.overview-card b small{color:var(--gold);font-size:11px;font-weight:700;margin-left:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.overview-card>span>span{font-size:12px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.overview-card em{font-style:normal;font-weight:700;color:var(--gold);font-size:12px;white-space:nowrap}
+@media(max-width:760px){.overview-grid{grid-template-columns:1fr}.overview-card{padding:13px}.overview-card .gi{width:42px;height:42px}}
+@media print{.overview{display:none}}

@@ -95,3 +95,9 @@
 .db-main{padding:34px var(--site-gutter,5vw) 80px}.db-main .database{margin-top:0;padding-top:0;border-top:0}
 @media(max-width:760px){.db-hero{padding:30px 20px 24px}.db-hero h1{font-size:28px}.db-main{padding:20px 16px 50px}.database-page .searchbar form button{margin-right:0}}
 .db-main .library-tabs{margin-top:0}
+
+/* 30 Oct: monster cards share one size - equal rows, two-line map line, drops pinned to the bottom */
+.reference-grid.monster-list{align-items:stretch;grid-auto-rows:1fr}
+.monster-card .monster-head{height:96px;align-items:flex-start}
+.monster-card .where{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.monster-card .drop-title{margin-top:auto}

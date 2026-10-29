@@ -9,6 +9,8 @@ let data,ui,pictures=[],articles=[],index=[],current='skills',limit=16,searchLim
 const kinds=['skills','items','monsters','maps','recipes','pets','story'];
 // database.html is the reference library alone: no handbook chapters, sidebar or overview
 const dbOnly=document.body.classList.contains('database-page');
+// the handbook links records over to database.html; on database.html they stay on the page
+const REF=dbOnly?'':'database.html',libraryHref=(kind,query='')=>'database.html?tab='+kind+(query?'&q='+encodeURIComponent(query):'');
 const label=k=>ui?.[k]??k,name=id=>data.items.find(i=>i.id===id)?.name??id;
 const className=id=>data.classes.find(c=>c.id===id)?.name??label(id);
 const mapName=id=>data.maps.find(m=>m.id===id)?.name??id;
@@ -19,7 +21,7 @@ const ICON_CELL={'เริ่มผจญภัย':[0,2],'เติบโต�
 const icon=key=>{const c=ICON_CELL[key];return c?`<i class="gi" style="--cell:${c[0]*20}% ${c[1]*100/3}%" aria-hidden="true"></i>`:'';};
 function renderOverview(){
  const groups=[...new Set(articles.map(a=>a.group))].map(g=>{const list=articles.filter(a=>a.group===g);return {icon:icon(g),title:g,count:list.length,unit:label('articles'),text:list.slice(0,4).map(a=>a.title).join(' · '),href:'#'+list[0].id,attrs:''};});
- const db=kinds.map(k=>({icon:icon(k),title:label(k),count:data[k].length,unit:label('entries'),text:label('about_'+k),href:'#database',attrs:` data-library="${k}"`}));
+ const db=kinds.map(k=>({icon:icon(k),title:label(k),count:data[k].length,unit:label('entries'),text:label('about_'+k),href:libraryHref(k),attrs:''}));
  const card=c=>`<a class="overview-card" href="${esc(c.href)}"${c.attrs}>${c.icon}<span><b>${esc(c.title)} <small>${number(c.count)} ${esc(c.unit)}</small></b><span>${esc(c.text)}</span></span><em>${esc(label('open'))} →</em></a>`;
  $('#overview').innerHTML=`<h2>${esc(label('handbook'))}</h2><div class="overview-grid">${groups.map(card).join('')}</div><h2>${esc(label('library'))}</h2><div class="overview-grid">${db.map(card).join('')}</div>`;
 }
@@ -27,7 +29,7 @@ const table=(headers,rows)=>`<div class="data-table"><table><thead><tr>${headers
 const reward=r=>[r.coins?number(r.coins)+' '+label('coins'):'',r.baseXp?number(r.baseXp)+' Base EXP':'',r.jobXp?number(r.jobXp)+' Job EXP':'',...(r.items??[]).map(i=>name(i.id)+' ×'+i.count)].filter(Boolean).join(' · ');
 const stats=it=>[...['atk','matk','def','mdef'].filter(k=>it[k]).map(k=>k.toUpperCase()+' +'+number(it[k])),...Object.entries(it.bonus??{}).filter(([,n])=>n).map(([k,n])=>k.toUpperCase()+' +'+number(n))].join(' · ')||label('statsEmpty');
 const copyButton=id=>`<button type="button" class="copy" data-copy="${esc(id)}">${esc(label('link'))}</button>`;
-const dbLink=(kind,id,text)=>`<a href="#ref-${esc(kind)}-${esc(kind==='items'?id.split('^')[0]:id)}">${esc(text)}</a>`;
+const dbLink=(kind,id,text)=>`<a href="${REF}#ref-${esc(kind)}-${esc(kind==='items'?id.split('^')[0]:id)}">${esc(text)}</a>`;
 
 function art(a){
  if(!a?.src)return '';
@@ -56,12 +58,12 @@ function visualFigures(id){
 }
 function pictureTiles(id){
  const tiles=(title,rows)=>`<section class="visual-examples" aria-label="${esc(title)}"><h3>${esc(title)}</h3><div class="visual-tiles">${rows.join('')}</div></section>`;
- const itemTile=i=>`<a class="visual-tile" href="#ref-items-${esc(i.id)}">${art(i.art)}<strong>${esc(i.name)}</strong><small>${esc(i.text??'')}</small></a>`;
- if(id==='classes')return tiles(label('classPictures'),data.classes.map(c=>`<a class="visual-tile class-tile" href="#database" data-library="skills" data-query="${esc(c.name)}"><img src="assets/landing98/class-${esc(c.id)}-m.webp" loading="lazy" decoding="async" width="180" height="180" alt="${esc(c.name)}"><strong>${esc(c.name)}</strong><small>${esc(c.role)}</small></a>`));
+ const itemTile=i=>`<a class="visual-tile" href="${REF}#ref-items-${esc(i.id)}">${art(i.art)}<strong>${esc(i.name)}</strong><small>${esc(i.text??'')}</small></a>`;
+ if(id==='classes')return tiles(label('classPictures'),data.classes.map(c=>`<a class="visual-tile class-tile" href="${esc(libraryHref('skills',c.name))}"><img src="assets/landing98/class-${esc(c.id)}-m.webp" loading="lazy" decoding="async" width="180" height="180" alt="${esc(c.name)}"><strong>${esc(c.name)}</strong><small>${esc(c.role)}</small></a>`));
  if(id==='equipment')return tiles(label('equipmentPictures'),['weapon','head','armor','garment','shoes','accessory'].map(slot=>itemTile(data.items.find(i=>i.kind==='gear'&&i.slot===slot))));
  if(id==='advancement')return tiles(label('materialPictures'),[...new Set(Object.values(data.rules.training).flatMap(t=>t.items.map(([id])=>id)))].map(id=>itemTile(data.items.find(i=>i.id===id))));
  if(id==='cards')return tiles(label('cardPictures'),data.items.filter(i=>i.kind==='card').slice(0,3).map(itemTile));
- if(id==='pets')return tiles(label('petPictures'),data.pets.map(p=>`<a class="visual-tile pet-tile" href="#ref-pets-${esc(p.id)}"><img src="${esc(p.art.src)}" alt="${esc(p.name)}" width="150" height="150" loading="lazy" decoding="async"><strong>${esc(p.name)} <span class="badge">${p.tier}</span></strong><small>${esc(p.skill.tip)}</small></a>`));
+ if(id==='pets')return tiles(label('petPictures'),data.pets.map(p=>`<a class="visual-tile pet-tile" href="${REF}#ref-pets-${esc(p.id)}"><img src="${esc(p.art.src)}" alt="${esc(p.name)}" width="150" height="150" loading="lazy" decoding="async"><strong>${esc(p.name)} <span class="badge">${p.tier}</span></strong><small>${esc(p.skill.tip)}</small></a>`));
  return '';
 }
 function setupPictureViewer(){
@@ -146,7 +148,7 @@ function monsterChips(){
  box.innerHTML=chips.map(([v,t,lv])=>`<button type="button" data-map-chip="${esc(v)}" aria-pressed="${v===value}">${esc(t)}${lv?` <small>${esc(lv)}</small>`:''}</button>`).join('');
 }
 const monsterTag=r=>r.boss?`<span class="tag boss">${esc(label('boss'))}</span>`:r.elite?`<span class="tag elite">${esc(label('eliteShort'))}</span>`:'';
-const dropLine=d=>`<li>${art(d.art)}<a href="#ref-items-${esc(d.id)}" data-close-monster>${esc(d.name)}</a><b>${pct(d.rate)}</b>${d.count!==1?`<small>×${d.count}</small>`:''}</li>`;
+const dropLine=d=>`<li>${art(d.art)}<a href="${REF}#ref-items-${esc(d.id)}" data-close-monster>${esc(d.name)}</a><b>${pct(d.rate)}</b>${d.count!==1?`<small>×${d.count}</small>`:''}</li>`;
 const byRate=list=>[...list].sort((a,b)=>b.rate-a.rate);
 function monsterCard(r){
  const top=byRate(r.drops).slice(0,4);
@@ -164,7 +166,7 @@ function openMonster(id){
  const hit=[[label('hit80'),'HIT '+Math.max(0,r.flee-10)+'+'],[label('hit95'),'HIT '+(r.flee+5)+'+'],[label('hit100'),'HIT '+(r.flee+10)+'+']],dodge=[[label('dodge50'),'FLEE '+(r.hit+30)+'+'],[label('dodge70'),'FLEE '+(r.hit+50)+'+']];
  const rows=list=>`<table>${list.map(([a,b])=>`<tr><td>${esc(a)}</td><th>${esc(b)}</th></tr>`).join('')}</table>`;
  const stat=(k,v,c)=>`<div class="${c}"><dt>${esc(k)}</dt><dd>${v}</dd></div>`;
- const where=r.locations.map(m=>`<a href="#ref-maps-${esc(m.id)}" data-close-monster>${esc(m.name)}</a>`).join(' · ')||'—';
+ const where=r.locations.map(m=>`<a href="${REF}#ref-maps-${esc(m.id)}" data-close-monster>${esc(m.name)}</a>`).join(' · ')||'—';
  monsterDialog.innerHTML=`<header><h2 id="monster-viewer-title">${esc(label('monsterInfo'))}: ${esc(r.name)}</h2><button type="button" data-close-monster aria-label="${esc(label('close'))}">✕</button></header><div class="monster-body">`+
   `<div class="monster-head">${art(r.art)}<div><h3>${esc(r.name)} ${monsterTag(r)}</h3><p class="lv">Lv.${r.level??1} · ${esc(label(r.magic?'magicAttack':'physicalAttack'))}${r.respawn?' · '+esc(label('respawn'))+' '+number(r.respawn/60)+' '+esc(label('minutes')):''}</p><p class="where">${esc(label('where'))}: ${where}</p></div></div>`+
   `<dl class="monster-grid">${stat('HP',number(r.hp),'hp')}${stat(label('attack')+' (ATK)',number(r.damage),'atk')}${stat('Base / Job EXP',number(r.baseXp)+' / '+number(r.jobXp),'exp')}${stat('FLEE',number(r.flee),'flee')}${stat('DEF / MDEF',number(r.def)+' / '+number(r.mdef),'def')}${stat('HIT',number(r.hit),'hit')}</dl>`+
@@ -218,13 +220,14 @@ function search(){
  if(normalize(q).length<2){$('#result-list').innerHTML='';$('#search-status').textContent=label('searchHint');return;}
  const found=index.filter(i=>(scope==='all'||i.kind===scope)&&matches(i.text,q));
  $('#search-status').textContent=found.length?`${number(found.length)} ${label('count')} · ${label('shown')} ${Math.min(searchLimit,found.length)}`:label('noResults');
- $('#result-list').innerHTML=found.slice(0,searchLimit).map(i=>`<a class="result-item" href="#${i.kind==='articles'?esc(i.id):'ref-'+i.kind+'-'+esc(i.id)}"><small>${esc(label(i.kind))}</small><strong>${esc(i.title)}</strong><p>${esc(i.snippet.slice(0,150))}</p></a>`).join('')+(found.length>searchLimit?`<button id="more-search" type="button">${esc(label('more'))}</button>`:'');
+ $('#result-list').innerHTML=found.slice(0,searchLimit).map(i=>`<a class="result-item" href="${i.kind==='articles'?'#'+esc(i.id):REF+'#ref-'+i.kind+'-'+esc(i.id)}"><small>${esc(label(i.kind))}</small><strong>${esc(i.title)}</strong><p>${esc(i.snippet.slice(0,150))}</p></a>`).join('')+(found.length>searchLimit?`<button id="more-search" type="button">${esc(label('more'))}</button>`:'');
 }
 function closeContents(){
  $('#contents')?.classList.remove('open');$('#contents-toggle')?.setAttribute('aria-expanded','false');
 }
 function route(){
  let hash;try{hash=decodeURIComponent(location.hash.slice(1));}catch{return;}
+ if(!dbOnly&&(hash==='database'||hash.startsWith('ref-'))){location.replace('database.html'+(hash==='database'?'':location.hash));return;}
  if(hash.startsWith('ref-')){const kind=kinds.find(k=>hash.startsWith('ref-'+k+'-'));if(!kind)return;const id=hash.slice(kind.length+5);if(!data[kind].some(r=>r.id===id))return;setLibrary(kind,'',id);}
  closeContents();requestAnimationFrame(()=>document.getElementById(hash)?.scrollIntoView({block:'start'}));
 }
@@ -242,18 +245,18 @@ async function load(){
  const groups=[...new Set(articles.map(a=>a.group))];articles.sort((a,b)=>groups.indexOf(a.group)-groups.indexOf(b.group));
  if(!dbOnly)$('#edition').textContent=`${label('updated')} · ${articles.length} ${label('articleCount')} · ${data.skills.length} ${label('skills')}`;
  if(!dbOnly){renderArticles();renderOverview();}$('#load-status').hidden=true;
- $('#library-tabs').innerHTML=kinds.map(k=>`<button type="button" data-library="${k}" aria-pressed="false">${icon(k)}${esc(label(k))} <small>${data[k].length}</small></button>`).join('');
+ if(dbOnly)$('#library-tabs').innerHTML=['monsters',...kinds.filter(k=>k!=='monsters')].map(k=>`<button type="button" data-library="${k}" aria-pressed="false">${icon(k)}${esc(label(k))} <small>${data[k].length}</small></button>`).join('');
  $('#search-scope').innerHTML=['all',...(dbOnly?[]:['articles']),...kinds].map(k=>`<option value="${k}">${esc(label(k))}</option>`).join('');
  index=[...articles.map(a=>({kind:'articles',id:a.id,title:a.title,snippet:a.body,text:searchText('articles',a)})),...kinds.flatMap(kind=>data[kind].map(r=>({kind,id:r.id,title:r.name??r.title,snippet:searchText(kind,r),text:searchText(kind,r)})))];
- setLibrary('skills');route();
+ if(dbOnly){const p=new URLSearchParams(location.search);setLibrary(kinds.includes(p.get('tab'))?p.get('tab'):'monsters',p.get('q')??'');}route();
  $('#search-form').addEventListener('submit',e=>{e.preventDefault();searchLimit=30;search();$('#search-results').scrollIntoView({block:'start'});});
  $('#guide-search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{searchLimit=30;if(!$('#guide-search').value){$('#search-results').hidden=true;return;}search();},180);});
  $('#search-scope').addEventListener('change',()=>{searchLimit=30;search();});
  $('#close-search').addEventListener('click',()=>{$('#search-results').hidden=true;$('#guide-search').focus();});
- $('#library-search').addEventListener('input',()=>{focused=null;limit=16;renderLibrary();});$('#library-filter').addEventListener('change',()=>{focused=null;limit=16;renderLibrary();});
- $('#load-more').addEventListener('click',()=>{limit+=16;renderLibrary();});
+ if(dbOnly){$('#library-search').addEventListener('input',()=>{focused=null;limit=16;renderLibrary();});$('#library-filter').addEventListener('change',()=>{focused=null;limit=16;renderLibrary();});
+ $('#load-more').addEventListener('click',()=>{limit+=16;renderLibrary();});}
  $('#contents-toggle')?.addEventListener('click',()=>{const open=$('#contents').classList.toggle('open');$('#contents-toggle').setAttribute('aria-expanded',String(open));if(open)$('#toc a')?.focus();});
- document.addEventListener('click',e=>{const chip=e.target.closest('[data-map-chip]');if(chip){$('#library-filter').value=chip.dataset.mapChip;limit=16;focused=null;renderLibrary();}const mon=e.target.closest('[data-monster]');if(mon)openMonster(mon.dataset.monster);const picture=e.target.closest('[data-picture]');if(picture)openPicture(picture.dataset.picture,picture);const button=e.target.closest('[data-copy]');if(button)copyLink(button.dataset.copy);const tab=e.target.closest('[data-library]');if(tab){if(tab.tagName==='A')e.preventDefault();setLibrary(tab.dataset.library,tab.dataset.query??'');if(tab.tagName==='A')$('#database').scrollIntoView({block:'start'});}if(e.target.closest('#more-search')){searchLimit+=30;search();}if(e.target.closest('#toc a'))closeContents();});
+ document.addEventListener('click',e=>{const chip=e.target.closest('[data-map-chip]');if(chip){$('#library-filter').value=chip.dataset.mapChip;limit=16;focused=null;renderLibrary();}const mon=e.target.closest('[data-monster]');if(mon)openMonster(mon.dataset.monster);const picture=e.target.closest('[data-picture]');if(picture)openPicture(picture.dataset.picture,picture);const button=e.target.closest('[data-copy]');if(button)copyLink(button.dataset.copy);const tab=dbOnly&&e.target.closest('[data-library]');if(tab){if(tab.tagName==='A')e.preventDefault();setLibrary(tab.dataset.library,tab.dataset.query??'');if(tab.tagName==='A')$('#database').scrollIntoView({block:'start'});}if(e.target.closest('#more-search')){searchLimit+=30;search();}if(e.target.closest('#toc a'))closeContents();});
  document.addEventListener('keydown',e=>{if(pictureDialog.open)return;if(e.key==='Escape'){closeContents();$('#search-results').hidden=true;$('#contents-toggle')?.focus();}if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$('#guide-search').focus();}});
  window.addEventListener('hashchange',route);
 }

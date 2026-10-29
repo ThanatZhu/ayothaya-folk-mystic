@@ -23,10 +23,9 @@ const PLACES={
 // fraction of the image; the painter moved them a little off the real places in PLACES.
 const PAINTED={'kailash-peak':[0.349,0.062],'himmapan-edge':[0.251,0.161],'lablae':[0.421,0.229],'ruined-temple':[0.333,0.273],'bamboo-grove':[0.508,0.298],'naga-cave':[0.708,0.214],'lotus-marsh':[0.390,0.347],'moonlit-mill':[0.446,0.403],'rice-fields':[0.308,0.453],'ayutthaya':[0.456,0.449],'old-orchard':[0.487,0.493]};
 // 0.123 owner: a second sheet for the rebirth realms (ไตรภูมิ), climbing from the ferry at the bottom to the shores at the
-// top. outputs/rebirth-map-prompt-2026-10-30.md asks the painter to put each realm exactly here; until the art arrives
-// the sheet shows a plain night sky.
+// top, on the owner's painted map (each pin on its painted realm); a sheet whose art fails to load shows a night sky.
 const REBIRTH_IMG='assets/world112/rebirth-realms.webp';
-const REBIRTH_PINS={'rebirth-ferry':[.50,.86],'rebirth-kalpa':[.32,.68],'rebirth-gandharva':[.66,.50],'rebirth-rahu':[.34,.32],'rebirth-sithandon':[.58,.13]};
+const REBIRTH_PINS={'rebirth-ferry':[.636,.856],'rebirth-kalpa':[.277,.589],'rebirth-gandharva':[.708,.434],'rebirth-rahu':[.338,.291],'rebirth-sithandon':[.615,.112]};
 // Which side of the pin the name sits on, so the crowded central plain stays readable (default below).
 const SIDE={'rebirth-ferry':'r','rebirth-kalpa':'r','rebirth-gandharva':'l','rebirth-rahu':'r','rebirth-sithandon':'r','ayutthaya':'r','bamboo-grove':'r','rice-fields':'l','moonlit-mill':'r','old-orchard':'l','lotus-marsh':'l','ruined-temple':'l','lablae':'r','naga-cave':'r','himmapan-edge':'b'};
 // Historic cities shown on the map but not open for travel yet.

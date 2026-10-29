@@ -5359,5 +5359,17 @@ Object.assign(globalThis.I18N_EN,{
  "แผนที่ทุกเขต มอนสเตอร์ประจำถิ่น NPC และทางเชื่อมระหว่างแผนที่": "Every map with its resident monsters, NPCs and warp connections",
  "สูตรคราฟต์ วัตถุดิบที่ต้องใช้ และค่าเบี้ย": "Crafting recipes, required materials and coin cost",
  "สัตว์เลี้ยง โบนัส และสกิลติดตัว": "Pets, their bonuses and passive skills",
- "เควสเนื้อเรื่องทุกบท ขั้นตอน และรางวัล": "Every story quest chapter, its steps and rewards"
+ "เควสเนื้อเรื่องทุกบท ขั้นตอน และรางวัล": "Every story quest chapter, its steps and rewards",
+ "ข้อมูลมอนสเตอร์": "Monster info",
+ "โจมตีเวท": "Magic attack",
+ "โจมตีกายภาพ": "Physical attack",
+ "เกิดใหม่ทุก": "Respawns every",
+ "ต้องมี HIT และ FLEE เท่าไรถึงสู้ได้สบาย": "HIT and FLEE you need to fight it comfortably",
+ "ตีโดน 80%": "80% hit chance",
+ "ตีโดน 95%": "95% hit chance",
+ "ตีโดน 100% (สูงสุด)": "100% hit chance (max)",
+ "หลบได้ 50%": "50% dodge",
+ "หลบได้ 70% (สูงสุด)": "70% dodge (max)",
+ "ดู HIT และ FLEE ของตัวเองได้ที่หน้าสเตตัสในเกม · ค่า LUK ช่วยหลบเพิ่มได้อีกเล็กน้อย": "Your own HIT and FLEE are on the in-game status window · LUK adds a little more dodge",
+ "เลือกแผนที่": "Choose a map"
 });

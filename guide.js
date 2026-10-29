@@ -136,6 +136,40 @@ function record(kind,r){
  }
  return `<article class="record ${kind==='maps'?'map-card':''}" id="${esc(id)}"><div class="record-head">${art(r.art)}<div><small>${esc(sub)}</small><h4>${esc(title)}</h4></div></div>${body}${copyButton(id)}</article>`;
 }
+// Monster tab, wiki style: a chip per map (with its level range), cards with key stats and top drops, a popup with everything.
+const levelRange=list=>{const plain=list.filter(m=>!data.monsters.find(t=>t.id===m.id)?.boss),l=(plain.length?plain:list).map(m=>m.level??1);return l.length?'Lv.'+Math.min(...l)+(Math.max(...l)>Math.min(...l)?'–'+Math.max(...l):''):'';};
+function monsterChips(){
+ const box=$('#library-chips'),on=current==='monsters';box.hidden=!on;if(!on)return;const value=$('#library-filter').value;
+ const chips=[['',label('allMaps'),''],['boss',label('boss'),''],...data.maps.filter(m=>m.monsters.length).map(m=>[m.id,m.name,levelRange(m.monsters)])];
+ box.innerHTML=chips.map(([v,t,lv])=>`<button type="button" data-map-chip="${esc(v)}" aria-pressed="${v===value}">${esc(t)}${lv?` <small>${esc(lv)}</small>`:''}</button>`).join('');
+}
+const monsterTag=r=>r.boss?`<span class="tag boss">${esc(label('boss'))}</span>`:r.elite?`<span class="tag elite">${esc(label('eliteShort'))}</span>`:'';
+const dropLine=d=>`<li>${art(d.art)}<a href="#ref-items-${esc(d.id)}" data-close-monster>${esc(d.name)}</a><b>${pct(d.rate)}</b>${d.count!==1?`<small>×${d.count}</small>`:''}</li>`;
+const byRate=list=>[...list].sort((a,b)=>b.rate-a.rate);
+function monsterCard(r){
+ const top=byRate(r.drops).slice(0,4);
+ return `<article class="monster-card${r.boss?' is-boss':''}" id="ref-monsters-${esc(r.id)}"><button type="button" class="monster-open" data-monster="${esc(r.id)}" aria-label="${esc(label('monsterInfo')+' '+r.name)}"></button>`+
+  `<div class="monster-head">${art(r.art)}<div><h4>${esc(r.name)} ${monsterTag(r)}</h4><p class="lv">Lv.${r.level??1}${r.magic?' · '+esc(label('magicAttack')):''}</p><p class="where">${esc(r.locations.map(m=>m.name).join(' · ')||'—')}</p></div></div>`+
+  `<dl class="monster-stats"><div><dt>HP</dt><dd>${number(r.hp)}</dd></div><div><dt>ATK</dt><dd>${number(r.damage)}</dd></div><div><dt>EXP</dt><dd>${number(r.baseXp)}</dd></div><div><dt>FLEE</dt><dd>${number(r.flee)}</dd></div><div><dt>DEF/MDEF</dt><dd>${number(r.def)}/${number(r.mdef)}</dd></div><div><dt>HIT</dt><dd>${number(r.hit)}</dd></div></dl>`+
+  `<p class="drop-title">${esc(label('drops'))} (${r.drops.length})</p>${top.length?`<ul class="drop-list">${top.map(dropLine).join('')}</ul>`:`<p class="muted">${esc(label('unlistedDrop'))}</p>`}</article>`;
+}
+let monsterDialog;
+function openMonster(id){
+ const r=data.monsters.find(m=>m.id===id);if(!r)return;
+ if(!monsterDialog){monsterDialog=document.createElement('dialog');monsterDialog.id='monster-viewer';monsterDialog.setAttribute('aria-labelledby','monster-viewer-title');document.body.append(monsterDialog);
+  monsterDialog.addEventListener('click',e=>{if(e.target===monsterDialog||e.target.closest('[data-close-monster]'))monsterDialog.close();});}
+ // combat-formulas.js: hit chance = (90 + HIT - FLEE)% capped at 100%; dodge = (FLEE - monster HIT + 20)% capped at 70%
+ const hit=[[label('hit80'),'HIT '+Math.max(0,r.flee-10)+'+'],[label('hit95'),'HIT '+(r.flee+5)+'+'],[label('hit100'),'HIT '+(r.flee+10)+'+']],dodge=[[label('dodge50'),'FLEE '+(r.hit+30)+'+'],[label('dodge70'),'FLEE '+(r.hit+50)+'+']];
+ const rows=list=>`<table>${list.map(([a,b])=>`<tr><td>${esc(a)}</td><th>${esc(b)}</th></tr>`).join('')}</table>`;
+ const stat=(k,v,c)=>`<div class="${c}"><dt>${esc(k)}</dt><dd>${v}</dd></div>`;
+ const where=r.locations.map(m=>`<a href="#ref-maps-${esc(m.id)}" data-close-monster>${esc(m.name)}</a>`).join(' · ')||'—';
+ monsterDialog.innerHTML=`<header><h2 id="monster-viewer-title">${esc(label('monsterInfo'))}: ${esc(r.name)}</h2><button type="button" data-close-monster aria-label="${esc(label('close'))}">✕</button></header><div class="monster-body">`+
+  `<div class="monster-head">${art(r.art)}<div><h3>${esc(r.name)} ${monsterTag(r)}</h3><p class="lv">Lv.${r.level??1} · ${esc(label(r.magic?'magicAttack':'physicalAttack'))}${r.respawn?' · '+esc(label('respawn'))+' '+number(r.respawn/60)+' '+esc(label('minutes')):''}</p><p class="where">${esc(label('where'))}: ${where}</p></div></div>`+
+  `<dl class="monster-grid">${stat('HP',number(r.hp),'hp')}${stat(label('attack')+' (ATK)',number(r.damage),'atk')}${stat('Base / Job EXP',number(r.baseXp)+' / '+number(r.jobXp),'exp')}${stat('FLEE',number(r.flee),'flee')}${stat('DEF / MDEF',number(r.def)+' / '+number(r.mdef),'def')}${stat('HIT',number(r.hit),'hit')}</dl>`+
+  `<section class="hit-box"><h4>${esc(label('hitTitle'))}</h4><div>${rows(hit)}${rows(dodge)}</div><p class="muted">${esc(label('hitNote'))}</p></section>`+
+  `<h4>${esc(label('drops'))} (${r.drops.length})</h4>${r.drops.length?`<ul class="drop-list full">${byRate(r.drops).map(dropLine).join('')}</ul>`:`<p class="muted">${esc(label('unlistedDrop'))}</p>`}<p class="muted">${esc(label('sourceNote'))}</p></div>`;
+ monsterDialog.showModal();
+}
 function filterOptions(){
  const select=$('#library-filter');let options=[['',label(current==='skills'?'allClasses':'allTypes')]];
  if(current==='skills')options.push(...data.classes.flatMap(c=>[[c.id,c.name],...(c.branches??[]).map(b=>[b.id,c.name+' / '+b.name]) ]));
@@ -143,7 +177,7 @@ function filterOptions(){
  else if(current==='monsters')options.push(['boss',label('boss')],['normal',label('normal')],['elite',label('elite')],...data.maps.filter(m=>m.monsters.length).map(m=>[m.id,m.name]));
  else if(current==='pets')options.push(['S','S'],['A','A'],['B','B'],['fly',label('fly')],['ground',label('ground')]);
  else if(current==='recipes')options.push(...[...new Set(data.recipes.map(r=>r.group))].map(k=>[k,label(k)]));
- select.innerHTML=options.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('');select.hidden=options.length===1;
+ select.innerHTML=options.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('');select.hidden=options.length===1||current==='monsters';
 }
 function libraryRows(){
  const query=$('#library-search').value,filter=$('#library-filter').value;
@@ -160,7 +194,7 @@ function libraryRows(){
 }
 function renderLibrary(){
  const rows=libraryRows();$('#library-count').textContent=`${label('shown')} ${Math.min(rows.length,limit)} ${label('of')} ${rows.length} ${label('count')}`;
- $('#library-results').innerHTML=rows.length?rows.slice(0,limit).map(r=>record(current,r)).join(''):`<p>${esc(label('noResults'))}</p>`;
+ monsterChips();$('#library-results').classList.toggle('monster-list',current==='monsters');$('#library-results').innerHTML=rows.length?rows.slice(0,limit).map(r=>current==='monsters'?monsterCard(r):record(current,r)).join(''):`<p>${esc(label('noResults'))}</p>`;
  $('#load-more').hidden=rows.length<=limit;$('#load-more').textContent=label('more');
  document.querySelectorAll('#library-tabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.library===current)));
 }
@@ -217,7 +251,7 @@ async function load(){
  $('#library-search').addEventListener('input',()=>{focused=null;limit=16;renderLibrary();});$('#library-filter').addEventListener('change',()=>{focused=null;limit=16;renderLibrary();});
  $('#load-more').addEventListener('click',()=>{limit+=16;renderLibrary();});
  $('#contents-toggle').addEventListener('click',()=>{const open=$('#contents').classList.toggle('open');$('#contents-toggle').setAttribute('aria-expanded',String(open));if(open)$('#toc a')?.focus();});
- document.addEventListener('click',e=>{const picture=e.target.closest('[data-picture]');if(picture)openPicture(picture.dataset.picture,picture);const button=e.target.closest('[data-copy]');if(button)copyLink(button.dataset.copy);const tab=e.target.closest('[data-library]');if(tab){if(tab.tagName==='A')e.preventDefault();setLibrary(tab.dataset.library,tab.dataset.query??'');if(tab.tagName==='A')$('#database').scrollIntoView({block:'start'});}if(e.target.closest('#more-search')){searchLimit+=30;search();}if(e.target.closest('#toc a'))closeContents();});
+ document.addEventListener('click',e=>{const chip=e.target.closest('[data-map-chip]');if(chip){$('#library-filter').value=chip.dataset.mapChip;limit=16;focused=null;renderLibrary();}const mon=e.target.closest('[data-monster]');if(mon)openMonster(mon.dataset.monster);const picture=e.target.closest('[data-picture]');if(picture)openPicture(picture.dataset.picture,picture);const button=e.target.closest('[data-copy]');if(button)copyLink(button.dataset.copy);const tab=e.target.closest('[data-library]');if(tab){if(tab.tagName==='A')e.preventDefault();setLibrary(tab.dataset.library,tab.dataset.query??'');if(tab.tagName==='A')$('#database').scrollIntoView({block:'start'});}if(e.target.closest('#more-search')){searchLimit+=30;search();}if(e.target.closest('#toc a'))closeContents();});
  document.addEventListener('keydown',e=>{if(pictureDialog.open)return;if(e.key==='Escape'){closeContents();$('#search-results').hidden=true;$('#contents-toggle').focus();}if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$('#guide-search').focus();}});
  window.addEventListener('hashchange',route);
 }

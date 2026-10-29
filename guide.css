@@ -35,3 +35,37 @@
 .overview-card em{font-style:normal;font-weight:700;color:var(--gold);font-size:12px;white-space:nowrap}
 @media(max-width:760px){.overview-grid{grid-template-columns:1fr}.overview-card{padding:13px}.overview-card .gi{width:42px;height:42px}}
 @media print{.overview{display:none}}
+
+/* 29 Oct: monster tab - map chips, monster cards and the monster popup */
+.map-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.map-chips button{border-radius:999px;padding:7px 14px;font-size:12px;background:#12352c;border:1px solid var(--line);color:var(--ink)}
+.map-chips button small{color:var(--muted);font-weight:500;margin-left:4px;font-variant-numeric:tabular-nums}
+.map-chips button[aria-pressed=true]{background:var(--gold);color:#12251a;border-color:var(--gold)}.map-chips button[aria-pressed=true] small{color:#12251a}
+.reference-grid.monster-list{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.monster-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px;background:linear-gradient(135deg,#24382bf4,#152925f0);border:1px solid #c6a16488;border-radius:8px;scroll-margin-top:170px}
+.monster-card:hover{border-color:var(--gold)}.monster-card.is-boss{border-color:var(--gold);box-shadow:inset 0 0 0 1px #e5c67933}
+.monster-open{position:absolute;inset:0;z-index:1;background:none;border:0;padding:0;cursor:pointer;border-radius:8px}
+.monster-card a{position:relative;z-index:2}
+.monster-head{display:flex;gap:12px;align-items:center}.monster-head .art-box{width:64px;height:64px;flex:none}
+.monster-head h3,.monster-head h4{margin:0;font-size:16px;font-weight:700}.monster-head p{margin:2px 0 0;font-size:12px}.monster-head .lv{color:var(--gold);font-weight:700}.monster-head .where{color:#8fd8b0}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;vertical-align:middle;margin-left:4px}.tag.boss{background:#c0392b;color:#fff}.tag.elite{background:#8a6d2b;color:#fff}
+.monster-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 10px;margin:0;padding:10px 12px;background:#0b221c;border-radius:6px}
+.monster-stats dt{font-size:10px;color:var(--muted)}.monster-stats dd{margin:0;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.drop-title{margin:0;font-size:12px;color:var(--muted)}
+.drop-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.drop-list li{display:flex;align-items:center;gap:6px;min-width:0;padding:4px 6px;background:#0b221c;border-radius:5px;font-size:12px}
+.drop-list .art-box{width:24px;height:24px;flex:none}.drop-list a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.drop-list b{color:var(--gold);font-variant-numeric:tabular-nums}.drop-list small{color:var(--muted)}
+#monster-viewer{width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 40px);padding:0;background:#10291f;color:var(--ink);border:1px solid var(--gold);border-radius:10px}
+#monster-viewer::backdrop{background:#000b}
+#monster-viewer>header{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;background:#10291f;border-bottom:1px solid var(--line)}
+#monster-viewer>header h2{margin:0;font-size:17px}#monster-viewer>header button{background:none;border:0;color:var(--ink);font-size:18px;cursor:pointer;padding:4px 8px}
+.monster-body{padding:16px 18px;display:flex;flex-direction:column;gap:14px}.monster-body h4{margin:0;color:var(--gold);font-size:14px}.monster-body .monster-head .art-box{width:84px;height:84px}
+.monster-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0}
+.monster-grid div{padding:10px;text-align:center;background:#0b221c;border-radius:6px}.monster-grid dt{font-size:10px;color:var(--muted)}.monster-grid dd{margin:2px 0 0;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.monster-grid .hp dd{color:#7ddc8a}.monster-grid .atk dd{color:#ef7b6b}.monster-grid .exp dd{color:var(--gold)}.monster-grid .flee dd{color:#6fd3d8}.monster-grid .def dd{color:#c49cf0}.monster-grid .hit dd{color:#f0b56b}
+.hit-box{padding:12px 14px;border:1px solid #6fd3d866;border-radius:8px;background:#0b221c}.hit-box h4{color:#6fd3d8}
+.hit-box>div{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0}.hit-box table{width:100%;font-size:12px;border-collapse:collapse}.hit-box table,.hit-box tr,.hit-box td,.hit-box th{padding:3px 0;border:0;background:none!important;color:var(--ink)}.hit-box th{text-align:right;font-variant-numeric:tabular-nums}
+.drop-list.full{grid-template-columns:1fr 1fr}
+@media(max-width:760px){.reference-grid.monster-list{grid-template-columns:1fr}.map-chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.map-chips button{white-space:nowrap}.monster-grid{grid-template-columns:1fr 1fr}.hit-box>div,.drop-list.full{grid-template-columns:1fr}}
+@media print{.map-chips,.monster-open{display:none}}

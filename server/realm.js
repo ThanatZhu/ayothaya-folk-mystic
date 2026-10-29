@@ -1,7 +1,7 @@
 import {rapidConsumable} from '../rapid-consumables202.js';
 import {isRankingExcluded} from './ranking-eligibility197.js';
 import {fieldAdventurers,adventurerAt,adventurerViews,adventurerContract,ADVENTURER_TIME} from '../field-adventurers177.js';
-import {prologueJoin,prologueMap,prologueStart,prologueKill,prologueTick,prologueCommand,prologueExit,prologueView,prologueRecord} from './prologue-realm.js?v=1';
+import {prologueJoin,prologueMap,prologueStart,prologueKill,prologueTick,prologueCommand,prologueExit,prologueView,prologueRecord,trialKit} from './prologue-realm.js?v=1';
 import {ARENA_MAP,arenaReservation,arenaView,arenaCommand,cleanArenaRooms,leaveArena,finishArena} from './arena-rooms166.js';
 import {checkWalk,startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} from './auto-walk.js';
 import {normalizeAutoTarget} from '../auto-targets.js';
@@ -752,6 +752,8 @@ export class RealmServer{
   const mine=rows.findIndex(([k])=>k===p.key);return {rows:rows.slice(0,10).map(([k,v],i)=>({rank:i+1,me:k===p.key,...v})),me:mine<0?null:{rank:mine+1,...rows[mine][1]},arena:this.arenaView(p)};}
 
  refreshStats(p){
+  // 0.122 prologue trial: the lent class's Lv.80 full-set build (server/prologue-realm.js); real stats stay untouched
+  if(p.trial){const sig='trial:'+p.trial;if(sig===p.statSig)return;const kit=trialKit(p.trial,p.character.gender);p.statSig=sig;p.derived=deriveStats({classId:p.trial,level:kit.level,stats:kit.stats,gear:kit.gear});p.world.applyDerived(p.derived);return;}
   const who=this.who(p),pet=activePremiumPet(p.petCollection)?.bonus??{},food=foodBuff(p.world),sig=JSON.stringify([who,p.stats,p.gear,pet,food]);if(sig===p.statSig)return;
   const fit=dropInvalidGear(p.bag,p.gear,who);if(JSON.stringify(fit.gear)!==JSON.stringify(p.gear)){const off=Object.keys(p.gear).filter(k=>p.gear[k]&&!fit.gear[k]).map(k=>itemDef(p.gear[k])?.name).filter(Boolean);p.gear=fit.gear;this.setBag(p,fit.bag);if(off.length)p.world.notice('ถอด '+off.join(', ')+' เก็บเข้ากระเป๋า · อาชีพนี้ใช้ไม่ได้');}
   p.statSig=JSON.stringify([who,p.stats,p.gear,pet,food]);p.derived=deriveStats({...who,stats:p.stats,gear:p.gear,pet,food});p.world.applyDerived(p.derived);this.rank(p);

@@ -41,8 +41,8 @@ import {atlasPath,className} from './classes.js?v=novice174';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=prologue1';
 import {createStoryUI} from './story-ui.js?v=rebirth199';
-import {createPrologueUI} from './prologue-ui.js?v=1';
-import {TRIAL_CLASSES} from './prologue.js?v=1';
+import {createPrologueUI} from './prologue-ui.js?v=2';
+import {TRIAL_CLASSES} from './prologue.js?v=2';
 import {createClassRewardUI} from './class-reward-ui192.js';
 import {createBagUI} from './bag-ui.js?v=mailfull198';
 import {createStatusUI} from './status-ui.js?v=stat-reset189';
@@ -85,7 +85,9 @@ try {
  const account=await prepareCloud(catalog);if(!account.character)throw new Error('Character save unavailable');
  const map=resolveMap(catalog,new URLSearchParams(location.search).get('map'),account.data?.mapId);
  // ทุ่งนิมิต: while the teacher's lent class is on, this page plays as that class (skill bar, sprite); the realm decides it
- const asked=new URLSearchParams(location.search).get('trial'),trial=map.prologue&&TRIAL_CLASSES.includes(asked)?asked:null;if(trial&&account.character.classId==='novice')Object.defineProperty(account,'character',{value:{...account.character,classId:trial},configurable:true,writable:true});
+ const asked=new URLSearchParams(location.search).get('trial'),trial=map.prologue&&TRIAL_CLASSES.includes(asked)?asked:null;if(trial&&account.character.classId==='novice'){Object.defineProperty(account,'character',{value:{...account.character,classId:trial},configurable:true,writable:true});
+  // 0.122 the lent class at its height: its special-look weapon (the stats are the realm's Lv.80 full set)
+  Object.defineProperty(account,'equipment',{value:{version:1,weapon:trial+'-weapon-crafted',outfit:trial+'-outfit-original'},configurable:true,writable:true});}
  loading.theme(map.id);loading.stage(2);
  history.replaceState(null,'','?server='+account.serverId+'&map='+encodeURIComponent(map.id)+(trial?'&trial='+trial:''));
  let worldUI=null,multiplayer=null,overview=false;

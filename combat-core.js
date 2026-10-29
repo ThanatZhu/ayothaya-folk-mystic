@@ -14,7 +14,7 @@ import {AILMENTS,rollAilment,held} from './ailments.js?v=01';
 import {advanceStats,advanceSkills} from './advancement.js?v=73';
 import {getClass,classSkills} from './classes.js?v=novice174';
 import {scaledSkill} from './skill-progress.js?v=novice174';
-import {PROLOGUE_BOSS} from './prologue.js?v=1';
+import {PROLOGUE_BOSS} from './prologue.js?v=2';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 // Engine-independent movement, collision, targeting and combat rules.
 export const SKILLS=[

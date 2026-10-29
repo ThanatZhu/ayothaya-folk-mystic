@@ -1,9 +1,23 @@
 // Realm side of the ทุ่งนิมิต prologue (rules in ../prologue.js). Every step is decided here: kills, the teacher's lent
 // class, the terrace, the guardian and the way home. Cutscenes only report "seen"; skipping one never skips a step.
 import {MONSTER_TYPES} from '../combat-core.js';
-import {PROLOGUE_MAP,PROLOGUE_KILLS,TEACHER,TERRACE,BOSS_SPOT,TRIAL_CLASSES,SCENE_IDS,PROLOGUE_BOSS,prologueDue,inTrial,onTerrace} from '../prologue.js?v=1';
+import {PROLOGUE_MAP,PROLOGUE_KILLS,TEACHER,TERRACE,BOSS_SPOT,TRIAL_CLASSES,SCENE_IDS,PROLOGUE_BOSS,prologueDue,inTrial,onTerrace} from '../prologue.js?v=2';
+import {raiseStat} from '../character-stats.js';
+import {gearLook,bossId,SET_SLOTS} from '../gear-sets.js';
 const BOSS_TYPE=MONSTER_TYPES.findIndex(t=>t.id===PROLOGUE_BOSS.id);
 const ACTIVE_LEVEL=5;   // every active skill of the lent class (ultimate included) at its top rank
+// 0.122 the lent power is the class at its height (owner: hit hard, full set): a Lv.80 build wearing the class's full
+// boss set. It only feeds the combat stats while the trial lasts; the saved level, stats, gear and bag never change.
+export const TRIAL_LEVEL=80;
+const BUILDS={melee:[['str',90],['agi',60],['vit',45],['dex',40],['luk',30]],hunter:[['dex',90],['agi',60],['vit',45],['str',30],['luk',30]],
+ magic:[['int',90],['dex',55],['vit',45],['agi',35],['luk',20]]};
+export function trialKit(classId,gender){
+ let stats=null;
+ for(const [k,to] of BUILDS[classId==='hunter'?'hunter':classId==='shaman'||classId==='acolyte'?'magic':'melee'])
+  while((stats?.[k]??1)<to){try{stats=raiseStat(stats,k,TRIAL_LEVEL);}catch{break;}}
+ const look=gearLook(classId,gender);
+ return {level:TRIAL_LEVEL,stats,gear:{weapon:bossId('weapon',classId),...Object.fromEntries(SET_SLOTS.map(slot=>[slot,bossId(slot,look)]))}};
+}
 
 // the state a joining record is in, or null (prologue off, finished long ago, or an existing character)
 export function prologueJoin(realm,record){
@@ -11,14 +25,14 @@ export function prologueJoin(realm,record){
  return prologueDue(record);
 }
 export const prologueMap=realm=>realm.catalog.maps.find(m=>m.id===PROLOGUE_MAP);
-function lend(p){
+function lend(realm,p){
  const w=p.world;w.setProfession(p.prologue.classId,'');
  w.skillLevels=w.skills.map((s,i)=>i<6&&!s.reserved&&!s.master&&!s.passive?ACTIVE_LEVEL:0);
- w.player.mp=w.player.maxMp;p.trial=p.prologue.classId;
+ p.trial=p.prologue.classId;realm.refreshStats(p);w.player.hp=w.player.maxHp;w.player.mp=w.player.maxMp;
 }
-function giveBack(p){
+function giveBack(realm,p){
  const w=p.world;w.setProfession(p.character.classId,p.character.jobId??'');
- w.skillLevels=[...(p.skills[p.character.classId]??w.skillLevels)];w.targetId=null;w.auto=false;p.trial=null;
+ w.skillLevels=[...(p.skills[p.character.classId]??w.skillLevels)];w.targetId=null;w.auto=false;p.trial=null;realm.refreshStats(p);
 }
 function spawnBoss(room){
  if(room.mobs.some(m=>m.prologueBoss&&m.hp>0))return;
@@ -31,13 +45,13 @@ function advance(p,stage,notice){p.prologue={...p.prologue,stage};p.saveNow=true
 export function prologueStart(realm,p){
  if(!p.prologue||p.room.map.id!==PROLOGUE_MAP)return;
  const w=p.world;Object.assign(w.player,p.room.map.spawn);
- if(inTrial(p.prologue)){lend(p);const npc=p.room.map.npcs.find(n=>n.name===TEACHER);Object.assign(w.player,p.prologue.stage==='trial'&&npc?{x:npc.x+2,z:npc.z+1}:{x:TERRACE.x,z:TERRACE.z+TERRACE.r+3});}
+ if(inTrial(p.prologue)){lend(realm,p);const npc=p.room.map.npcs.find(n=>n.name===TEACHER);Object.assign(w.player,p.prologue.stage==='trial'&&npc?{x:npc.x+2,z:npc.z+1}:{x:TERRACE.x,z:TERRACE.z+TERRACE.r+3});}
  if(p.prologue.stage==='boss')spawnBoss(p.room);
- if(p.prologue.stage==='fading'&&p.world.profession.id!==p.character.classId)giveBack(p);
+ if(p.prologue.stage==='fading'&&p.world.profession.id!==p.character.classId)giveBack(realm,p);
 }
 export function prologueKill(realm,p,mob){
  if(!p.prologue||p.room.map.id!==PROLOGUE_MAP)return;
- if(mob.prologueBoss&&p.prologue.stage==='boss'){giveBack(p);advance(p,'fading','✨ อสูรฟางนิมิตสลายไปแล้ว');return;}
+ if(mob.prologueBoss&&p.prologue.stage==='boss'){giveBack(realm,p);advance(p,'fading','✨ อสูรฟางนิมิตสลายไปแล้ว');return;}
  if(p.prologue.stage!=='wake'||mob.prologueBoss)return;
  const kills=Math.min(PROLOGUE_KILLS,p.prologue.kills+1);p.prologue={...p.prologue,kills};p.saveNow=true;
  if(kills>=PROLOGUE_KILLS)advance(p,'teacher','🌿 วิญญาณครูกำลังรอเจ้าอยู่ที่ต้นไทร');
@@ -54,7 +68,7 @@ export function prologueCommand(realm,p,m){
  if(m.action==='class'){
   const npc=p.room.map.npcs.find(n=>n.name===TEACHER);
   if(s.stage!=='teacher'||!TRIAL_CLASSES.includes(m.classId)||!npc||Math.hypot(npc.x-p.world.player.x,npc.z-p.world.player.z)>3.6)return realm.error(p,'prologue-class');
-  p.prologue={...s,classId:m.classId,stage:'trial'};p.saveNow=true;lend(p);p.world.notice('⚔️ พลังที่ยืมมาไหลเข้าสู่กาย · ไปที่ลานศิลาโบราณทางเหนือ');return;
+  p.prologue={...s,classId:m.classId,stage:'trial'};p.saveNow=true;lend(realm,p);p.world.notice('⚔️ พลังที่ยืมมาไหลเข้าสู่กาย · ไปที่ลานศิลาโบราณทางเหนือ');return;
  }
  if(m.action==='boss'){if(s.stage!=='arena')return;advance(p,'boss');spawnBoss(p.room);return;}
  if(m.action==='finish'){if(s.stage!=='fading')return realm.error(p,'prologue-finish');advance(p,'done');return;}

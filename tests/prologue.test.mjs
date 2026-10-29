@@ -4,7 +4,10 @@ import fs from 'node:fs';
 import {RealmServer} from '../server/realm.js';
 import {initialSave} from '../realm-state.js';
 import {MONSTER_TYPES} from '../combat-core.js';
-import {PROLOGUE_MAP,PROLOGUE_KILLS,TERRACE,dueScene,prologueDue,normalizePrologue} from '../prologue.js';
+import {PROLOGUE_MAP,PROLOGUE_KILLS,TERRACE,TRIAL_CLASSES,PROLOGUE_BOSS,dueScene,prologueDue,normalizePrologue} from '../prologue.js';
+import {trialKit,TRIAL_LEVEL} from '../server/prologue-realm.js';
+import {itemDef} from '../items.js';
+import {deriveStats} from '../character-stats.js';
 
 const catalog=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url)));
 const realmOf=()=>new RealmServer({catalog,roleSkills:true,prologue:true,now:()=>Date.UTC(2026,9,28,6)});
@@ -79,5 +82,26 @@ test('the lent class can actually beat the guardian with its own skills',()=>{
   console.log('fight',classId,Math.round(t)+' s','lowest HP',Math.round(low*100)+'%');assert.ok(p.world.player.hp>0,classId+' fell to the guardian');
   assert.ok(boss.hp<=0,classId+' did not win in 4 min (hp '+boss.hp+')');
   assert.ok(t>=20&&t<120,classId+' took '+Math.round(t)+' s');
+ }
+});
+test('every lent class fights at its height (Lv.80, full boss set) and goes home with nothing of it kept (0.122)',()=>{
+ for(const classId of TRIAL_CLASSES)for(const gender of ['male','female']){
+  const kit=trialKit(classId,gender);assert.equal(kit.level,TRIAL_LEVEL);
+  assert.deepEqual(Object.keys(kit.gear).sort(),['armor','garment','head','shoes','weapon']);
+  for(const id of Object.values(kit.gear))assert.ok(itemDef(id),classId+' '+gender+' '+id);
+  const d=deriveStats({classId,level:kit.level,stats:kit.stats,gear:kit.gear});assert.ok(Math.max(d.atk,d.matk)>=400,classId+' hits hard');assert.ok(d.maxHp>1400);
+  const realm=realmOf(),record=fresh({character:{name:'Dreamer',gender,classId:'novice'}}),bagBefore=null;let {p}=join(realm,record,'u-'+classId+gender);
+  const gearBefore=JSON.stringify(p.gear),statsBefore=JSON.stringify(p.stats);
+  killTraining(realm,p,PROLOGUE_KILLS);Object.assign(p.world.player,{x:teacher().x+1,z:teacher().z});say(realm,p,{action:'class',classId});
+  assert.equal(p.trial,classId);assert.equal(p.world.player.hp,p.world.player.maxHp);assert.equal(p.world.player.maxHp,d.maxHp,'the trial build is what the world fights with');
+  assert.equal(p.derived.basicBonus,d.basicBonus);
+  // the real character is untouched while lent, and in the save
+  assert.equal(JSON.stringify(p.gear),gearBefore);assert.equal(JSON.stringify(p.stats),statsBefore);
+  const saved=realm.record(p,record);assert.equal(JSON.stringify(saved.gear??{}),JSON.stringify(record.gear??p.gear));
+  // the guardian holds out for a real fight, then the build goes with the borrowed class
+  assert.ok(PROLOGUE_BOSS.hp>=Math.max(d.atk,d.matk)*30);
+  Object.assign(p.world.player,{x:TERRACE.x,z:TERRACE.z+TERRACE.r-1});for(let i=0;i<25;i++)realm.step(.05);say(realm,p,{action:'seen',id:'boss'});say(realm,p,{action:'boss'});
+  const boss=p.room.mobs.find(m=>m.prologueBoss);Object.assign(p.world.player,{x:boss.x+1,z:boss.z});realm.hurt(p,boss,1e6);
+  assert.equal(p.trial,null);assert.ok(p.world.player.maxHp<400,'back to a Novice');assert.ok(p.world.player.hp<=p.world.player.maxHp);
  }
 });

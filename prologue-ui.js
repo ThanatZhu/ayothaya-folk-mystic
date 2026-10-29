@@ -1,7 +1,7 @@
 // Client side of the ทุ่งนิมิต prologue: plays each cutscene when the realm says the story has reached it, offers the
 // teacher's seven paths inside the NPC conversation, keeps the objective in the quest tracker, and walks the player home.
 // The realm owns every step (server/prologue-realm.js); this file only shows them and reports what was watched.
-import {PROLOGUE_MAP,PROLOGUE_SCENES,TEACHER,TRIAL_CLASSES,OBJECTIVES,dueScene,inTrial} from './prologue.js?v=1';
+import {PROLOGUE_MAP,PROLOGUE_SCENES,TEACHER,TRIAL_CLASSES,OBJECTIVES,dueScene,inTrial} from './prologue.js?v=2';
 import {classPortrait} from './portraits.js?v=at1';
 import {getClass} from './classes.js?v=novice174';
 
@@ -21,7 +21,7 @@ export function createPrologueUI({game,worldUI,storyUI,map,account,trial:trialPa
  const once=(key,fn)=>{if(sent.has(key))return;sent.add(key);fn();};
  function play(id,after){
   if(playing||asked.has(id))return;asked.add(id);playing=id;const base=PROLOGUE_SCENES[id],s=state();
-  const hero={...base.hero,classId:base.hero.trial&&s?.classId?s.classId:'novice',gender:account.character.gender,appearance:account.character.appearance??{},equipment:base.hero.trial?null:account.equipment??null};
+  const hero={...base.hero,classId:base.hero.trial&&s?.classId?s.classId:'novice',gender:account.character.gender,appearance:account.character.appearance??{},equipment:base.hero.trial&&s?.classId?{version:1,weapon:s.classId+'-weapon-crafted',outfit:s.classId+'-outfit-original'}:account.equipment??null};
   dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:{...base,hero},onDone(){playing=null;world.prologueAction?.({action:'seen',id});after?.();}}}));
  }
  // the teacher's seven paths, as the NPC conversation's own choice buttons

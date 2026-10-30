@@ -1,0 +1,103 @@
+/* Separate layouts: desktop uses eight-column rows, touch uses a compact wheel. */
+body.actionbar-desktop.field-hud.hud63 .combat-controls,body.actionbar-desktop.field-hud.hud63 #quick-slots{display:none!important}
+#desktop-actionbar[hidden]{display:none!important}
+#desktop-actionbar{--action-size:52px;position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;width:max-content;min-height:158px;align-items:flex-end;z-index:35;pointer-events:auto;max-width:calc(100vw - 24px);color:#f8e4ad}
+body.actionbar-dragging #desktop-actionbar{z-index:110}
+.actionbar-rows{display:flex;flex-direction:column;gap:5px;padding:6px;background:linear-gradient(#18382be6,#081c18f2);border:1px solid #b18d4e;border-radius:6px;box-shadow:0 3px 12px #0008}
+.actionbar-row{display:grid;grid-template-columns:repeat(8,var(--action-size));gap:4px}
+#desktop-actionbar .action-slot{position:relative;display:block;width:var(--action-size);height:var(--action-size);padding:3px;margin:0;min-width:0;min-height:0;border:1px solid #b9a46b;border-radius:4px;background:#10241d;box-shadow:inset 0 0 0 1px #050f0d;cursor:pointer;overflow:hidden;touch-action:none}
+#desktop-actionbar .slot-icon{display:block;width:100%;height:100%;border-radius:2px;background-size:100% 100%;background-position:center;pointer-events:none;font-size:0}
+#desktop-actionbar .action-slot.empty{border-color:#9f915866;background:#081b17b3}
+#desktop-actionbar .action-slot.empty:before{content:'+';position:absolute;inset:0;display:grid;place-items:center;color:#d1c18c35;font-size:18px}
+#desktop-actionbar kbd{position:absolute;left:3px;top:1px;z-index:2;font:10px Arial,sans-serif;color:#fff4cf;text-shadow:0 1px 3px #000,1px 0 2px #000;pointer-events:none}
+#desktop-actionbar small{position:absolute;right:3px;bottom:1px;z-index:2;font:bold 10px Arial,sans-serif;color:#fff5d5;text-shadow:0 1px 3px #000;pointer-events:none}
+#desktop-actionbar em{position:absolute;inset:0;z-index:3;display:grid;place-items:center;color:#fff;font:bold 22px Arial,sans-serif;text-shadow:0 1px 3px #000;pointer-events:none}
+#desktop-actionbar .action-slot.cooling:after{content:'';position:absolute;inset:auto 0 0;height:var(--cooldown);background:#0009;pointer-events:none}
+#desktop-actionbar .action-slot:is(.locked,.depleted) .slot-icon{filter:grayscale(1);opacity:.4}
+#desktop-actionbar .action-slot.no-mana:not(.locked){border-color:#8872b4}
+#desktop-actionbar .action-slot:hover,#desktop-actionbar .action-slot.drop-over{border-color:#fff4ad;box-shadow:0 0 0 2px #f6d173,0 0 12px #eac66c88}
+#desktop-actionbar button:focus-visible{outline:2px solid #b7f5dd;outline-offset:2px}
+.actionbar-tools{position:absolute;left:calc(100% + 12px);bottom:0;display:flex;width:146px;flex-direction:column;gap:6px;align-items:stretch;flex-shrink:0}
+.actionbar-resize,#actionbar-life,#actionbar-combat{display:flex;gap:6px;align-items:center;justify-content:flex-start}
+#desktop-actionbar :is(.actionbar-resize button,#actionbar-life button){color:#fff0bb;border:1px solid #c6a66a;border-radius:12px;background:linear-gradient(155deg,#39634f,#1b3c30 58%,#102c23);box-shadow:inset 0 1px 0 #e7d39b55,inset 0 -2px 0 #081d1999,0 3px 6px #0005;font-family:inherit;cursor:pointer;transition:background .16s,box-shadow .16s,transform .16s}
+#desktop-actionbar .actionbar-resize button{display:flex;align-items:center;justify-content:center;gap:5px;width:70px;height:36px;min-width:70px;min-height:36px;padding:4px 6px;font-size:12px;font-weight:700}
+#desktop-actionbar .actionbar-row-sign{display:grid;place-items:center;width:19px;height:19px;flex-shrink:0;border-radius:50%;color:#243b2b;background:linear-gradient(#fff2bd,#d4b26c);box-shadow:inset 0 1px 0 #fff9;font:bold 18px/1 Arial,sans-serif}
+#desktop-actionbar .actionbar-resize button:disabled{opacity:.4;cursor:default;box-shadow:inset 0 1px 0 #e7d39b22}
+#desktop-actionbar #actionbar-life button{position:relative!important;inset:auto!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:70px!important;height:58px!important;min-width:70px!important;padding:5px!important;font-size:12px;font-weight:700;line-height:15px}
+#desktop-actionbar #emote-open .item-icon{width:28px;height:28px;display:block;filter:drop-shadow(0 1px 2px #0006)}
+.action-helper-label,.movement-glyph{display:none}
+#desktop-actionbar .action-helper-label,#desktop-actionbar .movement-glyph{display:block}
+#desktop-actionbar .movement-glyph{width:29px;height:29px;color:#ffe8a6;filter:drop-shadow(0 1px 1px #0008)}
+.movement-glyph svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.movement-glyph svg circle{fill:currentColor;stroke:none}
+#run-toggle[data-move-action=run] .walk-glyph,#run-toggle[data-move-action=walk] .run-glyph{display:none}
+#desktop-actionbar #run-toggle[aria-pressed=true]{background:linear-gradient(155deg,#58754c,#254c35 60%,#173925);border-color:#e6d28b}
+#desktop-actionbar :is(.actionbar-resize button,#actionbar-life button):not(:disabled):hover{background:linear-gradient(155deg,#557b57,#2d5741 60%,#193c2d);border-color:#fff0ac;box-shadow:inset 0 1px 0 #fff6,0 3px 8px #0006,0 0 8px #ead28a33;transform:translateY(-1px)}
+#desktop-actionbar :is(.actionbar-resize button,#actionbar-life button):not(:disabled):active{transform:translateY(1px) scale(.97);box-shadow:inset 0 2px 4px #071e1999}
+@media(prefers-reduced-motion:reduce){#desktop-actionbar :is(.actionbar-resize button,#actionbar-life button){transition:none;transform:none!important}}
+#desktop-actionbar #auto-control{position:relative!important;inset:auto!important;display:flex!important;width:auto!important;height:44px!important;gap:3px;align-items:center}
+#desktop-actionbar #auto-attack{width:44px!important;height:44px!important;min-width:0!important;font-size:10px!important;padding:0!important}
+#desktop-actionbar #auto-settings-open{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;flex-shrink:0;position:relative!important;inset:auto!important}
+#desktop-actionbar #attack{position:relative!important;inset:auto!important;width:52px!important;height:52px!important;min-width:0!important;padding:0!important}
+#desktop-actionbar .actionbar-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(100%)}
+body.actionbar-desktop #skill-window .skill-node strong{cursor:grab;touch-action:none}
+body.actionbar-desktop.field-hud.hud63 #online-dock{max-width:380px!important}
+@media(max-width:1300px){body.actionbar-desktop.field-hud.hud63 #online-dock{bottom:calc(var(--actionbar-height,180px) + 32px)!important;max-height:240px!important}}
+.actionbar-ghost{position:fixed;z-index:10000;width:48px;height:48px;transform:translate(-50%,-50%);pointer-events:none;border:2px solid #ffdf85;border-radius:4px;background:#123126}
+.actionbar-ghost strong{display:block;width:100%;height:100%;background-size:100% 100%;pointer-events:none}
+body.actionbar-dragging{user-select:none}
+@media(max-width:1280px){#desktop-actionbar{--action-size:46px;gap:6px}}
+@media(max-width:1050px){#desktop-actionbar{--action-size:42px}}
+/* Painted controls: row management on the left, emotes/movement on the right. */
+.action-helper-art{display:none}
+#desktop-actionbar>.actionbar-resize{position:absolute;right:calc(100% + 10px);bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;height:max(104px,var(--actionbar-rows-height,124px));width:48px}
+#desktop-actionbar .actionbar-resize button{display:block;width:48px;min-width:48px;height:48px;min-height:48px;flex-shrink:0;padding:0;border:0!important;background:none!important;box-shadow:none!important;border-radius:7px;filter:drop-shadow(0 2px 3px #0007)}
+#desktop-actionbar .actionbar-button-art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+#desktop-actionbar .actionbar-resize button:disabled{opacity:.45;filter:grayscale(.7) drop-shadow(0 1px 2px #0006)}
+#desktop-actionbar #actionbar-life button{width:70px!important;height:80px!important;min-height:80px!important;gap:0;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;text-shadow:0 1px 3px #000,1px 0 #143027,-1px 0 #143027;filter:drop-shadow(0 2px 3px #0007)}
+#desktop-actionbar #actionbar-life .action-helper-art{display:block;width:64px;height:64px;object-fit:contain;pointer-events:none}
+#desktop-actionbar #actionbar-life :is(.item-icon,.movement-glyph){display:none!important}
+#desktop-actionbar #actionbar-life .action-helper-label,#desktop-actionbar #actionbar-life .movement-label{display:block;font-size:12px;line-height:16px}
+#desktop-actionbar #run-toggle[aria-pressed=true] .action-helper-art{filter:brightness(1.15) drop-shadow(0 0 4px #f6d67a)}
+#desktop-actionbar #actionbar-life button:disabled{opacity:.45;filter:grayscale(.7)}
+/* Two level helper pairs, with a larger battle column and a corner settings cog. */
+.combat-control-art{display:none}
+#desktop-actionbar .actionbar-tools{display:grid;grid-template-columns:64px;gap:0;width:64px;align-items:end}
+#desktop-actionbar>.actionbar-resize{bottom:-8px;width:64px;height:130px;justify-content:flex-start;gap:10px}
+#desktop-actionbar .actionbar-resize button{display:flex;align-items:flex-start;justify-content:center;width:64px;min-width:64px;height:60px;min-height:60px}
+#desktop-actionbar .actionbar-button-art{width:48px;height:48px}
+#desktop-actionbar #actionbar-life{position:relative;bottom:-8px;display:flex;flex-direction:column;gap:10px;width:64px;height:130px}
+#desktop-actionbar #actionbar-life button{width:64px!important;min-width:64px!important;height:60px!important;min-height:60px!important;justify-content:flex-start;gap:0}
+#desktop-actionbar #actionbar-life .action-helper-art{width:48px;height:48px}
+#desktop-actionbar #actionbar-life :is(.action-helper-label,.movement-label){font-size:11px;line-height:12px}
+#actionbar-combat{position:fixed;right:max(24px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));display:flex;flex-direction:row;align-items:flex-end;gap:14px;width:182px;z-index:35;pointer-events:auto}
+#actionbar-combat[hidden]{display:none!important}
+#actionbar-combat button:focus-visible{outline:2px solid #b7f5dd;outline-offset:2px}
+#actionbar-combat #auto-control{position:relative!important;inset:auto!important;display:block!important;width:84px!important;height:98px!important;overflow:visible}
+#actionbar-combat :is(#auto-attack,#attack){position:relative!important;inset:auto!important;display:block!important;width:84px!important;height:98px!important;min-width:84px!important;min-height:98px!important;padding:0!important;border:0!important;border-radius:8px!important;background:none!important;box-shadow:none!important;font-size:0!important;overflow:visible;cursor:pointer;text-shadow:0 1px 3px #000,1px 0 #14251b,-1px 0 #14251b}
+#actionbar-combat .combat-control-art{position:absolute;top:0;left:0;display:block;width:84px;height:84px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 3px 4px #0008)}
+#actionbar-combat #auto-attack strong{position:absolute;bottom:0;left:10px;display:block;font:700 11px/14px Mali,Tahoma,sans-serif;color:#f7df9c}
+#actionbar-combat #auto-state{position:absolute;bottom:0;right:10px;display:block;font:700 11px/14px Mali,Tahoma,sans-serif;color:#f7df9c}
+#actionbar-combat #auto-attack small{display:none!important}
+#actionbar-combat #auto-attack.active .combat-control-art{filter:brightness(1.18) drop-shadow(0 0 6px #a4edaa99)}
+#actionbar-combat #auto-attack.active :is(strong,#auto-state){color:#b7f0bd}
+#actionbar-combat #attack::before{content:none!important;display:none!important}
+#actionbar-combat #attack small{position:absolute;bottom:0;left:0;right:0;top:auto;display:block!important;font:700 11px/14px Mali,Tahoma,sans-serif;text-align:center;color:#ffe9b4}
+#actionbar-combat #auto-settings-open{position:absolute!important;inset:-8px -8px auto auto!important;display:block!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;z-index:6}
+#actionbar-combat #auto-settings-open :is(svg),#actionbar-combat #auto-settings-open::before{display:none!important;content:none!important}
+#actionbar-combat #auto-settings-open .combat-control-art{width:36px;height:36px;filter:drop-shadow(0 2px 2px #000b)}
+#actionbar-combat button:hover .combat-control-art{filter:brightness(1.2) drop-shadow(0 3px 5px #0009)}
+#actionbar-combat button:active .combat-control-art{transform:scale(.95)}
+body.actionbar-mobile .combat-control-art{display:none!important}
+/* Four skills per page sit around attack; the central circular arrows change page. */
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel{position:fixed!important;right:var(--edge-r)!important;bottom:var(--touch-bottom)!important;width:228px!important;height:202px!important;display:block!important;translate:none!important;scale:1!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill{position:absolute!important;inset:auto!important;left:var(--arc-x)!important;top:var(--arc-y)!important;width:48px!important;height:48px!important;min-width:44px!important;min-height:44px!important;border-radius:50%!important;border:2px solid #d5b875!important;padding:3px!important;background:#112d25!important;box-shadow:0 2px 5px #0008}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill strong{position:absolute!important;inset:3px!important;display:block!important;width:auto!important;height:auto!important;margin:0!important;max-width:none!important;max-height:none!important;border-radius:50%!important;background-size:100% 100%!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skill-bank{position:absolute!important;left:110px!important;top:78px!important;width:48px!important;height:48px!important;inset-block-end:auto!important;border-radius:50%!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel .attack-controls{position:absolute!important;inset:0!important;display:block!important;pointer-events:none}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-control{position:absolute!important;inset:auto!important;left:56px!important;top:152px!important;display:flex!important;align-items:center;width:90px!important;height:48px!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-attack{width:48px!important;height:48px!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #attack{position:absolute!important;inset:auto!important;left:158px!important;top:132px!important;width:68px!important;height:68px!important}
+body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill[data-mobile-away]{display:none!important}
+@media(orientation:landscape){body.actionbar-mobile.mobile-play.field-hud.hud63 #online-dock.collapsed{right:calc(var(--edge-r) + 252px)!important;max-width:560px!important}}

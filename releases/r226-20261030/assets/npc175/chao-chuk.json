@@ -1,0 +1,102 @@
+{
+  "id": "chao-chuk175",
+  "source": "./assets/npc175/chao-chuk.png",
+  "frameSize": 320,
+  "foot": 276,
+  "bodyHeight": 210,
+  "worldScale": 0.78,
+  "facing": "right",
+  "frames": [
+    {
+      "rect": [
+        0,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "rect": [
+        320,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "rect": [
+        640,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "rect": [
+        960,
+        0,
+        320,
+        320
+      ]
+    }
+  ],
+  "clips": {
+    "idle": {
+      "frames": [
+        0,
+        1,
+        0
+      ],
+      "frameDurations": [
+        4.6,
+        0.12,
+        0.28
+      ],
+      "loop": true
+    },
+    "talk": {
+      "frames": [
+        2,
+        0
+      ],
+      "frameDurations": [
+        1.2,
+        0.8
+      ],
+      "loop": true
+    },
+    "sit": {
+      "frames": [
+        3
+      ],
+      "fps": 1,
+      "loop": true
+    }
+  },
+  "sourceBounds": [
+    [
+      264,
+      51,
+      507,
+      621
+    ],
+    [
+      158,
+      61,
+      401,
+      624
+    ],
+    [
+      259,
+      25,
+      590,
+      583
+    ],
+    [
+      132,
+      156,
+      430,
+      586
+    ]
+  ]
+}

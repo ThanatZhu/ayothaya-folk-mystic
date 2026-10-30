@@ -18,7 +18,7 @@ html body #boss-browser.jade-surface222::before{background:var(--jade-paper222) 
 html body dialog.npc-conversation.jade-surface222::before{background:var(--jade-silk222) center/cover no-repeat!important}
 html body dialog.npc-conversation.jade-surface222::after{border-image-slice:72!important}
 
-:root #boss-live-meter{background:var(--jade-silk222) center/cover no-repeat!important}
+/* Live boss damage uses the owner-requested plain text bubble. */
 
 :root{--uk-surface:var(--jade-silk222) center/cover no-repeat!important}
 

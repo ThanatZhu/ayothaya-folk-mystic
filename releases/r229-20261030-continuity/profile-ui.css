@@ -1,0 +1,44 @@
+/* 0.83 character card (profile-ui.js) and the settings gear in the top menu. */
+#menu-settings{--cell:100% 33.333%}
+#profile-card[data-hud-panel],#profile-card{position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);margin:0;width:min(640px,94vw);max-height:90dvh;padding:0;border:1px solid #c6a164;border-radius:12px;background:linear-gradient(135deg,#24382bf7,#132722f7);color:#fff0ce;box-shadow:0 10px 40px #0008;z-index:45;overflow:auto;font-family:Mali,Tahoma,sans-serif}
+#profile-card:not([open]){display:none}
+#profile-card>header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#b5924520;border-bottom:1px solid #af884f44}
+#profile-card>header>div{flex:1}#profile-card h2{margin:0;font-size:20px;color:#f4cf7a}#profile-card header small{font-size:12px;color:#c9b98f}
+.profile-body{display:grid;grid-template-columns:240px minmax(0,1fr)}
+.profile-hero{display:grid;justify-items:center;align-content:start;gap:6px;padding:12px;border-right:1px solid #af884f33;background:radial-gradient(ellipse at 50% 45%,#c7ac5933,transparent 65%)}
+.profile-hero canvas{width:100%;max-width:220px;aspect-ratio:1;image-rendering:pixelated;background:radial-gradient(ellipse 36% 6% at 50% 81%,#0005,transparent)}
+#profile-power{font-size:12px;color:#c9b98f;font-weight:400}#profile-power span{display:block;text-align:center;font-size:22px;color:#ffd36a;font-weight:800;text-shadow:0 0 8px #ff9b3d66}
+.profile-stats{display:grid;gap:8px;padding:12px 14px;align-content:start}
+.profile-level{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:12px}
+.profile-level b{color:#f4cf7a}.profile-level small{color:#c9b98f;font-size:10px}
+.profile-level i{height:7px;border-radius:9px;background:linear-gradient(90deg,#f4cf7a var(--p),#0e2926 var(--p));border:1px solid #af884f55}
+#profile-base{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+#profile-base li{display:grid;justify-items:center;padding:5px 2px;border:1px solid #af884f44;border-radius:7px;background:#0e292688}
+#profile-base b{font-size:11px;color:#f4cf7a}#profile-base span{font-size:16px;font-weight:800}
+#profile-derived{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:0}
+#profile-derived div{padding:5px 4px;border-radius:6px;background:#0e292688;text-align:center}
+#profile-derived dt{font-size:9px;color:#c9b98f}#profile-derived dd{margin:0;font-size:13px;font-weight:700}
+.profile-actions{display:flex;flex-wrap:wrap;gap:6px}
+.profile-actions button{flex:1 1 180px;min-height:40px;padding:6px 12px;border:1px solid #f4cf7a;border-radius:999px;background:#24382b;color:#f4dfac;font:700 12px Mali,Tahoma,sans-serif;cursor:pointer}
+#profile-raise.glow{background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210}
+@media (max-width:620px),(orientation:landscape) and (max-height:520px){.profile-body{grid-template-columns:170px minmax(0,1fr)}#profile-power span{font-size:18px}#profile-card{max-height:calc(100dvh - 16px)}}
+@media (max-width:620px){#profile-base{grid-template-columns:repeat(3,1fr)}#profile-derived{grid-template-columns:repeat(2,1fr)}}
+/* the game's full-screen canvas rule must not stretch the preview */
+#profile-card .profile-hero canvas{height:auto!important;position:static!important;inset:auto!important}
+/* 0.84 settings: centred on screen and wider, over a light scrim (tap outside to close) */
+html body.field-hud #account-panel:not([data-blocking=true]):not([hidden]){inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;transform:none!important;width:auto!important;max-width:none!important;max-height:none!important;display:grid!important;place-items:center;padding:12px;background:#0b141099;backdrop-filter:blur(2px);z-index:46}
+html body.field-hud #account-panel:not([data-blocking=true]) .account-card{width:min(640px,94vw)!important;max-height:calc(100dvh - 32px)!important;overflow-y:auto}
+/* 0.85 even layout: both action buttons share one size; combat numbers fill whole rows (2 + 3 + 2 on 6 columns) */
+#profile-card .profile-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#profile-card .profile-actions button{display:flex;align-items:center;justify-content:center;width:100%;margin:0;min-height:48px;padding:6px 12px;border:1px solid #f4cf7a;border-radius:999px;background:#24382b;color:#f4dfac;font:700 12px/1.25 Mali,Tahoma,sans-serif;text-align:center}
+#profile-card .profile-actions button.glow{background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210}
+#profile-derived{grid-template-columns:repeat(6,1fr)!important}
+#profile-derived div:nth-child(-n+2),#profile-derived div:nth-child(n+6){grid-column:span 3}#profile-derived div:nth-child(n+3):nth-child(-n+5){grid-column:span 2}
+
+/* Rename belongs to the profile title plate, separate from the live HUD. */
+#profile-card>header>div{min-width:0}
+#profile-card .profile-name-row{position:relative;min-width:0}
+:root #profile-card .profile-name-row h2{min-height:44px;padding-right:56px!important;display:flex;align-items:center;overflow-wrap:anywhere}
+#profile-card .profile-name-row #rename-pen{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:40px;height:40px;min-height:0;padding:6px;border:0;background:none;cursor:pointer;z-index:1}
+#profile-card #rename-pen:focus-visible{outline:2px solid #f4cf7a;outline-offset:-3px;border-radius:6px}
+#profile-card #rename-pen:hover{filter:brightness(1.2)}

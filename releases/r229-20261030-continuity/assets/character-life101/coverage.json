@@ -1,0 +1,13 @@
+{
+  "actors": 36,
+  "coverage": {
+    "idle": 36,
+    "walk": 36,
+    "run": 36,
+    "sit": 36,
+    "sleep": 36,
+    "sitDown": 36,
+    "standUp": 36
+  },
+  "productionDeployed": false
+}

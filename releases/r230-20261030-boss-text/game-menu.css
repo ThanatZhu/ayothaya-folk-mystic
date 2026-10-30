@@ -1,0 +1,68 @@
+/* 0.34: persistent MMORPG HUD. Wheel geometry remains owned by mmo-hud.js. */
+body.field-hud{--hud-surface:linear-gradient(135deg,#233e34ed,#152a25ed);--hud-rim:#b49a62}
+body.field-hud #game-menu{top:max(10px,env(safe-area-inset-top));right:max(200px,calc(env(safe-area-inset-right) + 192px));gap:4px;padding:0;border:0;background:none;box-shadow:none}
+body.field-hud #game-menu button{min-width:52px;min-height:58px;padding:3px;border-radius:7px;background:linear-gradient(#283e34e8,#172a24dd);border:1px solid #b49a6280;font-size:10px}
+body.field-hud #game-menu i{width:32px;height:32px;border-radius:7px;background:radial-gradient(#6a5330,#302b20);border:1px solid #c8aa69}
+#game-menu svg{width:25px;height:25px;fill:none;stroke:#f2d49a;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+body.field-hud #game-menu button:hover{background:#536449;border-color:#efd18b}
+body.field-hud .player-panel{width:250px;min-height:104px;padding:12px 12px 12px 78px;border:1px solid var(--hud-rim);border-radius:8px;background:var(--hud-surface);box-shadow:inset 0 0 0 3px #dec58712,0 3px 10px #0004}
+body.field-hud .portrait{left:13px;top:26px;width:52px;height:52px;aspect-ratio:1}body.field-hud .portrait:after{inset:-5px;background-size:contain}
+body.field-hud .player-heading strong{max-width:155px;font-size:13px}body.field-hud .player-heading small{max-width:155px;font-size:9px}body.field-hud .player-heading{margin-bottom:7px}
+body.field-hud .level-badge{left:15px;top:3px}body.field-hud .meter{height:14px;border-radius:4px}body.field-hud .meter span{line-height:12px;font-size:9px}
+body.field-hud .experience-bars{position:fixed;z-index:15;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:max(2px,env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0;pointer-events:none}
+body.field-hud .exp-track{height:10px;border-radius:3px}body.field-hud .exp-track>span{font-size:8px;line-height:8px}body.field-hud #base-exp>i{background:linear-gradient(90deg,#448dba,#92d4ef)}body.field-hud #job-exp>i{background:linear-gradient(90deg,#a2833e,#efd383)}
+body.field-hud .city-guide{display:none}
+body.field-hud .mini-panel{top:max(10px,env(safe-area-inset-top));width:172px;padding:5px;border:1px solid var(--hud-rim);border-radius:7px;background:var(--hud-surface);box-shadow:0 3px 10px #0004}
+body.field-hud #mini-open{padding:3px}body.field-hud #mini-open:after{display:none}body.field-hud #mini-open canvas{border-radius:3px}
+.field-map-title{display:block;text-align:center;color:#f1d89d;font-size:11px;padding:1px 0 4px;border-bottom:1px solid #a38a4b66}
+body.field-hud #party-frame{left:max(14px,env(safe-area-inset-left));right:auto;top:162px;width:180px;background:#183029c9;border-radius:5px;border:1px solid #b49a6266;box-shadow:none}
+body.field-hud #online-dock{bottom:24px;border-radius:6px;background:#173129c9;box-shadow:none}
+body.field-hud #online-button{top:124px;bottom:auto;left:max(14px,env(safe-area-inset-left));padding:3px 8px;min-height:28px;max-width:310px;font-size:10px;border-radius:5px;background:#183029bb}body.field-hud #online-meta{font-size:9px}
+body.field-hud .combat-controls.wheel #attack{background:radial-gradient(circle at 40% 30%,#505148,#282c27 67%,#171f1a);border:3px solid #dfc58c;box-shadow:0 0 0 2px #302a1f,0 0 0 4px #ab8b50,0 5px 12px #0008,inset 0 0 0 3px #d5bc7533;padding:5px;display:grid;place-items:center;overflow:hidden}
+body.field-hud #attack:before{display:none}body.field-hud #attack img{display:block;width:90%;height:90%;pointer-events:none;filter:drop-shadow(1px 3px 2px #0009)}body.field-hud #attack small{position:absolute;bottom:4px;font-size:8px;color:#f4dfaa;pointer-events:none}
+body.field-hud #attack:active{filter:brightness(1.28);transform:scale(.96)}body.field-hud #attack:focus-visible{outline:3px solid #a6f6d5;outline-offset:6px}
+body.field-hud .combat-controls.wheel #auto-attack{border:2px solid #bd9f62;border-radius:50%;background:#20372de8;box-shadow:inset 0 0 0 3px #baa36a22;color:#f5dfa9}
+body.field-hud .combat-controls.wheel #auto-attack.active{background:#567943;color:#fff2bd;border-color:#e4da91}
+/* Shared nonmodal utility windows, one at a time. No backdrop or page inertness. */
+body.field-hud :is(#skill-window,#online-panel,#settings-panel,#world-map)[data-hud-panel]{position:fixed;inset:auto;top:85px;right:200px;left:auto;bottom:auto;margin:0;width:330px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 360px);padding:0;border:1px solid var(--hud-rim);border-radius:7px;background:var(--hud-surface);color:#fff0ce;box-shadow:0 6px 24px #0006;z-index:40;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
+body.field-hud #online-panel[data-hud-panel]{width:460px;max-height:calc(100dvh - 200px)} /* player rows with invite buttons need room; phone rules below still win */
+body.field-hud :is(#skill-window,#online-panel)>header{padding:8px 10px;gap:7px;background:#b5924520}
+body.field-hud :is(#skill-window,#online-panel) h2{font-size:16px}body.field-hud :is(#skill-window,#online-panel) header small{display:none}
+body.field-hud #skill-list{padding:0 8px 8px}body.field-hud #skill-list li{padding:6px 3px;gap:5px}body.field-hud #skill-list li strong{font-size:11px}body.field-hud #skill-list li small{font-size:9px}body.field-hud #skill-list li b{font-size:9px;white-space:nowrap}body.field-hud #skill-list li button{min-width:44px;min-height:44px}
+body.field-hud .skill-hint{font-size:10px;margin:8px 10px}body.field-hud #skill-points{font-size:10px;white-space:nowrap}
+body.field-hud #settings-panel[data-hud-panel]{padding:10px}body.field-hud .settings-heading h2{font-size:15px}
+body.field-hud #world-map[data-hud-panel]{width:330px;padding:8px}body.field-hud #city-map-viewport{width:100%;height:min(290px,calc(100dvh - 420px))}
+body.field-hud #account-panel:not([data-blocking=true]){inset:auto;top:85px;right:200px;left:auto;bottom:auto;width:330px;padding:0;background:none;backdrop-filter:none;display:block;z-index:40}
+body.field-hud #account-panel[hidden]{display:none}body.field-hud #account-panel:not([data-blocking=true]) .account-card{width:100%;max-height:calc(100dvh - 360px);border:1px solid var(--hud-rim);border-radius:7px;background:var(--hud-surface);padding:14px;box-shadow:0 6px 24px #0006;text-align:left}
+body.field-hud .account-card h1{font-size:17px;margin:8px 0}body.field-hud .account-card .brand{font-size:9px;letter-spacing:1px}
+@media(max-width:900px),(pointer:coarse){
+ body.field-hud .player-panel{left:max(8px,env(safe-area-inset-left));top:6px;width:212px;min-height:90px;padding:10px 10px 10px 64px}
+ body.field-hud .portrait{left:13px;top:23px;width:44px;height:44px;aspect-ratio:1}body.field-hud .player-heading strong{font-size:11px;max-width:133px}body.field-hud .player-heading small{font-size:8px;max-width:133px}body.field-hud .meter{height:12px}body.field-hud .meter span{font-size:8px;line-height:10px}
+ body.field-hud #game-menu{right:max(140px,calc(env(safe-area-inset-right) + 132px));top:6px;gap:3px}body.field-hud #game-menu button{min-width:44px;width:44px;min-height:48px;font-size:8px;padding:2px}body.field-hud #game-menu i{width:25px;height:25px}body.field-hud #game-menu svg{width:21px;height:21px}body.field-hud #game-menu span{display:block}
+ body.field-hud .mini-panel{width:118px;right:max(8px,env(safe-area-inset-right));top:6px;padding:3px}.field-map-title{font-size:9px;padding-bottom:2px}
+ body.field-hud #online-button{top:102px;left:max(8px,env(safe-area-inset-left));right:auto;width:auto;max-width:212px;min-height:24px;font-size:9px;padding:2px 6px}body.field-hud #online-meta{font-size:8px;padding-left:4px;margin-left:0}
+ body.field-hud #party-frame{top:134px;left:max(8px,env(safe-area-inset-left));width:150px;max-height:calc(100dvh - 285px);overflow:auto;padding:4px 6px}
+ body.field-hud #online-dock{left:max(140px,calc(env(safe-area-inset-left) + 128px));bottom:22px;width:min(290px,calc(100vw - 460px))}body.field-hud #online-dock.collapsed{width:min(250px,calc(100vw - 460px))}
+ body.field-hud :is(#skill-window,#online-panel,#settings-panel,#world-map)[data-hud-panel],body.field-hud #account-panel:not([data-blocking=true]){top:63px;left:228px;right:auto;width:calc(100vw - 550px);max-height:calc(100dvh - 120px);max-width:330px}
+ body.field-hud #account-panel:not([data-blocking=true]) .account-card{max-height:calc(100dvh - 120px)}body.field-hud #city-map-viewport{height:min(210px,calc(100dvh - 190px))}
+ body.field-hud #attack small{display:none}body.field-hud .exp-track{height:9px}body.field-hud .exp-track>span{font-size:7px;line-height:7px}
+}
+@media(max-width:760px){body.field-hud #menu-chat{display:none}body.field-hud #online-meta{display:none}body.field-hud :is(#skill-window,#online-panel,#settings-panel,#world-map)[data-hud-panel],body.field-hud #account-panel:not([data-blocking=true]){left:170px;width:260px;max-height:calc(100dvh - 145px)}body.field-hud #party-frame{max-height:65px}body.field-hud #online-dock{width:210px}body.field-hud #online-dock.collapsed{width:160px}}
+@media(prefers-reduced-motion:reduce){body.field-hud #attack:active{transform:none}}
+
+body.field-hud .skill-icon.skill-art{display:block;width:38px;height:38px;min-width:38px;background-repeat:no-repeat;border:1px solid #b49a62;border-radius:6px;color:transparent;font-size:0!important;box-shadow:0 2px 4px #0005}
+
+/* Camera/how-to panel retired from the player-facing UI by owner request. */
+body.field-hud #settings-panel,body.field-hud #open-settings{display:none!important}
+/* 0.63 desktop: utility windows open in the middle of the screen instead of tucked under the top-right menu. */
+@media (pointer:fine) and (min-height:521px) and (min-width:761px){
+ html body :is(#skill-window,#online-panel,#status-window,#bag-window,#shop-window,#social-window,#pet-window,#quests-window)[data-hud-panel][open]{inset:0;margin:auto;height:fit-content;max-height:calc(100dvh - 140px)}
+}
+/* 0.65 painted UI icons: assets/ui63/ui-menu63.png, 6 columns x 4 rows (scripts/normalize-ui63.py). */
+body.field-hud #game-menu i{position:relative}
+body.field-hud #game-menu i>*{visibility:hidden}
+body.field-hud #game-menu i::after,#world-toggle::before,#open-settings::before{content:"";background:url("assets/ui63/ui-menu63.png?v=65") var(--cell,0 0)/600% 400% no-repeat}
+body.field-hud #game-menu i::after{position:absolute;inset:6%}
+#world-toggle::before,#open-settings::before{display:inline-block;width:1.5em;height:1.5em;margin-right:.35em;vertical-align:middle}
+#menu-profile{--cell:0% 0%}#menu-skills{--cell:20% 0%}#menu-status{--cell:40% 0%}#menu-bag{--cell:60% 0%}#menu-social{--cell:80% 0%}#menu-pet{--cell:100% 0%}
+#menu-quests{--cell:0% 33.333%}#menu-players{--cell:20% 33.333%}#menu-chat{--cell:40% 33.333%}#world-toggle{--cell:80% 33.333%}#open-settings{--cell:100% 33.333%}

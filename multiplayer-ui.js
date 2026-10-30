@@ -27,7 +27,7 @@ import {createPaintedAvatar} from './painted-avatar.js?v=gait220';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,actionChoice,supportsCharacterAction} from './character-action-state.js?v=106.0';
 import {skillPose,skillTrack} from './skill-choreography.js?v=novice174';
-import {createSkillEffects} from './skill-effects.js?v=novice174';
+import {createSkillEffects} from './skill-effects.js?v=attack224';
 const messages={'observer-mode':'โหมดผู้ชม · เดินและดูกล้องได้อย่างเดียว','observer-not-allowed':'โหมดผู้ชมใช้ได้เฉพาะอีเมลที่ได้รับอนุญาต','world-reset':'กำลังรีเซ็ตโลกก่อนเปิด CBT · กรุณากลับหน้าเลือกตัวละครหลังระบบพร้อม','invalid-auto-target':'เลือกเป้าหมายออโต้ใหม่อีกครั้ง','client-update-required':'เกมมีสกิลเวอร์ชันใหม่ กรุณารีเฟรชหน้าเกม','server-busy':'เซิร์ฟเวอร์กำลังบันทึกหรือสลับเครื่อง · ลองอีกครั้งในไม่กี่วินาที','stale-command':'คำสั่งซ้ำ/ล่าช้า · ลองกดใหม่อีกครั้ง','rate-limit':'กดเร็วเกินไป · รอสักครู่แล้วลองใหม่','duel-invalid':'ท้าดวลได้เฉพาะนอกเมือง กับผู้เล่นในแผนที่เดียวกัน','duel-busy':'มีคนกำลังประลองอยู่แล้ว','duel-far':'อยู่ห่างกันเกิน 20 ม. · เดินเข้าไปใกล้ก่อนท้าดวล','replaced':'บัญชีนี้เข้าเล่นจากอีกหน้าต่าง/อีกเครื่องแล้ว · หน้านี้ออฟไลน์','already-online':'บัญชีนี้กำลังเล่นอยู่อีกหน้าต่าง รอออกจากห้องเดิมก่อน','room-full':'ห้องเต็ม กรุณาลองอีกครั้ง','authentication-failed':'ยืนยันบัญชีไม่สำเร็จ กรุณาเข้าสู่ระบบใหม่','save-failed':'เซิร์ฟเวอร์บันทึกไม่สำเร็จ การเล่นถูกหยุดเพื่อป้องกันข้อมูลหาย','chat-rate':'ส่งข้อความเร็วเกินไป กรุณารอสักครู่','no-party':'ต้องเข้าปาร์ตี้ก่อน','expired-invite':'คำเชิญหมดอายุแล้ว','party-full-or-leader':'ปาร์ตี้เต็ม หรือคุณไม่ใช่หัวหน้าปาร์ตี้','not-party-leader':'เฉพาะหัวหน้าปาร์ตี้ทำรายการนี้ได้','invalid-invite':'เชิญผู้เล่นนี้ไม่ได้','invite-rate':'รอก่อนส่งคำเชิญอีกครั้ง','inspect-gone':'ผู้เล่นคนนี้ไม่อยู่ในแผนที่นี้แล้ว','invalid-chat':'ข้อความยาวได้ไม่เกิน 240 ตัวอักษร','world-rate':'แชตโลกส่งได้ทุก 8 วินาที','no-skill-points':'แต้มสกิลไม่พอ','skill-trial-required':'ขั้น 5 ต้องผ่านบททดสอบวิชา','skill-max':'สกิลขั้นสูงสุดแล้ว','skill-not-learned':'ยังไม่ได้เรียนสกิลนี้','invalid-skill':'สกิลไม่ถูกต้อง'};
 const chatErrors=new Set(['chat-rate','world-rate','no-party','invalid-chat']);
 const statusText={connecting:'กำลังเข้าห้อง…',reconnecting:'กำลังเชื่อมต่อใหม่…',online:'เชื่อมต่อแล้ว · เซิร์ฟเวอร์บันทึกให้อัตโนมัติ',offline:'ออกจากห้องแล้ว',error:'เชื่อมต่อไม่ได้ · กรุณาโหลดหน้าใหม่หลังแก้ปัญหา'};
@@ -39,7 +39,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
  const presentation=createCombatPresentation();
  const partyStyle=document.createElement('link');partyStyle.rel='stylesheet';partyStyle.href='party-ui.css?v=130';document.head.append(partyStyle);let rosterMode='all';
  const shell=document.getElementById('game-shell'),labels=document.getElementById('world-labels'),compact=mobileHudMedia();
- let client=null,active=false,clock=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0,currentChannel=normalizeChannel(new URLSearchParams(location.search).get('channel')||(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1)),channelCounts=[];const seenMessages=new Set(),bubbles=new Map();
+ let client=null,active=false,clock=0,basicClock224=0,party=null,roster=[],loadingGeneration=0,players=new Map(),self=null,unread=0,currentChannel=normalizeChannel(new URLSearchParams(location.search).get('channel')||(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1)),channelCounts=[];const seenMessages=new Set(),bubbles=new Map();
  // HUD chip: connection state dot + label. Opens the room/party roster.
  const button=el('button');button.id='online-button';button.dataset.state='offline';button.innerHTML='<i class="mp-dot" aria-hidden="true"></i><span id="online-label">ผู้เล่นออนไลน์</span>';shell.append(button);
  const chButton=el('button','mp-hud-channel');chButton.id='channel-button';chButton.type='button';chButton.innerHTML='<span class="ch-ico">🌐</span> <b id="channel-btn-label" class="ch-name">แนล 1</b><b id="channel-btn-mob" class="ch-name-mobile">CH 1</b> <span class="ch-detail">สลับแนล ▾</span>';shell.append(chButton);
@@ -209,6 +209,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(e.type.startsWith('spirit')){game.world.events.push({...e,presentationQueuedAt:performance.now()/1000});return;}
    if(e.actor===client.id){game.world.events.push({...e,presentationQueuedAt:performance.now()/1000});return;}
    const v=views.get(e.actor);if(!v||v.loading)return;
+   if(e.type==='damage')fx.hit(e);
    if(e.type==='petSkill'){v.pet?.attack(e.to,e.lag??0);const ids={fireBurst:'sky-spear',lotusCleanse:'cleanse',moonBarrier:'sanctuary',roarGuard:'guard',trueSight:'mark',flowerBind:'vine-trap',riceHeal:'heal',jadeShell:'sanctuary',waterMana:'regen',echoSlow:'hamstring'};game.roleEffects?.spawn({roleSkillId:ids[e.kind],from:{x:e.x,z:e.z},to:e.to??{x:e.x+.5,z:e.z},lag:e.lag??0});}
    if(e.type==='damage'&&Number.isInteger(e.id))game.world.events.push(e); // 0.99.3 everyone's numbers float over the monster they hit
    if(e.type==='miss'&&Number.isInteger(e.id))game.world.events.push(e);
@@ -219,11 +220,11 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(e.type==='cast'){
     if(!roleAnimationActive(v.roleAction,clock))v.roleAction=null;
     const id=v.state.character.classId,skill=skillTrack(id,e.skillIndex),current=skillTrack(id,v.action?.index);
-    if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock-(e.lag??0),timing:e.timing,castId:e.castId,facing:castFacing(e,v.state.player.face)};
+    if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock-(e.lag??0),timing:e.timing,castId:e.castId,basicStart224:basicClock224-(e.lag??0),facing:castFacing(e,v.state.player.face)};
     const track=skill&&e.timing?{...skill,duration:e.timing.duration,strikes:e.timing.impacts.map(at=>at/e.timing.duration)}:skill??{...skillTrack(id,0),duration:e.timing?.duration??attackDuration(id),strikes:[.42]},from=e.from??v.state.player,to=e.to??from;
     const noviceFx=id==='novice'&&skill&&Number.isInteger(e.skillIndex)?'novice:'+e.skillIndex:null;
     if(noviceFx&&game.roleEffects?.has(noviceFx))game.roleEffects.spawn({...e,roleSkillId:noviceFx,from,to,lag:e.lag??0});
-    else{const effect=fx.create(track,{...e,skillIndex:skill?e.skillIndex:null,synced:!!e.timing,from,to:{...to,y:groundHeight(game.world.nav,to.x,to.z)},direction:v.state.player.face,groundY:groundHeight(game.world.nav,from.x,from.z),reduced:reduced.matches,quality:compact.matches?'low':'high'});effect.age=e.lag??0;}
+    else{const effect=fx.create(track,{...e,skillIndex:skill?e.skillIndex:null,synced:!!e.timing,presentationClock:()=>basicClock224,startedAt:basicClock224-(e.lag??0),from,to:{...to,y:groundHeight(game.world.nav,to.x,to.z)},direction:v.state.player.face,groundY:groundHeight(game.world.nav,from.x,from.z),reduced:reduced.matches,quality:compact.matches?'low':'high'});effect.age=e.lag??0;}
    }
    if(e.type==='emote'&&!Object.hasOwn(v.state,'emote'))v.emote=activeEmote({name:e.name,time:e.time??clock},clock);
    if(e.type==='playerHit'){v.hitUntil=clock+.28;v.emote=null;v.state.emote=null;}
@@ -301,7 +302,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   openPlayerMenu(v.state,x,y);return true;
  };
  return {openParty:openRoster,get partyState(){return {party,online:client?.status==='online'};},get paused(){return false;},update(dt){
-  if(!active)return;clock+=presentationDelta(dt);presentation.flush(presentEvent);fx.update(presentationDelta(dt),camera);
+  if(!active)return;clock+=presentationDelta(dt);basicClock224+=presentationDelta(dt);presentation.flush(presentEvent);fx.update(presentationDelta(dt),camera);
   const guildTab=dock.querySelector('[data-channel=guild]');guildTab.disabled=!game.world.myGuild;if(guildTab.disabled&&dock.dataset.channel==='guild')setChannel('room');
   for(const v of views.values()){
    if(v.loading)continue;const state=v.state,p=state.player,old=v.sprite.position.clone(),f=1-Math.exp(-Math.min(.05,dt)*14);v.sprite.position.x+=(p.x-v.sprite.position.x)*f;v.sprite.position.z+=(p.z-v.sprite.position.z)*f;v.gait+=gaitStep(Math.hypot(v.sprite.position.x-old.x,v.sprite.position.z-old.z),Math.min(.05,dt),state.character.classId,p.running?'run':'walk');
@@ -309,7 +310,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(equipmentKey!==v.equipmentKey&&!v.equipmentLoading&&performance.now()>(v.equipmentRetryAt??0)){
     v.equipmentLoading=true;v.sprite.userData.setEquipment(state.equipment).then(changed=>{if(changed)v.equipmentKey=equipmentKey;}).catch(()=>{v.equipmentRetryAt=performance.now()+5000;}).finally(()=>{v.equipmentLoading=false;});
    }
-   const elapsed=clock-(v.action?.start??-100),track=skillTrack(state.character.classId,v.action?.index),emote=activeEmote(Object.hasOwn(state,'emote')?state.emote:v.emote,clock);
+   const elapsed=v.action?.index===null&&Number.isFinite(v.action.basicStart224)?basicClock224-v.action.basicStart224:clock-(v.action?.start??-100),track=skillTrack(state.character.classId,v.action?.index),emote=activeEmote(Object.hasOwn(state,'emote')?state.emote:v.emote,clock);
    const skillActive=track&&elapsed<(v.action.timing?.duration??track.duration),basicActive=v.action&&v.action.index===null&&elapsed<(v.action.timing?.duration??attackDuration(state.character.classId));
    const roleActive=roleAnimationActive(v.roleAction,clock);
    const chosen=actionChoice({time:clock,hit:clock<(v.hitUntil??0)&&!skillActive&&!basicActive&&!roleActive,cast:roleActive||skillActive,attack:basicActive,emote,moving:p.moving||Math.hypot(v.sprite.position.x-old.x,v.sprite.position.z-old.z)>.001,running:p.running,dead:p.hp<=0}),supported=supportsCharacterAction(chosen,v.sprite.userData.supportsAction?.bind(v.sprite.userData));
@@ -319,6 +320,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    const pose=rolePose??(skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed*(v.action.timing?track.duration/v.action.timing.duration:1),{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:basicActive&&mode==='attack'?elapsed*attackDuration(state.character.classId)/(v.action.timing?.duration??attackDuration(state.character.classId)):poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)}));
    v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'||v.sprite.userData.usesAuthoredGround?.(mode)||v.sprite.userData.skillArt?0:pose.y);const angle=controls.getAzimuthalAngle(),poseFace=rolePose?(v.roleAction.facing??p.face):skillActive||basicActive?(v.action.facing??p.face):p.face;{const side=poseFace.x*Math.cos(angle)-poseFace.z*Math.sin(angle);if(rolePose||skillActive||basicActive?Math.abs(side)>1e-6:Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
    if(basicActive&&mode==='attack')pose.actionPhase=Math.max(0,Math.min(1,elapsed/(v.action.timing?.duration??attackDuration(state.character.classId))));
+   pose.basicAttack224=basicActive&&mode==='attack'?{castId:v.action.castId,impactPhase:v.action.timing?.impacts?.[0]/v.action.timing?.duration||.42}:null;
    v.sprite.userData.setFacing?.(poseFace,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0||(p.down??0)>0;game.ghost?.(v.sprite,!!p.hidden);game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
    if((state.rebirth??0)!==v.rankShown){v.rankShown=state.rebirth??0;const t=v.label.querySelector('.rank-title');if(t){t.hidden=!v.rankShown;t.textContent=v.rankShown?'✦ '+rebirthRank(v.rankShown)+' ✦':'';}}
    const ally=!!party&&party.members.includes(state.id);v.label.classList.toggle('party',ally);v.label.classList.toggle('offline',state.connected===false);v.label.dataset.stall=state.stall??'';

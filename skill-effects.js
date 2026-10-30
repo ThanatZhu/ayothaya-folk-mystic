@@ -1,18 +1,21 @@
+import {warmBasicFx224,createBasicAttackEffect224} from './basic-attack-fx224.js';
 import * as THREE from './vendor/build/three.module.js';
 import {createCombatVfxResources,createCombatEffect} from './combat-vfx.js?v=novice174';
 
 // Shared by local/remote players and the seekable skill lab.
-export function createSkillEffects(scene){
+export function createSkillEffects(scene,{basicEffectFactory=createBasicAttackEffect224}={}){
+ void warmBasicFx224();
  const art=createCombatVfxResources(),active=[];let disposed=false;
  function remove(e){const i=active.indexOf(e);if(i<0)return;active.splice(i,1);scene.remove(e.group);e.releaseResources();}
  const api={
   create(track,options={}){
    if(disposed)throw new Error('Skill effects manager is disposed');
    while(active.length>=16)remove(active[0]);
-   const e=createCombatEffect(art,track,options);e.castId=options.castId;e.actor=options.actor??'self';e.dispose=()=>remove(e);active.push(e);scene.add(e.group);return e;
+   const e=(options.skillIndex===null?basicEffectFactory(track,options):null)??createCombatEffect(art,track,options);e.castId=options.castId;e.actor=options.actor??'self';e.dispose=()=>remove(e);active.push(e);scene.add(e.group);return e;
   },
+  hit(event){for(const e of active)if(event.castId!=null&&e.castId===event.castId&&e.actor===(event.actor??'self'))e.hit?.(event);},
   cancel(castId,actor='self'){for(const e of [...active])if(castId!=null&&e.castId===castId&&e.actor===actor)remove(e);},
-  update(dt,camera){const elapsed=Number.isFinite(dt)?Math.max(0,dt):0;for(const e of [...active]){e.age+=elapsed;if(e.age>e.life)remove(e);else e.sample(e.age,camera);}},
+  update(dt,camera){const elapsed=Number.isFinite(dt)?Math.max(0,dt):0;for(const e of [...active]){e.age=e.presentationAge?e.presentationAge():e.age+elapsed;if(e.age>e.life)remove(e);else e.sample(e.age,camera);}},
   clear(){for(const e of [...active])remove(e);},
   dispose(){if(disposed)return;api.clear();art.dispose();disposed=true;},
   get count(){return active.length;}

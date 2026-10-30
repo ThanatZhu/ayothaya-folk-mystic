@@ -15,7 +15,7 @@ import {groundHeight} from './combat-core.js?v=surfaces222';
 import {getLoadingScreen} from './loading-screen.js?v=105.0';
 import {createFrontierScene} from './frontier-scene.js?v=38';
 import {loadMonsterFrames} from './monster-art.js?v=farm223-gait220';
-import {createMultiplayer} from './multiplayer-ui.js?v=farm223-gait220';
+import {createMultiplayer} from './multiplayer-ui.js?v=attack224';
 import {createEquipmentUI} from './equipment-ui.js?v=appearance-paused';
 import {createCityLife,clearCourtTrees} from './city-life.js?v=surfaces222';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction} from './npc-life-animation.js?v=chuk175';
@@ -29,7 +29,7 @@ import {createLandscapeDetails} from './landscape-details.js?v=38';
 import {createMeadow,MEADOW_MAPS} from './meadow.js?v=surfaces222';
 import {createPerfSettings,readPerf,QUALITY} from './perf-settings.js?v=perf199';
 import {createCapitalLook,createCapitalTrees,createCapitalProps,paintify} from './capital-look.js?v=38';
-import {createPaintedAvatar} from './painted-avatar.js?v=gait220';
+import {createPaintedAvatar} from './painted-avatar.js?v=attack224';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
@@ -37,7 +37,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createAmbientMotion} from './ambient-motion.js?v=size1';
-import {createGame} from './game-controls.js?v=farm223-gait220';
+import {createGame} from './game-controls.js?v=attack224';
 import {atlasPath,className} from './classes.js?v=novice174';
 import {atlasCell} from './sprite-motion.js';
 import {createWorldUI} from './world-ui.js?v=surfaces222';
@@ -166,7 +166,7 @@ try {
  // 0.68.3 the original full-bodied art is the default again (the 8-direction side views read as paper-thin);
  // the 8-direction art stays one tap away in settings and the choice is remembered on this device.
  let eightWay=false;try{eightWay=localStorage.getItem('ayothaya-eight-way')==='1';}catch{}
- const heroMesh=createPaintedAvatar(heroFrames[0],{directional:eightWay,classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
+ const heroMesh=createPaintedAvatar(heroFrames[0],{directional:eightWay,preloadAttackArt:true,classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  // The shared avatar selects camera-relative painted art by default; unsupported
  // custom silhouettes retain their original equipped artwork.

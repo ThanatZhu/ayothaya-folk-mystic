@@ -39,7 +39,7 @@ export function createBasicAttackEffect224(track,options={},provided=null){
   sample(time,camera){
    if(disposed)return;art??=resources()?.ready;if(!art){trail.visible=spark.visible=false;return;}const t=Math.max(0,Number.isFinite(time)?time:0);
    if(camera){right.set(1,0,0).applyQuaternion(camera.quaternion);up.set(0,1,0).applyQuaternion(camera.quaternion);scratch.copy(camera.quaternion);}else{right.set(1,0,0);up.set(0,1,0);scratch.identity();}
-   delta.set(target.x,0,target.z);const angle=Math.atan2(delta.dot(up),delta.dot(right)),after=t-impact;
+   delta.set(target.x,style.projectile?target.y-.95:0,target.z);const angle=Math.atan2(delta.dot(up),delta.dot(right)),after=t-impact;
    const active=options.reduced?t>=release&&t<impact+.06:t>=release&&after<.16;
    trail.visible=active;
    if(active){

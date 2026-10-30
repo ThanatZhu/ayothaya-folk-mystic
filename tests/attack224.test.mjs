@@ -52,10 +52,10 @@ test('generated impact waits for confirmed basic damage; air, misses and unrelat
 test('camera orbit keeps trail pointed at the projected target; crowd manager isolates actors and cancellation',()=>{
  const a=art(),track={classId:'hunter',duration:.4,strikes:[.42]},scene=new THREE.Scene();
  const manager=createSkillEffects(scene,{basicEffectFactory:(t,o)=>createBasicAttackEffect224(t,o,a)});
- const alice=manager.create(track,{skillIndex:null,castId:1,actor:'alice',from:{x:0,z:0},to:{x:2,z:1}}),bob=manager.create(track,{skillIndex:null,castId:1,actor:'bob',from:{x:0,z:0},to:{x:2,z:1}});
+ const alice=manager.create(track,{skillIndex:null,castId:1,actor:'alice',from:{x:0,z:0},to:{x:2,z:1}}),bob=manager.create(track,{skillIndex:null,castId:1,actor:'bob',from:{x:0,z:0},to:{x:2,y:1.4,z:1}});
  manager.hit({type:'damage',source:'basic',actor:'alice',castId:1});assert.equal(alice.group.userData.confirmed,true);assert.equal(bob.group.userData.confirmed,false);
  const camera=new THREE.PerspectiveCamera();camera.position.set(-5,6,4);camera.lookAt(0,0,0);manager.update(.13,camera);
- const actual=new THREE.Vector3(1,0,0).applyQuaternion(bob.group.children[0].quaternion),direction=new THREE.Vector3(2,0,1),normal=new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
+ const actual=new THREE.Vector3(1,0,0).applyQuaternion(bob.group.children[0].quaternion),direction=new THREE.Vector3(2,1.4,1),normal=new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
  direction.addScaledVector(normal,-direction.dot(normal)).normalize();assert.ok(actual.dot(direction)>.999);
  manager.cancel(1,'alice');assert.equal(manager.count,1);manager.cancel(1,'alice');assert.equal(manager.count,1);manager.cancel(1,'bob');assert.equal(manager.count,0);
  for(let i=0;i<22;i++)manager.create(track,{skillIndex:null,castId:i,actor:'bob'});assert.equal(manager.count,16);manager.dispose();assert.equal(scene.children.length,0);

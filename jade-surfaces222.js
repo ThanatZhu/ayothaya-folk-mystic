@@ -5,7 +5,7 @@ export function installJadeSurfaces(){
  const link=document.createElement('link');link.rel='stylesheet';link.href='jade-surfaces222.css?v=surfaces222-inset1';link.id='jade-surfaces222';document.head.append(link);
  const framed=new WeakSet();
  function paint(el){
-  if(!(el instanceof HTMLElement)||ART_SCENE.test(el.id)||['item-hover221','boss-live-meter'].includes(el.id))return;
+  if(!(el instanceof HTMLElement)||ART_SCENE.test(el.id)||['item-hover221','boss-live-meter','npc-dialog','mentor-panel'].includes(el.id)||el.matches('.npc-conversation'))return;
   el.classList.add('jade-surface222');el.dataset.jadeSurface=/craft|refine|card|shop|store|market|auction|storage|farm-utility/i.test(el.id)?'paper':'silk';
   const pseudo=/^(?:craft-window|card-slot-window|mail-window|boss-browser)$/.test(el.id)||el.matches('dialog.npc-conversation');
   el.dataset.jadePseudo=String(pseudo);

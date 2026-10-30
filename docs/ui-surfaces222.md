@@ -17,3 +17,6 @@ Owner correction: generated backing images must end inside the frame. Native bac
 Owner tooltip exception: item stat hover callouts use a plain rounded text bubble with no illustrated backing and no decorative frame. Exclude item-hover221 from the shared surface painter. Keep stat values, contrast, keyboard focus and viewport clamping intact.
 
 Owner boss-meter exception (230): the live boss DPS overlay is a compact, plain translucent rounded text bubble at the upper left, beside the quest HUD. No generated backing, gold frame, ornate toggle or textured progress trough. Exclude boss-live-meter from the shared surface painter. Keep the actual damage/share numbers, party expansion, collapse, focus and touch targets. It moves below an update notice on narrower displays instead of covering it. This changes presentation only; the authority damage/party model remains untouched.
+
+
+Owner NPC dialogue exception (233, 31 October 2026): #npc-dialog, #mentor-panel and any .npc-conversation retain their original quiet dark gradient and tooltip-frame fill. Exclude these before adding .jade-surface222 or inline styles. The conversation stylesheet owns its transparent outer surface and inset backing; do not inherit the illustrated --uk-surface. Other windows keep their illustrated surfaces.

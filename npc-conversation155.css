@@ -47,3 +47,7 @@ html body .npc-conversation .npc-choice-actions :is(#close-npc,#mentor-close){co
 @media(orientation:landscape) and (max-width:900px),(orientation:landscape) and (pointer:coarse){
  html body dialog.npc-conversation{height:clamp(200px,43dvh,265px)!important;grid-template-columns:minmax(70px,19%) minmax(0,1fr) minmax(128px,28%)}
 }
+
+/* Owner: NPC conversations keep the original quiet backing, not the jade illustration. */
+html body dialog:is(#npc-dialog,#mentor-panel).npc-conversation{background:transparent!important;border:0!important;box-shadow:none!important;zoom:1!important}
+html body dialog:is(#npc-dialog,#mentor-panel).npc-conversation:focus{outline:none}

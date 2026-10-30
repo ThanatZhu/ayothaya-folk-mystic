@@ -22,3 +22,6 @@ h1,h2,h3,.story h1,.wordmark,.subtitle,.server-number{font-family:var(--font-gam
  #name-hint{font-size:10px}.class-badge{font-size:10px}
  .skill span{font-size:10px;line-height:16px}
 }
+
+/* Fixed game HUD geometry: do not inflate Thai text independently on mobile Safari. */
+html:has(body.field-hud){-webkit-text-size-adjust:100%;text-size-adjust:100%}

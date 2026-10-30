@@ -15,8 +15,6 @@ html body #craft-window.jade-surface222[data-craft176]::after,
 html body #card-slot-window.jade-surface222::before,
 html body #mail-window.jade-surface222::before,
 html body #boss-browser.jade-surface222::before{background:var(--jade-paper222) center/cover no-repeat!important}
-html body dialog.npc-conversation.jade-surface222::before{background:var(--jade-silk222) center/cover no-repeat!important}
-html body dialog.npc-conversation.jade-surface222::after{border-image-slice:72!important}
 
 /* Live boss damage uses the owner-requested plain text bubble. */
 
@@ -30,6 +28,5 @@ html body #card-slot-window.jade-surface222::before{inset:20px;border-radius:5px
 html body #mail-window.jade-surface222::before,
 html body #boss-browser.jade-surface222::before{inset:0;border-radius:5px}
 html body #craft-window.jade-surface222[data-craft176]::after{left:20px;right:20px;bottom:26px;border-radius:5px}
-html body dialog.npc-conversation.jade-surface222::before{inset:20px;border-radius:5px}
 @media(max-height:550px){html body #craft-window.jade-surface222[data-craft176]::after{left:18px;right:18px;bottom:22px}}
 @media(max-width:600px) and (min-height:551px){html body #craft-window.jade-surface222[data-craft176]::after{left:16px;right:16px;bottom:22px}}

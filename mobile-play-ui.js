@@ -29,24 +29,26 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  if($('online-label'))new MutationObserver(statusLabels).observe($('online-label'),{subtree:true,childList:true,characterData:true});
  if(chips)new MutationObserver(statusLabels).observe(chips,{subtree:true,childList:true,characterData:true});statusLabels();
  const minimap=document.querySelector('.mini-panel');
+ const setRailProperty=(name,value)=>{if(body.style.getPropertyValue(name)!==value)body.style.setProperty(name,value);};
  const railSize=()=>{
   const bottom=query.matches?Math.max(profile?.getBoundingClientRect().bottom??0,rail.getBoundingClientRect().bottom):0;
-  body.style.setProperty('--mobile-profile-bottom',bottom+'px');
+  setRailProperty('--mobile-profile-bottom',bottom+'px');
   // 0.116.1 the event icons can wrap to a second row: the target bar, quest panel and notices start below them
   const iconsBottom=query.matches?Math.max(0,...[rail,events].filter(n=>!n.hidden).map(n=>n.getBoundingClientRect()).filter(r=>r.height).map(r=>r.bottom)):0;
-  body.style.setProperty('--mobile-rail-bottom',iconsBottom+'px');if(!minimap)return;
-  const r=minimap.getBoundingClientRect();body.style.setProperty('--events-top',(r.bottom+8)+'px');
+  setRailProperty('--mobile-rail-bottom',iconsBottom+'px');if(!minimap)return;
+  const r=minimap.getBoundingClientRect();setRailProperty('--events-top',(r.bottom+8)+'px');
   const channelBounds=channel?.getBoundingClientRect(),profileEnd=Math.max(profile?.getBoundingClientRect().right??0,channelBounds?.right??0),discordLeft=r.left-52;
-  for(const [name,value] of Object.entries({'--mobile-map-bottom':r.bottom,'--mobile-map-left':r.left,'--mobile-map-right':innerWidth-r.right,'--mobile-map-width':r.width,'--mobile-discord-left':discordLeft,'--mobile-event-width':Math.max(44,discordLeft-profileEnd-12)}))body.style.setProperty(name,value+'px');
+  for(const [name,value] of Object.entries({'--mobile-map-bottom':r.bottom,'--mobile-map-left':r.left,'--mobile-map-right':innerWidth-r.right,'--mobile-map-width':r.width,'--mobile-discord-left':discordLeft,'--mobile-event-width':Math.max(44,discordLeft-profileEnd-12)}))setRailProperty(name,value+'px');
   // Use the real map bounds; reserve space only for event icons beside the button.
   const eventEdges=[...chips?.children??[]].filter(n=>!n.hidden).map(n=>n.getBoundingClientRect())
    .filter(e=>e.width&&e.left>=r.left&&e.left<r.right&&e.top<r.bottom+52&&e.bottom>r.bottom+8).map(e=>e.left-6);
   const end=Math.min(r.right-4,...eventEdges);
-  body.style.setProperty('--channel-map-left',(r.left+4)+'px');
-  body.style.setProperty('--channel-map-width',Math.min(144,Math.max(44,end-r.left-4))+'px');
+  setRailProperty('--channel-map-left',(r.left+4)+'px');
+  setRailProperty('--channel-map-width',Math.min(144,Math.max(44,end-r.left-4))+'px');
  };
- new ResizeObserver(railSize).observe(rail);new ResizeObserver(railSize).observe(events);
- if(minimap)new ResizeObserver(railSize).observe(minimap);
+ // Defer geometry writes out of ResizeObserver delivery, especially during Safari rotation.
+ let railFrame=0;const requestRailSize=()=>{if(!railFrame)railFrame=requestAnimationFrame(()=>{railFrame=0;railSize();});};
+ const railObserver=new ResizeObserver(requestRailSize);for(const node of [rail,events,minimap].filter(Boolean))railObserver.observe(node);
  const arrows='<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M26 12a11 11 0 0 0-19-4L4 12m0-7v7h7M6 20a11 11 0 0 0 19 4l3-4m0 7v-7h-7"/></svg>';
  if(dockToggle){const image=document.createElement('img');image.className='chat-drawer-art';image.src='./assets/ui-mobile/chat-drawer-v1.png';image.alt='';image.width=64;image.height=64;dockToggle.append(image);}
  const buffs=$('ailment-row'),arrangeBuffs=()=>{if(buffs)buffs.dataset.dense=String(buffs.children.length>12);};

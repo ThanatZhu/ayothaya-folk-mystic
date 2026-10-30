@@ -195,7 +195,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
  let shopNpc=null,tab='buy';
  shopDialog.querySelector('#shop-close').onclick=()=>shopDialog.close();
  shopDialog.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render(true);});
- function openShop(n){shopNpc=n;tab='buy';$('close-npc').click();openHudPanel(shopDialog);render(true);}
+ function openShop(n){shopNpc=n;tab='buy';$('close-npc').click();openHudPanel(shopDialog);render(true);shopDialog.scrollTop=0;$('shop-list').scrollTop=0;}
  worldUI.afterTalk=n=>{
   $('npc-shop')?.remove();const shop=SHOPS[n.name];if(!shop||shop.mapId!==map.id)return;
   const b=document.createElement('button');b.id='npc-shop';b.type='button';b.innerHTML=icon('shop-sign','item-icon small')+' เปิดร้าน · ซื้อ / ขาย';b.onclick=()=>openShop(n);

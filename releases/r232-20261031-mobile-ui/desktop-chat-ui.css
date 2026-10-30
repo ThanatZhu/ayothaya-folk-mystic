@@ -1,0 +1,54 @@
+.desktop-chat-heading,#desktop-chat-launcher,.chat-author-mark{display:none}
+@media(min-width:901px) and (pointer:fine){
+ html body.field-hud.hud63 #desktop-chat-launcher:not([hidden]){position:fixed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;left:max(20px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));width:76px;height:80px;padding:0;border:0;background:none;color:#fff0cd;z-index:47;cursor:pointer;filter:drop-shadow(0 3px 3px #0009);font:700 13px Mali,Tahoma,sans-serif}
+ #desktop-chat-launcher img{display:block;width:64px;height:64px;object-fit:contain;pointer-events:none;transition:transform .15s}
+ #desktop-chat-launcher kbd{font:700 12px Mali,Tahoma,sans-serif;text-shadow:0 2px 2px #000,1px 0 #14251f,-1px 0 #14251f}
+ #desktop-chat-launcher:hover img{transform:translateY(-3px) scale(1.06)}
+ #desktop-chat-launcher:focus-visible{outline:2px solid #f4d184;outline-offset:3px;border-radius:12px}
+ #desktop-chat-launcher .desktop-chat-unread{position:absolute;right:2px;top:0;min-width:22px;padding:2px 5px;border:1px solid #ffe0a1;border-radius:20px;background:#b83c2c;color:#fff;font-size:11px}
+ #desktop-chat-launcher .desktop-chat-unread[hidden]{display:none}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer:not([hidden]){position:fixed!important;left:max(16px,env(safe-area-inset-left))!important;right:auto!important;top:max(16px,env(safe-area-inset-top))!important;bottom:108px!important;translate:none!important;transform:none!important;width:clamp(440px,42vw,640px)!important;min-width:0!important;max-width:calc(100vw - 32px)!important;height:auto!important;max-height:none!important;box-sizing:border-box;display:grid!important;grid-template-columns:100px minmax(0,1fr);grid-template-rows:64px minmax(0,1fr) auto 68px;gap:0;padding:0!important;border:2px solid #ccad67!important;border-image:none!important;border-radius:14px!important;background:linear-gradient(125deg,#1a3a30f7,#102820f5)!important;box-shadow:0 12px 36px #0008,inset 0 0 0 3px #e5c77a22!important;overflow:hidden!important;z-index:46!important;font-size:14px}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer.collapsed:not([hidden]){display:none!important}
+ #online-dock.desktop-chat-drawer .desktop-chat-heading{display:flex;grid-column:1/-1;grid-row:1;align-items:center;justify-content:space-between;padding:8px 16px 8px 20px;border-bottom:1px solid #c5a55b55;background:linear-gradient(90deg,#47604880,#d5b45f15)}
+ #online-dock.desktop-chat-drawer .desktop-chat-heading small{font-size:9px;letter-spacing:.2em;color:#d7bc79}
+ #online-dock.desktop-chat-drawer .desktop-chat-heading h2{margin:0;font-size:21px;line-height:1.3;color:#fff1c9}
+ #online-dock.desktop-chat-drawer #desktop-chat-close{display:grid;place-items:center;width:38px;height:38px;padding:0;border:1px solid #d5b46a;border-radius:50%;background:#102a22;color:#ffe4a3;font:700 25px Mali,Tahoma,sans-serif;cursor:pointer}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer>header{display:flex!important;grid-column:1;grid-row:2/4;min-width:0;padding:12px 8px!important;align-items:stretch;gap:0;border:0;border-right:1px solid #d4b56c33;background:#091f1c80;height:auto!important}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer .mp-tabs{display:flex!important;flex-direction:column;width:100%;gap:8px;overflow:visible}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer .mp-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:66px;padding:6px 2px;font-size:12px;border-radius:9px;white-space:normal;flex-shrink:0}
+ #online-dock.desktop-chat-drawer .mp-tabs button::before{content:none!important;display:none!important}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer #dock-toggle{display:none!important}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer #online-messages{display:block!important;grid-column:2;grid-row:2;min-height:0;height:auto!important;max-height:none!important;padding:16px 18px;overflow:auto;overscroll-behavior:contain;font-size:14px;line-height:1.6;background:linear-gradient(180deg,#16382c33,transparent);scrollbar-color:#c5a55b99 transparent}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer #online-messages p{position:relative;margin:0 0 18px;padding-left:46px;min-height:42px;text-shadow:none}
+ #online-dock.desktop-chat-drawer #online-messages .chat-author-mark{position:absolute;left:0;top:2px;display:grid;place-items:center;width:34px;height:34px;border:1px solid #d8b86f;border-radius:50%;background:linear-gradient(#476753,#183c30);color:#ffe2a0;font-size:16px;font-weight:700;box-shadow:0 2px 5px #0005}
+ #online-dock.desktop-chat-drawer #online-messages p>b{display:block;margin-bottom:5px;font-size:12px;line-height:1.5}
+ #online-dock.desktop-chat-drawer #online-messages .chat-message-text{display:inline-block;max-width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid #adbe9560;border-radius:2px 12px 12px 12px;background:#e6e5c9;color:#1e392f;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 3px 5px #0003}
+ #online-dock.desktop-chat-drawer #online-messages .mine .chat-message-text{background:#e8cd85;border-color:#f4df9c;color:#3c3019}
+ #online-dock.desktop-chat-drawer #online-messages .system .chat-message-text{background:#355039bb;color:#d2e9b4;border-color:#b7ca8350}
+ #online-dock.desktop-chat-drawer #online-messages .whisper .chat-message-text{background:#e9c9df;color:#502a47}
+ #online-dock.desktop-chat-drawer #online-messages .mp-tag{font-size:10px;margin:0 5px 3px 0}
+ #online-dock.desktop-chat-drawer #online-messages time{display:block;margin:4px 0 0;font-size:9px;color:#c6cba999}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer #dock-note{grid-column:2;grid-row:3;min-width:0;padding:4px 14px;font-size:12px}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer #online-chat{grid-column:1/-1;grid-row:4;display:flex!important;align-items:center;gap:10px;padding:10px 12px!important;border-top:1px solid #d5b46a55;background:#18392ff2}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer #online-chat input{font-size:14px!important;min-height:44px;padding:8px 12px;border-radius:9px;background:#0a211a;color:#fff1d0}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer #online-chat button{font-size:14px!important;min-height:44px;padding:6px 18px;border-radius:9px}
+ @media(max-height:650px){
+  html body.field-hud.hud63 #online-dock.desktop-chat-drawer .mp-tabs button{min-height:48px;gap:2px;padding:4px 2px}
+ }
+ @media(prefers-reduced-motion:reduce){#desktop-chat-launcher img{transition:none}}
+}
+/* Generated gold/jade frame and controls; the chat occupies the top layer only. */
+@media(min-width:901px) and (pointer:fine){
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer.desktop-chat-overlay:not([hidden]){
+  margin:0!important;border:12px solid transparent!important;border-image:url('assets/ui-overlay143/chat-frame.webp') 175 170 / 28px / 0 stretch!important;border-radius:0!important;
+  padding:5px!important;background:linear-gradient(125deg,#173b30fa,#0c251ff9)!important;background-clip:padding-box!important;z-index:2147483000!important;
+ }
+ #online-dock.desktop-chat-overlay::backdrop{background:none;pointer-events:none}
+ #online-dock.desktop-chat-overlay #desktop-chat-close{width:44px;height:44px;flex-shrink:0;border:0;background:url('assets/ui-overlay143/close.webp') center/contain no-repeat;font-size:0;filter:drop-shadow(0 2px 2px #0008)}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer.desktop-chat-overlay .mp-tabs button{border:0!important;border-radius:0;background:url('assets/ui-overlay143/chat-tab.webp') center/100% 100% no-repeat!important;box-shadow:none;color:#f4dfad;text-shadow:0 1px 2px #000}
+ html body.field-hud.hud63 #online-dock.desktop-chat-overlay .mp-tabs button[aria-selected=true]{filter:brightness(1.35);color:#fff2c4}
+ html body.field-hud.hud63 #online-dock.desktop-chat-overlay .mp-tabs button:disabled{filter:grayscale(.6);opacity:.5}
+ html body.field-hud.hud63 #online-dock.desktop-chat-drawer.desktop-chat-overlay #online-chat button{width:114px;flex:0 0 114px;min-height:46px;padding:6px 10px 6px 46px;border:0;background:url('assets/ui-overlay143/send.webp') center/100% 100% no-repeat!important;border-radius:0;box-shadow:none;color:#314434;text-shadow:none;font-weight:700}
+ #online-dock.desktop-chat-overlay button:focus-visible{outline:2px solid #ffe6a3;outline-offset:-2px}
+ #online-dock.desktop-chat-overlay button:hover:not(:disabled){filter:brightness(1.2)}
+}

@@ -1,0 +1,449 @@
+{
+  "version": 41,
+  "frames": {
+    "male": [
+      {
+        "source": "shaman.png",
+        "rect": [
+          29,
+          5,
+          164,
+          225
+        ],
+        "anchor": 87.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          238,
+          5,
+          165,
+          225
+        ],
+        "anchor": 90.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          450,
+          5,
+          161,
+          228
+        ],
+        "anchor": 85.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          660,
+          5,
+          162,
+          226
+        ],
+        "anchor": 86.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          859,
+          4,
+          171,
+          226
+        ],
+        "anchor": 96.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          1074,
+          5,
+          160,
+          225
+        ],
+        "anchor": 86.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          12,
+          238,
+          191,
+          225
+        ],
+        "anchor": 80.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          226,
+          239,
+          239,
+          224
+        ],
+        "anchor": 114.27,
+        "scale": 0.962078
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          472,
+          236,
+          160,
+          227
+        ],
+        "anchor": 79.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          656,
+          241,
+          174,
+          222
+        ],
+        "anchor": 69.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          848,
+          239,
+          199,
+          224
+        ],
+        "anchor": 101.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          1076,
+          237,
+          161,
+          225
+        ],
+        "anchor": 84.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          37,
+          16,
+          222,
+          306
+        ],
+        "anchor": 118.0,
+        "scale": 0.710819
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          351,
+          16,
+          219,
+          306
+        ],
+        "anchor": 118.0,
+        "scale": 0.708488
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          664,
+          17,
+          221,
+          305
+        ],
+        "anchor": 120.0,
+        "scale": 0.708488
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          980,
+          16,
+          220,
+          306
+        ],
+        "anchor": 118.0,
+        "scale": 0.710819
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          37,
+          329,
+          221,
+          303
+        ],
+        "anchor": 121.0,
+        "scale": 0.720296
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          350,
+          329,
+          221,
+          304
+        ],
+        "anchor": 118.0,
+        "scale": 0.715526
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          666,
+          329,
+          219,
+          305
+        ],
+        "anchor": 119.0,
+        "scale": 0.713165
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          978,
+          329,
+          221,
+          304
+        ],
+        "anchor": 120.0,
+        "scale": 0.717903
+      }
+    ],
+    "female": [
+      {
+        "source": "shaman.png",
+        "rect": [
+          29,
+          469,
+          168,
+          228
+        ],
+        "anchor": 90.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          241,
+          468,
+          163,
+          229
+        ],
+        "anchor": 86.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          451,
+          469,
+          167,
+          231
+        ],
+        "anchor": 89.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          659,
+          468,
+          163,
+          230
+        ],
+        "anchor": 86.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          864,
+          470,
+          170,
+          229
+        ],
+        "anchor": 92.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          1076,
+          471,
+          159,
+          226
+        ],
+        "anchor": 83.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          11,
+          702,
+          195,
+          229
+        ],
+        "anchor": 85.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          231,
+          707,
+          240,
+          224
+        ],
+        "anchor": 108.64,
+        "scale": 0.91352
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          474,
+          704,
+          161,
+          227
+        ],
+        "anchor": 77.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          656,
+          707,
+          174,
+          224
+        ],
+        "anchor": 68.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          843,
+          708,
+          205,
+          225
+        ],
+        "anchor": 107.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman.png",
+        "rect": [
+          1080,
+          703,
+          158,
+          228
+        ],
+        "anchor": 80.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          37,
+          644,
+          221,
+          303
+        ],
+        "anchor": 119.0,
+        "scale": 0.718074
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          350,
+          644,
+          222,
+          305
+        ],
+        "anchor": 118.0,
+        "scale": 0.713334
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          664,
+          644,
+          221,
+          305
+        ],
+        "anchor": 118.0,
+        "scale": 0.710988
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          978,
+          644,
+          223,
+          304
+        ],
+        "anchor": 119.0,
+        "scale": 0.715697
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          37,
+          952,
+          221,
+          297
+        ],
+        "anchor": 118.0,
+        "scale": 0.730204
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          350,
+          954,
+          221,
+          294
+        ],
+        "anchor": 120.0,
+        "scale": 0.74275
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          664,
+          953,
+          220,
+          295
+        ],
+        "anchor": 118.0,
+        "scale": 0.73768
+      },
+      {
+        "source": "shaman-walk.png",
+        "rect": [
+          979,
+          953,
+          219,
+          295
+        ],
+        "anchor": 118.0,
+        "scale": 0.735171
+      }
+    ]
+  }
+}

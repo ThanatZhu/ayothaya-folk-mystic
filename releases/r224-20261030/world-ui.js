@@ -1,0 +1,190 @@
+import {baseProgress} from './experience.js';
+import {rebirthAccess} from './rebirth-content196.js';
+import {createNPCConversation} from './npc-conversation155.js?v=hire177';
+import {nearestTalkNPC,opaqueNPCHit} from './npc-interaction.js?v=137';
+import {getLoadingScreen} from './loading-screen.js?v=105.0';
+import {createWorldAtlas} from './world-atlas-ui.js?v=farm218';
+import {openHudPanel} from './hud-panels.js?v=34';
+import {drawMap} from './city-map.js?v=surfaces222';
+import {createMentorUI} from './mentor-ui.js?v=surfaces222';
+import * as THREE from 'three';
+import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
+import {groundHeight} from './combat-core.js?v=surfaces222';
+import {destinations,restoreTraveler,serializeTraveler,warpCost} from './world-state.js?v=death178';
+import {nextHop} from './story-quests.js?v=rebirth196';
+
+export function createWorldUI({catalog,map,game,scene,camera,controls,account,renderer=null,citizens=[],onLocalTravel=()=>{}}){
+ const $=id=>document.getElementById(id),world=game.world,dialog=$('world-map'),labels=$('world-labels');
+ const npcStyle=document.createElement('link');npcStyle.rel='stylesheet';npcStyle.href='./npc-interaction.css?v=144';document.head.append(npcStyle);
+ const reachable=destinations(catalog,map),lookup=id=>catalog.maps.find(m=>m.id===id),point=new THREE.Vector3();
+ let traveling=false,nearest=null,nearNPC=null,conversation=null,lastMini=0,lastBig=0;
+ const mentors=createMentorUI({game,account,catalog,map,inTown:()=>map.id==='ayutthaya',recall:()=>api.recall(),travel:async id=>{await travel(id);return traveling;},talkTo:name=>api.talkTo(name)});
+ const conversationUI=createNPCConversation({game,onClose:()=>endTalk()});
+ game.respawnTravel=async()=>{
+  if(world.player.hp>0)return false;
+  const before={hp:world.player.hp,mp:world.player.mp,down:world.player.down};
+  if(!game.online){if(game.networkExpected)throw Error('not-connected');world.respawn(true);}
+  const ok=await travel(catalog.capital,false,false,true);
+  if(!ok&&!game.online)Object.assign(world.player,before);return ok;
+ };
+ function endTalk(){if(conversation)conversation.talking=false;conversation=null;conversationUI.close();game.clearInput();}
+ if(!account)try{restoreTraveler(world,JSON.parse(sessionStorage.getItem('ayothaya-traveler-v5')));}catch{}
+ document.title=map.name+' · อโยธยา Folk Mystic';$('status').textContent=map.name+(map.safe?' · เขตปลอดภัย':' · นอกเมือง');
+ const mapHeading=document.querySelector('.field-map-title');if(mapHeading)mapHeading.textContent=map.name+' · CH '+(account?.serverId?.slice(-1)||'1');
+ document.querySelector('.player-heading small').textContent=map.safe?'เขตสงบ · พักฟื้นในเมืองหลวง':map.subtitle.split(' · ')[0];
+ if(map.safe){$('target-name').textContent='เขตปลอดภัย';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
+ $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
+ $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
+ async function travel(id,recall=false,warp=false,respawn=false){
+  if(!rebirthAccess(lookup(id),world.rebirth??0,baseProgress(world).level)){world.notice('ต้องจุติและมีเลเวลถึงเกณฑ์ก่อนเดินทางข้ามภพ');return false;}
+  if(traveling||!(reachable.has(id)||recall||warp||respawn||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||(!respawn&&world.player.hp<=0))return false;
+  if(lookup(id)?.guildHall&&!game.online){world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');return false;}
+  if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return false;}
+  traveling=true;game.clearInput();
+  getLoadingScreen().show(id,{travel:true});
+  if(account){
+   if(!await account.travel(lookup(id),{warp,respawn})){traveling=false;getLoadingScreen().hide();world.notice(warp?'วาร์ปไม่สำเร็จ · เบี้ยไม่พอหรือเชื่อมต่อขัดข้อง':'เซฟยังไม่สำเร็จ กรุณาลองเดินทางอีกครั้ง');return false;}
+  }else try{sessionStorage.setItem('ayothaya-traveler-v5',JSON.stringify(serializeTraveler(world)));}catch{}
+  getLoadingScreen().stage(1,'กำลังเดินทางไป '+lookup(id).name+'…');
+  location.assign('/game.html?server='+(account?.serverId??'server-1')+'&map='+encodeURIComponent(id));
+  return true;
+ }
+ // 0.59 realistic map: render the real scene straight down once (sprites hidden, no fog) and draw labels over it.
+ let photo=null,photoQueued=false; // 0.112.4 taken a moment after load, so the minimap shows the real map at once
+ function mapPhoto(){
+  if(photo!==null||!renderer)return photo||null;
+  try{
+   const b=map.bounds,W=1536,H=Math.round(W*b.d/b.w),cx=b.x+b.w/2,cz=b.z+b.d/2;
+   // 0.64.1 the sun's shadow box normally follows the hero; widen it to the whole map for this one render.
+   let sun=null;scene.traverse(o=>{if(o.isDirectionalLight&&o.castShadow)sun=o;});
+   const kept=sun&&{pos:sun.position.clone(),target:sun.target.position.clone(),cam:{...sun.shadow.camera}};
+   if(sun){const s=sun.shadow.camera,half=Math.max(b.w,b.d)/2+4;Object.assign(s,{left:-half,right:half,top:half,bottom:-half,far:400});s.updateProjectionMatrix();sun.target.position.set(cx,0,cz);sun.position.set(cx-14*4,100,cz+12*4);sun.target.updateMatrixWorld();sun.updateMatrixWorld();}
+   const cam=new THREE.OrthographicCamera(-b.w/2,b.w/2,b.d/2,-b.d/2,1,600);cam.position.set(cx,300,cz);cam.up.set(0,0,-1);cam.lookAt(cx,0,cz);cam.updateMatrixWorld();
+   const rt=new THREE.WebGLRenderTarget(W,H,{samples:4});rt.texture.colorSpace=THREE.SRGBColorSpace;
+   const hidden=[];scene.traverse(o=>{if(o.visible&&(o.isSprite||o.userData?.rigType||o.userData?.monsterId!==undefined)){o.visible=false;hidden.push(o);}});
+   const fog=scene.fog;scene.fog=null;const before=renderer.getRenderTarget();
+   renderer.setRenderTarget(rt);renderer.render(scene,cam);const px=new Uint8Array(W*H*4);renderer.readRenderTargetPixels(rt,0,0,W,H,px);renderer.setRenderTarget(before);
+   scene.fog=fog;hidden.forEach(o=>o.visible=true);rt.dispose();
+   if(sun){const s=sun.shadow.camera;Object.assign(s,{left:kept.cam.left,right:kept.cam.right,top:kept.cam.top,bottom:kept.cam.bottom,far:kept.cam.far});s.updateProjectionMatrix();sun.position.copy(kept.pos);sun.target.position.copy(kept.target);}
+   const c=document.createElement('canvas');c.width=W;c.height=H;const img=c.getContext('2d').createImageData(W,H);
+   for(let y=0;y<H;y++)img.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);c.getContext('2d').putImageData(img,0,0);
+   photo=c;
+  }catch(e){console.warn('map photo',e);photo=false;}
+  return photo||null;
+ }
+ // The illustrated atlas is modal so movement cannot continue behind the destination picker.
+ const atlas=createWorldAtlas({catalog,currentId:map.id,coins:()=>api.coins?.()??0,
+  onClose:()=>{game.clearInput();$('mini-open').focus();},
+  onWarp:id=>{
+   const cost=warpCost(catalog,map.id,id);
+   if(cost===null||traveling||world.player.hp<=0){atlas.close();return;}
+   if(!game.online&&!api.payWarp?.(cost)){atlas.close();world.notice('เบี้ยไม่พอ');return;}
+   atlas.close();travel(id,false,true);
+  },
+  onWalk:id=>walkToMap(id)});
+ // 0.122 "เดินไป" on the world map: walk to the gate toward that map and through it; the destination is stored only
+ // as the gate is taken, so the next map carries on (below) while a walk cancelled by hand leaves nothing behind.
+ const WALK_KEY='ayothaya-walk-to-map';
+ function walkToMap(id){
+  const dest=lookup(id);if(!dest||world.player.hp<=0)return;
+  if(id===map.id){world.notice('ถึง '+dest.name+' แล้ว');return;}
+  const hop=nextHop(catalog.maps,map.id,id),portal=map.portals.find(p=>p.to===hop);
+  if(!portal){world.notice('ยังไม่มีทางเดินไป '+dest.name);return;}
+  const go=()=>{try{sessionStorage.setItem(WALK_KEY,id);}catch{}travel(hop).then(ok=>{if(ok===false)try{sessionStorage.removeItem(WALK_KEY);}catch{}});};
+  game.clearInput();if(world.auto)world.setAuto?.(false);world.notice('เดินไป '+dest.name);
+  game.walkTo({x:portal.x,z:portal.z},{radius:1.2,kind:'map',onArrive:go,onFail:()=>world.notice('เดินไปจุดเดินทางไม่ได้')});
+ }
+ {let pendingWalk=null;try{pendingWalk=sessionStorage.getItem(WALK_KEY);sessionStorage.removeItem(WALK_KEY);}catch{}
+  if(pendingWalk)setTimeout(()=>walkToMap(pendingWalk),1500);}
+ const worldButton=document.createElement('button');worldButton.type='button';worldButton.id='world-toggle';worldButton.textContent='World';dialog.append(worldButton);
+ worldButton.onclick=()=>{game.clearInput();atlas.show();};
+ function openMap(){if(account?.paused||mentors.paused||atlas.open)return;endTalk();openHudPanel(dialog);drawCityMap();}
+ $('open-world').onclick=openMap;$('close-world').onclick=()=>dialog.close();
+ dialog.addEventListener('close',()=>{game.clearInput();$('mini-open').focus();});
+ const views=map.portals.map(p=>{
+  const name=lookup(p.to).name,lv=lookup(p.to).levels;
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.72,.84,40),new THREE.MeshBasicMaterial({color:'#edcf83',side:THREE.DoubleSide,transparent:true,opacity:.7,depthWrite:false}));
+  ring.rotation.x=-Math.PI/2;ring.position.set(p.x,.095,p.z);scene.add(ring);
+  const label=document.createElement('button');label.className='portal-label';label.textContent='↗ '+name+(lv?` · Lv.${lv[0]}–${lv[1]}`:'');   // 0.122 every way out names its level range
+  label.setAttribute('aria-label','จุดเดินทางไป '+name);labels.append(label);
+  // 0.53: inside a town the gates are a cart ride away — no walk to the gate first.
+  label.onclick=()=>{if(map.safe||Math.hypot(world.player.x-p.x,world.player.z-p.z)<2)travel(p.to);else game.walkTo({x:p.x,z:p.z},{radius:1.2,kind:'portal',onArrive:()=>travel(p.to)});};
+  return {p,ring,label};
+ });
+ const npcViews=[...map.npcs,...citizens].map(n=>{
+  const label=document.createElement('button');label.className='npc-label'+(n.mentorId?' mentor-label':n.citizen?' citizen-label':'');label.textContent=n.mentorId?n.title+' · '+n.name:n.name;label.setAttribute('aria-label','คุยกับ '+n.name);labels.append(label);
+  label.onclick=()=>talk(n);return {n,label};
+ });
+ function talk(n,opts={}){
+  // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
+  if(world.player.hp<=0||traveling||n.unavailable)return;
+  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:opts.quest?'quest':'npc',npc:n.name,onArrive:()=>talk(n,opts),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
+  endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);api.onConversationOpened?.(n);return;}conversation=n;n.talking=true;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);api.onConversationOpened?.(n);
+ }
+ const npcSprites=[];scene.traverse(o=>{if(o.isSprite&&o.userData.npc)npcSprites.push(o);});
+ const npcRay=new THREE.Raycaster(),npcPointer=new THREE.Vector2();
+ const talkBlocked=()=>traveling||world.player.hp<=0||!!conversation||atlas.open||mentors.paused||!!document.querySelector('dialog[open],#account-panel:not([hidden])')||document.body.matches('.mobile-menu-open,.mobile-chat-open,.controls-editing');
+ const pickNPC=(x,y)=>{if(talkBlocked())return null;npcPointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);npcRay.setFromCamera(npcPointer,camera);
+  for(const hit of npcRay.intersectObjects(npcSprites.filter(s=>s.visible)))if(opaqueNPCHit(hit))return hit.object.userData.npc;return null;
+ };
+ const activateNPC=npc=>{if(!npc||npc.unavailable||talkBlocked())return false;talk(npc);return true;};
+ game.npcInteraction={pick:pickNPC,activate:activateNPC,talkNearest(){return activateNPC(nearestTalkNPC(npcViews.filter(v=>!v.n.unavailable).map(v=>v.n),world.player));},tap(x,y){return activateNPC(pickNPC(x,y));}};
+ $('close-npc').onclick=endTalk;
+ $('interact').onclick=()=>{if(nearNPC)talk(nearNPC);else if(nearest)travel(nearest.to);};
+ addEventListener('keydown',e=>{
+  if(document.querySelector('#quest-cinematic[open],#mentor-panel[open]'))return;
+  if($('settings-panel')?.open||e.repeat||e.ctrlKey||e.altKey||e.metaKey||e.target.closest?.('input,textarea,select'))return;
+  if(e.code==='KeyM'){e.preventDefault();atlas.open?atlas.close():dialog.open?dialog.close():openMap();}
+  if(e.code==='Escape'&&conversation)endTalk();
+  if(e.code==='KeyR'&&!atlas.open&&!dialog.open&&!conversation&&!mentors.paused){e.preventDefault();$('interact').click();}
+ });
+ const mini=$('mini-map');
+ const markers=()=>({mobs:world.mobs,npcs:map.npcs.filter(n=>!n.minRebirth||(world.rebirth??0)>=n.minRebirth)});
+ const visibleMap=()=>({...map,portals:map.portals.filter(p=>!p.minRebirth||(world.rebirth??0)>=p.minRebirth)});
+ const drawCityMap=()=>drawMap($('city-map'),visibleMap(),world.player,{detailed:true,photo:mapPhoto(),...markers()});
+ let mapZoom=1;const viewport=$('city-map-viewport');
+ function zoomMap(step){const old=mapZoom;mapZoom=Math.max(1,Math.min(3,mapZoom+step));const x=(viewport.scrollLeft+viewport.clientWidth/2)*mapZoom/old-viewport.clientWidth/2,y=(viewport.scrollTop+viewport.clientHeight/2)*mapZoom/old-viewport.clientHeight/2;viewport.style.setProperty('--map-zoom',mapZoom);viewport.scrollTo(x,y);$('map-minus').disabled=mapZoom===1;$('map-plus').disabled=mapZoom===3;}
+ // 0.112.4 click (or tap) a spot on the big map to walk there; the same transform drawMap uses (detailed: 48 px margin)
+ $('city-map').addEventListener('click',e=>{
+  const c=e.currentTarget,r=c.getBoundingClientRect(),b=map.bounds,pad=48,cx=(e.clientX-r.left)*c.width/r.width,cy=(e.clientY-r.top)*c.height/r.height;
+  const x=b.x+(cx-pad)*b.w/(c.width-pad*2),z=b.z+(cy-pad)*b.d/(c.height-pad*2);
+  if(x<b.x||x>b.x+b.w||z<b.z||z>b.z+b.d||world.player.hp<=0)return;
+  game.clearInput();game.walkTo({x,z},{radius:.5,kind:'map',onFail:()=>world.notice('เดินไปจุดนั้นไม่ได้ · ลองแตะบนทางเดินหรือพื้นโล่ง')});
+ });
+ $('map-plus').onclick=()=>zoomMap(.5);$('map-minus').onclick=()=>zoomMap(-.5);
+ function minimap(){drawMap(mini,visibleMap(),world.player,{photo:photo||null,...markers()});}
+ function position(label,x,z,y){point.set(x,y,z).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
+ function npcPosition(label,n){const e=camera.matrixWorld.elements,h=(n.visualHeight??WORLD_BODY_HEIGHT)+.14;point.set(n.x+e[4]*h,groundHeight(map.nav,n.x,n.z)+.07+e[5]*h,n.z+e[6]*h).project(camera);label.style.transform=`translate(-50%,-100%) translate(${(point.x*.5+.5)*innerWidth}px,${(-point.y*.5+.5)*innerHeight}px)`;label.style.visibility=Math.abs(point.x)>1.1||Math.abs(point.y)>1.1?'hidden':'visible';}
+ function update(t){
+  const p=world.player;nearest=null;nearNPC=null;let best=2;
+  const area=(map.districts??[]).find(d=>Math.hypot(p.x-d.x,p.z-d.z)<14);$('district-description').textContent=area?area.name+' · '+(map.safe?'เขตปลอดภัย':'นอกเมือง'):map.subtitle;
+  $('mini-area').textContent=(area?.name??'ระหว่างทาง')+' · '+(map.safe?'ปลอดภัย':'นอกเมือง');
+  for(const v of views){const locked=v.p.minRebirth>(world.rebirth??0);v.ring.visible=!locked;v.label.hidden=locked;if(locked)continue;const d=Math.hypot(p.x-v.p.x,p.z-v.p.z);if(d<best){best=d;nearest=v.p;}v.ring.material.opacity=.52+Math.sin(t*2)*.2;position(v.label,v.p.x,v.p.z,.36);v.label.classList.toggle('near',d<2);}
+  let npcDistance=2.3;for(const v of npcViews){if(v.n.minRebirth){v.n.unavailable=(world.rebirth??0)<v.n.minRebirth;for(const s of npcSprites)if(s.userData.npc===v.n)s.visible=!v.n.unavailable;}if(v.n.unavailable){v.label.hidden=true;continue;}v.label.hidden=false;const d=Math.hypot(p.x-v.n.x,p.z-v.n.z);npcPosition(v.label,v.n);if(d>(document.body.classList.contains('mobile-play')?6:v.n.citizen?7:28))v.label.style.visibility='hidden';if(d<npcDistance){nearNPC=v.n;npcDistance=d;}}
+  mentors.update();conversationUI.update();const canInteract=!!(nearest||nearNPC)&&p.hp>0&&!conversation&&!dialog.open&&!atlas.open&&!mentors.paused;
+  $('interact').hidden=!canInteract;
+  if(canInteract){const button=$('interact'),mobile=document.body.classList.contains('mobile-play');button.dataset.kind=nearNPC?'npc':'portal';const text=nearNPC?(mobile?'พูดคุย':'กด Space เพื่อพูดคุย · หรือคลิก NPC'):'เดินทางไป '+lookup(nearest.to).name;if(button.textContent!==text)button.textContent=text;button.title=nearNPC?'คุยกับ '+nearNPC.name:text;button.setAttribute('aria-label',button.title);}
+  $('position-readout').textContent=`ตำแหน่ง ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`;
+  if(photo===null&&!photoQueued){photoQueued=true;setTimeout(()=>{mapPhoto();lastMini=0;},2500);}
+  const now=performance.now();if(now-lastMini>100){lastMini=now;minimap();}
+  if(dialog.open&&now-lastBig>250){lastBig=now;drawCityMap();} // 0.64.1 the open map follows you live
+ }
+ // Hooks for the story tracker: a quest line replaces the NPC's idle text; auto-walk can travel and talk by name.
+ const api={update,endTalk,registerNPC(n,sprite,label){npcViews.push({n,label});sprite.traverse(o=>{o.userData.npc=n;});npcSprites.push(sprite);label.onclick=()=>talk(n);return ()=>talk(n);},get paused(){return atlas.open||!!conversation||traveling||mentors.paused;},onTalk:null,afterTalk:null,onConversationOpened:null,travelTo:id=>travel(id),travelHome:()=>travel(catalog.capital,true),
+  // Directory destinations can be several maps away. Preserve free gate travel when
+  // permitted; otherwise let the existing atlas show the fare and confirm the warp.
+  travelToMap(id){
+   const destination=lookup(id);if(traveling||world.player.hp<=0||!destination||id===map.id)return false;
+   if(destination.instance||destination.guildHall||warpCost(catalog,map.id,id)===null){world.notice('ยังไม่มีเส้นทางวาร์ปไปที่นี่');return false;}
+   game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);
+   const gate=map.portals.find(p=>p.to===id);
+   if(gate&&(map.safe||Math.hypot(world.player.x-gate.x,world.player.z-gate.z)<2.5)){travel(id);return true;}
+   endTalk();atlas.show(id);return true;
+  },
+  guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
+  // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
+  recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},
+  talkTo:(name,opts={})=>{const n=npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.n;if(n)talk(n,opts);return !!n;},
+  npcLabel:name=>npcViews.find(v=>v.n.name===name&&!v.n.citizen)?.label??null};
+ minimap();return api;
+}

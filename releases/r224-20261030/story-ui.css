@@ -1,0 +1,49 @@
+/* Story quest tracker (story-ui.js). Desktop: right column under the minimap. Phone landscape: free strip under the menu. */
+#quest-tracker{position:fixed;z-index:16;right:max(10px,env(safe-area-inset-right));top:236px;width:236px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;column-gap:8px;row-gap:2px;align-items:center;padding:8px 10px 9px;border:1px solid #c6a16488;border-radius:9px;background:linear-gradient(135deg,#24382bf0,#152925e8);box-shadow:0 3px 12px #0005;font-family:Mali,Tahoma,sans-serif;color:#f6edd6;cursor:pointer}
+#quest-tracker small{grid-column:1/3;font-size:9px;letter-spacing:.04em;color:#ac9360;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#quest-tracker strong{grid-column:1;font-size:13px;color:#f4cf7a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#quest-tracker span{grid-column:1;font-size:11px;line-height:1.35;color:#f4dfac}
+#quest-go{grid-column:2;grid-row:2/4;align-self:center;padding:7px 10px;border:1px solid #f4cf7a;border-radius:999px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 11px Mali,Tahoma,sans-serif;white-space:nowrap;cursor:pointer;box-shadow:0 2px 0 #8a6a2e}
+#quest-go:active{transform:translateY(1px);box-shadow:none}
+#quest-go[hidden]{display:none}
+/* NPC the story wants next: gold "!" badge on its name tag. */
+.npc-label.quest-npc{border-color:#f4cf7a!important;color:#fff4cf!important}
+.npc-label.quest-npc::before{content:'!';display:inline-block;margin-right:5px;width:15px;height:15px;border-radius:50%;background:#f4cf7a;color:#2a2210;font-weight:800;font-size:11px;line-height:15px;text-align:center}
+@media (orientation:landscape) and (max-height:520px){
+ #quest-tracker{top:auto;bottom:auto;top:max(134px,calc(env(safe-area-inset-top) + 128px));right:max(8px,env(safe-area-inset-right));width:min(300px,34vw);padding:6px 8px 7px}
+ #quest-tracker small{display:none}
+ #quest-tracker strong{font-size:11px}
+ #quest-tracker span{font-size:10px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ #quest-go{padding:6px 9px;font-size:10px}
+}
+/* 0.98 tutorial line: how to do the current step */
+#quest-how{display:block;margin-top:3px;font-style:normal;font-size:10.5px;line-height:1.35;color:#95efe2}#quest-how[hidden]{display:none}
+
+/* 0.99 tutorial coach (coach.js): popover so it shows above modal windows; only the tip's × takes clicks */
+#coach{position:fixed;inset:0 auto auto 0;width:0;height:0;margin:0;padding:0;border:0;background:none;overflow:visible;pointer-events:none;color:#2a2210}
+#coach[hidden]{display:none}
+#coach .coach-ring{position:fixed;border:3px solid #f4cf7a;border-radius:14px;box-shadow:0 0 0 4px #f4cf7a55,0 0 22px #f4cf7aaa;animation:coach-pulse 1.1s ease-in-out infinite}
+#coach .coach-arrow{position:fixed;transform:translateX(-50%);font-size:26px;line-height:1;color:#f4cf7a;text-shadow:0 2px 6px #000,0 0 10px #f4cf7a;animation:coach-bob .8s ease-in-out infinite}
+#coach .coach-arrow.below{animation-name:coach-bob-up}
+#coach .coach-tip{position:fixed;display:flex;align-items:center;gap:8px;margin:0;padding:8px 10px 8px 14px;border-radius:12px;background:linear-gradient(180deg,#f8dd95,#d9ae57);box-shadow:0 6px 18px #0008;font:700 13px/1.35 Mali,Tahoma,sans-serif;box-sizing:border-box;pointer-events:auto;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+#coach .coach-tip:active{transform:scale(0.97)}
+#coach .coach-tip span{flex:1}
+#coach .coach-tip button{pointer-events:auto;flex:none;width:24px;height:24px;border:0;border-radius:50%;background:#2a221022;color:#2a2210;font:700 15px/1 Mali,Tahoma,sans-serif;cursor:pointer}
+@keyframes coach-pulse{50%{box-shadow:0 0 0 8px #f4cf7a22,0 0 30px #f4cf7a}}
+@keyframes coach-bob{50%{transform:translate(-50%,8px)}}@keyframes coach-bob-up{50%{transform:translate(-50%,-8px)}}
+@media (prefers-reduced-motion:reduce){#coach .coach-ring,#coach .coach-arrow{animation:none}}
+/* 0.99.1 the arrow toggle hangs outside the tracker on its left edge, so it never covers the quest text or ▶ เดินไป */
+#quest-tracker #quest-coach{position:absolute;top:0;right:calc(100% + 18px);z-index:1;display:grid;place-items:center;gap:1px;width:48px;height:52px;padding:4px 0 3px;border:2px solid #f4cf7a;border-radius:12px;background:linear-gradient(180deg,#2e4a2c,#102b24);color:#f4dfac;font:700 10px/1 Mali,Tahoma,sans-serif;box-shadow:0 3px 12px #0007;cursor:pointer}
+#quest-tracker #quest-coach b{font-size:22px;line-height:1}
+#quest-tracker #quest-coach:hover{border-color:#fff0ce}
+#quest-coach.off{opacity:.45;filter:grayscale(1)}
+#welcome-card{width:min(440px,calc(100vw - 32px));box-sizing:border-box;padding:20px 22px;border:1px solid #f4cf7a;border-radius:18px;background:linear-gradient(135deg,#2e4a2c,#102b24);color:#fff0ca;font-family:Mali,Tahoma,sans-serif;box-shadow:0 20px 80px #0009}
+#welcome-card::backdrop{background:#041b1a99}
+#welcome-card small{color:#95efe2;font-weight:700}#welcome-card h2{margin:4px 0 10px;color:#f4cf7a;font-size:22px}
+#welcome-card ul{margin:0 0 16px;padding-left:18px;display:grid;gap:8px;font-size:14px}#welcome-card b{color:#f4cf7a}
+#welcome-go{display:block;width:100%;min-height:46px;border:0;border-radius:12px;background:linear-gradient(180deg,#f8dd95,#d9ae57);color:#2a2210;font:700 16px Mali,Tahoma,sans-serif;cursor:pointer}
+#quest-tracker #quest-chapter,#quest-tracker #quest-title,#quest-tracker #quest-hint{grid-column:1}
+#quest-tracker #quest-how{grid-column:1/-1;grid-row:4}
+#coach .coach-tip[hidden]{display:none!important}
+
+#quest-campaign{font:inherit;font-size:12px;max-width:100%;padding:5px 8px;margin-bottom:7px;color:#ffe2a1;border:1px solid #b99b5b;border-radius:5px;background:#153a2d}

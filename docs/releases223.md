@@ -24,3 +24,19 @@ First adoption: users must enter this release once before they can see its new-u
 Cross-platform rule: frozen files are marked -text in .gitattributes. Pin textual asset metadata alongside code so checkout line endings cannot alter archived URLs. Source comparison ignores only CRLF/LF differences; archived byte hashes remain exact. Binary assets still use sparse retention and unchanged-image fallback.
 
 Pinned text detection uses actual non-NUL file bytes plus known binary formats, not a short extension whitelist. This covers asset-pack build notes/scripts as well as JSON/JS metadata. Older snapshots receive missing exact-byte text overrides on the next freeze.
+
+## Frontend-only publishing — 226, 30 October 2026
+
+Use this route for UI releases while DigitalOcean still deploys main automatically:
+1. Finish and test changes on a working branch; choose a new release ID and commit source.
+2. Fetch origin/main. Run node scripts/check-frontend226.mjs origin/main. It traverses server imports and rejects changed authority/shared rules, maps, packages or backend build settings.
+3. Freeze the new release, commit its archive, and build/verify retention.
+4. Push HEAD to refs/heads/frontend-live, NEVER main for a frontend-only change. DigitalOcean's existing main source remains untouched.
+5. Create a production Vercel deployment from that exact frontend-live commit in project prj_Xc7ovSs6wANLMS6G1jA69zI2ntav, team team_WrA2wlKT8Yda9e1ayCEBkqwY, using its existing Git connection. Verify READY, public release.json, the root entry base and retained runtime bytes.
+6. Confirm origin/main still points to the previous backend source and no DigitalOcean deployment check was triggered for this UI commit.
+
+Keep frontend-live history; merge it into the next deliberately planned backend release before integrating new shared rules. Never overwrite it with an older main checkout. Before a subsequent task, fetch both branches and start from the current frontend-live version.
+
+The 226 publication changes only the notification position and release workflow. It does not change the authority service, socket protocol, player state or gameplay rules. The notice appears 12 px from the desktop top safe edge and 8 px on short screens. Real local WebSocket tests at 1920×945, 1440×900 and 844×390 verify that discovery leaves the socket open and navigation waits for the player's click and completed save.
+
+This separates UI delivery from backend rollouts; it does not make a backend process replacement preserve TCP sockets. The actual DigitalOcean auto-deploy setting has NOT been changed. Access to its settings remains unavailable via connected tools; the requested in-app browser was unavailable. Do not operate the owner's native desktop/browser as a substitute.

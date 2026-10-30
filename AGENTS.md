@@ -30,3 +30,7 @@ Read docs/ui-surfaces222.md before adding or changing window backgrounds. Use th
 
 ## Frontend update continuity (223)
 Never auto-reload on release discovery. Preserve active WebSockets and retained runtime/asset URLs. Follow docs/releases223.md: choose a new release ID, commit source/assets, freeze, commit archives, then build and push. Never edit archived files or publish modified runtime under an old ID. Backend container replacement is separate and cannot be described as zero-disconnect without hosting evidence. Premium benefits and profanity filtering remain deferred by the owner.
+
+## Separate frontend publication (226, owner reports disconnects)
+
+For UI-only updates, follow the frontend-only workflow in docs/releases223.md and run scripts/check-frontend226.mjs. Push the frozen/tested commit to frontend-live and publish only Vercel through its connected tools. Do NOT push UI-only releases to main while DigitalOcean auto-deploys main. Fetch frontend-live and preserve its newest code when beginning future work. Backend/shared-rule changes require a separate planned authority rollout; no zero-disconnect claim for those. Use the in-app browser or connectors for hosting; do not control the owner's native computer/browser.

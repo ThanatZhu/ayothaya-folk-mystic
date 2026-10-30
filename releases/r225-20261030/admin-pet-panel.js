@@ -1,0 +1,17 @@
+import {PREMIUM_PETS} from './premium-pets.js';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+export function petGrantHTML(player,draft,busy){
+ const account=player.petCollection??{},collection=account.collection??{};
+ return `<section class="admin-pet-grant" ${draft.pane==='items'?'hidden':''}><header class="admin-pet-heading"><div><small>COMPANION COLLECTION</small><h3>สัตว์เลี้ยงของ ${esc(player.name)}</h3><p>${Object.keys(collection).length}/10 ตัว · ${(account.balance??0).toLocaleString('th-TH')} ทองแท่ง</p></div><span>ส่งผ่านจดหมาย<br>ยังไม่เปิดเติมเงินจริง</span></header><div class="admin-grant-currency"><label for="grant-pet-gems">1. ทองแท่งที่จะมอบ</label><div><input id="grant-pet-gems" type="number" min="0" max="1000000" step="1" value="${draft.gems}" ${busy?'disabled':''}><span>ทองแท่ง</span></div><nav aria-label="จำนวนทองแท่งด่วน">${[0,100,1000,5000].map(n=>`<button type="button" data-gem-amount="${n}" ${busy?'disabled':''}>${n?n.toLocaleString('th-TH'):'ไม่มอบทองแท่ง'}</button>`).join('')}</nav></div><div class="admin-pet-pick-heading"><label>2. เลือกสัตว์เลี้ยงจากรูป</label><button type="button" id="clear-pet-choice" ${busy?'disabled':''}>ไม่มอบสัตว์เลี้ยง</button></div><input type="hidden" id="grant-pet-id" value="${draft.pet??''}"><div class="admin-pet-picker">${PREMIUM_PETS.map(p=>{const own=collection[p.id];return `<button type="button" data-grant-pet="${p.id}" aria-pressed="${draft.pet===p.id}" ${busy?'disabled':''}><span class="admin-pet-rank">${p.tier}</span><img src="assets/pets125/${p.id}.webp" alt="${p.name}" width="512" height="512"><b>${p.name}</b><small>${p.movement==='fly'?'บินได้':'เดินดิน'}</small><span>${own?'★'.repeat(own.stars)+' · ตัวซ้ำ '+own.copies:'ผู้เล่นยังไม่มี'}</span></button>`;}).join('')}</div><div class="admin-grant-review"><small>3. ตรวจรายการก่อนส่งจดหมาย</small><p id="pet-grant-summary" role="status"></p><p class="hint">สัตว์เลี้ยงที่มีแล้วจะได้รับเป็นตัวซ้ำ 1 ตัว · ไม่เพิ่มดาวให้อัตโนมัติ</p><button type="button" id="give-pets" class="primary" ${busy?'disabled':''}>${busy?'กำลังบันทึก…':'ส่งเข้าจดหมายของ '+esc(player.name)}</button><p id="give-pets-status" role="status"></p></div></section>`;
+}
+export function bindPetGrant(root,{player,draft,busy,onSend}){
+ const gems=root.querySelector('#grant-pet-gems'),hidden=root.querySelector('#grant-pet-id'),send=root.querySelector('#give-pets');if(!gems||!send)return;
+ function review(){const pet=PREMIUM_PETS.find(p=>p.id===draft.pet),amount=Number(gems.value),valid=Number.isSafeInteger(amount)&&amount>=0&&amount<=1000000;
+  root.querySelector('#pet-grant-summary').textContent=player.name+' · '+(valid&&amount?amount.toLocaleString('th-TH')+' ทองแท่ง':'ไม่มอบทองแท่ง')+' · '+(pet?pet.name+' ×1':'ไม่มอบสัตว์เลี้ยง');
+  send.disabled=busy||!valid||(!amount&&!pet);root.querySelectorAll('[data-grant-pet]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.grantPet===draft.pet)));hidden.value=draft.pet??'';
+ }
+ gems.oninput=()=>{draft.gems=gems.value===''?0:Number(gems.value);review();};
+ root.querySelectorAll('[data-gem-amount]').forEach(b=>b.onclick=()=>{if(busy)return;draft.gems=Number(b.dataset.gemAmount);gems.value=draft.gems;review();});
+ root.querySelectorAll('[data-grant-pet]').forEach(b=>b.onclick=()=>{if(busy)return;draft.pet=b.dataset.grantPet;review();});
+ root.querySelector('#clear-pet-choice').onclick=()=>{if(busy)return;draft.pet=null;review();};send.onclick=()=>{if(!send.disabled)onSend();};review();
+}

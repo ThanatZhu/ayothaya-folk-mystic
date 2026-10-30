@@ -1,0 +1,59 @@
+/* Generated art supplies the frame and button surfaces; text stays selectable and translated. */
+:is(#mail-window,#boss-browser){isolation:isolate;overflow:visible;border:28px solid transparent;border-image-slice:100;border-image-width:28px;border-image-repeat:stretch;border-radius:0;background:transparent;box-shadow:0 16px 60px #0009;color:#fff0cd}
+:is(#mail-window,#boss-browser)::before{content:'';position:absolute;inset:-15px -19px;z-index:-1;pointer-events:none;border-radius:14px;background:url(assets/ui-kit/pattern.svg) 0 0/32px,linear-gradient(145deg,#214a3e,#0c2520 60%,#091e1a)}
+#mail-window{border-image-source:url(assets/ui-panels150/mail-frame.webp);padding:10px;display:flex;flex-direction:column;gap:0}
+#mail-window:not([open]){display:none}
+html body.field-hud.hud63 #mail-window[data-hud-panel][open]{overflow:visible}
+#boss-browser{border-image-source:url(assets/ui-panels150/boss-frame.webp);padding:0}
+#mail-window header{flex:none;padding-bottom:8px;gap:8px}
+#mail-window h2{font-size:21px}
+#mail-window #mail-status{flex:none;min-height:18px;line-height:1.4;font-size:12px;margin:6px 0}
+#mail-window .mail-layout{flex:1;height:auto;min-height:0;gap:16px;grid-template-columns:minmax(180px,30%) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+#mail-window #mail-list{flex-direction:column}
+#mail-window #mail-detail{padding:8px 12px;border-top:0}
+#mail-window #mail-detail h3{margin:10px 0 14px;color:#f3d38b}
+#mail-window #mail-detail .mail-body{font-size:14px}
+#mail-window .mail-toolbar{flex:none;display:flex;align-items:center;justify-content:flex-end;gap:10px;border-top:1px solid #c7a65455;margin-top:8px;padding-top:8px}
+.mail-toolbar>small{margin-right:auto;color:#c4cfb7;font-size:11px;line-height:1.5}
+#mail-window .mail-action,#mail-window #mail-claim,#boss-browser :is(.boss-browser-tabs button,.boss-travel,.boss-previous){
+ border:10px solid transparent;border-image:url(assets/ui-panels150/button.webp) 45 80 fill /10px 18px/0 stretch;border-radius:0;background:none;padding:0 12px;min-height:44px;color:#fff0c5;font-weight:700;text-shadow:0 1px 2px #082d23;box-shadow:none;line-height:1.5}
+#mail-window :is(.mail-action,#mail-claim):not(:disabled):hover,#boss-browser :is(.boss-browser-tabs button,.boss-travel,.boss-previous):not(:disabled):hover{filter:brightness(1.15)}
+#mail-window :is(.mail-action,#mail-claim):disabled{opacity:.45;filter:saturate(.35)}
+#mail-window #mail-claim-all{color:#fff6bf}
+#mail-window #mail-delete-all{color:#f4c7ac}
+#mail-window #mail-close,#boss-browser #boss-browser-close{width:44px;height:44px;min-width:44px;min-height:44px;flex:none;padding:0;border:0;border-radius:0;background:url(assets/ui63/frames/ring.png) center/contain no-repeat;color:#ffe3a0;font-size:26px;line-height:44px;text-shadow:0 1px 2px #000}
+#boss-browser .boss-browser-header{padding:4px 14px 10px}
+#boss-browser .boss-browser-tabs{padding-left:14px;padding-right:14px;flex-wrap:wrap}
+#boss-browser .boss-browser-tabs [aria-selected=true]{color:#fff4b9!important;filter:brightness(1.25);text-decoration:underline;text-underline-offset:4px}
+#boss-browser #boss-directory-state{margin-left:14px;margin-right:14px}
+#boss-browser #boss-browser-catalog{padding-left:14px;padding-right:14px}
+#boss-browser :is(.boss-hero,.boss-quick-stats){border-color:#bba26288}
+:is(#mail-window,#boss-browser) :is(button,select):focus-visible{outline:2px solid #b4e8d9;outline-offset:-5px}
+@media(max-width:700px),(max-height:550px){
+ :is(#mail-window,#boss-browser){border-width:18px;border-image-width:18px}
+ :is(#mail-window,#boss-browser)::before{inset:-10px -12px;border-radius:9px}
+ #mail-window{padding:4px;width:calc(100vw - 16px);height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)}
+ #mail-window h2{font-size:18px}
+ #mail-window #mail-status{font-size:10px;margin:3px 0;min-height:14px}
+ #mail-window header{padding-bottom:4px;gap:4px}
+ #mail-window .mail-layout{grid-template-columns:minmax(140px,29%) minmax(0,1fr);gap:8px}
+ #mail-window #mail-detail{padding:4px 6px}
+ #mail-window #mail-detail h3{font-size:14px;margin:6px 0}
+ #mail-window #mail-detail .mail-body{font-size:12px;line-height:1.6}
+ #mail-window .mail-toolbar{gap:6px;margin-top:4px;padding-top:4px}
+ .mail-toolbar>small{font-size:9px;max-width:44%}
+ #mail-window :is(.mail-action,#mail-claim){padding:0 6px;font-size:11px}
+ #mail-window .mail-attachments{margin:10px 0}
+ #boss-browser .boss-browser-header{padding:2px 6px 6px}
+ #boss-browser .boss-browser-tabs{padding:4px 6px 0;gap:4px}
+ #boss-browser :is(.boss-browser-tabs button,.boss-travel,.boss-previous){padding:0 6px}
+ #boss-browser #boss-directory-state{margin-left:6px;margin-right:6px}
+ #boss-browser #boss-browser-catalog{padding-left:6px;padding-right:6px}
+}
+@media(max-width:600px) and (orientation:portrait){
+ #mail-window .mail-layout{grid-template-columns:minmax(0,1fr);grid-template-rows:112px minmax(0,1fr)}
+ #mail-window #mail-list{flex-direction:row}
+ #mail-window #mail-list button{width:180px}
+ #mail-window .mail-toolbar{flex-wrap:wrap;justify-content:flex-end}
+ #mail-window .mail-toolbar>small{width:100%;max-width:none;flex-basis:100%}
+}

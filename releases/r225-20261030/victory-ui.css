@@ -1,0 +1,81 @@
+/* 0.122 Victory screen. Crest + card on the left, rewards/ranking tabs on the right; portrait phones stack and scroll. */
+#victory-screen{position:fixed;inset:0;z-index:600;font-family:var(--font-game,Mali,Tahoma,system-ui,sans-serif);color:#fff0ce}
+#victory-screen[hidden]{display:none}
+#victory-screen .victory-backdrop{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 45%,#3b1210e0,#07120ff2 62%);animation:victory-fade .35s ease-out}
+#victory-screen .victory-stage{position:relative;box-sizing:border-box;height:100%;max-width:1180px;margin:0 auto;padding:24px 28px;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);grid-template-rows:auto minmax(0,1fr);gap:8px 30px;align-items:start}
+#victory-screen .victory-crest{grid-column:1;position:relative;width:min(100%,460px);justify-self:center;margin:0;animation:victory-drop .5s cubic-bezier(.2,1.4,.4,1)}
+#victory-screen .victory-crest img{display:block;width:100%;aspect-ratio:2/1;filter:drop-shadow(0 6px 18px #000a)}
+#victory-screen .victory-crest strong{position:absolute;left:0;right:0;top:60%;transform:translateY(-50%);text-align:center;font-weight:700;font-size:clamp(26px,4.6vw,46px);line-height:1;color:#ffe9a8;text-shadow:0 2px 0 #6b4310,0 0 14px #ffcd5f88}
+#victory-screen .victory-time{margin:-4px 0 0;text-align:center;font-size:14px;font-weight:500;color:#f6edd6;font-variant-numeric:tabular-nums}
+#victory-screen .victory-card{grid-column:1;grid-row:2;position:relative;margin:4px auto 0;width:min(100%,300px);aspect-ratio:2/3;max-height:100%;justify-self:center;align-self:start}
+#victory-screen .victory-card::before{content:'';position:absolute;z-index:-1;left:-40%;right:-40%;top:22%;height:44%;background:linear-gradient(90deg,transparent,#a3151acc 18%,#d2342b 50%,#a3151acc 82%,transparent);transform:rotate(-14deg);box-shadow:0 0 40px #b8241e88}
+#victory-screen .victory-card img{display:block;width:100%;height:100%;object-fit:cover;border:2px solid #c6a164;border-radius:10px;transform:rotate(-4deg);box-shadow:0 14px 40px #000c,0 0 0 1px #00000088;background:#152925;animation:victory-card .55s .1s both cubic-bezier(.2,1.2,.4,1)}
+#victory-screen .victory-card[data-sprite="true"] img{object-fit:contain;padding:12%;box-sizing:border-box}
+#victory-screen .victory-card[data-awakened="true"] img{box-shadow:0 14px 40px #000c,0 0 0 2px #b0306888,0 0 34px 6px #a2207acc;animation:victory-card .55s .1s both cubic-bezier(.2,1.2,.4,1),victory-aura 2.4s 0.7s ease-in-out infinite}
+#victory-screen .victory-card figcaption{position:absolute;left:8%;right:8%;bottom:-14px;transform:rotate(-4deg);padding:6px 10px;text-align:center;font-weight:700;font-size:15px;border:1px solid #c6a16488;border-radius:6px;background:linear-gradient(135deg,#24382bf4,#152925f0);overflow-wrap:anywhere}
+#victory-screen .victory-panel{grid-column:2;grid-row:1/3;align-self:center;max-height:100%;min-height:0;display:flex;flex-direction:column;box-sizing:border-box;border:1px solid #c6a16488;border-radius:10px;background:linear-gradient(135deg,#24382bf4,#152925f0);box-shadow:0 20px 70px #000b;animation:victory-fade .4s .15s both}
+#victory-screen .victory-tabs{display:flex;gap:6px;padding:10px 10px 0;border-bottom:1px solid #c6a16444}
+#victory-screen .victory-tabs button{flex:1;min-height:44px;font:inherit;font-weight:700;font-size:15px;color:#d8cba6;background:none;border:0;border-bottom:3px solid transparent;cursor:pointer}
+#victory-screen .victory-tabs button[aria-selected="true"]{color:#ffe9a8;border-bottom-color:#e2bd68}
+#victory-screen button:focus-visible{outline:2px solid #f1d38c;outline-offset:2px}
+#victory-screen .victory-rewards,#victory-screen .victory-ranking.boss-result-table{flex:1;min-height:0;margin:0;max-height:none;overflow:auto;padding:14px 16px 16px;touch-action:pan-y;overscroll-behavior:contain}
+#victory-screen [hidden]{display:none!important}
+#victory-screen .victory-mvp{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid #c6a16466;border-radius:8px;background:linear-gradient(110deg,#9a77232e,transparent)}
+#victory-screen .victory-face{position:relative;flex:0 0 72px;height:72px;margin-top:14px}
+#victory-screen .victory-face>img:first-child{width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #e2bd68;background:#0d1d18}
+#victory-screen .victory-crown{position:absolute;left:50%;top:-30px;width:54px;transform:translateX(-50%) rotate(-8deg);filter:drop-shadow(0 2px 4px #000a)}
+#victory-screen .victory-mvp-text{min-width:0;display:grid;gap:2px}
+#victory-screen .victory-mvp-text small{font-size:11px;color:#e3bc68;font-weight:500}
+#victory-screen .victory-mvp-text strong{font-size:21px;font-weight:700;overflow-wrap:anywhere}
+#victory-screen .victory-mvp-text span{font-size:12px;color:#c4d1c2;font-variant-numeric:tabular-nums}
+#victory-screen h3{margin:16px 0 8px;font-size:14px;font-weight:700;color:#e3bc68}
+#victory-screen .victory-empty{margin:0;padding:14px;text-align:center;font-size:13px;color:#b6c3b5;border:1px dashed #c6a16455;border-radius:8px}
+#victory-screen .victory-drops{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+#victory-screen .victory-drop{display:flex;align-items:center;gap:10px;padding:6px 4px;animation:victory-fade .4s var(--delay) both}
+#victory-screen .victory-icon{flex:0 0 46px;height:46px;display:block;filter:drop-shadow(0 0 6px var(--glow)) drop-shadow(0 0 2px var(--glow));animation:victory-glow 2s calc(var(--delay) + .4s) ease-in-out infinite}
+#victory-screen .victory-drop-text{min-width:0;display:grid;gap:1px}
+#victory-screen .victory-drop-text strong{font-size:13px;font-weight:700;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#victory-screen .victory-drop-text small{font-size:11px;color:#b6c8b9;overflow-wrap:anywhere}
+#victory-screen .victory-drop-text em{font-style:normal;font-size:10px;color:#f0c27a}
+#victory-screen .victory-drop[data-status="lost"]{opacity:.62}
+#victory-screen .victory-drop[data-status="lost"] .victory-icon{filter:grayscale(.8);animation:none}
+#victory-screen .victory-drop[data-status="lost"] em{color:#f08f7a}
+#victory-screen .victory-close{position:absolute;top:10px;right:12px;width:44px;height:44px;font:inherit;font-size:28px;line-height:1;color:#fff0ce;border:1px solid #c6a16488;border-radius:50%;background:#152925e0;cursor:pointer;z-index:2}
+@keyframes victory-fade{from{opacity:0}to{opacity:1}}
+@keyframes victory-drop{from{opacity:0;transform:translateY(-30px) scale(1.2)}to{opacity:1;transform:none}}
+@keyframes victory-card{from{opacity:0;transform:rotate(-14deg) translateX(-40px) scale(.9)}to{opacity:1;transform:rotate(-4deg)}}
+@keyframes victory-aura{50%{box-shadow:0 14px 40px #000c,0 0 0 2px #d0406f,0 0 52px 12px #c02a5fdd}}
+@keyframes victory-glow{50%{filter:drop-shadow(0 0 11px var(--glow)) drop-shadow(0 0 3px var(--glow))}}
+/* landscape phones: everything smaller, panel scrolls inside */
+@media(max-height:550px) and (orientation:landscape){
+ #victory-screen .victory-stage{padding:8px 64px 8px 16px;gap:2px 18px;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+ #victory-screen .victory-crest{width:min(100%,250px)}
+ #victory-screen .victory-crest strong{font-size:24px}
+ #victory-screen .victory-time{font-size:11px;margin:-6px 0 0}
+ #victory-screen .victory-card{width:auto;height:calc(100dvh - 170px);min-height:120px}
+ #victory-screen .victory-card figcaption{font-size:12px;padding:3px 6px;bottom:-8px}
+ #victory-screen .victory-panel{max-height:calc(100dvh - 16px)}
+ #victory-screen .victory-tabs button{min-height:40px;font-size:13px}
+ #victory-screen .victory-rewards,#victory-screen .victory-ranking.boss-result-table{padding:8px 10px 10px}
+ #victory-screen .victory-mvp{padding:6px 10px}
+ #victory-screen .victory-face{flex-basis:50px;height:50px;margin-top:10px}
+ #victory-screen .victory-crown{width:40px;top:-22px}
+ #victory-screen .victory-mvp-text strong{font-size:16px}
+ #victory-screen h3{margin:8px 0 4px;font-size:12px}
+ #victory-screen .victory-icon{flex-basis:36px;height:36px}
+}
+/* portrait phones: crest, card, tabs stacked; the whole stage scrolls */
+@media(max-width:700px) and (orientation:portrait){
+ #victory-screen .victory-stage{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 14px 24px;overflow-y:auto;overscroll-behavior:contain}
+ #victory-screen .victory-crest{width:min(86%,340px);flex:none}
+ #victory-screen .victory-card{width:min(46%,190px);flex:none;margin:6px auto 18px}
+ #victory-screen .victory-panel{width:100%;flex:none;max-height:none}
+ #victory-screen .victory-rewards,#victory-screen .victory-ranking.boss-result-table{overflow:visible}
+ #victory-screen .victory-close{position:fixed;top:8px;right:8px}
+}
+@media(max-width:360px){
+ #victory-screen .victory-drops{grid-template-columns:minmax(0,1fr)}
+ #victory-screen .victory-mvp-text strong{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){#victory-screen *{animation:none!important}}
+body.victory-open #coach{display:none!important} /* the coach tip paints above everything else */

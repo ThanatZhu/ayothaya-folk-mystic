@@ -15,3 +15,12 @@ Latest owner instruction supersedes the older pending-approval notes: implement 
 Implemented: S companion selectable priorities; following-pet automatic ground pickup; right-click equip; 10,000-cowry card extraction; reviewed batch/all selling; attack approach; automatic quest running; plain rounded stat tooltips; grouped live boss damage; corrected ordinary window surfaces; auctions with durable escrow; opt-in frontend update notices and retained runtime URLs; measured late-game XP tuning with level-preserving migrations; ranked matchmaking separated from friendly duels; PvP MDEF and diminishing control.
 
 Validation is recorded in docs/overnight223.md and docs/progression223.md. Calendar progression and PvP fun still require player feedback, not claims of a month-long playtest. Full backend zero-disconnect deployment needs the live hosting change documented in docs/releases223.md.
+
+## Verified before publication
+- Latest main animation commits through ed8ceff merged; gameplay/UI suite: 950 passed, 14 environment-dependent skips.
+- Actual WebGL game: right-click equip, durable 10,000-cowry extraction, reviewed batch sale and auction deposit/cancel/claim pass.
+- Simulated frontend manifest update kept the same authenticated WebSocket alive; no automatic navigation; explicit Update waited for server save before reload.
+- Frozen r223-20261030 runtime/asset URLs pass the same actual-game flow. Desktop and phone UI (including 320px portrait/844px landscape), lost-ack replay, plain tooltip and zero surface pixels outside the inner frame pass.
+- Git fixture preserves old binary bytes and pinned text across two releases and CRLF/LF checkouts; root/source differences cannot silently reuse a release ID.
+- Existing 19 missing generic audio180 URLs remain the earlier audio baseline, not introduced in this batch. Audio work remains separate.
+- Live backend health before publication: healthy, 0 players. DigitalOcean settings still could not be inspected because Computer Use stopped on Windows URL verification; backend deployment continuity is not claimed.

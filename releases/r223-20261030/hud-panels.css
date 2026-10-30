@@ -1,0 +1,62 @@
+/* Shared placement for utility windows. Individual modules still own their content
+   and preferred width; all menu windows share the usable viewport's centre. */
+body.field-hud.hud63{
+ --window-left:max(12px,env(safe-area-inset-left));
+ --window-right:max(12px,env(safe-area-inset-right));
+ --window-top:max(12px,env(safe-area-inset-top));
+ --window-bottom:max(12px,env(safe-area-inset-bottom));
+ --window-height:calc(var(--visible-height,100dvh) - var(--window-top) - var(--window-bottom));
+}
+html body.field-hud.hud63 dialog[data-hud-panel][open]{
+ position:fixed!important;
+ inset:var(--window-top) var(--window-right) calc(100dvh - var(--visible-height,100dvh) + var(--window-bottom)) var(--window-left)!important;
+ margin:auto!important;
+ height:fit-content!important;min-height:0!important;
+ max-width:calc(100vw - var(--window-left) - var(--window-right))!important;
+ max-height:var(--window-height)!important;
+ transform:none!important;translate:none!important;scale:1!important;zoom:1!important;
+ box-sizing:border-box;overflow:auto;overscroll-behavior:contain;
+}
+/* Emotes belong to the shortcut table: keep the picker just above its top row,
+   including when rows change while the picker is open. */
+html body.actionbar-desktop.field-hud.hud63 #emote-window[data-hud-panel][open]{
+ bottom:calc(100dvh - var(--actionbar-grid-top,calc(100dvh - 178px)) + 10px)!important;
+ margin:auto auto 0!important;
+ max-height:calc(var(--actionbar-grid-top,calc(100dvh - 178px)) - var(--window-top) - 10px)!important;
+ z-index:46;overflow:auto;
+}
+/* Settings reuse the account overlay, so centre its card rather than shrinking
+   the overlay itself. Blocking save/error screens keep their own behaviour. */
+html body.field-hud.hud63 #account-panel:not([data-blocking=true]):not([hidden]){
+ position:fixed!important;inset:0!important;width:auto!important;height:auto!important;
+ max-width:none!important;max-height:none!important;transform:none!important;translate:none!important;
+ display:grid!important;place-items:center;box-sizing:border-box;
+ padding:var(--window-top) var(--window-right) calc(100dvh - var(--visible-height,100dvh) + var(--window-bottom)) var(--window-left)!important;
+}
+html body.field-hud.hud63 #account-panel:not([data-blocking=true]) .account-card{
+ width:min(640px,100%)!important;max-height:var(--window-height)!important;
+ min-height:0;box-sizing:border-box;margin:0;overflow:auto;overscroll-behavior:contain;
+}
+
+html body.field-hud.hud63 #mail-window[data-hud-panel][open]{height:min(660px,var(--window-height))!important;overflow:hidden}
+
+/* Compact AUTO panels use the utility-window centre; desktop docking follows below. */
+html body.field-hud.hud63 #auto-target-window[data-hud-panel][open]{
+ inset:calc(var(--vv-top,0px) + var(--window-top)) var(--window-right) calc(100dvh - var(--vv-top,0px) - var(--vv-h,var(--visible-height,100dvh)) + var(--window-bottom)) var(--window-left)!important;
+ margin:auto!important;
+ width:min(350px,calc(100vw - var(--window-left) - var(--window-right)))!important;
+ height:min(550px,calc(var(--vv-h,var(--visible-height,100dvh)) - var(--window-top) - var(--window-bottom)))!important;
+ max-height:calc(var(--vv-h,var(--visible-height,100dvh)) - var(--window-top) - var(--window-bottom))!important;
+ z-index:70;overflow:hidden!important;
+}
+/* Desktop: dock above battle buttons, with one clear column for event icons. */
+@media(min-width:901px) and (min-height:650px){
+ html body.field-hud.hud63:not(.mobile-play) #auto-target-window[data-hud-panel][open]{
+  --auto-picker-bottom:calc(var(--window-bottom) + 124px);
+  --auto-picker-top:max(var(--window-top),min(calc(var(--events-top,220px) + 60px),calc(var(--visible-height,100dvh) - var(--auto-picker-bottom) - 300px)));
+  inset:var(--auto-picker-top) calc(var(--window-right) + 60px) calc(100dvh - var(--visible-height,100dvh) + var(--auto-picker-bottom)) auto!important;
+  margin:auto 0 0 auto!important;
+  height:min(550px,calc(var(--visible-height,100dvh) - var(--auto-picker-top) - var(--auto-picker-bottom)))!important;
+  max-height:calc(var(--visible-height,100dvh) - var(--auto-picker-top) - var(--auto-picker-bottom))!important;
+ }
+}

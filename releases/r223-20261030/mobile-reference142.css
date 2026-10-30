@@ -1,0 +1,101 @@
+/* Reference geometry: screen-edge HUD, small center chat, full-height left drawer. */
+:root{--hud-safe-left:env(safe-area-inset-left,0px);--hud-safe-right:env(safe-area-inset-right,0px);--hud-safe-top:env(safe-area-inset-top,0px);--hud-safe-bottom:env(safe-area-inset-bottom,0px)}
+#mobile-chat-back,#mobile-chat-peek,#mobile-chat-world,#mobile-target-next{display:none}
+html body.mobile-play.field-hud.hud63{--ref-chat-width:clamp(168px,30vw,420px);--ref-preview-height:clamp(40px,14vh,90px);--ref-bottom:max(6px,var(--hud-safe-bottom));--chat-safe-left:max(8px,calc(var(--hud-safe-left) + 6px));--ref-drawer-width:min(calc(44vw + var(--chat-safe-left)),calc(100vw - var(--hud-safe-right) - 36px));--chat-inset-top:max(10px,var(--hud-safe-top));--chat-inset-bottom:max(10px,var(--hud-safe-bottom));--chat-drawer-height:max(0px,calc(var(--vv-h,var(--visible-height,100vh)) - var(--chat-inset-top) - var(--chat-inset-bottom)));--ref-slot:max(44px,var(--ref-unit));--ref-attack:max(72px,calc(var(--ref-unit)*1.9))}
+html body.mobile-play.field-hud.hud63 #quick-slots{display:contents!important}
+html body.mobile-play.field-hud.hud63 #quick-slots>button:not(#emote-open,#run-toggle){display:none!important}
+html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel{scale:none!important;transform:none!important;translate:none!important;filter:none!important;contain:none!important}
+html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel{right:max(4px,var(--hud-safe-right))!important;bottom:var(--ref-bottom)!important;width:calc(var(--ref-unit)*4.3)!important;height:calc(var(--ref-unit)*5.2)!important;overflow:visible!important}
+html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill{left:min(var(--arc-x),calc(100% - var(--ref-slot)))!important;width:var(--ref-slot)!important;height:var(--ref-slot)!important}
+html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #attack{left:min(calc(var(--ref-unit)*2.54),calc(100% - var(--ref-attack)))!important;top:calc(var(--ref-unit)*2.8)!important;width:var(--ref-attack)!important;height:var(--ref-attack)!important}
+html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skill-bank{left:min(calc(var(--ref-unit)*4),calc(100% - 44px))!important;top:calc(var(--ref-unit)*1.85)!important;width:44px!important;height:44px!important}
+html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-control{position:fixed!important;inset:auto!important;left:calc(50% + var(--ref-chat-width)/2 - 46px)!important;bottom:calc(var(--ref-bottom) + var(--ref-preview-height) + 7px)!important;width:44px!important;height:44px!important}
+html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-control #auto-attack{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;font-size:9px!important}
+html body.mobile-play.field-hud.hud63 #auto-settings-open{display:none!important}
+html body.mobile-play.field-hud.hud63 #mobile-target-next{display:grid;place-items:center;position:fixed;z-index:29;right:calc(max(4px,var(--hud-safe-right)) + var(--ref-unit)*1.85);bottom:calc(var(--ref-bottom) + var(--ref-unit)*.18);width:44px;height:44px;padding:8px;border:0;border-radius:50%;background:url('assets/ui-mobile139/ring.png') center/100% 100% no-repeat,#173e32;color:#eed296;touch-action:manipulation}
+#mobile-target-next svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2}
+.mobile-combat-rail{display:none}
+html body.mobile-play .mobile-combat-rail{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.8}
+html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel{isolation:isolate}
+html body.mobile-play.field-hud.hud63 #game-menu #rebirth-btn{position:relative!important;inset:auto!important;transform:none!important;translate:none!important;max-width:100%!important;min-height:44px!important;margin:0!important;padding:2px!important;font-size:10px!important;white-space:normal!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+html body.mobile-play.field-hud.hud63 #menu-toggle{top:calc(var(--edge-t) + var(--touch-map) - 8px)!important}
+html body.mobile-play.field-hud.hud63 #mobile-bag-shortcut{right:calc(var(--edge-r) + 64px)}
+@media(orientation:landscape) and (max-height:360px){html body.mobile-play.field-hud.hud63 #mobile-bag-shortcut{right:calc(var(--edge-r) + 108px)}}
+/* Preview stays small and centered, including while the drawer is open. */
+html body.actionbar-mobile.mobile-play.field-hud.hud63 #online-dock.collapsed,
+html body.mobile-play.field-hud.hud63 #mobile-chat-peek{
+ position:fixed!important;inset:auto!important;left:50%!important;bottom:var(--ref-bottom)!important;transform:translateX(-50%)!important;translate:none!important;
+ width:var(--ref-chat-width)!important;max-width:var(--ref-chat-width)!important;min-width:0!important;height:var(--ref-preview-height)!important;
+ margin:0!important;padding:0!important;border:0!important;border-image:none!important;border-radius:4px!important;background:#0b211bad!important;box-shadow:none!important;box-sizing:border-box;z-index:26;overflow:hidden!important;
+}
+html body.mobile-play.field-hud.hud63 #online-dock.collapsed #dock-toggle{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:4px 15px 4px 7px!important;border:0!important;border-radius:0!important;background:none!important;display:block!important;text-align:left}
+html body.mobile-play #online-dock.collapsed #dock-preview{display:none!important}
+html body.mobile-play #online-dock.collapsed #dock-toggle::after{content:'▴';top:2px;right:3px;font-size:12px}
+html body.mobile-play #online-dock.collapsed #dock-toggle>i{display:none}
+.mobile-chat-lines,.mobile-preview-line{display:block;max-width:100%;overflow:hidden}
+html body.mobile-play .mobile-preview-line{font:600 clamp(9px,1.55vh,12px)/1.5 Mali,Tahoma,sans-serif;color:#f5edd6;text-align:left;white-space:nowrap;text-overflow:ellipsis}
+.mobile-preview-line b{color:#b5d7b9}
+html body.mobile-play.field-hud.hud63 #mobile-chat-peek{padding:4px 7px!important;pointer-events:auto}
+html body.mobile-play.mobile-chat-open #mobile-chat-peek{display:block}
+html body.mobile-play #mobile-chat-world{display:flex;position:fixed;left:calc(50% - var(--ref-chat-width)/2);bottom:calc(var(--ref-bottom) + var(--ref-preview-height) + 7px);width:44px;height:44px;z-index:27;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:0;background:none;color:#f5e3bd;font:700 9px/1 Mali,Tahoma,sans-serif;touch-action:manipulation;text-shadow:0 1px 2px #000}
+#mobile-chat-world i{font-style:normal;font-size:27px;line-height:30px}
+html body.mobile-play.field-hud.hud63 #mobile-status-rail:not([hidden]){left:var(--edge)!important;right:auto!important;top:calc(var(--edge-t) + 66px)!important;width:min(210px,calc(100vw - 110px))!important;height:36px!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:3px!important;scrollbar-width:none}
+html body.mobile-play.field-hud.hud63 #mobile-status-rail #hud-chips>button{flex:0 0 32px!important;width:32px!important;min-width:32px!important;max-width:32px!important;height:36px!important;min-height:36px!important;font-size:8px!important}
+html body.mobile-play.field-hud.hud63 #mobile-status-rail #hud-chips>button::before{width:24px!important;height:24px!important;flex-basis:24px!important}
+html body.mobile-play.field-hud.hud63 #joystick{left:max(4px,env(safe-area-inset-left))!important;bottom:var(--ref-bottom)!important;width:88px!important;height:88px!important}
+html body.mobile-play.field-hud.hud63 #emote-open{position:fixed!important;inset:auto!important;left:calc(50% - var(--ref-chat-width)/2 + 50px)!important;bottom:calc(var(--ref-bottom) + var(--ref-preview-height) + 7px)!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;z-index:27}
+html body.mobile-play.field-hud.hud63 #run-toggle{position:fixed!important;inset:auto!important;left:calc(50% - var(--ref-chat-width)/2 + 100px)!important;bottom:calc(var(--ref-bottom) + var(--ref-preview-height) + 7px)!important;width:44px!important;height:44px!important;z-index:27}
+/* Inset drawer with the desktop frame and a compact painted side tab. */
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed),
+html body.mobile-play.field-hud.hud63.chat-typing #online-dock:not(.collapsed){
+ left:0!important;right:auto!important;top:calc(var(--vv-top,0px) + var(--chat-inset-top))!important;bottom:auto!important;width:var(--ref-drawer-width)!important;max-width:none!important;
+ height:var(--chat-drawer-height)!important;max-height:var(--chat-drawer-height)!important;
+ grid-template-columns:clamp(44px,6.5vw,80px) minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr) auto auto!important;
+ padding:clamp(18px,5vh,28px) 10px 10px var(--chat-safe-left)!important;
+ border:0!important;border-image:none!important;border-radius:0!important;
+ background:none!important;box-shadow:none!important;overflow:hidden!important;z-index:60!important;isolation:isolate;
+}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed)::before{content:'';position:absolute;inset:0;pointer-events:none;border:solid transparent;border-width:6px 4px;border-radius:12px;border-image:url('assets/ui-overlay143/chat-frame.webp') 175 170 / 18px / 0 stretch;background:linear-gradient(90deg,#143329fa,#173a2ffb);background-clip:padding-box;z-index:-1}
+html body.mobile-play #online-dock:not(.collapsed) :is(.desktop-chat-heading,#dock-toggle){display:none!important}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) #dock-toggle{display:none!important}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) .mp-tabs{padding:0 3px!important;gap:3px!important}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) .mp-tabs button{min-height:40px!important;flex-basis:40px;border:0;border-radius:0;background:#183a2a99;font-size:clamp(9px,1.7vh,12px)}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) #online-messages{padding-left:5px!important}
+html body.mobile-play #online-messages>p{padding-left:30px;font-size:11px}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) #online-chat{grid-column:2!important;margin-left:8px!important;gap:4px}
+html body.mobile-play #online-chat button{min-width:44px;padding:6px!important}
+html body.mobile-play.mobile-chat-open #mobile-chat-back{display:block;position:fixed;left:calc(var(--ref-drawer-width) - 3px);top:calc(var(--vv-top,0px) + var(--chat-inset-top) + var(--chat-drawer-height)/2 - 30px);width:32px;height:60px;padding:0;border:0;background:none;z-index:61;overflow:hidden;touch-action:manipulation}
+#mobile-chat-back img{position:absolute;inset:-2px -5px;width:42px;height:64px;max-width:none;pointer-events:none}
+html body.mobile-play.mobile-chat-open:not(.mobile-panel-open) #mobile-panel-backdrop{display:none!important}
+html body.mobile-play.field-hud.hud63.mobile-chat-open:not(.mobile-menu-open,.mobile-panel-open) :is(.combat-controls,#joystick){visibility:visible!important;pointer-events:auto!important}
+html body.mobile-play:is(.mobile-panel-open,.mobile-menu-open) :is(#mobile-chat-world,#mobile-chat-peek,#mobile-target-next){visibility:hidden!important;pointer-events:none!important}
+/* Vertical Quest / Party tabs and adjacent quest cards, as in the reference. */
+html body.mobile-play.field-hud.hud63 #activity-dock{left:env(safe-area-inset-left,0px)!important;top:clamp(98px,28vh,210px)!important;width:clamp(172px,21vw,300px)!important;display:grid!important;grid-template-columns:clamp(30px,3.5vw,44px) minmax(0,1fr)!important;gap:5px!important;--activity-height:clamp(140px,44vh,350px);pointer-events:none}
+html body.mobile-play #activity-dock nav{flex-direction:column!important;gap:5px!important}
+html body.mobile-play #activity-dock nav button{width:100%!important;min-width:0!important;height:clamp(60px,14vh,94px)!important;min-height:0!important;flex:none!important;padding:5px 2px;flex-direction:column-reverse!important;border-radius:16px;font-size:10px!important}
+html body.mobile-play #activity-dock nav button>span{writing-mode:vertical-rl;text-orientation:upright;letter-spacing:-2px}
+html body.mobile-play #activity-dock nav i{width:21px!important;height:21px!important}
+html body.mobile-play #activity-dock #activity-fold{display:block!important;min-width:30px!important;height:30px!important;min-height:30px!important;width:30px!important;font-size:23px!important;padding:0;border-radius:50%}
+html body.mobile-play #activity-dock #activity-content{max-height:var(--activity-height)!important;background:none;border:0;border-radius:0;box-shadow:none;overflow:auto}
+html body.mobile-play #activity-dock .activity-heading{display:none}
+html body.mobile-play.field-hud.hud63 #activity-dock #quest-tracker{background:#091f1cbb!important;border-radius:4px!important;padding:7px!important;gap:3px!important}
+html body.mobile-play.field-hud.hud63 #activity-dock #quest-tracker :is(#quest-chapter,#quest-how,#quest-go,#quest-coach){display:none!important}
+html body.mobile-play.field-hud.hud63 #activity-dock #quest-title{font-size:clamp(10px,1.7vh,13px)!important;line-height:1.4!important}
+html body.mobile-play.field-hud.hud63 #activity-dock #quest-hint{font-size:clamp(10px,1.65vh,12px)!important;line-height:1.45!important}
+html body.mobile-play.field-hud.hud63 #activity-dock #quest-distance{font-size:10px!important}
+html body.mobile-play.field-hud.hud63 #activity-dock #training-journal{margin-top:9px;padding:7px;background:#091f1cbb;border:0;border-radius:4px;font-size:10px}
+html body.mobile-play #activity-party-empty{padding:6px;gap:8px}html body.mobile-play #activity-party-empty :is(h3,p,small){display:none}html body.mobile-play #activity-party-empty button{font-size:10px;min-height:48px;padding:4px}
+@media(orientation:portrait){html body.mobile-play.field-hud.hud63{--ref-drawer-width:min(calc(88vw + var(--chat-safe-left)),calc(100vw - var(--hud-safe-right) - 36px));--ref-chat-width:clamp(150px,46vw,250px)}html body.actionbar-mobile.mobile-play.field-hud.hud63 #online-dock.collapsed,html body.mobile-play.field-hud.hud63 #mobile-chat-peek{bottom:calc(var(--ref-bottom) + var(--ref-unit)*6.2)!important}html body.mobile-play #mobile-chat-world,html body.mobile-play.field-hud.hud63 #emote-open,html body.mobile-play.field-hud.hud63 #run-toggle,html body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-control{bottom:calc(var(--ref-bottom) + var(--ref-unit)*6.2 + var(--ref-preview-height) + 6px)!important}html body.mobile-play.field-hud.hud63 #run-toggle{display:none!important}html body.mobile-play.field-hud.hud63 #activity-dock{top:clamp(140px,27vh,210px)!important;--activity-height:130px;width:172px!important}}
+@media(orientation:landscape) and (max-height:360px){html body.mobile-play.field-hud.hud63 #menu-toggle{right:calc(var(--edge-r) + 60px)!important}html body.mobile-play.field-hud.hud63 #run-toggle{display:none!important}}
+@media(orientation:portrait) and (max-width:360px){html body.mobile-play.field-hud.hud63 #activity-dock{--activity-height:40px}}
+@media(orientation:landscape) and (max-height:360px){html body.mobile-play #activity-dock nav button{height:44px!important;padding:2px 0!important;gap:1px!important}html body.mobile-play #activity-dock nav button>span{font-size:7px!important;line-height:1}html body.mobile-play #activity-dock nav i{width:10px!important;height:10px!important}html body.mobile-play #activity-dock #activity-fold{height:28px!important;min-height:28px!important}}
+@media(prefers-reduced-motion:no-preference){html body.mobile-play #online-dock:not(.collapsed){animation:ref-drawer-in .16s ease-out}@keyframes ref-drawer-in{from{transform:translateX(-100%)}to{transform:translateX(0)}}}
+
+/* Reuse the desktop frame and Send artwork; channel tabs stay text-only. */
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) .mp-tabs button{background:none!important;color:#c2c7b1;box-shadow:none;text-shadow:none}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) .mp-tabs button[aria-selected=true]{color:#fff2c4;background:#35533b80!important}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) .mp-tabs button:disabled{opacity:.5}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) #online-chat{margin-top:4px!important;align-items:center!important;row-gap:4px}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) #online-chat input{height:34px!important;min-height:34px!important;padding:4px 7px!important;line-height:24px;font-size:16px!important;border-radius:7px;background:#0a211a}
+html body.mobile-play.field-hud.hud63 #online-dock:not(.collapsed) #online-chat button{width:80px;flex:0 0 80px;min-width:80px;min-height:36px!important;height:36px!important;padding:4px 6px 4px 27px!important;border:0!important;border-radius:0!important;background:url('assets/ui-overlay143/send.webp') center/100% 100% no-repeat!important;box-shadow:none;color:#314434;text-shadow:none;font:700 11px/1.2 Mali,Tahoma,sans-serif}
+html body.mobile-play #online-dock:not(.collapsed) :is(.mp-tabs button,#online-chat button):focus-visible{outline:2px solid #ffe6a3;outline-offset:-2px}

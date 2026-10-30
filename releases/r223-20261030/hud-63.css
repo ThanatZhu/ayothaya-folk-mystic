@@ -1,0 +1,285 @@
+/* 0.66 HUD layout (hud-63.js injects this last). 8 px spacing grid, 16-24 px screen margins, frames are decoration only. */
+:root{--g:8px;--edge:max(16px,env(safe-area-inset-left));--edge-r:max(16px,env(safe-area-inset-right));--edge-t:max(16px,env(safe-area-inset-top));--exp-h:14px;
+ --jade:#14322d;--jade-2:#1d4a41;--gold:#e9c46a;--ink:#fff3d6;--muted:#cfe0d4;--surface:#0f2421e6}
+.hud63-frame{position:absolute;inset:0;pointer-events:none;z-index:2;background:no-repeat center/100% 100%}
+
+/* ---------- profile (top-left): portrait, name, level, HP/MP in one framed group ---------- */
+body.field-hud.hud63 .player-panel{left:var(--edge);top:var(--edge-t);width:270px;height:84px;min-height:0;padding:0;box-sizing:border-box;
+ background:none;border:0;box-shadow:none;overflow:visible}
+body.field-hud.hud63 .player-panel::before,body.field-hud.hud63 .player-panel::after{display:none}
+.hud63 .f-profile{background-image:url("assets/ui63/frames/profile.png")}
+body.field-hud.hud63 .player-panel .portrait{position:absolute;left:6.1%;top:10.4%;width:22.9%;height:74%;margin:0;border-radius:50%;z-index:1;
+ background-color:var(--jade);box-shadow:none;border:0}
+body.field-hud.hud63 .player-panel .portrait::after{display:none}
+body.field-hud.hud63 .player-heading{position:static;display:block;margin:0}
+body.field-hud.hud63 .player-heading>div{position:absolute;left:37%;top:19%;width:51%;height:30%;min-width:0;display:flex;align-items:center;z-index:3}
+body.field-hud.hud63 .player-heading strong{display:block;font-size:14px;font-weight:700;line-height:1.1;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.field-hud.hud63 .player-heading small{display:none}
+body.field-hud.hud63 .level-badge{position:absolute;left:4%;top:auto;bottom:-6px;right:auto;z-index:4;font-size:11px;padding:1px 7px;border-radius:999px;
+ background:var(--jade);border:1px solid var(--gold);color:var(--gold);line-height:16px}
+body.field-hud.hud63 .player-panel .meter{position:absolute;left:33.8%;width:60%;height:10.2%;margin:0;border-radius:6px;background:#1a110bcc;z-index:1;overflow:hidden}
+body.field-hud.hud63 .player-panel .meter:has(#hp){top:58.4%}
+body.field-hud.hud63 .player-panel .meter:has(#mp){top:76.9%}
+body.field-hud.hud63 .player-panel .meter i{border-radius:6px}
+body.field-hud.hud63 .player-panel .meter span{position:absolute;inset:auto 6px auto auto;top:50%;transform:translateY(-50%);z-index:3;font-size:9px;font-weight:700;line-height:1;
+ color:#fff;text-shadow:0 0 2px #000,0 1px 2px #000;letter-spacing:.2px}
+body.field-hud.hud63 .player-foot{display:none}
+body.field-hud.hud63 #online-button{left:var(--edge);top:calc(var(--edge-t) + 84px + var(--g));bottom:auto;right:auto}
+body.field-hud.hud63 #ailment-row{left:var(--edge);top:calc(var(--edge-t) + 84px + 44px + var(--g))}
+
+/* ---------- minimap (top-right): area name on the top plaque, coordinates on the bottom plaque ---------- */
+body.field-hud.hud63 .mini-panel{top:var(--edge-t);right:var(--edge-r);width:200px;height:198px;padding:0;background:none;border:0;box-shadow:none;box-sizing:border-box}
+.hud63 .f-minimap{background-image:url("assets/ui63/frames/minimap.png")}
+body.field-hud.hud63 #mini-open{position:absolute;left:9%;top:14.9%;width:81.7%;height:72.1%;padding:0;border:0;background:#203a2f;border-radius:10px;overflow:hidden;z-index:1}
+body.field-hud.hud63 #mini-open::after{display:none}
+body.field-hud.hud63 .mini-panel canvas{width:100%;height:100%;aspect-ratio:auto;display:block}
+body.field-hud.hud63 .field-map-title{position:absolute;left:24%;right:24%;top:3.5%;height:8%;display:flex;align-items:center;justify-content:center;z-index:3;
+ font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;padding:0;background:none;border:0;left:20%;right:20%}
+body.field-hud.hud63 #mini-meta{position:absolute;left:24%;right:24%;bottom:3.8%;height:8%;display:flex;align-items:center;justify-content:center;z-index:3;
+ font-size:10px;color:var(--muted);white-space:nowrap;margin:0}
+
+/* ---------- main menu (top centre): equal buttons, secondary entries in a drawer ---------- */
+body.field-hud.hud63 #game-menu{left:50%;right:auto;top:var(--edge-t);transform:translateX(-50%);gap:var(--g);padding:0;background:none}
+body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:60px;min-width:60px;height:72px;min-height:72px;padding:2px;border-radius:10px;
+ background:none;border:1px solid transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px}
+/* labels sit on one line: fixed-height box under a fixed-size icon, so every button's text lines up */
+body.field-hud.hud63 #game-menu>button span,body.field-hud.hud63 #menu-drawer>button span{display:block;height:12px;font-size:11px;font-weight:600;color:var(--ink);line-height:12px;white-space:nowrap;text-shadow:0 1px 2px #000c,0 0 4px #000a}
+/* 0.107.1 icon-only: no square tile, a larger icon lifted off the map by a soft shadow */
+body.field-hud.hud63 #game-menu i{flex:none;width:52px;height:52px;border-radius:8px;background:none;border:0;filter:drop-shadow(0 3px 3px #000a);transition:transform .12s}
+body.field-hud.hud63 #game-menu>button:hover,body.field-hud.hud63 #menu-drawer>button:hover{background:none;border-color:transparent}
+body.field-hud.hud63 #game-menu>button:hover i,body.field-hud.hud63 #menu-drawer>button:hover i{transform:translateY(-2px) scale(1.06)}
+body.field-hud.hud63 #menu-more i{display:grid;place-items:center;font-size:22px;font-style:normal;color:var(--gold);font-weight:700}
+body.field-hud.hud63 #menu-more i::after{display:none}
+body.field-hud.hud63 #menu-drawer{display:none;position:absolute;top:calc(100% + var(--g));right:0;padding:var(--g);gap:var(--g);border-radius:12px;background:var(--surface);
+ border:1px solid #c9a35a;box-shadow:0 8px 24px #0009;flex-direction:row}
+body.field-hud.hud63 #game-menu.more-open #menu-drawer{display:flex}
+body.field-hud.hud63 #game-menu.more-open #menu-more i{filter:drop-shadow(0 0 5px #f5d58a)}
+#menu-toggle{display:none}
+
+/* ---------- right column under the minimap: quest tracker (foldable) + event chips ---------- */
+#hud-right{position:fixed;z-index:16;right:var(--edge-r);top:calc(var(--edge-t) + 198px + var(--g));width:240px;display:flex;flex-direction:column;align-items:stretch;gap:var(--g);pointer-events:none}
+#hud-right>*{pointer-events:auto}
+body.field-hud.hud63 #hud-right #quest-tracker{position:relative;inset:auto;width:auto;top:auto;right:auto;margin:0;padding:6px 8px;border-radius:10px;
+ background:var(--surface);border:12px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 12px / 0 stretch;box-shadow:0 4px 14px #0007}
+body.field-hud.hud63 #quest-tracker small{font-size:10px;color:var(--muted)}
+body.field-hud.hud63 #quest-tracker strong{font-size:13px;color:var(--ink)}
+body.field-hud.hud63 #quest-tracker span{font-size:11px;color:var(--muted)}
+#quest-fold{position:absolute;top:-14px;left:-14px;width:28px;height:28px;border-radius:50%;border:1px solid #c9a35a;background:var(--jade);color:var(--gold);font-size:13px;z-index:3;cursor:pointer}
+body.field-hud.hud63 #quest-tracker.folded>:is(small,span){display:none}
+body.field-hud.hud63 #quest-tracker.folded{padding:4px 8px}
+body.field-hud.hud63 #hud-right #hud-chips{position:static;flex-direction:column;align-items:flex-end;gap:6px;top:auto;right:auto}
+body.field-hud.hud63 #hud-chips>button{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+
+/* ---------- target (under the menu, centred, small) and notices ---------- */
+body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 72px + 2 * var(--g));left:50%;transform:translateX(-50%);width:220px}
+body.field-hud.hud63 #notice{top:calc(var(--edge-t) + 72px + 92px + 56px)} /* 0.109.6 clear of the target box, below it */
+
+/* ---------- chat (bottom-left): readable jade glass, folds to a bar ---------- */
+body.field-hud.hud63 #online-dock{border-radius:12px;background:#0d1f1cf0;box-shadow:0 6px 18px #0008}
+body.field-hud.hud63 #online-dock:not(.collapsed){border:14px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 14px / 0 stretch}
+body.field-hud.hud63 #online-dock.collapsed{border:1px solid #c9a35a}
+body.field-hud.hud63 #online-dock #online-messages{font-size:13px;line-height:1.45;color:var(--ink)}
+@media (pointer:fine) and (min-width:901px) and (min-height:601px){
+ body.field-hud.hud63 #online-dock{left:var(--edge);bottom:calc(var(--exp-h) + 16px);width:340px}
+ body.field-hud.hud63 #online-dock #online-messages{height:84px}
+ body.field-hud.hud63 #online-dock.collapsed{width:240px}
+}
+
+/* ---------- desktop skill bar (bottom centre): equal square slots, key, cooldown, then attack ---------- */
+body.field-hud.hud63-bar{--bar-x:max(50%,calc(var(--edge) + 340px + var(--g) + 330px))}
+body.field-hud.hud63-bar .combat-controls.wheel{left:var(--bar-x)!important;right:auto!important;bottom:calc(var(--exp-h) + 16px)!important;transform:translateX(-50%);
+ width:auto!important;height:auto!important;display:flex!important;align-items:flex-end;gap:12px;padding:8px 10px;border-radius:14px;background:#0f2421cc;
+ border:1px solid #c9a35a99;box-shadow:0 6px 18px #0008;pointer-events:auto}
+body.field-hud.hud63-bar .combat-controls.wheel .skills{display:flex!important;gap:6px;position:static}
+body.field-hud.hud63-bar .combat-controls.wheel .skill{position:relative!important;right:auto!important;bottom:auto!important;width:46px!important;height:46px!important;border-radius:9px!important}
+body.field-hud.hud63-bar .combat-controls.wheel .skill.cooling:after{border-radius:8px!important}
+body.field-hud.hud63-bar .combat-controls.wheel .skill kbd{left:2px;top:2px;width:15px;height:15px;font-size:10px;border-radius:4px}
+body.field-hud.hud63-bar .combat-controls.wheel .skill .skill-level{bottom:-6px;font-size:9px}
+body.field-hud.hud63-bar .combat-controls.wheel .skill.locked{filter:grayscale(.85) brightness(.7)}
+body.field-hud.hud63-bar .combat-controls.wheel .skill.no-mana{box-shadow:inset 0 0 0 2px #4a8fe0}
+body.field-hud.hud63-bar .combat-controls.wheel .attack-controls{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;position:static!important;width:auto!important;height:auto!important}
+body.field-hud.hud63-bar .combat-controls.wheel #auto-attack{position:relative!important;right:auto!important;bottom:auto!important;width:44px;height:44px}
+body.field-hud.hud63-bar .combat-controls.wheel #attack{position:relative!important;right:auto!important;bottom:auto!important;width:58px;height:58px;
+ box-shadow:0 0 0 2px #c9a35a,0 4px 10px #0008}
+body.field-hud.hud63-bar #quick-slots{left:calc(var(--bar-x) - 318px);right:auto;margin-left:0;bottom:calc(var(--exp-h) + 16px + 76px + var(--g))}
+
+/* ---------- EXP: thin lines on the bottom edge, labels above them ---------- */
+body.field-hud.hud63 .experience-bars{left:var(--edge);right:var(--edge-r);bottom:max(4px,env(safe-area-inset-bottom));gap:var(--g)}
+body.field-hud.hud63 .exp-track{height:4px;border-radius:2px;overflow:visible;background:#0008;border:0}
+body.field-hud.hud63 .exp-track>i{border-radius:2px}
+body.field-hud.hud63 .exp-track>span{inset:auto auto 6px 0;font-size:10px;line-height:1;color:#f3e9cc;text-shadow:0 1px 2px #000;background:none}
+
+/* ---------- phones and small windows ---------- */
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ :root{--edge:max(8px,env(safe-area-inset-left));--edge-r:max(8px,env(safe-area-inset-right));--edge-t:max(6px,env(safe-area-inset-top));--exp-h:8px}
+ body.field-hud.hud63 .player-panel{width:204px;height:63px}
+ body.field-hud.hud63 .player-heading strong{font-size:12px}
+ body.field-hud.hud63 .player-panel .meter span{font-size:8px}
+ body.field-hud.hud63 .mini-panel{width:120px;height:119px}
+ body.field-hud.hud63 .field-map-title{font-size:9px}
+ body.field-hud.hud63 #mini-meta{display:none}
+ /* One 44 px button opens the whole menu as a panel. */
+ body.field-hud.hud63 #menu-toggle{display:flex;position:fixed;z-index:21;top:var(--edge-t);right:calc(var(--edge-r) + 120px + var(--g));width:48px;height:48px;border-radius:12px;
+  flex-direction:column;align-items:center;justify-content:center;gap:1px;background:linear-gradient(#2a4a3f,#16302a);border:1px solid #c9a35a;color:var(--gold)}
+ body.field-hud.hud63 #menu-toggle b{font-size:18px;line-height:1}body.field-hud.hud63 #menu-toggle span{font-size:9px;color:var(--ink)}
+ body.field-hud.hud63 #game-menu{display:none;position:fixed;z-index:22;left:auto;right:calc(var(--edge-r) + 120px + var(--g));top:calc(var(--edge-t) + 48px + var(--g));transform:none;
+  flex-wrap:wrap;width:min(260px,calc(100vw - 32px));padding:var(--g);border-radius:12px;background:var(--surface);border:1px solid #c9a35a;box-shadow:0 8px 24px #0009}
+ body.field-hud.hud63 #game-menu.phone-open{display:flex}
+ body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:56px;min-width:56px;height:56px;min-height:56px}
+ body.field-hud.hud63 #game-menu #menu-profile{display:flex}
+ body.field-hud.hud63 #menu-more{display:none!important}
+ body.field-hud.hud63 #menu-drawer{display:contents!important}
+ #hud-right{top:calc(var(--edge-t) + 119px + var(--g));width:min(220px,40vw)}
+ body.field-hud.hud63 .target-panel{left:var(--edge);top:calc(var(--edge-t) + 63px + 44px + var(--g));transform:none;width:170px}
+ body.field-hud.hud63 #hud-chips>button{font-size:10px;padding:3px 8px}
+ body.field-hud.hud63 #online-button{top:calc(var(--edge-t) + 63px + var(--g))}
+ body.field-hud.hud63 #ailment-row{top:calc(var(--edge-t) + 63px + 44px + var(--g))}
+ body.field-hud.hud63 #online-dock:not(.collapsed){border-width:10px;border-image-width:10px}
+ body.field-hud.hud63 #online-dock #online-messages{height:72px}
+}
+/* Portrait phones: field in the middle, controls along the bottom, joystick bottom-left, skills bottom-right. */
+@media (orientation:portrait) and (max-width:600px){
+ body.field-hud.hud63 #hud-right{width:min(200px,52vw)}
+ body.field-hud.hud63 #online-dock{left:var(--edge);right:auto;translate:none;bottom:calc(var(--exp-h) + 196px);width:min(340px,calc(100vw - 16px))}
+ body.field-hud.hud63 #online-dock.collapsed{width:auto;max-width:180px}
+ body.field-hud.hud63 #quick-slots{left:var(--edge);right:auto;margin-left:0;bottom:calc(var(--exp-h) + 140px);translate:none}
+ body.field-hud.hud63 .joystick{left:var(--edge);bottom:calc(var(--exp-h) + 20px)}
+ body.field-hud.hud63 .combat-controls.wheel{right:var(--edge-r);bottom:calc(var(--exp-h) + 12px)}
+ body.field-hud.hud63 #interact{bottom:calc(var(--exp-h) + 240px)}
+}
+@media (orientation:portrait) and (max-width:600px){body.field-hud.hud63 #online-dock.collapsed{min-width:140px}}
+@media (orientation:portrait) and (max-width:600px){#online-dock.collapsed #dock-preview:empty::before{content:var(--chat-label,"แชต");color:var(--ink,#fff3d6)}}
+
+/* 0.71 owner: desktop uses the same HUD as phones (framed profile/minimap, full menu row, skill wheel). */
+/* 0.123 owner: seven buttons on top, everything else on the เมนู page: a framed grid under the button (existing tooltip frame) */
+@media (pointer:fine) and (min-width:901px){
+ body.field-hud.hud63 #game-menu.more-open{overflow:visible;z-index:31}   /* the row scrolls sideways, which would clip the page; sit over the announcement (30) */
+ body.field-hud.hud63 #game-menu.more-open #menu-drawer{display:grid;grid-template-columns:repeat(4,64px);justify-items:center;align-items:start;gap:4px 6px;padding:8px 10px;
+  background:linear-gradient(135deg,#24382bf4,#152925f0);border:12px solid transparent;border-image:url("assets/ui63/frames/tooltip.png") 44 / 12px / 0 stretch;border-radius:0;box-shadow:0 8px 24px #0009}
+ body.field-hud.hud63 #menu-drawer>button[hidden]{display:none}
+}
+/* the เมนู button wears the golden lotus from the existing menu sheet */
+body.field-hud.hud63 #menu-more i{position:relative}
+body.field-hud.hud63 #menu-more i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 40% 66.667%/600% 400% no-repeat}
+
+/* ===== 0.68 owner feedback: event chips = icon + time (tap for details), target top-centre, tighter quest, fixed-width chat ===== */
+body.field-hud.hud63 #hud-right #hud-chips{flex-direction:row;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px}
+body.field-hud.hud63 #hud-chips>button{display:flex;align-items:center;gap:4px;padding:3px 9px 3px 5px;min-height:30px;border-radius:999px;font-size:11px;max-width:none}
+body.field-hud.hud63 #hud-chips>button[hidden]{display:none}
+body.field-hud.hud63 #hud-chips>button>span{display:none}
+body.field-hud.hud63 #hud-chips>button>b{font-weight:700;white-space:nowrap}
+body.field-hud.hud63 #hud-chips>button>i{font-style:normal;font-size:15px;line-height:1}
+body.field-hud.hud63 #hud-chips .item-icon{width:22px;height:22px}
+/* target monster: always top-centre, under the menu on desktop, at the top edge on phones */
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ body.field-hud.hud63 .target-panel{left:50%;top:var(--edge-t);transform:translateX(-50%);width:min(220px,40vw);padding:4px 10px;min-height:0}
+ body.field-hud.hud63 .target-panel strong{font-size:12px}body.field-hud.hud63 .target-panel small{font-size:10px}
+ body.field-hud.hud63 #notice{top:calc(var(--edge-t) + 62px)}
+}
+/* quest list: small, text packed tight */
+body.field-hud.hud63 #hud-right #quest-tracker{padding:4px 6px;row-gap:0;column-gap:6px}
+body.field-hud.hud63 #quest-tracker small{font-size:9px;line-height:1.1}
+body.field-hud.hud63 #quest-tracker strong{font-size:12px;line-height:1.15}
+body.field-hud.hud63 #quest-tracker span{font-size:10px;line-height:1.15}
+body.field-hud.hud63 #quest-go{min-height:28px;padding:2px 10px;font-size:11px;align-self:center}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ #hud-right{width:min(200px,36vw)}
+ body.field-hud.hud63 #hud-right #quest-tracker{border-width:8px;border-image-width:8px;padding:2px 4px}
+ body.field-hud.hud63 #quest-tracker small{display:none}
+ body.field-hud.hud63 #quest-tracker strong{font-size:11px}
+ body.field-hud.hud63 #quest-tracker span{font-size:9.5px}
+ body.field-hud.hud63 #quest-go{min-height:44px;min-width:44px;padding:0 8px;font-size:10px}
+ body.field-hud.hud63 #hud-chips>button{min-height:28px;font-size:10px}
+}
+/* chat keeps one width open or folded */
+body.field-hud.hud63 #online-dock.collapsed{width:var(--chat-w)!important;max-width:none!important}
+body.field-hud.hud63 #online-dock{width:var(--chat-w)!important;max-width:none!important}
+body.field-hud.hud63{--chat-w:340px}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){body.field-hud.hud63{--chat-w:min(320px,calc(100vw - 2 * (var(--edge) + 200px)))}}
+@media (orientation:portrait) and (max-width:600px){body.field-hud.hud63{--chat-w:min(300px,calc(100vw - 16px))}}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ /* phones: event chips move to the free left column under the online chip, clear of the skill wheel */
+ body.field-hud.hud63 #hud-right #hud-chips{position:fixed;left:var(--edge);right:auto;top:calc(var(--edge-t) + 63px + 44px + var(--g));width:220px;justify-content:flex-start;z-index:15}
+ body.field-hud.hud63 #ailment-row{top:calc(var(--edge-t) + 63px + 44px + 40px + var(--g))}
+ body.field-hud.hud63 .target-panel{padding:3px 10px 5px;min-height:0;height:auto}
+ body.field-hud.hud63 .target-panel small{display:none}
+}
+body.field-hud.hud63 #hud-right #quest-tracker{padding-left:16px}
+
+/* ===== 0.68.1: EXP hairline on the very screen edge, quest text shown in full ===== */
+body.field-hud.hud63 .experience-bars{left:0!important;right:0!important;bottom:0!important;gap:0!important}
+body.field-hud.hud63 .exp-track{height:3px;border-radius:0}
+body.field-hud.hud63 .exp-track>i{border-radius:0}
+body.field-hud.hud63 .exp-track>span{left:max(8px,env(safe-area-inset-left));bottom:5px}
+body.field-hud.hud63 .exp-track.job>span{left:8px}
+body.field-hud.hud63 #quest-tracker :is(strong,span,small){white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:block}
+body.field-hud.hud63 #quest-tracker strong{font-size:11px!important;line-height:1.15}
+body.field-hud.hud63 #quest-tracker span{font-size:9.5px!important;line-height:1.15}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ body.field-hud.hud63 #quest-tracker strong{font-size:10px!important}
+ body.field-hud.hud63 #quest-tracker span{font-size:8.5px!important}
+ body.field-hud.hud63 #quest-tracker small{display:none!important}
+ body.field-hud.hud63 #quest-go{min-height:36px;min-width:44px;font-size:9.5px;padding:0 6px}
+}
+
+/* ===== 0.68.2 phones: the menu is a row along the top again (owner preference); target box drops below it ===== */
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ body.field-hud.hud63 #menu-toggle{display:none!important}
+ body.field-hud.hud63 #game-menu{display:flex!important;flex-wrap:nowrap;left:auto;right:calc(var(--edge-r) + 120px + var(--g));top:var(--edge-t);transform:none;width:auto;padding:0;gap:4px;background:none;border:0;box-shadow:none}
+ body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{width:48px;min-width:44px;height:56px;min-height:44px;padding:1px;gap:2px}
+ body.field-hud.hud63 #game-menu i{width:38px;height:38px}
+ body.field-hud.hud63 #game-menu>button span,body.field-hud.hud63 #menu-drawer>button span{font-size:9px}
+ body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 56px + var(--g))}
+}
+/* narrow portrait phones: the menu runs across the full width under the profile and minimap (two rows),
+   then the target box (left) and quest + event chips (right) sit below it */
+@media (orientation:portrait) and (max-width:600px){
+ body.field-hud.hud63{--menu-top:calc(var(--edge-t) + 119px + var(--g));--below-menu:calc(var(--edge-t) + 119px + 104px + 2 * var(--g))}
+ body.field-hud.hud63 #game-menu{flex-wrap:wrap;justify-content:center;left:var(--edge);right:var(--edge-r);top:var(--menu-top);width:auto}
+ body.field-hud.hud63 .target-panel{left:var(--edge);top:var(--below-menu);transform:none;width:min(170px,44vw)}
+ body.field-hud.hud63 #hud-right{top:var(--below-menu)}
+ body.field-hud.hud63 #hud-right #hud-chips{position:static;width:auto;justify-content:flex-end}
+ body.field-hud.hud63 #ailment-row{top:calc(var(--below-menu) + 60px)}
+}
+body.field-hud.hud63 #quest-tracker small{line-height:1.25!important;margin:0 0 2px!important;position:static!important}body.field-hud.hud63 #quest-tracker strong{position:static!important;margin:0!important}
+
+/* 0.68.3 iOS zooms the whole page into any input under 16px and never zooms back: keep every in-game field at 16px on touch screens */
+@media (pointer:coarse){#game-shell :is(input,textarea,select),body :is(#online-text,dialog input,dialog textarea){font-size:16px!important}}
+
+/* 0.70.1 chat while the phone keyboard is open: pinned to the top of the visible area, messages readable */
+body.field-hud.hud63.chat-typing #online-dock{position:fixed!important;top:calc(var(--vv-top,0px) + 6px)!important;bottom:auto!important;left:50%!important;right:auto!important;translate:-50% 0!important;
+ width:min(560px,calc(100vw - 16px))!important;max-height:calc(var(--vv-h,50vh) - 12px);z-index:60;display:flex!important}
+body.field-hud.hud63.chat-typing #online-dock :is(.mp-tabs,#online-messages,#online-chat){display:flex!important}
+body.field-hud.hud63.chat-typing #online-dock #online-messages{display:block!important;height:auto!important;max-height:calc(var(--vv-h,50vh) - 110px);min-height:40px;overflow:auto}
+/* 0.70.1 market button + retired buttons */
+body.field-hud.hud63 .hud63-hidden{display:none!important}
+body.field-hud.hud63 #menu-market i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 60% 66.667%/600% 400% no-repeat}
+body.field-hud.hud63 #menu-market i{position:relative}
+body.field-hud.hud63.chat-typing #online-dock #dock-preview{display:none}
+body.field-hud.hud63 #menu-rank i{position:relative}
+body.field-hud.hud63 #menu-rank i::after{display:block;content:"";position:absolute;inset:6%;background:url("assets/ui63/ui-menu63.png?v=65") 100% 66.667%/600% 400% no-repeat}
+/* 0.87 owner: a bigger chat on computers (wider box, about twice the lines) */
+@media (pointer:fine) and (min-width:901px) and (min-height:601px){
+ body.field-hud.hud63{--chat-w:min(480px,34vw)}
+ body.field-hud.hud63 #online-dock #online-messages{height:min(190px,24vh)}
+ body.field-hud.hud63 #online-dock #online-messages{font-size:14px}
+}
+/* 0.95 guild war line inside the target box */
+#war-line{display:block;margin-top:3px;font-size:10px;font-weight:700;color:#ffb47a}#war-line[hidden]{display:none}
+/* 0.97 weather chip (weather-fx.js), first in the chip row under the minimap */
+#weather-chip{display:flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #9cc6d688;border-radius:999px;background:#14262ad8;color:#d6eef5;font:700 11px Mali,Tahoma,sans-serif;cursor:pointer}
+#weather-chip i{font-style:normal}#weather-chip b{font-weight:400;opacity:.85}
+#weather-chip[data-weather=storm]{border-color:#b9a4ff;background:#241d3ae8;color:#efe6ff;box-shadow:0 0 10px #8f7bff66}
+/* 0.106.2 short landscape phones: the quest card keeps one line (title + Go) so the Master skill arc stays clear;
+   the hint and how-to are still in the Quests window. */
+@media (pointer:coarse) and (max-height:500px){
+ body.field-hud.hud63 #quest-tracker :is(#quest-chapter,#quest-hint,#quest-how){display:none!important}
+ body.field-hud.hud63 #quest-tracker #quest-title{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+ body.field-hud.hud63 #hud-right #quest-tracker{padding-top:0!important;padding-bottom:0!important;min-height:0!important;row-gap:0!important;margin-top:-8px!important}
+ body.field-hud.hud63 #quest-go{min-height:30px!important;padding:0 10px!important}
+}
+/* 1.12.4 owner (phone): a closed HUD window is never drawn. bag-ui.css gave the phone bag display:flex without [open],
+   so the closed bag stayed on screen over every other window and swallowed their close buttons. */
+dialog[data-hud-panel]:not([open]){display:none!important}
+/* and windows are smaller on short landscape phones: everything inside scales together */
+@media (orientation:landscape) and (max-height:520px){dialog[data-hud-panel][open]{zoom:.8}}

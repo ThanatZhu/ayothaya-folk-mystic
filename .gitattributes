@@ -1,0 +1,2 @@
+# Frozen runtime bytes must survive checkout unchanged on Windows and Linux.
+releases/** -text

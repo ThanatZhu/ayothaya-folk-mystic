@@ -20,3 +20,5 @@ Separate frontend publishing from authority deployment: disable deploy_on_push o
 This task could not inspect/change DigitalOcean settings: Computer Use stopped because it could not verify the current Windows browser URL. No deployment API token or repository deployment secret was configured. No browser workaround was used. Consequently no promise that pushing backend changes preserves existing TCP sessions is made.
 
 First adoption: users must enter this release once before they can see its new-update notice on later frontend releases. The code cannot inject that notice retroactively into an already-running older frontend.
+
+Cross-platform rule: frozen files are marked -text in .gitattributes. Pin textual asset metadata alongside code so checkout line endings cannot alter archived URLs. Source comparison ignores only CRLF/LF differences; archived byte hashes remain exact. Binary assets still use sparse retention and unchanged-image fallback.

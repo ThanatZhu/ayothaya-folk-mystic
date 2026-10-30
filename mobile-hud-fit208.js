@@ -22,7 +22,7 @@ export function createMobileHudFit208(){
   if(dock&&!dock.classList.contains('collapsed')){const d=rect(dock);place($('mobile-chat-back'),d.right-3*s,d.top+d.height/2-30*s);}
   place($('channel-popover'),l,p.bottom+4*s);
   place($('mobile-chat-peek'),chatX,chatY,{width:chatW,height:chatH});const toolsY=chatY-51*s;place($('emote-open'),chatX,toolsY);place($('run-toggle'),chatX+50*s,toolsY);const auto=$('auto-control');if(auto){auto.dataset.hudScale208='';scaled.add(auto);}
-  place($('interact'),w/2-52*s,h-b-chatH-106*s);const target=document.querySelector('.target-panel');place(target,Math.max(p.right+8*s,w*.36),Math.max(t+52*s,rect($('mobile-event-row'))?.bottom+4*s||0),{width:Math.max(100*s,w*.24)});
+  const target=document.querySelector('.target-panel');place(target,Math.max(p.right+8*s,w*.36),Math.max(t+52*s,rect($('mobile-event-row'))?.bottom+4*s||0),{width:Math.max(100*s,w*.24)});
   const ribbon=$('realm-announcement');if(ribbon){own(ribbon);ribbon.dataset.hudScale208='';set(ribbon,'top',Math.max(t+70*s,h*.3)/s+'px');}
   for(const id of ['notice']){const n=$(id);place(n,w*.34,Math.max(t+70*s,h*.3),{width:w*.34});}
   const nav=$('game-menu');if(nav?.classList.contains('phone-open')){place(nav,w-r-278*s,menuY+54*s,{width:278*s});set(nav,'max-height',Math.max(80,h-menuY-60*s-b)/s+'px');}

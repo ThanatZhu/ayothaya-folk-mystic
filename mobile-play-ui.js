@@ -1,3 +1,4 @@
+import {createMobileInteractionDock} from './mobile-interaction-dock234.js';
 import {createMobileHudFit208} from './mobile-hud-fit208.js?v=fit208';
 import {mobileHudMedia} from './hud-mode204.js';
 import {createMobileCombatLayout} from './mobile-combat-ui.js?v=fit208';
@@ -100,5 +101,5 @@ export function createMobilePlayUI({clearInput=()=>{},selectTarget=()=>{}}={}){
  addEventListener('resize',refresh);window.visualViewport?.addEventListener('resize',refresh);
  query.addEventListener('change',()=>{page=0;closeQuest();refresh();});
  document.addEventListener('pointerdown',e=>{if(query.matches&&body.classList.contains('mobile-quest-open')&&!e.target.closest?.('#hud-right,#mobile-quest-summary'))closeQuest();},{passive:true});
- refresh();createMobileReferenceUI({clearInput,selectTarget});combatLayout=createMobileCombatLayout();combatLayout.refresh();const hudEditor=createMobileHudEditor({clearInput});const hudFit=createMobileHudFit208();return {refresh,hudEditor,hudFit};
+ refresh();createMobileReferenceUI({clearInput,selectTarget});combatLayout=createMobileCombatLayout();combatLayout.refresh();const hudEditor=createMobileHudEditor({clearInput});const hudFit=createMobileHudFit208();createMobileInteractionDock();return {refresh,hudEditor,hudFit};
 }

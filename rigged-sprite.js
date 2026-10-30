@@ -1,3 +1,4 @@
+import {paintedAttack224,warmPaintedAttacks224} from './painted-attack224.js';
 import {loadPaintedGait220,gaitFits220,gaitFrame220} from './painted-gait220.js';
 import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=size1';
 import * as THREE from './vendor/build/three.module.js';
@@ -7,7 +8,7 @@ import {loadLifeArt,lifeFrameAt,mapFrames,builtFrames} from './character-life-ar
 import {createPosturePlayback} from './character-action-state.js?v=106.0';
 import {poseTexture,poseScale,posesFit} from './skill-pose-art.js?v=pose119';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
-export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt,gaitArtLoader=loadPaintedGait220}={}){
+export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt,gaitArtLoader=loadPaintedGait220,attackArtSampler=paintedAttack224,preloadAttackArt=false}={}){
  const geometry=new THREE.PlaneGeometry(1,1);geometry.translate(0,.5,0);
  const material=new THREE.MeshBasicMaterial({map:texture,alphaTest:.45,transparent:false,depthWrite:true,side:THREE.DoubleSide,color:'#fff1da'});
  const mesh=new THREE.Mesh(geometry,material);mesh.frustumCulled=false;
@@ -34,6 +35,7 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   const nextLife=newLife&&Object.fromEntries(Object.entries(newLife).map(([key,value])=>[key,textures(value)]));
   release();frames=next;life=nextLife;gait=newGait;loadedClass=id;loadedGender=shown;appearanceDirty=false;poseFit=posesFit(id,currentAppearance,gear);
   material.map=frames[loadedGender][Math.min(mesh.userData.artFrame??0,frames[loadedGender].length-1)];
+  if(preloadAttackArt&&poseFit)void warmPaintedAttacks224(id,shown,typeof preloadAttackArt==='function'?preloadAttackArt:null);
   mesh.userData.artReady=true;mesh.userData.lifeAction=null;delete mesh.userData.artError;
  }
  async function artwork(id,look,gear){
@@ -43,7 +45,7 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  }
 
  const activeGait=()=>loadedClass===currentClass&&loadedGender===currentGender&&!appearanceDirty&&poseFit?gait:null;
- mesh.userData.usesAuthoredGround=mode=>!!activeGait()?.clips[mode];
+ mesh.userData.usesAuthoredGround=mode=>!!activeGait()?.clips[mode]||(mode==='attack'&&!!mesh.userData.attackArt224);
  mesh.userData.supportsAuthoredAction=action=>!!activeGait()?.clips[action]||!!life?.[loadedGender]?.clips[action]?.frames.length;
  mesh.userData.supportsAction=action=>['idle','walk'].includes(action)||mesh.userData.supportsAuthoredAction(action);
  mesh.userData.setRig=(id,g)=>{
@@ -86,23 +88,25 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   if(frame>=20&&lifeIndex<0)flip=false; // front/back walk art is drawn facing the camera / away from it
   // 0.119 a skill with its own pose sheet draws it; until it loads, or for gear the sheet cannot show, the class frames play.
   const skill=pose.skillArt,art=skill&&poseFit&&frames&&!mesh.userData.directional&&loadedClass===currentClass?poseTexture(skill.id,currentClass,currentGender,skill.frame):null;
+  const basic=action==='attack'&&pose.basicAttack224&&poseFit&&loadedClass===currentClass&&loadedGender===currentGender&&!appearanceDirty?attackArtSampler(currentClass,currentGender,{...pose,mode:action}):null;
+  mesh.userData.attackArt224=basic?{variant:basic.variant,direction:basic.direction,frame:basic.frame,castId:basic.castId,tier:basic.tier}:null;
   const selected=!pose.profileFrame&&!resolved.transition&&!mesh.userData.directional&&activeGait()?gaitFrame220({mode:action,phase:pose.phase,time:resolved.time,direction:pose.viewDirection,reduced:pose.reduced}):null;
   const gaitTexture=selected?activeGait().clips[action]?.frames[selected.direction]?.[selected.index]:null;
   mesh.userData.paintedGait217=gaitTexture?selected:null;mesh.userData.paintedGait220=mesh.userData.paintedGait217;
-  if(gaitTexture)flip=false; // All eight camera-relative views are authored in the atlas.
+  if(gaitTexture||basic)flip=false; // All eight camera-relative views are authored in the atlas.
   mesh.userData.skillArt=art?skill.id:null;
   if(!mesh.userData.directional&&frames){
-   material.map=gaitTexture??art??(lifeIndex>=0?clip.frames[lifeIndex]:frames[loadedGender][frame]);
+   material.map=basic?.texture??gaitTexture??art??(lifeIndex>=0?clip.frames[lifeIndex]:frames[loadedGender][frame]);
    mesh.userData.artFrame=frame;mesh.userData.lifeAction=lifeIndex>=0?action:null;mesh.userData.lifeFrame=lifeIndex;mesh.userData.lifeTransition=resolved.transition;
   }
   // Pose cells share the 320 frame and its ground anchor; their scale brings the standing body to the class frames' height.
-  const painted=frames&&!mesh.userData.directional,size=art?poseScale(skill.id,currentGender):1,extent=gaitTexture?activeGait().extent:painted?size*FRAME_SIZE/LOGICAL_SIZE:1;
-  const positions=geometry.attributes.position,foot=gaitTexture?activeGait().footV*extent:mesh.userData.directional?(mesh.userData.footV??1):painted?size*FRAME_FOOT/LOGICAL_SIZE:1;
+  const painted=frames&&!mesh.userData.directional,size=art?poseScale(skill.id,currentGender):1,extent=basic?basic.extent:gaitTexture?activeGait().extent:painted?size*FRAME_SIZE/LOGICAL_SIZE:1;
+  const positions=geometry.attributes.position,foot=basic?basic.footV*extent:gaitTexture?activeGait().footV*extent:mesh.userData.directional?(mesh.userData.footV??1):painted?size*FRAME_FOOT/LOGICAL_SIZE:1;
   // A sub-pixel breath about the planted contact; no joint cuts, moving bag or gait deformation.
   const breath=pose.reduced?1:['idle','sit','sleep','rest'].includes(action)?1+Math.sin((pose.time??0)*Math.PI*2/(action==='sleep'?4.8:4.1))*.0025:1;
   positions.setXYZ(0,(flip?.5:-.5)*extent,foot*breath,0);positions.setXYZ(1,(flip?-.5:.5)*extent,foot*breath,0);
   positions.setXYZ(2,(flip?.5:-.5)*extent,(foot-extent)*breath,0);positions.setXYZ(3,(flip?-.5:.5)*extent,(foot-extent)*breath,0);// Cosmetic weight transfer follows facing, while combat position and hit range stay unchanged.
-  if(currentClass==='novice'&&!pose.reduced){const dx=(pose.paintOffsetX??0)*(flip?-1:1),dy=pose.paintOffsetY??0;for(let i=0;i<positions.count;i++)positions.setXYZ(i,positions.getX(i)+dx,positions.getY(i)+dy,0);}
+  if(currentClass==='novice'&&!pose.reduced&&!basic){const dx=(pose.paintOffsetX??0)*(flip?-1:1),dy=pose.paintOffsetY??0;for(let i=0;i<positions.count;i++)positions.setXYZ(i,positions.getX(i)+dx,positions.getY(i)+dy,0);}
   positions.needsUpdate=true;
  };
  mesh.userData.dispose=()=>{if(disposed)return;disposed=true;version++;release();geometry.dispose();material.dispose();};

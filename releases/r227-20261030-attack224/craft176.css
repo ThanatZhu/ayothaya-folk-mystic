@@ -1,0 +1,211 @@
+/* Live crafting UI, using the game's original jade and gold nine-slice frame. */
+html body #craft-window[data-craft176]{--craft-frame-top:64px;--craft-frame-side:62px;--craft-cap-size:390px;position:fixed!important;inset:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;margin:auto!important;transform:none!important;width:min(1280px,calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)))!important;max-width:none!important;height:min(800px,calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;max-height:none!important;padding:40px 30px 26px!important;box-sizing:border-box;overflow:hidden!important;border:0!important;border-image:none!important;border-radius:0!important;background:transparent!important;color:#f4e6c2;font-family:Mali,Tahoma,sans-serif;isolation:isolate;box-shadow:none!important;z-index:46}
+html body #craft-window[data-craft176][open]{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:14px}
+html body #craft-window[data-craft176]::before{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;border:solid transparent;border-width:64px 62px 48px;border-image:url('./assets/ui-skill150/window.webp') 250 350 220 350 / 64px 62px 48px / 0 stretch;-webkit-mask:linear-gradient(#000 0 0) left top/var(--craft-frame-side) 100% no-repeat,linear-gradient(#000 0 0) right top/var(--craft-frame-side) 100% no-repeat,linear-gradient(#000 0 0) center bottom/100% calc(100% - var(--craft-frame-top)) no-repeat;mask:linear-gradient(#000 0 0) left top/var(--craft-frame-side) 100% no-repeat,linear-gradient(#000 0 0) right top/var(--craft-frame-side) 100% no-repeat,linear-gradient(#000 0 0) center bottom/100% calc(100% - var(--craft-frame-top)) no-repeat}
+html body #craft-window[data-craft176]::after{content:"";position:absolute;inset:32px 11px 19px;z-index:-1;background:radial-gradient(ellipse at 65% 20%,#28483880,transparent 65%),linear-gradient(135deg,#193d32,#0a231e 76%)}
+html body #craft-window[data-craft176]::backdrop{background:#020d0abd;backdrop-filter:blur(3px)}
+html body #craft-window[data-craft176] *{box-sizing:border-box}
+html body #craft-window[data-craft176] button{font:inherit;cursor:pointer;touch-action:manipulation;min-height:0!important}
+html body #craft-window[data-craft176] button:disabled{cursor:default;opacity:.46;filter:saturate(.4)}
+html body #craft-window[data-craft176] :focus-visible{outline:2px solid #ffe4a0;outline-offset:2px}
+html body #craft-window[data-craft176]>header{position:static!important;display:flex;align-items:center;gap:16px;padding:0 4px 12px!important;background:none!important;border-bottom:1px solid #d6af6350;min-width:0}
+html body #craft-window[data-craft176]>header>div{flex:1;min-width:0}
+html body #craft-window[data-craft176]>header small{display:block;font-size:10px;letter-spacing:.22em;color:#d4b36d}
+html body #craft-window[data-craft176]>header #craft-title{margin:3px 0 0;padding:0!important;min-width:0!important;min-height:0!important;background:none!important;border:0!important;border-image:none!important;font-size:25px;line-height:1.4;color:#f2d58c!important;text-shadow:none!important}
+html body #craft-window[data-craft176] #craft-coins{display:flex;align-items:center;gap:6px;font-size:15px;white-space:nowrap;color:#ecd89e}
+html body #craft-window[data-craft176] #craft-close{flex:0 0 42px;width:42px!important;height:42px!important;min-width:0!important;min-height:0!important;padding:0!important;background:#173a2d url('./assets/ui63/frames/ring.png') center/100% 100% no-repeat!important;border:0!important;border-image:none!important;border-radius:50%;font-size:24px;color:#f2d58c;line-height:1}
+html body #craft-window[data-craft176] .craft176-tabs{display:flex;gap:8px;min-height:40px}
+html body #craft-window[data-craft176] .craft176-tabs button{flex:1;padding:8px 12px;border:1px solid #baa05f66;border-radius:5px;background:#173d33;color:#ddcfa7;font-size:14px}
+html body #craft-window[data-craft176] .craft176-tabs button[aria-selected=true]{color:#2c2918;background:linear-gradient(#f6dda0,#b78838);border-color:#efd38e;box-shadow:inset 0 1px #fff6}
+html body #craft-window[data-craft176] .craft176-workspace{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(0,2.45fr);gap:18px;min-height:0;min-width:0}
+html body #craft-window[data-craft176] .craft176-browser{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;border-right:1px solid #c8a25438;padding-right:18px}
+html body #craft-window[data-craft176] .craft176-search{display:flex;align-items:center;gap:8px;border:1px solid #b19d635c;background:#071e1a;border-radius:5px;padding:0 10px;min-width:0}
+html body #craft-window[data-craft176] .craft176-search>span{font-size:23px;color:#dfc27e}
+html body #craft-window[data-craft176] #craft-search{width:100%;min-width:0;padding:10px 0;background:transparent!important;border:0!important;box-shadow:none;color:#fff0ce;font:inherit;font-size:13px;min-height:40px}
+html body #craft-window[data-craft176] #craft-search::placeholder{color:#b4b99e}
+html body #craft-window[data-craft176] .craft176-filter{display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;color:#cfdbbb;min-height:25px}
+html body #craft-window[data-craft176] #craft-ready{accent-color:#e7c578;width:17px;height:17px;margin:0}
+html body #craft-window[data-craft176] #craft-found{margin-left:auto;color:#b0bda2;font-size:11px}
+html body #craft-window[data-craft176] #craft-list{display:flex;flex-direction:column;gap:7px;list-style:none;margin:0;padding:2px 5px 4px 0;overflow:auto;min-height:0;scrollbar-width:thin;scrollbar-color:#a58b4b #09211c;overscroll-behavior:contain}
+html body #craft-window[data-craft176] #craft-list li{display:block;flex:none;padding:0!important;background:transparent!important;border:0!important;border-radius:0}
+html body #craft-window[data-craft176] #craft-list button{display:flex;align-items:center;gap:9px;width:100%;min-height:70px;text-align:left;border:1px solid #9c9d6d4a;background:#17372e;border-radius:5px;padding:9px;color:#e9e0bc}
+html body #craft-window[data-craft176] #craft-list button[aria-selected=true]{background:linear-gradient(105deg,#b49c484d,#274738);border-color:#e2bd6c;box-shadow:inset 3px 0 #e0bb68}
+html body #craft-window[data-craft176] #craft-list button>span{display:grid;gap:5px;flex:1;min-width:0}
+html body #craft-window[data-craft176] #craft-list strong{font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+html body #craft-window[data-craft176] #craft-list small{font-size:10px;color:#bfc5a8}
+html body #craft-window[data-craft176] #craft-list em{font-style:normal;font-size:15px;flex:none}
+html body #craft-window[data-craft176] .item-icon{display:inline-block;width:44px;height:44px;flex:0 0 44px;background-repeat:no-repeat;vertical-align:middle}
+html body #craft-window[data-craft176] .item-icon.small{width:34px;height:34px;flex-basis:34px}
+html body #craft-window[data-craft176] .craft176-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;min-width:0;min-height:0}
+html body #craft-window[data-craft176] .craft176-preview{min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;text-align:center;scrollbar-width:thin;scrollbar-color:#a58b4b #09211c;padding:6px}
+html body #craft-window[data-craft176] .craft176-display{position:relative;display:grid;place-items:center;min-height:220px;background:radial-gradient(ellipse,#a5ac5b25,transparent 65%)}
+html body #craft-window[data-craft176] #craft-output{display:block;width:min(100%,220px);height:auto;aspect-ratio:1;flex-basis:auto;filter:drop-shadow(0 8px 8px #0007)}
+html body #craft-window[data-craft176] #craft-output[hidden]{display:none}
+html body #craft-window[data-craft176] .craft176-sparks{position:absolute;left:8%;right:8%;top:40%;opacity:0;color:#ffe9ab;font-size:30px;pointer-events:none;letter-spacing:8px}
+html body #craft-window[data-craft176].craft176-complete .craft176-sparks{animation:craft176-spark .8s ease-out both}
+html body #craft-window[data-craft176] #craft-item-name{font-size:21px;color:#f1d285;margin:12px 0 8px;line-height:1.5}
+html body #craft-window[data-craft176] #craft-description{font-size:13px;line-height:1.8;white-space:pre-line;color:#cfdbba;margin:0 0 12px}
+html body #craft-window[data-craft176] #craft-output-count{display:inline-block;font-size:12px;color:#dec783;padding:6px 10px;border:1px solid #b99f5b50;border-radius:20px}
+html body #craft-window[data-craft176] #craft-success{color:#aee0a2;font-size:12px;line-height:1.6;margin:12px 0 0}
+html body #craft-window[data-craft176] .craft176-materials{min-height:0;min-width:0;display:flex;flex-direction:column;gap:8px;padding:14px;background:#0a241e70;border:1px solid #bba46736;border-radius:6px}
+html body #craft-window[data-craft176] .craft176-materials>h3{margin:0;font-size:17px;color:#e9d38e;line-height:1.6}
+html body #craft-window[data-craft176] .craft176-source-hint{font-size:11px;color:#a9bea7;margin:0 0 5px}
+html body #craft-window[data-craft176] #craft-materials{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#a58b4b #09211c;padding:2px}
+html body #craft-window[data-craft176] .craft176-material{display:flex;align-items:center;gap:8px;flex:none;width:100%;min-height:70px;padding:8px;text-align:left;border:1px solid #b7ab6844;border-radius:5px;background:#1b3c30;color:#e6dbb6}
+html body #craft-window[data-craft176] .craft176-material:hover{border-color:#e0be72}
+html body #craft-window[data-craft176] .craft176-material>span{min-width:0;flex:1;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+html body #craft-window[data-craft176] .craft176-material small{display:block;font-size:10px;color:#9fba9b}
+html body #craft-window[data-craft176] .craft176-material>b{font-size:13px;white-space:nowrap}
+html body #craft-window[data-craft176] .craft176-material>em{font-style:normal;font-size:16px}
+html body #craft-window[data-craft176] .short{color:#edb786!important}
+html body #craft-window[data-craft176] .ok{color:#b6dfaa!important}
+html body #craft-window[data-craft176] #craft-readiness{font-size:12px;line-height:1.6;margin:auto 0 0;padding-top:8px}
+html body #craft-window[data-craft176] .craft176-footer{display:grid;grid-template-columns:minmax(210px,1fr) minmax(160px,1fr) minmax(250px,1fr);align-items:center;gap:24px;border-top:1px solid #d6af6350;padding:18px 22px 22px;min-width:0}
+html body #craft-window[data-craft176] .craft176-quantity{display:grid;gap:5px;min-width:0}
+html body #craft-window[data-craft176] .craft176-quantity>label{font-size:12px;color:#bfc5a8}
+html body #craft-window[data-craft176] .craft176-quantity>div{display:flex;align-items:stretch;gap:5px}
+html body #craft-window[data-craft176] .craft176-quantity button{height:40px;min-width:36px;padding:5px 9px;border:1px solid #bfa05c80;border-radius:4px;background:#214337;color:#e9d69d}
+html body #craft-window[data-craft176] #craft-quantity{height:40px;width:50px;text-align:center;padding:0;border-radius:4px;appearance:textfield;-moz-appearance:textfield;font:inherit;font-size:14px}
+html body #craft-window[data-craft176] #craft-quantity::-webkit-inner-spin-button{appearance:none}
+html body #craft-window[data-craft176] #craft-max{font-size:12px}
+html body #craft-window[data-craft176] .craft176-cost{display:grid;gap:5px;align-self:center;text-align:center;min-width:0}
+html body #craft-window[data-craft176] .craft176-cost>small{font-size:12px;color:#bfc5a8}
+html body #craft-window[data-craft176] #craft-total{display:flex;align-items:center;justify-content:center;gap:6px;font-size:19px;white-space:nowrap;color:#efd48e}
+html body #craft-window[data-craft176] .craft176-submit{min-width:0;width:100%;max-width:340px;justify-self:end}
+html body #craft-window[data-craft176] #craft-note{font-size:11px;line-height:1.4;color:#b8d9b4;margin:0 0 5px;min-height:16px}
+html body #craft-window[data-craft176] #craft-note:empty{display:none}
+html body #craft-window[data-craft176][data-error=true] #craft-note{color:#edb786}
+html body #craft-window[data-craft176] #craft-make{display:block;width:100%;height:56px;min-height:56px!important;padding:0 24px;line-height:1.4;border:solid transparent;border-width:12px 24px;border-image:url('./assets/ui63/frames/button.png') 30 fill / 12px 24px / 0 stretch;border-radius:0;background:none;color:#f5da94;font-size:18px;font-weight:700;text-shadow:0 1px #071a16}
+html body #craft-window[data-craft176] #craft-empty{color:#b8b89a;font-size:12px;line-height:1.7;margin:6px 0}
+html body #craft-window[data-craft176] #craft-empty[hidden]{display:none}
+html body #craft-window[data-craft176] .craft176-sources{min-width:0;font-size:12px}
+html body #craft-window[data-craft176] .craft176-sources>button{padding:8px 10px;border:1px solid #bfa05c80;border-radius:4px;background:#214337;color:#e9d69d;font-size:11px;min-height:36px}
+html body #craft-window[data-craft176] .craft176-sources h4{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.6;margin:12px 0}
+html body #craft-window[data-craft176] .craft176-sources ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+html body #craft-window[data-craft176] .craft176-sources li{padding:8px;border-bottom:1px solid #c7ac6040;line-height:1.7}
+html body #craft-window[data-craft176] .craft176-sources small{display:block;color:#aac3a5;font-size:11px}
+@keyframes craft176-spark{0%{opacity:0;transform:translateY(12px) scale(.5)}30%{opacity:1}100%{opacity:0;transform:translateY(-45px) scale(1.3)}}
+@media(max-width:1050px){
+ html body #craft-window[data-craft176] .craft176-workspace{grid-template-columns:minmax(180px,.85fr) minmax(0,2fr);gap:12px}
+ html body #craft-window[data-craft176] .craft176-browser{padding-right:12px}
+ html body #craft-window[data-craft176] .craft176-detail{gap:12px}
+ html body #craft-window[data-craft176] .craft176-materials{padding:10px}
+ html body #craft-window[data-craft176] .craft176-material{flex-wrap:wrap;gap:5px}
+ html body #craft-window[data-craft176] .craft176-material>span{flex-basis:calc(100% - 45px)}
+ html body #craft-window[data-craft176] .craft176-material>b{margin-left:39px}
+}
+@media(max-height:560px){
+ html body #craft-window[data-craft176]{inset:max(3px,env(safe-area-inset-top)) max(5px,env(safe-area-inset-right)) max(3px,env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left))!important;width:calc(100vw - 10px - env(safe-area-inset-left) - env(safe-area-inset-right))!important;height:calc(100dvh - 6px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;padding:28px 22px 18px!important}
+ html body #craft-window[data-craft176][open]{gap:6px}
+ html body #craft-window[data-craft176]::before{border-image-width:50px 52px 38px;border-width:50px 52px 38px}
+ html body #craft-window[data-craft176]::after{inset:26px 10px 15px}
+ html body #craft-window[data-craft176]>header{padding:0 3px 4px!important;gap:8px;min-height:30px}
+ html body #craft-window[data-craft176]>header small{display:none}
+ html body #craft-window[data-craft176]>header #craft-title{font-size:17px;margin:0}
+ html body #craft-window[data-craft176] #craft-coins{font-size:11px;gap:3px}
+ html body #craft-window[data-craft176] #craft-close{width:30px!important;height:30px!important;flex-basis:30px;font-size:19px}
+ html body #craft-window[data-craft176] .craft176-tabs{min-height:30px;gap:5px}
+ html body #craft-window[data-craft176] .craft176-tabs button{font-size:11px;padding:4px 6px}
+ html body #craft-window[data-craft176] .craft176-workspace{grid-template-columns:minmax(140px,.8fr) minmax(0,2fr);gap:10px}
+ html body #craft-window[data-craft176] .craft176-browser{gap:5px;padding-right:10px}
+ html body #craft-window[data-craft176] #craft-search{font-size:11px;min-height:32px;padding:4px 0}
+ html body #craft-window[data-craft176] .craft176-filter{font-size:10px;gap:4px;min-height:20px}
+ html body #craft-window[data-craft176] #craft-found{font-size:9px}
+ html body #craft-window[data-craft176] #craft-list{gap:5px}
+ html body #craft-window[data-craft176] #craft-list button{min-height:54px;padding:5px;gap:5px}
+ html body #craft-window[data-craft176] #craft-list strong{font-size:10px;line-height:1.45}
+ html body #craft-window[data-craft176] #craft-list small{font-size:9px}
+ html body #craft-window[data-craft176] #craft-list button>span{gap:2px}
+ html body #craft-window[data-craft176] .item-icon{width:34px;height:34px;flex-basis:34px}
+ html body #craft-window[data-craft176] .item-icon.small{width:26px;height:26px;flex-basis:26px}
+ html body #craft-window[data-craft176] .craft176-detail{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:8px}
+ html body #craft-window[data-craft176] .craft176-preview{padding:0 3px}
+ html body #craft-window[data-craft176] .craft176-display{min-height:90px}
+ html body #craft-window[data-craft176] #craft-output{width:100px}
+ html body #craft-window[data-craft176] #craft-item-name{font-size:13px;margin:5px 0;line-height:1.45}
+ html body #craft-window[data-craft176] #craft-description{font-size:10px;line-height:1.65;margin-bottom:5px}
+ html body #craft-window[data-craft176] #craft-output-count{font-size:9px;padding:3px 6px}
+ html body #craft-window[data-craft176] #craft-success{font-size:10px;margin-top:5px}
+ html body #craft-window[data-craft176] .craft176-materials{padding:7px;gap:3px}
+ html body #craft-window[data-craft176] .craft176-materials>h3{font-size:12px}
+ html body #craft-window[data-craft176] .craft176-source-hint{font-size:9px;margin:0 0 3px}
+ html body #craft-window[data-craft176] #craft-materials{gap:5px}
+ html body #craft-window[data-craft176] .craft176-material{min-height:48px!important;padding:5px;gap:4px;flex-wrap:nowrap}
+ html body #craft-window[data-craft176] .craft176-material>span{font-size:10px;flex-basis:auto}
+ html body #craft-window[data-craft176] .craft176-material>b{font-size:11px;margin-left:0}
+ html body #craft-window[data-craft176] .craft176-material small{font-size:9px}
+ html body #craft-window[data-craft176] #craft-readiness{font-size:9px;padding-top:4px}
+ html body #craft-window[data-craft176] .craft176-footer{grid-template-columns:auto minmax(85px,.7fr) minmax(130px,1fr);gap:10px;padding:7px 8px 10px}
+ html body #craft-window[data-craft176] .craft176-quantity{gap:2px}
+ html body #craft-window[data-craft176] .craft176-quantity>label,html body #craft-window[data-craft176] .craft176-cost>small{font-size:9px}
+ html body #craft-window[data-craft176] .craft176-quantity>div{gap:3px}
+ html body #craft-window[data-craft176] .craft176-quantity button{height:32px;min-width:30px;padding:3px 6px}
+ html body #craft-window[data-craft176] #craft-quantity{height:32px;width:36px;font-size:11px}
+ html body #craft-window[data-craft176] #craft-max{font-size:10px}
+ html body #craft-window[data-craft176] #craft-total{font-size:13px;gap:3px}
+ html body #craft-window[data-craft176] #craft-note{font-size:9px;min-height:0;margin-bottom:2px}
+ html body #craft-window[data-craft176] #craft-make{height:36px;min-height:36px!important;font-size:13px;padding:0 12px;border-width:8px 16px;border-image-width:8px 16px}
+ html body #craft-window[data-craft176] .craft176-sources h4{font-size:10px;margin:5px 0}
+ html body #craft-window[data-craft176] .craft176-sources li{padding:4px;font-size:10px}
+ html body #craft-window[data-craft176] .craft176-sources small{font-size:9px}
+ html body #craft-window[data-craft176] .craft176-sources>button{font-size:9px;padding:4px 6px;min-height:30px}
+}
+@media(max-width:600px) and (min-height:561px){
+ html body #craft-window[data-craft176]{padding:34px 20px 22px!important}
+ html body #craft-window[data-craft176][open]{gap:8px}
+ html body #craft-window[data-craft176]::before{border-image-width:56px 42px 40px}
+ html body #craft-window[data-craft176]::after{inset:30px 8px 16px}
+ html body #craft-window[data-craft176]>header #craft-title{font-size:19px}
+ html body #craft-window[data-craft176]>header small{display:none}
+ html body #craft-window[data-craft176] #craft-coins{font-size:11px}
+ html body #craft-window[data-craft176] .craft176-tabs button{padding:5px;font-size:11px}
+ html body #craft-window[data-craft176] .craft176-workspace{grid-template-columns:1fr;grid-template-rows:minmax(130px,.7fr) minmax(0,1fr)}
+ html body #craft-window[data-craft176] .craft176-browser{border-right:0;padding-right:0}
+ html body #craft-window[data-craft176] .craft176-detail{grid-template-columns:1fr 1fr;gap:8px}
+ html body #craft-window[data-craft176] .craft176-display{min-height:100px}
+ html body #craft-window[data-craft176] #craft-output{width:100px}
+ html body #craft-window[data-craft176] #craft-item-name{font-size:14px}
+ html body #craft-window[data-craft176] #craft-description{font-size:10px}
+ html body #craft-window[data-craft176] .craft176-materials{padding:6px}
+ html body #craft-window[data-craft176] .craft176-materials>h3{font-size:12px}
+ html body #craft-window[data-craft176] .craft176-footer{grid-template-columns:1fr 1fr;gap:5px}
+ html body #craft-window[data-craft176] .craft176-submit{grid-column:1/-1}
+ /* 0.122 portrait phones (tester feedback): the recipe list showed one row and the materials one item, under a big
+    preview and footer. The list gets more height and slimmer rows, the preview becomes one row (icon beside the name),
+    materials use the full width in two columns, and the footer drops its labels and shrinks its buttons. */
+ html body #craft-window[data-craft176] .craft176-workspace{grid-template-rows:minmax(150px,1fr) minmax(0,1.3fr)}
+ html body #craft-window[data-craft176] #craft-list{gap:4px}
+ html body #craft-window[data-craft176] #craft-list button{min-height:44px;padding:4px 7px;gap:7px}
+ html body #craft-window[data-craft176] #craft-list button>span{gap:1px}
+ html body #craft-window[data-craft176] #craft-list strong{font-size:12px;line-height:1.4}
+ html body #craft-window[data-craft176] .craft176-detail{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:6px}
+ html body #craft-window[data-craft176] .craft176-preview{display:grid;grid-template-columns:56px minmax(0,1fr);column-gap:10px;align-items:center;text-align:left;overflow:visible;padding:0}
+ html body #craft-window[data-craft176] .craft176-preview>*{grid-column:2;margin:0}
+ html body #craft-window[data-craft176] .craft176-display{grid-column:1;grid-row:1/span 4;min-height:56px}
+ html body #craft-window[data-craft176] #craft-output{width:52px}
+ html body #craft-window[data-craft176] .craft176-sparks{display:none}
+ html body #craft-window[data-craft176] #craft-output-count{font-size:11px;padding:2px 8px;justify-self:start}
+ html body #craft-window[data-craft176] .craft176-materials{display:flex;flex-direction:column;min-height:0}
+ html body #craft-window[data-craft176] .craft176-source-hint{font-size:10px;margin:0 0 4px}
+ html body #craft-window[data-craft176] #craft-materials{gap:5px}
+ html body #craft-window[data-craft176] .craft176-material{min-height:40px;padding:4px 8px;gap:8px;flex-wrap:nowrap}
+ html body #craft-window[data-craft176] .craft176-search{height:34px}
+ html body #craft-window[data-craft176] .craft176-search>span{font-size:16px}
+ html body #craft-window[data-craft176] #craft-search{font-size:13px}
+ html body #craft-window[data-craft176] .craft176-material>span{font-size:11px;line-height:1.35;flex-basis:auto}
+ html body #craft-window[data-craft176] .craft176-material>b{margin-left:0;font-size:11px}
+ html body #craft-window[data-craft176] #craft-readiness{font-size:11px;margin:4px 0 0}
+ html body #craft-window[data-craft176] .craft176-footer{grid-template-columns:auto minmax(0,1fr);gap:6px 10px;padding:8px 2px 0}
+ html body #craft-window[data-craft176] .craft176-quantity>label,html body #craft-window[data-craft176] .craft176-cost>small{display:none}
+ html body #craft-window[data-craft176] .craft176-quantity button,html body #craft-window[data-craft176] #craft-quantity{height:32px}
+ html body #craft-window[data-craft176] #craft-quantity{width:40px}
+ html body #craft-window[data-craft176] #craft-total{font-size:15px;justify-content:flex-end}
+ html body #craft-window[data-craft176] #craft-make{height:44px;min-height:44px!important;font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){html body #craft-window[data-craft176].craft176-complete .craft176-sparks{animation:none}}
+
+/* Keep the crown's natural aspect ratio; only the straight gold rails grow. */
+html body #craft-window[data-craft176]>header::before{content:"";position:absolute;inset:0 auto auto 50%;width:calc(var(--craft-cap-size)*.6);height:var(--craft-frame-top);transform:translateX(-50%);z-index:5;pointer-events:none;background:url('./assets/ui-skill150/window.webp') center top/var(--craft-cap-size) auto no-repeat}
+html body #craft-window[data-craft176]>header::after{content:"";position:absolute;inset:calc(var(--craft-frame-top)*.56) var(--craft-frame-side) auto;height:5px;z-index:4;pointer-events:none;background:linear-gradient(#d0a34e 0 2px,transparent 2px 3px,#735a28 3px 5px)}
+@media(max-height:560px){html body #craft-window[data-craft176]{--craft-frame-top:50px;--craft-frame-side:52px;--craft-cap-size:305px}}
+@media(max-width:600px) and (min-height:561px){html body #craft-window[data-craft176]{--craft-frame-top:56px;--craft-frame-side:42px;--craft-cap-size:341px}}

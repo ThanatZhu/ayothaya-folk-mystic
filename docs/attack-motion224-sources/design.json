@@ -1,0 +1,56 @@
+{
+  "version": 224,
+  "classes": {
+    "novice": "Thai village novice in cream wrap shirt, brown crossbody bag and belt, loose navy trousers and sandals, empty hands.",
+    "swordsman": "Thai swordsman in navy quilted armour and gold trim, red sash, dark bun, sandals. Exactly ONE curved silver sword in anatomical RIGHT hand and ONE round shield on LEFT arm.",
+    "lancer": "Thai lancer in dark gold-edged armour, red sash and sandals. Exactly ONE long spear held with two sensible grips, never duplicate a spear in rear views. Keep the original male moustache only for male.",
+    "hunter": "Thai archer in olive green layered clothes, navy trousers and sandals. Exactly ONE wooden bow held in anatomical LEFT hand and one quiver on back. Right hand draws/releases ONE arrow. Preserve male headwrap or female flower/hair ornament.",
+    "boxer": "Thai boxer in rope-tied black bun, cream wraps, red sash, navy shorts and sandals. Male has bare chest as reference. Female wears the modest red training wrap top from reference. Exactly two arms.",
+    "rogue": "Thai rogue in dark gold-edged leather/cloth, red neck scarf and sash, sandals, exactly TWO small curved daggers, one per hand.",
+    "shaman": "Thai shaman in cream shirt, blue trousers, red sash, charm belt and beaded necklace, exactly ONE wooden spirit staff in RIGHT hand with attached blank paper talismans. Preserve hair bun and gender.",
+    "acolyte": "Thai acolyte with shaved head, prayer beads and sandals. Male saffron/orange robe; female modest cream-white robe. No weapons, staff or hair."
+  },
+  "attacks": {
+    "novice": [
+      "short lead jab with opposite hand guarding",
+      "rear-hand straight punch with torso twist",
+      "open-palm thrust"
+    ],
+    "swordsman": [
+      "downward diagonal sword cut",
+      "waist-high horizontal sword sweep",
+      "rising diagonal sword cut"
+    ],
+    "lancer": [
+      "straight two-handed spear thrust",
+      "short controlled waist-high spear sweep",
+      "rising diagonal spear thrust"
+    ],
+    "hunter": [
+      "standing draw and release one arrow",
+      "wide braced stance draw and release one arrow",
+      "low crouched draw and release one arrow"
+    ],
+    "boxer": [
+      "lead left jab",
+      "rear right cross with clear torso twist",
+      "short bent-arm elbow strike, NOT another straight punch"
+    ],
+    "rogue": [
+      "right-hand dagger diagonal cut",
+      "left-hand dagger horizontal cut",
+      "crossed two-dagger cut below neck level"
+    ],
+    "shaman": [
+      "free left palm flick while staff stays gripped",
+      "pointed staff pulse with free hand guiding",
+      "free-hand talisman casting gesture while staff remains in right hand"
+    ],
+    "acolyte": [
+      "single palm push with prayer beads in other hand",
+      "two-hand mantra push",
+      "forward prayer-bead hand thrust"
+    ]
+  },
+  "provider": "built-in image_gen"
+}

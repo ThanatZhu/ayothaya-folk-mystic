@@ -117,10 +117,11 @@ export function createStatusUI({game,account,bagUI}){
    const cards=Object.keys(bagItems).filter(c=>itemDef(c)?.kind==='card'&&itemDef(c).slot===slot);
    const cardRow=it&&it.slots!==0?(it.card?`<div class="card-equipped">${cardArt(it.card)}<span><strong>${itemDef(it.card).name}</strong><small>${cardEffectText(it.card)}</small></span><button type="button" data-remove-card="${slot}">ถอดการ์ด</button></div>`:`<span class="card-pick"><button type="button" data-slotcard="${slot}">เลือกการ์ด${cards.length?' · '+cards.length+' ชนิด':''}</button></span>`):'';
    const name=it?.card?it.name.replace(' ['+itemDef(it.card).name+']',''):it?.name;
-   return `<li><i class="item-icon" style="${it?iconStyle(id):''}"></i><div><small>${SLOT_LABEL[slot]}</small><strong>${it?name:'— ว่าง —'}</strong>${refineTierBadge(it)}<em>${it?it.text:'แตะอุปกรณ์ในกระเป๋าแล้วกด สวมใส่'}</em>${cardRow}</div>${it?`<button type="button" data-off="${slot}">ถอด</button>`:''}</li>`;}).join('');
+   return `<li data-equipped-slot="${slot}"><i class="item-icon" style="${it?iconStyle(id):''}"></i><div><small>${SLOT_LABEL[slot]}</small><strong>${it?name:'— ว่าง —'}</strong>${refineTierBadge(it)}<em>${it?it.text:'แตะอุปกรณ์ในกระเป๋าแล้วกด สวมใส่'}</em>${cardRow}</div>${it?`<button type="button" data-off="${slot}">ถอด</button>`:''}</li>`;}).join('');
   $('status-gear').querySelectorAll('[data-remove-card]').forEach(b=>b.onclick=()=>bagUI.openCardRemoval(b.dataset.removeCard,b));
   $('status-gear').querySelectorAll('[data-slotcard]').forEach(b=>b.onclick=()=>cardPicker.open(b.dataset.slotcard,b));
   $('status-gear').querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>takeOff(b.dataset.off));
+  $('status-gear').querySelectorAll('[data-equipped-slot]').forEach(row=>row.oncontextmenu=e=>{if(e.pointerType==='touch'||e.target.closest('.card-equipped,.card-pick,button'))return;e.preventDefault();e.stopPropagation();const slot=row.dataset.equippedSlot;if(view().gear[slot])takeOff(slot);});
  }
  applyOffline();render(true);
  // Refine window hooks (offline gear lives here).

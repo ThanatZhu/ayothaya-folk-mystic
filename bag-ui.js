@@ -226,7 +226,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    $('bag-space').textContent=`ช่องที่ใช้ ${all.length} / ${bagCap(b)}`;
    const gearSig=JSON.stringify(gear);if(gearSig!==shownGear){shownGear=gearSig;
    $('bag-gear').innerHTML=GEAR_PLACES.map(([slot,label])=>{const id=gear[slot],it=id&&itemDef(id);return `<button type="button" class="gear-slot g-${slot}${worn===slot?' on':''}${it?' r'+(it.rarity??0)+gradeTone(it):''}" data-gear="${slot}" title="${label}${it?' · '+it.name:''}">${it?icon(id):''}<small>${label}</small>${refineTierBadge(it)}</button>`;}).join('');
-   $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.onclick=()=>{worn=el.dataset.gear;selected=null;render(true);});
+   $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>{el.onclick=()=>{worn=el.dataset.gear;selected=null;render(true);};el.oncontextmenu=e=>{if(e.pointerType==='touch')return;e.preventDefault();e.stopPropagation();const slot=el.dataset.gear;if(!api.gearView?.()[slot])return;cancelDrag();api.onTakeOff?.(slot);};});
    // 0.117 set progress under the worn slots: "ชุดทะลวง 3/4", reached bonuses green
    let sets=$('bag-sets');if(!sets){sets=document.createElement('div');sets.id='bag-sets';($('bag-gear').closest('.bag-stage')??$('bag-gear')).after(sets);}
    const wornDefs=Object.values(gear).filter(Boolean).map(itemDef).filter(Boolean),fams=[...new Set(wornDefs.filter(w=>w.set).map(w=>w.set.family))],bosses=[...new Set(wornDefs.filter(w=>w.bossSet).map(w=>w.bossSet))];

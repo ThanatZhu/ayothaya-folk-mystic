@@ -18,9 +18,9 @@ test('same authoritative cast selects the same variation on every renderer witho
 });
 test('all sixteen identities have three full eight-view clips in both sizes',async()=>{
  for(const id of ATTACK_CLASSES224)for(const g of ['male','female']){
-  const m=JSON.parse(await readFile(new URL('../assets/attack224/'+id+'-'+g+'.json',import.meta.url),'utf8'));
+  const m=JSON.parse(await readFile(new URL('../assets/attack228/'+id+'-'+g+'.json',import.meta.url),'utf8'));
   assert.equal(m.classId,id);assert.equal(m.gender,g);assert.deepEqual(m.directions,ATTACK_DIRECTIONS224);assert.equal(m.variants.length,3);
-  for(const v of m.variants){for(const f of [v.image,v.sdImage])assert.ok((await stat(new URL('../assets/attack224/'+f,import.meta.url))).size>1000);for(const d of ATTACK_DIRECTIONS224)assert.ok(v.views[d].bodyHeight>30);}
+  for(const v of m.variants){for(const f of [v.image,v.sdImage])assert.ok((await stat(new URL('../assets/attack228/'+f,import.meta.url))).size>1000);for(const d of ATTACK_DIRECTIONS224)assert.ok(v.views[d].bodyHeight>30);}
  }
 });
 test('new basic artwork overrides novice procedural pose but cannot replace a skill or custom equipment',async()=>{

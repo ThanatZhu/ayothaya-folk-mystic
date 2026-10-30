@@ -12,9 +12,9 @@ function trim(){
 }
 function manifest(id,g){
  const key=id+'-'+g;if(manifests.has(key))return manifests.get(key);
- const url=new URL('./assets/attack224/'+key+'.json',import.meta.url);
+ const url=new URL('./assets/attack228/'+key+'.json',import.meta.url);
  const job=fetch(url).then(async r=>{if(!r.ok)throw Error('attack224-manifest-'+r.status);const m=await r.json();
- if(m.version!==224||m.classId!==id||m.gender!==g||m.cell!==320||m.anchor?.[0]!==160||m.anchor?.[1]!==288||m.frames!==4||m.variants?.length!==3||JSON.stringify(m.directions)!==JSON.stringify(ATTACK_DIRECTIONS224))throw Error('attack224-invalid-manifest');
+ if(m.version!==228||m.classId!==id||m.gender!==g||m.cell!==320||m.anchor?.[0]!==160||m.anchor?.[1]!==288||m.frames!==4||m.variants?.length!==3||JSON.stringify(m.directions)!==JSON.stringify(ATTACK_DIRECTIONS224))throw Error('attack224-invalid-manifest');
  for(const v of m.variants){if(!/^[a-z0-9-]+\.webp$/.test(v.image)||!/^[a-z0-9-]+\.webp$/.test(v.sdImage))throw Error('attack224-invalid-image');for(const d of ATTACK_DIRECTIONS224)if(!Number.isFinite(v.views?.[d]?.bodyHeight)||v.views[d].bodyHeight<30||v.views[d].bodyHeight>200)throw Error('attack224-invalid-body');}
  return {meta:m,url};
  }).catch(e=>{manifests.delete(key);throw e;});manifests.set(key,job);return job;

@@ -1,6 +1,6 @@
 # Painted basic attacks — 224
 
-Release: r227-20261030-attack224. Frontend presentation update.
+Release: r231-20261030-full-figures. Frontend presentation update; see attack-clipping228.md for the corrected full-body extraction.
 
 Each of the eight professions has three basic-attack variations for both genders in the approved original costume. Each variation has guard, drive, contact/release and recovery poses, with eight view directions. Five views are drawn; the opposite three are mirrored during packing. Total: 48 clips and 1,536 packed body frames, in HD and SD WebP.
 
@@ -21,7 +21,7 @@ The shaman keeps one staff. The swordswoman's contact poses were corrected so th
 
 - docs/attack-motion224-sources/: transparent masters, costume references, exact prompts, correction prompts, calibration and SHA-256 records. swordsman-female-pose-correction.prompt.txt describes the final swordswoman master.
 - scripts/build-attack224.py: connected-figure extraction, common body scale, shoe/ground pivots, full weapon bounds, mirrored views, HD/SD packing and soft-edged FX packing.
-- assets/attack224/: sixteen manifests, ninety-six body WebPs, four FX WebPs and catalog/FX metadata.
+- assets/attack228/: sixteen manifests, ninety-six body WebPs, four FX WebPs and catalog/FX metadata.
 
 Run python scripts/build-attack224.py. Keep full source rows while extracting figures: polearms can cross a nominal cell margin. Per-view body heights compensate for weapon length; crouched frames do not get enlarged to standing height.
 

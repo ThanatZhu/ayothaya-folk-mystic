@@ -38,3 +38,13 @@ Verification is recorded in outputs/ground-loot219 (never commit outputs). Exist
 Final owner rule verified: equipped/following pets collect while combat AUTO stays OFF, without a pickup key or another switch. All three real-game browser scenarios passed (desktop, landscape touch, reduced-motion touch); desktop F pickup preserves combat AUTO and F with no drops retains its original AUTO action. No new page errors or changed-asset failures.
 
 Final build passed. Whole suite: 921 tests, 905 passed, 14 skipped, only the 2 previously documented hunter/shaman boss-auto201 failures remain. Translation coverage: 0 of 5153 strings missing. Outputs, local test accounts and recordings are excluded from the commit.
+
+## Ground presentation — 225
+
+Ground loot is world geometry, never a screen-space inventory icon. Reuse the existing transparent item artwork, crop atlas padding, lay the cutout flat on the sampled terrain, and keep a small contact shadow. World lights, fog, depth occlusion and camera perspective apply naturally. Do not add bobbing, perpetual spins, inventory frames or inventory rarity halos to normal ground drops.
+
+The HTML layer contains only transparent 44/48 px mouse/touch targets, accessible labels and focus/hover hints. It must not draw a second visible copy of the item. Reserved bundles remain dimmed and explain ownership. Ground positions and pickup permissions still come from the realm; the presentation must not change rates, rewards or pet collection.
+
+Repeated artwork shares an instanced draw call, with one instanced contact-shadow batch. Geometry and image materials update when bundles change; there is no new renderer, animation loop or per-item light. Release instance buffers, materials and cropped textures when the last reference disappears.
+
+Verification: 32 focused loot/item/pet/mail tests pass. Real local realm + WebGL checks pass at 1440×900, 844×390 touch, and reduced-motion touch: manual pickup, F pickup, pet travel/return with combat AUTO off, no duplicate rewards, no changed-asset 404s or page errors. Camera orbit leaves world item matrices unchanged; scene-light checks preserve item material colours. Actual desktop/phone/rotated screenshots and local evidence are in outputs/ground-loot225 (untracked). The known 19 generic audio180 missing cues remain separate from this visual change. Phone checks are emulation, not a physical-device claim.

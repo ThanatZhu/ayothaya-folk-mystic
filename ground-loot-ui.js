@@ -3,11 +3,12 @@ import {GROUND_LOOT,GROUND_PICKUP_ERRORS,makeGroundDrop,groundDropView,groundEli
 import {activePremiumPet} from './pet-account.js';
 import {groundHeight,walkLineClear} from './combat-core.js?v=surfaces222';
 import {itemLabel} from './items.js';
-import {iconStyle} from './bag-ui.js?v=surfaces222';
-export function createGroundLootUI({game,camera,map,bagUI}){
+import {createGroundLootRenderer} from './ground-loot-render225.js';
+export function createGroundLootUI({game,camera,scene,map,bagUI}){
+ const groundArt=createGroundLootRenderer({scene});
  const world=game.world,layer=document.createElement('div'),views=new Map(),local=new Map(),point=new THREE.Vector3();let serial=0,wasOnline=false;
  layer.className='ground-loot-layer';layer.setAttribute('aria-label','ไอเท็มบนพื้น');document.getElementById('game-shell').append(layer);
- const css=document.createElement('link');css.rel='stylesheet';css.href='ground-loot.css?v=loot219';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='ground-loot.css?v=ground225';document.head.append(css);
  const find=id=>(world.groundDrops??[]).find(d=>d.id===id);
  const distance=d=>Math.hypot(world.player.x-d.x,world.player.z-d.z);
  function pickup(id){
@@ -51,21 +52,21 @@ export function createGroundLootUI({game,camera,map,bagUI}){
    if(!v){
     const button=document.createElement('button');button.type='button';button.className='ground-loot-item';button.dataset.dropId=drop.id;
     button.addEventListener('pointerdown',e=>e.stopPropagation());button.onclick=e=>{e.stopPropagation();pickup(drop.id);};
-    const art=document.createElement('span'),hint=document.createElement('span');art.className='ground-loot-art';hint.className='ground-loot-hint';button.append(art,hint);layer.append(button);v={button,art,hint};views.set(drop.id,v);
+    const hint=document.createElement('span');hint.className='ground-loot-hint';button.append(hint);layer.append(button);v={button,hint};views.set(drop.id,v);
    }
    const sig=JSON.stringify([drop.items,drop.coins]);if(v.sig!==sig){
-    v.sig=sig;v.art.replaceChildren();
-    const items=drop.items.slice(0,3);if(!items.length&&drop.coins)items.push({id:'coin',count:drop.coins});
-    items.forEach((item,i)=>{const icon=document.createElement('i');icon.className='ground-loot-icon';icon.style.cssText=iconStyle(item.id==='coin'?'cowrie-pile':item.id);icon.style.setProperty('--i',i);v.art.append(icon);});
+    v.sig=sig;
     v.title=[itemLabel(drop.items),drop.coins?drop.coins+' เบี้ย':''].filter(Boolean).join(' · ');
    }
    v.button.title=v.title;v.button.setAttribute('aria-label','เก็บของ · '+v.title);v.button.dataset.reserved=String(!drop.canPick);v.button.disabled=world.observer||world.player.hp<=0;
    v.hint.textContent=drop.canPick?'แตะ / F · เก็บของ':'สิทธิ์ของ '+drop.ownerName;
-   point.set(drop.x,groundHeight(world.nav,drop.x,drop.z)+.2,drop.z).project(camera);
+   const floor=groundHeight(world.nav,drop.x,drop.z);groundArt.set(drop,floor);
+   point.set(drop.x,floor+.073,drop.z).project(camera);
    const visible=point.z>-1&&point.z<1&&Math.abs(point.x)<1.04&&Math.abs(point.y)<1.04;
-   v.button.hidden=!visible;if(visible)v.button.style.transform='translate(-50%,-85%) translate('+((point.x*.5+.5)*innerWidth)+'px,'+((-point.y*.5+.5)*innerHeight)+'px)';
+   v.button.hidden=!visible;if(visible)v.button.style.transform='translate(-50%,-50%) translate('+((point.x*.5+.5)*innerWidth)+'px,'+((-point.y*.5+.5)*innerHeight)+'px)';
   }
-  for(const [id,v] of views)if(!seen.has(id)){v.button.remove();views.delete(id);}
+  for(const [id,v] of views)if(!seen.has(id)){v.button.remove();views.delete(id);groundArt.remove(id);}
+  groundArt.flush();
  }
- return {update,pickup,dispose(){delete world.pickupNearestGround;layer.remove();css.remove();delete world.spawnGroundLoot;}};
+ return {update,pickup,dispose(){groundArt.dispose();delete world.pickupNearestGround;layer.remove();css.remove();delete world.spawnGroundLoot;}};
 }

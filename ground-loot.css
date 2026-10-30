@@ -1,11 +1,8 @@
 .ground-loot-layer{position:fixed;inset:0;pointer-events:none;z-index:4}
-.ground-loot-item{position:absolute;left:0;top:0;width:54px;height:48px;padding:0;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;pointer-events:auto;touch-action:manipulation;font-family:var(--font-game);color:#fff0ce;cursor:pointer;overflow:visible}
+.ground-loot-item{position:absolute;left:0;top:0;width:44px;height:44px;padding:0;border:0!important;border-radius:50%;background:transparent!important;box-shadow:none!important;pointer-events:auto;touch-action:manipulation;font-family:var(--font-game);color:#fff0ce;cursor:pointer;overflow:visible}
 .ground-loot-item[hidden]{display:none}
-.ground-loot-art{position:absolute;inset:0;pointer-events:none}
-.ground-loot-icon{display:block;position:absolute;width:36px;height:36px;left:calc(4px + var(--i)*9px);top:calc(5px - var(--i)*3px);background-repeat:no-repeat;filter:drop-shadow(0 2px 2px #000a);pointer-events:none}
-.ground-loot-item[data-reserved=true] .ground-loot-art{opacity:.45}
-.ground-loot-hint{position:absolute;left:50%;top:43px;transform:translateX(-50%);white-space:nowrap;max-width:200px;font-size:11px;font-weight:700;color:#fff0ce;text-shadow:0 1px 3px #000,0 0 3px #000;opacity:0;pointer-events:none}
-.ground-loot-item:focus-visible{outline:2px solid #e5c77a;outline-offset:3px;border-radius:50%}
+.ground-loot-hint{position:absolute;left:50%;top:37px;transform:translateX(-50%);white-space:nowrap;max-width:200px;font-size:11px;font-weight:700;color:#fff0ce;text-shadow:0 1px 3px #000,0 0 3px #000;opacity:0;pointer-events:none}
+.ground-loot-item:focus-visible{outline:2px solid #e5c77a;outline-offset:0}
 .ground-loot-item:focus-visible .ground-loot-hint{opacity:1}
 @media(hover:hover) and (pointer:fine){.ground-loot-item:hover .ground-loot-hint{opacity:1}}
-@media(pointer:coarse){.ground-loot-item{width:56px;height:52px}.ground-loot-hint{font-size:10px}}
+@media(pointer:coarse){.ground-loot-item{width:48px;height:48px}.ground-loot-hint{font-size:10px}}

@@ -1,0 +1,46 @@
+/* Use the measured visual viewport, including browser bars and keyboard, without shrinking text. */
+@media (orientation:landscape) and (max-height:600px){
+ .mobile-viewport body[data-screen=character] .lobby-layout{top:var(--lobby-top,40px);height:var(--lobby-height,calc(100dvh - 46px))!important;padding:0 8px!important;overflow:hidden}
+ body[data-screen=character] .lobby-card{max-width:860px;padding:8px 12px;overflow:hidden}
+ body[data-screen=character] .lobby-header{min-height:36px;padding-top:4px;padding-bottom:4px}
+ body[data-screen=character] .character-heading h2{font-size:17px;line-height:1.3;margin:0}
+ body[data-screen=character] .character-heading .eyebrow{font-size:8px;line-height:1.3;letter-spacing:1px}
+ body[data-screen=character] #character-slots{gap:6px;margin:5px 0}
+ body[data-screen=character] button.character-slot{height:52px;min-height:52px;line-height:1.2;padding:3px;font-size:10px}
+ body[data-screen=character] .slot-portrait{height:23px;width:23px}
+ body[data-screen=character] #progression-hint{margin:2px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:2px 6px;font-size:10px}
+ body[data-screen=character] .character-body{grid-template-columns:minmax(100px,24%) minmax(0,1fr)!important;gap:12px!important}
+ body[data-screen=character] .hero-art{width:min(190px,100%);max-height:100%;object-fit:contain}
+ body[data-screen=character] .character-stage{min-height:0!important}
+ body[data-screen=character] .character-details{padding-right:4px;scrollbar-width:thin}
+ body[data-screen=character] .class-summary{display:none}
+ body[data-screen=character] #open-wardrobe{height:44px;min-height:44px;margin:0 0 5px;padding:6px 10px;font-size:11px}
+ body[data-screen=character] .character-details:has(#existing-character:not([hidden])){display:flex;flex-direction:column;overflow:hidden}
+ body[data-screen=character] #existing-character:not([hidden]){display:flex;flex:1;flex-direction:column;min-height:0;gap:4px}
+ body[data-screen=character] #existing-name{font-size:16px;line-height:1.3;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ body[data-screen=character] #existing-detail{font-size:10px;line-height:1.4;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ body[data-screen=character] #existing-character>.small{display:none}
+ body[data-screen=character] #enter-world{margin-top:auto;min-height:44px;flex-shrink:0;padding:8px 12px;font-size:13px}
+ body[data-screen=character] #back-servers{min-height:28px;padding:4px 0;margin:2px 0 0;font-size:10px}
+ body[data-screen=character] .lobby-status{font-size:10px;line-height:1.25;max-height:26px;overflow:auto;flex-shrink:0}
+ body[data-screen=character] #hero-name{min-height:40px;font-size:16px}
+ body[data-screen=character] .character-body:has(#character-form:not([hidden])){position:relative}
+ body[data-screen=character] .character-body:has(#character-form:not([hidden])) .character-stage{padding-bottom:48px}
+ body[data-screen=character] .character-details:has(#character-form:not([hidden])) #open-wardrobe{position:absolute;left:0;bottom:0;width:24%;height:44px;margin:0;font-size:9px;line-height:1.3}
+ body[data-screen=character] #character-form{gap:3px 10px}
+ body[data-screen=character] #character-form fieldset{margin:4px 0;grid-column:2;grid-row:1/4;align-self:center;flex-wrap:wrap;gap:8px}
+ body[data-screen=character] #character-form fieldset legend{margin-bottom:4px}
+ body[data-screen=character] #create-character{min-height:44px;position:static;padding:6px;margin:0;grid-row:4}
+ .mobile-viewport.keyboard-open body[data-screen=character] .character-details{overflow-y:auto}
+ .mobile-viewport.keyboard-open body[data-screen=character] #open-wardrobe{display:none}
+}
+@media (orientation:landscape) and (max-height:350px){
+ body[data-screen=character] .character-heading .eyebrow{display:none}
+ body[data-screen=character] #character-slots{margin:3px 0}
+ body[data-screen=character] button.character-slot{height:44px;min-height:44px}
+ body[data-screen=character] .slot-portrait{height:17px;width:17px}
+ body[data-screen=character] #progression-hint{margin-bottom:3px;font-size:9px}
+ body[data-screen=character] #open-wardrobe{margin-bottom:3px}
+ body[data-screen=character] #existing-character:not([hidden]){gap:2px}
+ body[data-screen=character] #existing-name{font-size:14px}
+}

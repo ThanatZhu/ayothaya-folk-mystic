@@ -1,0 +1,140 @@
+/* 0.113 lobby redesign, loaded last. Character screen: roster | hero on a lit stage | details panel. */
+.lobby-header .top-actions{margin-right:84px}
+.lobby-card{border-color:#c6a16488;box-shadow:0 24px 80px #050f0c99,inset 0 0 0 1px #f3d99a14,inset 0 1px 0 #f3d99a26}
+.lobby-card h2{font-weight:700;color:#fff0ce}
+.screen .muted,.screen .small{color:#d9ccb0}
+
+body[data-screen=character] .lobby-card{max-width:1020px!important;width:100%;display:flex;flex-direction:column}
+body[data-screen=character] .lobby-layout{grid-template-columns:minmax(0,1020px)!important}
+.character-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.character-heading .slot{font-variant-numeric:tabular-nums;font-weight:700;color:#e5c27e;border:1px solid #c6a16466;border-radius:999px;padding:3px 12px;font-size:12px}
+#progression-hint{border-left:0!important;border-radius:999px;background:#0e1d1999;border:1px solid #c6a16433!important;padding:6px 14px!important;color:#e9d6a5}
+
+body[data-screen=character] .character-body{display:grid!important;grid-template-columns:minmax(150px,23%) minmax(0,1fr) minmax(0,36%)!important;gap:16px!important;align-items:stretch;min-height:0}
+
+/* roster column */
+body[data-screen=character] #character-slots{display:flex!important;flex-direction:column;gap:8px!important;margin:0!important;min-height:0;overflow-y:auto;scrollbar-width:thin}
+body[data-screen=character] button.character-slot{display:grid!important;grid-template-columns:42px minmax(0,1fr);grid-template-rows:auto auto;column-gap:10px;align-items:center;justify-items:start;text-align:left;flex:0 0 auto;height:auto!important;min-height:58px!important;padding:6px 10px!important;border-radius:12px;border:1px solid #c6a16440;background:linear-gradient(135deg,#24382bcc,#152925cc);font-size:12px!important;transition:border-color .15s,transform .15s}
+body[data-screen=character] button.character-slot:hover:not(:disabled){border-color:#e5c27e;transform:translateX(2px)}
+body[data-screen=character] .character-slot[aria-pressed=true]{border-color:#e5c27e;background:linear-gradient(135deg,#6b5a30d9,#3a3420d9);box-shadow:0 0 0 1px #e5c27e,0 0 18px #e5c27e33}
+body[data-screen=character] .slot-portrait{grid-row:1/3;width:42px!important;height:42px!important;border-radius:50%;background-color:#0c1a16;border:1px solid #c6a16466;background-size:400% 200%!important}
+body[data-screen=character] .character-slot strong{font-weight:700;font-size:13px;color:#fff0ce;max-width:100%}
+body[data-screen=character] .character-slot small{font-size:10px!important;font-variant-numeric:tabular-nums}
+body[data-screen=character] button.character-slot:not(:has(strong)){display:flex!important;justify-content:center;border-style:dashed;background:#0e1d1966;color:#c9b88f}
+
+/* hero stage */
+body[data-screen=character] .character-stage{position:relative;min-height:0!important;border-radius:16px;overflow:hidden;background:radial-gradient(ellipse 70% 55% at 50% 62%,#e5c27e2e,transparent 70%),linear-gradient(180deg,#0d1b1766,#0a1512b3);border:1px solid #c6a16433;padding:10px 10px 12px}
+body[data-screen=character] .hero-art{width:min(260px,100%)!important;max-width:100%!important;aspect-ratio:1;height:auto!important;background:none!important;flex-shrink:1;min-height:0}
+body[data-screen=character] .pedestal{top:auto!important;bottom:22%;width:70%!important;left:15%}
+.stage-name{font-weight:700;font-size:18px;color:#fff0ce;text-shadow:0 2px 8px #000a;min-height:1.4em;z-index:2;margin-top:-4px}
+body[data-screen=character] .class-badge{display:block!important;font-size:11px;color:#e5c27e;margin:2px 0 8px}
+body[data-screen=character] .pose-controls{display:flex!important;gap:6px;z-index:2}
+body[data-screen=character] .pose-controls button{border-radius:999px;font-size:11px;padding:4px 10px}
+
+/* details panel */
+body[data-screen=character] .character-details{display:flex;flex-direction:column;gap:10px;min-height:0;overflow-y:auto;padding:14px!important;border-radius:16px;background:#0e1d1999;border:1px solid #c6a16433}
+body[data-screen=character] .class-summary{display:block!important;margin:0;padding:10px 12px;border-radius:12px;background:#24382b99;border:0;border-left:0}
+body[data-screen=character] .class-summary strong{font-weight:700;color:#fff0ce}
+body[data-screen=character] .class-summary p{margin:4px 0 0;font-size:12px;color:#d9ccb0}
+body[data-screen=character] #character-form:not([hidden]){display:flex!important;flex-direction:column;gap:6px}
+body[data-screen=character] #character-form label[for=hero-name]{font-weight:700;color:#fff0ce}
+body[data-screen=character] #hero-name{width:100%;min-height:44px;border-radius:10px}
+body[data-screen=character] #gender-options{display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important;border:0;padding:0;margin:4px 0!important;align-self:stretch!important;width:100%;min-width:0}
+body[data-screen=character] #gender-options legend{grid-column:1/-1;float:left;width:100%}
+body[data-screen=character] #gender-options legend{font-weight:700;color:#fff0ce;padding:0;margin-bottom:6px}
+body[data-screen=character] #gender-options label{width:auto!important;position:relative;display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:10px;border:1px solid #c6a16455;background:#152925cc;cursor:pointer;font-weight:700}
+body[data-screen=character] #gender-options label:has(input:checked){border-color:#e5c27e;background:#6b5a30d9;color:#fff0ce;box-shadow:0 0 0 1px #e5c27e}
+body[data-screen=character] #gender-options input{position:absolute;opacity:0;pointer-events:none}
+body[data-screen=character] #gender-options label:has(input:focus-visible){outline:3px solid #f7cc6f;outline-offset:2px}
+body[data-screen=character] #create-character,body[data-screen=character] #enter-world{min-height:48px;border-radius:12px;font-weight:700;font-size:15px;margin-top:auto}
+body[data-screen=character] #existing-character:not([hidden]){display:flex;flex-direction:column;gap:6px;flex:1}
+body[data-screen=character] #existing-name{margin:0;font-weight:700;color:#fff0ce}
+
+/* phones in landscape */
+@media (orientation:landscape) and (max-height:600px){
+ .lobby-header .top-actions{margin-right:76px}
+ body[data-screen=character] .character-body{grid-template-columns:minmax(128px,21%) minmax(0,1fr) minmax(0,40%)!important;gap:8px!important;flex:1}
+ body[data-screen=character] button.character-slot{min-height:44px!important;padding:3px 8px!important;grid-template-columns:32px minmax(0,1fr);column-gap:7px}
+ body[data-screen=character] .slot-portrait{width:32px!important;height:32px!important}
+ body[data-screen=character] .character-slot strong{font-size:11px}
+ body[data-screen=character] #character-slots{gap:5px!important}
+ body[data-screen=character] button.character-slot{flex:1 1 0;min-height:34px!important}
+ body[data-screen=character] .character-stage{padding:4px 4px 6px}
+ body[data-screen=character] .hero-art{width:min(170px,100%)!important}
+ .stage-name{font-size:13px}
+ body[data-screen=character] .class-badge,body[data-screen=character] .class-summary{display:none!important}
+ body[data-screen=character] .pose-controls button{font-size:10px;padding:2px 8px;min-height:26px}
+ body[data-screen=character] .character-details{padding:8px!important;gap:5px}
+ body[data-screen=character] #name-hint{display:none}
+ body[data-screen=character] #hero-name{min-height:38px}
+ body[data-screen=character] #gender-options label{min-height:34px}
+ body[data-screen=character] #gender-options legend{margin-bottom:3px}
+ body[data-screen=character] #create-character,body[data-screen=character] #enter-world{min-height:42px;font-size:13px}
+}
+
+/* 0.113.1 owner: phones felt oversized. Compact pass for short landscape screens (inputs stay 16px so iOS does not zoom). */
+@media (orientation:landscape) and (max-height:500px){
+ [data-lang-toggle]{top:6px!important;right:8px!important;font-size:10px!important;padding:2px 8px!important}
+ .lobby-header .top-actions{margin-right:62px}
+ .lobby-header .top-actions button,#identity{font-size:9px!important;padding:3px 7px!important;min-height:0!important}
+ .wordmark{font-size:12px!important}.wordmark .brand-emblem{width:22px!important;height:22px!important}
+ body:not([data-screen=character]) .lobby-card{max-width:300px!important;padding:10px 14px!important;justify-self:end}
+ .lobby-card .steps{margin-bottom:6px!important;font-size:9px}.lobby-card .steps b{width:18px;height:18px;font-size:8px}
+ .screen .eyebrow{font-size:7px!important;margin:0 0 2px!important}
+ .screen h2{font-size:16px!important;line-height:1.3!important;margin:0 0 4px!important}
+ .screen .muted{font-size:10px!important;line-height:1.45!important;margin:0 0 8px!important}
+ .screen .small{font-size:9px!important;line-height:1.4!important;margin:6px 0 0!important}
+ #login-screen button,#servers-screen .text-button{min-height:34px!important;padding:5px 10px!important;font-size:11px!important}
+ .divider{margin:5px 0!important;font-size:9px}
+ .server{min-height:0!important;padding:6px 10px!important;margin-bottom:6px}.server-number{font-size:16px!important}.server strong{font-size:12px}.server small{font-size:9px}
+ .story .brand-hero{max-width:150px}.story-copy{font-size:11px!important}
+ body[data-screen=character] .character-heading h2{font-size:14px!important}
+ body[data-screen=character] .character-heading .slot{font-size:10px;padding:1px 8px}
+ body[data-screen=character] #progression-hint{font-size:9px!important;padding:2px 10px!important;margin:3px 0 5px!important}
+ body[data-screen=character] .character-body{grid-template-columns:minmax(112px,19%) minmax(0,1fr) minmax(0,36%)!important;gap:6px!important}
+ body[data-screen=character] button.character-slot{min-height:30px!important;padding:2px 6px!important;font-size:10px!important;grid-template-columns:24px minmax(0,1fr);column-gap:5px;border-radius:9px}
+ body[data-screen=character] .slot-portrait{width:24px!important;height:24px!important}
+ body[data-screen=character] .character-slot strong{font-size:10px}body[data-screen=character] .character-slot small{font-size:8px!important}
+ body[data-screen=character] .hero-art{width:min(140px,100%)!important}
+ .stage-name{font-size:11px}
+ body[data-screen=character] .pose-controls button{font-size:9px;padding:1px 7px;min-height:22px}
+ body[data-screen=character] .character-details{padding:6px 8px!important;gap:4px;border-radius:12px}
+ body[data-screen=character] #character-form label[for=hero-name],body[data-screen=character] #gender-options legend{font-size:10px}
+ body[data-screen=character] #hero-name{min-height:32px!important;height:32px;padding:2px 8px}
+ body[data-screen=character] #gender-options label{min-height:28px;font-size:11px;border-radius:8px}
+ body[data-screen=character] #create-character,body[data-screen=character] #enter-world{min-height:34px!important;font-size:12px!important;border-radius:10px}
+ body[data-screen=character] #existing-name{font-size:13px!important}body[data-screen=character] #existing-detail{font-size:9px!important}
+ body[data-screen=character] #back-servers{font-size:9px!important;min-height:22px!important}
+}
+
+/* 0.113.2 owner: on phones the character card should be as big as its content, not stretched to fill the screen */
+@media (orientation:landscape) and (max-height:500px){
+ .mobile-viewport body[data-screen=character] .lobby-layout,body[data-screen=character] .lobby-layout{height:auto!important;max-height:var(--lobby-height,calc(100dvh - 46px))!important;display:flex!important;justify-content:center;align-items:flex-start}
+ body[data-screen=character] .lobby-card{height:auto!important;max-height:100%;width:auto!important;max-width:560px!important;overflow-y:auto!important}
+ body[data-screen=character] .character-body{flex:0 0 auto!important;grid-template-columns:118px 170px 200px!important;align-items:start}
+ body[data-screen=character] #character-slots{overflow:visible}
+ body[data-screen=character] button.character-slot{flex:0 0 auto!important;min-height:30px!important}
+ body[data-screen=character] .character-stage{padding:4px}
+ body[data-screen=character] .hero-art{width:110px!important}
+ body[data-screen=character] .character-details{align-self:start}
+ body[data-screen=character] #create-character,body[data-screen=character] #enter-world{margin-top:4px}
+ body[data-screen=character] #existing-character:not([hidden]){flex:0 0 auto}
+}
+
+/* 0.113.3 signed-in login screen: the continue and link-Google buttons sat flush; the "or" divider hung over nothing */
+#login-screen>button:not([hidden])+button:not([hidden]){margin-top:10px}
+#login-screen .divider:has(+#login-quick[hidden]){display:none}
+
+/* 0.114 delete a character: quiet link under the enter button, a confirm dialog that needs the name typed */
+.delete-link{align-self:center;color:#e08a7a!important;font-size:11px!important;margin-top:2px}
+.delete-link:hover:not(:disabled){color:#ff9e8c!important;text-decoration:underline}
+#delete-dialog{max-width:min(380px,92vw);padding:18px 20px;border-radius:14px;border:1px solid #c6a16488;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#f6edd6;font-family:var(--font-game)}
+#delete-dialog::backdrop{background:#050f0cb3}
+#delete-dialog h3{margin:0 0 8px;font-weight:700;color:#ffb3a3}
+#delete-dialog p{margin:0 0 12px;font-size:13px;line-height:1.55}
+#delete-dialog b{color:#fff0ce}
+#delete-dialog label{display:block;font-size:12px;margin-bottom:6px;color:#d9ccb0}
+#delete-dialog input{width:100%;min-height:40px;font-size:16px;border-radius:10px;padding:4px 10px;border:1px solid #c6a16466;background:#0e1d19;color:#fff0ce}
+.delete-actions{display:flex;gap:8px;margin-top:14px}.delete-actions button{flex:1;min-height:40px;border-radius:10px;font-weight:700}
+#delete-go{background:#a8392b;color:#fff0ce;border:1px solid #e07a66}#delete-go:disabled{opacity:.4;cursor:not-allowed}
+@media (orientation:landscape) and (max-height:500px){#delete-dialog{padding:10px 14px}#delete-dialog p{font-size:11px;margin-bottom:6px}#delete-dialog input{min-height:32px}.delete-actions{margin-top:8px}.delete-actions button{min-height:32px}.delete-link{font-size:9px!important;min-height:20px!important;padding:0!important}}

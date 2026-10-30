@@ -1,0 +1,21 @@
+{
+  "version": 228,
+  "variants": [
+    "novice-male",
+    "novice-female",
+    "swordsman-male",
+    "swordsman-female",
+    "lancer-male",
+    "lancer-female",
+    "hunter-male",
+    "hunter-female",
+    "boxer-male",
+    "boxer-female",
+    "rogue-male",
+    "rogue-female",
+    "shaman-male",
+    "shaman-female",
+    "acolyte-male",
+    "acolyte-female"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+ "mode": "builtin imagegen",
+ "transparent_background": true,
+ "prompt": "Use case: stylized-concept. Create one small cute messenger mascot UI asset for a hand-painted Thai Ayothaya fantasy MMORPG announcement ribbon. A tiny friendly round tawny owl, jade-green little shoulder cape with a restrained antique gold lotus clasp, holding a small rolled parchment scroll sealed with a red ribbon. The owl sits facing slightly RIGHT toward incoming announcements, warm attentive eyes and a cheerful expression, readable bold silhouette at 44px. Hand-painted 2D old-school RPG sprite illustration with clean edges, simple purposeful shapes, warm natural gold and jade accents matching a painted game HUD. Single centered character, whole owl and scroll visible, fills 88% of square canvas. True transparent alpha background. No text, no letters, no frame, no landscape, no particles, no bloom, no glossy 3D, no overcomplicated ornament.",
+ "source": "exec-929cac83-366d-4a49-9056-1efe43ff4a6b.png",
+ "asset": "owl.webp"
+}

@@ -26,3 +26,5 @@ Validation is recorded in docs/overnight223.md and docs/progression223.md. Calen
 - Live backend health before publication: healthy, 0 players. DigitalOcean settings still could not be inspected because Computer Use stopped on Windows URL verification; backend deployment continuity is not claimed.
 
 Publication candidate: r223-20261030a. The first protected preview caught CRLF conversion in an asset-pack PowerShell note. Text pinning now detects actual text bytes, including uncommon extensions, and preserves the earlier release's exact bytes with sparse overrides. The live production site was not changed by that failed preview.
+
+Protected Vercel preview for commit 9007e58 reached READY. Checked game entry/release.json no-store, r223a base URL, immutable archived metadata, binary-image fallback, and archived-page redirect. Fetched game-boot.js and gait catalog match the frozen SHA256 bytes exactly. No deployment-protection setting was weakened.

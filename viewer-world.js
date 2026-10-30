@@ -166,7 +166,7 @@ try {
  // 0.68.3 the original full-bodied art is the default again (the 8-direction side views read as paper-thin);
  // the 8-direction art stays one tap away in settings and the choice is remembered on this device.
  let eightWay=false;try{eightWay=localStorage.getItem('ayothaya-eight-way')==='1';}catch{}
- const heroMesh=createPaintedAvatar(heroFrames[0],{directional:eightWay,preloadAttackArt:true,classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
+ const heroMesh=createPaintedAvatar(heroFrames[0],{directional:eightWay,preloadAttackArt:texture=>renderer.initTexture(texture),classId:account.character.classId,gender:account.character.gender,appearance:account.character.appearance,equipment:account.equipment});scene.add(heroMesh);
  characters.push({sprite:heroMesh,shadow:shadow(map.spawn.x,-map.spawn.z,.45),height:heroHeight,frames:heroFrames});
  // The shared avatar selects camera-relative painted art by default; unsupported
  // custom silhouettes retain their original equipped artwork.
@@ -210,7 +210,7 @@ try {
  const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,monsterArt,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,roleSkills:true,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender,name:account.character.name},isPaused:()=>loading.active||!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  // Local test hook (dev server only) for automated walk/bridge/portal checks; absent on the deployed site.
- if(['127.0.0.1','localhost'].includes(location.hostname))window.__ayothaya={game,map,camera,renderer,scene,lighting:{world:worldLight,actors:actorLighting,profile:lightProfile}};
+ if(['127.0.0.1','localhost'].includes(location.hostname))window.__ayothaya={game,map,camera,renderer,scene,hero:heroMesh,lighting:{world:worldLight,actors:actorLighting,profile:lightProfile}};
  document.querySelector('.player-heading strong').textContent=account.character?.name||'นักเดินทาง';
  document.querySelector('.player-heading small').textContent=className(account.character.classId,account.character.gender)+' · '+map.name;
  // Extract one atlas cell so a circular portrait can preserve the sprite's natural aspect ratio.

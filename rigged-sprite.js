@@ -35,7 +35,7 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   const nextLife=newLife&&Object.fromEntries(Object.entries(newLife).map(([key,value])=>[key,textures(value)]));
   release();frames=next;life=nextLife;gait=newGait;loadedClass=id;loadedGender=shown;appearanceDirty=false;poseFit=posesFit(id,currentAppearance,gear);
   material.map=frames[loadedGender][Math.min(mesh.userData.artFrame??0,frames[loadedGender].length-1)];
-  if(preloadAttackArt&&poseFit)void warmPaintedAttacks224(id,shown);
+  if(preloadAttackArt&&poseFit)void warmPaintedAttacks224(id,shown,typeof preloadAttackArt==='function'?preloadAttackArt:null);
   mesh.userData.artReady=true;mesh.userData.lifeAction=null;delete mesh.userData.artError;
  }
  async function artwork(id,look,gear){

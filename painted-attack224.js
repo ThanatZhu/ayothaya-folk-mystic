@@ -27,14 +27,14 @@ function request(id,g,variant){
   const v=meta.variants[variant],base=await new THREE.TextureLoader().loadAsync(new URL(tier==='sd'?v.sdImage:v.image,url).href);
   base.colorSpace=THREE.SRGBColorSpace;base.magFilter=base.minFilter=THREE.NearestFilter;base.generateMipmaps=false;
   c.base=base;c.meta=meta;c.variant=v;c.tier=tier;
-  c.frames=Object.fromEntries(ATTACK_DIRECTIONS224.map((d,row)=>[d,Array.from({length:4},(_,i)=>{const t=base.clone();t.repeat.set(.25,.125);t.offset.set(i/4,1-(row+1)/8);t.needsUpdate=true;return t;})]));trim();return c;
+  c.frames=Object.fromEntries(ATTACK_DIRECTIONS224.map((d,row)=>[d,Array.from({length:4},(_,i)=>{const t=base.clone();t.repeat.set(.25,.125);t.offset.set(i/4,1-(row+1)/8);t.needsUpdate=true;return t;})]));c.used=now();trim();return c;
  }).catch(()=>{c.failed=now();return null;});
  }
  c.used=now();return c;
 }
-export async function warmPaintedAttacks224(id,g){
+export async function warmPaintedAttacks224(id,g,prepareTexture=null){
  if(!valid(id,g)||typeof document==='undefined')return false;
- await Promise.all([0,1,2].map(v=>request(id,g,v).ready));return true;
+ const sheets=await Promise.all([0,1,2].map(v=>request(id,g,v).ready));if(prepareTexture)for(const c of sheets)if(c)try{prepareTexture(c.base);}catch{}return sheets.every(Boolean);
 }
 export function paintedAttack224(id,g,pose={}){
  if(!valid(id,g)||typeof document==='undefined'||!pose.basicAttack224||pose.mode!=='attack')return null;

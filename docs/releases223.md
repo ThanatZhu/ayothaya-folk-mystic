@@ -52,3 +52,21 @@ The 228 notification remains at the top while leaving the existing HUD menu row 
 Use node scripts/publish-frontend226.mjs --push as the guarded publication entry. It requires a clean committed tree, preserves frontend-live ancestry, checks the backend dependency graph, verifies retained runtime bytes, pushes ONLY frontend-live, verifies main stayed unchanged, and emits exact Vercel production-deployment arguments for the connected tool. It never restarts DigitalOcean. Read those arguments and deploy the verified commit through the existing Vercel connection.
 
 For a real publication acceptance run, set QA_LIVE_RELEASE_URL=https://ayothayaonline.com/release.json. The test waits while the old player farms until that public release actually changes to the prepared version, then checks both player paths. This uses isolated local test characters/authority with the production frontend manifest signal, not player credentials or test rewards on the live world. Separately compare the live backend dashboard uptime before/after publication; uptime must advance rather than reset. Backend/code rollouts remain separate.
+
+## Verified production publication — r229-20261030-continuity
+
+Published frontend commit bd286a550e9d5eba2a9581d53dab28c1bfdd56de through Vercel deployment dpl_A1zXEWNHadxsHh8vW8PFa4kKCz5F. It preserves the concurrently delivered painted basic-attack release by merging frontend-live before publication. The publisher correctly refused an initial non-ancestor push; no force push was used.
+
+Two isolated test characters with a real local realm and WebGL clients waited for the PUBLIC release.json to switch to r229. The retained r226 player stayed connected and never navigated while the second player saved and entered r229:
+- kills: 1 -> 26 while the notice was visible -> 71 after the other player updated;
+- XP: 3922 -> 4822 -> 6267;
+- coins: 4 -> 125 -> 309; collected item count: 3 -> 34 -> 88;
+- retained-client socket closures: 0; retained-client navigations after the baseline: 0;
+- late retained-runtime fetch: exact original bytes; save-before-navigation: passed;
+- page errors and changed-asset failures: 0 (19 known unrelated audio180 cue failures remain).
+
+These are local test-world results with fixture monsters, not rewards or test accounts written to production. Live backend dashboard uptime advanced from 9950 to 10478 seconds over 528 seconds of wall time, rather than resetting. Health remained authoritative. The backend source refs/heads/main stayed at 1c5b414e9f4b7123a074ce0c34edab8e82d491a5; this publication triggered no DigitalOcean deployment check.
+
+Local evidence: outputs/update-farming-live/report.json and screenshots/videos; outputs/update-publication/before.json and after.json. They remain untracked because the directories also contain disposable test account tokens. Ten focused merged checks (attack presentation, authority-change guard and runtime retention) pass. Desktop/phone notice, open-socket and save sequencing checks pass at 1920x945, 1440x900 and 844x390.
+
+This completes the frontend-update/continued-farming acceptance. It does not add live replacement of the backend process; planned authority rollouts remain separate.

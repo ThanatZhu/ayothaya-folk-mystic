@@ -1,0 +1,82 @@
+[
+  {
+    "file": "sanctuary.webp",
+    "width": 1672,
+    "height": 941,
+    "bytes": 259824,
+    "alpha": false,
+    "sha256": "058c24fbdac1973503f4e0993b104916e3884a44081b315802172acbbc797964"
+  },
+  {
+    "file": "sanctuary-mobile.webp",
+    "width": 960,
+    "height": 540,
+    "bytes": 102646,
+    "alpha": false,
+    "sha256": "d3b078c25321756bfabfd6eeb5830b6651fe66a667b3b1c2945b4ee106b1ac12"
+  },
+  {
+    "file": "amulet-somdej.webp",
+    "width": 410,
+    "height": 676,
+    "bytes": 113740,
+    "alpha": true,
+    "sha256": "feebd9bcc3f32d63fadecdfac870bbd20fdc75e82ee144b6e296c51098d0c40d"
+  },
+  {
+    "file": "amulet-phra-rod.webp",
+    "width": 388,
+    "height": 676,
+    "bytes": 94646,
+    "alpha": true,
+    "sha256": "b325d4c12187a922214e832f6525709f9b6818e35355957a1d08d49a24e52495"
+  },
+  {
+    "file": "amulet-nang-phaya.webp",
+    "width": 507,
+    "height": 676,
+    "bytes": 113604,
+    "alpha": true,
+    "sha256": "2024d76e4d22d5d5aa6040e151cb9e5aa021e35582b8668f3d9a7f1def45abe8"
+  },
+  {
+    "file": "amulet-phong-suphan.webp",
+    "width": 462,
+    "height": 676,
+    "bytes": 125738,
+    "alpha": true,
+    "sha256": "578dd4b8e27104cc2284dfd2387b5d8f2f3560bee659375a437b828107c579fd"
+  },
+  {
+    "file": "amulet-sum-kor.webp",
+    "width": 420,
+    "height": 676,
+    "bytes": 111194,
+    "alpha": true,
+    "sha256": "dd70d36bdfb4616d1ac716ad6a3decd175415d40bb1bd0ac9177d038a3540bd5"
+  },
+  {
+    "file": "button-jade.webp",
+    "width": 720,
+    "height": 156,
+    "bytes": 38274,
+    "alpha": true,
+    "minAlpha": 0
+  },
+  {
+    "file": "button-gold.webp",
+    "width": 720,
+    "height": 158,
+    "bytes": 39372,
+    "alpha": true,
+    "minAlpha": 0
+  },
+  {
+    "file": "close.webp",
+    "width": 192,
+    "height": 190,
+    "bytes": 18302,
+    "alpha": true,
+    "minAlpha": 0
+  }
+]

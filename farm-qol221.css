@@ -22,9 +22,9 @@
 .auction223-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}.auction223-form label,.auction223-amount{display:grid;gap:8px}.auction223 input,.auction223 select{min-width:0;width:100%;box-sizing:border-box;min-height:44px;padding:8px;border:1px solid #a58d53;border-radius:8px;background:#173e32;color:#ffedc1;font:inherit}
 @media(max-width:480px){.auction223-form{grid-template-columns:1fr}.auction223-row{grid-template-columns:34px minmax(0,1fr);gap:8px}.auction223-row>button{grid-column:2}.auction223-tabs .qol-btn{flex:1 0 42%}}
 
-#game-update223{position:fixed;z-index:80;left:50%;top:calc(env(safe-area-inset-top) + 12px);bottom:auto;transform:translateX(-50%);max-width:calc(100vw - 24px);box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:8px 12px;background:#214838f5;border-radius:16px;color:#fff0cf;font:12px/1.5 Mali,Tahoma,sans-serif;box-shadow:0 4px 16px #0005}
+#game-update223{position:fixed;z-index:80;left:50%;top:calc(env(safe-area-inset-top) + 96px);bottom:auto;transform:translateX(-50%);max-width:calc(100vw - 24px);box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:8px 12px;background:#214838f5;border-radius:16px;color:#fff0cf;font:12px/1.5 Mali,Tahoma,sans-serif;box-shadow:0 4px 16px #0005}
 #game-update223[hidden]{display:none}#game-update223 button{font-size:12px;white-space:nowrap}
-@media(max-height:550px){#game-update223{bottom:auto;top:calc(env(safe-area-inset-top) + 8px);padding:4px 9px;gap:5px}}
+@media(max-height:550px){#game-update223{bottom:auto;top:calc(env(safe-area-inset-top) + 78px);padding:4px 9px;gap:5px}}
 
 #boss-live-meter .boss-meter-toggle{width:44px;height:44px;min-height:44px;flex:none;background:url('assets/ui63/frames/ring.png') center/contain no-repeat;color:#fff0bc;text-shadow:0 1px 2px #001f16}
 

@@ -40,3 +40,15 @@ Keep frontend-live history; merge it into the next deliberately planned backend 
 The 226 publication changes only the notification position and release workflow. It does not change the authority service, socket protocol, player state or gameplay rules. The notice appears 12 px from the desktop top safe edge and 8 px on short screens. Real local WebSocket tests at 1920×945, 1440×900 and 844×390 verify that discovery leaves the socket open and navigation waits for the player's click and completed save.
 
 This separates UI delivery from backend rollouts; it does not make a backend process replacement preserve TCP sockets. The actual DigitalOcean auto-deploy setting has NOT been changed. Access to its settings remains unavailable via connected tools; the requested in-app browser was unavailable. Do not operate the owner's native desktop/browser as a substitute.
+
+## Farming continuity acceptance — 227/228
+
+The two-player WebGL/real-realm check is scripts/check-update-farming227.mjs. It hosts frontend HTTP separately from the game authority, keeps a retained r226 client farming, switches the published frontend, and has a second player update. It checks increasing kills, XP, coins and actual pet-collected loot; no socket closure or navigation for the player who stays; exact late loading of retained code; save-before-navigation; and the new version only for the updater. Test identities, low-HP fixture monsters and recorded video are isolated in outputs, never production.
+
+First local real-game run: kills 1 -> 3 -> 40; XP 3922 -> 3994 -> 5186; coins 7 -> 11 -> 162; item count 1 -> 2 -> 45. The authority instance and old client connection remained the same. Source code and gameplay rates were not changed.
+
+The 228 notification remains at the top while leaving the existing HUD menu row clear: 96px on desktop and 78px on short screens, plus the safe inset. No item/button art changes.
+
+Use node scripts/publish-frontend226.mjs --push as the guarded publication entry. It requires a clean committed tree, preserves frontend-live ancestry, checks the backend dependency graph, verifies retained runtime bytes, pushes ONLY frontend-live, verifies main stayed unchanged, and emits exact Vercel production-deployment arguments for the connected tool. It never restarts DigitalOcean. Read those arguments and deploy the verified commit through the existing Vercel connection.
+
+For a real publication acceptance run, set QA_LIVE_RELEASE_URL=https://ayothayaonline.com/release.json. The test waits while the old player farms until that public release actually changes to the prepared version, then checks both player paths. This uses isolated local test characters/authority with the production frontend manifest signal, not player credentials or test rewards on the live world. Separately compare the live backend dashboard uptime before/after publication; uptime must advance rather than reset. Backend/code rollouts remain separate.

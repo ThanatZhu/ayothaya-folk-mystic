@@ -1,0 +1,20 @@
+/* Approved painted branding; source PNGs retain their original transparency. */
+.wordmark{display:inline-flex;align-items:center;gap:10px;min-width:0}
+.brand-emblem{display:block;width:42px;height:42px;object-fit:contain;flex:none}
+.story{min-width:0}
+.story h1.brand-title{margin:0;font-size:0;line-height:1;letter-spacing:0}
+.brand-hero{display:block;width:min(100%,520px);height:auto;max-height:36vh;object-fit:contain;object-position:left center}
+.journey-brand{display:block;width:260px;height:174px;max-width:42vw;background:url('assets/brand69/ayothaya-logo.png') left center/contain no-repeat}
+.journey-brand>span,.journey-brand>div{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(orientation:landscape) and (max-height:600px){
+ .brand-emblem{width:28px;height:28px}
+ .wordmark{gap:7px}
+ .brand-hero{max-height:30vh}
+}
+@media(max-height:600px){
+ .journey-brand{width:180px;height:64px}
+}
+@media(max-width:600px) and (orientation:portrait){
+ .brand-emblem{width:32px;height:32px}
+ .brand-hero{width:min(100%,320px);max-height:26vh}
+}

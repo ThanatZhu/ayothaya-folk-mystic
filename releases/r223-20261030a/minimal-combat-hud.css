@@ -1,0 +1,26 @@
+/* Keep the player frame; only target information is unframed. */
+body.field-hud.hud63 #ailment-row{position:fixed;left:var(--edge);top:calc(var(--edge-t) + var(--profile-height,84px) + 8px);max-width:204px;display:flex;flex-wrap:wrap;gap:4px}
+body.field-hud.hud63 #ailment-row:empty{display:none}
+body.field-hud.hud63 #online-button{top:calc(var(--edge-t) + var(--profile-height,84px) + var(--status-height,0px) + 16px)}
+body.field-hud.hud63 #hud-channel-row{position:static;display:flex;flex:0 0 100%;width:100%;min-width:0;box-sizing:border-box}
+body.field-hud.hud63 #hud-channel-row>#channel-button{position:static!important;inset:auto!important;transform:none;box-sizing:border-box;width:100%;min-width:0;min-height:44px;height:auto;padding:6px 10px;font-size:12px;justify-content:center}
+body.field-hud.hud63 #hud-channel-row>#channel-button .ch-detail{display:none}
+body.field-hud.hud63 .target-panel{--target-text-shadow:1px 0 0 #171008,-1px 0 0 #171008,0 -1px 0 #171008,0 1px 0 #171008,0 2px 2px #000,0 4px 6px #000c;background:none!important;border:0!important;border-image:none!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important;text-shadow:0 1px 1px #000,0 2px 4px #000e;padding:4px 8px;animation:none!important;opacity:1}
+body.field-hud.hud63 .target-panel::before,body.field-hud.hud63 .target-panel::after{display:none!important}
+body.field-hud.hud63 .target-panel[hidden]{display:none!important}
+body.field-hud.hud63 .target-panel #target-name{text-shadow:var(--target-text-shadow)}
+body.field-hud.hud63 .target-panel #target-hp{display:block;font-size:10px}
+body.field-hud.hud63 .target-panel .target-meter{height:6px;border-radius:3px;overflow:hidden;background:#0d171dde}
+body.field-hud.hud63 .target-panel[data-kind=boss] #target-name{color:#ffe2a2}
+body.field-hud.hud63 .target-panel[data-kind=boss] .target-meter{height:10px}
+body.field-hud.hud63 .target-panel[data-kind=boss] #target-fill{background:#d95545}
+body.field-hud .mob-label{width:56px;min-height:20px;padding:4px 3px;background:none!important;border:0!important;box-shadow:none!important;line-height:1.2}
+body.field-hud .mob-label span{display:none;font-size:10px;white-space:nowrap;text-shadow:0 1px 2px #000,0 0 4px #000}
+body.field-hud .mob-label.boss span{text-shadow:1px 0 0 #171008,-1px 0 0 #171008,0 -1px 0 #171008,0 1px 0 #171008,0 2px 2px #000,0 4px 6px #000c}
+body.field-hud .mob-label:is(.selected,.boss,.leader,:hover,:focus-visible){width:76px}
+body.field-hud .mob-label:is(.selected,.boss,.leader,:hover,:focus-visible) span{display:block}
+body.field-hud .mob-label i{height:5px;border:1px solid #15201c;border-radius:3px;background:#182321e0;overflow:hidden;margin-top:3px}
+body.field-hud .mob-label b{height:100%;background:#a7c77b}
+body.field-hud .mob-label.selected b{background:#efc36b}
+body.field-hud .mob-label[hidden]{display:none!important}
+body.field-hud .mob-label:focus-visible{outline:2px solid var(--gold);outline-offset:2px}

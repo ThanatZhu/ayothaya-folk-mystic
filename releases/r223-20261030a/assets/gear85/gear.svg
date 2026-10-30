@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1024" width="1536" height="1024">
+<!-- 0.85 stand-in icons for the new head / garment / shoes slots (6 x 4 cells of 256 px, same grid as the painted
+     atlases). Replace with painted art at assets/gear85/gear.png when it exists (docs/art-prompts-085-gear.md). -->
+<defs>
+ <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf3df"/><stop offset="1" stop-color="#c9b48a"/></linearGradient>
+ <linearGradient id="palm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1d58a"/><stop offset="1" stop-color="#a77a34"/></linearGradient>
+ <linearGradient id="cotton" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eadbb8"/><stop offset="1" stop-color="#9d8458"/></linearGradient>
+ <linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d4473a"/><stop offset="1" stop-color="#7c1d18"/></linearGradient>
+ <linearGradient id="leather" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a6436"/><stop offset="1" stop-color="#4f2f17"/></linearGradient>
+ <linearGradient id="dark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6e5a3e"/><stop offset="1" stop-color="#2f2416"/></linearGradient>
+ <filter id="sh"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<g stroke="#2b1c0f" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" filter="url(#sh)">
+ <!-- 0 headband -->
+ <g transform="translate(0 0)"><ellipse cx="128" cy="120" rx="82" ry="40" fill="url(#cloth)"/><ellipse cx="128" cy="112" rx="64" ry="24" fill="#3a2a18" stroke="none" opacity=".55"/>
+  <path d="M190 128 Q222 160 206 214 Q196 176 176 150Z" fill="url(#cloth)"/><path d="M176 140 Q196 190 168 222 Q170 186 160 156Z" fill="#e5d5ae"/><path d="M60 120 Q128 138 196 120" fill="none" stroke="#b33b2e" stroke-width="8"/></g>
+ <!-- 1 ngob palm-leaf hat -->
+ <g transform="translate(256 0)"><path d="M28 168 Q128 40 228 168 Q128 196 28 168Z" fill="url(#palm)"/>
+  <path d="M128 70 L60 166 M128 70 L96 178 M128 70 L160 178 M128 70 L196 166" stroke="#8a6127" stroke-width="4" fill="none"/><path d="M40 170 Q128 196 216 170" fill="none" stroke="#6d4a1c" stroke-width="8"/><path d="M96 180 Q128 226 160 180" fill="none" stroke="#c0392b" stroke-width="6"/></g>
+ <!-- 2 cotton cloak -->
+ <g transform="translate(512 0)"><path d="M88 52 Q128 72 168 52 L214 210 Q128 236 42 210Z" fill="url(#cotton)"/><path d="M88 52 Q128 92 168 52" fill="#d6c49c"/>
+  <path d="M100 96 L84 206 M156 96 L172 206 M128 100 L128 218" stroke="#8b7550" stroke-width="4" fill="none"/><circle cx="128" cy="76" r="10" fill="#a8741d"/></g>
+ <!-- 3 yant cloak -->
+ <g transform="translate(768 0)"><path d="M84 50 Q128 70 172 50 L222 212 Q128 238 34 212Z" fill="url(#red)"/><path d="M84 50 Q128 92 172 50" fill="#a52a22"/>
+  <rect x="96" y="112" width="64" height="64" fill="none" stroke="#f2c766" stroke-width="5" transform="rotate(45 128 144)"/><circle cx="128" cy="144" r="12" fill="none" stroke="#f2c766" stroke-width="5"/><path d="M50 204 Q128 228 206 204" fill="none" stroke="#f2c766" stroke-width="6"/><circle cx="128" cy="74" r="10" fill="#f2c766"/></g>
+ <!-- 4 woven sandals -->
+ <g transform="translate(1024 0)"><path d="M54 120 Q64 70 104 76 Q124 84 118 150 Q112 212 84 214 Q52 210 54 120Z" fill="url(#palm)"/><path d="M140 110 Q150 62 190 68 Q210 76 204 142 Q198 204 170 206 Q138 202 140 110Z" fill="url(#palm)"/>
+  <path d="M60 118 L116 128 M58 150 L114 160 M146 108 L202 118 M144 140 L200 150" stroke="#7a5523" stroke-width="5"/></g>
+ <!-- 5 buffalo leather shoes -->
+ <g transform="translate(1280 0)"><path d="M30 176 Q34 130 70 122 L104 112 Q120 150 150 158 L176 166 Q196 176 192 198 L36 200Z" fill="url(#leather)"/><path d="M36 196 L192 196" stroke="#2b1c0f" stroke-width="12"/>
+  <path d="M86 120 Q96 150 126 160" fill="none" stroke="#d9b37a" stroke-width="5"/><path d="M74 88 L110 112" stroke="#d9b37a" stroke-width="5"/></g>
+ <!-- 6 ranger boots -->
+ <g transform="translate(0 256)"><path d="M78 40 L136 40 L140 150 Q190 158 212 186 L214 212 L70 212 L64 150Z" fill="url(#dark)"/><path d="M70 208 L214 208" stroke="#1d150c" stroke-width="12"/>
+  <path d="M84 70 L132 70 M86 100 L134 100 M88 130 L136 130" stroke="#c9a14f" stroke-width="6"/><path d="M72 40 L142 40" stroke="#c9a14f" stroke-width="8"/></g>
+</g>
+</svg>

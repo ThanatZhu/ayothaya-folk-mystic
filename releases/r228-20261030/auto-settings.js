@@ -1,0 +1,60 @@
+import {applySkillArt} from './skill-art.js?v=icons117';
+import {openHudPanel} from './hud-panels.js?v=34';
+import {HOTBAR_KEYS,isMaster} from './skill-progress.js?v=novice174';
+import {swapSkillSlots,orderedAutoConfig,moveAutoSkill} from './auto-settings-model.js?v=auto202';
+
+export function createAutoSettings({game,classId}){
+ if(!document.querySelector('link[data-auto-settings]')){const css=document.createElement('link');css.rel='stylesheet';css.href='./auto-settings.css?v=potion203';css.dataset.autoSettings='';document.head.append(css);}
+ const toggle=document.getElementById('auto-attack');if(!toggle)return null;
+ let control=document.getElementById('auto-control');if(!control){control=document.createElement('div');control.id='auto-control';toggle.before(control);control.append(toggle);}
+ const gear=document.createElement('button');gear.id='auto-settings-open';gear.type='button';gear.setAttribute('aria-label','ตั้งค่าออโต้และตำแหน่งสกิล');gear.setAttribute('aria-haspopup','dialog');gear.setAttribute('aria-controls','auto-settings-window');gear.title='ตั้งค่าออโต้และตำแหน่งสกิล';
+ gear.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 2-.7 3-2 .9L4.5 5 2 9.3l2.2 2.1v2.2L2 15.7 4.5 20l2.8-.9 2 .9.7 3h5l.7-3 2-.9 2.8.9 2.5-4.3-2.2-2.1v-2.2L23 9.3 20.5 5l-2.8.9-2-.9L15 2Z"/><circle cx="12.5" cy="12.5" r="3.5"/></svg>';
+ gear.setAttribute('aria-expanded','false');control.append(gear);
+ const dialog=document.createElement('dialog');dialog.id='auto-settings-window';dialog.setAttribute('aria-labelledby','auto-settings-title');
+ dialog.innerHTML='<header><div><small>AUTO</small><h2 id="auto-settings-title">ออโต้และปุ่มลัด</h2></div><button type="button" id="auto-settings-close" aria-label="ปิดตั้งค่าออโต้">×</button></header><nav class="auto-tabs" aria-label="หน้าตั้งค่าออโต้"><button type="button" data-auto-tab="skills" aria-pressed="true">สกิลอัตโนมัติ</button><button type="button" data-auto-tab="positions" aria-pressed="false">จัดตำแหน่งสกิล</button><button type="button" data-auto-tab="potions" aria-pressed="false">น้ำยา</button></nav><div class="auto-settings-body"><section data-auto-page="skills"><h3>เลือกสกิลและจัดคอมโบ</h3><label class="auto-rotation-label" for="auto-rotation-mode">รูปแบบการใช้สกิล<select id="auto-rotation-mode"><option value="priority">เลือกสกิลที่พร้อม (ระบบเดิม)</option><option value="sequence">คอมโบตามลำดับ วนซ้ำ</option></select></label><p id="auto-rotation-help"></p><div id="auto-skill-choices"></div><section id="auto-sequence-panel" hidden><h3>ลำดับคอมโบ</h3><p>กดลูกศรเพื่อเรียง · แยกจากตำแหน่งปุ่มบนจอ</p><ol id="auto-sequence"></ol></section></section><section data-auto-page="positions" hidden><h3>จัดตำแหน่งปุ่มลัด</h3><p>แตะช่องต้นทาง แล้วแตะช่องปลายทางเพื่อสลับ หรือใช้เมาส์ลากสลับช่องได้</p><ol id="auto-hotbar"></ol><button type="button" id="auto-cancel-move" hidden>ยกเลิกการย้าย</button></section><section data-auto-page="potions" hidden><h3>ใช้น้ำยาอัตโนมัติ</h3><p>เลือกเกณฑ์ HP / MP ที่ให้ใช้น้ำยา 0% คือปิด ใช้ได้เมื่อเปิด AUTO</p><div class="auto-potion-settings"><label for="auto-hp">HP ต่ำกว่า</label><input type="range" id="auto-hp" min="0" max="90" step="5"><output id="auto-hp-out" for="auto-hp"></output><label for="auto-mp">MP ต่ำกว่า</label><input type="range" id="auto-mp" min="0" max="90" step="5"><output id="auto-mp-out" for="auto-mp"></output></div></section></div><footer><p id="auto-settings-note" role="status">บันทึกการตั้งค่าให้อัตโนมัติ</p><button type="button" id="auto-settings-done">เสร็จแล้ว</button></footer>';
+ const quickSettings=document.createElement('section');quickSettings.className='auto-quick-items203';quickSettings.innerHTML='<h3>ปุ่มยาใช้ด่วนบนมือถือ</h3>';for(const [category,label]of [['hp','เลือกยา HP'],['mp','เลือกยา MP'],['cure','เลือกยาแก้สถานะ']]){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{dialog.close();dispatchEvent(new CustomEvent('configure-mobile-consumable202',{detail:category}));};quickSettings.append(b);}dialog.querySelector('[data-auto-page=potions]').append(quickSettings);
+ (document.getElementById('game-shell')??document.body).append(dialog);
+ const layoutButton=document.createElement('button');layoutButton.type='button';layoutButton.id='mobile-hud-arrange';layoutButton.textContent='ลากจัดปุ่มบนหน้าจอ';layoutButton.onclick=()=>{dialog.close();dispatchEvent(new Event('open-mobile-hud-editor'));};dialog.querySelector('[data-auto-page=positions]').prepend(layoutButton);
+ const $=id=>dialog.querySelector('#'+id),world=game.world;if(world.roleCombat&&!world.roleCombat.legacy){const aim=document.createElement('button');aim.type='button';aim.className='role-aim-button';aim.textContent='เล็งจุดวางสกิลบนพื้น';aim.onclick=()=>{dialog.close();dispatchEvent(new Event('role-aim-ground'));};dialog.querySelector('[data-auto-page=positions]').append(aim);}let carry=null,tab='skills',signature='',timer=0;
+ const config=()=>world.autoConfig??{skills:[],hp:40,mp:0};
+ const learned=k=>(world.skillLevels?.[k]??(isMaster(k)?0:1))>0;
+ const note=text=>$('auto-settings-note').textContent=text;
+ function output(){for(const id of ['hp','mp'])$('auto-'+id+'-out').textContent=+$('auto-'+id).value?$('auto-'+id).value+'%':'ปิด';}
+ function persist(raw=config()){game.setAutoConfig(orderedAutoConfig(game.hotbar,raw));note('บันทึกการตั้งค่าออโต้แล้ว');}
+ function move(from,to){const next=swapSkillSlots(game.hotbar,from,to);if(!next)return;game.setHotbar(next);carry=null;persist();draw();note('ย้ายสกิลลงปุ่มลัดแล้ว');}
+ function setTab(next){tab=next;dialog.querySelectorAll('[data-auto-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.autoTab===tab)));dialog.querySelectorAll('[data-auto-page]').forEach(s=>s.hidden=s.dataset.autoPage!==tab);}
+ function drawSequence(){
+  const cfg=config(),sequence=cfg.rotation==='sequence';$('auto-rotation-mode').value=sequence?'sequence':'priority';$('auto-sequence-panel').hidden=!sequence;
+  $('auto-rotation-help').textContent=sequence?'วนใช้ตามลำดับ 1 → 2 → 3 · รอคูลดาวน์ / MP ของสกิลถัดไป ระหว่างรอจะตีธรรมดา · ข้ามสกิลที่ยังไม่เรียนหรือเงื่อนไขไม่ตรง':'เลือกสกิลที่อนุญาตให้ระบบใช้เมื่อพร้อม';
+  const list=$('auto-sequence');list.replaceChildren();
+  cfg.skills.forEach((k,index)=>{const skill=world.skills[k];if(!skill)return;const li=document.createElement('li'),num=document.createElement('b'),art=document.createElement('strong'),text=document.createElement('span'),name=document.createElement('b'),tip=document.createElement('small'),arrows=document.createElement('div');num.className='auto-combo-number';num.textContent=index+1;art.textContent=skill.icon;name.textContent=skill.name;tip.textContent=(learned(k)?'': 'ยังไม่ได้เรียน · ')+(skill.tip??skill.description??'')+' · MP '+skill.cost+' · CD '+skill.cd+' วิ';text.append(name,tip);arrows.className='auto-combo-arrows';
+   for(const [delta,label]of [[-1,'ขึ้น'],[1,'ลง']]){const b=document.createElement('button');b.type='button';b.textContent=delta<0?'↑':'↓';b.setAttribute('aria-label','เลื่อน '+skill.name+' '+label);b.disabled=index+delta<0||index+delta>=cfg.skills.length;b.dataset.sequenceMove=index+':'+delta;b.onclick=()=>{game.setAutoConfig(moveAutoSkill(config(),index,index+delta));draw();note('บันทึกลำดับคอมโบแล้ว');list.querySelector('[data-sequence-move="'+(index+delta)+':'+delta+'"]')?.focus();};arrows.append(b);}li.append(num,art,text,arrows);list.append(li);
+  });if(!cfg.skills.length){const empty=document.createElement('li');empty.className='auto-combo-empty';empty.textContent='ติ๊กสกิลด้านบนเพื่อเริ่มจัดลำดับ';list.append(empty);}
+  if(classId)applySkillArt([...list.children],classId,cfg.skills,world.skills);
+ }
+ function draw(){
+  const bar=game.hotbar,cfg=config();signature=JSON.stringify([bar,world.skillLevels,cfg]);
+  $('auto-hotbar').replaceChildren();$('auto-skill-choices').replaceChildren();
+  bar.forEach((k,j)=>{
+   const skill=world.skills[k];if(!skill)return;
+   const li=document.createElement('li'),slot=document.createElement('button'),key=document.createElement('kbd'),art=document.createElement('strong'),label=document.createElement('span');slot.type='button';slot.dataset.slot=j;slot.className='auto-slot';slot.draggable=true;slot.setAttribute('aria-pressed',String(carry===j));slot.setAttribute('aria-label','ช่อง '+HOTBAR_KEYS[j]+' · '+skill.name);key.textContent=HOTBAR_KEYS[j];art.textContent=skill.icon;label.textContent=skill.name;slot.append(key,art,label);li.append(slot);li.hidden=!!skill.reserved||!!skill.passive;$('auto-hotbar').append(li);
+   slot.onclick=()=>{if(carry===null){carry=j;draw();note('เลือกช่องปลายทางเพื่อสลับสกิล');}else if(carry===j){carry=null;draw();}else move(carry,j);};
+   slot.ondragstart=e=>{e.dataTransfer.setData('application/x-ayothaya-slot',String(j));e.dataTransfer.effectAllowed='move';};slot.ondragover=e=>{e.preventDefault();slot.classList.add('over');};slot.ondragleave=()=>slot.classList.remove('over');slot.ondrop=e=>{e.preventDefault();const data=e.dataTransfer.getData('application/x-ayothaya-slot');if(/^\d+$/.test(data))move(Number(data),j);};
+   const choice=document.createElement('label'),checkbox=document.createElement('input'),icon=document.createElement('strong'),text=document.createElement('span'),status=document.createElement('small');choice.className='auto-skill-choice';choice.hidden=!!skill.reserved||!!skill.passive;checkbox.type='checkbox';checkbox.dataset.auto=k;checkbox.checked=cfg.skills.includes(k);checkbox.disabled=!learned(k)||skill.reserved||skill.passive;icon.textContent=skill.icon;text.textContent=(game.actionBar?.desktop?'':HOTBAR_KEYS[j]+' · ')+skill.name;status.textContent=learned(k)?'Lv '+(world.skillLevels?.[k]??1):'ยังไม่ได้เรียน';text.append(status);choice.append(checkbox,icon,text);$('auto-skill-choices').append(choice);
+   checkbox.onchange=()=>{const enabled=new Set(config().skills);checkbox.checked?enabled.add(k):enabled.delete(k);persist({...config(),skills:[...enabled]});drawSequence();signature=JSON.stringify([bar,world.skillLevels,config()]);};
+  });
+  if(classId){applySkillArt([...$('auto-hotbar').children],classId,bar,world.skills);applySkillArt([...$('auto-skill-choices').children],classId,bar,world.skills);}
+  $('auto-cancel-move').hidden=carry===null;for(const id of ['hp','mp'])$('auto-'+id).value=cfg[id];output();drawSequence();setTab(tab);
+ }
+ function open(){const desktop=game.actionBar?.desktop;dialog.querySelector('[data-auto-tab=positions]').textContent=desktop?'จัดวงล้อมือถือ':'จัดตำแหน่งสกิล';const positions=dialog.querySelector('[data-auto-page=positions]');positions.querySelector('h3').textContent=desktop?'จัดวงล้อมือถือ':'จัดตำแหน่งปุ่มลัด';positions.querySelector('p').textContent=desktop?'ใช้กับวงล้อมือถือ · บนคอมให้ลากสกิลหรือไอเท็มลงตารางโดยตรง':'แตะช่องต้นทาง แล้วแตะช่องปลายทางเพื่อสลับ หรือใช้เมาส์ลากสลับช่องได้';game.clearInput?.();carry=null;draw();note('บันทึกการตั้งค่าให้อัตโนมัติ');openHudPanel(dialog);gear.setAttribute('aria-expanded','true');clearInterval(timer);timer=setInterval(()=>{if(signature!==JSON.stringify([game.hotbar,world.skillLevels,config()]))draw();},400);}
+ gear.onclick=e=>{e.stopPropagation();if(dialog.open)dialog.close();else open();};
+ dialog.querySelectorAll('[data-auto-tab]').forEach(b=>b.onclick=()=>setTab(b.dataset.autoTab));
+ $('auto-rotation-mode').onchange=()=>{persist({...config(),rotation:$('auto-rotation-mode').value});draw();};
+ $('auto-cancel-move').onclick=()=>{carry=null;draw();note('ยกเลิกการย้ายแล้ว');};
+ for(const id of ['hp','mp'])$('auto-'+id).oninput=()=>{output();persist({...config(),hp:+$('auto-hp').value,mp:+$('auto-mp').value});signature=JSON.stringify([game.hotbar,world.skillLevels,config()]);};
+ $('auto-settings-close').onclick=$('auto-settings-done').onclick=()=>dialog.close();
+ dialog.addEventListener('close',()=>{clearInterval(timer);gear.setAttribute('aria-expanded','false');carry=null;});
+ addEventListener('open-auto-settings',open);
+ dispatchEvent(new Event('resize'));
+ return {open,dialog};
+}

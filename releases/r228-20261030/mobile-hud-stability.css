@@ -1,0 +1,49 @@
+/* Mobile HUD ownership: loaded after the legacy HUD sheets by createHud63. */
+/* Desktop has a reserved strip between the profile and minimap. When space is
+   short, scroll the strip instead of letting buttons spill over either panel.
+   0.123 owner: the seven buttons line up at the right end, next to the minimap. */
+@media (pointer:fine) and (min-width:901px) and (min-height:601px){
+ body.field-hud.hud63 #game-menu{left:calc(var(--edge) + 286px);right:calc(var(--edge-r) + 216px);top:var(--edge-t);width:auto;transform:none;display:flex;flex-wrap:nowrap;justify-content:flex-end;justify-content:safe flex-end;overflow-x:auto;overflow-y:hidden;max-height:92px;padding:0 4px 4px;box-sizing:border-box;scrollbar-width:thin;overscroll-behavior-x:contain;touch-action:pan-x}
+ body.field-hud.hud63 #game-menu>button,body.field-hud.hud63 #menu-drawer>button{flex:0 0 60px}
+}
+@media (pointer:coarse),(max-width:900px),(max-height:600px){
+ body.field-hud.hud63{--mobile-bottom:max(18px,calc(env(safe-area-inset-bottom) + 8px))}
+ body.field-hud.hud63 .player-panel{width:min(204px,calc(100vw - var(--edge) - var(--edge-r) - 184px))}
+ body.field-hud.hud63 #menu-toggle{display:flex!important;min-width:44px;min-height:48px}
+ body.field-hud.hud63 #game-menu{display:none!important;left:auto;right:var(--edge-r);top:calc(var(--edge-t) + 56px);width:min(320px,calc(100vw - var(--edge) - var(--edge-r)));max-height:calc(var(--visible-height,100dvh) - var(--edge-t) - var(--mobile-bottom) - 64px);overflow-y:auto;overscroll-behavior:contain;flex-wrap:wrap;justify-content:flex-start;gap:8px;padding:10px;background:var(--surface);border:1px solid var(--gold);border-radius:12px;box-sizing:border-box}
+ body.field-hud.hud63 #game-menu.phone-open{display:flex!important}
+ body.field-hud.hud63 #game-menu #hud-chips{position:static!important;inset:auto;width:100%;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+ body.field-hud.hud63 #game-menu #channel-button{position:static!important;min-height:44px;max-width:100%;width:auto}
+ body.field-hud.hud63 #game-menu :is(button,#hud-chips>button){min-height:44px;min-width:44px}
+ body.field-hud.hud63 #online-dock{box-sizing:border-box;--chat-w:min(300px,calc(100vw - var(--phone-left,120px) - var(--phone-right,270px) - 16px));min-width:0;overflow:hidden}
+ body.field-hud.hud63 #online-dock.collapsed{min-width:0}
+ body.field-hud.hud63 #online-dock :is(.mp-dock-bar,#online-chat){min-width:0}
+ body.field-hud.hud63 #online-chat input{min-width:0;font-size:16px!important}
+ body.field-hud.hud63 :is(dialog[data-hud-panel][open],#npc-dialog:not([hidden])){zoom:1;box-sizing:border-box;max-width:calc(100vw - var(--edge) - var(--edge-r));max-height:calc(var(--visible-height,100dvh) - var(--edge-t) - var(--mobile-bottom) - 16px);overflow-y:auto;overscroll-behavior:contain}
+ body.field-hud.hud63 :is(dialog[data-hud-panel],#npc-dialog) button{min-height:44px}
+ body.field-hud.hud63 #quest-go{min-height:44px!important}
+ body.field-hud.hud63.chat-typing :is(.combat-controls,#joystick,#quick-slots,#interact){visibility:hidden;pointer-events:none}
+ body.field-hud.hud63.chat-typing #online-dock{--chat-w:min(560px,calc(100vw - 16px))}
+}
+@media (orientation:landscape) and (max-height:600px){
+ body.field-hud.hud63 .target-panel{left:calc(var(--edge) + 212px);right:calc(var(--edge-r) + 184px);top:var(--edge-t);width:auto;transform:none;max-height:56px;overflow:hidden}
+ body.field-hud.hud63 #hud-right{left:calc(var(--edge) + 112px);right:calc(var(--edge-r) + var(--wheel-width,253px) + 8px);top:calc(var(--edge-t) + 100px);width:auto;max-height:max(52px,calc(var(--visible-height,100dvh) - 240px));overflow-y:auto;overflow-x:hidden;padding:10px 0 0 12px;box-sizing:border-box;pointer-events:auto}
+ body.field-hud.hud63 #online-dock{left:var(--phone-left);right:var(--phone-right);translate:none;bottom:var(--mobile-bottom)}
+ body.field-hud.hud63 #online-dock:not(.collapsed){left:var(--edge);right:auto;bottom:calc(var(--mobile-bottom) + 112px);--chat-w:min(320px,calc(100vw - var(--edge) - var(--edge-r)));z-index:24}
+}
+@media (orientation:portrait) and (max-width:600px){
+ /* The three-ring wheel cannot fit beside a joystick in portrait. Keep the
+    same live skill buttons in a four-column grid with 44px touch targets. */
+ body.field-hud.hud63 .combat-controls.wheel{width:188px!important;height:auto!important;bottom:var(--mobile-bottom);display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+ body.field-hud.hud63 .combat-controls.wheel .skills{display:grid;grid-template-columns:repeat(4,44px);gap:4px}
+ body.field-hud.hud63 .combat-controls.wheel .skill{position:static!important;width:44px;height:44px;--wheel-slot:44px}
+ body.field-hud.hud63 .combat-controls.wheel .attack-controls{display:flex;position:static;gap:12px;align-items:center}
+ body.field-hud.hud63 .combat-controls.wheel :is(#attack,#auto-attack){position:static!important}
+ body.field-hud.hud63 .combat-controls.wheel #attack{width:58px;height:58px}
+ body.field-hud.hud63 .combat-controls.wheel :is(kbd,.skill-level){display:none}
+ body.field-hud.hud63 #online-dock{--chat-w:min(300px,calc(100vw - var(--edge) - var(--edge-r)));bottom:calc(var(--mobile-bottom) + 262px)}
+ body.field-hud.hud63 #quick-slots{left:var(--edge);bottom:calc(var(--mobile-bottom) + 126px);max-width:104px;flex-wrap:wrap}
+ body.field-hud.hud63 #interact{left:var(--edge);right:auto;bottom:calc(var(--mobile-bottom) + 196px);max-width:104px;transform:none}
+ body.field-hud.hud63 #hud-right{top:calc(var(--edge-t) + 132px)}
+ body.field-hud.hud63 .target-panel{top:calc(var(--edge-t) + 108px);left:var(--edge);width:min(160px,40vw)}
+}

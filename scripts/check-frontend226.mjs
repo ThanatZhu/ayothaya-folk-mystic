@@ -1,7 +1,7 @@
 import fs from 'node:fs';import path from 'node:path';import {execFileSync} from 'node:child_process';
 const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim(),base=process.argv[2]??'origin/main',authority=new Set();
 function scan(file){
- file=file.replaceAll('\\','/');if(authority.has(file)||!fs.existsSync(file))return;authority.add(file);
+ file=file.replaceAll('\\','/');if(authority.has(file))return;authority.add(file);if(!fs.existsSync(file))return;
  const text=fs.readFileSync(file,'utf8');
  for(const match of text.matchAll(/(?:from\s*|import\s*\(\s*|import\s*)['"]([^'"]+)['"]/g)){
   const ref=match[1].split('?')[0];if(ref.startsWith('.'))scan(path.posix.normalize(path.posix.join(path.posix.dirname(file),ref)));

@@ -2,7 +2,8 @@ import {createSkillLibraryRenderer} from './assets/skill-polish/library-renderer
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleEffectTime,sampleRoleEffect} from './combat-animation165.js?v=pose119';
 import {groundHeight} from './combat-core.js?v=surfaces222';
-import {createSheetVfx,hasSheet} from './role-sheet-vfx.js?v=surfaces222';
+import {createSheetVfx,hasSheet,basicAttackVfxId,BASIC_COMBO_VFX} from './role-sheet-vfx.js?v=surfaces222';
+export {basicAttackVfxId,BASIC_COMBO_VFX};
 export function roleEffectSpace(from,to,nav,canonicalFrom=-2,canonicalTo=1.55){
  const dx=to.x-from.x,dz=to.z-from.z,d=Math.hypot(dx,dz),ux=d>.01?dx/d:1,uz=d>.01?dz/d:0;
  return {yaw:Math.atan2(uz,ux),point(p,origin=null){

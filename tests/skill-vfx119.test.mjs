@@ -4,7 +4,7 @@ import * as THREE from '../vendor/build/three.module.js';
 import {ROLES} from '../assets/skills-next/catalog.js';
 import {VFX_SHEETS,VFX_UNMATCHED} from '../assets/skills-next/vfx-2026-10/vfx-map.js';
 globalThis.matchMedia??=()=>({matches:false});
-const {sheetFrame,sheetTail,vfxPlacement,createSheetVfx}=await import('../role-sheet-vfx.js');
+const {sheetFrame,sheetTail,vfxPlacement,createSheetVfx,BASIC_SHEETS,BASIC_COMBO_VFX,basicAttackVfxId,hasSheet}=await import('../role-sheet-vfx.js');
 const dir=new URL('../assets/skills-next/vfx-2026-10/game/',import.meta.url);
 
 test('every class and Master active skill has its own painted sheet, on disk for desktop and mobile',()=>{
@@ -16,6 +16,20 @@ test('every class and Master active skill has its own painted sheet, on disk for
  assert.equal(new Set(keys).size,keys.length,'a sheet is used once');
  for(const k of keys)for(const tier of ['hd','sd'])assert.ok(existsSync(new URL(tier+'/'+k+'.webp',dir)),tier+'/'+k);
  assert.deepEqual(VFX_UNMATCHED.map(u=>u.file).sort(),['fx-novice-n4-ground.png','fx-novice-n4.png']);
+});
+test('all 8 classes have 4-stage basic attack combo painted sheets on disk for slash and magic classes',()=>{
+ for(const b of Object.values(BASIC_SHEETS))for(const tier of ['hd','sd'])assert.ok(existsSync(new URL(tier+'/'+b.effect+'.webp',dir)),tier+'/'+b.effect);
+ const scene=new THREE.Scene(),world={player:{x:0,z:0},nav:null,networkSelfId:'me'},vfx=createSheetVfx(scene,world,{tier:'sd'});
+ let castId=100;
+ for(const [classId,seq] of Object.entries(BASIC_COMBO_VFX)){
+  assert.equal(seq.length,4,classId);
+  for(let step=0;step<4;step++){
+   const id=basicAttackVfxId(classId,step);
+   assert.equal(hasSheet(id),true,`${classId}:${step} -> ${id}`);
+   assert.equal(vfx.spawn({roleSkillId:id,basic:true,comboStep:step,castId:++castId,from:{x:0,z:0},to:{x:2,z:0},timing:{impacts:[.24],duration:.55}}),true);
+  }
+ }
+ vfx.clear();vfx.dispose();assert.equal(scene.children.length,0);
 });
 test('the peak frame sits on every real release beat; build-up before, fade after',()=>{
  const impacts=[.3,.55,.8],tail=sheetTail({duration:.96},false);

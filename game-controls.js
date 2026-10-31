@@ -6,7 +6,7 @@ import {normalizeRoleSkills,upgradeRoleSkill,ROLE_MARK} from './role-skill-progr
 import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {createRoleAnimation,roleAnimationActive,sampleRolePose,ageQueuedCombatEvent,castFacing,retimeRoleAnimation} from './combat-animation165.js?v=pose119';
 import {prefetchPoses} from './skill-pose-art.js?v=pose119';
-import {createLiveRoleVfx} from './role-skill-vfx.js?v=surfaces222';
+import {createLiveRoleVfx,basicAttackVfxId,BASIC_COMBO_VFX} from './role-skill-vfx.js?v=surfaces222';
 import {revivalCount} from './revival-item.js?v=live185';
 import {createRolePlayUI} from './role-play-ui.js?v=live185';
 import {itemDef} from './items.js?v=107';
@@ -276,7 +276,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
     const comboSkillIdx=[0,1,6,9][Math.max(0,comboStep)%4]??0;
     if(!roleAnimationActive(roleClip,roleEffects.time)){roleClip=null;activeSkill=null;basicCastId=e.castId;castFace=aim;actionStart=start;castUntil=actionStart+timing.duration;actionMode='attack';swingScale=attackDuration(world.profession.id)/timing.duration;}
     strikeAt=start+timing.impacts[0];strikes=timing.impacts.map(at=>({at:start+at,power:.4}));world.clearEmote();
-    const track={...skillTrack(world.profession.id,comboSkillIdx),duration:timing.duration,strikes:timing.impacts.map(at=>at/timing.duration)},from=e.from??world.player,to=e.to??from;
+    const from=e.from??world.player,to=e.to??from,basicFx=basicAttackVfxId(world.profession.id,comboStep);
+    if(basicFx&&roleEffects.has(basicFx)){roleEffects.spawn({...e,basic:true,comboStep,roleSkillId:basicFx,from,to,lag,timing});return;}
+    const track={...skillTrack(world.profession.id,comboSkillIdx),duration:timing.duration,strikes:timing.impacts.map(at=>at/timing.duration)};
     const fx=skillEffects.create(track,{...e,skillIndex:null,synced:true,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});fx.age=lag;return;
    }
    const track=Number.isInteger(e.skillIndex)?skillTrack(world.profession.id,e.skillIndex):null;
@@ -303,9 +305,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    strikeAt=world.time-lag+(fast?fast.strikes[0]*fast.duration:.42*attackDuration(world.profession.id)/swingScale);if(e.predicted)predictions.push({index:Number.isInteger(e.skillIndex)?e.skillIndex:null,at:wall(),strikeAt});strikes=beats.map(at=>({at,power:track?1:.4}));if(e.color)castLight.color.set(e.color);
    const comboSkillIdx=[0,1,6,9][Math.max(0,comboStep)%4]??0;
    const presentation=fast??{...skillTrack(world.profession.id,comboSkillIdx),duration:attackDuration(world.profession.id),strikes:[.42]};
-   const from=e.from??world.player,to=e.to??from,noviceFx=world.profession.id==='novice'&&fast&&Number.isInteger(e.skillIndex)?'novice:'+e.skillIndex:null;
-   // 0.119 Novice basics play their painted sheet on the same beats as the swing.
-   if(noviceFx&&roleEffects.has(noviceFx)){roleEffects.spawn({...e,roleSkillId:noviceFx,from,to,lag,timing:{impacts:fast.strikes.map(b=>b*fast.duration),duration:fast.duration}});return;}
+   const from=e.from??world.player,to=e.to??from,basic=!Number.isInteger(e.skillIndex),sheetFx=basic?basicAttackVfxId(world.profession.id,comboStep):world.profession.id==='novice'&&fast?'novice:'+e.skillIndex:basicAttackVfxId(world.profession.id,e.skillIndex);
+   // 0.119+ Painted sheets play on basic attacks and novice casts on the exact swing beats.
+   if(sheetFx&&roleEffects.has(sheetFx)){roleEffects.spawn({...e,basic,comboStep,roleSkillId:sheetFx,from,to,lag,timing:{impacts:presentation.strikes.map(b=>b*presentation.duration),duration:presentation.duration}});return;}
    const effect=skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,synced:true,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});effect.age=lag;
  }
  function effect(e){
@@ -582,8 +584,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // Applied by the renderer around the draw call only, so it never leaks into the orbit controls.
  function shakeOffset(out){const t=world.time,a=shakeAmount;return out.set(Math.sin(t*83)*a,Math.cos(t*67)*a*.6,Math.sin(t*71+1)*a);}
- // Warm the HTTP cache with this character's own skill sheets once the map has settled.
- setTimeout(()=>{const ids=world.skills.map((s,i)=>s.roleSkillId??'novice:'+i);roleEffects.prefetch(ids);prefetchPoses(ids);},4000);
+ // Warm the HTTP cache with this character's basic attack and skill sheets.
+ setTimeout(()=>roleEffects.prefetch(BASIC_COMBO_VFX[world.profession.id]??BASIC_COMBO_VFX.novice),120);
+ setTimeout(()=>{const ids=world.skills.map((s,i)=>s.roleSkillId??'novice:'+i);roleEffects.prefetch([...ids,...(BASIC_COMBO_VFX[world.profession.id]??[])]);prefetchPoses(ids);},4000);
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
  return {set respawnInventory(value){respawnInventory=value;},set respawnTravel(fn){respawnTravel=fn;},roleEffects,roleDecor,get canUseActions(){return !isPaused();},ghost,selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

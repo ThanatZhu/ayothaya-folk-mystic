@@ -1,0 +1,8 @@
+/* 0.122 stat help in the status window (status-ui.js / stat-tips.js) */
+#status-stats li{cursor:help}
+#stat-tip{position:absolute;z-index:3;box-sizing:border-box;padding:9px 11px;border:1px solid #c6a16488;border-radius:8px;background:linear-gradient(135deg,#24382bf4,#152925f0);box-shadow:0 8px 24px #0009;color:#f6edd6;font:500 12px/1.5 var(--font-game,Mali,Tahoma,sans-serif);pointer-events:none}
+#stat-tip strong{display:block;color:#f4cf7a;font-weight:700;font-size:13px;margin-bottom:3px}
+#stat-tip ul{margin:0;padding-left:16px}#stat-tip li{margin:1px 0}
+#stat-tip .stat-tip-gains{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:4px 10px;font-variant-numeric:tabular-nums}
+#stat-tip .stat-tip-gains small{flex-basis:100%;color:#c9b98f;font-size:11px}#stat-tip .stat-tip-gains span{color:#95efe2;font-weight:700}
+#stat-tip .stat-tip-cost{margin:5px 0 0;color:#c9b98f;font-size:11px;font-variant-numeric:tabular-nums}

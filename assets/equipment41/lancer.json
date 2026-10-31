@@ -10,7 +10,7 @@
           131,
           205
         ],
-        "anchor": 65.0,
+        "anchor": 65,
         "scale": 0.901639
       },
       {
@@ -21,7 +21,7 @@
           148,
           203
         ],
-        "anchor": 74.0,
+        "anchor": 74,
         "scale": 0.901639
       },
       {
@@ -32,7 +32,7 @@
           136,
           202
         ],
-        "anchor": 71.0,
+        "anchor": 71,
         "scale": 0.901639
       },
       {
@@ -43,7 +43,7 @@
           149,
           202
         ],
-        "anchor": 89.0,
+        "anchor": 89,
         "scale": 0.901639
       },
       {
@@ -54,7 +54,7 @@
           169,
           203
         ],
-        "anchor": 86.0,
+        "anchor": 86,
         "scale": 0.901639
       },
       {
@@ -65,7 +65,7 @@
           207,
           183
         ],
-        "anchor": 96.0,
+        "anchor": 96,
         "scale": 0.901639
       },
       {
@@ -98,7 +98,7 @@
           130,
           199
         ],
-        "anchor": 67.0,
+        "anchor": 67,
         "scale": 0.901639
       },
       {
@@ -109,7 +109,7 @@
           175,
           227
         ],
-        "anchor": 77.0,
+        "anchor": 77,
         "scale": 0.901639
       },
       {
@@ -131,96 +131,96 @@
           132,
           188
         ],
-        "anchor": 72.0,
+        "anchor": 72,
         "scale": 0.901639
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          60,
-          39,
-          167,
-          328
+          93,
+          65,
+          148,
+          211
         ],
-        "anchor": 78.0,
-        "scale": 0.719512
+        "anchor": 67,
+        "scale": 0.876,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          256,
-          52,
-          172,
-          315
+          412,
+          65,
+          146,
+          211
         ],
-        "anchor": 84.0,
-        "scale": 0.749206
+        "anchor": 68,
+        "scale": 0.876,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          444,
-          44,
-          178,
-          325
+          737,
+          65,
+          127,
+          211
         ],
-        "anchor": 84.0,
-        "scale": 0.726154
+        "anchor": 63,
+        "scale": 0.876,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          650,
-          42,
-          168,
-          325
+          1057,
+          65,
+          128,
+          211
         ],
-        "anchor": 78.0,
-        "scale": 0.726154
+        "anchor": 63,
+        "scale": 0.876,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          848,
-          58,
-          176,
-          309
+          86,
+          385,
+          154,
+          211
         ],
-        "anchor": 88.0,
-        "scale": 0.763754
+        "anchor": 74,
+        "scale": 0.876,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          1054,
-          47,
-          174,
-          317
+          406,
+          385,
+          147,
+          211
         ],
-        "anchor": 82.0,
-        "scale": 0.744479
+        "anchor": 74,
+        "scale": 0.876,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          53,
-          377,
-          172,
-          312
+          734,
+          385,
+          135,
+          211
         ],
-        "anchor": 78.0,
-        "scale": 0.743852
+        "anchor": 66,
+        "scale": 0.876,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          256,
-          401,
-          175,
-          286
+          1053,
+          385,
+          138,
+          211
         ],
-        "anchor": 91.0,
-        "scale": 0.825175
+        "anchor": 67,
+        "scale": 0.876,
+        "source": "lancer-walk.png"
       }
     ],
     "female": [
@@ -232,7 +232,7 @@
           139,
           214
         ],
-        "anchor": 73.0,
+        "anchor": 73,
         "scale": 0.90535
       },
       {
@@ -243,7 +243,7 @@
           156,
           212
         ],
-        "anchor": 81.0,
+        "anchor": 81,
         "scale": 0.90535
       },
       {
@@ -254,7 +254,7 @@
           143,
           214
         ],
-        "anchor": 77.0,
+        "anchor": 77,
         "scale": 0.90535
       },
       {
@@ -265,7 +265,7 @@
           161,
           215
         ],
-        "anchor": 91.0,
+        "anchor": 91,
         "scale": 0.90535
       },
       {
@@ -276,7 +276,7 @@
           171,
           211
         ],
-        "anchor": 86.0,
+        "anchor": 86,
         "scale": 0.90535
       },
       {
@@ -287,7 +287,7 @@
           207,
           194
         ],
-        "anchor": 94.0,
+        "anchor": 94,
         "scale": 0.90535
       },
       {
@@ -320,7 +320,7 @@
           141,
           212
         ],
-        "anchor": 72.0,
+        "anchor": 72,
         "scale": 0.90535
       },
       {
@@ -331,7 +331,7 @@
           176,
           233
         ],
-        "anchor": 80.0,
+        "anchor": 80,
         "scale": 0.90535
       },
       {
@@ -353,96 +353,96 @@
           140,
           198
         ],
-        "anchor": 76.0,
+        "anchor": 76,
         "scale": 0.90535
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          53,
-          704,
-          174,
-          298
-        ],
-        "anchor": 83.0,
-        "scale": 0.791946
-      },
-      {
-        "source": "lancer-walk.png",
-        "rect": [
-          261,
-          723,
-          166,
-          278
-        ],
-        "anchor": 86.0,
-        "scale": 0.848921
-      },
-      {
-        "source": "lancer-walk.png",
-        "rect": [
-          448,
+          95,
           706,
-          175,
-          298
+          136,
+          210
         ],
-        "anchor": 84.0,
-        "scale": 0.791946
+        "anchor": 65,
+        "scale": 0.922595,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          651,
-          709,
-          170,
-          293
+          414,
+          706,
+          135,
+          210
         ],
-        "anchor": 80.0,
-        "scale": 0.805461
+        "anchor": 66,
+        "scale": 0.922595,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          851,
-          731,
-          173,
-          271
+          735,
+          706,
+          129,
+          210
         ],
-        "anchor": 91.0,
-        "scale": 0.870849
+        "anchor": 65,
+        "scale": 0.922595,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          1056,
-          708,
-          168,
-          291
+          1055,
+          706,
+          129,
+          210
         ],
-        "anchor": 80.0,
-        "scale": 0.810997
+        "anchor": 65,
+        "scale": 0.922595,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          47,
-          1008,
-          172,
-          243
+          91,
+          1026,
+          143,
+          210
         ],
-        "anchor": 88.0,
-        "scale": 0.971193
+        "anchor": 69,
+        "scale": 0.922595,
+        "source": "lancer-walk.png"
       },
       {
-        "source": "lancer-walk.png",
         "rect": [
-          258,
-          1003,
-          167,
-          249
+          411,
+          1026,
+          138,
+          210
         ],
-        "anchor": 86.0,
-        "scale": 0.947791
+        "anchor": 69,
+        "scale": 0.922595,
+        "source": "lancer-walk.png"
+      },
+      {
+        "rect": [
+          738,
+          1026,
+          129,
+          210
+        ],
+        "anchor": 62,
+        "scale": 0.922595,
+        "source": "lancer-walk.png"
+      },
+      {
+        "rect": [
+          1058,
+          1026,
+          131,
+          210
+        ],
+        "anchor": 62,
+        "scale": 0.922595,
+        "source": "lancer-walk.png"
       }
     ]
   }

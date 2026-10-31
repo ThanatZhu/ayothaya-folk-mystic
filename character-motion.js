@@ -1,6 +1,8 @@
 import {novicePunchPose} from './novice-combat174.js';
 import {motionFrame} from './animation-frames.js?v=37';
 import {neutralJoints} from './character-rig.js?v=37';
+import {attackDuration} from './combat-timing.js';
+export {attackDuration} from './combat-timing.js';
 // Joint targets drive fixed-length arms/legs. Root motion is translation, not scale.
 export const MOTION_MODES=['idle','walk','run','sit','sleep','sitDown','standUp','attack','cast','guard','hit','dash','bow','celebrate','rest'];
 const clamp=v=>Math.max(0,Math.min(1,v));
@@ -26,15 +28,13 @@ export const gaitStep=(distance,dt,classId,mode='walk')=>Math.min(Math.max(0,dis
 // Per-class values return here if a redrawn walk in the original style is added later.
 const WALK_CYCLE={};
 export const walkCycle=classId=>WALK_CYCLE[classId]??2.1;
-import {attackDuration} from './combat-timing.js';
-export {attackDuration} from './combat-timing.js';
-export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side'}={}){
- const t=Math.max(0,Number.isFinite(time)?time:0),p={mode,time:Math.max(0,Number.isFinite(time)?time:0),phase,reduced,artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,paintOffsetX:0,paintOffsetY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
+export function characterMotion({time=0,mode='idle',classId='shaman',reduced=false,phase=null,view='side',variant=0}={}){
+ const t=Math.max(0,Number.isFinite(time)?time:0),p={mode,time:Math.max(0,Number.isFinite(time)?time:0),phase,reduced,variant:variant|0,artFrame:0,frame:0,x:0,y:0,sx:1,sy:1,rotation:0,body:0,lean:0,head:0,armL:0,armR:0,armLY:0,armRY:0,paintOffsetX:0,paintOffsetY:0,legL:0,legR:0,liftL:0,liftR:0,crouch:0,...neutralJoints()};
  if(reduced)return p;
  if(mode==='walk'||mode==='run'){
   // 0.29: livelier gait. Bigger stride and arm swing, a forward lean, a rise while the feet pass,
   // with planted stance feet and a lifted swing leg.
-  const a=(phase??t*1.65)*Math.PI*2,s=Math.sin(a),c=Math.cos(a),step=Math.max(0,-Math.cos(a*2))**2;
+  const a=(phase??t*1.65)*Math.PI*2,s=Math.sin(a),c=Math.cos(a);
   p.legL=s*.075;p.legR=-s*.075;p.liftL=Math.max(0,c)*.07;p.liftR=Math.max(0,-c)*.07;
   const stride=classId==='acolyte'?.65:classId==='rogue'?1.12:1,arms=['lancer','shaman'].includes(classId)?.45:classId==='boxer'?.65:1;
   p.legL*=stride;p.legR*=stride;p.liftL*=stride;p.liftR*=stride;
@@ -51,16 +51,19 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
   p.crouch=.012+.008*Math.cos(a*2);p.body=0;p.y=Math.abs(Math.sin(a))*.03; // footfall rise; the redrawn novice cycle bobs in the art, so the planted foot stays on the ground
  }else if(mode==='attack'){
   const q=t/attackDuration(classId);if(q>=1)return p;
+  const v=((variant|0)%4+4)%4,comboBoost=v===3?1.32:v===2?1.16:v===1?1.06:1;
   const wind=ease(q/.28),strike=ease((q-.28)/.16),recover=ease((q-.55)/.45),power=strike*(1-recover);
-  p.frame=q>=.29&&q<.78?3:0;p.lean=-.025*wind*(1-strike)+.045*power;p.crouch=.018*wind*(1-strike);
-  p.armR=power*(classId==='lancer'?.06:.035);p.armL=-power*.012;p.head=-p.lean*.25;
-  p.legL=-power*.010;p.legR=power*.018;
   const load=wind*(1-strike);
-  if(['swordsman','rogue'].includes(classId)){p.handLY=-load*.1+power*.045;p.handLX=power*.08;p.wristL=-load*.6+power*1.1;p.handRX=power*.05;p.wristR=-power*.6;}
-  else if(classId==='lancer'){p.handLX=power*.15-load*.03;p.handLY=-power*.045;p.wristL=power*1.15;p.handRX=power*.08;}
+  p.frame=q>=.29&&q<.78?3:0;p.lean=-.025*load+.045*power*comboBoost;p.crouch=.018*load+(v===1?.01*power:0);
+  p.x=classId==='hunter'?-.03*load-.04*power:-.045*load+.18*comboBoost*power;
+  p.y=(v===3?.045:v===2?.02:0)*Math.sin(clamp((q-.24)/.46)*Math.PI);
+  p.armR=power*(classId==='lancer'?.06:.035)*comboBoost;p.armL=-power*.012*comboBoost;p.head=-p.lean*.25;
+  p.legL=-power*.010*comboBoost;p.legR=power*.018*comboBoost;
+  if(['swordsman','rogue'].includes(classId)){p.handLY=-load*.1+power*(v===1?.01:.045);p.handLX=power*.08*comboBoost;p.wristL=-load*.6+power*(v===3?1.35:1.1);p.handRX=power*.05;p.wristR=-power*.6;}
+  else if(classId==='lancer'){p.handLX=power*.15*comboBoost-load*.03;p.handLY=v===1?power*.01:-power*.045;p.wristL=power*1.15;p.handRX=power*.08;}
   else if(classId==='hunter'){p.handLX=-load*.04+power*.1;p.handLY=-wind*.09*(1-recover);p.handRY=-wind*.07*(1-recover);p.wristR=power*.1;}
-  else{p.handRX=power*.1-load*.025;p.handRY=classId==='boxer'?power*.025:-power*.11;p.handLY=-load*.02;}
-  p.footLX=-power*.015;p.footRX=power*.025;
+  else{p.handRX=power*.1*comboBoost-load*.025;p.handRY=classId==='boxer'?(v===2?-power*.04:power*.025):-power*.11;p.handLY=-load*.02;}
+  p.footLX=-power*.015*comboBoost;p.footRX=power*.025*comboBoost;
  }else if(mode==='cast'){
   const lift=ease(t/.25)*(1-ease((t-.55)/.25));p.frame=t>.18&&t<.7?3:0;p.armL=-lift*.022;p.armR=lift*.022;p.body=lift*.012;p.head=-lift*.006;
  }else if(mode==='guard'){p.crouch=.028;p.lean=-.015;p.armL=.012;p.armR=-.012;}
@@ -74,8 +77,8 @@ export function characterMotion({time=0,mode='idle',classId='shaman',reduced=fal
   p.handLX=p.armL;p.handRX=p.armR;p.handLY=-(p.armLY??0)-p.armL*.5;p.handRY=-(p.armRY??0)-p.armR*.5;
   p.footLX=p.legL;p.footRX=p.legR;p.footLY=-p.liftL;p.footRY=-p.liftR;
  }
- p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId,view);
- if(classId==='novice'&&mode==='attack'){Object.assign(p,novicePunchPose(t/attackDuration(classId),{reduced}));p.profileFrame=true;}p.stand=mode==='idle'?1:0;
+ p.artFrame=motionFrame(mode,mode==='attack'?t/attackDuration(classId):t,phase,reduced,classId,view,variant);
+ if(classId==='novice'&&mode==='attack'){Object.assign(p,novicePunchPose(t/attackDuration(classId),{reduced,variant}));p.profileFrame=true;}p.stand=mode==='idle'?1:0;
  return p;
 }
 // Continuous soft weights avoid cutting a sprite into disconnected rectangles.

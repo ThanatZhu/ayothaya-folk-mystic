@@ -3,7 +3,7 @@
   "bodyHeight": 210,
   "frameSize": 320,
   "foot": 276,
-  "review": "owner-approved-for-release",
+  "review": "preview-only",
   "actors": {
     "novice-male": {
       "source": "player/novice-male.png",
@@ -116,6 +116,78 @@
         {
           "rect": [
             2240,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-male.png"
+        },
+        {
+          "rect": [
+            4800,
             0,
             320,
             320
@@ -249,30 +321,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -289,10 +369,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -449,6 +529,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/novice-female.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -574,30 +726,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -614,10 +774,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -774,6 +934,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-male.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -899,30 +1131,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -939,10 +1179,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -1099,6 +1339,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/swordsman-female.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -1224,30 +1536,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -1264,10 +1584,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -1424,6 +1744,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-male.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -1549,30 +1941,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -1589,10 +1989,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -1749,6 +2149,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/lancer-female.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -1874,30 +2346,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -1914,10 +2394,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -2074,6 +2554,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-male.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -2199,30 +2751,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -2239,10 +2799,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -2399,6 +2959,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/hunter-female.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -2524,30 +3156,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -2564,10 +3204,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -2724,6 +3364,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-male.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -2849,30 +3561,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -2889,10 +3609,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -3049,6 +3769,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/boxer-female.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -3174,30 +3966,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -3214,10 +4014,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -3374,6 +4174,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-male.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -3499,30 +4371,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -3539,10 +4419,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -3699,6 +4579,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/rogue-female.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -3824,30 +4776,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -3864,10 +4824,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -4024,6 +4984,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-male.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -4149,30 +5181,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -4189,10 +5229,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -4349,6 +5389,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/shaman-female.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -4474,30 +5586,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -4514,10 +5634,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -4674,6 +5794,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-male.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -4799,30 +5991,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -4839,10 +6039,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -4999,6 +6199,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/acolyte-female.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -5124,30 +6396,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -5164,10 +6444,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -5322,6 +6602,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-0.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -5398,30 +6750,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -5438,10 +6798,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -5589,6 +6949,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-1.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -5665,30 +7097,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -5705,10 +7145,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -5856,6 +7296,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-2.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -5932,30 +7444,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -5972,10 +7492,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -6123,6 +7643,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/people-3.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -6199,30 +7791,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -6239,10 +7839,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -6390,6 +7990,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-0.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -6466,30 +8138,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -6506,10 +8186,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -6657,6 +8337,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-1.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -6733,30 +8485,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -6773,10 +8533,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -6924,6 +8684,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-2.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -7000,30 +8832,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -7040,10 +8880,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -7191,6 +9031,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-arms-3.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -7267,30 +9179,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -7307,10 +9227,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -7458,6 +9378,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-0.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -7534,30 +9526,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -7574,10 +9574,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -7725,6 +9725,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-1.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -7801,30 +9873,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -7841,10 +9921,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -7992,6 +10072,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-2.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -8068,30 +10220,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -8108,10 +10268,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -8259,6 +10419,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/masters-mystic-3.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -8335,30 +10567,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -8375,10 +10615,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -8526,6 +10766,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-0.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -8602,30 +10914,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -8642,10 +10962,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -8793,6 +11113,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-1.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -8869,30 +11261,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -8909,10 +11309,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -9060,6 +11460,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-2.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -9136,30 +11608,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -9176,10 +11656,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -9327,6 +11807,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-market-3.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -9403,30 +11955,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -9443,10 +12003,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -9594,6 +12154,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-0.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -9670,30 +12302,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -9710,10 +12350,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -9861,6 +12501,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-1.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -9937,30 +12649,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -9977,10 +12697,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -10128,6 +12848,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-2.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -10204,30 +12996,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -10244,10 +13044,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [
@@ -10395,6 +13195,78 @@
         },
         {
           "rect": [
+            2560,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            2880,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            3200,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            3520,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            3840,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            4160,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            4480,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
+            4800,
+            0,
+            320,
+            320
+          ],
+          "source": "../character-life101/locomotion/citizens-river-3.png"
+        },
+        {
+          "rect": [
             0,
             0,
             320,
@@ -10471,30 +13343,38 @@
             5,
             6,
             7,
-            8
-          ],
-          "fps": 3.6,
-          "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
-        },
-        "run": {
-          "frames": [
+            8,
             9,
             10,
             11,
             12
           ],
-          "fps": 5.5,
+          "fps": 7.6,
           "loop": true,
-          "note": "ภาพวาดใหม่ 4 จังหวะ · ขานำสลับข้าง แขนอิสระแกว่งสวนขา สัมภาระอยู่ด้านเดิม"
+          "note": "ภาพวาด 8 จังหวะเต็มรอบก้าว · ขานำสลับข้างพร้อมจังหวะรับน้ำหนักและส่งตัวสมจริง"
         },
-        "sitDown": {
+        "run": {
           "frames": [
-            0,
             13,
             14,
             15,
             16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "fps": 11,
+          "loop": true,
+          "note": "ภาพวิ่ง 8 จังหวะเต็มรอบก้าว · จังหวะลอยตัว ลงน้ำหนัก และดีดตัวสลับข้างสมจริง"
+        },
+        "sitDown": {
+          "frames": [
+            0,
+            21,
+            22,
+            23,
+            24,
             2
           ],
           "frameDurations": [
@@ -10511,10 +13391,10 @@
         "standUp": {
           "frames": [
             2,
-            16,
-            15,
-            14,
-            13,
+            24,
+            23,
+            22,
+            21,
             0
           ],
           "frameDurations": [

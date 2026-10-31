@@ -193,7 +193,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   try{const image=new Image();image.src=atlasPath(state.character.classId);await image.decode();if(generation!==loadingGeneration||views.get(id)!==placeholder)return;
    const art=customizeAtlas(image,state.character.appearance,state.character.classId),frames=Array.from({length:4},(_,i)=>frame(art,atlasCell(state.character.gender,i))),sprite=createPaintedAvatar(frames[0],{directional:false,classId:state.character.classId,gender:state.character.gender,appearance:state.character.appearance,equipment:state.equipment});sprite.scale.set(CHARACTER_WORLD_SCALE,CHARACTER_WORLD_SCALE,1);sprite.position.set(state.player.x,.06,state.player.z);scene.add(sprite);
    const label=el('span','remote-player-label');label.append(el('small','rank-title'),el('b','',state.character.name));label.querySelector('b').dataset.i18nSkip='';label.querySelector('.rank-title').hidden=true;labels.append(label);
-   views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null,equipmentKey:JSON.stringify(state.equipment)});
+   views.set(id,{...placeholder,loading:false,sprite,frames,label,gait:0,action:null,emote:null,comboStep:0,lastComboAt:-9,equipmentKey:JSON.stringify(state.equipment)});
   }catch{if(views.get(id)===placeholder)placeholder.retryAt=performance.now()+5000;}
  }
  function acceptSnapshot(s){presentation.push({type:'presentationSnapshot',snapshot:s,at:s.time},s.time);for(const e of s.events??[])presentation.push(e,s.time);}
@@ -219,8 +219,12 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    if(e.type==='cast'){
     if(!roleAnimationActive(v.roleAction,clock))v.roleAction=null;
     const id=v.state.character.classId,skill=skillTrack(id,e.skillIndex),current=skillTrack(id,v.action?.index);
-    if(skill||!current||clock-v.action.start>=current.duration)v.action={index:e.skillIndex??null,start:clock-(e.lag??0),timing:e.timing,castId:e.castId,facing:castFacing(e,v.state.player.face)};
-    const track=skill&&e.timing?{...skill,duration:e.timing.duration,strikes:e.timing.impacts.map(at=>at/e.timing.duration)}:skill??{...skillTrack(id,0),duration:e.timing?.duration??attackDuration(id),strikes:[.42]},from=e.from??v.state.player,to=e.to??from;
+    if(skill||!current||clock-v.action.start>=current.duration){
+     if(!skill){v.comboStep=clock-(v.lastComboAt??-9)<1.8?((v.comboStep??-1)+1)%4:0;v.lastComboAt=clock;}
+     v.action={index:e.skillIndex??null,start:clock-(e.lag??0),timing:e.timing,castId:e.castId,facing:castFacing(e,v.state.player.face)};
+    }
+    const comboSkillIdx=[0,1,6,9][Math.max(0,v.comboStep??0)%4]??0;
+    const track=skill&&e.timing?{...skill,duration:e.timing.duration,strikes:e.timing.impacts.map(at=>at/e.timing.duration)}:skill??{...skillTrack(id,comboSkillIdx),duration:e.timing?.duration??attackDuration(id),strikes:[.42]},from=e.from??v.state.player,to=e.to??from;
     const noviceFx=id==='novice'&&skill&&Number.isInteger(e.skillIndex)?'novice:'+e.skillIndex:null;
     if(noviceFx&&game.roleEffects?.has(noviceFx))game.roleEffects.spawn({...e,roleSkillId:noviceFx,from,to,lag:e.lag??0});
     else{const effect=fx.create(track,{...e,skillIndex:skill?e.skillIndex:null,synced:!!e.timing,from,to:{...to,y:groundHeight(game.world.nav,to.x,to.z)},direction:v.state.player.face,groundY:groundHeight(game.world.nav,from.x,from.z),reduced:reduced.matches,quality:compact.matches?'low':'high'});effect.age=e.lag??0;}
@@ -316,8 +320,8 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
    const mode=['sit','sleep','run'].includes(chosen)&&!supported?(chosen==='run'?'walk':'idle'):chosen,locomotion=mode==='walk'||mode==='run',poseTime=mode==='hit'?clock-v.hitUntil+.28:skillActive||basicActive?elapsed:emote?.name===mode?clock-emote.time:clock;
    v.label.dataset.animationPending=['sit','sleep','run'].includes(chosen)&&!supported?chosen:'';
    const rolePose=p.hp>0?sampleRolePose(v.roleAction,clock,{reduced:reduced.matches}):null;
-   const pose=rolePose??(skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed*(v.action.timing?track.duration/v.action.timing.duration:1),{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:basicActive&&mode==='attack'?elapsed*attackDuration(state.character.classId)/(v.action.timing?.duration??attackDuration(state.character.classId)):poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view)}));
-   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(v.sprite.userData.directionalActive&&mode==='walk'||v.sprite.userData.usesAuthoredGround?.(mode)||v.sprite.userData.skillArt?0:pose.y);const angle=controls.getAzimuthalAngle(),poseFace=rolePose?(v.roleAction.facing??p.face):skillActive||basicActive?(v.action.facing??p.face):p.face;{const side=poseFace.x*Math.cos(angle)-poseFace.z*Math.sin(angle);if(rolePose||skillActive||basicActive?Math.abs(side)>1e-6:Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
+   const pose=rolePose??(skillActive&&mode!=='hit'?skillPose(state.character.classId,v.action.index,elapsed*(v.action.timing?track.duration/v.action.timing.duration:1),{reduced:reduced.matches}):characterMotion({classId:state.character.classId,mode,time:basicActive&&mode==='attack'?elapsed*attackDuration(state.character.classId)/(v.action.timing?.duration??attackDuration(state.character.classId)):poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches,view:v.view=walkView(p.face,controls.getAzimuthalAngle(),v.view),variant:Math.max(0,v.comboStep??0)}));
+   v.sprite.material.map=v.frames[0];v.sprite.position.y=groundHeight(game.world.nav,p.x,p.z)+.06+(locomotion||v.sprite.userData.usesAuthoredGround?.(mode)||v.sprite.userData.skillArt?0:pose.y);const angle=controls.getAzimuthalAngle(),poseFace=rolePose?(v.roleAction.facing??p.face):skillActive||basicActive?(v.action.facing??p.face):p.face;{const side=poseFace.x*Math.cos(angle)-poseFace.z*Math.sin(angle);if(rolePose||skillActive||basicActive?Math.abs(side)>1e-6:Math.abs(side)/(Math.hypot(p.face.x,p.face.z)||1)>.3)v.flip=side<0;}
    if(basicActive&&mode==='attack')pose.actionPhase=Math.max(0,Math.min(1,elapsed/(v.action.timing?.duration??attackDuration(state.character.classId))));
    v.sprite.userData.setFacing?.(poseFace,angle,{mode,time:poseTime,phase:locomotion?v.gait:null,reduced:reduced.matches});v.sprite.userData.pose(pose,!!v.flip);v.sprite.visible=p.hp>0||(p.down??0)>0;game.ghost?.(v.sprite,!!p.hidden);game.xray?.(v.sprite,groundHeight(game.world.nav,p.x,p.z));
    if((state.rebirth??0)!==v.rankShown){v.rankShown=state.rebirth??0;const t=v.label.querySelector('.rank-title');if(t){t.hidden=!v.rankShown;t.textContent=v.rankShown?'✦ '+rebirthRank(v.rankShown)+' ✦':'';}}

@@ -9,7 +9,7 @@ export function lifeAssetVariant(classId,equipment=null){
  return classId&&['shaman','rogue'].includes(classId)&&normalizeEquipment(equipment,classId).weapon.endsWith('-crafted')?'crafted106':'basic';
 }
 async function catalog(variant='basic'){
- if(!manifests.has(variant))manifests.set(variant,fetch(variant==='crafted106'?'./assets/character-life106/manifest.json?v=106':ROOT+'manifest.json?v=life101').then(async r=>{
+ if(!manifests.has(variant))manifests.set(variant,fetch(variant==='crafted106'?'./assets/character-life106/manifest.json?v=108':ROOT+'manifest.json?v=life108').then(async r=>{
   if(!r.ok)throw new Error('โหลดรายการท่าทางตัวละครไม่ได้');
   return r.json();
  }).catch(error=>{manifests.delete(variant);throw error;}));
@@ -17,7 +17,8 @@ async function catalog(variant='basic'){
 }
 function image(path){
  if(!images.has(path))images.set(path,(async()=>{
-  const img=new Image();img.src=/^(?:\.\/)?assets\//.test(path)||path.startsWith('/')?path:ROOT+path;await img.decode();return img;
+  const img=new Image(),base=/^(?:\.\/)?assets\//.test(path)||path.startsWith('/')?path:ROOT+path;
+  img.src=base+(base.includes('?')?'&':'?')+'v=life108';await img.decode();return img;
  })().catch(error=>{images.delete(path);throw error;}));
  return images.get(path);
 }

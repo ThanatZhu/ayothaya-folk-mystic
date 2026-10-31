@@ -6,7 +6,7 @@ const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const base=path.join(repo,'assets/character-life100'),next=path.join(repo,'assets/character-life101');
 const read=async file=>JSON.parse(await readFile(file,'utf8'));
 const players=await read(path.join(base,'players.json')),npcs=await read(path.join(base,'npcs.json'));
-const manifest={version:2,bodyHeight:210,frameSize:320,foot:276,review:'preview-only',actors:{...players.actors,...npcs.actors}};
+const manifest={version:2,bodyHeight:210,frameSize:320,foot:276,review:'owner-approved-for-release',actors:{...players.actors,...npcs.actors}};
 const fragments=(await readdir(next)).filter(name=>name.endsWith('.json')&&name!=='coverage.json').sort();
 for(const name of fragments){
  const fragment=await read(path.join(next,name));

@@ -10,7 +10,7 @@
           116,
           220
         ],
-        "anchor": 59.0,
+        "anchor": 59,
         "scale": 0.977778
       },
       {
@@ -21,7 +21,7 @@
           145,
           221
         ],
-        "anchor": 71.0,
+        "anchor": 71,
         "scale": 0.977778
       },
       {
@@ -32,7 +32,7 @@
           140,
           222
         ],
-        "anchor": 73.0,
+        "anchor": 73,
         "scale": 0.977778
       },
       {
@@ -43,7 +43,7 @@
           145,
           220
         ],
-        "anchor": 75.0,
+        "anchor": 75,
         "scale": 0.977778
       },
       {
@@ -54,7 +54,7 @@
           136,
           221
         ],
-        "anchor": 75.0,
+        "anchor": 75,
         "scale": 0.977778
       },
       {
@@ -65,7 +65,7 @@
           149,
           221
         ],
-        "anchor": 84.0,
+        "anchor": 84,
         "scale": 0.977778
       },
       {
@@ -76,7 +76,7 @@
           147,
           224
         ],
-        "anchor": 71.0,
+        "anchor": 71,
         "scale": 0.977778
       },
       {
@@ -87,7 +87,7 @@
           197,
           224
         ],
-        "anchor": 96.0,
+        "anchor": 96,
         "scale": 0.977778
       },
       {
@@ -98,7 +98,7 @@
           176,
           220
         ],
-        "anchor": 81.0,
+        "anchor": 81,
         "scale": 0.977778
       },
       {
@@ -109,7 +109,7 @@
           168,
           225
         ],
-        "anchor": 77.0,
+        "anchor": 77,
         "scale": 0.977778
       },
       {
@@ -120,7 +120,7 @@
           176,
           222
         ],
-        "anchor": 98.0,
+        "anchor": 98,
         "scale": 0.977778
       },
       {
@@ -131,96 +131,96 @@
           117,
           225
         ],
-        "anchor": 59.0,
+        "anchor": 59,
         "scale": 0.977778
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          52,
-          37,
-          196,
-          293
+          99,
+          66,
+          131,
+          210
         ],
-        "anchor": 108.0,
-        "scale": 0.738391
+        "anchor": 61,
+        "scale": 1.024339,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          374,
-          37,
-          177,
-          293
+          418,
+          66,
+          123,
+          210
         ],
-        "anchor": 95.0,
-        "scale": 0.735853
+        "anchor": 62,
+        "scale": 1.024339,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          667,
-          37,
-          204,
-          293
+          747,
+          66,
+          105,
+          210
         ],
-        "anchor": 115.0,
-        "scale": 0.738391
+        "anchor": 53,
+        "scale": 1.024339,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          989,
-          36,
-          192,
-          294
+          1067,
+          66,
+          114,
+          210
         ],
-        "anchor": 105.0,
-        "scale": 0.733333
+        "anchor": 53,
+        "scale": 1.024339,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          59,
-          345,
-          187,
-          290
+          98,
+          386,
+          132,
+          210
         ],
-        "anchor": 100.0,
-        "scale": 0.743519
+        "anchor": 62,
+        "scale": 1.024339,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          374,
-          344,
-          178,
-          292
+          421,
+          386,
+          119,
+          210
         ],
-        "anchor": 96.0,
-        "scale": 0.735853
+        "anchor": 59,
+        "scale": 1.024339,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          686,
-          344,
-          192,
-          291
+          745,
+          386,
+          103,
+          210
         ],
-        "anchor": 96.0,
-        "scale": 0.738391
+        "anchor": 55,
+        "scale": 1.024339,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          997,
-          344,
-          191,
-          290
+          1065,
+          386,
+          111,
+          210
         ],
-        "anchor": 99.0,
-        "scale": 0.738391
+        "anchor": 55,
+        "scale": 1.024339,
+        "source": "acolyte-walk.png"
       }
     ],
     "female": [
@@ -232,7 +232,7 @@
           118,
           227
         ],
-        "anchor": 62.0,
+        "anchor": 62,
         "scale": 0.969163
       },
       {
@@ -243,7 +243,7 @@
           144,
           226
         ],
-        "anchor": 77.0,
+        "anchor": 77,
         "scale": 0.969163
       },
       {
@@ -254,7 +254,7 @@
           141,
           226
         ],
-        "anchor": 73.0,
+        "anchor": 73,
         "scale": 0.969163
       },
       {
@@ -265,7 +265,7 @@
           145,
           225
         ],
-        "anchor": 75.0,
+        "anchor": 75,
         "scale": 0.969163
       },
       {
@@ -276,7 +276,7 @@
           134,
           226
         ],
-        "anchor": 75.0,
+        "anchor": 75,
         "scale": 0.969163
       },
       {
@@ -287,7 +287,7 @@
           149,
           227
         ],
-        "anchor": 84.0,
+        "anchor": 84,
         "scale": 0.969163
       },
       {
@@ -298,7 +298,7 @@
           150,
           225
         ],
-        "anchor": 72.0,
+        "anchor": 72,
         "scale": 0.969163
       },
       {
@@ -309,7 +309,7 @@
           199,
           227
         ],
-        "anchor": 97.0,
+        "anchor": 97,
         "scale": 0.969163
       },
       {
@@ -320,7 +320,7 @@
           178,
           222
         ],
-        "anchor": 82.0,
+        "anchor": 82,
         "scale": 0.969163
       },
       {
@@ -331,7 +331,7 @@
           169,
           227
         ],
-        "anchor": 77.0,
+        "anchor": 77,
         "scale": 0.969163
       },
       {
@@ -342,7 +342,7 @@
           178,
           222
         ],
-        "anchor": 99.0,
+        "anchor": 99,
         "scale": 0.969163
       },
       {
@@ -353,96 +353,96 @@
           119,
           224
         ],
-        "anchor": 61.0,
+        "anchor": 61,
         "scale": 0.969163
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          50,
-          656,
-          198,
-          298
+          102,
+          706,
+          137,
+          210
         ],
-        "anchor": 108.0,
-        "scale": 0.742477
+        "anchor": 58,
+        "scale": 1.047619,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          374,
-          656,
-          183,
-          298
+          424,
+          706,
+          124,
+          210
         ],
-        "anchor": 97.0,
-        "scale": 0.739969
+        "anchor": 56,
+        "scale": 1.047619,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          672,
-          656,
-          200,
-          298
+          741,
+          706,
+          108,
+          210
         ],
-        "anchor": 110.0,
-        "scale": 0.742477
+        "anchor": 59,
+        "scale": 1.047619,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          989,
-          656,
-          194,
-          298
+          1062,
+          706,
+          120,
+          210
         ],
-        "anchor": 107.0,
-        "scale": 0.739969
+        "anchor": 58,
+        "scale": 1.047619,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          59,
-          965,
-          190,
-          285
+          96,
+          1026,
+          131,
+          210
         ],
-        "anchor": 98.0,
-        "scale": 0.773961
+        "anchor": 64,
+        "scale": 1.047619,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          371,
-          965,
-          186,
-          286
+          417,
+          1026,
+          121,
+          210
         ],
-        "anchor": 98.0,
-        "scale": 0.771235
+        "anchor": 63,
+        "scale": 1.047619,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          686,
-          965,
-          197,
-          286
+          741,
+          1026,
+          110,
+          210
         ],
-        "anchor": 96.0,
-        "scale": 0.768529
+        "anchor": 59,
+        "scale": 1.047619,
+        "source": "acolyte-walk.png"
       },
       {
-        "source": "acolyte-walk.png",
         "rect": [
-          1001,
-          965,
-          185,
-          284
+          1061,
+          1026,
+          122,
+          210
         ],
-        "anchor": 94.0,
-        "scale": 0.771235
+        "anchor": 59,
+        "scale": 1.047619,
+        "source": "acolyte-walk.png"
       }
     ]
   }

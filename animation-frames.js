@@ -5,12 +5,68 @@ export const WALK_BASE={side:12,front:20,back:28};
 // 0.61.1 standing still uses the same redrawn art as walking (feet together, arms down: frame 4 of the front/back
 // cycle), so the character no longer changes style when it stops. Walking up → stand facing away, otherwise face the camera.
 export const STAND_FRAME={front:23,back:31};
-export function motionFrame(mode,time=0,phase=null,reduced=false,classId='novice',view='side'){
+export const ATTACK_COMBOS={
+ novice:[
+  [[.24,5],[.58,6],[.85,10]],
+  [[.22,5],[.56,7],[.85,10]],
+  [[.20,8],[.44,7],[.66,6],[.86,10]],
+  [[.24,8],[.62,9],[.86,10]]
+ ],
+ swordsman:[
+  [[.24,5],[.58,6],[.85,10]],
+  [[.22,5],[.56,7],[.85,10]],
+  [[.20,8],[.45,7],[.68,6],[.86,10]],
+  [[.24,5],[.62,9],[.86,10]]
+ ],
+ lancer:[
+  [[.24,5],[.58,6],[.85,10]],
+  [[.22,5],[.56,7],[.85,10]],
+  [[.20,8],[.45,7],[.68,6],[.86,10]],
+  [[.24,8],[.62,9],[.86,10]]
+ ],
+ hunter:[
+  [[.24,5],[.58,7],[.85,10]],
+  [[.20,5],[.44,6],[.68,7],[.86,10]],
+  [[.22,8],[.56,7],[.85,9]],
+  [[.24,6],[.62,9],[.86,10]]
+ ],
+ boxer:[
+  [[.24,5],[.58,6],[.85,10]],
+  [[.22,5],[.56,7],[.85,10]],
+  [[.22,5],[.58,8],[.85,10]],
+  [[.24,8],[.62,9],[.86,10]]
+ ],
+ rogue:[
+  [[.24,5],[.58,6],[.85,10]],
+  [[.22,8],[.56,7],[.85,10]],
+  [[.20,5],[.44,6],[.68,7],[.86,10]],
+  [[.24,8],[.62,9],[.86,10]]
+ ],
+ shaman:[
+  [[.24,5],[.58,6],[.85,10]],
+  [[.22,5],[.56,7],[.85,10]],
+  [[.22,8],[.56,6],[.85,10]],
+  [[.24,8],[.62,9],[.86,10]]
+ ],
+ acolyte:[
+  [[.24,5],[.58,6],[.85,10]],
+  [[.22,11],[.56,7],[.85,10]],
+  [[.22,8],[.56,6],[.85,11]],
+  [[.24,11],[.62,9],[.86,10]]
+ ]
+};
+export function attackComboFrame(classId='novice',t=0,variant=0){
+ const tracks=ATTACK_COMBOS[classId]||ATTACK_COMBOS.novice;
+ const track=tracks[((variant|0)%tracks.length+tracks.length)%tracks.length];
+ for(const [until,frame] of track)if(t<until)return frame;
+ return 0;
+}
+export function motionFrame(mode,time=0,phase=null,reduced=false,classId='novice',view='side',variant=0){
  if(reduced)return 0;
  const t=Math.max(0,Number.isFinite(time)?time:0);
  if(mode==='walk')return (WALK_BASE[view]??12)+Math.floor((((phase??t*1.65)%1+1)%1)*8);
  if(mode==='idle')return view==='back'?STAND_FRAME.back:STAND_FRAME.front;
- if(mode==='attack'||mode==='cast')return t<.24?5:t<.58?(classId==='hunter'?7:6):t<.85?10:0;
+ if(mode==='attack'||mode==='cast')return attackComboFrame(classId,t,variant);
  if(mode==='guard')return ['swordsman','novice'].includes(classId)?8:classId==='acolyte'?9:5;
  if(mode==='hit')return 5;
  if(mode==='dash')return 7;

@@ -14,12 +14,13 @@ export function createLifeNPC({game,map,scene,camera,controls,bagUI,worldUI}){
  function actor(classId,gender,label,interactive=false){
   const sprite=createRiggedSprite(blank(),{classId,gender});sprite.scale.set(CHARACTER_WORLD_SCALE,CHARACTER_WORLD_SCALE,1);scene.add(sprite);
   const tag=document.createElement(interactive?'button':'span');if(interactive){tag.type='button';tag.style.pointerEvents='auto';}tag.className='npc-label life-label';tag.textContent=label;labels.append(tag);
-  return {classId,sprite,tag,x:0,z:0,face:{x:1,z:0},gait:0,view:'side',flip:false,moving:false,running:false,rest:0,attackAt:-9,
+  return {classId,sprite,tag,x:0,z:0,face:{x:1,z:0},gait:0,view:'side',flip:false,moving:false,running:false,rest:0,attackAt:-9,comboStep:0,
    place(dt,t){
     const mode=t-this.attackAt<attackDuration(classId)?'attack':this.moving?(this.running&&sprite.userData.supportsAction('run')?'run':'walk'):this.rest>0&&sprite.userData.supportsAction('sit')?'sit':'idle';
-    const p=characterMotion({classId,mode,time:t-this.attackAt<attackDuration(classId)?t-this.attackAt:t,phase:this.gait,reduced:matchMedia('(prefers-reduced-motion:reduce)').matches,view:this.view=walkView(this.face,controls.getAzimuthalAngle(),this.view)});
+    const p=characterMotion({classId,mode,time:t-this.attackAt<attackDuration(classId)?t-this.attackAt:t,phase:this.gait,reduced:matchMedia('(prefers-reduced-motion:reduce)').matches,view:this.view=walkView(this.face,controls.getAzimuthalAngle(),this.view),variant:this.comboStep});
     const side=this.face.x*Math.cos(controls.getAzimuthalAngle())-this.face.z*Math.sin(controls.getAzimuthalAngle());if(Math.abs(side)>.3)this.flip=side<0;
-    sprite.position.set(this.x,groundHeight(game.world.nav,this.x,this.z)+.06,this.z);sprite.userData.pose(p,this.flip);
+    const fl=Math.hypot(this.face.x,this.face.z)||1,lunge=mode==='attack'?p.x:0;
+    sprite.position.set(this.x+this.face.x/fl*lunge,groundHeight(game.world.nav,this.x,this.z)+.06,this.z+this.face.z/fl*lunge);sprite.userData.pose(p,this.flip);
     const e=camera.matrixWorld.elements,h=WORLD_BODY_HEIGHT+.14;
     at.set(this.x+e[4]*h,sprite.position.y+e[5]*h,this.z+e[6]*h).project(camera);tag.hidden=Math.abs(at.x)>1.05||Math.abs(at.y)>1.05||at.z>=1||!sprite.visible;
     tag.style.transform=`translate(-50%,-100%) translate(${(at.x*.5+.5)*innerWidth}px,${(-at.y*.5+.5)*innerHeight}px)`;
@@ -55,7 +56,7 @@ export function createLifeNPC({game,map,scene,camera,controls,bagUI,worldUI}){
   };
  });
  game.onEvent(e=>{
-  if(e.type==='merc'&&merc&&(!e.actor||e.actor===world.networkSelfId)){merc.attackAt=world.time-(e.lag??0);merc.face={x:e.x-merc.x,z:e.z-merc.z};}
+  if(e.type==='merc'&&merc&&(!e.actor||e.actor===world.networkSelfId)){merc.comboStep=world.time-merc.attackAt<2.2?(merc.comboStep+1)%4:0;merc.attackAt=world.time-(e.lag??0);merc.face={x:e.x-merc.x,z:e.z-merc.z};}
   if(e.type==='hired'){pending=null;worldUI.endTalk();}
   if(e.type==='notice'&&pending&&['เดินเข้าใกล้นักผจญภัยเพื่อจ้าง','จ้างผู้ช่วยไม่ได้ในขณะนี้','มีทหารรับจ้างอยู่แล้ว','เบี้ยไม่พอ','อีกฝ่ายกำลังแลกของอยู่'].includes(e.text)){pending=null;drawHire();}
  });

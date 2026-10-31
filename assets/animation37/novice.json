@@ -9,7 +9,7 @@
           115,
           234
         ],
-        "anchor": 60.0,
+        "anchor": 60,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -20,7 +20,7 @@
           132,
           238
         ],
-        "anchor": 75.0,
+        "anchor": 75,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -31,7 +31,7 @@
           123,
           238
         ],
-        "anchor": 66.0,
+        "anchor": 66,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -42,7 +42,7 @@
           125,
           238
         ],
-        "anchor": 68.0,
+        "anchor": 68,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -53,7 +53,7 @@
           126,
           237
         ],
-        "anchor": 69.0,
+        "anchor": 69,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -64,7 +64,7 @@
           144,
           238
         ],
-        "anchor": 76.0,
+        "anchor": 76,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -75,7 +75,7 @@
           159,
           234
         ],
-        "anchor": 70.0,
+        "anchor": 70,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -86,7 +86,7 @@
           165,
           229
         ],
-        "anchor": 67.0,
+        "anchor": 67,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -97,7 +97,7 @@
           141,
           233
         ],
-        "anchor": 66.0,
+        "anchor": 66,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -108,7 +108,7 @@
           185,
           231
         ],
-        "anchor": 94.0,
+        "anchor": 94,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -119,7 +119,7 @@
           159,
           233
         ],
-        "anchor": 77.0,
+        "anchor": 77,
         "scale": 0.92437,
         "source": "novice.png"
       },
@@ -130,96 +130,96 @@
           109,
           235
         ],
-        "anchor": 54.0,
+        "anchor": 54,
         "scale": 0.92437,
         "source": "novice.png"
       },
       {
         "rect": [
-          81,
-          42,
-          151,
-          279
+          93,
+          66,
+          130,
+          210
         ],
-        "anchor": 82.0,
-        "scale": 0.775278,
+        "anchor": 67,
+        "scale": 1.030012,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          387,
-          41,
-          155,
-          280
+          413,
+          66,
+          126,
+          210
         ],
-        "anchor": 82.0,
-        "scale": 0.772509,
+        "anchor": 67,
+        "scale": 1.030012,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          699,
-          41,
-          159,
-          279
+          739,
+          66,
+          114,
+          210
         ],
-        "anchor": 87.0,
-        "scale": 0.775278,
+        "anchor": 61,
+        "scale": 1.030012,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          1011,
-          41,
-          161,
-          280
+          1058,
+          66,
+          115,
+          210
         ],
-        "anchor": 89.0,
-        "scale": 0.772509,
+        "anchor": 62,
+        "scale": 1.030012,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          74,
-          353,
-          160,
-          280
+          91,
+          386,
+          139,
+          210
         ],
-        "anchor": 88.0,
-        "scale": 0.772509,
+        "anchor": 69,
+        "scale": 1.030012,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          390,
-          353,
-          155,
-          279
+          422,
+          386,
+          118,
+          210
         ],
-        "anchor": 82.0,
-        "scale": 0.775278,
+        "anchor": 58,
+        "scale": 1.030012,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          700,
-          353,
-          160,
-          280
+          744,
+          386,
+          110,
+          210
         ],
-        "anchor": 87.0,
-        "scale": 0.772509,
+        "anchor": 56,
+        "scale": 1.030012,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          1012,
-          353,
-          166,
-          280
+          1063,
+          386,
+          110,
+          210
         ],
-        "anchor": 90.0,
-        "scale": 0.772509,
+        "anchor": 57,
+        "scale": 1.030012,
         "source": "novice-walk.png"
       }
     ],
@@ -231,7 +231,7 @@
           112,
           240
         ],
-        "anchor": 57.0,
+        "anchor": 57,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -242,7 +242,7 @@
           133,
           244
         ],
-        "anchor": 70.0,
+        "anchor": 70,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -253,7 +253,7 @@
           116,
           243
         ],
-        "anchor": 61.0,
+        "anchor": 61,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -264,7 +264,7 @@
           117,
           241
         ],
-        "anchor": 63.0,
+        "anchor": 63,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -275,7 +275,7 @@
           123,
           241
         ],
-        "anchor": 65.0,
+        "anchor": 65,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -286,7 +286,7 @@
           136,
           237
         ],
-        "anchor": 69.0,
+        "anchor": 69,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -297,7 +297,7 @@
           155,
           236
         ],
-        "anchor": 66.0,
+        "anchor": 66,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -308,7 +308,7 @@
           158,
           236
         ],
-        "anchor": 69.0,
+        "anchor": 69,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -319,7 +319,7 @@
           136,
           236
         ],
-        "anchor": 62.0,
+        "anchor": 62,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -330,7 +330,7 @@
           186,
           234
         ],
-        "anchor": 92.0,
+        "anchor": 92,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -341,7 +341,7 @@
           157,
           234
         ],
-        "anchor": 70.0,
+        "anchor": 70,
         "scale": 0.901639,
         "source": "novice.png"
       },
@@ -352,96 +352,96 @@
           108,
           239
         ],
-        "anchor": 52.0,
+        "anchor": 52,
         "scale": 0.901639,
         "source": "novice.png"
       },
       {
         "rect": [
-          79,
-          671,
-          152,
-          287
+          94,
+          706,
+          128,
+          210
         ],
-        "anchor": 78.0,
-        "scale": 0.753984,
+        "anchor": 66,
+        "scale": 1.030445,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          387,
-          672,
-          155,
-          284
+          415,
+          706,
+          125,
+          210
         ],
-        "anchor": 80.0,
-        "scale": 0.761949,
+        "anchor": 65,
+        "scale": 1.030445,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          700,
-          672,
-          159,
-          287
+          746,
+          706,
+          108,
+          210
         ],
-        "anchor": 83.0,
-        "scale": 0.753984,
+        "anchor": 54,
+        "scale": 1.030445,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          1013,
-          673,
-          160,
-          286
+          1066,
+          706,
+          108,
+          210
         ],
-        "anchor": 85.0,
-        "scale": 0.75662,
+        "anchor": 54,
+        "scale": 1.030445,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          72,
-          985,
-          159,
-          259
+          98,
+          1026,
+          136,
+          210
         ],
-        "anchor": 88.0,
-        "scale": 0.835496,
+        "anchor": 62,
+        "scale": 1.030445,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          387,
-          985,
-          158,
-          259
+          428,
+          1026,
+          115,
+          210
         ],
-        "anchor": 87.0,
-        "scale": 0.835496,
+        "anchor": 52,
+        "scale": 1.030445,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          698,
-          985,
-          160,
-          259
+          744,
+          1026,
+          110,
+          210
         ],
-        "anchor": 88.0,
-        "scale": 0.835496,
+        "anchor": 56,
+        "scale": 1.030445,
         "source": "novice-walk.png"
       },
       {
         "rect": [
-          1020,
-          984,
-          160,
-          261
+          1063,
+          1026,
+          111,
+          210
         ],
-        "anchor": 84.0,
-        "scale": 0.829094,
+        "anchor": 57,
+        "scale": 1.030445,
         "source": "novice-walk.png"
       }
     ]

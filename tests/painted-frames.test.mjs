@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {FRAME_COUNT,motionFrame,gestureFrame} from '../animation-frames.js';
+import {FRAME_COUNT,ATTACK_COMBOS,motionFrame,gestureFrame} from '../animation-frames.js';
 import {skillTrack,skillPose,SKILL_TRACKS} from '../skill-choreography.js';
 const ids=Object.keys(SKILL_TRACKS),base=new URL('../assets/animation37/',import.meta.url);
 test('every class and gender has complete, unclipped authored frames and six parts',()=>{
@@ -23,4 +23,16 @@ test('skill playback stays within painted atlas and distinct signature attacks u
  for(const id of ids)for(let slot=0;slot<10;slot++){const t=skillTrack(id,slot);for(let n=0;n<=100;n++){const p=skillPose(id,slot,t.duration*n/100);assert.ok(Number.isInteger(p.artFrame)&&p.artFrame>=0&&p.artFrame<12);assert.equal(p.sx,1);assert.equal(p.sy,1);}assert.equal(skillPose(id,slot,.4,{reduced:true}).artFrame,0);}
  assert.equal(gestureFrame('elbow','boxer'),7);assert.equal(gestureFrame('knee','boxer'),8);assert.equal(gestureFrame('kick','boxer'),9);
  assert.notEqual(gestureFrame('draw','hunter'),gestureFrame('release','hunter'));assert.equal(gestureFrame('pray','acolyte'),11);
+});
+test('every class including novice has four distinct basic attack combo sequences',()=>{
+ for(const id of ['novice',...ids]){
+  assert.equal(ATTACK_COMBOS[id]?.length,4,id+' has 4 attack combos');
+  const signatures=new Set();
+  for(let v=0;v<4;v++){
+   const seq=[.12,.32,.50,.72].map(q=>motionFrame('attack',q,null,false,id,'side',v));
+   assert.ok(seq.every(f=>Number.isInteger(f)&&f>=0&&f<12),id+' combo '+v+' valid frames');
+   signatures.add(seq.join(','));
+  }
+  assert.equal(signatures.size,4,id+' has 4 distinct combo frame sequences');
+ }
 });

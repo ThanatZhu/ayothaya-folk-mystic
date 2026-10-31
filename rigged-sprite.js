@@ -1,13 +1,13 @@
-import {loadPaintedGait220,gaitFits220,gaitFrame220} from './painted-gait220.js';
+import {gaitFits220,gaitFrame220} from './painted-gait220.js';
 import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=size1';
 import * as THREE from './vendor/build/three.module.js';
-import {loadPaintedCharacter} from './painted-character.js?v=size1';
-import {FRAME_COUNT} from './animation-frames.js?v=37';
-import {loadLifeArt,lifeFrameAt,mapFrames,builtFrames} from './character-life-art.js?v=106.0';
+import {loadPaintedCharacter} from './painted-character.js?v=life108';
+import {FRAME_COUNT} from './animation-frames.js?v=life108';
+import {loadLifeArt,lifeFrameAt,mapFrames,builtFrames} from './character-life-art.js?v=life108';
 import {createPosturePlayback} from './character-action-state.js?v=106.0';
 import {poseTexture,poseScale,posesFit} from './skill-pose-art.js?v=pose119';
 // Complete painted silhouettes: no mesh cuts through anatomical joints.
-export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt,gaitArtLoader=loadPaintedGait220}={}){
+export function createRiggedSprite(texture,{classId='novice',gender='male',appearance={},equipment=null,paintedArtLoader=loadPaintedCharacter,lifeArtLoader=loadLifeArt,gaitArtLoader=null}={}){
  const geometry=new THREE.PlaneGeometry(1,1);geometry.translate(0,.5,0);
  const material=new THREE.MeshBasicMaterial({map:texture,alphaTest:.45,transparent:false,depthWrite:true,side:THREE.DoubleSide,color:'#fff1da'});
  const mesh=new THREE.Mesh(geometry,material);mesh.frustumCulled=false;
@@ -38,7 +38,7 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
  }
  async function artwork(id,look,gear){
   const shown=currentGender,[art,result,nextGait]=await Promise.all([paintedArtLoader(id,look,gear),loadLife(id,look,gear,shown).then(value=>({value}),error=>({error})),
-   gaitFits220(id,shown,look,gear)?Promise.resolve().then(()=>gaitArtLoader(id,shown)).then(value=>({value}),error=>({error})):Promise.resolve({value:null})]);
+   gaitArtLoader&&gaitFits220(id,shown,look,gear)?Promise.resolve().then(()=>gaitArtLoader(id,shown)).then(value=>({value}),error=>({error})):Promise.resolve({value:null})]);
   return {art,shown,newLife:result.value??null,lifeError:result.error?.message??null,newGait:nextGait.value??null,gaitError:nextGait.error?.message??null};
  }
 

@@ -10,7 +10,7 @@
           156,
           219
         ],
-        "anchor": 82.0,
+        "anchor": 82,
         "scale": 0.990991
       },
       {
@@ -21,7 +21,7 @@
           152,
           223
         ],
-        "anchor": 84.0,
+        "anchor": 84,
         "scale": 0.990991
       },
       {
@@ -32,7 +32,7 @@
           156,
           220
         ],
-        "anchor": 93.0,
+        "anchor": 93,
         "scale": 0.990991
       },
       {
@@ -43,7 +43,7 @@
           155,
           220
         ],
-        "anchor": 83.0,
+        "anchor": 83,
         "scale": 0.990991
       },
       {
@@ -54,7 +54,7 @@
           144,
           223
         ],
-        "anchor": 82.0,
+        "anchor": 82,
         "scale": 0.990991
       },
       {
@@ -65,7 +65,7 @@
           156,
           215
         ],
-        "anchor": 94.0,
+        "anchor": 94,
         "scale": 0.990991
       },
       {
@@ -76,7 +76,7 @@
           174,
           211
         ],
-        "anchor": 106.0,
+        "anchor": 106,
         "scale": 0.990991
       },
       {
@@ -87,7 +87,7 @@
           162,
           208
         ],
-        "anchor": 65.0,
+        "anchor": 65,
         "scale": 0.990991
       },
       {
@@ -98,7 +98,7 @@
           155,
           211
         ],
-        "anchor": 75.0,
+        "anchor": 75,
         "scale": 0.990991
       },
       {
@@ -109,7 +109,7 @@
           160,
           212
         ],
-        "anchor": 78.0,
+        "anchor": 78,
         "scale": 0.990991
       },
       {
@@ -120,7 +120,7 @@
           182,
           199
         ],
-        "anchor": 120.0,
+        "anchor": 120,
         "scale": 0.990991
       },
       {
@@ -131,96 +131,96 @@
           144,
           218
         ],
-        "anchor": 73.0,
+        "anchor": 73,
         "scale": 0.990991
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          80,
-          28,
-          217,
-          306
+          81,
+          66,
+          146,
+          210
         ],
-        "anchor": 118.0,
-        "scale": 0.705066
+        "anchor": 79,
+        "scale": 1.033462,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          389,
-          32,
-          209,
-          304
+          401,
+          66,
+          142,
+          210
         ],
-        "anchor": 111.0,
-        "scale": 0.70972
+        "anchor": 79,
+        "scale": 1.033462,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          693,
-          32,
-          217,
-          303
+          716,
+          66,
+          150,
+          210
         ],
-        "anchor": 119.0,
-        "scale": 0.70972
+        "anchor": 84,
+        "scale": 1.033462,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          992,
-          28,
-          215,
-          309
+          1036,
+          66,
+          160,
+          210
         ],
-        "anchor": 120.0,
-        "scale": 0.698198
+        "anchor": 84,
+        "scale": 1.033462,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          77,
-          345,
-          211,
-          298
+          86,
+          386,
+          163,
+          210
         ],
-        "anchor": 111.0,
-        "scale": 0.726504
+        "anchor": 74,
+        "scale": 1.033462,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          380,
-          346,
-          213,
-          301
+          407,
+          386,
+          149,
+          210
         ],
-        "anchor": 115.0,
-        "scale": 0.719214
+        "anchor": 73,
+        "scale": 1.033462,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          690,
-          345,
-          206,
-          302
+          744,
+          386,
+          114,
+          210
         ],
-        "anchor": 111.0,
-        "scale": 0.719214
+        "anchor": 56,
+        "scale": 1.033462,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          993,
-          344,
-          215,
-          304
+          1061,
+          386,
+          117,
+          210
         ],
-        "anchor": 119.0,
-        "scale": 0.70972
+        "anchor": 59,
+        "scale": 1.033462,
+        "source": "swordsman-walk.png"
       }
     ],
     "female": [
@@ -232,7 +232,7 @@
           155,
           225
         ],
-        "anchor": 81.0,
+        "anchor": 81,
         "scale": 0.964912
       },
       {
@@ -243,7 +243,7 @@
           154,
           228
         ],
-        "anchor": 78.0,
+        "anchor": 78,
         "scale": 0.964912
       },
       {
@@ -254,7 +254,7 @@
           147,
           226
         ],
-        "anchor": 79.0,
+        "anchor": 79,
         "scale": 0.964912
       },
       {
@@ -265,7 +265,7 @@
           156,
           228
         ],
-        "anchor": 82.0,
+        "anchor": 82,
         "scale": 0.964912
       },
       {
@@ -276,7 +276,7 @@
           145,
           231
         ],
-        "anchor": 81.0,
+        "anchor": 81,
         "scale": 0.964912
       },
       {
@@ -287,7 +287,7 @@
           158,
           220
         ],
-        "anchor": 94.0,
+        "anchor": 94,
         "scale": 0.964912
       },
       {
@@ -298,7 +298,7 @@
           181,
           215
         ],
-        "anchor": 111.0,
+        "anchor": 111,
         "scale": 0.964912
       },
       {
@@ -309,7 +309,7 @@
           161,
           209
         ],
-        "anchor": 64.0,
+        "anchor": 64,
         "scale": 0.964912
       },
       {
@@ -320,7 +320,7 @@
           155,
           212
         ],
-        "anchor": 78.0,
+        "anchor": 78,
         "scale": 0.964912
       },
       {
@@ -331,7 +331,7 @@
           161,
           222
         ],
-        "anchor": 76.0,
+        "anchor": 76,
         "scale": 0.964912
       },
       {
@@ -342,7 +342,7 @@
           169,
           196
         ],
-        "anchor": 104.0,
+        "anchor": 104,
         "scale": 0.964912
       },
       {
@@ -353,96 +353,96 @@
           148,
           218
         ],
-        "anchor": 75.0,
+        "anchor": 75,
         "scale": 0.964912
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          72,
-          656,
-          214,
-          291
+          73,
+          706,
+          158,
+          210
         ],
-        "anchor": 113.0,
-        "scale": 0.738657
+        "anchor": 87,
+        "scale": 1.033834,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          368,
-          655,
-          209,
-          297
+          393,
+          706,
+          154,
+          210
         ],
-        "anchor": 110.0,
-        "scale": 0.728607
+        "anchor": 87,
+        "scale": 1.033834,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          666,
-          658,
-          212,
-          293
+          722,
+          706,
+          144,
+          210
         ],
-        "anchor": 114.0,
-        "scale": 0.736119
+        "anchor": 78,
+        "scale": 1.033834,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          973,
-          659,
-          214,
-          294
+          1042,
+          706,
+          155,
+          210
         ],
-        "anchor": 117.0,
-        "scale": 0.728607
+        "anchor": 78,
+        "scale": 1.033834,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          75,
-          953,
-          211,
-          282
+          90,
+          1026,
+          160,
+          210
         ],
-        "anchor": 107.0,
-        "scale": 0.765038
+        "anchor": 70,
+        "scale": 1.033834,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          368,
-          957,
-          211,
-          283
+          411,
+          1026,
+          146,
+          210
         ],
-        "anchor": 110.0,
-        "scale": 0.765038
+        "anchor": 69,
+        "scale": 1.033834,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          672,
-          959,
-          211,
-          280
+          742,
+          1026,
+          118,
+          210
         ],
-        "anchor": 114.0,
-        "scale": 0.770541
+        "anchor": 58,
+        "scale": 1.033834,
+        "source": "swordsman-walk.png"
       },
       {
-        "source": "swordsman-walk.png",
         "rect": [
-          980,
-          960,
-          209,
-          280
+          1062,
+          1026,
+          118,
+          210
         ],
-        "anchor": 109.0,
-        "scale": 0.770541
+        "anchor": 58,
+        "scale": 1.033834,
+        "source": "swordsman-walk.png"
       }
     ]
   }

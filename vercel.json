@@ -53,6 +53,11 @@
       "source": "/releases/:release",
       "destination": "/game.html",
       "permanent": false
+    },
+    {
+      "source": "/releases/:release/",
+      "destination": "/game.html",
+      "permanent": false
     }
   ],
   "rewrites": [

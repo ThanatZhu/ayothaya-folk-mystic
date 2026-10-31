@@ -1,0 +1,20 @@
+{
+  "tool": "built-in image_gen",
+  "purpose": "Replace stretched black frame centers with full green illustrated UI surfaces. Keep frame geometry and existing gameplay behavior.",
+  "masters": [
+    "outputs/ui-surfaces222/jade-silk-master.png",
+    "outputs/ui-surfaces222/jade-paper-master.png"
+  ],
+  "assets": [
+    {
+      "file": "jade-silk.webp",
+      "prompt": "Production game asset, not a UI mockup. Create one full-bleed seamless-feeling background texture for the interior of Thai fantasy MMORPG windows, Ayothaya emerald and antique gold theme. Landscape 1536 x 1024. A luminous but restrained mid-dark jade green painted silk and polished mineral surface, rich green #174f3e to #245f4b with soft gently drifting painterly cloud marbling. Very faint small traditional Thai diamond and lotus-petal textile motifs evenly distributed at about 4 percent contrast, exquisitely quiet. Entire center 85 percent must be uniform, uncluttered and low contrast for cream/gold text and item illustrations to be placed later. Soft warm jade illumination, gentle natural fibers, luxury game material. Edge-to-edge green at the same brightness, no vignette, no black pixels or near-black large regions, no black gradients, no inset dark rectangle, no panel border, no gold frame, no corners, no objects, no characters, no temples, no text, no symbols, no buttons, no sparkle streaks, no bright focal point. This is ONLY the flat green material used behind live interactive text, designed to crop responsively without losing anything. Opaque background."
+    },
+    {
+      "file": "jade-paper.webp",
+      "prompt": "Generate a production raster background material for Thai fantasy MMORPG inventory, card extraction, crafting and merchant windows. One landscape full-bleed opaque image, 1536 by 1024, no UI mockup. Soft medium jade-green lacquered handmade paper and woven Thai silk, warm earthy green #245541 with a gentle muted golden undertone, subtly illuminated fibers and fine handmade pigment grain. Keep at least the central 90 percent almost plain and evenly lit, reserved for readable cream text, card art, item lists and controls which will be added by code. Only extremely faint Thai lotus and diamond watermarks at the far outer edges at 2 percent contrast. Beautiful restrained old Ayutthaya craftsmanship, calm luxury, not shiny and not busy. The entire image must remain visibly GREEN, including all edges and corners. Absolutely no black or nearly black patches, no black vignette, no burnt paper edges, no inset rectangle, no panels, no bevels, no frame, no gold border, no corners, no text, no writing, no items, no people, no scenery, no bright light spot, no major diagonal lines. Cropping this material to a phone portrait or wide landscape should remain visually balanced."
+    }
+  ],
+  "mobile": "Same generated masters encoded for smaller viewports. No creative alteration.",
+  "date": "2026-10-30"
+}

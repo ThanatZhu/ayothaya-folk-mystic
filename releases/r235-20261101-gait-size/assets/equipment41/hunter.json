@@ -1,0 +1,449 @@
+{
+  "version": 41,
+  "frames": {
+    "male": [
+      {
+        "source": "hunter.png",
+        "rect": [
+          36,
+          10,
+          154,
+          222
+        ],
+        "anchor": 68.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          246,
+          10,
+          159,
+          222
+        ],
+        "anchor": 69.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          450,
+          11,
+          157,
+          223
+        ],
+        "anchor": 65.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          671,
+          11,
+          155,
+          221
+        ],
+        "anchor": 67.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          873,
+          12,
+          165,
+          221
+        ],
+        "anchor": 76.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          1092,
+          11,
+          146,
+          221
+        ],
+        "anchor": 63.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          16,
+          245,
+          194,
+          222
+        ],
+        "anchor": 73.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          228,
+          248,
+          185,
+          219
+        ],
+        "anchor": 72.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          440,
+          240,
+          179,
+          227
+        ],
+        "anchor": 76.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          658,
+          248,
+          177,
+          219
+        ],
+        "anchor": 71.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          875,
+          248,
+          164,
+          219
+        ],
+        "anchor": 66.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          1089,
+          246,
+          155,
+          221
+        ],
+        "anchor": 60.0,
+        "scale": 0.977778
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          12,
+          37,
+          217,
+          298
+        ],
+        "anchor": 94.0,
+        "scale": 0.728345
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          331,
+          37,
+          221,
+          295
+        ],
+        "anchor": 93.0,
+        "scale": 0.73083
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          664,
+          35,
+          217,
+          296
+        ],
+        "anchor": 92.0,
+        "scale": 0.725876
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          986,
+          35,
+          221,
+          297
+        ],
+        "anchor": 93.0,
+        "scale": 0.725876
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          17,
+          342,
+          218,
+          295
+        ],
+        "anchor": 91.0,
+        "scale": 0.73083
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          332,
+          346,
+          223,
+          291
+        ],
+        "anchor": 96.0,
+        "scale": 0.743519
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          660,
+          342,
+          224,
+          295
+        ],
+        "anchor": 96.0,
+        "scale": 0.73083
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          981,
+          343,
+          227,
+          294
+        ],
+        "anchor": 97.0,
+        "scale": 0.735853
+      }
+    ],
+    "female": [
+      {
+        "source": "hunter.png",
+        "rect": [
+          34,
+          479,
+          162,
+          229
+        ],
+        "anchor": 70.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          251,
+          479,
+          169,
+          229
+        ],
+        "anchor": 73.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          456,
+          478,
+          162,
+          230
+        ],
+        "anchor": 67.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          681,
+          480,
+          160,
+          228
+        ],
+        "anchor": 64.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          887,
+          480,
+          163,
+          227
+        ],
+        "anchor": 70.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          1090,
+          480,
+          158,
+          229
+        ],
+        "anchor": 67.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          21,
+          717,
+          199,
+          237
+        ],
+        "anchor": 71.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          243,
+          725,
+          177,
+          230
+        ],
+        "anchor": 66.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          443,
+          715,
+          178,
+          238
+        ],
+        "anchor": 79.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          649,
+          719,
+          186,
+          234
+        ],
+        "anchor": 80.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          868,
+          727,
+          171,
+          227
+        ],
+        "anchor": 67.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter.png",
+        "rect": [
+          1077,
+          726,
+          169,
+          227
+        ],
+        "anchor": 72.0,
+        "scale": 0.92437
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          23,
+          651,
+          211,
+          308
+        ],
+        "anchor": 91.0,
+        "scale": 0.684943
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          340,
+          652,
+          213,
+          307
+        ],
+        "anchor": 90.0,
+        "scale": 0.684943
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          670,
+          651,
+          216,
+          307
+        ],
+        "anchor": 94.0,
+        "scale": 0.684943
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          999,
+          651,
+          216,
+          307
+        ],
+        "anchor": 89.0,
+        "scale": 0.684943
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          25,
+          965,
+          213,
+          287
+        ],
+        "anchor": 91.0,
+        "scale": 0.73559
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          343,
+          966,
+          218,
+          285
+        ],
+        "anchor": 92.0,
+        "scale": 0.73559
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          676,
+          965,
+          215,
+          287
+        ],
+        "anchor": 91.0,
+        "scale": 0.733009
+      },
+      {
+        "source": "hunter-walk.png",
+        "rect": [
+          998,
+          966,
+          216,
+          286
+        ],
+        "anchor": 90.0,
+        "scale": 0.733009
+      }
+    ]
+  }
+}

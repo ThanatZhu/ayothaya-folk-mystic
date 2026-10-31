@@ -1,0 +1,449 @@
+{
+  "version": 41,
+  "frames": {
+    "male": [
+      {
+        "source": "swordsman.png",
+        "rect": [
+          29,
+          14,
+          156,
+          219
+        ],
+        "anchor": 82.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          260,
+          13,
+          152,
+          223
+        ],
+        "anchor": 84.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          465,
+          14,
+          156,
+          220
+        ],
+        "anchor": 93.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          677,
+          15,
+          155,
+          220
+        ],
+        "anchor": 83.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          910,
+          13,
+          144,
+          223
+        ],
+        "anchor": 82.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          1089,
+          18,
+          156,
+          215
+        ],
+        "anchor": 94.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          34,
+          250,
+          174,
+          211
+        ],
+        "anchor": 106.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          259,
+          250,
+          162,
+          208
+        ],
+        "anchor": 65.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          472,
+          249,
+          155,
+          211
+        ],
+        "anchor": 75.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          672,
+          249,
+          160,
+          212
+        ],
+        "anchor": 78.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          887,
+          261,
+          182,
+          199
+        ],
+        "anchor": 120.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          1095,
+          244,
+          144,
+          218
+        ],
+        "anchor": 73.0,
+        "scale": 0.990991
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          80,
+          28,
+          217,
+          306
+        ],
+        "anchor": 118.0,
+        "scale": 0.705066
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          389,
+          32,
+          209,
+          304
+        ],
+        "anchor": 111.0,
+        "scale": 0.70972
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          693,
+          32,
+          217,
+          303
+        ],
+        "anchor": 119.0,
+        "scale": 0.70972
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          992,
+          28,
+          215,
+          309
+        ],
+        "anchor": 120.0,
+        "scale": 0.698198
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          77,
+          345,
+          211,
+          298
+        ],
+        "anchor": 111.0,
+        "scale": 0.726504
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          380,
+          346,
+          213,
+          301
+        ],
+        "anchor": 115.0,
+        "scale": 0.719214
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          690,
+          345,
+          206,
+          302
+        ],
+        "anchor": 111.0,
+        "scale": 0.719214
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          993,
+          344,
+          215,
+          304
+        ],
+        "anchor": 119.0,
+        "scale": 0.70972
+      }
+    ],
+    "female": [
+      {
+        "source": "swordsman.png",
+        "rect": [
+          28,
+          479,
+          155,
+          225
+        ],
+        "anchor": 81.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          258,
+          478,
+          154,
+          228
+        ],
+        "anchor": 78.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          472,
+          480,
+          147,
+          226
+        ],
+        "anchor": 79.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          676,
+          478,
+          156,
+          228
+        ],
+        "anchor": 82.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          912,
+          477,
+          145,
+          231
+        ],
+        "anchor": 81.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          1088,
+          482,
+          158,
+          220
+        ],
+        "anchor": 94.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          28,
+          719,
+          181,
+          215
+        ],
+        "anchor": 111.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          259,
+          722,
+          161,
+          209
+        ],
+        "anchor": 64.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          472,
+          722,
+          155,
+          212
+        ],
+        "anchor": 78.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          671,
+          714,
+          161,
+          222
+        ],
+        "anchor": 76.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          887,
+          738,
+          169,
+          196
+        ],
+        "anchor": 104.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman.png",
+        "rect": [
+          1091,
+          718,
+          148,
+          218
+        ],
+        "anchor": 75.0,
+        "scale": 0.964912
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          72,
+          656,
+          214,
+          291
+        ],
+        "anchor": 113.0,
+        "scale": 0.738657
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          368,
+          655,
+          209,
+          297
+        ],
+        "anchor": 110.0,
+        "scale": 0.728607
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          666,
+          658,
+          212,
+          293
+        ],
+        "anchor": 114.0,
+        "scale": 0.736119
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          973,
+          659,
+          214,
+          294
+        ],
+        "anchor": 117.0,
+        "scale": 0.728607
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          75,
+          953,
+          211,
+          282
+        ],
+        "anchor": 107.0,
+        "scale": 0.765038
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          368,
+          957,
+          211,
+          283
+        ],
+        "anchor": 110.0,
+        "scale": 0.765038
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          672,
+          959,
+          211,
+          280
+        ],
+        "anchor": 114.0,
+        "scale": 0.770541
+      },
+      {
+        "source": "swordsman-walk.png",
+        "rect": [
+          980,
+          960,
+          209,
+          280
+        ],
+        "anchor": 109.0,
+        "scale": 0.770541
+      }
+    ]
+  }
+}

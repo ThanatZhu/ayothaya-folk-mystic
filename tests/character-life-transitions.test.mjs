@@ -99,9 +99,9 @@ test('per-frame atlas sources append locomotion without replacing the existing r
  const {loadLifeArt}=await import('../character-life-art.js?frame-source-test');
  const art=await loadLifeArt('test-actor');
  assert.deepEqual(decoded.sort(),[
-  './assets/character-life100/rest.png',
-  './assets/character-life100/../character-life101/locomotion/test.png',
-  './assets/character-life101/transition/test.png'
+  './assets/character-life100/rest.png?v=life108',
+  './assets/character-life100/../character-life101/locomotion/test.png?v=life108',
+  './assets/character-life101/transition/test.png?v=life108'
  ].sort());
  // 0.122 frames are drawn on first use, once each, and shared between clips
  assert.equal(draws.length,0);assert.equal(art.clips.walk.frames.length,4);

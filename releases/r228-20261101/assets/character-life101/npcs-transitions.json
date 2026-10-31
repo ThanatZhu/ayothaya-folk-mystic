@@ -1,0 +1,1126 @@
+{
+  "actors": {
+    "people-0": {
+      "source": "transitions/people-0.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "people-1": {
+      "source": "transitions/people-1.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "people-2": {
+      "source": "transitions/people-2.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "people-3": {
+      "source": "transitions/people-3.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "masters-arms-0": {
+      "source": "transitions/masters-arms-0.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "masters-arms-1": {
+      "source": "transitions/masters-arms-1.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "masters-arms-2": {
+      "source": "transitions/masters-arms-2.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "masters-arms-3": {
+      "source": "transitions/masters-arms-3.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft",
+      "reviewNotes": "Kneeling head is slightly higher than squat; inspect playback before accepting."
+    },
+    "masters-mystic-0": {
+      "source": "transitions/masters-mystic-0.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "masters-mystic-1": {
+      "source": "transitions/masters-mystic-1.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "masters-mystic-2": {
+      "source": "transitions/masters-mystic-2.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "masters-mystic-3": {
+      "source": "transitions/masters-mystic-3.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "citizens-market-0": {
+      "source": "transitions/citizens-market-0.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft",
+      "reviewNotes": "Kneeling/settling intermediate drawings are similar because skirt hides the knees."
+    },
+    "citizens-market-1": {
+      "source": "transitions/citizens-market-1.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "citizens-market-2": {
+      "source": "transitions/citizens-market-2.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "citizens-market-3": {
+      "source": "transitions/citizens-market-3.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "citizens-river-0": {
+      "source": "transitions/citizens-river-0.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "citizens-river-1": {
+      "source": "transitions/citizens-river-1.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "citizens-river-2": {
+      "source": "transitions/citizens-river-2.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    },
+    "citizens-river-3": {
+      "source": "transitions/citizens-river-3.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            320,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            640,
+            0,
+            320,
+            320
+          ]
+        },
+        {
+          "rect": [
+            960,
+            0,
+            320,
+            320
+          ]
+        }
+      ],
+      "sitDownOrder": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "standUpOrder": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "frameDurations": [
+        0.14,
+        0.18,
+        0.2,
+        0.2
+      ],
+      "review": "draft"
+    }
+  }
+}

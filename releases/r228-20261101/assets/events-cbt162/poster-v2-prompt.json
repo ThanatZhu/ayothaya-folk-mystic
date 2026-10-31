@@ -1,0 +1,8 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "edit",
+  "reference": "assets/events-cbt162/poster.webp",
+  "source": "poster-v2-source.png",
+  "web": "poster-v2.webp",
+  "prompt": "Use case: precise-object-edit. Edit target: attached Thai fantasy game CBT triptych artwork. Preserve the left lotus mage illustration and middle three champions on podiums, style, colors, costumes and faces as faithfully as possible. Critical edit: redraw the RIGHT panel sword duel so BOTH chibi warriors hold exactly one sword each correctly IN THEIR HANDS, fingers wrapped around a visible handle below a gold guard, blade extending away from hand. No sword attached to forearm, no floating sword or extra blade, no intersecting limb/weapon, no fused arms. Change right-panel poses as necessary for unambiguous anatomy: left green warrior holds sword upward in front using his right hand; right red warrior holds sword upward using his right hand, blades cross high above the hands, free arms separate and visible, two arms per person. Maintain dynamic friendly duel in Ayutthaya arena with gold light, temples and spectators. Composition: output ONLY the three illustrated panels in one wide landscape artwork, equal widths, slim ornate gold separators, approximately 2.55:1 width:height. REMOVE the empty dark green top and bottom header/footer bands entirely; artwork should reach the top and bottom canvas edges. No typography, no words, no numbers, no text, no logos. This is artwork for an existing UI whose title and captions are separately rendered in HTML. High-quality polished Thai fantasy anime/chibi illustration matching the reference."
+}

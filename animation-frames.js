@@ -64,7 +64,7 @@ export function attackComboFrame(classId='novice',t=0,variant=0){
 export function motionFrame(mode,time=0,phase=null,reduced=false,classId='novice',view='side',variant=0){
  if(reduced)return 0;
  const t=Math.max(0,Number.isFinite(time)?time:0);
- if(mode==='walk')return (WALK_BASE[view]??12)+Math.floor((((phase??t*1.65)%1+1)%1)*8);
+ if(mode==='walk'||mode==='run')return (WALK_BASE[view]??12)+Math.floor((((phase??t*(mode==='run'?2.2:1.65))%1+1)%1)*8);
  if(mode==='idle')return view==='back'?STAND_FRAME.back:STAND_FRAME.front;
  if(mode==='attack'||mode==='cast')return attackComboFrame(classId,t,variant);
  if(mode==='guard')return ['swordsman','novice'].includes(classId)?8:classId==='acolyte'?9:5;

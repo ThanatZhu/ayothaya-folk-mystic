@@ -18,7 +18,8 @@ export function createMotionPreview(host){
   ctx.strokeStyle='#d1b26966';ctx.lineWidth=1;ctx.stroke();
   ctx.fillStyle='#08181077';ctx.beginPath();ctx.ellipse(160,floor+1,42,6,0,0,Math.PI*2);ctx.fill();
   const source=frames?.[Math.max(0,Math.min(FRAME_COUNT-1,Math.round(p.artFrame??0)))]??frames?.[0]??cell;
-  if(frames)drawCharacterFrame(ctx,source,25,y-(p.y??0)*130,size);else ctx.drawImage(source,25,floor-size-(p.y??0)*130,size,size);
+  const dy=p.mode==='walk'||p.mode==='run'?0:(p.y??0)*130;
+  if(frames)drawCharacterFrame(ctx,source,25,y-dy,size);else ctx.drawImage(source,25,floor-size-dy,size,size);
  }
  return {setSource,draw};
 }

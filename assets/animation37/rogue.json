@@ -136,90 +136,90 @@
       },
       {
         "rect": [
-          81,
-          66,
-          162,
-          210
+          62,
+          21,
+          228,
+          285
         ],
-        "anchor": 79,
-        "scale": 1.038008,
+        "anchor": 114,
+        "scale": 0.770253,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          400,
-          66,
-          161,
-          210
+          377,
+          24,
+          231,
+          282
         ],
-        "anchor": 80,
-        "scale": 1.038008,
+        "anchor": 116,
+        "scale": 0.767541,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          731,
-          66,
-          145,
-          210
+          694,
+          20,
+          213,
+          286
         ],
-        "anchor": 69,
-        "scale": 1.038008,
+        "anchor": 107,
+        "scale": 0.770253,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          1052,
-          66,
-          147,
-          210
+          1002,
+          18,
+          226,
+          305
         ],
-        "anchor": 68,
-        "scale": 1.038008,
+        "anchor": 113,
+        "scale": 0.764848,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          94,
-          386,
-          148,
-          210
+          62,
+          323,
+          213,
+          295
         ],
-        "anchor": 66,
-        "scale": 1.038008,
+        "anchor": 107,
+        "scale": 0.781296,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          415,
-          386,
-          138,
-          210
+          353,
+          326,
+          253,
+          294
         ],
-        "anchor": 65,
-        "scale": 1.038008,
+        "anchor": 127,
+        "scale": 0.778506,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          728,
-          386,
-          151,
-          210
+          693,
+          320,
+          210,
+          304
         ],
-        "anchor": 72,
-        "scale": 1.038008,
+        "anchor": 105,
+        "scale": 0.762174,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          1049,
-          386,
-          153,
-          210
+          1002,
+          318,
+          215,
+          301
         ],
-        "anchor": 71,
-        "scale": 1.038008,
+        "anchor": 108,
+        "scale": 0.775735,
         "source": "rogue-walk.png"
       }
     ],
@@ -358,90 +358,90 @@
       },
       {
         "rect": [
-          94,
-          706,
-          149,
-          210
+          55,
+          603,
+          236,
+          326
         ],
-        "anchor": 66,
-        "scale": 1.042942,
+        "anchor": 118,
+        "scale": 0.742433,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          412,
-          706,
-          148,
-          210
+          374,
+          607,
+          227,
+          322
         ],
-        "anchor": 68,
-        "scale": 1.042942,
+        "anchor": 114,
+        "scale": 0.747501,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          731,
-          706,
-          144,
-          210
+          683,
+          604,
+          231,
+          330
         ],
-        "anchor": 69,
-        "scale": 1.042942,
+        "anchor": 116,
+        "scale": 0.734959,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          1053,
-          706,
-          145,
-          210
+          1002,
+          615,
+          226,
+          317
         ],
-        "anchor": 67,
-        "scale": 1.042942,
+        "anchor": 113,
+        "scale": 0.737434,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          94,
-          1026,
-          147,
-          210
+          61,
+          904,
+          220,
+          304
         ],
-        "anchor": 66,
-        "scale": 1.042942,
+        "anchor": 110,
+        "scale": 0.760479,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          415,
-          1026,
-          136,
-          210
+          358,
+          909,
+          239,
+          302
         ],
-        "anchor": 65,
-        "scale": 1.042942,
+        "anchor": 120,
+        "scale": 0.760479,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          734,
-          1026,
-          140,
-          210
+          681,
+          909,
+          227,
+          305
         ],
-        "anchor": 66,
-        "scale": 1.042942,
+        "anchor": 114,
+        "scale": 0.750061,
         "source": "rogue-walk.png"
       },
       {
         "rect": [
-          1053,
-          1026,
-          144,
-          210
+          1000,
+          907,
+          226,
+          306
         ],
-        "anchor": 67,
-        "scale": 1.042942,
+        "anchor": 113,
+        "scale": 0.750061,
         "source": "rogue-walk.png"
       }
     ]

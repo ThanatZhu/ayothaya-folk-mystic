@@ -1,7 +1,7 @@
 // 0.116 audio catalogue: one list for the game (feedback.js) and the asset gallery. The files are original, rendered
 // offline from code (outputs/audio-v2: Thai 7-tone scale, ranat, khong wong, ching, pi, so u, klong), no licences.
 export const AUDIO_BASE='assets/audio180/';
-export const AUDIO_VERSION='180';
+export const AUDIO_VERSION='229';
 // seconds = exact loop length (the music loops seamlessly at this point)
 export const BGM={
  town:{name:'เมืองหลวงยามสงบ',note:'ระนาดเอก ฆ้องวง ฉิ่ง · 84 bpm',seconds:68.571},
@@ -41,7 +41,7 @@ export const audioUrl=file=>`${AUDIO_BASE}${file}.mp3?v=${AUDIO_VERSION}`;
 // 0.121 combat sounds (scripts/build-combat-sfx.mjs: Kenney CC0 + our own synthesis). Each class has its own basic
 // swing / hit (3 variants) and an ultimate sting; each skill plays its effect family's cast at the start and its hit on
 // every impact (2 variants). The family is the skill's first effect sheet in the skill profiles.
-export const COMBAT_BASE='assets/audio-combat/',COMBAT_VERSION='121';
+export const COMBAT_BASE='assets/audio-combat/',COMBAT_VERSION='229';
 export const COMBAT_CLASSES=['swordsman','lancer','hunter','boxer','rogue','shaman','acolyte'];
 export const COMBAT_FAMILIES=['fist','sword','lance','arrow','shield','dust','banner','shadow','holy','talisman','spirit','lotus','venom','vines','rooster','rooster-crow','life-tree'];
 export const COMBAT_NAMES={swordsman:'นักดาบ',lancer:'นักทวน',hunter:'นายพราน',boxer:'นักมวย',rogue:'จอมโจร',shaman:'หมอผี',acolyte:'พระ / แม่ชี',

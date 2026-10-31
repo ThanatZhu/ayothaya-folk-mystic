@@ -175,7 +175,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(!m||m.hp<=0||!world.prey(m))m=world.mobs.filter(x=>x.hp>0&&world.prey(x)).sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0]??null;
   if(m&&Math.hypot(m.x-p.x,m.z-p.z)>8)m=null;
   if(!m||p.hp<=0)return;
-  const cast=(index,kind,color)=>{p.face={x:m.x-p.x,z:m.z-p.z};playCast({type:'cast',skillIndex:index,predicted:true,kind,color,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z}});};
+  const cast=(index,kind,color)=>{p.face={x:m.x-p.x,z:m.z-p.z};const ev={type:'cast',skillIndex:index,predicted:true,kind,color,from:{x:p.x,z:p.z},to:{x:m.x,z:m.z}};playCast(ev);for(const fn of listeners)fn(ev);};
   if(predAutoCast===0){
    const view={bodyRadius,player:p,target:m,skills:world.skills,skillLevels:world.skillLevels,profession:world.profession,cooldowns:world.cooldowns.map((c,i)=>Math.max(c-(wall()-cooldownsAt)-netLag,predCD[i]??0)) /* snapshot cooldowns are a network delay old */};
    const i=pickAutoSkill(view,world.autoConfig,scaledSkill);

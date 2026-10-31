@@ -1,7 +1,7 @@
 import {gaitFits220,gaitFrame220} from './painted-gait220.js';
-import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=size1';
+import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE} from './character-size.js?v=size228';
 import * as THREE from './vendor/build/three.module.js';
-import {loadPaintedCharacter} from './painted-character.js?v=life108';
+import {loadPaintedCharacter} from './painted-character.js?v=life228';
 import {FRAME_COUNT} from './animation-frames.js?v=life108';
 import {loadLifeArt,lifeFrameAt,mapFrames,builtFrames} from './character-life-art.js?v=life108';
 import {createPosturePlayback} from './character-action-state.js?v=106.0';

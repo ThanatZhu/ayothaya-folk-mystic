@@ -1,0 +1,73 @@
+/* 0.53 hit feedback (feedback.js): critical numbers, level-up banner + glow, sound sliders in the profile panel */
+.damage-number.crit{font-size:1.75em!important;color:#ffd27a!important;text-shadow:0 0 6px #ff9b3d,0 2px 2px #000!important;animation:crit-pop .32s cubic-bezier(.2,1.6,.4,1)}
+.damage-number.crit::after{content:'!'}
+@keyframes crit-pop{from{scale:.4}to{scale:1}}
+.big-banner.levelup strong{font-size:32px;color:#ffe08a;letter-spacing:1px;text-shadow:0 0 12px #ffcf5a,0 2px 6px #000}
+.big-banner.levelup{border-color:#ffe08a;background:radial-gradient(circle at 50% 40%,#5a4a1cee,#1a2a22ee)}
+#audio-settings{display:grid;gap:6px;margin:8px 0;padding:8px 10px;border:1px solid #af884f55;border-radius:8px;font-size:12px}
+#audio-settings label{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:8px}
+#audio-settings input{accent-color:#f4cf7a}
+@media(prefers-reduced-motion:reduce){.damage-number.crit{animation:none}}
+.big-banner em{display:block;font-style:normal;font-size:12px;color:#fff0ce;margin-top:2px}
+/* 0.74 punchier numbers: every hit pops in large and settles, spread sideways so stacked hits stay readable */
+.damage-number{font-size:22px;font-weight:900;translate:var(--dx,0) 0;text-shadow:0 0 4px #000,1px 2px 0 #1a120c;animation:dmg-pop .3s cubic-bezier(.2,1.8,.4,1)}
+.damage-number.crit{font-size:2.3em!important;color:#ffe27a!important;text-shadow:0 0 10px #ff7b2d,0 0 3px #000,1px 2px 0 #3a1406!important;animation:crit-pop .38s cubic-bezier(.2,1.9,.4,1)}
+@keyframes dmg-pop{from{scale:1.9}to{scale:1}}
+@keyframes crit-pop{from{scale:2.6}to{scale:1}}
+@media(prefers-reduced-motion:reduce){.damage-number{animation:none}}
+/* 0.77 performance settings sit under the sound sliders */
+.perf-settings{display:grid;gap:6px;margin-top:4px;padding-top:6px;border-top:1px solid #af884f33}
+.perf-settings label{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:8px}
+.perf-settings select{font:inherit;padding:3px 6px;border-radius:6px;border:1px solid #af884f88;background:#1d2a20;color:#f3e6c4}
+.perf-settings small{opacity:.75;line-height:1.4}
+/* 0.80 GPU helper under the graphics settings */
+.perf-gpu{display:grid;gap:5px;padding:6px 8px;border-radius:6px;background:#00000022;line-height:1.45}
+.perf-gpu b{color:#f4cf7a}.perf-gpu p,.perf-gpu ol{margin:0}.perf-gpu ol{padding-left:18px}
+.perf-open{display:block;text-align:center;padding:6px;border-radius:6px;background:#e0b65c;color:#1c241c;font-weight:bold;text-decoration:none}
+
+/* 0.99.3 stacked numbers: no sideways jitter, crits pop larger, heals a touch smaller */
+.damage-number{white-space:nowrap;letter-spacing:.02em}
+.damage-number.heal{font-size:16px}
+/* 0.99.5 juicy numbers: thick outline, punch-in with a white flash, crits burst with light behind them */
+.damage-number{isolation:isolate;font:900 21px/1 Mali,Tahoma,sans-serif!important;-webkit-text-stroke:4px #1b0f07;paint-order:stroke fill;text-shadow:0 3px 0 #0009!important;animation:dmg-punch .26s cubic-bezier(.2,1.7,.35,1)!important}
+.damage-number.big{font-size:27px!important}
+.damage-number.heal{font-size:17px!important;-webkit-text-stroke:3px #0b2a12}
+.damage-number.crit{font-size:33px!important;color:#ffb12e!important;-webkit-text-stroke:5px #3a0900;text-shadow:0 0 14px #ff7a1a,0 3px 0 #000a!important;animation:crit-punch .36s cubic-bezier(.2,1.9,.35,1)!important}
+.damage-number.crit::before{content:"";position:absolute;z-index:-1;left:50%;top:50%;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;
+ background:radial-gradient(circle,#fffbe0 0,#ffd25acc 22%,#ff8a1f55 46%,transparent 68%);animation:crit-burst .42s ease-out forwards}
+@keyframes dmg-punch{0%{scale:.35;filter:brightness(3.2)}45%{scale:1.5;filter:brightness(1.6)}100%{scale:1;filter:none}}
+@keyframes crit-punch{0%{scale:.3;filter:brightness(4)}40%{scale:1.9;rotate:-6deg;filter:brightness(1.8)}70%{scale:.92;rotate:3deg}100%{scale:1;rotate:0deg;filter:none}}
+@keyframes crit-burst{0%{scale:.2;opacity:1}100%{scale:1.6;opacity:0}}
+@media(prefers-reduced-motion:reduce){.damage-number,.damage-number.crit,.damage-number.crit::before{animation:none!important}}
+/* 0.106.5 level up (0.106.6: room above the line so stacked Thai marks like the ้ in ขึ้น keep the gold fill): Thai lettering between gold kanok scrolls + an English line over the hero, a ring and lotus petals
+   from the feet, a note under the HP panel */
+.rank-up{position:fixed;z-index:40;left:50%;top:45%;width:0;height:0;pointer-events:none;font-family:var(--font-game);color:#fff0ce}
+.rank-banner{position:absolute;left:0;bottom:6px;translate:-50% 0;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;animation:rank-in 2.6s ease-out forwards}
+.rank-banner::before{content:"";position:absolute;z-index:-1;inset:-18px -40px -10px;background:radial-gradient(closest-side,#1529259e,#15292555 60%,transparent)}
+.rank-banner strong{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.rank-banner strong b{font-weight:700;font-size:34px;line-height:1.15;padding:.45em .1em .15em;margin:-.35em 0 -.1em;letter-spacing:.5px;color:#ffe7a8;background:linear-gradient(100deg,#f2c25a 20%,#fff6d8 45%,#f2c25a 60%) 0 0/250% 100%;
+ -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 1px #3a2208) drop-shadow(0 2px 0 #3a2208) drop-shadow(0 0 10px #ffcf5a77);animation:rank-shine 1.6s .3s ease-in-out}
+.rank-banner strong svg{width:58px;height:27px;fill:#f2c25a;filter:drop-shadow(0 1px 0 #3a2208) drop-shadow(0 0 4px #ffcf5a66);animation:rank-scroll .7s .05s ease-out backwards}
+.rank-banner strong svg:first-child{scale:-1 1}
+.rank-banner .k-line{fill:none;stroke:#f2c25a;stroke-width:2.6;stroke-linecap:round}
+.rank-en{font-weight:700;font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#f6dc9a;white-space:nowrap;text-shadow:0 1px 2px #000c}
+.rank-rule{width:150px;height:9px;margin:2px 0;position:relative;background:linear-gradient(90deg,transparent,#c6a164 30%,#c6a164 70%,transparent) center/100% 1px no-repeat}
+.rank-rule::after{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;translate:-50% -50%;rotate:45deg;background:#f2c25a;box-shadow:0 0 6px #ffcf5a}
+.rank-lv{font-weight:700;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px #000,0 0 6px #000a}
+.rank-up .ring{position:absolute;left:-38px;top:56px;width:76px;height:24px;border-radius:50%;border:2px solid #ffe08a;box-shadow:0 0 18px 4px #ffd25a77,inset 0 0 10px #ffd25a88;opacity:0;animation:rank-ring 1.3s ease-out forwards}
+.rank-up .petal{position:absolute;left:-5px;top:60px;width:10px;height:14px;border-radius:10px 0 10px 0;background:linear-gradient(135deg,#fff3f5,#f6a9bb);box-shadow:0 0 4px #ffd6df88;opacity:0;animation:rank-petal 1.9s ease-out forwards}
+.rank-note{position:fixed;z-index:46;left:14px;top:150px;display:grid;gap:2px;max-width:300px;padding:6px 10px;border-radius:8px;border:1px solid #c6a16488;
+ background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;font:500 12px/1.4 var(--font-game);pointer-events:none;animation:rank-note 4.3s ease-out forwards}
+.rank-note em{font-style:normal}
+@keyframes rank-in{0%{opacity:0;translate:-50% 14px;scale:.82}12%{opacity:1;translate:-50% 0;scale:1.04}20%{scale:1}80%{opacity:1;translate:-50% 0}100%{opacity:0;translate:-50% -12px}}
+@keyframes rank-scroll{from{opacity:0;clip-path:inset(0 0 0 100%)}to{opacity:1;clip-path:inset(0)}}
+@keyframes rank-shine{from{background-position:100% 0}to{background-position:0 0}}
+@keyframes rank-ring{0%{opacity:1;scale:.25}100%{opacity:0;scale:2.6}}
+@keyframes rank-petal{0%{opacity:0;transform:translate(0,0) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),-130px) rotate(var(--r))}}
+@keyframes rank-note{0%{opacity:0;translate:-10px 0}8%{opacity:1;translate:0}88%{opacity:1}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.rank-up .ring,.rank-up .petal{display:none}.rank-banner,.rank-note{animation:rank-fade 2.6s step-end forwards}.rank-banner strong b,.rank-banner strong svg{animation:none}}
+@keyframes rank-fade{to{opacity:0}}
+
+/* 1.09.4 magic crits glow purple, physical crits glow orange */
+.damage-number.crit.magic{text-shadow:0 0 10px #8a3dff,0 0 3px #000,1px 2px 0 #24083a!important}
+.damage-number.crit:not(.magic){text-shadow:0 0 10px #ff5a00,0 0 3px #000,1px 2px 0 #3a1406!important}

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "sealed",
+    "prompt": "Edit this existing Thai fantasy MMORPG ritual animation sprite. CRITICAL: REMOVE the ivory amulet tablet and EVERY seated-human or religious relief entirely. The ritual must reveal NO recognizable prize type: no amulet, pet, egg, equipment, material, face, silhouette of a person, question mark or item. Replace the tablet with a small FORMLESS pale-white and subtle cyan magical energy swirl with floating dust, no solid object inside it. Keep the SAME emerald/gold pedestal, camera, original canvas, alignment and scale; preserve the stage-specific physical pose of the supplied frame. Clean premium hand-painted 2D game art. Actual alpha transparency outside the shrine, pedestal and glow. No scene background, lettering or UI. This is the quiet SEALED state: closed glass reliquary enclosing a faint shapeless light swirl with four intact gold seal filaments. The viewer must not know whether the final prize is an amulet or crafting material.",
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-b71002a0-c0c6-4648-b51b-b6f69d4c0de7.png"
+  },
+  {
+    "id": "awakening",
+    "prompt": "Edit this existing Thai fantasy MMORPG ritual animation sprite. CRITICAL: REMOVE the ivory amulet tablet and EVERY seated-human or religious relief entirely. The ritual must reveal NO recognizable prize type: no amulet, pet, egg, equipment, material, face, silhouette of a person, question mark or item. Replace the tablet with a small FORMLESS pale-white and subtle cyan magical energy swirl with floating dust, no solid object inside it. Keep the SAME emerald/gold pedestal, camera, original canvas, alignment and scale; preserve the stage-specific physical pose of the supplied frame. Clean premium hand-painted 2D game art. Actual alpha transparency outside the shrine, pedestal and glow. No scene background, lettering or UI. This is the CHARGING state: glass and seal filaments cracking into light fragments, the roof lifted as in the reference, a stronger formless white energy spiral gathering inside. Absolutely no amulet or solid prize.",
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-2a89a43e-a568-4138-bd75-c9a9a4393131.png"
+  },
+  {
+    "id": "revealed",
+    "prompt": "Edit this existing Thai fantasy MMORPG ritual animation sprite. CRITICAL: REMOVE the ivory amulet tablet and EVERY seated-human or religious relief entirely. The ritual must reveal NO recognizable prize type: no amulet, pet, egg, equipment, material, face, silhouette of a person, question mark or item. Replace the tablet with a small FORMLESS pale-white and subtle cyan magical energy swirl with floating dust, no solid object inside it. Keep the SAME emerald/gold pedestal, camera, original canvas, alignment and scale; preserve the stage-specific physical pose of the supplied frame. Clean premium hand-painted 2D game art. Actual alpha transparency outside the shrine, pedestal and glow. No scene background, lettering or UI. This is the OPEN state: upper glass enclosure and roof dissolved as in the reference. Above the unchanged pedestal there is only a rising shapeless ribbon of white/cyan magic and a luminous circular seal of light. There is NO amulet, object or prize in the center. Final rewards will be shown separately by game code.",
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-23673143-4949-4db8-a739-4f9a9b5caaf7.png"
+  },
+  {
+    "id": "help-button",
+    "prompt": "Create ONE square transparent-background 2D game UI button icon for an emerald-and-antique-gold Thai fantasy MMORPG. A simple circular dark emerald stone medallion with a narrow aged-gold rim and 4 restrained tiny lotus corner accents. In the exact center a large crisp ivory-gold QUESTION MARK '?' with a round dot, instantly readable at 32 pixels. The question mark is the only glyph. No text, letters, character, animal, amulet or background. Fine hand-painted material detail, clean silhouette, balanced minimal ornamentation, no excessive AI filigree, no ornate outer square frame. Fill 88% of square canvas; real alpha transparency around the circular button.",
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-7885a1c8-81a2-4ce7-a7dc-e8212e431ab0.png"
+  }
+]

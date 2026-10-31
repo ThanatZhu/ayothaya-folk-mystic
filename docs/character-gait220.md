@@ -28,3 +28,7 @@ These sheets cover each profession's original appearance and class gear. Customi
 - Normal-motion game recordings, desktop/mobile contact images and extracted playback frames were inspected. Private QA evidence stays in uncommitted `outputs/gait220-qa/`; no new animation review page is shipped.
 - The existing local fixture omits MP3 static serving, so its unrelated audio 404s were excluded.
 
+
+## Proportion correction (235)
+
+The runtime now loads the full-silhouette 235 pack. See [character-gait235.md](character-gait235.md). Rebuilding 220 alone does not update the current runtime.

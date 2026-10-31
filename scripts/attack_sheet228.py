@@ -26,18 +26,18 @@ def _split(mask,seeds):
     cap[yy,xx]=nc;steps[yy,xx]=nn;owner[yy,xx]=label;heapq.heappush(queue,(-nc,nn,label,yy,xx))
  return owner[1:-1,1:-1]
 
-def extract_sheet(im):
- im=im.convert('RGBA');arr=np.array(im);a=arr[:,:,3];cw,ch=im.width/12,im.height/5
+def extract_sheet(im,columns=12,grid_rows=5,recover_edge=True):
+ im=im.convert('RGBA');arr=np.array(im);a=arr[:,:,3];cw,ch=im.width/columns,im.height/grid_rows
  region=Image.fromarray((a>=115).astype('uint8')*255).filter(ImageFilter.MaxFilter(3))
  core=np.array(region.filter(ImageFilter.MinFilter(9)));ys,xs=np.nonzero(core)
  assert len(xs),'No solid character cores'
  groups={};grid=[];serial=0
- for row in range(5):
-  for col in range(12):
+ for row in range(grid_rows):
+  for col in range(columns):
    k=np.argmin((xs-(col+.5)*cw)**2+(ys-(row+.57)*ch)**2);seed=(int(xs[k]),int(ys[k]));label=region.getpixel(seed)
    if label==255:
     serial+=1;label=serial;ImageDraw.floodfill(region,seed,label,thresh=0)
-   index=row*12+col+1;groups.setdefault(label,[]).append((index,seed));grid.append((row,col,index,label))
+   index=row*columns+col+1;groups.setdefault(label,[]).append((index,seed));grid.append((row,col,index,label))
  labels=np.array(region);masks={}
  for group,members in groups.items():
   mask=labels==group
@@ -47,7 +47,7 @@ def extract_sheet(im):
    split=_split(mask[y0:y1,x0:x1],[(i,(sx-x0,sy-y0))for i,(sx,sy)in members])
    for i,_ in members:
     part=np.zeros_like(mask);part[y0:y1,x0:x1]=split==i;masks[i]=part
- rows=[[] for _ in range(5)]
+ rows=[[] for _ in range(grid_rows)]
  for row,col,index,label in grid:
   mask=masks[index]&(a>=115);yy,xx=np.nonzero(mask);assert len(xx)>200,('small figure',row,col,len(xx))
   x0,y0,x1,y1=int(xx.min()),int(yy.min()),int(xx.max())+1,int(yy.max())+1
@@ -55,6 +55,6 @@ def extract_sheet(im):
   p=arr[y0:y1,x0:x1].copy();p[:,:,3]=np.where(mask[y0:y1,x0:x1],p[:,:,3],0)
   rows[row].append({'image':Image.fromarray(p),'cx':(col+.5)*cw-x0,'cw':cw,'edge':x1>=im.width-1,'sourceBounds':[x0,y0,x1,y1]})
  for row in rows:
-  if row[-1]['edge']:row[-1]={**row[8],'recoveryGuard':True}
+  if recover_edge and row[-1]['edge']:row[-1]={**row[8],'recoveryGuard':True}
  return rows
 

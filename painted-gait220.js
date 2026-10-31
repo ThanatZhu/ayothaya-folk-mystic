@@ -1,3 +1,4 @@
+// 235: full connected silhouettes; equal-row crops shortened legs and inflated walk bodies.
 import * as THREE from './vendor/build/three.module.js';
 import {BODY_HEIGHT,LOGICAL_SIZE} from './character-size.js';
 import {posesFit} from './skill-pose-art.js?v=pose119';
@@ -17,11 +18,11 @@ export async function loadPaintedGait220(classId,gender){
  const tier=compact()?'sd':'hd',key=classId+'-'+gender+'/'+tier;
  if(cache.has(key))return cache.get(key);
  const job=(async()=>{
-  const url=new URL('./assets/character-gait220/'+classId+'-'+gender+'.json',import.meta.url),response=await fetch(url);
+  const url=new URL('./assets/character-gait235/'+classId+'-'+gender+'.json',import.meta.url),response=await fetch(url);
   if(!response.ok)throw new Error('gait220-manifest-'+response.status);
   const manifest=await response.json(),meta=tier==='sd'?{...manifest,...manifest.tiers?.sd}:manifest;
   const cell=tier==='sd'?128:256,body=tier==='sd'?80:160,foot=tier==='sd'?120:240;
-  if(meta.version!==220||meta.classId!==classId||meta.gender!==gender||meta.cell!==cell||meta.bodyHeight!==body||
+  if(meta.version!==235||meta.classId!==classId||meta.gender!==gender||meta.cell!==cell||meta.bodyHeight!==body||
    meta.anchor?.[0]!==cell/2||meta.anchor?.[1]!==foot||JSON.stringify(meta.directions)!==JSON.stringify(GAIT_DIRECTIONS220))throw new Error('gait220-invalid-manifest');
   const names=['walk','run'];
   if(names.some(n=>meta.clips?.[n]?.frames!==4||!/^[a-z0-9-]+\.png$/.test(meta.clips[n].image)))throw new Error('gait220-invalid-clip');

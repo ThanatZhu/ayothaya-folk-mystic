@@ -14,3 +14,16 @@ test('frontend gate accepts UI but blocks changed or deleted shared authority co
   git('checkout',base,'--','shared.js');fs.writeFileSync(path.join(root,'maps/world.json'),'{"map":"changed"}');commit();r=check();assert.notEqual(r.status,0);assert.match(r.stderr,/maps\/world.json/);
  }finally{if(path.dirname(root)===os.tmpdir()&&path.basename(root).startsWith('frontend226-'))fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('frontend gate preserves the static release-entry redirect but rejects deployment setting changes',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'frontend226-'));const git=(...args)=>execFileSync('git',args,{cwd:root,stdio:'pipe'});
+ const commit=()=>{git('add','-A');git('-c','user.name=Fixture','-c','user.email=fixture@example.invalid','commit','-qm','fixture');};
+ try{
+  fs.mkdirSync(path.join(root,'server'));fs.mkdirSync(path.join(root,'scripts'));fs.copyFileSync(new URL('../scripts/check-frontend226.mjs',import.meta.url),path.join(root,'scripts/check-frontend226.mjs'));
+  fs.writeFileSync(path.join(root,'server/host.js'),'');const config={buildCommand:'npm run build',redirects:[]},file=path.join(root,'vercel.json');fs.writeFileSync(file,JSON.stringify(config));
+  git('init','-q');git('checkout','-qb','frontend-live');commit();const base=git('rev-parse','HEAD').toString().trim();const check=()=>spawnSync(process.execPath,['scripts/check-frontend226.mjs',base],{cwd:root,encoding:'utf8'});
+  config.redirects.push({source:'/releases/:release/',destination:'/game.html',permanent:false});fs.writeFileSync(file,JSON.stringify(config));commit();assert.equal(check().status,0);
+  config.buildCommand='node server/host.js';fs.writeFileSync(file,JSON.stringify(config));commit();assert.notEqual(check().status,0);
+  config.buildCommand='npm run build';config.redirects[0].destination='/other';fs.writeFileSync(file,JSON.stringify(config));commit();assert.notEqual(check().status,0);
+ }finally{if(path.dirname(root)===os.tmpdir()&&path.basename(root).startsWith('frontend226-'))fs.rmSync(root,{recursive:true,force:true});}
+});

@@ -7,10 +7,10 @@ const make=(id,g)=>({classId:id,gender:g,extent:1.3125,footV:240/256,clips:Objec
 test('every profession and gender has matching HD/SD images and four distinct frame windows',async()=>{
  for(const id of GAIT_CLASSES220)for(const g of ['male','female']){
   assert.equal(gaitFits220(id,g),true);
-  const m=JSON.parse(await readFile(new URL('../assets/character-gait220/'+id+'-'+g+'.json',import.meta.url),'utf8'));
-  assert.equal(m.classId,id);assert.equal(m.gender,g);assert.deepEqual(m.directions,GAIT_DIRECTIONS220);
+  const m=JSON.parse(await readFile(new URL('../assets/character-gait235/'+id+'-'+g+'.json',import.meta.url),'utf8'));
+  assert.equal(m.version,235);assert.equal(m.classId,id);assert.equal(m.gender,g);assert.deepEqual(m.directions,GAIT_DIRECTIONS220);
   for(const meta of [m,{...m,...m.tiers.sd}])for(const mode of ['walk','run']){
-   assert.equal(meta.clips[mode].frames,4);const b=await readFile(new URL('../assets/character-gait220/'+meta.clips[mode].image,import.meta.url));
+   assert.equal(meta.clips[mode].frames,4);const b=await readFile(new URL('../assets/character-gait235/'+meta.clips[mode].image,import.meta.url));
    assert.equal(b.readUInt32BE(16),meta.cell*4);assert.equal(b.readUInt32BE(20),meta.cell*8);
   }
   assert.equal(gaitFits220(id,g,{outfit:'crimson'}),false);

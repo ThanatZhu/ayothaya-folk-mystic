@@ -1,5 +1,7 @@
 # Illustrated window surfaces — 222
 
+> Superseded menu artwork (236): the owner approved the new shared frame + C matte jade on 1 November 2026. Read [unified-menu236.md](unified-menu236.md) for all new menu work and migration. This document records the previous implementation; do not restore its old asset choices, including its old NPC-skin choice, over the new standard. Explicit gacha/companion and plain tooltip/boss-meter exceptions remain.
+
 Owner requirement: replace the black stretched window interiors with newly generated in-game backgrounds.
 
 - Use assets/ui-surfaces222/jade-silk.webp for ordinary panels, jade-paper.webp for crafting, extraction, refinement, stores and markets. Phone versions are selected at <=700px width or <=550px height.

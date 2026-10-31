@@ -50,6 +50,11 @@
       "permanent": false
     },
     {
+      "source": "/releases/:release/",
+      "destination": "/play.html",
+      "permanent": false
+    },
+    {
       "source": "/releases/:release",
       "destination": "/game.html",
       "permanent": false

@@ -1,0 +1,46 @@
+/* 0.32 MMO HUD: radial skill wheel, status line in the online chip, menu dots, minimap footer.
+   Loaded last; scoped to body.mmo-hud so the old layout returns if mmo-hud.js does not run. */
+body.mmo-hud .combat-controls.wheel{position:fixed;left:auto;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));transform:none;display:block;gap:0;padding:0;pointer-events:none}
+body.mmo-hud .combat-controls.wheel>*{pointer-events:auto}
+body.mmo-hud .combat-controls.wheel .skills{position:static;display:block;padding:0;margin:0;background:none;border:0;box-shadow:none;border-radius:0;grid-template-columns:none}
+body.mmo-hud .combat-controls.wheel .attack-controls{position:static;display:block;padding:0}
+body.mmo-hud .combat-controls.wheel #skill-bank{display:none}
+body.mmo-hud .combat-controls.wheel .skill{position:absolute;width:var(--wheel-slot);height:var(--wheel-slot);min-height:0;padding:2px;margin:0;border-radius:50%;display:grid;place-items:center;background:#102a24;border:2px solid #d0a75e;box-shadow:0 3px 9px #000a,inset 0 0 0 1px #0006;overflow:visible;pointer-events:auto}
+body.mmo-hud .combat-controls.wheel .skill:hover{border-color:#ffe2a0;box-shadow:0 0 12px #ffd98a88,0 3px 9px #000a}
+/* Empty atlas elements have no intrinsic width; anchor them to the button instead of a shrinkable grid track. */
+body.mmo-hud .combat-controls.wheel .skill strong{position:absolute;inset:2px;display:block;width:auto;height:auto;min-width:0;min-height:0;border-radius:50%;font-size:20px;line-height:1;text-align:center;box-shadow:none}
+body.mmo-hud .combat-controls.wheel .skill span{display:none}
+body.mmo-hud .combat-controls.wheel .skill kbd{position:absolute;left:-5px;top:-5px;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;background:#2a1d10;border:1px solid #d0a75e;color:#ffe7a6;font:700 10px Mali,Tahoma,sans-serif;z-index:3}
+body.mmo-hud .combat-controls.wheel .skill .skill-level{left:50%;right:auto;top:auto;bottom:-7px;transform:translateX(-50%);padding:0 5px;border-radius:7px;background:#1c1209e0;border:1px solid #d0a75e88;z-index:3;white-space:nowrap}
+body.mmo-hud .combat-controls.wheel .skill em{position:absolute;inset:0;display:grid;place-items:center;font:700 17px Mali,Tahoma,sans-serif;color:#fff;text-shadow:0 1px 3px #000;z-index:2;pointer-events:none}
+body.mmo-hud .combat-controls.wheel .skill.cooling:after{content:'';position:absolute;inset:2px!important;width:auto!important;height:auto!important;border-radius:50%!important;background:conic-gradient(#000000b0 var(--cooldown),transparent 0)!important;z-index:1}
+body.mmo-hud .combat-controls.wheel .skill.no-mana{border-color:#6f9fd8;filter:saturate(.45)}
+body.mmo-hud .combat-controls.wheel #attack{position:absolute;right:6px;bottom:6px;width:var(--wheel-attack);height:var(--wheel-attack);border-radius:50%;border:3px solid #e2bd73;box-shadow:0 0 0 4px #0005,0 6px 16px #000a,inset 0 0 18px #ffd98a55}
+body.mmo-hud .combat-controls.wheel #auto-attack{position:absolute;width:54px;height:54px;border-radius:50%;padding:0;display:grid;place-items:center;align-content:center;gap:0;font-size:10px}
+body.mmo-hud .combat-controls.wheel #auto-attack small{display:none}
+body.mmo-hud .control-hint{display:none}
+/* Status line: ping · FPS · server time · realm, inside the online chip. */
+#online-meta{margin-left:4px;padding-left:9px;border-left:1px solid #d0a75e55;font-size:11px;color:#d9c8a2;white-space:nowrap}
+#online-meta:empty{display:none}
+/* Notification dots on menu buttons. */
+#game-menu button{position:relative}
+.menu-dot{position:absolute;top:3px;right:8px;width:10px;height:10px;border-radius:50%;background:#e2453a;box-shadow:0 0 0 2px #2a1d10,0 0 8px #e2453a}
+/* Minimap footer: coordinates and realm. */
+#mini-meta{display:block;margin-top:3px;text-align:center;font:600 10px Mali,Tahoma,sans-serif;color:#e8d9b3;text-shadow:0 1px 2px #000}
+/* System chat lines and tab. */
+#online-messages p.system,#online-messages p.system b{color:#c9e8a8}
+#online-dock[data-channel=system] #online-messages p:not(.system){display:none}
+.mp-tabs [data-channel=system][aria-selected=true]{background:#a8d98a33;border-color:#c9e8a8aa;color:#e4f6d4}
+@media (pointer:coarse),(max-width:900px){
+ body.mmo-hud .combat-controls.wheel #auto-attack{width:42px;height:42px;font-size:9px}
+ body.mmo-hud .combat-controls.wheel .skill strong{font-size:16px}
+ body.mmo-hud .combat-controls.wheel .skill kbd{width:16px;height:16px;font-size:9px}
+ body.mmo-hud #online-button{left:max(244px,calc(env(safe-area-inset-left) + 236px));right:auto;top:max(12px,env(safe-area-inset-top));bottom:auto;max-width:calc(100vw - 560px);white-space:nowrap;overflow:hidden}
+ #online-label{white-space:nowrap}
+ #online-meta{font-size:9px}
+}
+@media (max-width:760px){#online-meta{display:none}}
+@media (max-height:520px){#mini-meta{display:none}}
+/* 0.101 Master slots (outer arc): hidden until a Master skill is learned, gold ring when shown */
+.skill[hidden]{display:none!important}
+body.mmo-hud .combat-controls.wheel .skill.master-slot{border-color:#ffd77a;box-shadow:0 0 10px #ffcf6a88,0 3px 9px #000a}

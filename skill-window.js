@@ -18,11 +18,6 @@ export function createSkillWindow({game,classId}){
  const dialog=document.createElement('dialog');dialog.id='skill-window';dialog.dataset.profession=classId||'shaman';dialog.setAttribute('aria-labelledby','skill-window-title');
  dialog.innerHTML='<header><div><small>SKILL TREE</small><h2 id="skill-window-title">สกิล</h2></div><b id="skill-points"></b><button class="mp-icon" id="skill-close" aria-label="ปิดหน้าสกิล">×</button></header><p class="skill-hint"></p><div class="skill-tabs" role="tablist"><button type="button" role="tab" data-tab="base" aria-selected="true">สกิลอาชีพ</button><button type="button" role="tab" data-tab="master" aria-selected="false">Master <small id="master-count"></small></button></div><div class="skill-tree role-tree" id="skill-tree"></div><section id="skill-detail" aria-live="polite"></section><p id="skill-note" role="status"></p>';
  document.getElementById('game-shell').append(dialog);
- // Crop the existing painting in fixed-aspect SVG viewports. Only the plain
- // rails stretch; the crown and corner ornaments must never be nine-sliced.
- const frame=document.createElement('div');frame.className='skill-frame-art';frame.setAttribute('aria-hidden','true');
- const ornaments=[['tl',0,0,350,380],['tr',1186,0,350,380],['bl',0,704,350,320],['br',1186,704,350,320],['crown',460,0,616,240],['foot',500,840,536,160]];
- frame.innerHTML=ornaments.map(([part,x,y,w,h])=>`<svg class="skill-frame-${part}" viewBox="${x} ${y} ${w} ${h}" width="${w}" height="${h}" focusable="false"><image href="./assets/ui-skill150/window.webp" width="1536" height="1024"/></svg>`).join('');dialog.append(frame);
  dialog.querySelector('header small').textContent=getClass(classId||'shaman').name+' · SKILL TREE';
  const workspace=document.createElement('div');workspace.className='skill-workspace';
  dialog.querySelector('.skill-tree').before(workspace);workspace.append(dialog.querySelector('.skill-tree'),dialog.querySelector('#skill-detail'));

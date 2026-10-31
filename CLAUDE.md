@@ -12,3 +12,6 @@ Read docs/pet-stat-build220.md before changing S pet bonuses. Keep player-chosen
 
 ## Frontend update continuity (223)
 Never auto-reload on release discovery. Preserve active WebSockets and retained runtime/asset URLs. Follow docs/releases223.md: choose a new release ID, commit source/assets, freeze, commit archives, then build and push. Never edit archived files or publish modified runtime under an old ID. Backend container replacement is separate and cannot be described as zero-disconnect without hosting evidence. Premium benefits and profanity filtering remain deferred by the owner.
+
+## Permanent menu visual standard (236)
+Before creating or changing any menu window, read AGENTS.md and docs/unified-menu236.md and inspect docs/images/unified-menu236/approved-desktop.png and approved-phone.png. The owner selected the shared gold frame + C matte jade with corrected backing, permanently for present and future menus. Use assets/ui-unified236/frame.png and matte-jade.png. No per-menu frame/background redesign or old-skin fallback. Preserve the gacha/companion screens and their subdialogs, plain tooltips and boss-meter exceptions. The standard supersedes older menu skin choices; retain release archives. Migration is not yet shipped.

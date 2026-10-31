@@ -14,8 +14,29 @@ const SHOT=new Set(['holy','retreatShot','ambush']);
 const LINE=new Set(['line','drill','chainLine','cone']);
 // Novice basics are not role skills; their save slot is their identity (the hotbar may move them, the slot never does).
 const NOVICE_KIND={'novice:0':'jab','novice:4':'rest','novice:5':'guard'};
+export const BASIC_SHEETS=Object.freeze({
+ 'basic:slash':{name:'คมดาบอัคคี',classId:'swordsman',ultimate:false,effect:'fx-basic-slash',kind:'slash'},
+ 'basic:dagger':{name:'มีดคู่มรกตเงา',classId:'rogue',ultimate:false,effect:'fx-basic-dagger',kind:'backstab'},
+ 'basic:spirit':{name:'เพลิงพรายยันต์',classId:'shaman',ultimate:false,effect:'fx-basic-spirit',kind:'holy'},
+ 'basic:dharma':{name:'บัวทองธรรมจักร',classId:'acolyte',ultimate:false,effect:'fx-basic-dharma',kind:'holy'}
+});
+export const BASIC_COMBO_VFX=Object.freeze({
+ swordsman:['basic:slash','sword-open','duel-riposte','duel-brand'],
+ rogue:['basic:dagger','rogue-slash','venom-edge','rogue-shadowstab'],
+ lancer:['lance-pierce','basic:slash','war-drill','war-chain'],
+ shaman:['basic:spirit','sham-ghostfire','sham-curse','sm-drain'],
+ acolyte:['basic:dharma','aco-light','ward-cut','aco-cleanse'],
+ boxer:['box-jab','mb-maemai','ib-headbutt','box-knee-dash'],
+ hunter:['hunt-shot','rang-fan','spirit-peck','hunt-retreat'],
+ novice:['novice:0','basic:slash','box-jab','novice:0']
+});
+export const basicAttackVfxId=(classId,comboStep=0)=>{
+ const seq=BASIC_COMBO_VFX[classId]??BASIC_COMBO_VFX.novice;
+ return seq[Math.max(0,comboStep)%seq.length];
+};
+const sheetEntry=id=>VFX_SHEETS[id]??BASIC_SHEETS[id];
 export const vfxPlacement=kind=>AROUND.has(kind)?'around':SELF.has(kind)?'self':AREA.has(kind)?'area':SHOT.has(kind)?'shot':LINE.has(kind)?'line':'target';
-export const hasSheet=id=>!!VFX_SHEETS[id]?.effect;
+export const hasSheet=id=>!!sheetEntry(id)?.effect;
 const skills=new Map(ALL_SKILLS.map(s=>[s.id,s]));
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
@@ -63,17 +84,17 @@ export function createSheetVfx(scene,world,{tier:forced=null,camera=null}={}){
  }
  function release(clip){clip.holder.busy=false;clip.holder.sprite.visible=clip.holder.ground.visible=false;clip.holder.smat.map=clip.holder.gmat.map=null;clips.splice(clips.indexOf(clip),1);trim();}
  function spawn(e){
-  const id=e.roleSkillId,entry=VFX_SHEETS[id];if(disposed||!entry?.effect||!e.from||!e.to)return false;
+  const id=e.roleSkillId,entry=sheetEntry(id);if(disposed||!entry?.effect||!e.from||!e.to)return false;
   const actor=e.actor??self(),own=actor===self(),key=e.castId!=null?actor+'|'+e.castId:null;
   if(key&&clips.some(c=>c.key===key))return true; // the same cast delivered twice
   const p=world.player,direction=effectDirection(e.from,e.to,e.direction??(own?p:locate?.(actor))?.face);if(!own&&p&&Math.hypot(e.from.x-p.x,e.from.z-p.z)>32)return true; // too far to read
   const cap=caps().clips;while(clips.length>=cap)release(clips.find(c=>!c.own)??clips[0]);
-  const skill=skills.get(id),kind=skill?.kind??NOVICE_KIND[id]??e.kind,place=vfxPlacement(kind),ultimate=!!(skill?.ultimate??entry.ultimate);
+  const skill=skills.get(id),kind=e.basic?(entry.classId==='shaman'||entry.classId==='acolyte'||entry.classId==='hunter'?'holy':entry.classId==='lancer'&&id!=='basic:slash'?'line':'slash'):skill?.kind??BASIC_SHEETS[id]?.kind??NOVICE_KIND[id]??e.kind,place=vfxPlacement(kind),ultimate=!e.basic&&!!(skill?.ultimate??entry.ultimate);
   const impacts=e.timing?.impacts?.length?[...e.timing.impacts]:[skill?.windup??.36],radius=skill?.radius??2.8;
-  const wide=place==='around'||place==='area';
-  const clip={key,actor,own,id,entry,place,ultimate,direction,from:{...e.from},to:{...e.to},start:clock-Math.max(0,e.lag??0),impacts,tail:sheetTail(e.timing,ultimate),hits:new Set(),holder:holder(),
-   size:wide?clamp(radius*1.9,2.6,ultimate?8:6.5):ultimate?3.4:place==='shot'?1.9:2.3,ground:clamp(radius*2.5,2.4,ultimate?9:7)};
-  sheet(entry.effect);if(entry.ground)sheet(entry.ground);clips.push(clip);return true;
+  const wide=place==='around'||place==='area',basicScale=e.basic?(e.comboStep===3?2.45:2.15):null;
+  const clip={key,actor,own,id,entry:e.basic?{...entry,ground:null}:entry,place,ultimate,direction,from:{...e.from},to:{...e.to},start:clock-Math.max(0,e.lag??0),impacts,tail:sheetTail(e.timing,ultimate),hits:new Set(),holder:holder(),
+   size:basicScale??(wide?clamp(radius*1.9,2.6,ultimate?8:6.5):ultimate?3.4:place==='shot'?1.9:2.3),ground:clamp(radius*2.5,2.4,ultimate?9:7)};
+  sheet(clip.entry.effect);if(clip.entry.ground)sheet(clip.entry.ground);clips.push(clip);return true;
  }
  // A real damage event of this cast puts the blow where and when the authority dealt it (once per hit index).
  function hit(e){
@@ -109,7 +130,7 @@ export function createSheetVfx(scene,world,{tier:forced=null,camera=null}={}){
   cancel(castId,actor=self()){for(const c of clips.filter(c=>c.key===actor+'|'+castId))release(c);},
   rekey(from,to,actor=self()){for(const c of clips)if(c.key===actor+'|'+from)c.key=actor+'|'+to;},
   // Warm the HTTP cache for the player's own skills; nothing reaches the GPU until a cast needs it.
-  prefetch(ids){for(const id of ids){const e=VFX_SHEETS[id];for(const key of [e?.effect,e?.ground])if(key&&!fetched.has(key)){fetched.add(key);fetch(BASE+tier()+'/'+key+'.webp',{priority:'low'}).catch(()=>{});}}},
+  prefetch(ids){for(const id of ids){const e=sheetEntry(id);for(const key of [e?.effect,e?.ground])if(key&&!fetched.has(key)){fetched.add(key);fetch(BASE+tier()+'/'+key+'.webp',{priority:'low'}).catch(()=>{});}}},
   set locate(fn){locate=fn;},
   clear(){for(const c of [...clips])release(c);trim();},
   dispose(){disposed=true;for(const c of [...clips])release(c);for(const h of pool){scene.remove(h.sprite,h.ground);h.smat.dispose();h.gmat.dispose();}pool.length=0;plane.dispose();for(const c of cache.values()){c.frames?.forEach(t=>t.dispose());c.mirrored?.forEach(t=>t.dispose());c.base?.dispose();}cache.clear();},

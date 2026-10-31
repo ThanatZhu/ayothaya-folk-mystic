@@ -20,12 +20,12 @@ export function standingHeight(directory,classId,gender){return heights[director
 // by up to 21%. These reviewed crown/sole pairs exclude that weapon (frames 12–19).
 export const LANCER_WALK_BODY={
  animation37:{
-  male:[[54,305],[37,291],[50,304],[53,304],[36,285],[51,299],[56,312],[19,269]],
-  female:[[46,293],[18,260],[45,291],[47,289],[18,258],[43,283],[26,241],[30,237]]
+  male:[[54,321],[33,288],[53,307],[54,321],[36,286],[48,297],[68,325],[20,271]],
+  female:[[46,309],[13,271],[43,305],[48,306],[18,259],[41,297],[41,257],[45,253]]
  },
  equipment41:{
-  male:[[72,328],[62,315],[68,325],[71,325],[57,309],[66,317],[56,312],[34,286]],
-  female:[[49,298],[35,278],[50,298],[50,293],[29,271],[50,291],[25,243],[40,249]]
+  male:[[72,344],[60,314],[66,339],[72,342],[58,311],[64,331],[72,344],[36,289]],
+  female:[[64,329],[31,290],[51,315],[52,311],[29,287],[48,305],[41,260],[54,264]]
  }
 };
 export function paintedFrameCalibration(directory,classId,gender,index,frame,idleScale){

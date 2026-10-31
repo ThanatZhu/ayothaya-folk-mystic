@@ -1,4 +1,4 @@
-import {paintedFrameCalibration,FRAME_SIZE,FRAME_FOOT} from './character-size.js?v=size1';
+import {paintedFrameCalibration,FRAME_SIZE,FRAME_FOOT} from './character-size.js?v=size228';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {normalizeEquipment,equipmentItem,equipmentAppearance} from './equipment.js?v=41';
 const cache=new Map();
@@ -9,9 +9,9 @@ export function loadPaintedCharacter(classId,appearance={},equipment=null){
  const key=classId+directory+JSON.stringify(appearance);
  if(cache.has(key))return cache.get(key);
  const pending=(async()=>{
-  const response=await fetch('./assets/'+directory+'/'+classId+'.json');if(!response.ok)throw new Error('Animation metadata: '+classId);
+  const response=await fetch('./assets/'+directory+'/'+classId+'.json?v=life228');if(!response.ok)throw new Error('Animation metadata: '+classId);
   const meta=await response.json(),images={};
-  await Promise.all([...new Set(Object.values(meta.frames).flat().map(f=>f.source))].map(async source=>{const image=new Image();image.src='./assets/'+directory+'/'+source;await image.decode();images[source]=image;}));
+  await Promise.all([...new Set(Object.values(meta.frames).flat().map(f=>f.source))].map(async source=>{const image=new Image();image.src='./assets/'+directory+'/'+source+'?v=life228';await image.decode();images[source]=image;}));
   // 0.122 a gender's forty frames are drawn when first read: a hero shows one, and the other doubled its canvases
   const result={},build=gender=>meta.frames[gender].map((frame,index)=>{
    const {rect,anchor,scale,source}=frame,{factor,foot}=paintedFrameCalibration(directory,classId,gender,index,frame,meta.frames[gender][0].scale);
@@ -36,8 +36,8 @@ export function loadPaintedStanding(classId,gender='male',appearance={},equipmen
  const styledAppearance=equipmentAppearance(appearance,gear,classId),sex=gender==='female'?'female':'male',key=JSON.stringify([classId,sex,directory,styledAppearance]);
  if(standingCache.has(key))return standingCache.get(key);
  const pending=(async()=>{
-  const response=await fetch('./assets/'+directory+'/'+classId+'.json');if(!response.ok)throw new Error('Standing metadata: '+classId);
-  const meta=await response.json(),frame=meta.frames[sex][0],image=new Image();image.src='./assets/'+directory+'/'+frame.source;await image.decode();
+  const response=await fetch('./assets/'+directory+'/'+classId+'.json?v=life228');if(!response.ok)throw new Error('Standing metadata: '+classId);
+  const meta=await response.json(),frame=meta.frames[sex][0],image=new Image();image.src='./assets/'+directory+'/'+frame.source+'?v=life228';await image.decode();
   const {rect,anchor,scale}=frame,{factor,foot}=paintedFrameCalibration(directory,classId,sex,0,frame,frame.scale);
   const cell=document.createElement('canvas');cell.width=cell.height=256;const ctx=cell.getContext('2d');ctx.imageSmoothingEnabled=false;
   const [x,y,w,h]=rect;ctx.drawImage(image,x,y,w,h,128-anchor*scale,244-h*scale,w*scale,h*scale);

@@ -1,0 +1,589 @@
+{
+  "version": 2,
+  "status": "live-world125",
+  "generation": "built-in image_gen",
+  "note": "เชื่อมเกมรุ่น 125: มอนสเตอร์ใหม่ 29 ตัว ชุดท่า 232 เฟรม บอสประจำ 9 แมพ ดรอปและแอดมินพร้อม เมืองลับแลปลอดภัย",
+  "safeTown": "lablae",
+  "maps": [
+    {
+      "mapId": "bamboo-grove",
+      "name": "ป่าไผ่ผีปอบ",
+      "levelBand": [
+        35,
+        45
+      ],
+      "monsters": [
+        {
+          "id": "bamboo-sprout",
+          "name": "หน่อไผ่หลง",
+          "rank": "normal",
+          "height": 1.35,
+          "hook": "ตัวเล็กพบเป็นกลุ่ม ให้ฝึกอ่านจังหวะและโจมตีเป็นวง",
+          "attack": "สะบัดใบไผ่ระยะประชิด",
+          "art": "bamboo-sprout-idle-v1.png",
+          "stage": "live-world125",
+          "gameReady": true,
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            206,
+            101,
+            952,
+            1012
+          ],
+          "animation": "animations/bamboo-sprout.json"
+        },
+        {
+          "id": "hungry-pop",
+          "name": "ปอบหิวโหย",
+          "rank": "normal",
+          "height": 1.85,
+          "hook": "ประชิดไว ถอยหลอกหลังโจมตี ทำให้สายระยะไกลต้องรักษาระยะ",
+          "attack": "ตะปบสองมือ",
+          "art": "hungry-pop-idle-v1.png",
+          "stage": "live-world125",
+          "gameReady": true,
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            199,
+            84,
+            918,
+            1035
+          ],
+          "animation": "animations/hungry-pop.json"
+        },
+        {
+          "id": "bamboo-bat",
+          "name": "ค้างคาวใบไผ่",
+          "rank": "normal",
+          "height": 1.2,
+          "hook": "บินอยู่ต่ำ เข้าจิกแล้วถอย รูปร่างแนวนอนแยกจากตัวอื่น",
+          "attack": "โฉบผ่านระยะสั้น",
+          "art": "bamboo-bat-idle-v1.png",
+          "stage": "live-world125",
+          "gameReady": true,
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "contentRect": [
+            49,
+            88,
+            1438,
+            790
+          ],
+          "animation": "animations/bamboo-bat.json"
+        },
+        {
+          "id": "bamboo-ward",
+          "name": "หุ่นไผ่อาคม",
+          "rank": "elite",
+          "height": 2.65,
+          "hook": "ตัวพิเศษเกราะหนา มีจังหวะชาร์จหมัดให้ขัดท่าหรือหลบ",
+          "attack": "ทุบพื้นเป็นวงแคบ",
+          "art": "bamboo-ward-idle-v1.png",
+          "stage": "live-world125",
+          "gameReady": true,
+          "sourceSize": [
+            1222,
+            1287
+          ],
+          "contentRect": [
+            83,
+            65,
+            1056,
+            1149
+          ],
+          "animation": "animations/bamboo-ward.json"
+        },
+        {
+          "id": "pop-grove-lord",
+          "name": "ปอบเจ้าดง",
+          "rank": "boss",
+          "height": 4.1,
+          "hook": "บอสประจำแมพ ใช้พลองกวาดและคำรามเรียกลูกน้อง มีสัญญาณก่อนโจมตี",
+          "attack": "พลองกวาดวงและกระแทกพื้น",
+          "art": "pop-grove-lord-idle-v1.png",
+          "stage": "live-world125",
+          "gameReady": true,
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            45,
+            50,
+            1219,
+            1099
+          ],
+          "animation": "animations/pop-grove-lord.json"
+        }
+      ]
+    },
+    {
+      "mapId": "ruined-temple",
+      "name": "วัดร้างริมกรุงเก่า",
+      "levelBand": [
+        45,
+        55
+      ],
+      "monsters": [
+        {
+          "id": "clay-temple-doll",
+          "name": "ตุ๊กตาดินเฝ้าวัด",
+          "rank": "normal",
+          "hook": "ตัวเล็กเนื้อดินเผา",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "clay-temple-doll-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            366,
+            158,
+            625,
+            925
+          ],
+          "height": 1.15,
+          "animation": "animations/clay-temple-doll.json"
+        },
+        {
+          "id": "haunted-bell",
+          "name": "ระฆังผี",
+          "rank": "normal",
+          "hook": "ระฆังลอยต่ำ โจมตีคลื่นเสียงระยะกลาง",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "haunted-bell-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            231,
+            122,
+            915,
+            904
+          ],
+          "height": 1.3,
+          "animation": "animations/haunted-bell.json"
+        },
+        {
+          "id": "walking-bricks",
+          "name": "กองอิฐเดินได้",
+          "rank": "normal",
+          "hook": "อิฐโบราณรวมร่าง เคลื่อนช้าแต่ทนทาน",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "walking-bricks-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            170,
+            136,
+            979,
+            948
+          ],
+          "height": 1.55,
+          "animation": "animations/walking-bricks.json"
+        },
+        {
+          "id": "stone-gate-guardian",
+          "name": "ยักษ์ศิลาเฝ้าประตู",
+          "rank": "elite",
+          "hook": "ผู้พิทักษ์หิน พุ่งเป็นเส้นให้หลบด้านข้าง",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "stone-gate-guardian-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            242,
+            81,
+            799,
+            1070
+          ],
+          "height": 2.65,
+          "animation": "animations/stone-gate-guardian.json"
+        },
+        {
+          "id": "abandoned-bell-curse",
+          "name": "อาถรรพ์ระฆังร้าง",
+          "rank": "boss",
+          "hook": "บอสระฆังสำริดยักษ์ คุมพื้นที่ด้วยคลื่นเสียง",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "abandoned-bell-curse-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            36,
+            39,
+            1249,
+            1117
+          ],
+          "height": 4,
+          "animation": "animations/abandoned-bell-curse.json"
+        }
+      ]
+    },
+    {
+      "mapId": "himmapan-edge",
+      "name": "ชายป่าหิมพานต์",
+      "levelBand": [
+        55,
+        70
+      ],
+      "monsters": [
+        {
+          "id": "mist-cap",
+          "name": "เห็ดลายหมอก",
+          "rank": "normal",
+          "hook": "เห็ดหมอกทรงกลม ปล่อยสปอร์เป็นพื้นที่",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "mist-cap-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            242,
+            172,
+            902,
+            897
+          ],
+          "height": 1.1,
+          "animation": "animations/mist-cap.json"
+        },
+        {
+          "id": "crystal-tusk-boar",
+          "name": "หมูป่าเขาแก้ว",
+          "rank": "normal",
+          "hook": "สัตว์สี่เท้าเขาผลึก ชาร์จเป็นเส้น",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "crystal-tusk-boar-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            273,
+            210,
+            924,
+            795
+          ],
+          "height": 1.65,
+          "animation": "animations/crystal-tusk-boar.json"
+        },
+        {
+          "id": "leaf-flame-bird",
+          "name": "นกเปลวใบไม้",
+          "rank": "normal",
+          "hook": "นกตัวเล็กหางใบไม้โจมตีระยะกลาง",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "leaf-flame-bird-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            185,
+            212,
+            997,
+            842
+          ],
+          "height": 1.2,
+          "animation": "animations/leaf-flame-bird.json"
+        },
+        {
+          "id": "vine-tiger",
+          "name": "เสือเถาวัลย์",
+          "rank": "elite",
+          "hook": "เสือขนาดใหญ่ กระโจนและผูกเถาวัลย์",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "vine-tiger-idle-v1.png",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "contentRect": [
+            166,
+            116,
+            1361,
+            848
+          ],
+          "height": 2.7,
+          "animation": "animations/vine-tiger.json"
+        },
+        {
+          "id": "woodland-elephant",
+          "name": "คชสารพฤกษ์",
+          "rank": "boss",
+          "hook": "ช้างป่าร่างพฤกษ์ งาใหญ่ กระแทกพื้น",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "woodland-elephant-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            80,
+            82,
+            1195,
+            1037
+          ],
+          "height": 4.35,
+          "animation": "animations/woodland-elephant.json"
+        }
+      ]
+    },
+    {
+      "mapId": "naga-cave",
+      "name": "ถ้ำพญานาค",
+      "levelBand": [
+        70,
+        85
+      ],
+      "monsters": [
+        {
+          "id": "cave-crystal-toad",
+          "name": "อึ่งแก้วถ้ำ",
+          "rank": "normal",
+          "hook": "กบหินตัวกลม กระโดดพร้อมวงเตือน",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "cave-crystal-toad-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            217,
+            282,
+            900,
+            724
+          ],
+          "height": 1.15,
+          "animation": "animations/cave-crystal-toad.json"
+        },
+        {
+          "id": "jade-scale-hatchling",
+          "name": "ลูกงูเกล็ดหยก",
+          "rank": "normal",
+          "hook": "งูเล็กเคลื่อนคด",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "jade-scale-hatchling-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            359,
+            137,
+            745,
+            915
+          ],
+          "height": 1.25,
+          "animation": "animations/jade-scale-hatchling.json"
+        },
+        {
+          "id": "glowstone-crab",
+          "name": "ปูหินเรืองแสง",
+          "rank": "normal",
+          "hook": "ปูทรงกว้าง เกราะหน้าแข็ง",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "glowstone-crab-idle-v1.png",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "contentRect": [
+            158,
+            158,
+            1244,
+            760
+          ],
+          "height": 1.2,
+          "animation": "animations/glowstone-crab.json"
+        },
+        {
+          "id": "stream-serpent",
+          "name": "อสรพิษเฝ้าธาร",
+          "rank": "elite",
+          "hook": "งูใหญ่คุมแนวธารน้ำด้วยพิษ",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "stream-serpent-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            201,
+            47,
+            1073,
+            1097
+          ],
+          "height": 2.7,
+          "animation": "animations/stream-serpent.json"
+        },
+        {
+          "id": "underwater-naga-guardian",
+          "name": "นาคพิทักษ์บาดาล",
+          "rank": "boss",
+          "hook": "นาคใหญ่ มีท่ากวาดหางและคลื่นน้ำ",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "underwater-naga-guardian-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            260,
+            21,
+            1010,
+            1129
+          ],
+          "height": 4.4,
+          "animation": "animations/underwater-naga-guardian.json"
+        }
+      ]
+    },
+    {
+      "mapId": "kailash-peak",
+      "name": "ยอดเขาไกรลาส",
+      "levelBand": [
+        85,
+        99
+      ],
+      "monsters": [
+        {
+          "id": "stone-mist-hare",
+          "name": "กระต่ายหมอกศิลา",
+          "rank": "normal",
+          "hook": "สัตว์เล็กขนเทาหมอก เข้าปะทะแล้วถอย",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "stone-mist-hare-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            308,
+            101,
+            714,
+            999
+          ],
+          "height": 1.15,
+          "animation": "animations/stone-mist-hare.json"
+        },
+        {
+          "id": "wind-mountain-bird",
+          "name": "ปักษาวายุ",
+          "rank": "normal",
+          "hook": "นกภูเขาปีกเรียว โจมตีเป็นแนวลม",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "wind-mountain-bird-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            58,
+            147,
+            1223,
+            939
+          ],
+          "height": 1.4,
+          "animation": "animations/wind-mountain-bird.json"
+        },
+        {
+          "id": "crystal-horn-goat",
+          "name": "แพะเขาผลึก",
+          "rank": "normal",
+          "hook": "สัตว์ภูเขาสี่เท้า เขาผลึกและท่าพุ่ง",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "crystal-horn-goat-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            288,
+            164,
+            785,
+            909
+          ],
+          "height": 1.8,
+          "animation": "animations/crystal-horn-goat.json"
+        },
+        {
+          "id": "stone-garuda",
+          "name": "ครุฑศิลาฝึกศึก",
+          "rank": "elite",
+          "hook": "นักรบปักษาเนื้อศิลา เตรียมท่าก่อนพุ่ง",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "stone-garuda-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            283,
+            96,
+            836,
+            1037
+          ],
+          "height": 2.85,
+          "animation": "animations/stone-garuda.json"
+        },
+        {
+          "id": "cloud-peak-yaksha",
+          "name": "ยักษ์เมฆาคุ้มขุนเขา",
+          "rank": "boss",
+          "hook": "ยักษ์ขุนเขา ใช้แรงลมและกระแทกพื้น",
+          "stage": "live-world125",
+          "gameReady": true,
+          "art": "cloud-peak-yaksha-idle-v1.png",
+          "sourceSize": [
+            1312,
+            1199
+          ],
+          "contentRect": [
+            16,
+            18,
+            1282,
+            1129
+          ],
+          "height": 4.45,
+          "animation": "animations/cloud-peak-yaksha.json"
+        }
+      ]
+    }
+  ]
+}

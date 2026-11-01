@@ -176,3 +176,19 @@ html body #skill-window .skill-node.passive{border:0}
 @media(max-width:640px),(orientation:landscape) and (max-height:560px){#skill-window .skill-node>.skill-ult-badge{top:-8px;font-size:9px;padding:0 6px}}
 #skill-window .skill-node>.skill-upgrade[hidden]{display:none}
 @media(max-width:640px),(orientation:landscape) and (max-height:560px){#skill-window .skill-tree.role-tree{grid-template-columns:repeat(4,minmax(0,56px));gap:6px 26px;padding-top:8px;padding-bottom:8px}}
+/* 239: the node artwork owns the gold edge. Fit the icon underneath that
+   edge instead of nesting the old rounded icon border inside it. */
+#skill-window .skill-node:not(.passive){padding:4px;--skill-node-inset:4px}
+#skill-window .skill-node:not(.passive)>.skill-select{border-radius:2px}
+#skill-window .skill-node .skill-icon{min-width:0;border:0;box-shadow:none;border-radius:inherit;background-clip:border-box}
+#skill-window .skill-node .skill-icon[data-skill-icon],#skill-window[data-profession=novice] .skill-node .skill-icon{background-size:118% 118%!important}
+#skill-window .skill-node>.skill-select{overflow:hidden}
+#skill-window .skill-node.picked:not(.passive)>.skill-select{outline:0;box-shadow:none}
+/* Narrow grids may shrink a column: keep height tied to its actual width. */
+#skill-window .skill-node{height:auto;aspect-ratio:1;align-self:center}
+@media(max-width:380px){#skill-window .skill-tree.role-tree{column-gap:12px}}
+html body #skill-window .skill-node>.skill-select{min-width:0;min-height:0}
+html body #skill-window .skill-node:not(.passive)>.skill-select{border-radius:2px}
+@media(max-width:380px){#skill-window .skill-node.passive{padding:4px}}
+/* Keep the upgrade control at its designed size, outside the icon centre. */
+html body #skill-window .skill-node>.skill-upgrade{width:32px;min-width:32px;height:32px!important;min-height:32px!important;padding:0}

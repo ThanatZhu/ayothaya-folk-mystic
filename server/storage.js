@@ -52,6 +52,7 @@ export class LocalStore{
  async classRewardPage({after=null,limit=100}={}){const rows=(await this.listProfiles()).sort((a,b)=>a.uid.localeCompare(b.uid)).filter(r=>after===null||r.uid.localeCompare(after)>0),page=rows.slice(0,limit);return {rows:page,after:page.at(-1)?.uid??after,done:rows.length<=limit};}
  async loadClassRewardState(){try{return JSON.parse(await readFile(path.join(this.directory,'class-reward192.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}}
  saveClassRewardState(state){const data=JSON.stringify(state);this.rewardQueue=(this.rewardQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'class-reward192.json');await writeFile(file+'.tmp',data,{mode:0o600});await rename(file+'.tmp',file);});return this.rewardQueue;}
+ async characterPreviews(uid){const record=this.rows.get(uid);return record?[{slotId:'slot-1',record:copy(record)}]:[];}
  async deleteCharacter(identity){
   const row=this.rows.get(identity.uid);if(!row||identity.slotId!=='slot-1')throw new Error('character-not-found');
   const lock=this.leases.get(identity.uid);if(lock&&lock.expires>Date.now())throw new Error('player-online');
@@ -135,6 +136,20 @@ export class FirebaseStore{
  deleteGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).delete();}
  // 0.103 back office. The private profiles sit in multiplayerProfiles/{uid}/characters; the collection group also
  // matches the legacy players/{uid}/characters mirror, which is skipped. One read per document: the host caches it.
+ async characterPreviews(uid){
+  const slots=Array.from({length:5},(_,i)=>'slot-'+(i+1)),refs=slots.map(slotId=>this.refs({uid,slotId}));
+  const snapshots=await this.db.getAll(...refs.flatMap(r=>[r.profile,r.legacy]));
+  return slots.flatMap((slotId,i)=>{
+   const profile=snapshots[i*2],mirror=snapshots[i*2+1];if(!mirror.exists)return [];
+   const record=copy(profile.exists?profile.data().record:mirror.data());
+   // Match acquire(): a new client-writable mirror cannot invent progress or gear.
+   if(!profile.exists){
+    if(!(mirror.data().updatedAt?.toMillis?.()<MIRROR_CUTOFF)){const c=record.character;record.character={name:c.name,gender:c.gender,classId:'novice',...(c.appearance?{appearance:c.appearance}:{})};record.state=initialSave();}
+    for(const key of ['stats','gear','equipment','rebirth','petCollection'])delete record[key];
+   }
+   return [{slotId,record}];
+  });
+ }
  async listProfiles(limit=2000){
   const snap=await this.db.collectionGroup('characters').limit(limit).get();
   return snap.docs.filter(d=>d.ref.parent.parent?.parent?.id==='multiplayerProfiles'&&d.data().record).map(d=>({uid:d.ref.parent.parent.id,slotId:d.id,record:d.data().record,savedAt:d.data().updatedAt??null}));

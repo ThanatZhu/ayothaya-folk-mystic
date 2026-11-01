@@ -1,3 +1,4 @@
+import {characterPreview} from './character-preview240.js';
 import{XP_CURVE}from'../experience.js';
 import{readPublicFile,releaseRedirect}from'./public-files223.js';
 import {AUCTION_ACTIONS,AUCTION_ERRORS,auctionAction,publicAuctions,settleAuctions} from '../auctions223.js';
@@ -336,6 +337,19 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   }
   // 0.114 a signed-in player deletes one of their own characters (lobby). The token names the account; the store
   // refuses while that account is in a game.
+  if(url.pathname==='/character/previews'&&req.method==='GET'){
+   res.setHeader('Cache-Control','private, no-store');
+   if(origin&&!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
+   const token=String(req.headers.authorization??'').replace(/^Bearer /,'');let uid;
+   try{uid=mode==='local'?store.verifyLocal(token):(await authenticate(token)).uid;}catch{}
+   if(!uid){reply(401,{error:'bad-token'});return;}
+   try{
+    const rows=await store.characterPreviews(uid);
+    const characters=rows.map(({record,slotId})=>characterPreview(record,slotId,[...realm.peers.values()].find(p=>p.uid===uid&&p.slotId===slotId)));
+    reply(200,{schema:1,characters});
+   }catch{reply(503,{error:'preview-unavailable'});}
+   return;
+  }
   if(url.pathname==='/character/delete'&&req.method==='POST'){
    if(!allowedOrigin(origin)){reply(403,{error:'origin'});return;}
    let data='',tooLarge=false;for await(const chunk of req){data+=chunk;if(data.length>1024){tooLarge=true;break;}}if(tooLarge){reply(413,{error:'too-large'});return;}

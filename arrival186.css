@@ -56,3 +56,22 @@ body:not([data-screen=login]) #switch-account{display:none}
 .login-actions:has(#continue-account:not([hidden])) :is(.divider,.account-note){display:none}
 .story-intro{animation:screen-arrive .85s .05s both}.story-copy{animation:screen-arrive .85s .2s both}
 @media(orientation:landscape) and (max-height:430px){#servers-screen .realm-note{display:none}}
+
+/* 240: the login steps span the same content width as the character window. */
+body[data-screen=character] .lobby-card>nav{width:100%;flex:none}
+body[data-screen=character] .steps{display:flex;max-width:none;width:100%}
+body[data-screen=character] .pose-controls{display:none!important}
+.preview-status-message{font-size:12px;line-height:1.6;color:#e8d7ad;margin:10px}
+@media(orientation:landscape) and (max-height:600px){
+ body[data-screen=character] .character-details{overflow-y:auto;min-height:0}
+ body[data-screen=character] .lobby-stats-card{display:grid}
+ body[data-screen=character] .lobby-derived-grid{display:grid}
+}
+body[data-screen=character] .character-stage:before{content:none}
+@media(orientation:landscape) and (max-height:600px){
+ #character-screen:not([hidden]){display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+ .character-heading,#progression-hint{flex:none}
+ .character-body{flex:1;grid-template-rows:minmax(0,1fr);min-height:0}
+ #character-slots{overflow-y:auto}
+ body[data-screen=character] .character-details{justify-content:flex-start}
+}

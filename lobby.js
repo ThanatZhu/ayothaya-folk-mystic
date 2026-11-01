@@ -6,7 +6,7 @@ import {validateAppearance} from './appearance-state.js';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {progression,jobFor,CLASS_LEVEL,advanceReady} from './advancement.js?v=73';
 import {CLASSES,getClass,className,atlasPath} from './classes.js?v=novice174';
-import {previewPose} from './sprite-motion.js';
+import {lobbyPose,fetchCharacterPreviews,previewStatus} from './lobby-preview240.js';
 import {createLandscapeGuard} from './mobile-layout.js?v=login158';
 import {connectFirebase,deadline} from './firebase-client.js';
 import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS} from './realm-state.js?v=62';
@@ -18,15 +18,22 @@ import {statTip} from './stat-tips.js?v=tips210';
 wakeServer();
 const $=id=>document.getElementById(id);
 createLandscapeGuard({allowPortrait:true});
-let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',poseMode='cycle',previewTime=0;
+let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',previewTime=0;
 let roster=[],selectedChannel=normalizeChannel(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1);
-let currentStatusView=null,activeTipKey=null;
+let currentStatusView=null,activeTipKey=null,characterPreviews=new Map(),previewRequest=0;
+async function refreshPreviews(){
+ const request=++previewRequest;characterPreviews=new Map();if(!store?.cloud)return;
+ const requestedOwner=owner;
+ try{const values=await fetchCharacterPreviews(connection,multiplayerURL());if(owner===requestedOwner&&request===previewRequest)characterPreviews=values;}catch{}
+}
+
 const say=text=>$('lobby-status').textContent=text;
-const lobbyMotion=createMotionPreview($('hero-preview')),arrival=createArrivalShowcase($('arrival-showcase'));
+const lobbyMotion=createMotionPreview($('hero-preview'),{authoredRun:true}),arrival=createArrivalShowcase($('arrival-showcase'));
 $('explore-paths').onclick=()=>arrival.open();
 
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
 function readCharacterStatus(rec){
+ if(rec&&store?.cloud){const saved=characterPreviews.get(rec.slotId);return saved?previewStatus(saved):null;}
  const classId=rec?.character?.classId??selectedClass??'novice';
  const level=rec?progression(rec.state.traveler).level:1;
  const path=statPath(rec?.character??{classId});
@@ -83,6 +90,10 @@ function renderCharacterStats(){
  if(targetParent&&anchor&&card.nextSibling!==anchor)targetParent.insertBefore(card,anchor);
  const v=readCharacterStatus(record);
  currentStatusView=v;
+ card.querySelector('.lobby-stats-head').hidden=!v;statList.hidden=!v;derivedList.hidden=!v;
+ let pending=card.querySelector('.preview-status-message');
+ if(!pending){pending=el('p','โหลดข้อมูลตัวละครล่าสุดไม่ได้ กรุณาลองเลือกโลกอีกครั้ง','preview-status-message');card.append(pending);}
+ pending.hidden=!!v;if(!v){hideLobbyTip();return;}
  pts.textContent='แต้มสถานะ '+v.points;
  const total=v.derived.total??v.stats,reborn=v.derived.rebirthBonus??0;
  const rebirthTag=reborn?` <em class="rebirth-bonus" title="โบนัสจุติถาวร">+${reborn}</em>`:'';
@@ -119,8 +130,9 @@ if(statsCard){
 const atlases=new Map();let atlasToken=0;
 async function drawAtlas(){
  const token=++atlasToken,id=selectedClass,src=atlasPath(id);
+ const available=!record||!store?.cloud||characterPreviews.has(record.slotId);$('hero-preview').style.visibility=available?'':'hidden';if(!available)return;
  if(!atlases.has(src))atlases.set(src,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;}));
- try{const img=await atlases.get(src);if(token===atlasToken)lobbyMotion.setSource(customizeAtlas(img,validateAppearance(record?.character.appearance),id),previewGender,id,record?.equipment);}catch{atlases.delete(src);}
+ try{const img=await atlases.get(src);if(token===atlasToken)lobbyMotion.setSource(customizeAtlas(img,validateAppearance(record?.character.appearance),id),previewGender,id,characterPreviews.get(record?.slotId)?.equipment??record?.equipment);}catch{atlases.delete(src);}
 }
 function show(next){hideLobbyTip();screen=next;arrival.setScreen(next);document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
 function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#delete-character,.character-slot').forEach(b=>b.disabled=value);}
@@ -153,7 +165,7 @@ async function selectIdentity(id){
  // 0.117 online accounts (Google or quick play) accept the terms and privacy policy once per version
  if(id!=='guest'){lock(true);const ok=await ensureConsent(connection?.auth.currentUser).catch(()=>false);lock(false);if(!ok){say('ต้องยอมรับข้อกำหนดและนโยบายความเป็นส่วนตัวก่อนเล่นออนไลน์ · หรือเลือกเล่นออฟไลน์บนเครื่องนี้');return;}}
  lock(true);say('กำลังเตรียมรายชื่อเซิร์ฟเวอร์…');
- try{await catalogReady;owner=id;store=createRealmStore({connection,owner,catalog});showIdentity();show('servers');}
+ try{await catalogReady;owner=id;characterPreviews=new Map();store=createRealmStore({connection,owner,catalog});showIdentity();show('servers');}
  catch(e){report(e);}finally{lock(false);}
 }
 async function setup(){
@@ -193,15 +205,15 @@ function preview(gender=previewGender){
  drawAtlas();previewTime=0;
 }
 for(const c of CLASSES){const label=document.createElement('label');label.className='class-option';const radio=document.createElement('input');radio.type='radio';radio.name='profession';radio.value=c.id;radio.checked=c.id===selectedClass;radio.addEventListener('change',()=>{selectedClass=c.id;preview();});const text=document.createElement('span');text.textContent=c.name;const icon=document.createElement('b');icon.textContent=c.icon;label.append(radio,icon,text);$('class-options').append(label);}
-document.querySelectorAll('[data-pose]').forEach(b=>b.onclick=()=>{poseMode=b.dataset.pose;previewTime=0;document.querySelectorAll('[data-pose]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));});
+
 let previewLast=0;const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 let lastRigDraw=0;
 function animatePreview(ms){const dt=Math.min(.05,(ms-previewLast)/1000);previewLast=ms;
  if(!document.hidden&&screen==='character'){
- const stopped=false;previewTime+=dt*(reduced.matches?.45:.7);
- const state=previewPose(previewTime,poseMode,stopped);
- if(ms-lastRigDraw>=1000/30){lastRigDraw=ms;const mode=poseMode==='attack'?'attack':state.casting?'attack':state.moving?'walk':'idle';lobbyMotion.draw(characterMotion({time:mode==='attack'?previewTime%.95:previewTime,mode,classId:selectedClass,reduced:stopped}));}
- $('hero-preview').dataset.pose=stopped?'idle':state.casting?'attack':state.moving?'walk':'idle';
+ previewTime+=dt;
+ const state=lobbyPose(previewTime,selectedClass,reduced.matches);
+ if(ms-lastRigDraw>=1000/30){lastRigDraw=ms;lobbyMotion.draw(characterMotion({...state,classId:selectedClass,reduced:reduced.matches}));}
+ $('hero-preview').dataset.pose=state.mode;
  }requestAnimationFrame(animatePreview);
 }requestAnimationFrame(animatePreview);
 preview();
@@ -209,18 +221,19 @@ document.querySelectorAll('[name=gender]').forEach(input=>input.addEventListener
 function drawRoster(){
  $('slot-count').textContent=roster.length+' / 5';$('character-slots').replaceChildren();
  for(const id of CHARACTER_SLOTS){
-  const row=roster.find(r=>r.slotId===id),button=document.createElement('button');button.type='button';button.className='character-slot';button.setAttribute('aria-pressed',String(row?.slotId===record?.slotId&&!!row));
-  if(row){const image=document.createElement('span');image.className='slot-portrait';image.style.backgroundImage='url('+atlasPath(row.character.classId)+')';image.style.backgroundPosition='0 '+(row.character.gender==='female'?'100%':'0%');const name=document.createElement('strong');name.textContent=row.character.name;const detail=document.createElement('small');detail.textContent='Lv. '+progression(row.state.traveler).level+' · '+className(row.character.classId,row.character.gender);button.append(image,name,detail);button.setAttribute('aria-label','เลือก '+row.character.name+' '+detail.textContent);}
+  let row=roster.find(r=>r.slotId===id),button=document.createElement('button');button.type='button';button.className='character-slot';button.setAttribute('aria-pressed',String(row?.slotId===record?.slotId&&!!row));
+  if(row){row={...row,character:characterPreviews.get(row.slotId)?.character??row.character};const image=document.createElement('span');image.className='slot-portrait';image.style.backgroundImage='url('+atlasPath(row.character.classId)+')';image.style.backgroundPosition='0 '+(row.character.gender==='female'?'100%':'0%');const name=document.createElement('strong');name.textContent=characterPreviews.get(row.slotId)?.character.name??row.character.name;const detail=document.createElement('small');detail.textContent='Lv. '+(characterPreviews.get(row.slotId)?.level??progression(row.state.traveler).level)+' · '+className(row.character.classId,row.character.gender);button.append(image,name,detail);button.setAttribute('aria-label','เลือก '+row.character.name+' '+detail.textContent);}
   else{button.textContent='+ สร้างตัวละคร';button.setAttribute('aria-label','สร้างตัวละครช่อง '+id.slice(-1));}
   button.onclick=()=>{if(busy)return;record=row??null;selected=row?row.serverId:'server-1';displayCharacter();};$('character-slots').append(button);
  }
 }
 function displayCharacter(){
+ if(record){const fresh=characterPreviews.get(record.slotId);if(fresh)record={...record,character:fresh.character,state:{...record.state,mapId:fresh.mapId}};}
  const srv=SERVERS[0];$('realm-caption').textContent=srv.name+' · '+srv.subtitle;
  document.body.dataset.characterMode=record?'select':'create';$('character-form').hidden=!!record;$('existing-character').hidden=!record;$('character-title').textContent=record?'เลือกตัวละคร':'สร้างผู้ฝึกตน';drawRoster();
  $('character-form').hidden=!!record||roster.length>=5;
  $('progression-hint').textContent=!record?'ผู้ฝึกตน → อาชีพที่ Job 10 → Master ที่ Job 40':record.character.jobId?'Master · '+jobFor(record.character.classId,record.character.jobId).name:record.character.classId==='novice'?(advanceReady(record.state.traveler,'novice').ok?'พร้อมรับบททดสอบอาชีพที่ลานครูแห่งอโยธยา':'ฝึก Job ผู้ฝึกตนให้ตัน (Job 10) เพื่อเปลี่ยนอาชีพ'):'อาชีพ '+className(record.character.classId,record.character.gender)+'ฝึก Job ให้ตัน (Job 40) เพื่อรับ Master';
- if(record){selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
+ if(record){selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+(characterPreviews.get(record.slotId)?.level??progression(record.state.traveler).level);$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
  else{$('character-form').reset();selectedClass='novice';preview('male');}
  $('stage-name').textContent=record?.character.name??'';
  renderCharacterStats();
@@ -229,21 +242,21 @@ function displayCharacter(){
 $('hero-name').addEventListener('input',()=>{if(!record)$('stage-name').textContent=$('hero-name').value.trim();});
 document.querySelectorAll('[data-server]').forEach(button=>button.onclick=async()=>{
  if(busy)return;lock(true);selected=button.dataset.server||'server-1';selectedChannel=normalizeChannel(button.dataset.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(selectedChannel));}catch{}say('กำลังโหลดตัวละคร…');
- try{await checkWorldReady();roster=await store.list();record=roster[0]??null;if(record)selected=record.serverId;displayCharacter();}catch(e){record=null;report(e);}finally{lock(false);}
+ try{await checkWorldReady();roster=await store.list();await refreshPreviews();record=roster[0]??null;if(record)selected=record.serverId;displayCharacter();}catch(e){record=null;report(e);}finally{lock(false);}
 });
 $('character-form').onsubmit=async event=>{
  event.preventDefault();if(busy)return;lock(true);say('กำลังสร้างตัวละคร…');
- try{await checkWorldReady();record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:'novice',appearance:validateAppearance(),jobId:''});roster=await store.list();displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}
+ try{await checkWorldReady();record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:'novice',appearance:validateAppearance(),jobId:''});roster=await store.list();await refreshPreviews();displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}
 };
 $('change-class').onclick=async()=>{
  if(!record||busy||selectedClass===record.character.classId)return;lock(true);say('กำลังบันทึกอาชีพ…');
- try{record=await store.changeClass(selected,record,selectedClass);roster=await store.list();displayCharacter();say('เปลี่ยนอาชีพแล้ว · ความคืบหน้าเดิมยังอยู่');}catch(e){report(e);}finally{lock(false);}
+ try{record=await store.changeClass(selected,record,selectedClass);roster=await store.list();await refreshPreviews();displayCharacter();say('เปลี่ยนอาชีพแล้ว · ความคืบหน้าเดิมยังอยู่');}catch(e){report(e);}finally{lock(false);}
 };
 $('delete-character').onclick=()=>{if(!record||busy)return;$('delete-name').textContent=record.character.name;$('delete-confirm').value='';$('delete-go').disabled=true;$('delete-dialog').showModal();$('delete-confirm').focus();};
 $('delete-confirm').oninput=()=>{$('delete-go').disabled=$('delete-confirm').value.trim()!==record?.character.name;};
 $('delete-dialog').addEventListener('close',async()=>{
  if($('delete-dialog').returnValue!=='ok'||!record||busy)return;lock(true);say('กำลังลบตัวละคร…');
- try{const name=record.character.name;await store.remove(record);record=null;roster=await store.list();displayCharacter();say('ลบ '+name+' แล้ว');}catch(e){report(e);}finally{lock(false);}
+ try{const name=record.character.name;await store.remove(record);record=null;roster=await store.list();await refreshPreviews();displayCharacter();say('ลบ '+name+' แล้ว');}catch(e){report(e);}finally{lock(false);}
 });
 $('enter-world').onclick=()=>{
  if(!record||busy)return;
@@ -262,3 +275,5 @@ async function checkWorldReady(){
  let state;try{const r=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(3500)});if(r.ok)state=await r.json();}catch{}
  if(state?.maintenance)throw Error('world-reset');
 }
+
+addEventListener('focus',async()=>{if(screen!=='character'||busy||!store?.cloud)return;await refreshPreviews();if(screen==='character')displayCharacter();});

@@ -17,7 +17,7 @@ export function createStatusUI({game,account,bagUI}){
  const classId=account?.character?.classId??world.profession.id;
  const path=statPath(account?.character??{classId});let local={stats:normalizeStats(null),gear:normalizeGear(null),path};
  try{const v=JSON.parse(localStorage.getItem(key));if(v)local={stats:normalizeStats(v.path&&v.path!==path?null:v.stats),gear:normalizeGear(v.gear),path};}catch{}
- const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};if(!account?.cloud)save();
+ const save=()=>{try{localStorage.setItem(key,JSON.stringify({...local,rebirth:world.rebirth??0}));}catch{}};if(!account?.cloud)save();
  const who=()=>({classId,level:baseProgress(world).level,reborn:world.rebirth??0});
  const view=()=>game.online?{stats:normalizeStats(world.stats),gear:normalizeGear(world.gear),points:world.statPoints??0,derived:world.derivedView??deriveStats({...who()})}
   :{...local,points:statPoints(local.stats,who().level,who().reborn),derived:deriveStats({...who(),...local,pet:world.petBonus,food:foodBuff(world)})};
@@ -99,6 +99,7 @@ export function createStatusUI({game,account,bagUI}){
  let shown='';
  function render(force=false){
   const v=view(),sig=JSON.stringify([v,dialog.open]);if(!force&&sig===shown)return;shown=sig;
+  if(game.online&&world.stats){try{localStorage.setItem(key,JSON.stringify({stats:v.stats,gear:v.gear,rebirth:who().reborn,path}));}catch{}}
   dot.hidden=!(v.points>0);
   if(!dialog.open)return;
   $('status-points').textContent='แต้มสถานะ '+v.points;

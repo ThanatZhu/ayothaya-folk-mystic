@@ -1,3 +1,4 @@
+import {createEventHub242} from './event-hub242.js';
 import {announce} from './announcement-ui.js?v=149';
 // 0.48 everyday UI: ailment icons on the HUD, RO-style emote bubbles (picker + own bubble), daily login popup.
 // Remote players' bubbles are drawn by multiplayer-ui.js; the server rewards the daily login online, this file offline.
@@ -105,7 +106,6 @@ export function createLifeUI({game,account,camera}){
   setTimeout(()=>announce('🏮 '+e.name+' · '+e.text,{id:'festival:'+e.id,kind:'festival'}),6000);}
   // 0.100.5 events window: every running and weekly event explained in one place, with live countdowns
  const eventsChip=document.createElement('button');eventsChip.type='button';eventsChip.id='events-chip';eventsChip.innerHTML='<i aria-hidden="true">📜</i><span>กิจกรรม</span>';eventsChip.onclick=openEvents;chips.append(eventsChip);
- const eventsWin=document.createElement('dialog');eventsWin.id='events-window';eventsWin.setAttribute('aria-labelledby','events-title');($('game-shell')??document.body).append(eventsWin);
  const span=ms=>{const s=Math.max(0,Math.floor(ms/1000)),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?d+' วัน '+h+' ชม.':h?h+' ชม. '+m+' นาที':m+':'+String(s%60).padStart(2,'0');};
  const day=(t,o={day:'numeric',month:'short'})=>new Date(t).toLocaleDateString(globalThis.I18N?.locale??'th-TH',{timeZone:'Asia/Bangkok',...o});
  const loot=r=>[r.coins?r.coins.toLocaleString('th-TH')+' เบี้ย':'',...r.items.map(i=>(itemDef(i.id)?.name??i.id)+' ×'+i.count)].filter(Boolean).join(' · ');
@@ -122,9 +122,9 @@ export function createLifeUI({game,account,camera}){
    card('🏆','ทัวร์นาเมนต์ประลอง','',`<p>ปิดรอบในอีก ${span(arenaEnds(now)-now)}</p><ul><li>ท้าดวลผู้เล่นอื่น ชนะ +${ARENA.win} แต้ม · เสมอ +${ARENA.draw} (คู่เดิมนับวันละ ${ARENA.pairDaily} ครั้ง)</li><li>อันดับ 1–3 ประจำสัปดาห์ได้รางวัล: ${ARENA.prizes.map((p,i)=>'#'+(i+1)+' '+loot(p)).join(' / ')}</li></ul>`)}
   </div>`;
  }
- let eventsTimer=0;
- function openEvents(){eventsWin.innerHTML=eventsHTML();eventsWin.querySelector('#events-close').onclick=()=>eventsWin.close();game.clearInput();openHudPanel(eventsWin);
-  clearInterval(eventsTimer);eventsTimer=setInterval(()=>{if(!eventsWin.open){clearInterval(eventsTimer);return;}const y=eventsWin.querySelector('.ev-list')?.scrollTop??0;eventsWin.innerHTML=eventsHTML();eventsWin.querySelector('#events-close').onclick=()=>eventsWin.close();eventsWin.querySelector('.ev-list').scrollTop=y;},1000);}
+ let eventHub=null;
+ function openEvents(input){eventHub??=createEventHub242({game,liveRules:()=>{const holder=document.createElement('div');holder.innerHTML=eventsHTML();return holder.querySelector('.ev-list').innerHTML;},onCbtDetails:()=>dispatchEvent(new CustomEvent('open-cbt-details242'))});eventHub.open(typeof input==='string'?input:input?.currentTarget?.id==='surge-chip'?'other':'festival');}
+ addEventListener('open-event-hub242',e=>openEvents(e.detail??'cbt'));
  // 0.103.2 rebirth (จุติ) has its own glowing button, shown only once it can be used: online, Base Lv.99, under 10 rebirths
  const rebirthBtn=document.createElement('button');rebirthBtn.type='button';rebirthBtn.id='rebirth-btn';rebirthBtn.hidden=true;($('game-shell')??document.body).append(rebirthBtn);
  rebirthBtn.onclick=()=>{const n=(world.rebirth??0)+1;

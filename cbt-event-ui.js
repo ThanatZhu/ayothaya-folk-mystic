@@ -1,7 +1,7 @@
 import {CBT_EVENT,CBT_REWARDS,CBT_IDEAS,CBT_ARENA_RULES,cbtPreviewProgress,cbtEntryKey,cbtRewardPulls} from './cbt-event.js?v=162.1';
 import {ITEMS,ITEM_ATLAS,ATLASES} from './items.js?v=107';
 const art='assets/events-cbt162/';
-export function createCbtEventUI({game,account={},loading={active:false},autoOpen=true,autoOpenDelay=5000,storage=globalThis.sessionStorage}={}){
+export function createCbtEventUI({game,account={},loading={active:false},autoOpen=true,onOpenHub=null,autoOpenDelay=5000,storage=globalThis.sessionStorage}={}){
  const host=document.getElementById('game-shell')??document.body;
  if(document.getElementById('cbt-event'))return;
  const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./cbt-event.css?v=cbt172',import.meta.url).href;document.head.append(css);
@@ -30,8 +30,9 @@ export function createCbtEventUI({game,account={},loading={active:false},autoOpe
   content.scrollTop=0;content.querySelectorAll('[data-open-cbt]').forEach(b=>b.onclick=()=>choose(b.dataset.openCbt));
  }
  function choose(next){tab=next;render();}
- function open(){if(dialog.open)return;previousFocus=document.activeElement;game.clearInput?.();dispatchEvent(new CustomEvent('hud-panel-opening',{detail:dialog.id}));tab='overview';render();dialog.showModal();dialog.querySelector('#cbt-close').focus({preventScroll:true});}
+ function open(details=false){if(onOpenHub&&details!==true){onOpenHub();return;}if(dialog.open)return;previousFocus=document.activeElement;game.clearInput?.();dispatchEvent(new CustomEvent('hud-panel-opening',{detail:dialog.id}));tab='overview';render();dialog.showModal();dialog.querySelector('#cbt-close').focus({preventScroll:true});}
  function close(){dialog.close();}
+ addEventListener('open-cbt-details242',()=>open(true));
  chip.onclick=open;dialog.querySelector('#cbt-close').onclick=close;dialog.querySelector('#cbt-return').onclick=close;
  dialog.querySelectorAll('[data-cbt-tab]').forEach(b=>b.onclick=()=>choose(b.dataset.cbtTab));
  dialog.addEventListener('close',()=>{game.clearInput?.();if(previousFocus?.isConnected&&!previousFocus.closest('[inert]'))previousFocus.focus({preventScroll:true});});

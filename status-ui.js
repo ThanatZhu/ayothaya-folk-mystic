@@ -1,6 +1,6 @@
 import {bindStatHold} from './stat-hold.js';
 import {createStatResetUI} from './stat-reset-ui.js?v=surfaces222';
-// Allocation and explanations only. Equipment actions are exposed through the bag.
+// Allocation and combat totals only. Equipment actions are exposed through the bag.
 // Online the server owns changes; offline gear and stats retain their existing shared owner.
 import {statPath,STATS,STAT_MAX,STAT_LABEL,STAT_HINT,raiseCost,statPoints,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,insertCard} from './character-stats.js?v=tier167';
 import {ITEM_ERRORS,itemDef,foodBuff} from './items.js?v=stat-reset189';
@@ -8,6 +8,7 @@ import {baseProgress} from './experience.js?v=105.3';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {createCardSlotUI} from './card-slot-ui.js?v=cards156';
 import {statTip} from './stat-tips.js?v=tips210';
+import {statusMetrics} from './status-metrics238.js';
 
 const $=id=>document.getElementById(id);
 
@@ -59,23 +60,36 @@ export function createStatusUI({game,account,bagUI}){
  const nav=$('game-menu');if(nav)nav.insertBefore(menuButton,$('menu-bag')??$('menu-players')??null);
  const dot=document.createElement('b');dot.className='menu-dot';dot.hidden=true;menuButton.append(dot);
  const dialog=document.createElement('dialog');dialog.id='status-window';dialog.setAttribute('aria-labelledby','status-title');
- dialog.innerHTML='<header><h2 id="status-title">สถานะ</h2><b id="status-points"></b><button class="mp-icon" id="status-close" aria-label="ปิดหน้าสถานะ">×</button></header><div class="status-columns237"><section class="status-allocation237" aria-label="อัปค่าสถานะ"><h3>อัปค่าสถานะ</h3><p class="status-hint237">กดค้างที่ปุ่ม + เพื่อเพิ่มต่อเนื่อง</p><ol id="status-stats"></ol><h3>ค่าพลังรวม</h3><dl id="status-derived"></dl></section><section class="status-explanations237" aria-label="รายละเอียดค่าสถานะ"><h3>รายละเอียดค่าสถานะ</h3><p class="status-hint237">ผลของแต่ละค่า และผลเมื่ออัปเพิ่มอีก 1 แต้ม</p><div id="status-details" tabindex="0" aria-label="คำอธิบาย STR AGI VIT INT DEX LUK"></div></section></div>';
+ dialog.innerHTML='<header><h2 id="status-title">สถานะ</h2><b id="status-points"></b><button class="mp-icon" id="status-close" aria-label="ปิดหน้าสถานะ">×</button></header><div class="status-columns237"><section class="status-allocation237" aria-label="อัปค่าสถานะ"><h3>อัปค่าสถานะ</h3><p class="status-hint237">กดค้างที่ปุ่ม + เพื่อเพิ่มต่อเนื่อง</p><ol id="status-stats"></ol></section><section class="status-explanations237" aria-label="ค่าพลังรวม"><h3>ค่าพลังรวม</h3><p class="status-hint237">ชี้หรือแตะที่ค่าเพื่อดูรายละเอียด · อัปเดตตามค่าตัวละคร</p><div id="status-details" tabindex="0" aria-label="ค่าพลังรวมทุกหมวด"></div></section></div>';
  ($('game-shell')??document.body).append(dialog);
  const resetUI=createStatResetUI({game,bagUI,stats:()=>view().stats,onOpen:()=>hold.stop(),resetOffline(){local.stats=normalizeStats(null);save();applyOffline();render(true);}});
  const hold=bindStatHold($('status-stats'),{read:stat=>({value:view().stats[stat],allowed:canRaise(stat)}),raise,enabled:()=>dialog.open&&!resetUI.busy&&(!game.online||world.netState?.().startsWith('online/'))});
  dialog.addEventListener('close',()=>hold.stop());dialog.addEventListener('cancel',()=>hold.stop());
- // Permanent help beside allocation; no floating tooltip over the stat rows.
+ // Fixed-size, clamped help stays beside the hovered row; allocation buttons remain stable.
  if(!document.querySelector('link[data-status-bag237]')){const css=document.createElement('link');css.rel='stylesheet';css.href='status-bag237.css';css.dataset.statusBag237='';document.head.append(css);}
- let selectedStat='str';
- function selectStat(row,scroll=false){const stat=row?.querySelector('[data-stat]')?.dataset.stat;if(!stat)return;selectedStat=stat;
-  dialog.querySelectorAll('#status-stats > li').forEach(n=>n.classList.toggle('stat-selected237',n===row));
-  dialog.querySelectorAll('[data-stat-detail]').forEach(n=>{n.classList.toggle('stat-selected237',n.dataset.statDetail===stat);if(scroll&&n.dataset.statDetail===stat)n.scrollIntoView({block:'nearest',behavior:'instant'});});
+ const tip=document.createElement('aside');tip.id='status-hover238';tip.hidden=true;tip.setAttribute('role','tooltip');dialog.append(tip);
+ let tipTarget=null,tipKey=null,tipHideTimer=0,metricRows=new Map();
+ const escape=text=>String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function hideTip(){clearTimeout(tipHideTimer);tip.hidden=true;if(tipTarget)tipTarget.removeAttribute('aria-describedby');tipTarget=null;tipKey=null;}
+ function placeTip(){if(!tipTarget?.isConnected)return hideTip();const r=tipTarget.getBoundingClientRect(),w=innerWidth,h=innerHeight;tip.style.width=Math.min(320,w-24)+'px';tip.style.maxHeight=Math.max(80,h-24)+'px';tip.style.left='0px';tip.style.top='0px';const box=tip.getBoundingClientRect(),sx=box.width/tip.offsetWidth||1,sy=box.height/tip.offsetHeight||1;let x=r.right+10,y=r.top;
+  if(x+box.width>w-12){if(r.left-box.width-10>=12)x=r.left-box.width-10;else{x=Math.max(12,Math.min(r.left,w-box.width-12));y=r.bottom+8;if(y+box.height>h-12)y=r.top-box.height-8;}}
+  tip.style.left=(Math.max(12,Math.min(x,w-box.width-12))-box.left)/sx+'px';tip.style.top=(Math.max(12,Math.min(y,h-box.height-12))-box.top)/sy+'px';
  }
- const statList=$('status-stats');
- statList.addEventListener('pointerover',e=>{if(e.pointerType!=='touch')selectStat(e.target.closest('li'));});
- statList.addEventListener('focusin',e=>selectStat(e.target.closest('li')));
- statList.addEventListener('click',e=>{if(!e.target.closest('button'))selectStat(e.target.closest('li'),true);});
- statList.addEventListener('keydown',e=>{if(e.target.tagName==='LI'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectStat(e.target,true);}});
+ function showTip(target){clearTimeout(tipHideTimer);if(!target)return;const stat=target.dataset.statHelp,metric=metricRows.get(target.dataset.metric);if(!stat&&!metric)return;
+  if(tipTarget&&tipTarget!==target)tipTarget.removeAttribute('aria-describedby');tipTarget=target;tipKey=stat?'stat:'+stat:'metric:'+target.dataset.metric;
+  if(stat){const v=view(),t=statTip(stat,{who:who(),stats:v.stats,gear:v.gear});tip.innerHTML='<strong>'+escape(t.title+' · '+STAT_HINT[stat])+'</strong><ul>'+t.rules.map(line=>'<li>'+escape(line)+'</li>').join('')+'</ul>'+(t.gains.length?'<p class="stat-next237">อัปเพิ่ม 1 แต้ม: '+t.gains.map(([k,n])=>escape(k+' '+n)).join(' · ')+'</p>':'')+'<p>'+escape(t.raise)+'</p>';}
+  else tip.innerHTML='<strong>'+escape(metric.label)+' · '+escape(metric.value)+'</strong><p>'+escape(metric.help)+'</p>';
+  tip.hidden=false;target.setAttribute('aria-describedby',tip.id);placeTip();
+ }
+ const helpTarget=e=>e.target.closest?.('[data-stat-help],[data-metric]');
+ dialog.addEventListener('pointerover',e=>{if(e.pointerType!=='touch'){const target=helpTarget(e);if(target&&target!==tipTarget)showTip(target);}});
+ dialog.addEventListener('pointerout',e=>{if(e.pointerType!=='touch'&&tipTarget&&!tipTarget.contains(e.relatedTarget)&&!tip.contains(e.relatedTarget)){clearTimeout(tipHideTimer);tipHideTimer=setTimeout(hideTip,150);}});
+ tip.addEventListener('pointerenter',()=>clearTimeout(tipHideTimer));tip.addEventListener('pointerleave',hideTip);
+ dialog.addEventListener('focusin',e=>showTip(helpTarget(e)));dialog.addEventListener('focusout',e=>{if(!tip.contains(e.relatedTarget))hideTip();});
+ dialog.addEventListener('click',e=>{const target=helpTarget(e);if(!target||e.target.closest('button[data-stat]'))return;showTip(target);});
+ dialog.addEventListener('keydown',e=>{if(e.key==='Escape'&&!tip.hidden){e.preventDefault();e.stopPropagation();hideTip();}else if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-stat-help]')){e.preventDefault();showTip(e.target);}});
+ dialog.addEventListener('close',hideTip);dialog.addEventListener('scroll',e=>{if(e.target!==tip&&!tip.contains(e.target))hideTip();},true);addEventListener('resize',hideTip);
+ document.addEventListener('pointerdown',e=>{if(tipTarget&&!tipTarget.contains(e.target)&&!tip.contains(e.target))hideTip();});
  const cardPicker=createCardSlotUI({game,bag:()=>bagUI.bag(),gear:()=>view().gear,onInsert:slotCard});
  bagUI.openCardPicker=(slot,button)=>cardPicker.open(slot,button);
  dialog.querySelector('#status-close').onclick=()=>dialog.close();
@@ -92,16 +106,16 @@ export function createStatusUI({game,account,bagUI}){
   // 0.104 permanent rebirth bonus, shown green apart from gear/pet/food
   const reborn=v.derived.rebirthBonus??0,rebirthTag=reborn?` <em class="rebirth-bonus" title="โบนัสจุติถาวร">+${reborn}</em>`:'';
   const statMarkup=STATS.map(k=>{const cost=raiseCost(v.stats[k]),bonus=Math.round(((total[k]??v.stats[k])-v.stats[k]-reborn)*100)/100;
-   return `<li tabindex="0" aria-describedby="stat-detail-${k}" aria-label="${STAT_LABEL[k]} · ${STAT_HINT[k]}"><b>${STAT_LABEL[k]}</b><span>${v.stats[k]+rebirthTag}${bonus?` <em>+${bonus}</em>`:''}</span><small>${STAT_HINT[k]}</small><button type="button" data-stat="${k}" title="กดค้างเพื่อเพิ่มต่อเนื่อง" ${v.points<cost||v.stats[k]>=STAT_MAX?'disabled':''} aria-label="เพิ่ม ${STAT_LABEL[k]}">+<i>${cost}</i></button></li>`;}).join('');
+   return `<li tabindex="0" data-stat-help="${k}" aria-label="${STAT_LABEL[k]} · ${STAT_HINT[k]}"><b>${STAT_LABEL[k]}</b><span>${v.stats[k]+rebirthTag}${bonus?` <em>+${bonus}</em>`:''}</span><small>${STAT_HINT[k]}</small><button type="button" data-stat="${k}" title="กดค้างเพื่อเพิ่มต่อเนื่อง" ${v.points<cost||v.stats[k]>=STAT_MAX?'disabled':''} aria-label="เพิ่ม ${STAT_LABEL[k]}">+<i>${cost}</i></button></li>`;}).join('');
   // Preserve pressed buttons and keyboard focus across server snapshots.
   const list=$('status-stats');
   if(!list.children.length)list.innerHTML=statMarkup;
   else{const template=document.createElement('template');template.innerHTML=statMarkup;[...template.content.children].forEach((row,i)=>{const target=list.children[i];target.querySelector('span').innerHTML=row.querySelector('span').innerHTML;const old=target.querySelector('button'),next=row.querySelector('button');old.disabled=next.disabled;old.innerHTML=next.innerHTML;});}
-  const d=v.derived,pct=n=>Math.round(n*100)+'%';
-  $('status-derived').innerHTML=[['HP สูงสุด',d.maxHp],['MP สูงสุด',d.maxMp],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)],['ความเร็วโจมตี',Math.round(100/d.delay)+'%']].map(([k,n])=>`<div><dt>${k}</dt><dd>${n}</dd></div>`).join('');
-  const details=$('status-details'),oldScroll=details.scrollTop;
-  details.innerHTML=STATS.map(stat=>{const t=statTip(stat,{who:who(),stats:v.stats,gear:v.gear});return `<article id="stat-detail-${stat}" data-stat-detail="${stat}"><h4>${t.title} · ${STAT_HINT[stat]}</h4><ul>${t.rules.map(line=>'<li>'+line+'</li>').join('')}</ul>${t.gains.length?'<p class="stat-next237"><small>อัปเพิ่ม 1 แต้ม</small> '+t.gains.map(([k,n])=>'<span>'+k+' '+n+'</span>').join(' · ')+'</p>':''}<p class="stat-cost237">${t.raise}</p></article>`;}).join('');
-  details.scrollTop=oldScroll;selectStat([...list.children].find(row=>row.querySelector('[data-stat]')?.dataset.stat===selectedStat));
+  const groups=statusMetrics(game.online?world.derivedView:v.derived),details=$('status-details');metricRows=new Map(groups.flatMap(g=>g.rows.map(row=>[row.key,row])));
+  if(!groups.length){details.textContent='กำลังโหลดค่าพลังจากเซิร์ฟเวอร์…';return;}
+  if(!details.querySelector('[data-metric]'))details.innerHTML=groups.map(g=>'<section class="status-metric-group238"><h4>'+escape(g.title)+'</h4><div class="status-metric-grid238">'+g.rows.map(row=>'<button type="button" data-metric="'+row.key+'"><span>'+escape(row.label)+'</span><b>'+escape(row.value)+'</b></button>').join('')+'</div></section>').join('');
+  else for(const row of metricRows.values()){const target=details.querySelector('[data-metric="'+row.key+'"]');if(target)target.querySelector('b').textContent=row.value;}
+  if(tipKey&&tipTarget)showTip(tipTarget);
  }
  applyOffline();render(true);
  // Refine window hooks (offline gear lives here).

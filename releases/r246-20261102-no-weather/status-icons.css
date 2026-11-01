@@ -1,0 +1,6 @@
+.status-art{display:inline-block;width:28px;height:28px;flex-shrink:0;background-repeat:no-repeat;background-color:#10271f;border-radius:5px;vertical-align:middle}
+.status-badge{position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;flex-shrink:0;border:1px solid #9ecba4;border-radius:6px;background:#12291f}
+.status-badge.debuff{border-color:#d7756d}.status-badge b{position:absolute;bottom:-2px;right:-1px;padding:0 2px;border-radius:3px;background:#071811d9;color:#fff4d4;font:700 10px/1.3 Mali,Tahoma,sans-serif;text-shadow:0 1px 2px #000;pointer-events:none}
+#ailment-row:empty{display:none}#ailment-row .status-art{width:28px;height:28px}#ailment-row .status-badge{border-color:#a7ca94}#ailment-row .status-badge.debuff{border-color:#d7756d}
+.actor-status{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;max-width:190px}.actor-status .status-badge{width:24px;height:24px}.actor-status .status-art{width:22px;height:22px}.actor-status b{font-size:9px}
+.actor-label[aria-pressed=true]>.actor-status{display:flex;white-space:normal}.actor-label .status-badge{display:inline-flex;width:24px;height:24px}.actor-label .status-art{display:inline-block;width:22px;height:22px;margin:0;background-color:#10271f}.actor-label .status-badge b{height:auto;background:#071811d9;font:700 9px/1.3 Mali,Tahoma,sans-serif}

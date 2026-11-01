@@ -19,7 +19,7 @@ export function createStatusUI({game,account,bagUI}){
  const classId=account?.character?.classId??world.profession.id;
  const path=statPath(account?.character??{classId});let local={stats:normalizeStats(null),gear:normalizeGear(null),path};
  try{const v=JSON.parse(localStorage.getItem(key));if(v)local={stats:normalizeStats(v.path&&v.path!==path?null:v.stats),gear:normalizeGear(v.gear),path};}catch{}
- const save=()=>{try{localStorage.setItem(key,JSON.stringify(local));}catch{}};if(!account?.cloud)save();
+ const save=()=>{try{localStorage.setItem(key,JSON.stringify({...local,rebirth:world.rebirth??0}));}catch{}};if(!account?.cloud)save();
  const who=()=>({classId,level:baseProgress(world).level,reborn:world.rebirth??0});
  const view=()=>game.online?{stats:normalizeStats(world.stats),gear:normalizeGear(world.gear),points:world.statPoints??0,derived:world.derivedView??deriveStats({...who()})}
   :{...local,points:statPoints(local.stats,who().level,who().reborn),derived:deriveStats({...who(),...local,pet:world.petBonus,food:foodBuff(world)})};
@@ -73,22 +73,27 @@ export function createStatusUI({game,account,bagUI}){
  let tipStat=null;
  const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
  function showTip(li){
-  const stat=li?.querySelector('button[data-stat]')?.dataset.stat;if(!stat)return;
+  const stat=li?.dataset?.stat??li?.querySelector('button[data-stat]')?.dataset.stat;if(!stat)return;
   const v=view(),t=statTip(stat,{who:who(),stats:v.stats,gear:v.gear}),rules=el('ul');
   for(const line of t.rules)rules.append(el('li',line));
-  tip.replaceChildren(el('strong',t.title+' · '+STAT_HINT[stat]),rules);
+  const prefix=li?.dataset?.derivedLabel?li.dataset.derivedLabel+' · ':'';
+  tip.replaceChildren(el('strong',prefix+t.title+' · '+STAT_HINT[stat]),rules);
   if(t.gains.length){const gains=el('p',null,'stat-tip-gains');gains.append(el('small','อัปอีก 1 แต้มตอนนี้ได้'),...t.gains.map(([k,n])=>el('span',k+' '+n)));tip.append(gains);}
   tip.append(el('p',t.raise,'stat-tip-cost'));
   tipStat=stat;tip.hidden=false;
-  tip.style.left=li.offsetLeft+'px';tip.style.width=li.offsetWidth+'px';
+  tip.style.left=li.offsetLeft+'px';tip.style.width=Math.max(210,li.offsetWidth)+'px';
   const top=li.offsetTop+li.offsetHeight+4,room=dialog.scrollHeight-tip.offsetHeight-6;tip.style.top=Math.max(4,Math.min(top,room))+'px';
  }
  function hideTip(){tip.hidden=true;tipStat=null;}
- const statList=$('status-stats');
+ const statList=$('status-stats'),derivedList=$('status-derived');
  statList.addEventListener('pointerover',e=>{if(e.pointerType!=='touch')showTip(e.target.closest('li'));});
  statList.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')hideTip();});
  statList.addEventListener('focusin',e=>showTip(e.target.closest('li')));statList.addEventListener('focusout',hideTip);
  statList.addEventListener('click',e=>{if(e.target.closest('button'))return;const li=e.target.closest('li');if(!li)return;const stat=li.querySelector('button[data-stat]')?.dataset.stat;if(tipStat===stat)hideTip();else showTip(li);});
+ derivedList.addEventListener('pointerover',e=>{if(e.pointerType!=='touch')showTip(e.target.closest('div[data-stat]'));});
+ derivedList.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')hideTip();});
+ derivedList.addEventListener('focusin',e=>showTip(e.target.closest('div[data-stat]')));derivedList.addEventListener('focusout',hideTip);
+ derivedList.addEventListener('click',e=>{const div=e.target.closest('div[data-stat]');if(!div)return;if(tipStat===div.dataset.stat)hideTip();else showTip(div);});
  const cardPicker=createCardSlotUI({game,bag:()=>bagUI.bag(),gear:()=>view().gear,onInsert:slotCard});
  dialog.querySelector('#status-close').onclick=()=>dialog.close();
  menuButton.onclick=()=>{if(dialog.open)dialog.close();else{game.clearInput();openHudPanel(dialog);render(true);}};
@@ -97,6 +102,7 @@ export function createStatusUI({game,account,bagUI}){
  let shown='';
  function render(force=false){
   const v=view(),sig=JSON.stringify([v,dialog.open,Object.entries(bagUI.bag().items??{}).filter(([id])=>itemDef(id)?.kind==='card')]);if(!force&&sig===shown)return;shown=sig;
+  if(game.online&&world.stats){try{localStorage.setItem(key,JSON.stringify({stats:v.stats,gear:v.gear,rebirth:who().reborn,path}));}catch{}}
   dot.hidden=!(v.points>0);
   if(!dialog.open)return;
   $('status-points').textContent='แต้มสถานะ '+v.points;
@@ -110,8 +116,8 @@ export function createStatusUI({game,account,bagUI}){
   if(!list.children.length)list.innerHTML=statMarkup;
   else{const template=document.createElement('template');template.innerHTML=statMarkup;[...template.content.children].forEach((row,i)=>{const target=list.children[i];target.querySelector('span').innerHTML=row.querySelector('span').innerHTML;const old=target.querySelector('button'),next=row.querySelector('button');old.disabled=next.disabled;old.innerHTML=next.innerHTML;});}
   if(tipStat)showTip([...list.children].find(li=>li.querySelector('button[data-stat]')?.dataset.stat===tipStat));
-  const d=v.derived,pct=n=>Math.round(n*100)+'%';
-  $('status-derived').innerHTML=[['HP สูงสุด',d.maxHp],['MP สูงสุด',d.maxMp],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk],['DEF',d.def],['หลบหลีก',pct(d.flee)],['คริติคอล',pct(d.crit)],['ความเร็วโจมตี',Math.round(100/d.delay)+'%']].map(([k,n])=>`<div><dt>${k}</dt><dd>${n}</dd></div>`).join('');
+  const d=v.derived,pct=n=>Math.round(n*100)+'%',mainAtk=d.magic?'int':classId==='hunter'?'dex':'str';
+  $('status-derived').innerHTML=[['HP สูงสุด',d.maxHp,'vit'],['MP สูงสุด',d.maxMp,'int'],[d.magic?'MATK':'ATK',d.magic?d.matk:d.atk,mainAtk],['DEF',d.def,'vit'],['หลบหลีก',pct(d.flee),'agi'],['คริติคอล',pct(d.crit),'luk'],['ความเร็วโจมตี',Math.round(100/d.delay)+'%','agi']].map(([k,n,st])=>`<div data-stat="${st}" data-derived-label="${k}" tabindex="0"><dt>${k}</dt><dd>${n}</dd></div>`).join('');
   const bagItems=bagUI.bag().items??{};
   $('status-gear').innerHTML=GEAR_SLOTS.map(slot=>{const id=v.gear[slot],it=id&&itemDef(id);
    const cards=Object.keys(bagItems).filter(c=>itemDef(c)?.kind==='card'&&itemDef(c).slot===slot);

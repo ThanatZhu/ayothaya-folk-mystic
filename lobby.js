@@ -13,14 +13,108 @@ import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS}
 import {createRealmStore} from './realm-store.js?v=surfaces222';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
 import {ensureConsent} from './consent.js?v=1';
+import {statPath,STATS,STAT_LABEL,STAT_HINT,statPoints,normalizeStats,normalizeGear,deriveStats} from './character-stats.js?v=tier167';
+import {statTip} from './stat-tips.js?v=tips210';
 wakeServer();
 const $=id=>document.getElementById(id);
 createLandscapeGuard({allowPortrait:true});
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',poseMode='cycle',previewTime=0;
 let roster=[],selectedChannel=normalizeChannel(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1);
+let currentStatusView=null,activeTipKey=null;
 const say=text=>$('lobby-status').textContent=text;
 const lobbyMotion=createMotionPreview($('hero-preview')),arrival=createArrivalShowcase($('arrival-showcase'));
 $('explore-paths').onclick=()=>arrival.open();
+
+const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
+function readCharacterStatus(rec){
+ const classId=rec?.character?.classId??selectedClass??'novice';
+ const level=rec?progression(rec.state.traveler).level:1;
+ const path=statPath(rec?.character??{classId});
+ let raw=null;
+ if(rec){
+  try{
+   raw=JSON.parse(localStorage.getItem('ayothaya-status:'+(rec.serverId||selected||'server-1')+':'+rec.slotId))
+    ??JSON.parse(localStorage.getItem('ayothaya-status:local:'+rec.slotId));
+  }catch{}
+ }
+ const validPath=!raw?.path||raw.path===path;
+ const stats=normalizeStats(rec?.stats??rec?.state?.stats??(validPath?raw?.stats:null));
+ const gear=normalizeGear(rec?.gear??rec?.state?.gear??raw?.gear);
+ const reborn=Math.max(0,(rec?.rebirth??rec?.state?.rebirth??raw?.rebirth??0)|0);
+ const who={classId,level,reborn};
+ const points=Math.max(0,statPoints(stats,level,reborn));
+ const derived=deriveStats({...who,stats,gear});
+ return {who,stats,gear,points,derived};
+}
+function hideLobbyTip(){
+ const tip=$('lobby-stat-tip');
+ if(tip)tip.hidden=true;
+ activeTipKey=null;
+}
+function showLobbyTip(item){
+ const stat=item?.dataset?.stat,tip=$('lobby-stat-tip'),card=$('lobby-character-stats');
+ if(!stat||!tip||!card||!currentStatusView)return;
+ const v=currentStatusView,t=statTip(stat,{who:v.who,stats:v.stats,gear:v.gear}),rules=el('ul');
+ for(const line of t.rules)rules.append(el('li',line));
+ const prefix=item.dataset.derivedLabel?item.dataset.derivedLabel+' · ':'';
+ tip.replaceChildren(el('strong',prefix+t.title+' · '+STAT_HINT[stat]),rules);
+ if(t.gains.length){
+  const gains=el('p',null,'stat-tip-gains');
+  gains.append(el('small','อัปอีก 1 แต้มตอนนี้ได้'),...t.gains.map(([k,n])=>el('span',k+' '+n)));
+  tip.append(gains);
+ }
+ tip.append(el('p',t.raise,'stat-tip-cost'));
+ activeTipKey=(item.dataset.derivedLabel||'')+':'+stat;
+ tip.hidden=false;
+ const cardRect=card.getBoundingClientRect(),itemRect=item.getBoundingClientRect();
+ const lobbyRect=document.querySelector('.lobby-card')?.getBoundingClientRect()??cardRect;
+ const tipHeight=tip.offsetHeight||136;
+ const roomBelow=lobbyRect.bottom-itemRect.bottom-10;
+ const top=roomBelow<tipHeight&&(itemRect.top-lobbyRect.top)>tipHeight
+  ?(itemRect.top-cardRect.top-tipHeight-6)
+  :(itemRect.bottom-cardRect.top+6);
+ tip.style.top=Math.round(top)+'px';
+}
+function renderCharacterStats(){
+ const card=$('lobby-character-stats'),statList=$('lobby-stats'),derivedList=$('lobby-derived'),pts=$('lobby-stat-points');
+ if(!card||!statList||!derivedList||!pts)return;
+ const targetParent=record?$('existing-character'):$('character-form');
+ const anchor=record?$('existing-detail')?.nextSibling:$('create-character');
+ if(targetParent&&anchor&&card.nextSibling!==anchor)targetParent.insertBefore(card,anchor);
+ const v=readCharacterStatus(record);
+ currentStatusView=v;
+ pts.textContent='แต้มสถานะ '+v.points;
+ const total=v.derived.total??v.stats,reborn=v.derived.rebirthBonus??0;
+ const rebirthTag=reborn?` <em class="rebirth-bonus" title="โบนัสจุติถาวร">+${reborn}</em>`:'';
+ statList.innerHTML=STATS.map(k=>{
+  const bonus=Math.round(((total[k]??v.stats[k])-v.stats[k]-reborn)*100)/100;
+  return `<li data-stat="${k}" tabindex="0"><b>${STAT_LABEL[k]}</b><span>${v.stats[k]+rebirthTag}${bonus?` <em>+${bonus}</em>`:''}</span><small>${STAT_HINT[k]}</small></li>`;
+ }).join('');
+ const d=v.derived,pct=n=>Math.round(n*100)+'%',mainAtk=d.magic?'int':v.who.classId==='hunter'?'dex':'str';
+ derivedList.innerHTML=[
+  ['HP สูงสุด',d.maxHp,'vit'],
+  ['MP สูงสุด',d.maxMp,'int'],
+  [d.magic?'MATK':'ATK',d.magic?d.matk:d.atk,mainAtk],
+  ['DEF',d.def,'vit'],
+  ['หลบหลีก',pct(d.flee),'agi'],
+  ['คริติคอล',pct(d.crit),'luk'],
+  ['ความเร็วโจมตี',Math.round(100/d.delay)+'%','agi']
+ ].map(([k,n,st])=>`<div data-stat="${st}" data-derived-label="${k}" tabindex="0"><dt>${k}</dt><dd>${n}</dd></div>`).join('');
+ hideLobbyTip();
+}
+const statsCard=$('lobby-character-stats');
+if(statsCard){
+ statsCard.addEventListener('pointerover',e=>{if(e.pointerType!=='touch')showLobbyTip(e.target.closest('[data-stat]'));});
+ statsCard.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')hideLobbyTip();});
+ statsCard.addEventListener('focusin',e=>showLobbyTip(e.target.closest('[data-stat]')));
+ statsCard.addEventListener('focusout',hideLobbyTip);
+ statsCard.addEventListener('click',e=>{
+  const item=e.target.closest('[data-stat]');if(!item)return;
+  const key=(item.dataset.derivedLabel||'')+':'+item.dataset.stat;
+  if(activeTipKey===key)hideLobbyTip();else showLobbyTip(item);
+ });
+}
+
 // 0.113 the dressing room is off for now: new characters take the default look, saved looks still show in the preview
 const atlases=new Map();let atlasToken=0;
 async function drawAtlas(){
@@ -28,7 +122,7 @@ async function drawAtlas(){
  if(!atlases.has(src))atlases.set(src,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;}));
  try{const img=await atlases.get(src);if(token===atlasToken)lobbyMotion.setSource(customizeAtlas(img,validateAppearance(record?.character.appearance),id),previewGender,id,record?.equipment);}catch{atlases.delete(src);}
 }
-function show(next){screen=next;arrival.setScreen(next);document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
+function show(next){hideLobbyTip();screen=next;arrival.setScreen(next);document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
 function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#delete-character,.character-slot').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
@@ -95,6 +189,7 @@ function preview(gender=previewGender){
  $('profession-options').hidden=!canChoose;
  $('change-class').hidden=!canChoose||selectedClass===record.character.classId;$('enter-world').hidden=!!record&&selectedClass!==record.character.classId;
  document.querySelectorAll('[name=profession]').forEach(el=>el.checked=el.value===selectedClass);
+ renderCharacterStats();
  drawAtlas();previewTime=0;
 }
 for(const c of CLASSES){const label=document.createElement('label');label.className='class-option';const radio=document.createElement('input');radio.type='radio';radio.name='profession';radio.value=c.id;radio.checked=c.id===selectedClass;radio.addEventListener('change',()=>{selectedClass=c.id;preview();});const text=document.createElement('span');text.textContent=c.name;const icon=document.createElement('b');icon.textContent=c.icon;label.append(radio,icon,text);$('class-options').append(label);}
@@ -128,6 +223,7 @@ function displayCharacter(){
  if(record){selectedClass=record.character.classId;preview(record.character.gender);$('existing-name').textContent=record.character.name+' · Lv. '+progression(record.state.traveler).level;$('existing-detail').textContent=(jobFor(record.character.classId,record.character.jobId)?.name??className(record.character.classId,record.character.gender))+' · '+(record.character.gender==='female'?'หญิง':'ชาย')+' · '+(catalog.maps.find(m=>m.id===record.state.mapId)??catalog.maps.find(m=>m.id===catalog.capital)).name;}
  else{$('character-form').reset();selectedClass='novice';preview('male');}
  $('stage-name').textContent=record?.character.name??'';
+ renderCharacterStats();
  show('character');
 }
 $('hero-name').addEventListener('input',()=>{if(!record)$('stage-name').textContent=$('hero-name').value.trim();});

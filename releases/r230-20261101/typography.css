@@ -1,0 +1,24 @@
+/* Thai + Latin rounded lettering, hosted with the game (SIL OFL in assets/fonts). */
+@font-face{font-family:Mali;src:url('assets/fonts/Mali-Medium.ttf') format('truetype');font-style:normal;font-weight:400 500;font-display:swap}
+@font-face{font-family:Mali;src:url('assets/fonts/Mali-Bold.ttf') format('truetype');font-style:normal;font-weight:600 900;font-display:swap}
+:root{--font-game:Mali,Tahoma,system-ui,sans-serif}
+html,body{font-family:var(--font-game);font-weight:500}
+button,input,select,textarea{font-family:inherit}
+h1,h2,h3,.story h1,.wordmark,.subtitle,.server-number{font-family:var(--font-game)}
+.story h1{letter-spacing:-.035em;line-height:1.35;font-weight:700;text-shadow:0 3px 0 #684c3159,0 8px 28px #10271a80}
+.screen h2,.server strong{font-weight:700;line-height:1.5}
+.wordmark{letter-spacing:1.5px}.wordmark span{font-family:var(--font-game);font-weight:700}
+.subtitle{font-size:23px;font-weight:700;letter-spacing:5px}.server-number{font-weight:700}
+.story-copy{line-height:1.95}.class-option span{font-weight:700}
+.meter span,.skill kbd,.skill em{font-variant-numeric:tabular-nums}
+@media(orientation:landscape) and (max-height:600px){
+ .screen h2{line-height:1.35}.lobby-footer{display:none}
+ body[data-screen=character] .lobby-layout{padding-bottom:0}
+}
+@media(min-height:601px){
+ .muted{font-size:13px}.google,.primary,.secondary{font-size:14px}
+ .steps,.small,.lobby-status{font-size:11px}.text-button{font-size:11px}
+ .class-option span{font-size:11px}.class-summary p{font-size:11px}
+ #name-hint{font-size:10px}.class-badge{font-size:10px}
+ .skill span{font-size:10px;line-height:16px}
+}

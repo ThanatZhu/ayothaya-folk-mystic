@@ -1,0 +1,35 @@
+:root{--jade-silk222:url('assets/ui-surfaces222/jade-silk.webp');--jade-paper222:url('assets/ui-surfaces222/jade-paper.webp')}
+:root .jade-surface222{background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important;color:#fff0d2}
+.jade-surface222::backdrop{background:#0a392ab3;backdrop-filter:blur(2px)}
+.jade-surface222>header{background:transparent!important}
+:root .jade-surface222 :is(.qol-body,.shop-list,.bag-stage,.bag-pack,.refine-body,.craft-body,.slot-card-list,.mailbox-body){background-color:transparent!important}
+:root .jade-surface222 :is(.qol-close,.slot-card-close,.premium-close,button[id$="-close"]){border:0!important;border-image:none!important;border-radius:50%!important;background:transparent url('assets/gacha-banner199/close.webp') center/contain no-repeat!important;min-width:44px!important;min-height:44px!important;width:44px!important;height:44px!important;padding:0!important;color:transparent!important;font-size:0!important;flex:none}
+:root .jade-surface222 :is(.qol-close,.slot-card-close,.premium-close,button[id$="-close"]):focus-visible{outline:2px solid #ffe2a3;outline-offset:2px}
+@media(max-width:700px),(max-height:550px){:root{--jade-silk222:url('assets/ui-surfaces222/jade-silk-mobile.webp');--jade-paper222:url('assets/ui-surfaces222/jade-paper-mobile.webp')}}
+
+:root .gacha-overlay-card,:root .gacha-rates-panel{background-image:var(--jade-silk222)!important;background-position:center!important;background-size:cover!important;background-color:#174b38!important}
+
+/* Some authored frames use a separate backing below decorative pseudo-elements.
+   Replace that backing, retaining the frame, its inset, and transparent corners. */
+html body #craft-window.jade-surface222[data-craft176]::after,
+html body #card-slot-window.jade-surface222::before,
+html body #mail-window.jade-surface222::before,
+html body #boss-browser.jade-surface222::before{background:var(--jade-paper222) center/cover no-repeat!important}
+html body dialog.npc-conversation.jade-surface222::before{background:var(--jade-silk222) center/cover no-repeat!important}
+html body dialog.npc-conversation.jade-surface222::after{border-image-slice:72!important}
+
+:root #boss-live-meter{background:var(--jade-silk222) center/cover no-repeat!important}
+
+:root{--uk-surface:var(--jade-silk222) center/cover no-repeat!important}
+
+/* Owner correction: the image stops at the inside of the painted frame.
+   Do not clip the whole window: raised ornaments, portraits and focus rings survive. */
+:root .jade-surface222{background-clip:padding-box!important;background-origin:padding-box!important}
+:root .gacha-overlay-card,:root .gacha-rates-panel{background-clip:padding-box!important;background-origin:padding-box!important}
+html body #card-slot-window.jade-surface222::before{inset:20px;border-radius:5px}
+html body #mail-window.jade-surface222::before,
+html body #boss-browser.jade-surface222::before{inset:0;border-radius:5px}
+html body #craft-window.jade-surface222[data-craft176]::after{left:20px;right:20px;bottom:26px;border-radius:5px}
+html body dialog.npc-conversation.jade-surface222::before{inset:20px;border-radius:5px}
+@media(max-height:550px){html body #craft-window.jade-surface222[data-craft176]::after{left:18px;right:18px;bottom:22px}}
+@media(max-width:600px) and (min-height:551px){html body #craft-window.jade-surface222[data-craft176]::after{left:16px;right:16px;bottom:22px}}

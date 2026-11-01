@@ -1,0 +1,113 @@
+{
+  "version": 228,
+  "classId": "rogue",
+  "gender": "female",
+  "cell": 320,
+  "anchor": [
+    160.0,
+    288
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "frames": 4,
+  "variants": [
+    {
+      "image": "rogue-female-0.webp",
+      "sdImage": "rogue-female-0-sd.webp",
+      "views": {
+        "S": {
+          "bodyHeight": 144.0
+        },
+        "SE": {
+          "bodyHeight": 144.0
+        },
+        "E": {
+          "bodyHeight": 144.0
+        },
+        "NE": {
+          "bodyHeight": 144.0
+        },
+        "N": {
+          "bodyHeight": 144.0
+        },
+        "SW": {
+          "bodyHeight": 144.0
+        },
+        "W": {
+          "bodyHeight": 144.0
+        },
+        "NW": {
+          "bodyHeight": 144.0
+        }
+      }
+    },
+    {
+      "image": "rogue-female-1.webp",
+      "sdImage": "rogue-female-1-sd.webp",
+      "views": {
+        "S": {
+          "bodyHeight": 144.0
+        },
+        "SE": {
+          "bodyHeight": 144.0
+        },
+        "E": {
+          "bodyHeight": 144.0
+        },
+        "NE": {
+          "bodyHeight": 144.0
+        },
+        "N": {
+          "bodyHeight": 144.0
+        },
+        "SW": {
+          "bodyHeight": 144.0
+        },
+        "W": {
+          "bodyHeight": 144.0
+        },
+        "NW": {
+          "bodyHeight": 144.0
+        }
+      }
+    },
+    {
+      "image": "rogue-female-2.webp",
+      "sdImage": "rogue-female-2-sd.webp",
+      "views": {
+        "S": {
+          "bodyHeight": 144.0
+        },
+        "SE": {
+          "bodyHeight": 144.0
+        },
+        "E": {
+          "bodyHeight": 144.0
+        },
+        "NE": {
+          "bodyHeight": 144.0
+        },
+        "N": {
+          "bodyHeight": 144.0
+        },
+        "SW": {
+          "bodyHeight": 144.0
+        },
+        "W": {
+          "bodyHeight": 144.0
+        },
+        "NW": {
+          "bodyHeight": 144.0
+        }
+      }
+    }
+  ]
+}

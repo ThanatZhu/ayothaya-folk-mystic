@@ -6,10 +6,13 @@ export function createDamageFloats({container,project,reducedMotion}){
  const remove=f=>{f.el.remove();active.splice(active.indexOf(f),1);};
  function place(f,reduced=isReduced()){
   const p=project(f.pos());
-  const rise=reduced?0:12*Math.min(1,f.age/.5);
+  // A shared launch point, then a vertical stream: retain each confirmed hit.
+  const age=Math.max(0,f.age),flight=Math.min(1,age/f.life);
+  const rise=reduced?0:14*(1-Math.exp(-age*22))+66*flight;
+  f.el.style.scale=String(reduced?1:1-.22*Math.max(0,(flight-.2)/.8));
   f.el.style.translate=`calc(${p.x}px - 50%) calc(${p.y-rise}px - 100%)`;
-  f.el.style.visibility=p.visible===false?'hidden':'visible';
-  f.el.style.opacity=String(Math.min(1,Math.max(0,(f.life-f.age)/.2)));
+  f.el.style.visibility=p.visible===false||f.age<0?'hidden':'visible';
+  f.el.style.opacity=String(Math.min(1,Math.max(0,(f.life-f.age)/.24)));
  }
  function add(e,{positive=false,big=false,anchor}={}){
   const word=typeof e.amount==='string',crit=!positive&&!word&&!e.hurt&&!!(e.crit||e.color==='#ffd27a');
@@ -19,10 +22,17 @@ export function createDamageFloats({container,project,reducedMotion}){
   el.classList.toggle('critical',crit);el.classList.toggle('heavy',big&&!crit);el.classList.toggle('companion',companion);
   glyph.className='damage-glyph247';glyph.textContent=String(e.amount);el.append(glyph);
   if(companion){const tag=document.createElement('small');tag.textContent='พราย';el.prepend(tag);}
-  // One line above each target: the newest confirmed hit replaces its previous popup.
-  for(const previous of active.filter(f=>f.key===anchor.key))remove(previous);
+  // No horizontal lanes or summed damage. Older hits continue their own flight.
+  const previous=active.filter(f=>f.key===anchor.key);
+  for(const old of previous)old.el.classList.add('trailing');
+  // A stationary latest value avoids overlapping text in reduced-motion mode.
+  if(isReduced())for(const old of previous)remove(old);
+  else if(previous.length>=8)remove(previous[0]);
   if(active.length>=40)remove(active[0]);
-  const f={el,key:anchor.key,pos:anchor.pos,crit,age:0,life:crit?1.02:.84};
+  // Same-frame multi-hit packets still read as individual hits, at most 420 ms apart.
+  const last=previous.at(-1),delay=isReduced()?0:Math.min(.42,Math.max(0,.06-(last?.age??1)));
+  el.style.setProperty('--damage-delay',delay+'s');
+  const f={el,key:anchor.key,pos:anchor.pos,crit,age:-delay,life:crit?.96:.84};
   place(f);container.append(el);active.push(f);return el;
  }
  function update(dt){

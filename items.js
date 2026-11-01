@@ -24,6 +24,16 @@ export const stackLimit=id=>id===CONQUEST_SHARD?CONQUEST_STACK:MAX_STACK;
 // 0.109.6 bag expansion: each bag carries its own size (40 base, +10 per expansion at Mae Bua's, up to 100)
 export const BAG_MAX=100,BAG_STEP=10;
 export const bagCap=bag=>{const n=bag?.slots;return Number.isSafeInteger(n)?Math.min(BAG_MAX,Math.max(BAG_SLOTS,n)):BAG_SLOTS;};
+// Counts remain totals by item ID for saves/crafting; capacity is measured in stacks.
+export const bagSlotsUsed=bag=>Object.entries(bag?.items??{}).reduce((n,[id,count])=>n+(BAGGABLE(id)&&Number.isSafeInteger(count)&&count>0?Math.ceil(count/stackLimit(id)):0),0);
+export function itemRoom(bag,id,cap=bagCap(bag)){
+ if(!BAGGABLE(id))return 0;
+ const limit=stackLimit(id),have=bag?.items?.[id]??0;
+ return Math.max(0,cap-bagSlotsUsed(bag))*limit+(have>0?Math.ceil(have/limit)*limit-have:0);
+}
+export function bagStacks(bag){
+ const b=normalizeBag(bag);return Object.entries(b.items).flatMap(([id,total])=>Array.from({length:Math.ceil(total/stackLimit(id))},(_,index)=>({id,index,count:Math.min(stackLimit(id),total-index*stackLimit(id))})));
+}
 export const expandCost=bag=>bagCap(bag)>=BAG_MAX?null:2000*((bagCap(bag)-BAG_SLOTS)/BAG_STEP+1);
 
 // icon = atlas cell (row-major, 6 per row). kind: loot (sell only) · potion (usable) · ui (never in a bag).
@@ -219,8 +229,9 @@ export const SHOPS={
 const int=(v,min,max)=>Number.isSafeInteger(v)?Math.min(Math.max(v,min),max):min;
 export function normalizeBag(bag,cap=bagCap(bag)){
  const b=bag&&typeof bag==='object'?bag:{},items={},slots=bagCap(b);
+ let remaining=cap===Infinity?Infinity:Math.max(0,Math.floor(Number(cap)||0));
  for(const [id,n] of Object.entries(b.items&&typeof b.items==='object'?b.items:{})){
-  if(!BAGGABLE(id))continue;const c=int(n,0,stackLimit(id));if(c>0&&Object.keys(items).length<cap)items[id]=c;
+  if(!BAGGABLE(id))continue;const c=int(n,0,Math.min(Number.MAX_SAFE_INTEGER,remaining*stackLimit(id)));if(c>0){items[id]=c;remaining-=Math.ceil(c/stackLimit(id));}
  }
  return slots>BAG_SLOTS?{coins:int(b.coins,0,MAX_COINS),items,slots}:{coins:int(b.coins,0,MAX_COINS),items};
 }
@@ -234,7 +245,7 @@ export function addLoot(bag,{coins=0,items=[]}={}){
  const gained=int(coins,0,MAX_COINS);b.coins=Math.min(MAX_COINS,b.coins+gained);
  for(const {id,count:n=1} of items){
   if(!BAGGABLE(id)||!(n>0))continue;
-  const room=id in b.items||Object.keys(b.items).length<bagCap(b)?stackLimit(id)-(b.items[id]??0):0,take=Math.min(room,n);
+  const room=itemRoom(b,id),take=Math.min(room,n);
   if(take>0){b.items[id]=(b.items[id]??0)+take;added.push({id,count:take});}
   if(take<n)lost.push({id,count:n-take});
  }

@@ -50,7 +50,7 @@ test('invalid requests, insufficient gold, random errors and full bags cannot de
  const poor=record();poor.petCollection.balance=99;assert.throws(()=>draw(poor),/no-gems/);assert.equal(poor.petCollection.balance,99);
  for(const x of [-1,1,NaN,Infinity])assert.throws(()=>draw(record(),1,()=>x),/bad-random/);
  const full=record();full.bag.items=Object.fromEntries(Object.keys(ITEMS).filter(k=>['loot','potion','card'].includes(itemDef(k).kind)).slice(0,bagCap(full.bag)).map(k=>[k,1]));assert.equal(Object.keys(full.bag.items).length,bagCap(full.bag));assert.throws(()=>draw(full,1,()=>0),/bag-full/);assert.equal(full.petCollection.balance,2000);
- const stack=record();stack.bag.items['break-guard']=MAX_STACK;assert.throws(()=>draw(stack,1,()=>.6),/bag-full/);assert.equal(stack.petCollection.balance,2000);
+ const stack=record();stack.bag.items['break-guard']=MAX_STACK*bagCap(stack.bag);assert.throws(()=>draw(stack,1,()=>.6),/bag-full/);assert.equal(stack.petCollection.balance,2000);
 });
 test('pet draws and mail grants preserve independent amulet pity; public wallets omit receipts',()=>{
  let r=draw(record(),1,()=>.8).record;

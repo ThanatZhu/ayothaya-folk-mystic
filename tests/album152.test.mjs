@@ -30,7 +30,7 @@ test('milestones award once and only on explicit deposits',()=>{
 test('full bag, full reward stack and coin cap reject the entire deposit without consuming the card',()=>{
  const state={...empty(),album:ALBUM_CARDS.slice(0,2)},id=ALBUM_CARDS[2];
  const filler=Object.keys(ITEMS).filter(x=>x!==id&&x!=='hp-large'&&normalizeBag({items:{[x]:1}}).items[x]).slice(0,39);
- for(const bag of [{coins:0,items:{[id]:2,...Object.fromEntries(filler.map(x=>[x,1]))}},{coins:0,items:{[id]:1,'hp-large':999}},{coins:MAX_COINS,items:{[id]:1}}]){
+ for(const bag of [{coins:0,items:{[id]:2,...Object.fromEntries(filler.map(x=>[x,1]))}},{coins:0,items:{[id]:2,'hp-large':999*39}},{coins:MAX_COINS,items:{[id]:1}}]){
   const before=structuredClone(bag);assert.throws(()=>depositAlbumCard(state,bag,id),/album-full|album-coins/);assert.deepEqual(bag,before);assert.equal(state.album.length,2);
  }
  const bag={items:{[id]:1,...Object.fromEntries(filler.map(x=>[x,1]))}},r=depositAlbumCard(state,bag,id);assert.equal(Object.keys(r.bag.items).length,40);assert.equal(r.bag.items['hp-large'],5);

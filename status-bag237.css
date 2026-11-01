@@ -75,6 +75,9 @@ html body #game-shell #bag-window>.market-bar{flex:none;flex-wrap:wrap;gap:8px;p
  html body #game-shell #bag-window>.market-bar button{width:100%;min-width:0!important;min-height:36px;font-size:11px;padding:4px 10px!important}
 }
 @media(orientation:landscape) and (max-height:520px){html body #game-shell #bag-window .bag-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}}
+/* Keep square slots in their own grid rows; the generic 44px touch minimum
+   otherwise sizes occupied rows shorter than their aspect-ratio artwork. */
+html body #game-shell #bag-window .bag-grid .slot{min-height:auto!important}
 html body #game-shell #bag-window .bag-detail>div{min-width:0;overflow-wrap:anywhere}
 @media(max-width:720px) and (orientation:portrait){
  html body #game-shell #bag-window[data-hud-panel][open]{height:calc(var(--vv-h,100dvh) - 24px)!important;max-height:calc(var(--vv-h,100dvh) - 24px)!important}

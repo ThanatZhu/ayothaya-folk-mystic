@@ -1,6 +1,6 @@
 // Storage at ลุงเรือง, player trade and vending stalls (0.46). One window, five views.
 // Online every move is a realm-server command; offline only storage works (kept in localStorage beside the bag).
-import {ITEM_ERRORS,itemDef} from './items.js?v=107';
+import {ITEM_ERRORS,itemDef,bagSlotsUsed} from './items.js?v=107';
 import {STORAGE_NPC,STORAGE_SLOTS,STALL_MAX,TRADABLE,normalizeStorage,moveOffer} from './market.js?v=107';
 import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
@@ -72,7 +72,7 @@ export function createMarketUI({game,map,account,bagUI}){
   const body=$('market-body'),tradable=Object.fromEntries(Object.entries(bag.items).filter(([id])=>TRADABLE(id)));
   if(view==='storage'){
    body.innerHTML=`<div class="market-cols"><section><h3>กระเป๋า</h3><ul class="market-list">${rows(tradable,(id,n)=>`<button type="button" data-a="store" data-n="1">ฝาก 1</button>${n>1?`<button type="button" data-a="store" data-n="${n}">ทั้งหมด</button>`:''}`)}</ul></section>`+
-    `<section><h3>คลัง <small>${Object.keys(storage().items).length}/${STORAGE_SLOTS}</small></h3><ul class="market-list">${rows(storage().items,(id,n)=>`<button type="button" data-a="retrieve" data-n="1">ถอน 1</button>${n>1?`<button type="button" data-a="retrieve" data-n="${n}">ทั้งหมด</button>`:''}`)}</ul></section></div>`;
+    `<section><h3>คลัง <small>${bagSlotsUsed(storage())}/${STORAGE_SLOTS}</small></h3><ul class="market-list">${rows(storage().items,(id,n)=>`<button type="button" data-a="retrieve" data-n="1">ถอน 1</button>${n>1?`<button type="button" data-a="retrieve" data-n="${n}">ทั้งหมด</button>`:''}`)}</ul></section></div>`;
    body.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>move(b.dataset.a,b.closest('li').dataset.id,+b.dataset.n));
   }
   if(view==='pick'){

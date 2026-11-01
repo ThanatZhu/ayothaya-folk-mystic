@@ -23,5 +23,5 @@ test('invalid, unaffordable, full-bag and full-stack purchases never charge or p
  assert.throws(()=>buy(fresh(),'invented'),/bad-product/);assert.throws(()=>buy(fresh(),'rename-card',1,'x'),/bad-request-id/);
  const poor=fresh();poor.petCollection.balance=99;assert.throws(()=>buy(poor,'break-guard'),/no-gems/);assert.equal(poor.petCollection.balance,99);
  const full=fresh();full.bag.items=Object.fromEntries(Object.keys(ITEMS).filter(k=>k!=='rename-card'&&['loot','potion','card'].includes(itemDef(k).kind)).slice(0,bagCap(full.bag)).map(k=>[k,1]));const copy=structuredClone(full);assert.throws(()=>buy(full),/bag-full/);assert.deepEqual(full,copy);
- const stack=fresh();stack.bag.items['lek-lai']=MAX_STACK-3;const before=structuredClone(stack);assert.throws(()=>buy(stack,'lek-lai-pack'),/bag-full/);assert.deepEqual(stack,before);
+ const stack=fresh();stack.bag.items['lek-lai']=MAX_STACK*bagCap(stack.bag)-3;const before=structuredClone(stack);assert.throws(()=>buy(stack,'lek-lai-pack'),/bag-full/);assert.deepEqual(stack,before);
 });

@@ -13,7 +13,7 @@ test('insufficient gold, full bag and full stack do not deduct currency or mutat
  for(const scenario of ['gold','bag','stack']){
   const r=record();if(scenario==='gold')r.petCollection.balance=199;
   if(scenario==='bag')r.bag.items=Object.fromEntries(Object.keys(ITEMS).filter(k=>['loot','gear','card'].includes(ITEMS[k].kind)).slice(0,40).map(k=>[k,1]));
-  if(scenario==='stack')r.bag.items['soul-talisman']=999;
+  if(scenario==='stack')r.bag.items['soul-talisman']=999*40;
   const before=structuredClone(r);assert.throws(()=>identityAction(r,{type:'revivalBuy',id:'buy-revival-fail'}),scenario==='gold'?/not-enough-gold/:/bag-full/);assert.deepEqual(r,before);
  }
 });

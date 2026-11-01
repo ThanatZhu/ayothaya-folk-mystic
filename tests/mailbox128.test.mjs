@@ -10,7 +10,7 @@ test('mail claims atomically grant all attachments once, even after pet receipts
  a.petCollection.receipts=[];const again=mailboxAction(a,{type:'mailClaim',mailId:mail.id},[],2000);assert.deepEqual(again.bag,a.bag);assert.equal(again.petCollection.balance,1000);assert.equal(again.mailbox.messages[0].claimedAt,1000);assert.equal(r.mailbox.messages[0].claimedAt,0);
 });
 test('full bags and coin caps leave all mail attachments unclaimed and cannot partially credit a wallet',()=>{
- const r={serverId:'server-1',bag:{coins:0,items:{'hp-small':999}},mailbox:deliverMail(null,gift()).mailbox};assert.throws(()=>mailboxAction(r,{type:'mailClaim',mailId:'gift-000001'}),/bag-full/);assert.equal(r.petCollection,undefined);assert.equal(r.mailbox.messages[0].readAt,0);
+ const r={serverId:'server-1',bag:{coins:0,items:{'hp-small':999*40}},mailbox:deliverMail(null,gift()).mailbox};assert.throws(()=>mailboxAction(r,{type:'mailClaim',mailId:'gift-000001'}),/bag-full/);assert.equal(r.petCollection,undefined);assert.equal(r.mailbox.messages[0].readAt,0);
  r.bag={coins:MAX_COINS,items:{}};assert.throws(()=>mailboxAction(r,{type:'mailClaim',mailId:'gift-000001'}),/coin-cap/);assert.equal(r.mailbox.messages[0].claimedAt,0);
  for(const id of ['pet-lure','egg-rat','pet-food'])assert.throws(()=>composeMail({id:'invalid-001',title:'X',body:'X',attachments:{items:[{id,count:1}]}}),/bad-item/);
  assert.throws(()=>composeMail({id:'invalid-001',title:'X',body:'X',attachments:{items:[{id:'hp-small',count:1},{id:'hp-small',count:1}]}}),/bad-item/);

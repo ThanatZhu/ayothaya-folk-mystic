@@ -12,10 +12,10 @@ test('all five rainbow amulets require exactly 50000 shards, including batched c
  }
  assert.equal(AMULET_CRAFT_SHARDS,50000);assert.equal(recipeFor('boss-weapon-swordsman').needs[CONQUEST_SHARD],100);
 });
-test('shards accumulate beyond 999 and survive inventory/storage normalization; ordinary items retain their cap',()=>{
- const bag={coins:0,items:{[CONQUEST_SHARD]:49999,'rat-tooth':2000}};assert.equal(normalizeBag(bag).items[CONQUEST_SHARD],49999);assert.equal(normalizeBag(bag).items['rat-tooth'],MAX_STACK);assert.equal(normalizeStorage(bag).items[CONQUEST_SHARD],49999);
+test('shards accumulate beyond 999 and survive inventory/storage normalization; ordinary items use multiple stacks',()=>{
+ const bag={coins:0,items:{[CONQUEST_SHARD]:49999,'rat-tooth':2000}};assert.equal(normalizeBag(bag).items[CONQUEST_SHARD],49999);assert.equal(normalizeBag(bag).items['rat-tooth'],2000);assert.equal(normalizeStorage(bag).items[CONQUEST_SHARD],49999);
  const grown=addLoot(bag,{items:[{id:CONQUEST_SHARD,count:3}]});assert.equal(grown.bag.items[CONQUEST_SHARD],50002);assert.deepEqual(grown.lost,[]);assert.equal(stackLimit(CONQUEST_SHARD),CONQUEST_STACK);
- const capped=addLoot({items:{[CONQUEST_SHARD]:CONQUEST_STACK-1}},{items:[{id:CONQUEST_SHARD,count:3}]});assert.equal(capped.bag.items[CONQUEST_SHARD],CONQUEST_STACK);assert.equal(capped.lost[0].count,2);
+ const capped=addLoot({items:{[CONQUEST_SHARD]:CONQUEST_STACK-1}},{items:[{id:CONQUEST_SHARD,count:3}]});assert.equal(capped.bag.items[CONQUEST_SHARD],CONQUEST_STACK+2);assert.deepEqual(capped.lost,[]);
  const [from,to]=moveOffer({items:{[CONQUEST_SHARD]:50000}},{items:{}},{items:{[CONQUEST_SHARD]:50000}});assert.equal(from.items[CONQUEST_SHARD],undefined);assert.equal(to.items[CONQUEST_SHARD],50000);
 });
 test('shop escrow and returned stock preserve a large shard stack without truncating it',()=>{

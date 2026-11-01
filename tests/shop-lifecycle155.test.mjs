@@ -15,7 +15,7 @@ test('the last sale removes the public shop immediately, preserves proceeds, fre
 test('24 hours is enforced at the exact boundary even without a sweep; expiry never discards escrow or unsold items',()=>{
  const t=fixture(),owner=t.join('seller',{coins:0,items:{'rat-tooth':5}}),buyer=t.join('buyer');t.send(owner,'shopOpen',{shop:listing('rat-tooth',5)});const s=[...t.realm.shops.values()][0];assert.equal(s.expiresAt-s.createdAt,SHOP_DURATION);
  t.advance(SHOP_DURATION-1);assert.equal(shopIsOpen(s,t.now),true);t.advance(1);assert.equal(t.realm.shopList('server-1').length,0);const before=structuredClone(buyer.bag);assert.equal(t.send(buyer,'shopBuy',{shop:s.id,item:'rat-tooth',count:1}),false);assert.deepEqual(buyer.bag,before);assert.equal(t.realm.shops.get(s.id).closedReason,'expired');assert.equal(t.realm.shops.get(s.id).items['rat-tooth'].count,5);
- owner.bag={coins:0,items:{'rat-tooth':MAX_STACK}};assert.equal(t.send(owner,'shopCollect',{shop:s.id}),false);assert.equal(t.realm.shops.has(s.id),true);owner.bag={coins:0,items:{}};assert.equal(t.send(owner,'shopCollect',{shop:s.id}),true);assert.equal(owner.bag.items['rat-tooth'],5);assert.equal(t.realm.shops.has(s.id),false);
+ owner.bag={coins:0,items:{'rat-tooth':MAX_STACK*40}};assert.equal(t.send(owner,'shopCollect',{shop:s.id}),false);assert.equal(t.realm.shops.has(s.id),true);owner.bag={coins:0,items:{}};assert.equal(t.send(owner,'shopCollect',{shop:s.id}),true);assert.equal(owner.bag.items['rat-tooth'],5);assert.equal(t.realm.shops.has(s.id),false);
 });
 
 test('buying stores close when filled or expired and return every acquired item and unused coin',()=>{

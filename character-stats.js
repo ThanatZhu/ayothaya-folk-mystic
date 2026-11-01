@@ -1,7 +1,7 @@
 // Ragnarok-style status (STR AGI VIT INT DEX LUK) and stat-bearing gear (weapon / armor / accessory).
 // Pure rules shared by the client (offline guests + UI) and the realm server. Gear lives in the bag until
 // equipped; it is separate from the cosmetic look in equipment.js, so costumes stay free choices.
-import {BAG_SLOTS,bagCap,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=tier167';
+import {itemRoom,ITEMS,normalizeBag,itemDef,composeId} from './items.js?v=tier167';
 import {dodgeChance,monsterHit} from './combat-formulas.js';
 import {effectiveGearStats,roundGearStat} from './refine-tiers.js';
 import {setBonuses,STAT_CAPS,lookClass} from './gear-sets.js';
@@ -63,13 +63,13 @@ export function equipGear(bag,gear,id,who){
  const b=normalizeBag(bag),g=normalizeGear(gear),slot=itemDef(id).slot;
  if(!b.items[id])throw new Error('no-item');
  b.items[id]--;if(!b.items[id])delete b.items[id];
- if(g[slot])b.items[g[slot]]=(b.items[g[slot]]??0)+1;
+ if(g[slot]){if(itemRoom(b,g[slot])<1)throw new Error('bag-full');b.items[g[slot]]=(b.items[g[slot]]??0)+1;}
  g[slot]=id;return {bag:b,gear:g};
 }
 export function unequipGear(bag,gear,slot){
  const b=normalizeBag(bag),g=normalizeGear(gear);
  if(!GEAR_SLOTS.includes(slot)||!g[slot])throw new Error('slot-empty');
- if(!(g[slot] in b.items)&&Object.keys(b.items).length>=bagCap(b))throw new Error('bag-full');
+ if(itemRoom(b,g[slot])<1)throw new Error('bag-full');
  b.items[g[slot]]=(b.items[g[slot]]??0)+1;g[slot]=null;return {bag:b,gear:g};
 }
 // Gear that no longer fits (class change, e.g. Novice → Swordsman) goes back to the bag.

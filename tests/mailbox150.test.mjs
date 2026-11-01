@@ -19,7 +19,7 @@ test('delete all protects unread mail and unclaimed gifts, including broadcasts;
 });
 test('claim all atomically receives each complete letter once; blocked letters retain every attachment',()=>{
  const blocked=mail('blocked',{coins:50,goldBars:20,items:[{id:'hp-small',count:2}]}),fits=mail('fits',{coins:3,goldBars:10,pets:['rice-rabbit','rice-rabbit']}),note=mail('note');
- const r=record([blocked,fits,note]);r.bag.items['hp-small']=999;
+ const r=record([blocked,fits,note]);r.bag.items['hp-small']=999*40;
  const result=mailboxBulkAction(r,{type:'mailClaimAll',attachments:{coins:999999}},[],1000),next=result.record;
  assert.equal(result.summary.claimed,1);assert.equal(result.summary.remaining,1);assert.equal(result.summary.blocked[0].code,'bag-full');
  assert.equal(next.bag.coins,3);assert.equal(next.petCollection.balance,10);assert.equal(next.petCollection.collection['rice-rabbit'].copies,1);

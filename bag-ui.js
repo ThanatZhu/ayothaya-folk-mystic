@@ -8,7 +8,7 @@ import {ATLAS_LAYOUTS} from './items.js?v=class-reward192';
 import {GRADES,gearLook,setLines,bossLines,familyName,BOSS_SETS,SET_SLOTS} from './gear-sets.js';
 import {levelGifts} from './experience.js?v=105.3';
 import {consumeRevival,revivalCount} from './revival-item.js?v=revival180';
-import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=class-reward192';
+import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,bagStacks,itemRoom,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=class-reward192';
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {pickPotion} from './auto-play.js?v=auto202';
@@ -221,8 +221,8 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    el.disabled=!id||!n;el.classList.toggle('empty',!id);el.title=id?itemDef(id).name+' ('+key+')':'ตั้งปุ่มลัดในกระเป๋า';el.setAttribute('aria-label',el.title);});
   if(dialog.open){
    $('bag-coins').innerHTML='<span title="เบี้ย">'+icon('cowrie','item-icon small')+b.coins.toLocaleString('th-TH')+'</span><span class="bag-gold" title="ทองแท่ง"><img src="assets/summon147/gold-bars.webp" alt="ทองแท่ง">'+normalizePetAccount(world.petCollection).balance.toLocaleString('th-TH')+'</span>';
-   const all=Object.keys(b.items),kinds=TABS.find(t=>t[0]===category)[2],ids=kinds?all.filter(id=>kinds.includes(itemDef(id)?.kind)):all;if(selected&&!b.items[selected])selected=null;
-   tabs.querySelectorAll('[data-cat]').forEach(t=>{const k=TABS.find(x=>x[0]===t.dataset.cat)[2],n=k?all.filter(id=>k.includes(itemDef(id)?.kind)).length:all.length;t.setAttribute('aria-selected',String(t.dataset.cat===category));t.dataset.count=n;});
+   const all=bagStacks(b),kinds=TABS.find(t=>t[0]===category)[2],ids=kinds?all.filter(({id})=>kinds.includes(itemDef(id)?.kind)):all;if(selected&&!b.items[selected])selected=null;
+   tabs.querySelectorAll('[data-cat]').forEach(t=>{const k=TABS.find(x=>x[0]===t.dataset.cat)[2],n=k?all.filter(({id})=>k.includes(itemDef(id)?.kind)).length:all.length;t.setAttribute('aria-selected',String(t.dataset.cat===category));t.dataset.count=n;});
    $('bag-space').textContent=`ช่องที่ใช้ ${all.length} / ${bagCap(b)}`;
    const gearSig=JSON.stringify(gear);if(gearSig!==shownGear){shownGear=gearSig;
    $('bag-gear').innerHTML=GEAR_PLACES.map(([slot,label])=>{const id=gear[slot],it=id&&itemDef(id);return `<button type="button" class="gear-slot g-${slot}${worn===slot?' on':''}${it?' r'+(it.rarity??0)+gradeTone(it):''}" data-gear="${slot}" title="${label}${it?' · '+it.name:''}">${it?icon(id):''}<small>${label}</small>${refineTierBadge(it)}</button>`;}).join('');
@@ -233,7 +233,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    sets.innerHTML=[...fams.map(f=>{const p=wornDefs.filter(w=>w.set?.family===f);return `<span class="${p.length>=2?'on':''}">ชุด${familyName(f)} ${Math.min(p.length,SET_SLOTS.length)}/${SET_SLOTS.length}</span>`;}),...bosses.map(c=>{const n=wornDefs.filter(w=>w.bossSet===c).length;return `<span class="boss${n>=2?' on':''}">${BOSS_SETS[c].name} ${n}/5</span>`;})].join('');
    }
    $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>el.classList.toggle('on',el.dataset.gear===worn));
-   $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:bagCap(b),Math.ceil(ids.length/6)*6)},(_,i)=>{const id=ids[i];return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${gradeTone(itemDef(id))}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" title="${itemDef(id).name}">${icon(id)}<b>${b.items[id]}</b></button>`:'<span class="slot empty"></span>';}).join('');
+   $('bag-grid').innerHTML=Array.from({length:Math.max(kinds?24:bagCap(b),Math.ceil(ids.length/6)*6)},(_,i)=>{const stack=ids[i],id=stack?.id;return id?`<button type="button" class="slot r${itemDef(id).rarity??0}${gradeTone(itemDef(id))}${id===selected?' on':''}${itemDef(id).kind==='potion'?' potion':''}" data-id="${id}" data-stack="${stack.index}" title="${itemDef(id).name} ×${stack.count}">${icon(id)}<b>${stack.count}</b></button>`:'<span class="slot empty"></span>';}).join('');
    $('bag-grid').querySelectorAll('[data-id]').forEach(el=>{el.onclick=()=>{if(dragged)return;selected=el.dataset.id;worn=null;render(true);};el.onpointerdown=e=>dragStart(e,el.dataset.id);el.oncontextmenu=e=>{const id=el.dataset.id;if(e.pointerType==='touch'||itemDef(id)?.kind!=='gear')return;e.preventDefault();cancelDrag();api.onWear?.(id);};});
    $('bag-gear').querySelectorAll('[data-gear]').forEach(el=>{el.classList.toggle('on',el.dataset.gear===worn);el.setAttribute('aria-pressed',String(el.dataset.gear===worn));});
    const wornId=worn&&gear[worn],wornIt=wornId&&itemDef(wornId);
@@ -256,8 +256,8 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    $('shop-list').querySelectorAll('li[data-id]').forEach((li,k)=>{
     const inp=li.querySelector('input'),total=li.querySelector('.total'),deal=li.querySelector('.deal'),{id,price,have}=rows[k],cur=tab==='buy'&&shop.currency;
     // 0.100.10 the most this row allows: buy = what the purse pays for and the bag holds; sell = what the bag holds.
-    const funds=cur?b.items[shop.currency]??0:b.coins,room=have||Object.keys(b.items).length<bagCap(b)?MAX_STACK-have:0;
-    const max=tab==='buy'?Math.min(room,Math.floor(funds/price)):have,n=()=>Math.min(max,Math.max(1,Math.floor(+inp.value)||1));
+    const funds=cur?b.items[shop.currency]??0:b.coins,room=itemRoom(b,id);
+    const max=tab==='buy'?Math.min(MAX_STACK,room,Math.floor(funds/price)):have,n=()=>Math.min(max,Math.max(1,Math.floor(+inp.value)||1));
     const show=()=>{total.textContent=max<1?ITEM_ERRORS[room<1?'bag-full':cur?'no-tokens':'no-coins']:'รวม '+(n()*price).toLocaleString('th-TH')+(cur?' เหรียญ':' เบี้ย');};
     inp.max=String(Math.max(1,max));deal.disabled=max<1;inp.disabled=max<1;show();
     inp.oninput=()=>{if(+inp.value>max)inp.value=String(max);show();};inp.onchange=()=>{inp.value=String(n());show();};

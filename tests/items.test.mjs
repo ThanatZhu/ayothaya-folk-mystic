@@ -24,8 +24,8 @@ test('atlas cells are unique and every drop, shop and monster reference is real'
 test('bags clamp junk, stacks cap at MAX_STACK and a full bag reports what was lost', () => {
  assert.deepEqual(normalizeBag({coins:-5,items:{'hp-small':3,'nope':2,'cowrie':9,'rat-tooth':0}}),{coins:0,items:{'hp-small':3}});
  const r=addLoot({coins:1,items:{'rat-tooth':MAX_STACK-1}},{coins:5,items:[{id:'rat-tooth',count:3},{id:'hp-small',count:1}]});
- assert.equal(r.bag.coins,6);assert.equal(r.bag.items['rat-tooth'],MAX_STACK);
- assert.deepEqual(r.lost,[{id:'rat-tooth',count:2}]);
+ assert.equal(r.bag.coins,6);assert.equal(r.bag.items['rat-tooth'],MAX_STACK+2);
+ assert.deepEqual(r.lost,[]);
  const many=Object.fromEntries(Array.from({length:BAG_SLOTS},(_,i)=>['x'+i,1]));
  assert.equal(Object.keys(normalizeBag({items:many}).items).length,0,'unknown ids never take a slot');
  assert.equal(addLoot({items:{'hp-small':1}},{items:[{id:'hp-small',count:1}]}).bag.items['hp-small'],2);
@@ -68,7 +68,7 @@ test('0.100.10 discard removes 1..stack of an item; buy takes one quantity up to
  const rich={coins:1e6,items:{}};
  assert.equal(buy(rich,'แม่บัว','hp-small',150).items['hp-small'],150,'more than the old 99 cap');
  assert.equal(buy({coins:1e6,items:{'hp-small':990}},'แม่บัว','hp-small',9).items['hp-small'],MAX_STACK);
- assert.throws(()=>buy({coins:1e6,items:{'hp-small':990}},'แม่บัว','hp-small',10),/bag-full/,'stack cap, nothing is charged');
+ assert.equal(buy({coins:1e6,items:{'hp-small':990}},'แม่บัว','hp-small',10).items['hp-small'],1000,'a new stack uses a free slot');
  assert.throws(()=>buy(rich,'แม่บัว','hp-small',MAX_STACK+1),/bad-count/);
  assert.throws(()=>buy({coins:ITEMS['hp-small'].buy*3-1,items:{}},'แม่บัว','hp-small',3),/no-coins/);
 });

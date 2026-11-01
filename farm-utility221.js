@@ -1,4 +1,4 @@
-import {normalizeBag,itemDef,sell,bagCap,MAX_STACK,composeId} from './items.js';
+import {normalizeBag,itemDef,sell,bagCap,itemRoom,composeId} from './items.js';
 export const CARD_REMOVAL_FEE=10000;
 export const UTILITY_MUTATIONS=['cardRemove','sellBatch'];
 export const UTILITY_ERRORS={'no-card':'อุปกรณ์นี้ไม่มีการ์ด','gear-changed':'อุปกรณ์เปลี่ยนแล้ว กรุณาตรวจรายการใหม่','sale-changed':'จำนวนหรือราคาขายเปลี่ยนแล้ว กรุณาตรวจรายการใหม่','empty-sale':'เลือกของที่จะขายก่อน','bad-utility':'รายการไม่ถูกต้อง','card-price-changed':'ค่าถอดการ์ดเปลี่ยนแล้ว กรุณาตรวจยอดใหม่'};
@@ -8,7 +8,7 @@ export function extractCard(bag,gear,slot,expected){
  const worn=gear?.[slot],it=itemDef(worn);if(!it||it.kind!=='gear')throw Error('slot-empty');if(worn!==expected)throw Error('gear-changed');if(!it.card)throw Error('no-card');
  const b=normalizeBag(bag),card=it.card;if(itemDef(card)?.kind!=='card')throw Error('no-card');
  if(b.coins<CARD_REMOVAL_FEE)throw Error('no-coins');
- if((b.items[card]??0)>=MAX_STACK||!b.items[card]&&Object.keys(b.items).length>=bagCap(b))throw Error('bag-full');
+ if(itemRoom(b,card)<1)throw Error('bag-full');
  b.coins-=CARD_REMOVAL_FEE;b.items[card]=(b.items[card]??0)+1;
  return {bag:b,gear:{...gear,[slot]:composeId(it.base,it.refine,null,it.affix,it.grade)},card,fee:CARD_REMOVAL_FEE};
 }

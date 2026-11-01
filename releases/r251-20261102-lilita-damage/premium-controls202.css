@@ -1,0 +1,51 @@
+/* Generated artwork controls. Nine-slice preserves lotus ends at compact and wide sizes. */
+:root #gacha-window button,
+:root #gacha-window :is(#amulet-gacha,#pet-summon-premium) button,
+:root #pet-window #pet-premium button{
+ --control-art:url('assets/premium-controls202/button-jade.webp');
+ box-sizing:border-box!important;min-height:44px;cursor:pointer;touch-action:manipulation;
+ border:10px solid transparent!important;border-image:var(--control-art) 28% 14% fill / 10px 26px / 0 stretch!important;
+ background:none!important;border-radius:999px!important;box-shadow:none!important;padding:2px 15px!important;color:#f5e6bc!important;
+ font-family:Mali,Tahoma,sans-serif;transition:transform 140ms cubic-bezier(.22,1,.36,1),opacity 140ms;
+}
+:root #gacha-window #amulet-gacha button:is([aria-pressed=true],[data-amulet-draw="10"]),
+:root #gacha-window #amulet-gacha button.relic-done,
+:root #gacha-window #pet-summon-premium button.summon-primary,
+:root #pet-window #pet-premium button.pet-primary,
+:root #pet-window #pet-premium #pet-auto-live[aria-pressed=true]{
+ --control-art:url('assets/premium-controls202/button-gold.webp');border-image-source:var(--control-art)!important;color:#342a17!important;
+}
+:root #gacha-window button:disabled,:root #pet-window #pet-premium button:disabled{opacity:.42;cursor:default}
+:root #gacha-window button:not(:disabled):active,:root #pet-window #pet-premium button:not(:disabled):active{transform:scale(.975);transition-duration:0ms}
+:root #gacha-window button:focus-visible,:root #pet-window #pet-premium button:focus-visible{outline:2px solid #fff0b0!important;outline-offset:2px}
+:root #gacha-window .premium-gacha-tabs button[role=tab],
+:root #gacha-window #amulet-gacha :is(.amulet-roster button,.relic-prize),
+:root #gacha-window #pet-summon-premium :is(.gacha-featured-pets>button,.summon-egg),
+:root #pet-window #pet-premium .pet-roster button[data-pet]{
+ background:none!important;background-image:none!important;background-color:transparent!important;border:0!important;border-image:none!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
+}
+:root #gacha-window .premium-gacha-tabs button>span{
+ border:10px solid transparent;border-image:url('assets/premium-controls202/button-jade.webp') 28% 14% fill / 10px 24px / 0 stretch;padding:0 7px;color:#e7dcc1;
+}
+:root #gacha-window .premium-gacha-tabs [aria-selected=true]>span{border-image-source:url('assets/premium-controls202/button-gold.webp');color:#342a17}
+:root #gacha-window .premium-gacha-tabs [role=tab]:active{transform:none}
+:root #gacha-window #amulet-gacha .amulet-roster button:active{transform:translateX(calc(-50% + var(--fan-offset)*48%)) translateY(calc(var(--fan-distance)*-6%)) scale(calc(1 - var(--fan-distance)*.12))}
+:root #gacha-window .premium-close,
+:root #gacha-window .gacha-overlay-close,
+:root #gacha-window .gacha-rates-close,
+:root #pet-window:has(#pet-premium) .premium-close{
+ width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0!important;flex:none;
+ background:transparent url('assets/gacha-banner199/close.webp') center/contain no-repeat!important;border:0!important;border-image:none!important;box-shadow:none!important;border-radius:50%!important;font-size:0!important;color:transparent!important;
+}
+:root #gacha-window .premium-close::before,:root #gacha-window .premium-close::after,:root #pet-window .premium-close::before,:root #pet-window .premium-close::after{display:none!important}
+:root #gacha-window #amulet-gacha .relic-prize:disabled{opacity:1}
+:root #gacha-window #amulet-gacha .relic-prize:focus-visible,
+:root #gacha-window #pet-summon-premium .summon-egg:focus-visible,
+:root #pet-window #pet-premium [data-pet]:focus-visible{outline-offset:-2px}
+@media(hover:hover) and (pointer:fine){
+ :root #gacha-window button:not(:disabled):hover,:root #pet-window #pet-premium button:not(:disabled):hover{opacity:1}
+ :root #gacha-window .gacha-tools button:hover,:root #gacha-window .gacha-secondary:hover{color:#fff4d5!important}
+}
+@media(prefers-reduced-motion:reduce){
+ :root #gacha-window button,:root #pet-window #pet-premium button{transition:none!important}
+}

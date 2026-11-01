@@ -24,7 +24,6 @@ export function createDamageFloats({container,project,reducedMotion}){
   if(companion){const tag=document.createElement('small');tag.textContent='พราย';el.prepend(tag);}
   // No horizontal lanes or summed damage. Older hits continue their own flight.
   const previous=active.filter(f=>f.key===anchor.key);
-  for(const old of previous)old.el.classList.add('trailing');
   // A stationary latest value avoids overlapping text in reduced-motion mode.
   if(isReduced())for(const old of previous)remove(old);
   else if(previous.length>=8)remove(previous[0]);

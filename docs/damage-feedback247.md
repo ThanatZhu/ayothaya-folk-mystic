@@ -1,8 +1,8 @@
-# Confirmed-hit damage feedback (249, recorded reference)
+# Confirmed-hit damage feedback (250, recorded reference and persistent critical backdrop)
 
 The owner's 22-second recording supersedes the r248 interpretation of one line. Numbers launch along the same vertical line above each target; every confirmed hit remains visible while rising, shrinking slightly and fading. New hits do not replace older ones in normal motion, scatter horizontally, aggregate or change the damage value.
 
-Normal impact: 180 ms; critical impact: 220 ms, peak scale 1.28. Crits have an original short burgundy impact silhouette behind gold numerals (violet for magic). Its 300 ms fade ends early when another hit arrives at that target, avoiding stacked backplates. Lifetimes: 840 ms normal, 960 ms critical; final fade 240 ms. Travel is approximately 80 screen pixels. This is an adaptation of the supplied motion reference, not copied art or a pixel-exact reproduction.
+Normal impact: 180 ms; critical impact: 220 ms, peak scale 1.28. Crits have an original burgundy impact silhouette behind gold numerals (violet for magic). Owner correction: the burgundy silhouette remains attached to each critical number for its entire lifetime, including while newer hits arrive. It scales and travels with the number, fading only with the parent during the final exit. Lifetimes: 840 ms normal, 960 ms critical; final fade 240 ms. Travel is approximately 80 screen pixels. This is an adaptation of the supplied motion reference, not copied art or a pixel-exact reproduction.
 
 Existing game-controls authoritative hit/impact scheduling, world anchors, formulas, audio and combat shake remain unchanged. Only the presentation of simultaneous same-target packets is staggered by 60 ms, bounded to 420 ms, to avoid fully overlapping digits. No unconfirmed hits are created. Physical ivory, critical gold, magic blue, magic critical violet, received red, healing green and companion mint/source label remain distinguishable. No additional frame loop or font download. Maximum eight simultaneous numbers per target and forty globally; oldest presentation nodes expire first at the cap.
 

@@ -1,6 +1,6 @@
 // Presentation only: one popup per confirmed hit; never merge or change damage.
 export function createDamageFloats({container,project,reducedMotion}){
- if(!document.querySelector('link[data-damage-floats247]')){const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./damage-floats247.css',import.meta.url).href;css.dataset.damageFloats247='';document.head.append(css);}
+ if(!document.querySelector('link[data-damage-floats247]')){const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./damage-floats247.css',import.meta.url).href;css.dataset.damageFloats247='';css.addEventListener('load',()=>{document.fonts.load('24px "Lilita One"').catch(()=>{});},{once:true});document.head.append(css);}
  const media=matchMedia('(prefers-reduced-motion: reduce)'),isReduced=reducedMotion??(()=>media.matches);
  const active=[];
  const remove=f=>{f.el.remove();active.splice(active.indexOf(f),1);};

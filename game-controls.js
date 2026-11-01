@@ -1,3 +1,4 @@
+import {createDamageFloats} from './damage-floats247.js';
 import {mobileHudMedia} from './hud-mode204.js';
 import {characterHead} from './character-label.js?v=149';
 import {createRoleWorldDecor} from './role-world-decor.js?v=surfaces222';
@@ -117,7 +118,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const playerLabel=document.createElement('span');playerLabel.className='hero-label';playerLabel.innerHTML='<small class="rank-title" hidden></small><b data-i18n-skip></b>';
  playerLabel.querySelector('b').textContent=config.name||className(world.profession.id,config.gender);let shownRank=-1;$('world-labels').append(playerLabel);
  const motionPreference=matchMedia('(prefers-reduced-motion:reduce)'),compactEffects=matchMedia('(pointer:coarse),(max-width:900px)');
- const floats=[],projection=new THREE.Vector3();let kick=0; // 0.99.3 impact shake (crits, heavy hits taken)
+ const projection=new THREE.Vector3();let kick=0; // 0.99.3 impact shake (crits, heavy hits taken)
  // 0.91 the notice sits just under the target box whenever that box shows, so the two never overlap (every layout).
  function placeNotice(){const n=$('notice'),t=document.querySelector('.target-panel'),r=t&&getComputedStyle(t).display!=='none'?t.getBoundingClientRect():null;n.style.top=r&&r.height?Math.round(r.bottom+8)+'px':'';}
  function toast(text){placeNotice();$('notice').textContent=text;$('notice').classList.add('visible');noticeUntil=performance.now()+2500;dispatchEvent(new CustomEvent('game-notice',{detail:text}));}
@@ -130,9 +131,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  // 0.123 a stealthed player (own world.status.stealth, or a remote player's snapshot `hidden`) is drawn at 35%
  function ghost(sprite,hidden){const a=hidden?.35:1;if(sprite.userData.ghost===a)return;sprite.userData.ghost=a;sprite.traverse(o=>{for(const m of [].concat(o.material??[])){m.userData.baseOpacity??=m.opacity;m.userData.baseTransparent??=m.transparent;m.opacity=m.userData.baseOpacity*a;m.transparent=hidden||m.userData.baseTransparent;m.needsUpdate=true;}});}
  function project(node,x,y,z){projection.set(x,y,z).project(camera);node.style.transform=`translate(-50%,-100%) translate(${(projection.x*.5+.5)*innerWidth}px,${(-projection.y*.5+.5)*innerHeight}px)`;node.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';}
- // 0.99.3 numbers rise from the head of whoever was hit and stack: each new one pushes the older ones of that
- // target up a line, they drift upward together and fade out. Anchors follow the target while it moves.
- const FLOAT_LINE=22,FLOAT_LIFE=1.05,FLOAT_STACK=4;
+ // Confirmed-hit feedback; world projection stays in the existing render loop.
+ const damageFloats=createDamageFloats({container:$('world-labels'),project(a){projection.set(a.x,a.y,a.z).project(camera);return {x:(projection.x*.5+.5)*innerWidth,y:(-projection.y*.5+.5)*innerHeight,visible:Math.abs(projection.x)<=1.12&&Math.abs(projection.y)<=1.12&&projection.z<=1};}});
  function anchorOf(e){
   if(e.type==='damage'&&Number.isInteger(e.id)&&world.mobs[e.id]){const m=world.mobs[e.id],v=mobViews[e.id];return {key:'m'+e.id,pos:()=>({x:m.x,y:(v?.height??1.4)+.3,z:m.z})};}
   if(e.type==='damage'&&typeof e.id==='string'){const id=e.id;return {key:id,pos:()=>{const f=world.foes?.().find(o=>o.id===id);const x=f?.x??e.x,z=f?.z??e.z;return {x,y:2.2+groundHeight(world.nav,x,z),z};}};}
@@ -140,26 +140,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   return {key:'at'+Math.round(e.x)+':'+Math.round(e.z),pos:()=>({x:e.x,y:1.9+groundHeight(world.nav,e.x,e.z),z:e.z})};
  }
  function popup(e,positive=false,anchor=anchorOf(e)){
-  const crit=!positive&&(e.crit||e.color==='#ffd27a'),magic=!positive&&!!e.magic,el=document.createElement('span');const mob=Number.isInteger(e.id)?world.mobs[e.id]:null,big=!positive&&!crit&&mob&&typeof e.amount==='number'&&e.amount>=mob.maxHp*.2;
-  const companion=e.source==='spirit';el.dataset.damageSource=companion?'spirit':'player';
-  el.className='damage-number'+(companion?' spirit-damage':'')+(crit?' crit':'')+(magic?' magic':'')+(big?' big':'')+(positive?' heal':'');
-  // 1.09 owner: numbers only (no minus or plus sign) and four fixed colours instead of one per skill/element:
-  // white = your hit, gold = critical, red = damage you take, green = healing. Words (MISS, คอมโบ!) keep their own.
-  const word=typeof e.amount==='string';
-  if(companion){const tag=document.createElement('small');tag.textContent='พราย';el.append(tag,document.createTextNode(String(e.amount)));}else el.textContent=String(e.amount); // owner: plain numbers, no + or −
-  // 1.09.4 owner: physical white, physical crit orange; magic blue, magic crit purple; taken red; heal green
-  el.style.setProperty('color',companion?'#b5ffe6':word?(e.color??'#fff4dc'):positive?'#8ff08c':e.hurt?'#ff5a4a':magic?(crit?'#c27bff':'#6cc8ff'):crit?'#ff9a2e':'#fff4dc','important');
-  const same=floats.filter(f=>f.key===anchor.key);for(const f of same)f.slot+=crit?1.3:1;
-  if(same.length>=FLOAT_STACK){const old=same[0];old.el.remove();floats.splice(floats.indexOf(old),1);}
-  const f={el,key:anchor.key,pos:anchor.pos,age:0,slot:0,off:0,side:same.length%2?1:-1}; // popcorn: alternate left / right as they rise
-  // 0.99.6 place it over the head before it is shown, so it never flashes at the screen corner first
-  placeFloat(f,0);$('world-labels').append(el);floats.push(f);
- }
- function placeFloat(f,dt){
-  f.off+=(f.slot*FLOAT_LINE-f.off)*Math.min(1,dt*16);const a=f.pos();projection.set(a.x,a.y,a.z).project(camera);
-  // 0.99.8 position through `translate` (applied before the pop-in `scale`), so the pop grows in place over the head
-  f.el.style.translate=`calc(${(projection.x*.5+.5)*innerWidth+f.side*Math.min(1,f.age*3)*14}px - 50%) calc(${(-projection.y*.5+.5)*innerHeight-f.off-f.age*26}px - 100%)`;
-  f.el.style.visibility=Math.abs(projection.x)>1.12||Math.abs(projection.y)>1.12||projection.z>1?'hidden':'visible';
+  const mob=Number.isInteger(e.id)?world.mobs[e.id]:null;
+  damageFloats.add(e,{positive,anchor,big:!positive&&mob&&typeof e.amount==='number'&&e.amount>=mob.maxHp*.2});
  }
  // 1.11 owner (AUTO feels late online): the client mirrors the server's AUTO choice and starts the swing or cast at
  // once; the server's own cast event then only confirms it. Damage, numbers and deaths still come from the server and
@@ -542,8 +524,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   const target=world.target;targetRing.visible=!!target;if(target){targetRing.position.set(target.x,.088,target.z);targetRing.scale.setScalar(1+.07*Math.sin(t*5));}
   skillEffects.update(visualDt,camera);
   for(let i=pillars.length-1;i>=0;i--){const p=pillars[i];p.age+=dt;p.m.material.opacity=.7*Math.max(0,1-p.age/2.6);p.m.scale.x=p.m.scale.z=1+Math.sin(p.age*6)*.08;if(p.age>2.6){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();pillars.splice(i,1);}}
-  for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.age+=visualDt;if(f.age>FLOAT_LIFE){f.el.remove();floats.splice(i,1);continue;}
-   placeFloat(f,visualDt);f.el.style.opacity=String(f.age<.55?1:Math.max(0,1-(f.age-.55)/(FLOAT_LIFE-.55)));}
+  damageFloats.update(visualDt);
   if(performance.now()>noticeUntil)$('notice').classList.remove('visible');else placeNotice();
   if(t-lastHUD>.08){lastHUD=t;
    $('hp').style.width=`${p.hp/p.maxHp*100}%`;$('mp').style.width=`${p.mp/p.maxMp*100}%`;$('hp-text').textContent=`HP ${Math.ceil(p.hp)} / ${p.maxHp}`;$('mp-text').textContent=`MP ${Math.floor(p.mp)} / ${p.maxMp}`;$('kills').textContent=`Lv. ${progression(world).level} · ปราบมอน ${world.kills} ตัว`;if($('hero-level'))$('hero-level').textContent='Lv. '+progression(world).level;

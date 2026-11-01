@@ -5530,5 +5530,7 @@ Object.assign(globalThis.I18N_EN,{
  "ดาเมจแรก": "Initial damage",
  "พิษต่อครั้ง": "Poison damage per tick",
  "ก่อนโบนัส เกราะและคริติคอล": "Before bonuses, defense and criticals",
- "ขั้นถัดไป:": "Next rank:"
+ "ขั้นถัดไป:": "Next rank:",
+ "ผลการต่อสู้": "Battle Results",
+ "ภาพบอสยังโหลดไม่สำเร็จ": "Boss image could not be loaded"
 });

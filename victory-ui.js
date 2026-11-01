@@ -1,7 +1,8 @@
-// 0.122 Victory screen after a boss kill (ROX-inspired, our own art): crest + fight time, the boss card, MVP (top
+// Victory screen after a boss kill: crest + fight time, the in-game boss, MVP (top
 // individual damage) with crown, rare drops the authority really handed out, and the party/solo ranking. Pops up once
 // per encounter for the people in the report only, closes itself after 8 s unless the player starts using it.
-import {bossResultGroups,mergeBossLoot,bossCard,involves} from './boss-results.js?v=surfaces222';
+import {bossResultGroups,mergeBossLoot,involves} from './boss-results.js?v=surfaces222';
+import {installUnifiedMenus236} from './unified-menu236.js';
 import {bossRanking,format} from './boss-results-ui.js?v=surfaces222';
 import {classPortrait,monsterPortrait} from './portraits.js?v=surfaces222';
 import {className} from './classes.js?v=novice174';
@@ -14,30 +15,41 @@ export const AUTO_CLOSE=8000;
 const mmss=s=>{const t=Math.max(0,Math.round(s));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
 const RARITY_GLOW=['','','#73b8ff','#c79bff','#ffd36b'];
 export function createVictoryUI({game}){
- const css=el('link');css.rel='stylesheet';css.href='victory-ui.css?v=victory197';document.head.append(css);
+ const css=el('link');css.rel='stylesheet';css.href='victory-ui.css?v=boss245';document.head.append(css);
  const root=el('section');root.id='victory-screen';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-labelledby','victory-title');
  const backdrop=el('div','victory-backdrop'),stage=el('div','victory-stage');
  const crest=el('header','victory-crest'),emblem=el('img');emblem.src='assets/victory/victory-emblem.webp';emblem.alt='';emblem.decoding='async';
- const word=el('strong','','ชนะ!');word.id='victory-title';const time=el('p','victory-time');crest.append(emblem,word,time);
- const card=el('figure','victory-card'),cardImg=el('img'),cardName=el('figcaption');cardImg.alt='';card.append(cardImg,cardName);
+ const word=el('strong','','ชนะ!');word.id='victory-title';const time=el('p','victory-time'),emblemFrame=el('div','victory-emblem');emblemFrame.append(emblem,word);crest.append(emblemFrame,time);
+ const boss=el('figure','victory-boss'),bossImg=el('img'),bossName=el('figcaption'),artMessage=el('p','victory-art-message');bossImg.alt='';bossImg.decoding='async';artMessage.setAttribute('role','status');boss.append(bossImg,artMessage,bossName);
  const panel=el('div','victory-panel'),tabs=el('nav','victory-tabs'),rewardsTab=el('button','','รางวัล'),rankTab=el('button','','อันดับ');
- for(const [b,name] of [[rewardsTab,'rewards'],[rankTab,'ranking']]){b.type='button';b.dataset.tab=name;b.setAttribute('role','tab');}tabs.setAttribute('role','tablist');tabs.append(rewardsTab,rankTab);
+ panel.id='boss-reward-panel';panel.dataset.hudPanel='';
+ const heading=el('header','victory-panel-heading'),title=el('h2','','ผลการต่อสู้');
+ for(const [b,name] of [[rewardsTab,'rewards'],[rankTab,'ranking']]){b.type='button';b.dataset.tab=name;b.id='victory-tab-'+name;b.setAttribute('role','tab');b.setAttribute('aria-controls','victory-'+name);}tabs.setAttribute('role','tablist');tabs.append(rewardsTab,rankTab);
  const rewards=el('section','victory-rewards'),ranking=el('section','victory-ranking boss-result-table');rewards.setAttribute('role','tabpanel');ranking.setAttribute('role','tabpanel');
+ for(const [p,name] of [[rewards,'rewards'],[ranking,'ranking']]){p.id='victory-'+name;p.setAttribute('aria-labelledby','victory-tab-'+name);}
  const close=el('button','victory-close','×');close.type='button';close.setAttribute('aria-label','ปิด');
- panel.append(tabs,rewards,ranking);stage.append(crest,card,panel,close);root.append(backdrop,stage);
+ close.classList.add('qol-close');heading.append(title,close);
+ panel.append(heading,tabs,rewards,ranking);stage.append(crest,boss,panel);root.append(backdrop,stage);
  document.body.append(root); // above the coach tips and HUD layers, which live outside #game-shell's stacking
+ installUnifiedMenus236().paint(panel);
  // the ranking reuses the report's look; its stylesheet is normally loaded by the boss browser
  if(!document.querySelector('link[href^="boss-results-ui.css"]')){const rank=el('link');rank.rel='stylesheet';rank.href='boss-results-ui.css?v=victory197';document.head.append(rank);}
 
  const seen=new Set(),queue=[];let current=null,tab='rewards',timer=0;
  function stopTimer(){clearTimeout(timer);timer=0;}
  function shut(){stopTimer();root.hidden=true;document.body.classList.remove('victory-open');current=null;game.clearInput?.();const next=queue.shift();if(next)show(next);}
- function setTab(name){tab=name;rewardsTab.setAttribute('aria-selected',String(name==='rewards'));rankTab.setAttribute('aria-selected',String(name==='ranking'));rewards.hidden=name!=='rewards';ranking.hidden=name!=='ranking';}
- function drawCard(result){
-  const {awakened,src}=bossCard(result.bossId);card.dataset.awakened=String(awakened);cardName.textContent=result.bossName;
-  const index=MONSTER_TYPES.findIndex(t=>t.id===result.bossId),sprite=()=>{card.dataset.sprite='true';if(index<0){cardImg.removeAttribute('src');return;}monsterPortrait(index).then(url=>{if(current===result)cardImg.src=url;}).catch(()=>cardImg.removeAttribute('src'));};
-  card.dataset.sprite='false';cardImg.onerror=()=>{cardImg.onerror=null;sprite();};
-  if(src)cardImg.src=src;else sprite();
+ function setTab(name){tab=name;rewardsTab.setAttribute('aria-selected',String(name==='rewards'));rankTab.setAttribute('aria-selected',String(name==='ranking'));rewardsTab.tabIndex=name==='rewards'?0:-1;rankTab.tabIndex=name==='ranking'?0:-1;rewards.hidden=name!=='rewards';ranking.hidden=name!=='ranking';}
+ let artGeneration=0;
+ function drawBoss(result){
+  bossName.textContent=result.bossName;bossImg.alt=result.bossName;
+  boss.dataset.awakened=String(String(result.bossId??'').endsWith('-awakened'));
+  if(boss.dataset.bossId===result.bossId&&boss.dataset.artState==='ready')return;
+  const generation=++artGeneration;boss.dataset.bossId=result.bossId;boss.dataset.artState='loading';bossImg.hidden=true;bossImg.removeAttribute('src');artMessage.textContent='กำลังโหลด…';artMessage.hidden=false;
+  const fail=()=>{if(generation!==artGeneration)return;boss.dataset.artState='error';bossImg.hidden=true;artMessage.hidden=false;artMessage.textContent='ภาพบอสยังโหลดไม่สำเร็จ';};
+  const index=MONSTER_TYPES.findIndex(t=>t.id===result.bossId);
+  if(index<0){fail();return;}
+  bossImg.onerror=fail;bossImg.onload=()=>{if(generation!==artGeneration)return;boss.dataset.artState='ready';bossImg.hidden=false;artMessage.hidden=true;};
+  monsterPortrait(index).then(url=>{if(generation===artGeneration)bossImg.src=url;}).catch(fail);
  }
  function drawRewards(result){
   rewards.replaceChildren();
@@ -66,12 +78,15 @@ export function createVictoryUI({game}){
  function draw(){
   const result=current;if(!result)return;
   time.textContent='ระยะเวลาต่อสู้ '+mmss(result.duration);
-  drawCard(result);drawRewards(result);ranking.replaceChildren(...bossRanking(result,game.world.networkSelfId));setTab(tab);
+  drawBoss(result);drawRewards(result);ranking.replaceChildren(...bossRanking(result,game.world.networkSelfId));setTab(tab);
  }
  function show(result){current=result;tab='rewards';draw();root.hidden=false;document.body.classList.add('victory-open');game.clearInput?.();stopTimer();timer=setTimeout(shut,AUTO_CLOSE);}
  // Using the panel (tabs, party rows, scrolling) keeps it open; a tap on the empty backdrop, × or Escape closes it.
  panel.addEventListener('pointerdown',e=>{e.stopPropagation();stopTimer();});
- card.addEventListener('pointerdown',e=>e.stopPropagation());
+ boss.addEventListener('pointerdown',e=>e.stopPropagation());
+ panel.addEventListener('focusin',stopTimer);panel.addEventListener('wheel',stopTimer,{passive:true});
+ stage.addEventListener('touchmove',stopTimer,{passive:true});stage.addEventListener('wheel',stopTimer,{passive:true});
+ tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();stopTimer();setTab(e.key==='Home'?'rewards':e.key==='End'?'ranking':tab==='rewards'?'ranking':'rewards');(tab==='rewards'?rewardsTab:rankTab).focus();});
  for(const b of [rewardsTab,rankTab])b.onclick=e=>{e.stopPropagation();setTab(b.dataset.tab);};
  close.onclick=e=>{e.stopPropagation();shut();};
  backdrop.addEventListener('click',shut);stage.addEventListener('click',e=>{if(e.target===stage)shut();});

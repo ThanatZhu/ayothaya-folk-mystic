@@ -1,0 +1,26 @@
+{
+  "version": 228,
+  "classes": [
+    "novice",
+    "swordsman",
+    "lancer",
+    "hunter",
+    "boxer",
+    "rogue",
+    "shaman",
+    "acolyte"
+  ],
+  "frames": 6,
+  "cell": 192,
+  "sdCell": 96,
+  "sheets": {
+    "trails": {
+      "image": "fx-trails.webp",
+      "sdImage": "fx-trails-sd.webp"
+    },
+    "impacts": {
+      "image": "fx-impacts.webp",
+      "sdImage": "fx-impacts-sd.webp"
+    }
+  }
+}

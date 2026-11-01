@@ -1,5 +1,6 @@
 import {normalizeAutoTarget,autoTargetAllows,autoRankAllows} from './auto-targets.js?v=auto202';
 import {skillHit} from './skill-critical.js';
+import {skillDamageFormula,skillDamageBase} from './skill-damage244.js';
 import {startAttackOrder,stepAttackOrder} from './combat-attack-order221.js?v=surfaces222';
 import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js?v=petbuild220';
 import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=farm213';
@@ -265,7 +266,7 @@ export class CombatWorld{
  // 0.58 combo: a skill on a rooted monster hits 30% harder.
  // 0.103 skill damage also passes the monster's DEF (MDEF for magic classes); duels and war targets are handled elsewhere
  guardOf(mob,magic){if(!mob||mob.pvp)return 1;const t=MONSTER_TYPES[mob.type];return defFactor((magic?monsterMdef(t):monsterDef(t))*(mob.petArmor?.left>0?1-mob.petArmor.power:1)*(1-(this.derived?.armorPen??0)));}
- power(n,mob=null){const combo=mob?.root>0&&mob.hp>0;if(combo)this.emit('combo',{x:mob.x,z:mob.z});return Math.round(n*(this.derived?.skillPower??1)*(mob?this.affinity(mob,false)*this.guardOf(mob,!!this.derived?.magic):1)*(combo?1.3:1));}
+ power(n,mob=null){const combo=mob?.root>0&&mob.hp>0;if(combo)this.emit('combo',{x:mob.x,z:mob.z});const formula=skillDamageFormula(n,!!this.derived?.magic),base=skillDamageBase(formula,this.derived);return Math.round(base*(mob?this.affinity(mob,false)*this.guardOf(mob,!!this.derived?.magic):1)*(combo?1.3:1));}
  // 0.44 element + size (affinity.js). Basic attacks: weapon element, physical. Skills: class element; magic classes ignore size.
  affinity(mob,basic){if(mob.pvp)return this.weakness();const d=this.derived,cls=this.profession.id,magic=d?.magic??(cls==='shaman'||cls==='acolyte');
   const element=basic?(d?.weaponElement??'neutral'):(CLASS_SKILL_ELEMENT[cls]??d?.weaponElement??'neutral');

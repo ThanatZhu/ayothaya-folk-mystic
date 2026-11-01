@@ -1,5 +1,8 @@
 import {skillOpenAt,roleSkillMax,isPassiveSlot,PASSIVE_MAX} from './role-skill-progress.js';
 import {getClass} from './classes.js?v=novice174';
+import {skillDamageText} from './skill-damage244.js';
+import {roleTiming} from './combat-timing.js';
+import {SKILL_PROFILES} from './assets/skill-polish/library-profiles.js';
 import {applySkillArt} from './skill-art.js?v=skills119';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {jobProgress} from './experience.js?v=105.3';
@@ -58,7 +61,9 @@ export function createSkillWindow({game,classId}){
  function numbers(s,l){
   if(s.passive){const each=s.modifier&&Math.abs(s.value)<1?pct(s.value)+'%':String(s.value);return [s.tip,'ขั้นละ +'+each,l?'ตอนนี้ +'+(Math.abs(s.value)<1?pct(s.value*l)+'%':s.value*l):null].filter(Boolean).join(' · ');}
   const now=scaledSkill(s,Math.max(1,l)),next=l>=1&&l<maxAt(picked)?scaledSkill(s,l+1):null,area=now?.radius&&['cleave','zone','wall','storm','trap','rain','thorns','holyField','mine','meteor','sanctuary','yantra','lifeTree','massBind','uppercut','soulWave','curseWave','push','taunt','anchor','purify'].includes(s.type);
-  return [s.tip,now?.power?'พลัง '+now.power+(next&&next.power!==now.power?' → '+next.power:''):null,now?.damage?'พลัง '+now.damage:null,'MP '+now.cost,'คูลดาวน์ '+now.cd+' วิ'+(next&&next.cd!==now.cd?' → '+next.cd:''),area?'วง '+Math.round(now.radius*10)/10:now?.range?'ระยะ '+Math.round(now.range*10)/10:null,s.seconds&&!['line','cleave','break'].includes(s.type)?'นาน '+s.seconds+' วิ':null,s.windup>=.5?'ร่าย '+s.windup+' วิ':null].filter(Boolean).join(' · ');
+  const damageStats=game.online?world.derivedView:world.derived;
+  const describe=skill=>skillDamageText(skill,damageStats,world.profession.id,skill.roleSkillId?roleTiming(skill,SKILL_PROFILES[skill.roleSkillId]).impacts.length:1),formula=describe(now),nextFormula=next&&describe(next);
+  return [s.tip,formula??(now?.power?'พลัง '+now.power+(next&&next.power!==now.power?' → '+next.power:''):null),nextFormula&&nextFormula!==formula?'ขั้นถัดไป: '+nextFormula:null,'MP '+now.cost,'คูลดาวน์ '+now.cd+' วิ'+(next&&next.cd!==now.cd?' → '+next.cd:''),area?'วง '+Math.round(now.radius*10)/10:now?.range?'ระยะ '+Math.round(now.range*10)/10:null,s.seconds&&!['line','cleave','break'].includes(s.type)?'นาน '+s.seconds+' วิ':null,s.windup>=.5?'ร่าย '+s.windup+' วิ':null].filter(Boolean).join(' · ');
  }
  function draw(){
   const points=world.skillPoints??0,lv=levels(),job=jobLevel();

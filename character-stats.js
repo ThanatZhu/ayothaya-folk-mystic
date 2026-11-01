@@ -110,6 +110,8 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
   weaponElement:worn.find(it=>it.slot==='weapon')?.element??'neutral',
   // 0.102.1 magic classes hit with their full MATK on basic attacks too (owner)
   basicBonus:magic?matk:atk,
+  // Retained for old clients/status views. Combat resolves explicit % ATK + flat
+  // through skill-damage244; never multiply that result by skillPower again.
   skillPower:1+(magic?matk:atk)/40,
   // 0.103 HIT (DEX) against monster FLEE, FLEE (AGI) against monster HIT, MDEF (INT) against magic blows;
   // flee = the dodge chance against a monster of the same level, for the status window

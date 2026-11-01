@@ -5522,5 +5522,13 @@ Object.assign(globalThis.I18N_EN,{
  "· เวลาไทย": "· Thailand time",
  "โบนัสวันหยุดกำลังทำงาน": "Weekend bonus active",
  "รอวันเสาร์–อาทิตย์": "Waiting for Saturday–Sunday",
- "ย่อกติกา ↑": "Collapse rules ↑"
+ "ย่อกติกา ↑": "Collapse rules ↑",
+ "ดาเมจพื้นฐานสกิล": "Base skill damage",
+ "ดาเมจพื้นฐานรวมทุกฮิต": "Base damage across all hits",
+ "ดาเมจพื้นที่ต่อครั้ง": "Area damage per tick",
+ "ดาเมจอัญเชิญต่อครั้ง": "Summon damage per hit",
+ "ดาเมจแรก": "Initial damage",
+ "พิษต่อครั้ง": "Poison damage per tick",
+ "ก่อนโบนัส เกราะและคริติคอล": "Before bonuses, defense and criticals",
+ "ขั้นถัดไป:": "Next rank:"
 });

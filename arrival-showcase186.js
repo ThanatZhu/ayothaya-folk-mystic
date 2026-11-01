@@ -1,6 +1,7 @@
 import {createMotionPreview} from './motion-preview.js?v=arrival186';
-import {characterMotion,attackDuration} from './character-motion.js?v=novice174';
+import {characterMotion} from './character-motion.js?v=novice174';
 import {atlasPath} from './classes.js?v=novice174';
+import {lobbyPose} from './lobby-preview240.js';
 import {ROLES} from './assets/skills-next/catalog.js';
 import {reworkIconURL} from './assets/skills-next/rework-icon-map.js';
 
@@ -9,17 +10,17 @@ import {reworkIconURL} from './assets/skills-next/rework-icon-map.js';
 export function createArrivalShowcase(host){
  if(!host)return {setScreen(){},dispose(){}};
  const reduced=matchMedia('(prefers-reduced-motion:reduce)'),images=new Map();
- let selected=0,screen='login',elapsed=0,last=0,raf=0,disposed=false,loadToken=0,manualUntil=0,returnFocus=null;
+ let selected=0,screen='login',elapsed=0,last=0,lastDraw=0,raf=0,disposed=false,loadToken=0,manualUntil=0,returnFocus=null;
  const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
  const button=(cls,text,label)=>{const e=node('button',cls,text);e.type='button';if(label)e.setAttribute('aria-label',label);return e;};
- const stage=node('div','arrival-stage'),orbit=node('div','arrival-orbit'),glow=node('div','arrival-glow'),hero=node('div','arrival-hero');
- orbit.setAttribute('aria-hidden','true');glow.setAttribute('aria-hidden','true');hero.setAttribute('aria-hidden','true');stage.append(orbit,glow,hero);
+ const stage=node('div','arrival-stage'),glow=node('div','arrival-glow'),hero=node('div','arrival-hero');
+ glow.setAttribute('aria-hidden','true');hero.setAttribute('aria-hidden','true');stage.append(glow,hero);
  const caption=node('div','arrival-caption'),kicker=node('small','arrival-kicker','หนึ่งโลก · เจ็ดเส้นทาง'),title=node('h3','arrival-class'),roleLabel=node('p','arrival-role');caption.append(kicker,title,roleLabel);
  const controls=node('div','arrival-controls'),prev=button('arrival-prev','‹','ดูอาชีพก่อนหน้า'),next=button('arrival-next','›','ดูอาชีพถัดไป'),dots=node('div','arrival-dots');
  const explore=button('arrival-explore','สำรวจ 7 อาชีพ');explore.setAttribute('aria-haspopup','dialog');explore.setAttribute('aria-controls','path-preview-dialog');
  const selections=ROLES.map((role,i)=>{const b=button('arrival-dot','',role.name);b.onclick=()=>choose(i,{manual:true});dots.append(b);return b;});
  controls.append(prev,dots,next);host.replaceChildren(stage,caption,controls,explore);
- const preview=createMotionPreview(hero);
+ const preview=createMotionPreview(hero,{authoredRun:true});
 
  const dialog=node('dialog','path-dialog');dialog.id='path-preview-dialog';dialog.setAttribute('aria-labelledby','path-preview-title');
  const heading=node('header','path-heading'),headingText=node('div','path-heading-copy'),eyebrow=node('small','path-kicker','ค้นพบเส้นทางของคุณ'),headingTitle=node('h2',null,'7 อาชีพ · เลือกทางที่เป็นคุณ');headingTitle.id='path-preview-title';headingText.append(eyebrow,headingTitle);
@@ -28,7 +29,7 @@ export function createArrivalShowcase(host){
  const pathStage=node('div','path-stage'),pathHero=node('div','path-hero'),poseLabel=node('span','path-pose','ท่ายืน');pathHero.setAttribute('aria-hidden','true');pathStage.append(pathHero,poseLabel);
  const detail=node('section','path-detail'),detailKicker=node('small','path-kicker','เส้นทางการผจญภัย'),name=node('h3','path-name'),roleText=node('p','path-role'),description=node('p','path-description'),skillTitle=node('h4','path-section-title','สกิลประจำเส้นทาง'),skills=node('div','path-skills'),masterTitle=node('h4','path-section-title','ต่อยอดเป็น Master'),masters=node('div','path-masters');detail.append(detailKicker,name,roleText,description,skillTitle,skills,masterTitle,masters);
  const note=node('footer','path-note','ทุกอาชีพเริ่มจากผู้ฝึกตน · เลือกเส้นทางเมื่อ Job 10');body.append(list,pathStage,detail);dialog.append(heading,body,note);document.body.append(dialog);
- const largePreview=createMotionPreview(pathHero);
+ const largePreview=createMotionPreview(pathHero,{authoredRun:true});
  const choices=ROLES.map((role,i)=>{const b=button('path-choice'),portrait=node('span','path-portrait'),label=node('b',null,role.name);portrait.style.backgroundImage=`url("${atlasPath(role.id)}")`;portrait.setAttribute('aria-hidden','true');b.dataset.classId=role.id;b.append(portrait,label);b.onclick=()=>choose(i,{manual:true});list.append(b);return b;});
 
   function load(id){if(!images.has(id)){const image=new Image();image.src=atlasPath(id);images.set(id,image.decode().then(()=>image).catch(error=>{images.delete(id);throw error;}));}return images.get(id);}
@@ -48,18 +49,16 @@ export function createArrivalShowcase(host){
   catch{if(token===loadToken){host.dataset.artReady='error';roleLabel.textContent=role.role;}}
  }
  function draw(){
-  const role=ROLES[selected],phase=elapsed%14;let mode='idle',time=elapsed*.7;
-  if(phase>=4.5&&phase<8)mode='walk';
-  else if(phase>=8&&phase<10.5){mode='attack';time=((phase-8)*.7)%attackDuration(role.id);}
-  const pose=characterMotion({time,mode,classId:role.id,reduced:false});
+  const role=ROLES[selected],state=lobbyPose(elapsed,role.id,reduced.matches),mode=state.mode;
+  const pose=characterMotion({...state,classId:role.id,reduced:reduced.matches});
   if(screen!=='character')preview.draw(pose);if(dialog.open)largePreview.draw(pose);
-  host.dataset.pose=mode;dialog.dataset.pose=mode;poseLabel.textContent=mode==='attack'?'ท่าโจมตี':mode==='walk'?'ท่าเดิน':'ท่ายืน';
+  host.dataset.pose=mode;dialog.dataset.pose=mode;poseLabel.textContent=mode==='attack'?'ท่าโจมตี':mode==='run'?'ท่าวิ่ง':'ท่ายืน';
  }
  function frame(now){
   raf=0;if(disposed||document.hidden)return;const dt=last?Math.min(.1,(now-last)/1000):0;last=now;
-  elapsed+=dt*(reduced.matches?.65:1);
+  elapsed+=reduced.matches?0:dt;
   if(screen!=='character'||dialog.open){
-   if(!dialog.open&&elapsed>=14&&now>=manualUntil)choose(selected+1);
+   if(!reduced.matches&&!dialog.open&&elapsed>=14&&now>=manualUntil)choose(selected+1);
    draw();
   }
   raf=requestAnimationFrame(frame);

@@ -1,4 +1,4 @@
-import {createArrivalShowcase} from './arrival-showcase186.js?v=186.1';
+import {createArrivalShowcase} from './arrival-showcase186.js?v=241';
 import {getLoadingScreen} from './loading-screen.js?v=39';
 import {createMotionPreview} from './motion-preview.js?v=mobile2';
 import {characterMotion} from './character-motion.js?v=novice174';

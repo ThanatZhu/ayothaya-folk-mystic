@@ -19,7 +19,6 @@ import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {SKILLS,MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {BALANCE,BASELINE,FIELDS,monsterKey} from './balance.js';
 import {scaledSkill} from './skill-progress.js?v=novice174';
-import {WEATHERS} from './weather.js?v=181';
 import {deriveStats} from './character-stats.js';
 import {monsterDef,monsterMdef,monsterFlee,monsterHit as monsterHitStat,defFactor,hitChance,dodgeChance,magicMonster,CRIT_MULT} from './combat-formulas.js';
 
@@ -41,9 +40,9 @@ const LOCAL=['127.0.0.1','localhost'].includes(location.hostname),API=LOCAL?'':m
 let players=null,picked=null,adminMsg='',fbConn=null,fbWarm=null;
 let fx={classId:'swordsman',level:50,str:40,agi:20,vit:20,int:1,dex:20,luk:10,watk:60,wmatk:0,skillLv:5};
 try{Object.assign(fx,JSON.parse(localStorage.getItem('ayo-admin-formula'))??{});}catch{}
-// 0.110.7 weather / world-boss tab state lives up here: the first render() runs at load and may open either tab
+// World-boss state must exist before the first render.
 // (the last tab is remembered), so declaring it further down left it uninitialised and crashed the whole page.
-let weatherState=null,weatherMsg='',weatherMaps=null,wx={serverId:'server-1',mapId:'',minutes:30};
+
 let bossMsg='',bossMaps=null,bx={serverId:'server-1',channel:1,mapId:'',typeId:String(MONSTER_TYPES.findIndex(t=>t.mvp)),count:1,spot:null}; // spot = in-game {x,y} (y = -z) or null = random
 let presence='all',shownRows=50; // 0.103 players list: online / offline filter and how many rows are drawn
 let itemGrantPending=null,itemGrantSending=false,petGrantPending=null,petGrantSending=false,giftPane='pets';const petGrantDrafts=new Map();
@@ -54,7 +53,7 @@ const itemName=id=>itemDef(id)?.name??id;
 const pickedLook=()=>{const x=players?.find(v=>v.id===picked);return x?gearLook(x.classId,x.gender):null;};
 // graded gear is sent with the grade picked in the filter ('^1'..'^4'); everything else as is
 const gradeId=id=>itemKind==='gear'&&ITEMS[id]?.graded&&Number.isInteger(giftGear.grade)&&giftGear.grade?id+'^'+giftGear.grade:id;
-try{const s=JSON.parse(localStorage.getItem('ayo-admin-view'));if(s){tab=s.tab??tab;classId=s.classId??classId;}}catch{}
+try{const s=JSON.parse(localStorage.getItem('ayo-admin-view'));if(s){tab=s.tab==='weather'?'players':s.tab??tab;classId=s.classId??classId;}}catch{}
 
 // Original value (code) and the value in effect for one field.
 const original=(group,key,field,current)=>{const id=group+'.'+key+'.'+field;return id in BASELINE?BASELINE[id]:current;};
@@ -76,8 +75,8 @@ function set(r,f,v){
  showCount();
 }
 // 0.101.2 side menu: what each page is for, in one line
-const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],weather:['🌦️','สภาพอากาศ','เปลี่ยนฝน หมอก พายุในเกมทันที ทุกแผนที่หรือแผนที่เดียว'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP'],observers:['👁','ผู้ชมล่องหน','อีเมลที่เปิดโหมดผู้ชมได้ (ล่องหน ไม่ตกเป็นเป้า ไว้ไลฟ์วอกิลด์)']};
-const NAV=[['ผู้เล่นและชุมชน',['players','mail','evidence','observers']],['โลกเกมตอนนี้',['weather','boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
+const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP'],observers:['👁','ผู้ชมล่องหน','อีเมลที่เปิดโหมดผู้ชมได้ (ล่องหน ไม่ตกเป็นเป้า ไว้ไลฟ์วอกิลด์)']};
+const NAV=[['ผู้เล่นและชุมชน',['players','mail','evidence','observers']],['โลกเกมตอนนี้',['boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
 // 0.118 evidence log (player names and details are shown exactly as recorded: data-i18n-skip): search what players and admins did (server keeps players 90 days, admins 3 years) and export it.
 const bkkDay=(t=Date.now())=>new Date(t+7*3600e3).toISOString().slice(0,10);
 const ev={stream:'players',from:bkkDay(),to:bkkDay(),type:'',q:'',rows:null,total:0,truncated:false,loading:false,msg:''};
@@ -159,7 +158,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','weather','boss','mapbosses','mail','evidence','observers'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','boss','mapbosses','mail','evidence','observers'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
  $('page-title').textContent=name;$('page-help').textContent=(tab==='skills'&&skillSet==='live'?'ชุดสกิลที่ใช้ในเกมปัจจุบัน · ดูรูป บทบาท และสาย Master':help)+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -180,7 +179,7 @@ function render(withFilters=true){
  if(withFilters)filters();pageHead();
  if(tab==='skills'&&skillSet==='live'){currentSkills();return;}
  if(tab==='table'){$('view').innerHTML=skillTable();$('view').querySelectorAll('tbody[data-path]').forEach(t=>paintAdminSkills(t,tableView,liveRoleSkills(tableView,t.dataset.path)));return;}
- if(tab==='evidence'){evidenceTab();return;}if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='weather'){weatherTab();return;}if(tab==='observers'){observersTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
+ if(tab==='evidence'){evidenceTab();return;}if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='observers'){observersTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
  const rows=rowsFor(),cols=columns(rows),cards=['skills','monsters'].includes(tab)&&viewMode==='cards';
  const undo=(r,i)=>`<button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button>`;
  const note=tab==='skills'?'<p class="admin-legacy-note">ชุดสกิลเดิมก่อนปรับระบบอาชีพ · ไม่ใช่ชุดสกิลปัจจุบันที่แสดงในเกม</p>':'';
@@ -379,31 +378,6 @@ async function loadPlayers(quiet=false,fresh=false){
  if(tab==='players')playersTab();
 }
 function autoRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(tab!=='players'||document.hidden)return;if(itemGrantSending||petGrantSending||levelAdjustSending||document.activeElement?.closest?.('#give,.admin-pet-grant,.admin-level-panel'))return;loadPlayers(true);},15000);}
-// 0.109.7 weather tab: set rain / mist / storm (or clear) on a realm for some minutes, or hand it back to the clock.
-async function loadWeather(){try{weatherState=(await adminFetch('/admin/weather')).servers;weatherMsg='';}catch(e){weatherMsg=ADMIN_ERRORS[e.message]??'โหลดไม่สำเร็จ · '+e.message;}if(tab==='weather')weatherTab();}
-async function setWeather(weather){
- weatherMsg='กำลังเปลี่ยน…';weatherTab();
- try{const r=await adminFetch('/admin/weather',{serverId:wx.serverId,weather,minutes:wx.minutes,mapId:wx.mapId||null});(weatherState??={})[r.serverId]=r.weather;
-  weatherMsg=weather==='auto'?'กลับเป็นสภาพอากาศตามเวลาแล้ว':'เปลี่ยนเป็น '+WEATHERS[weather].icon+' '+WEATHERS[weather].name+' แล้ว · ผู้เล่นเห็นภายในไม่กี่วินาที';}
- catch(e){weatherMsg=ADMIN_ERRORS[e.message]??'เปลี่ยนไม่สำเร็จ · '+e.message;}weatherTab();
-}
-function weatherTab(){
- warmFirebase();const user=LOCAL||fbConn?.auth.currentUser;
- if(!weatherMaps){weatherMaps=[];fetch('maps/world.json').then(r=>r.json()).then(w=>{weatherMaps=w.maps.filter(m=>!m.instance).map(m=>({id:m.id,name:m.name}));if(tab==='weather')weatherTab();}).catch(()=>{});}
- if(user&&!weatherState&&!weatherMsg)loadWeather();
- const mapName=id=>weatherMaps?.find(m=>m.id===id)?.name??id;
- const now=id=>{const o=weatherState?.[id];return o?`${WEATHERS[o.id].icon} ${WEATHERS[o.id].name} · ${o.mapId?esc(mapName(o.mapId)):'ทุกแผนที่'} · อีก ${Math.ceil(o.left/6e4)} นาที`:'ตามเวลา (สุ่มทุก 15 นาที)';};
- $('view').innerHTML=!user?`<div class="wx"><p>ต้องล็อกอิน Google ด้วยบัญชีแอดมินก่อน</p><button type="button" id="wx-login" class="wx-auto">ล็อกอิน</button></div>`:
-  `<div class="wx"><p class="wx-now">ตอนนี้ · เซิร์ฟ 1: <b>${now('server-1')}</b> · เซิร์ฟ 2: <b>${now('server-2')}</b></p>
-  <div class="wx-pick"><label>เซิร์ฟ <select id="wx-server"><option value="server-1"${wx.serverId==='server-1'?' selected':''}>เซิร์ฟ 1</option><option value="server-2"${wx.serverId==='server-2'?' selected':''}>เซิร์ฟ 2</option></select></label>
-  <label>แผนที่ <select id="wx-map"><option value="">ทุกแผนที่กลางแจ้ง</option>${(weatherMaps??[]).map(m=>`<option value="${esc(m.id)}"${m.id===wx.mapId?' selected':''}>${esc(m.name)}</option>`).join('')}</select></label>
-  <label>นาน <select id="wx-min">${[15,30,60,120,240].map(n=>`<option value="${n}"${n===wx.minutes?' selected':''}>${n} นาที</option>`).join('')}</select></label></div>
-  <div class="wx-grid">${Object.entries(WEATHERS).map(([id,w])=>`<button type="button" data-wx="${id}"><i>${w.icon}</i><b>${w.name}</b><small>${w.text}</small></button>`).join('')}</div>
-  <button type="button" class="wx-auto" data-wx="auto">↺ กลับเป็นตามเวลา</button><p class="wx-msg" role="status">${esc(weatherMsg)}</p><small>ดันเจี้ยนไม่มีฝนเสมอ · หมดเวลาแล้วกลับเป็นตามเวลาเอง</small></div>`;
- $('wx-login')&&($('wx-login').onclick=async()=>{if(await signIn())loadWeather();});
- $('wx-server')&&($('wx-server').onchange=e=>{wx.serverId=e.target.value;});$('wx-map')&&($('wx-map').onchange=e=>{wx.mapId=e.target.value;});$('wx-min')&&($('wx-min').onchange=e=>{wx.minutes=+e.target.value;});
- $('view').querySelectorAll('[data-wx]').forEach(b=>b.onclick=()=>setWeather(b.dataset.wx));
-}
 // 0.119 observer tab: who may turn on observer mode. The owner and OBSERVER_EMAILS (backend setting) are fixed here;
 // the saved list is added to or taken from, and a removed address loses the mode at once.
 let obsList=null,obsMsg='',obsBusy=false;

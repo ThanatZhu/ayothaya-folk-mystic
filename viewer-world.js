@@ -50,7 +50,6 @@ import {createStatusUI} from './status-ui.js?v=surfaces222';
 import {createProfileUI} from './profile-ui.js?v=profile171';
 import {createRefineUI} from './refine-ui.js?v=surfaces222';
 import {createCraftUI} from './craft-ui.js?v=surfaces222';
-import {createWeather} from './weather-fx.js?v=181';
 import {createMarketUI} from './market-ui.js?v=surfaces222';
 import {createSocialUI} from './social-ui.js?v=surfaces222';
 import {createLifeUI} from './life-ui.js?v=surfaces222';
@@ -254,7 +253,7 @@ try {
  const graphicsLabel=()=>{$('graphics').textContent=softLook.enabled?'ภาพละมุน · เปิด':'ภาพละมุน · ปิด (ประหยัดเครื่อง)';$('graphics').setAttribute('aria-pressed',String(softLook.enabled));};
  graphicsLabel();$('graphics').onclick=()=>{softLook.setEnabled(!softLook.enabled);graphicsLabel();};
  $('load')?.remove();loading.stage(5);document.querySelectorAll('.camera-panel button,.attack-controls button').forEach(b=>b.disabled=false);
- const perf=createPerfSettings({renderer,scene,sun,softLook,resize,onApply:graphicsLabel});const weather=createWeather({scene,controls,sun,map,game,quality:readPerf().quality,reduced:matchMedia('(prefers-reduced-motion:reduce)').matches});const perfBox=$('audio-settings');if(perfBox)perf.mount(perfBox);
+ const perf=createPerfSettings({renderer,scene,sun,softLook,resize,onApply:graphicsLabel});const perfBox=$('audio-settings');if(perfBox)perf.mount(perfBox);
  let firstFrame=true,lastMs=null;const shakeVector=new THREE.Vector3();
  renderer.setAnimationLoop(ms=>{
   if(!perf.shouldDraw(ms))return;
@@ -273,7 +272,6 @@ try {
   });
   flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;followSun(game.world.player);
   const viewDistance=camera.position.distanceTo(controls.target);scene.fog.near=viewDistance+14;scene.fog.far=viewDistance+102; // haze follows the camera (overview moves it 6x further)
-  weather.update(document.hidden||landscape.blocked?0:dt);
   const shake=game.shakeOffset(shakeVector);camera.position.add(shake);actorLighting.update();softLook.render();camera.position.sub(shake);if(firstFrame){firstFrame=false;loading.finish();}
  });
 }catch(error){console.error(error);$('status').textContent='เปิดฉากไม่สำเร็จ';loading.fail();}

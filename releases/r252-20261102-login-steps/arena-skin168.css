@@ -1,0 +1,80 @@
+/* Generated transparent artwork; nine-slice keeps the corner ornaments intact. */
+#arena-lobby.social166-panel{
+ --arena-frame-edge:52px;
+ width:min(880px,calc(100vw - 28px));max-height:calc(100dvh - 28px);
+ padding:34px 36px 30px;border:0;background:none;border-radius:0;overflow:visible;
+ isolation:isolate;box-shadow:none;color:#f9e8b5;
+}
+#arena-lobby[open]{display:flex;flex-direction:column}
+#arena-lobby::before{
+ content:"";position:absolute;inset:0;box-sizing:border-box;pointer-events:none;z-index:-1;
+ border:var(--arena-frame-edge) solid transparent;
+ border-image:url('assets/arena168/frame.webp') 24% / var(--arena-frame-edge) / 0 stretch;
+ filter:drop-shadow(0 9px 16px #0009);
+}
+#arena-lobby::after{
+ content:"";position:absolute;inset:15px;z-index:-2;pointer-events:none;
+ background:radial-gradient(ellipse at 25% 0,#2e5142 0,transparent 65%),linear-gradient(130deg,#15392e,#0b211c);
+ border-radius:22px;clip-path:polygon(22px 0,calc(100% - 22px) 0,100% 22px,100% calc(100% - 22px),calc(100% - 22px) 100%,22px 100%,0 calc(100% - 22px),0 22px);
+}
+#arena-lobby>header{flex-shrink:0;min-height:48px;padding:0 0 12px;border-bottom:1px solid #d4b36e55;gap:16px}
+#arena-lobby h2{font-size:24px;color:#ffe5a1;text-shadow:0 2px 3px #0009;letter-spacing:.02em}
+#arena-lobby .arena-body{min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:0 5px 2px;scrollbar-width:thin;scrollbar-color:#bba15b #17382e}
+#arena-lobby .arena-intro{margin:16px 0 14px;gap:20px}
+#arena-lobby .arena-intro img{width:108px;height:108px}
+#arena-lobby .arena-intro h3{color:#f6d895;font-size:20px}
+#arena-lobby .arena-intro p{font-size:14px;color:#e1ddc0}
+#arena-lobby .arena-toolbar{gap:12px;align-items:center}
+#arena-lobby button{
+ box-sizing:border-box;min-height:54px;min-width:128px;padding:4px 10px;
+ border:12px solid transparent;border-left-width:30px;border-right-width:30px;
+ border-image:url('assets/arena168/button-secondary.webp') 24% 16% fill / 12px 30px / 0 stretch;
+ border-radius:0;background:none;color:#ffecb9;font-weight:700;
+ font-size:14px;line-height:1.25;text-shadow:0 2px 2px #061c12;
+ box-shadow:none;transition:filter .14s,transform .1s;white-space:normal;
+}
+#arena-lobby #arena-create{
+ min-width:206px;border-image-source:url('assets/arena168/button-primary.webp');color:#fff0b4;
+}
+#arena-lobby button:hover:not(:disabled){background:none;filter:brightness(1.16)}
+#arena-lobby button:active:not(:disabled){transform:translateY(1px);filter:brightness(.92)}
+#arena-lobby button:focus-visible{outline:2px solid #fff0b3;outline-offset:3px}
+#arena-lobby button:disabled{opacity:.46;filter:saturate(.45)}
+#arena-lobby>header>button{
+ flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;
+ padding:0;border:0;border-radius:50%;border-image:none;background:url('assets/arena168/button-close.webp') center/contain no-repeat;
+ font-size:24px;line-height:44px;color:#fff2bf;text-align:center;
+}
+#arena-lobby>header>button:hover{background:url('assets/arena168/button-close.webp') center/contain no-repeat}
+#arena-lobby #arena-message{min-height:18px;margin:8px 0;color:#e9cc85;font-size:13px}
+#arena-lobby #arena-rooms{max-height:none;overflow:visible;gap:12px;font-size:14px}
+#arena-lobby #arena-rooms:empty{display:none}
+#arena-lobby #arena-rooms article{border:1px solid #a1874a75;border-radius:9px;background:linear-gradient(145deg,#244a3a,#102e25);padding:14px 16px}
+#arena-lobby #arena-rooms article h3{color:#f5dfab;line-height:1.5}
+#arena-lobby #arena-rooms article button{margin:4px 4px 0 0;font-size:13px;min-height:50px}
+@media(max-width:700px),(max-height:550px){
+ #arena-lobby.social166-panel{--arena-frame-edge:36px;width:min(820px,calc(100vw - 16px));max-height:calc(100dvh - 16px);padding:23px 24px 20px}
+ #arena-lobby::after{inset:10px;border-radius:16px;clip-path:polygon(16px 0,calc(100% - 16px) 0,100% 16px,100% calc(100% - 16px),calc(100% - 16px) 100%,16px 100%,0 calc(100% - 16px),0 16px)}
+ #arena-lobby>header{min-height:38px;padding-bottom:6px}
+ #arena-lobby h2{font-size:20px}
+ #arena-lobby>header>button{width:38px;height:38px;min-width:38px;min-height:38px;flex-basis:38px;line-height:38px;font-size:23px}
+ #arena-lobby .arena-intro{margin:10px 0;gap:12px}
+ #arena-lobby .arena-intro img{width:66px;height:66px}
+ #arena-lobby .arena-intro h3{font-size:17px;margin:0 0 4px}
+ #arena-lobby .arena-intro p{font-size:12px;margin:2px 0}
+ #arena-lobby .arena-toolbar{gap:8px}
+ #arena-lobby button{min-height:48px;min-width:112px;font-size:13px;padding:2px 6px;border-width:10px 25px;border-image-width:10px 25px}
+ #arena-lobby #arena-create{min-width:176px}
+ #arena-lobby #arena-message{font-size:12px;margin:4px 0;min-height:14px}
+ #arena-lobby #arena-rooms{font-size:12px;gap:8px}
+ #arena-lobby #arena-rooms article{padding:9px 11px}
+}
+@media(max-width:480px){
+ #arena-lobby .arena-toolbar{flex-wrap:nowrap}
+ #arena-lobby #arena-create{min-width:0;flex:1}
+ #arena-lobby #arena-refresh{min-width:104px}
+ #arena-lobby .arena-intro{align-items:flex-start;gap:10px}
+ #arena-lobby .arena-intro img{width:56px;height:56px}
+ #arena-lobby .arena-intro h3{font-size:16px}
+ #arena-lobby .arena-intro p{font-size:11px}
+}

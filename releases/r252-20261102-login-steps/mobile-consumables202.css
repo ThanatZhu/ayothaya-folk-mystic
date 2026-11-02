@@ -1,0 +1,29 @@
+#mobile-consumables202{position:fixed;z-index:42;display:flex;gap:4px;width:140px;pointer-events:auto;font-family:Mali,Tahoma,sans-serif;touch-action:manipulation}
+#mobile-consumables202 .rapid-slot202{position:relative;width:44px;flex-shrink:0;padding-bottom:20px}
+#mobile-consumables202 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;font-family:inherit}
+#mobile-consumables202 .rapid-use202{position:relative;width:44px;height:48px;padding:5px;border:1px solid #d6b265;border-radius:9px;background:linear-gradient(145deg,#274d3b,#10291f);box-shadow:0 2px 6px #0009,inset 0 0 0 2px #87662b55;color:#fff4d4}
+#mobile-consumables202 .rapid-use202 i{display:block;width:34px;height:34px;background-repeat:no-repeat}
+#mobile-consumables202 .rapid-use202 b{position:absolute;right:3px;bottom:1px;font-size:10px;color:#fff7dd;text-shadow:1px 1px #000,-1px -1px #000}
+#mobile-consumables202 .rapid-use202>span{position:absolute;top:53px;left:-4px;right:-4px;white-space:nowrap;text-align:center;font-size:9px;color:#ffedba;text-shadow:0 1px 3px #000;font-weight:700}
+#mobile-consumables202 .rapid-use202:active{filter:brightness(1.4);transform:scale(.96)}
+#mobile-consumables202 .rapid-use202:disabled{filter:grayscale(1);opacity:.45;cursor:default}
+#mobile-consumables202 button:focus-visible{outline:2px solid #baffd6;outline-offset:2px}
+#mobile-consumable-picker202{width:min(360px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:12px;border:1px solid #d8b86f;border-radius:12px;background:#13382c;color:#fff0ca;font:13px Mali,Tahoma,sans-serif;box-sizing:border-box}
+#mobile-consumable-picker202::backdrop{background:#00151099}
+#mobile-consumable-picker202 header{display:flex;align-items:center;justify-content:space-between}#mobile-consumable-picker202 h2{font-size:17px}
+#mobile-consumable-picker202 button{color:inherit;background:#214b39;border:1px solid #af985f;border-radius:8px;min-height:44px;min-width:44px;font:inherit}
+#mobile-consumable-picker202 .rapid-item-choices{display:grid;gap:7px;max-height:55dvh;overflow:auto}
+#mobile-consumable-picker202 .rapid-item-choices button{display:flex;align-items:center;gap:10px;text-align:left;padding:8px}
+#mobile-consumable-picker202 i{display:block;width:36px;height:36px;flex-shrink:0}
+body:is(.mobile-panel-open,.mobile-menu-open,.mobile-chat-open,.chat-typing) #mobile-consumables202{visibility:hidden;pointer-events:none}
+body:not(.mobile-play) #mobile-consumables202{display:none}
+/* The painted button is 32 px; the transparent touch area stays 44 px. */
+#mobile-consumables202{width:132px;gap:0}
+#mobile-consumables202 .rapid-slot202{width:44px;padding-bottom:8px}
+#mobile-consumables202 .rapid-use202{display:block;min-width:44px;min-height:44px;max-height:44px;width:44px;height:44px;padding:0;border:0;background:transparent;box-shadow:none}
+#mobile-consumables202 .rapid-use202:before{content:'';position:absolute;left:6px;top:3px;width:32px;height:34px;box-sizing:border-box;border:1px solid #d6b265;border-radius:6px;background:linear-gradient(145deg,#274d3b,#10291f);box-shadow:0 2px 4px #0009,inset 0 0 0 1px #87662b55}
+#mobile-consumables202 .rapid-use202 i{position:absolute;left:9px;top:7px;width:26px;height:26px}
+#mobile-consumables202 .rapid-use202 b{right:8px;bottom:7px;font-size:8px}
+#mobile-consumables202 .rapid-use202>span{top:39px;font-size:8px}
+/* Very small landscape phones keep the battlefield clear; use inventory or AUTO potions. */
+@media(max-width:600px) and (max-height:360px){#mobile-consumables202{display:none!important}}

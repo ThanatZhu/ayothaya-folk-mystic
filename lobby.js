@@ -167,6 +167,8 @@ async function selectIdentity(id){
  lock(true);say('กำลังเตรียมรายชื่อเซิร์ฟเวอร์…');
  try{await catalogReady;owner=id;characterPreviews=new Map();store=createRealmStore({connection,owner,catalog});showIdentity();show('servers');}
  catch(e){report(e);}finally{lock(false);}
+ // one world only: skip the world picker (it comes back when a second server is listed)
+ if(screen==='servers'&&worlds.length===1)await openWorld(worlds[0]);
 }
 async function setup(){
  try{
@@ -192,7 +194,7 @@ $('login-quick').onclick=async()=>{
 $('link-google').onclick=linkGoogle;$('identity-link').onclick=linkGoogle;
 $('switch-account').onclick=async()=>{if(busy)return;if(anon()&&!confirm('บัญชีนี้ยังไม่ได้ผูก Google · ถ้าออกตอนนี้ ตัวละครทั้งหมดในบัญชีนี้จะหายถาวร · กด ยกเลิก แล้วผูก Google ก่อน หรือกด ตกลง เพื่อออกเลย'))return;lock(true);try{await connection.sdk.signOut(connection.auth);sessionStorage.removeItem(ENTRY_KEY);location.replace('./play.html');}catch(e){report(e);lock(false);}};
 $('back-login').onclick=()=>{if(!busy){owner=null;show('login');setup();}};
-$('back-servers').onclick=()=>{if(!busy)show('servers');};
+$('back-servers').onclick=()=>{if(!busy)worlds.length===1?$('back-login').onclick():show('servers');};
 function preview(gender=previewGender){
  previewGender=gender;const c=getClass(selectedClass),art=$('hero-preview');
  art.className='hero-art rig-preview '+gender;art.style.backgroundImage='url("'+atlasPath(c.id)+'")';art.style.setProperty('--row',gender==='female'?'100%':'0%');art.setAttribute('aria-label',className(c.id,gender)+' · '+(gender==='female'?'หญิง':'ชาย'));
@@ -240,10 +242,12 @@ function displayCharacter(){
  show('character');
 }
 $('hero-name').addEventListener('input',()=>{if(!record)$('stage-name').textContent=$('hero-name').value.trim();});
-document.querySelectorAll('[data-server]').forEach(button=>button.onclick=async()=>{
+const worlds=document.querySelectorAll('[data-server]');
+worlds.forEach(button=>button.onclick=()=>openWorld(button));
+async function openWorld(button){
  if(busy)return;lock(true);selected=button.dataset.server||'server-1';selectedChannel=normalizeChannel(button.dataset.channel);try{sessionStorage.setItem(CHANNEL_KEY,String(selectedChannel));}catch{}say('กำลังโหลดตัวละคร…');
  try{await checkWorldReady();roster=await store.list();await refreshPreviews();record=roster[0]??null;if(record)selected=record.serverId;displayCharacter();}catch(e){record=null;report(e);}finally{lock(false);}
-});
+}
 $('character-form').onsubmit=async event=>{
  event.preventDefault();if(busy)return;lock(true);say('กำลังสร้างตัวละคร…');
  try{await checkWorldReady();record=await store.create(selected,{name:$('hero-name').value,gender:document.querySelector('[name=gender]:checked').value,classId:'novice',appearance:validateAppearance(),jobId:''});roster=await store.list();await refreshPreviews();displayCharacter();say('สร้างตัวละครแล้ว พร้อมออกเดินทาง');}catch(e){report(e);}finally{lock(false);}

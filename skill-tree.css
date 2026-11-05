@@ -182,6 +182,9 @@ html body #skill-window .skill-node.passive{border:0}
 #skill-window .skill-node:not(.passive)>.skill-select{border-radius:2px}
 #skill-window .skill-node .skill-icon{min-width:0;border:0;box-shadow:none;border-radius:inherit;background-clip:border-box}
 #skill-window .skill-node .skill-icon[data-skill-icon],#skill-window[data-profession=novice] .skill-node .skill-icon{background-size:118% 118%!important}
+/* Passive artwork includes its own painted ring. Keep that ring outside the
+   circular aperture so it cannot sit off-centre inside the UI's gold rim. */
+#skill-window .skill-node.passive .skill-icon[data-skill-icon]{background-size:156% 156%!important}
 #skill-window .skill-node>.skill-select{overflow:hidden}
 #skill-window .skill-node.picked:not(.passive)>.skill-select{outline:0;box-shadow:none}
 /* Narrow grids may shrink a column: keep height tied to its actual width. */

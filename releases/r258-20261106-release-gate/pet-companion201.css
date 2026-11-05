@@ -1,0 +1,201 @@
+/* Companion management: one hero, a quiet collection rail, and actions beside their consequences. */
+:root dialog.premium-window#pet-window:has([data-presentation=companion201]){
+ width:min(1320px,calc(100vw - 24px))!important;height:min(820px,calc(100dvh - 24px))!important;
+ background:linear-gradient(90deg,#08271fb8 0%,#08271f70 16%,#08271f0d 31%,#08271f0d 52%,#08271f99 73%,#08271fb3),linear-gradient(0deg,#07271f99,transparent 28%,transparent 82%,#07271f70),url('assets/companion203/himmapan-glade.webp') center/cover no-repeat!important;
+ background-size:cover!important;background-repeat:no-repeat!important;
+ border-width:14px!important;border-image-width:32px!important;border-image-slice:17%!important;padding:8px 14px!important;
+}
+#pet-window #pet-premium *,#pet-window #pet-premium *::before{box-sizing:border-box}
+:root #pet-window:has([data-presentation=companion201])>.premium-window-heading{padding:10px 8px!important;min-height:64px;background:none!important}
+:root #pet-window:has([data-presentation=companion201]) .premium-window-heading h2{border:0!important;border-image:none!important;background:none!important;padding:0!important;font-size:28px!important}
+:root #pet-window:has([data-presentation=companion201]) .premium-close{background:transparent url('assets/gacha-banner199/close.webp') center/contain no-repeat!important;border:0!important;border-image:none!important;box-shadow:none!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0!important;color:transparent!important;font-size:0!important}
+#pet-window:has([data-presentation=companion201]) .premium-close::before,#pet-window:has([data-presentation=companion201]) .premium-close::after{display:none}
+:root #pet-window #pet-premium{overflow:hidden;min-width:0}
+#pet-window #pet-premium .pet-collection-heading{padding:10px 8px 12px;border:0;gap:12px;flex:none}
+#pet-window #pet-premium .pet-collection-heading h3{margin:0;font-size:14px;color:#d6c7a0}
+#pet-window #pet-premium .pet-collection-heading small{display:none}
+#pet-window #pet-premium #pet-owned{margin-left:8px;color:#e8ca83}
+
+:root #pet-window #pet-premium #pet-collection{display:flex;padding:8px 8px 0;min-height:0;overflow:hidden;gap:16px;background:none;flex:1}
+#pet-window #pet-premium .pet-collection-layout{display:grid;grid-template-columns:190px minmax(0,1fr);gap:24px;flex:1;min-height:0;min-width:0}
+:root #pet-window #pet-premium .pet-roster{display:flex;flex-direction:column;align-content:initial;gap:6px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9f8b51 transparent;min-height:0;max-height:none;height:auto!important;padding:0 9px 0 0;border-right:1px solid #c7a96b35}
+#pet-window #pet-premium .pet-roster button[data-pet]{
+ display:grid;grid-template-columns:62px minmax(0,1fr);grid-template-rows:1fr 1fr;align-items:center;align-content:center;justify-content:start;position:relative;
+ background:none!important;border:0!important;border-image:none!important;border-radius:0!important;box-shadow:none!important;padding:9px 2px!important;min-height:88px!important;flex:none;text-align:left;overflow:visible;color:#c5c7b2;
+}
+#pet-window #pet-premium .pet-roster button[data-pet]::after{content:'';position:absolute;left:70px;right:5px;bottom:3px;height:1px;background:linear-gradient(90deg,#d8ba72,transparent);opacity:0}
+#pet-window #pet-premium .pet-roster [aria-pressed=true]::after{opacity:1}
+#pet-window #pet-premium .pet-roster img{grid-column:1;grid-row:1/3;width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 4px 5px #0008);transition:transform 180ms cubic-bezier(.22,1,.36,1)}
+#pet-window #pet-premium .pet-roster [aria-pressed=true] img{filter:drop-shadow(0 0 7px #e7c47b70);transform:scale(1.08)}
+#pet-window #pet-premium .pet-roster .pet-rank{top:5px;left:0;font-size:9px;color:#e4c479}
+#pet-window #pet-premium .pet-roster b{grid-column:2;align-self:end;font-size:12px;color:inherit}
+#pet-window #pet-premium .pet-roster small:not(.pet-rank){grid-column:2;align-self:start;font-size:10px;color:#c9b67e;margin-top:4px}
+#pet-window #pet-premium .pet-roster [aria-pressed=true]{color:#ffecb8}
+:root #pet-window #pet-premium .pet-inspect{display:grid;grid-template-columns:minmax(160px,1.15fr) minmax(250px,1fr);align-items:center;gap:24px;padding:0;border:0;min-height:0;overflow:hidden;text-align:left;position:relative}
+#pet-window #pet-premium .pet-inspect>img{width:100%;height:100%;max-height:440px;min-height:0;object-fit:contain;filter:drop-shadow(0 12px 14px #0007);animation:none}
+#pet-window #pet-premium .pet-inspect-copy{text-shadow:0 1px 3px #02150fe0;min-width:0;max-height:100%;overflow:auto;overscroll-behavior:contain;padding:14px 8px 14px 0;scrollbar-width:thin;scrollbar-color:#9f8b51 transparent}
+#pet-window #pet-premium .pet-detail-kicker{font-size:10px;color:#bba779;letter-spacing:.06em}
+#pet-window #pet-premium .pet-inspect h3{font-size:clamp(23px,2.6vw,36px);line-height:1.4;margin:8px 0;color:#ffe4a5}
+#pet-window #pet-premium .pet-inspect p{font-size:12px;color:#d0cdb8;line-height:1.85;margin:8px 0}
+#pet-window #pet-premium .pet-bonus{display:flex;justify-content:start;flex-wrap:wrap;gap:8px 20px;padding:14px 0;margin:14px 0;border-block:1px solid #c4a05d36}
+#pet-window #pet-premium .pet-bonus span{padding:0;border:0;font-size:17px;color:#fff0bc}
+#pet-window #pet-premium .pet-skill-title{justify-content:start;gap:10px;font-size:15px;margin:15px 0 6px}
+#pet-window #pet-premium .pet-skill-art{width:42px;height:42px}
+#pet-window #pet-premium .pet-manage-actions{display:flex;flex-wrap:wrap;justify-content:start;gap:8px;margin-top:22px}
+#pet-window #pet-premium .pet-manage-actions button{flex:1;min-width:125px;min-height:50px;font-size:12px}
+#pet-window #pet-premium .pet-live-skill{padding:12px 0 4px;border-top:1px solid #c4a05d45;gap:12px;flex:none}
+#pet-window #pet-premium .pet-live-skill strong{font-size:12px;color:#d9d2b6}
+#pet-window #pet-premium .pet-account-message{background:none!important;padding:5px 8px!important;font-size:10px;color:#a6b5a3}
+#pet-window #pet-premium .pet-empty{padding:16px 0;margin:auto;text-align:center}
+#pet-window #pet-premium .pet-empty h3{font-size:20px}
+#pet-window #pet-premium .pet-roster:has(.pet-empty){grid-column:1/-1;justify-content:center;border:0}
+#pet-window #pet-premium .pet-inspect:empty,#pet-window #pet-premium .pet-live-skill:empty{display:none}
+@media(max-height:550px) and (orientation:landscape){
+ :root dialog.premium-window#pet-window:has([data-presentation=companion201]){height:calc(100dvh - 12px)!important;width:calc(100vw - 14px)!important;border-width:10px!important;border-image-width:25px!important;padding:0 6px!important}
+ :root #pet-window:has([data-presentation=companion201])>.premium-window-heading{min-height:44px;padding:0 6px!important}
+ :root #pet-window:has([data-presentation=companion201]) .premium-window-heading h2{font-size:20px!important}
+ #pet-window #pet-premium .pet-collection-heading{padding:0 4px 4px;min-height:44px}
+ #pet-window #pet-premium .pet-collection-heading h3{font-size:11px}
+ #pet-window #pet-premium .pet-collection-layout{grid-template-columns:135px minmax(0,1fr);gap:10px}
+ #pet-window #pet-premium #pet-collection{gap:5px;padding:0 4px}
+ #pet-window #pet-premium .pet-roster{padding-right:5px}
+ #pet-window #pet-premium .pet-roster button[data-pet]{grid-template-columns:45px 1fr;min-height:66px!important;padding:4px 0!important}
+ #pet-window #pet-premium .pet-roster img{width:45px;height:49px}
+ #pet-window #pet-premium .pet-roster b{font-size:10px}
+ #pet-window #pet-premium .pet-roster small:not(.pet-rank){font-size:8px;margin-top:1px}
+ #pet-window #pet-premium .pet-inspect{grid-template-columns:minmax(110px,.7fr) minmax(235px,1fr);gap:10px}
+ #pet-window #pet-premium .pet-inspect-copy{padding:5px 4px}
+ #pet-window #pet-premium .pet-detail-kicker{font-size:8px}
+ #pet-window #pet-premium .pet-inspect h3{font-size:21px;margin:1px 0}
+ #pet-window #pet-premium .pet-inspect p{font-size:10px;margin:3px 0}
+ #pet-window #pet-premium .pet-bonus{padding:6px 0;margin:5px 0;gap:8px 16px}
+ #pet-window #pet-premium .pet-bonus span{font-size:13px}
+ #pet-window #pet-premium .pet-skill-title{font-size:11px;margin:5px 0}
+ #pet-window #pet-premium .pet-skill-art{width:28px;height:28px}
+ #pet-window #pet-premium .pet-manage-actions{margin-top:8px;gap:4px}
+ #pet-window #pet-premium .pet-manage-actions button{min-width:95px;min-height:44px;font-size:10px;padding:5px 16px!important}
+ #pet-window #pet-premium .pet-live-skill{padding:4px 0 0;gap:6px;flex-wrap:nowrap}
+ #pet-window #pet-premium .pet-live-skill strong{width:auto;text-align:left;font-size:10px}
+ #pet-window #pet-premium .pet-live-skill button{font-size:10px}
+ #pet-window #pet-premium .pet-account-message{padding:1px!important;font-size:8px}
+}
+@media(max-width:600px) and (orientation:portrait){
+ :root dialog.premium-window#pet-window:has([data-presentation=companion201]){width:calc(100vw - 12px)!important;height:calc(100dvh - 16px)!important;padding:0 6px!important;border-width:10px!important;border-image-width:24px!important;background-image:linear-gradient(180deg,#05271fbf,#05271fa6 22%,#05271f26 40%,#05271fb8 64%,#05271fe6),url('assets/companion203/himmapan-glade-mobile.webp')!important;background-position:42% center!important}
+ :root #pet-window:has([data-presentation=companion201])>.premium-window-heading{min-height:60px;padding:4px!important}
+ :root #pet-window:has([data-presentation=companion201]) .premium-window-heading h2{font-size:21px!important}
+ #pet-window #pet-premium .pet-collection-heading{padding:2px 0 4px;gap:5px;min-height:44px}
+ #pet-window #pet-premium .pet-collection-heading h3{font-size:10px}
+ #pet-window #pet-premium #pet-owned{margin-left:3px}
+ #pet-window #pet-premium #pet-go-gacha{padding-inline:17px!important;font-size:10px;white-space:nowrap}
+ :root #pet-window #pet-premium #pet-collection{overflow:auto;gap:8px;padding:4px 0;overscroll-behavior:contain}
+ :root #pet-window #pet-premium .pet-collection-layout{display:flex;flex-direction:column;flex:none;gap:12px}
+ :root #pet-window #pet-premium .pet-roster{flex-direction:row;height:106px!important;min-height:106px;overflow-x:auto;overflow-y:hidden;border:0;border-top:1px solid #c7a96b35;padding:6px 0;gap:2px}
+ #pet-window #pet-premium .pet-roster button[data-pet]{display:flex;flex-direction:column;min-width:76px;max-width:76px;min-height:88px!important;padding:3px!important;text-align:center;gap:1px}
+ #pet-window #pet-premium .pet-roster img{width:52px;height:52px;flex:none}
+ #pet-window #pet-premium .pet-roster b{font-size:9px;align-self:center}
+ #pet-window #pet-premium .pet-roster small:not(.pet-rank){font-size:8px;align-self:center;margin:0}
+ #pet-window #pet-premium .pet-roster button[data-pet]::after{left:10%;right:10%;bottom:0}
+ :root #pet-window #pet-premium .pet-inspect{display:flex;flex-direction:column;gap:4px;overflow:visible;border:0;flex:none;padding:0}
+ #pet-window #pet-premium .pet-inspect>img{height:190px;min-height:190px;max-height:none;width:100%}
+ #pet-window #pet-premium .pet-inspect-copy{overflow:visible;text-align:center;padding:0 8px;width:100%}
+ #pet-window #pet-premium .pet-detail-kicker{font-size:9px}
+ #pet-window #pet-premium .pet-inspect h3{font-size:27px;margin:3px 0}
+ #pet-window #pet-premium .pet-inspect p{font-size:11px;margin:5px 0}
+ #pet-window #pet-premium .pet-bonus{justify-content:center;padding:10px 0;margin:10px 0}
+ #pet-window #pet-premium .pet-bonus span{font-size:15px}
+ #pet-window #pet-premium .pet-skill-title{justify-content:center;font-size:13px;margin:8px 0 5px}
+ #pet-window #pet-premium .pet-skill-art{height:32px;width:32px}
+ #pet-window #pet-premium .pet-manage-actions{margin-top:12px;flex-wrap:nowrap}
+ #pet-window #pet-premium .pet-manage-actions button{min-width:0;min-height:48px;padding:7px 14px!important;font-size:10px}
+ #pet-window #pet-premium .pet-live-skill{padding:8px 0 4px;flex-wrap:wrap;justify-content:center}
+ #pet-window #pet-premium .pet-live-skill strong{width:100%;text-align:center;font-size:10px}
+ #pet-window #pet-premium .pet-live-skill button{flex:1;min-width:0;font-size:10px;padding-inline:15px!important}
+}
+@media(max-width:600px) and (max-height:650px) and (orientation:portrait){
+ #pet-window #pet-premium .pet-inspect>img{height:140px;min-height:140px}
+ #pet-window #pet-premium .pet-inspect h3{font-size:23px}
+}
+@media(prefers-reduced-motion:reduce){
+ #pet-window #pet-premium *{animation:none!important;transition:none!important}
+}
+
+@media(max-height:550px) and (orientation:landscape){
+ #pet-window #pet-premium .pet-detail-kicker{display:none}
+ #pet-window #pet-premium .pet-inspect h3{font-size:18px;margin:0;line-height:1.3}
+ #pet-window #pet-premium .pet-inspect p{font-size:9px;line-height:1.45;margin:2px 0}
+ #pet-window #pet-premium .pet-bonus{padding:3px 0;margin:3px 0}
+ #pet-window #pet-premium .pet-skill-title{font-size:10px;margin:3px 0}
+ #pet-window #pet-premium .pet-skill-art{width:24px;height:24px}
+ #pet-window #pet-premium .pet-manage-actions{margin-top:4px}
+}
+
+@media(prefers-reduced-motion:reduce){#pet-window #pet-premium .pet-inspect>img.pet-selection-enter{animation:none!important}}
+
+/* Companion decisions and compact screens. The collection rail stays reachable while details scroll. */
+#pet-window #pet-premium .pet-ability{margin:12px 0 0;border:0;background:none}
+#pet-window #pet-premium .pet-ability summary{list-style:none;cursor:pointer;min-height:44px;touch-action:manipulation}
+#pet-window #pet-premium .pet-ability summary::-webkit-details-marker{display:none}
+#pet-window #pet-premium .pet-skill-title i{margin-left:auto;font-size:20px;font-style:normal;color:#d6bc7e}
+#pet-window #pet-premium .pet-ability[open] .pet-skill-title i{transform:rotate(180deg)}
+#pet-window #pet-premium .pet-ability summary:focus-visible{outline:2px solid #fff0b0;outline-offset:3px}
+#pet-window #pet-premium .pet-star-progress{display:flex;flex-direction:column;gap:6px;margin:16px 0 0;font-size:10px;color:#bfc9b4}
+#pet-window #pet-premium .pet-star-progress progress{width:100%;height:5px;accent-color:#d5bb7b}
+#pet-window #pet-premium .pet-active-art{width:40px;height:40px;object-fit:contain;flex:none}
+#pet-window #pet-premium .pet-empty>img{width:160px;height:160px;object-fit:contain}
+#pet-window #pet-premium #pet-collection:has(>.pet-empty:not([hidden])){justify-content:center}
+#pet-window #pet-premium .pet-collection-layout[hidden]{display:none!important}
+@media(max-height:550px) and (orientation:landscape){
+ #pet-window #pet-premium .pet-ability{margin:2px 0}
+ #pet-window #pet-premium .pet-ability summary{min-height:44px}
+ #pet-window #pet-premium .pet-star-progress{margin:4px 0;gap:3px;font-size:9px}
+ #pet-window #pet-premium .pet-active-art{width:30px;height:30px}
+}
+@media(max-width:600px) and (orientation:portrait){
+ :root #pet-window #pet-premium #pet-collection{overflow:hidden;flex:1;min-height:0;padding:0}
+ :root #pet-window #pet-premium .pet-collection-layout{display:flex;flex-direction:column;flex:1;min-height:0;gap:8px}
+ :root #pet-window #pet-premium .pet-roster{height:98px!important;min-height:98px;padding:4px 0 8px;border-top:0;border-bottom:1px solid #c7a96b35;flex:none}
+ #pet-window #pet-premium .pet-roster button[data-pet]{min-height:84px!important}
+ :root #pet-window #pet-premium .pet-inspect{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;align-items:stretch;scrollbar-width:thin}
+ #pet-window #pet-premium .pet-inspect>img{height:clamp(140px,20dvh,180px);min-height:clamp(140px,20dvh,180px);flex:none}
+ #pet-window #pet-premium .pet-inspect-copy{padding:0 8px 6px;flex:none}
+ #pet-window #pet-premium .pet-ability{margin:7px 0 0;text-align:left}
+ #pet-window #pet-premium .pet-skill-title{justify-content:start;margin:0}
+ #pet-window #pet-premium .pet-star-progress{margin:9px 0;font-size:9px;text-align:left}
+ #pet-window #pet-premium .pet-manage-actions{position:sticky;bottom:0;padding:9px 0 6px;margin-top:10px;background:linear-gradient(transparent,#071e17 20%);z-index:2}
+ #pet-window #pet-premium .pet-live-skill{padding:6px 0 2px;gap:4px 8px;align-items:center;justify-content:start}
+ #pet-window #pet-premium .pet-active-art{width:25px;height:25px}
+ #pet-window #pet-premium .pet-live-skill strong{width:auto;flex:1;text-align:left}
+ #pet-window #pet-premium .pet-live-skill button{flex:1;min-width:0;font-size:10px}
+ #pet-window #pet-premium .pet-live-skill #pet-use-live{flex-basis:calc(50% - 4px)}
+ #pet-window #pet-premium .pet-live-skill #pet-auto-live{flex-basis:calc(50% - 4px)}
+}
+
+@media(max-width:600px) and (orientation:portrait){
+ :root #pet-window #pet-premium .pet-inspect{justify-content:flex-start}
+ #pet-window #pet-premium .pet-live-skill{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 7px;position:relative}
+ #pet-window #pet-premium .pet-active-art{position:absolute;top:6px;left:0}
+ #pet-window #pet-premium .pet-live-skill strong{grid-column:1/-1;min-height:25px;padding-left:32px;display:flex;align-items:center}
+ #pet-window #pet-premium .pet-live-skill #pet-use-live{grid-column:1;grid-row:2}
+ #pet-window #pet-premium .pet-live-skill #pet-auto-live{grid-column:2;grid-row:2}
+}
+
+/* Character-wide S companion stat choice. Existing generated capsule buttons remain the control owner. */
+#pet-window #pet-premium .pet-build-editor{margin:8px 0;border-block:1px solid #c6a16455;padding:8px 0}
+#pet-window #pet-premium .pet-build-editor[hidden]{display:none!important}
+#pet-window #pet-premium .pet-build-editor>summary{list-style:none;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;justify-content:space-between;min-height:44px;cursor:pointer;touch-action:manipulation;color:#f6edd6}
+#pet-window #pet-premium .pet-build-editor>summary::-webkit-details-marker{display:none}
+#pet-window #pet-premium .pet-build-editor>summary::after{content:'⌄';color:#d9bb78}
+#pet-window #pet-premium .pet-build-editor[open]>summary::after{transform:rotate(180deg)}
+#pet-window #pet-premium .pet-build-editor>summary:focus-visible{outline:2px solid #fff0b0;outline-offset:2px}
+#pet-window #pet-premium .pet-build-summary{font-size:10px;color:#d6c7a0}
+#pet-window #pet-premium .pet-build-slots,#pet-window #pet-premium .pet-build-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}
+#pet-window #pet-premium .pet-build-slots button{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;font-variant-numeric:tabular-nums}
+#pet-window #pet-premium .pet-build-slots small{font-size:9px}#pet-window #pet-premium .pet-build-slots b{font-size:11px}
+#pet-window #pet-premium .pet-build-grid button{min-width:0;font-size:11px}
+#pet-window #pet-premium .pet-build-budget{color:#e8ca83;font-variant-numeric:tabular-nums}
+#pet-window #pet-premium .pet-build-state{min-height:2em;font-size:11px}
+#pet-window #pet-premium .pet-build-actions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+#pet-window #pet-premium .pet-build-actions button{flex:1;min-width:90px;font-size:10px}
+#pet-window #pet-premium .pet-build-actions [data-build-recommend]{flex-basis:100%}
+
+#pet-window #pet-premium .pet-build-slots button,#pet-window #pet-premium .pet-build-grid button,#pet-window #pet-premium .pet-build-actions button{min-height:44px}

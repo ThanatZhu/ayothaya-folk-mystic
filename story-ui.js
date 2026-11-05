@@ -125,11 +125,11 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
   // 0.123 no story left (chapter 1 is retired, or the rebirth arc is over): suggest where to farm at this level
   const farm=obj?null:farmHere();
   if(farm){
-   const here=farm.id===map.id;
+   const here=farm.id===map.id,fare=here?null:worldUI.warpCost?.(farm.id)??null;
    $('quest-chapter').textContent='แนะนำแมพฟาร์ม · Lv.'+baseLevel();$('quest-title').textContent=farm.name+' · Lv.'+farm.levels[0]+'–'+farm.levels[1];
    $('quest-hint').textContent=here?'ฟาร์มวัสดุ → คราฟต์ → ล่าบอส → อัปของ':'แมพที่เหมาะกับเลเวลของคุณตอนนี้';
-   $('quest-how').textContent=here?'กดเพื่อเดินไปหามอนแล้วเปิด AUTO':'กดเพื่อเดินไปเอง ถึงแล้วเปิด AUTO ให้';$('quest-how').hidden=false;
-   $('quest-go').hidden=false;$('quest-go').textContent=game.walking&&walking?'■ หยุด':here?'▶ ฟาร์มเลย':'▶ เดินไป';
+   $('quest-how').textContent=here?'กดเพื่อเดินไปหามอนแล้วเปิด AUTO':fare===null?'กดเพื่อเดินไปเอง ถึงแล้วเปิด AUTO ให้':'กดเพื่อวาร์ปไปเลย ถึงแล้วเปิด AUTO ให้';$('quest-how').hidden=false;
+   $('quest-go').hidden=false;$('quest-go').textContent=game.walking&&walking?'■ หยุด':here?'▶ ฟาร์มเลย':fare===null?'▶ เดินไป':`▶ วาร์ป · ${fare} เบี้ย`;
    worldUI.npcLabel(markedNpc)?.classList.remove('quest-npc');markedNpc=null;return;
   }
   $('quest-chapter').textContent=obj?.quest?.chapter??'ภาคจุติ · ห้าภพ';
@@ -265,6 +265,11 @@ export function createStoryUI({game,worldUI,map,catalog,account}){
      game.walkTo({x:m.x,z:m.z},{radius:2.4,kind:'quest',mobId:m.id,onArrive:()=>{done();world.select(m.id);setTimeout(()=>world.setAuto?.(true),150);},onFail:()=>{done();}});
      render();
     }
+    return;
+   }
+   // the farm card warps straight there for the usual fare; a story step keeps walking the gates for free
+   if(!obj&&worldUI.warpCost?.(farmMap)!=null){
+    (async()=>{try{sessionStorage.setItem(resumeKey,'1');}catch{}try{if(await worldUI.warpTo(farmMap)===false)clearResume();}catch{clearResume();}})();
     return;
    }
    s.mapId=farmMap;

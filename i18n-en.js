@@ -5532,5 +5532,7 @@ Object.assign(globalThis.I18N_EN,{
  "ก่อนโบนัส เกราะและคริติคอล": "Before bonuses, defense and criticals",
  "ขั้นถัดไป:": "Next rank:",
  "ผลการต่อสู้": "Battle Results",
- "ภาพบอสยังโหลดไม่สำเร็จ": "Boss image could not be loaded"
+ "ภาพบอสยังโหลดไม่สำเร็จ": "Boss image could not be loaded",
+ "กดเพื่อวาร์ปไปเลย ถึงแล้วเปิด AUTO ให้": "Press to warp there; AUTO turns on when you arrive",
+ "▶ วาร์ป · {0} เบี้ย": "▶ Warp · {0} cowries"
 });

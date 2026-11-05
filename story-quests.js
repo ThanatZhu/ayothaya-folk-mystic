@@ -182,7 +182,7 @@ export function storyEvent(state,event){
 // 0.123 the map to farm at this level: the hardest one whose Lv. range still holds it (the rebirth maps only
 // for a reborn player on the rebirth campaign); off the top of every range, the closest one.
 export function farmMapFor(maps,level,{rebirth=0,campaign}={}){
- const rb=campaign==='rebirth'&&rebirth>=1,open=maps.filter(m=>m.levels&&!m.prologue&&!!m.minRebirth===rb&&!(rebirth<m.minRebirth));
+ const rb=campaign==='rebirth'&&rebirth>=1,open=maps.filter(m=>m.levels&&!m.prologue&&!m.instance&&!!m.minRebirth===rb&&!(rebirth<m.minRebirth)); // a party dungeon is no solo farm tip (and has no warp)
  const fits=open.filter(m=>level>=m.levels[0]&&level<=m.levels[1]).sort((a,b)=>b.levels[0]-a.levels[0]);
  return fits[0]??open.sort((a,b)=>Math.min(Math.abs(level-a.levels[0]),Math.abs(level-a.levels[1]))-Math.min(Math.abs(level-b.levels[0]),Math.abs(level-b.levels[1])))[0]??null;
 }

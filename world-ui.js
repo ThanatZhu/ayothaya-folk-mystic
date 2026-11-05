@@ -181,6 +181,16 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
    if(gate&&(map.safe||Math.hypot(world.player.x-gate.x,world.player.z-gate.z)<2.5)){travel(id);return true;}
    endTalk();atlas.show(id);return true;
   },
+   // One tap from the farm card: the atlas fare, without the atlas. Online the server charges and has the last word.
+  warpCost:id=>warpCost(catalog,map.id,id),
+  warpTo(id){
+   const destination=lookup(id),cost=warpCost(catalog,map.id,id);if(traveling||world.player.hp<=0||!destination||cost===null)return false;
+   if(!rebirthAccess(destination,world.rebirth??0,baseProgress(world).level)){world.notice('ต้องจุติและมีเลเวลถึงเกณฑ์ก่อนเดินทางข้ามภพ');return false;}
+   const coins=api.coins?.()??0;if(coins<cost){world.notice(`เบี้ยไม่พอ · ขาดอีก ${(cost-coins).toLocaleString('th-TH')} เบี้ย`);return false;}
+   if(!game.online&&!api.payWarp?.(cost)){world.notice('เบี้ยไม่พอ');return false;}
+   game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);
+   return travel(id,false,true);
+  },
   guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
   // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
   recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},

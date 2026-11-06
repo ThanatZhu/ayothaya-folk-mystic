@@ -8,7 +8,7 @@ export function waterProfile(map={},name='water'){
  return {kind:fall?'waterfall':still?'pool':'river',speed:fall?1.45:still?.055:.32,
   direction:fall?[0,-1]:area?.w>area?.d?[1,0]:[0,-1],
   ripple:fall?.1:still?.035:.065,foam:fall?.13:still?.025:.065,
-  sky:night?'#7aabb7':map.mood==='dusk'?'#a1bab1':'#c4dfd6'};
+  sky:night?'#7aabb7':map.mood==='dusk'?'#a1bab1':'#b3c2ae'};
 }
 
 // Chamfer distance in metres, computed once on load, not once per frame.

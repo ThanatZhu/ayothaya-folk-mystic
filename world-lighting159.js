@@ -12,8 +12,9 @@ const PROFILES={
 };
 export function lightingProfile(map={}){
  const mood=map.instance?'cellar':map.procedural==='mill'?'night':Object.hasOwn(PROFILES,map.mood)?map.mood:'day';
- return {...PROFILES[mood],mood,finish:{blur:3.4,warmth:PROFILES[mood].warmth,vignette:.42,contrast:1.04,lift:-.012,saturation:1.14,bloom:.22,threshold:.82}};
+ return {...PROFILES[mood],mood,finish:{pixel:2,blur:3.8,warmth:PROFILES[mood].warmth,vignette:.42,contrast:1.04,lift:-.012,saturation:1.14,bloom:.22,threshold:.82}};
 }
+const EARTH_LAYER=/^(Streets|Tracks|Courtyard|Feathered)/,EARTH=new THREE.Color('#d8bfa4'); // warm packed earth instead of pale sand
 const RECEIVER=/^(Ground|Soil foundation|Cellar foundation|Water surface|Damp canal|Streets|Tracks|Courtyard|Feathered|Earthen rice|Dense low rice canopy|Forest floor|Terrain|Island meadow|Wetland islands|Raised flagstone|Spirit arena paved|Stone moss|Arena inlays)/i;
 function depthFor(material){
  const depth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking});
@@ -32,7 +33,7 @@ export function applyWorldLighting({scene,model,map,sun,hemi,renderer}){
   o.castShadow=!water&&!cloud&&!RECEIVER.test(o.name.replace(/_/g,' '));o.receiveShadow=!cloud;
   const wind=ms.find(m=>/rice|grain|grassblade|grassdry/i.test(m.name));
   if(o.castShadow&&wind){wind.shadowSide=THREE.DoubleSide;if(!depths.has(wind))depths.set(wind,depthFor(wind));o.customDepthMaterial=depths.get(wind);}
-  for(const m of ms){if(materials.has(m)||water||cloud)continue;materials.add(m);
+  for(const m of ms){if(materials.has(m)||water||cloud)continue;materials.add(m);if(profile.mood==='day'&&EARTH_LAYER.test(o.name))m.color.multiply(EARTH);
    if(/grassblade|grassdry|rice|stubble|reeds/i.test(m.name)){
     const before=m.onBeforeCompile,key=m.customProgramCacheKey();
     m.onBeforeCompile=(s,r)=>{before.call(m,s,r);s.vertexShader='varying float worldRoot159;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nworldRoot159=smoothstep(.04,.52,position.y);');s.fragmentShader='varying float worldRoot159;\n'+s.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb*=mix(vec3(.78,.82,.70),vec3(1.02,1.01,.98),worldRoot159);');};

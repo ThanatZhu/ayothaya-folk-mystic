@@ -52,7 +52,7 @@ function plant(parent,geometry,material,items,tile=14){
  }
 }
 const mix3=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
-const DEEP=[.040,.125,.022],MID=[.115,.245,.040],SUN=[.300,.340,.070]; // linear RGB
+const DEEP=[.030,.080,.020],MID=[.095,.155,.035],SUN=[.290,.270,.075]; // linear RGB: olive, not lawn green
 function grow(parent,meadow,map,wind,density){
  const b=map.bounds,grass=[],leaves=[],step=.26/Math.sqrt(density),edge=(x,z,r)=>meadow.grass(x+r,z)&&meadow.grass(x-r,z)&&meadow.grass(x,z+r)&&meadow.grass(x,z-r);
  for(let ix=0;ix*step<b.w;ix++)for(let iz=0;iz*step<b.d;iz++){

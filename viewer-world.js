@@ -118,12 +118,25 @@ try {
  }
  let rotating=null;
  function resize(){const a=innerWidth/innerHeight,h=Math.max(12.8,18.2/a);camera.left=-h*a;camera.right=h*a;camera.top=h;camera.bottom=-h;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false);softLook.setSize(innerWidth,innerHeight);}
- function turn(direction){rotating={from:controls.getAzimuthalAngle(),delta:direction*Math.PI/4,start:performance.now(),radius:camera.position.distanceTo(controls.target),polar:controls.getPolarAngle()};}
+ function turn(direction){if(!controls.enableRotate)return;rotating={from:controls.getAzimuthalAngle(),delta:direction*Math.PI/4,start:performance.now(),radius:camera.position.distanceTo(controls.target),polar:controls.getPolarAngle()};}
  function zoom(factor){camera.zoom=THREE.MathUtils.clamp(camera.zoom*factor,overview?.08:.65,2.7);camera.updateProjectionMatrix();}
  $('left').onclick=()=>turn(-1);$('right').onclick=()=>turn(1);$('in').onclick=()=>zoom(1.18);$('out').onclick=()=>zoom(1/1.18);
  $('reset').onclick=()=>{rotating=null;camera.position.copy(initial);camera.zoom=1;controls.target.copy(target);camera.updateProjectionMatrix();controls.update();};
  // 0.119 camera tilt, kept per device: 0 = the original angle, 100 = the lowest look across the ground. Same orthographic camera.
- const BASE_POLAR=controls.minPolarAngle,LOW_POLAR=THREE.MathUtils.degToRad(74),TILT_KEY='ayothaya.cameraTilt';
+ const BASE_POLAR=controls.minPolarAngle,LOW_POLAR=THREE.MathUtils.degToRad(74),TILT_KEY='ayothaya.cameraTilt',HOME_AZIMUTH=controls.getAzimuthalAngle();
+ // Camera views, kept per device. 2.5D is the locked default; only 3D may turn and tilt.
+ const VIEWS={'2.5D':{polar:BASE_POLAR},'3D':{polar:THREE.MathUtils.degToRad(70),free:true},'2D':{polar:THREE.MathUtils.degToRad(22)}},VIEW_KEY='ayothaya.cameraView';
+ function setView(id){
+  const name=VIEWS[id]?id:'2.5D',view=VIEWS[name],radius=camera.position.distanceTo(controls.target);rotating=null;controls.enableRotate=!!view.free;
+  controls.minPolarAngle=controls.maxPolarAngle=view.polar;camera.position.setFromSphericalCoords(radius,view.polar,view.free?controls.getAzimuthalAngle():HOME_AZIMUTH).add(controls.target);controls.update();
+  $('left').disabled=$('right').disabled=$('tilt').disabled=!view.free;const shown=$('view-switch');if(shown)shown.textContent=name;
+  try{localStorage.setItem(VIEW_KEY,name);}catch{}
+ }
+ function mountViewSwitch(){
+  const button=document.createElement('button');button.id='view-switch';button.type='button';button.onclick=()=>{const names=Object.keys(VIEWS);setView(names[(names.indexOf(button.textContent)+1)%names.length]);};
+  (document.querySelector('.actionbar-tools')??document.body).prepend(button);
+  let saved=null;try{saved=localStorage.getItem(VIEW_KEY);}catch{}setView(saved);
+ }
  function setTilt(value){const t=THREE.MathUtils.clamp(Math.round(value)||0,0,100);controls.minPolarAngle=controls.maxPolarAngle=BASE_POLAR+(LOW_POLAR-BASE_POLAR)*t/100;controls.update();$('tilt').value=String(t);$('tilt-value').textContent=t?t+'%':'เดิม';try{localStorage.setItem(TILT_KEY,String(t));}catch{}}
  let savedTilt=0;try{savedTilt=Number(localStorage.getItem(TILT_KEY))||0;}catch{}
  setTilt(savedTilt);$('tilt').oninput=e=>setTilt(Number(e.target.value));
@@ -208,7 +221,7 @@ try {
  const monsterArt=await loadMonsterFrames(map);
  await heroMesh.userData.ready;if(heroMesh.userData.artError)throw new Error('Character animation unavailable');directionalStatus();loading.stage(4);
  createAnnouncementUI(document.getElementById('game-shell'));
- const game=createGame({skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,monsterArt,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,roleSkills:true,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender,name:account.character.name},isPaused:()=>loading.active||!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
+ const game=createGame({mapBounds:map.bounds,skillState:{skills:account.skills,offline:!account.cloud,onChange:s=>account.setSkills(s)},scene,camera,controls,canvas:renderer.domElement,hero:characters[0],monsterTextures,monsterArt,sprite,shadow,cancelCameraTurn:()=>{rotating=null;},config:{...map,roleSkills:true,classId:account.character.classId,jobId:account.character.jobId,gender:account.character.gender,name:account.character.name},isPaused:()=>loading.active||!!document.querySelector('dialog:modal')||multiplayer?.paused||landscape.blocked||account.paused||overview||(worldUI?.paused??false)});gameHandle=game;
  applySave(game.world,map,account.data);
  // Local test hook (dev server only) for automated walk/bridge/portal checks; absent on the deployed site.
  if(['127.0.0.1','localhost'].includes(location.hostname))window.__ayothaya={game,map,camera,renderer,scene,lighting:{world:worldLight,actors:actorLighting,profile:lightProfile}};
@@ -248,7 +261,7 @@ try {
  if(window.__ayothaya)window.__ayothaya.mobileConsumables=mobileConsumables;
  createCbtEventUI({game,account,loading,onOpenHub:()=>dispatchEvent(new CustomEvent('open-event-hub242',{detail:'cbt'})),autoOpen:!map.pvpArena});
  const arenaUI=createArenaUI({game,account,map,catalog,worldUI});
- createActionbar({game,bagUI,account});
+ createActionbar({game,bagUI,account});mountViewSwitch();
  document.querySelector('.player-heading small').textContent=(jobFor(account.character.classId,account.character.jobId)?.name??className(account.character.classId,account.character.gender))+' · '+(map.safe?'เขตสงบ':map.name);
  function motionLabel(){$('motion').textContent=motionPlaying?'หยุดลมและน้ำ':'เล่นลมและน้ำ';$('motion').setAttribute('aria-pressed',String(!motionPlaying));}
  motionLabel();$('motion').onclick=()=>{motionPlaying=motion.toggle();motionLabel();};

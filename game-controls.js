@@ -1,3 +1,4 @@
+import {cameraFocus} from './camera-bounds.js';
 import {createDamageFloats} from './damage-floats247.js';
 import {mobileHudMedia} from './hud-mode204.js';
 import {characterHead} from './character-label.js?v=149';
@@ -31,7 +32,7 @@ import {className} from './classes.js?v=novice174';
 import {rebirthRank} from './character-stats.js?v=107';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=auto202';
 
-export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={}}){
+export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={},mapBounds=null}){
  const world=new CombatWorld(config);world.spiritCompanion=true;const SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
  const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world,camera),roleUI=createRolePlayUI({world,buyItem:async id=>{if(!network)throw Error('not-connected');const r=await network.request('revivalBuy',id);world.bag=r.bag;world.petCollection=r.petCollection;return r;},canBuy:()=>network?.status==='online',itemCount:()=>network?revivalCount(world.bag):respawnInventory?.count()??0,clear:()=>clearInput(),respawn:async destination=>{clearInput();cancelWalk();if(networkExpected&&!network)throw Error('not-connected');if(destination==='capital')return respawnTravel?.();if(network){await network.request('respawn',crypto.randomUUID(),{destination:'here'});return true;}return respawnInventory?.use()??false;}});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null,respawnTravel=null,respawnInventory=null;
  // Skill levels: the server owns them online; guests keep them in their local save.
@@ -496,7 +497,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   castLight.intensity=reduced?0:flash*14;castLight.position.set(p.x,floor+1.3,p.z);kick*=Math.exp(-dt*14);shakeAmount=reduced?0:Math.max(shake*.11,kick*.07,roleShake);
   hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,floor+.1,p.z);shield.visible=p.shield>0;hideHero(!!world.observer);
   // Camera follows the player while preserving user-controlled azimuth and zoom.
-  const follow=new THREE.Vector3(p.x,floor+1,p.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
+  const focus=cameraFocus(p.x,p.z,mapBounds,{halfWidth:camera.right/camera.zoom,halfDepth:camera.top/camera.zoom/Math.max(.25,Math.cos(controls.getPolarAngle())),azimuth:controls.getAzimuthalAngle()}),follow=new THREE.Vector3(focus.x,floor+1,focus.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
   controls.update();camera.updateMatrixWorld();
   const head=characterHead(hero.sprite,camera);project(playerLabel,head.x,head.y,head.z);
   if((world.rebirth??0)!==shownRank){shownRank=world.rebirth??0;const t=playerLabel.querySelector('.rank-title');t.hidden=!shownRank;t.textContent=shownRank?'✦ '+rebirthRank(shownRank)+' ✦':'';}

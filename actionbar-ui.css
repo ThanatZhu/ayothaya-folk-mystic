@@ -101,3 +101,5 @@ body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-a
 body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #attack{position:absolute!important;inset:auto!important;left:158px!important;top:132px!important;width:68px!important;height:68px!important}
 body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill[data-mobile-away]{display:none!important}
 @media(orientation:landscape){body.actionbar-mobile.mobile-play.field-hud.hud63 #online-dock.collapsed{right:calc(var(--edge-r) + 252px)!important;max-width:560px!important}}
+#view-switch{width:70px;height:36px;min-height:36px;padding:0 4px;font:700 13px var(--font-game);font-variant-numeric:tabular-nums;color:#fff0ce;border:1px solid #c6a16488;border-radius:10px;background:linear-gradient(135deg,#24382bf4,#152925f0);cursor:pointer;align-self:flex-start;z-index:40}
+body:not(.actionbar-desktop) #view-switch{position:fixed;right:max(8px,env(safe-area-inset-right));top:50%}

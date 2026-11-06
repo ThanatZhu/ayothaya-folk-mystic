@@ -1,0 +1,114 @@
+/* Shared ritual choreography. Both categories use the same clock from gacha-motion201.js.
+   Image hit targets stay transparent; no rectangular flash plates or extra WebGL scene. */
+#gacha-window #amulet-gacha .relic-scene,
+#gacha-window #pet-summon-premium .summon-scene{--ritual-light:#e9d29a;isolation:isolate}
+#gacha-window #amulet-gacha .relic-scene{overflow:auto}
+#gacha-window #amulet-gacha :is(.relic-vault,.relic-effects,.relic-impact),
+#gacha-window #pet-summon-premium .summon-scene :is(.summon-musician,.summon-light,.summon-mist,.summon-particles){display:none!important}
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-focus{position:absolute;inset:2% 15% 13%;display:grid;place-items:center;pointer-events:none;z-index:2;opacity:1}
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-focus>img{display:block;position:absolute;inset:0;z-index:2;width:100%;height:100%;min-height:0;max-height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px #0009);transform:translateY(0) scale(1);opacity:1;animation:none}
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-aura{position:absolute;width:min(460px,100%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff2b24d, #a6d8ba21 34%,transparent 68%);opacity:.35;transform:scale(.95)}
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-ring{position:absolute;width:min(330px,78%);aspect-ratio:1;border:1px solid #e4c98066;border-radius:50%;opacity:.32;transform:rotate(-16deg) scale(.94)}
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-ring::before{content:'';position:absolute;inset:-5px;border-radius:50%;border-top:2px solid #fce7aa;border-bottom:2px solid #fce7aa;border-inline:2px solid transparent;opacity:.8}
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-ring-inner{width:min(290px,67%);border-style:dashed;transform:rotate(16deg) scale(.94);opacity:.22}
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-impact{position:absolute;width:min(540px,120%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff7d8 0%,#f8d494a3 8%,#d8bc7133 28%,transparent 62%);opacity:0;z-index:3}
+#gacha-window #amulet-gacha .amulet-ceremony:is([data-phase=arriving],[data-phase=ready]) .gacha-ritual-focus,
+#gacha-window #pet-summon-premium .summon-scene:is([data-phase=idle],[data-phase=arriving],[data-phase=eggs]) .gacha-ritual-focus{opacity:0;visibility:hidden}
+#gacha-window #amulet-gacha .relic-invocation{bottom:3%;transform:none!important}
+#gacha-window #amulet-gacha .relic-invocation strong{font-size:18px}
+#gacha-window #amulet-gacha .relic-invocation small{font-size:9px}
+#gacha-window #amulet-gacha .relic-grid{gap:12px;padding:16px;z-index:3}
+#gacha-window #amulet-gacha .relic-prize{overflow:visible;min-height:120px;animation:none;opacity:1}
+#gacha-window #amulet-gacha .relic-prize-art:after{display:none!important}
+#gacha-window #amulet-gacha .relic-item-art{transform:translateY(8px) scale(.94);transition:opacity 220ms,transform 480ms cubic-bezier(.22,1,.36,1);transition-delay:var(--reveal-delay,0ms)}
+#gacha-window #amulet-gacha .relic-prize.is-open .relic-item-art{transform:none;opacity:1}
+#gacha-window #amulet-gacha .relic-seal{transition:opacity 160ms,transform 200ms;transition-delay:var(--reveal-delay,0ms)}
+#gacha-window #amulet-gacha .relic-prize.is-open .relic-seal{opacity:0;transform:translateY(-4px) scale(1.03)}
+#gacha-window #amulet-gacha .relic-prize.is-open .relic-prize-halo{opacity:0!important}
+#gacha-window #amulet-gacha .relic-prize.is-open[data-tier=rainbow] .relic-item-art{filter:drop-shadow(0 0 10px #86e8cf)}
+#gacha-window #amulet-gacha .relic-prize.is-open[data-tier=red] .relic-item-art{filter:drop-shadow(0 0 8px #ed627b)}
+#gacha-window #amulet-gacha .relic-prize.is-open[data-tier=orange] .relic-item-art{filter:drop-shadow(0 0 8px #eeb35e)}
+#gacha-window #pet-summon-premium .summon-eggs{left:5%;right:5%;top:7%;bottom:11%;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:14px;z-index:3;animation:none}
+#gacha-window #pet-summon-premium .summon-eggs[data-count="1"]{left:25%;right:25%;top:4%;bottom:12%;grid-template-columns:1fr;grid-template-rows:1fr}
+#gacha-window #pet-summon-premium .summon-scene:not([data-phase=arriving]):not([data-phase=eggs]) .summon-eggs{opacity:0;pointer-events:none}
+#gacha-window #pet-summon-premium .summon-scene:is([data-phase=arriving],[data-phase=eggs]) .summon-eggs{opacity:1;transform:none}
+#gacha-window #pet-summon-premium .summon-egg{animation:none;opacity:1;transform:none;display:flex;flex-direction:column}
+#gacha-window #pet-summon-premium .summon-egg .egg-visual{width:100%;height:auto;flex:1;min-height:0}
+#gacha-window #pet-summon-premium .summon-egg .egg-visual img{max-height:100%!important;filter:drop-shadow(0 4px 7px #0009);transform:none;animation:none;transition:opacity 220ms,transform 480ms cubic-bezier(.22,1,.36,1);transition-delay:var(--reveal-delay,0ms)}
+#gacha-window #pet-summon-premium .summon-egg .egg-pet{opacity:0;transform:translateY(8px) scale(.94)}
+#gacha-window #pet-summon-premium .summon-egg.revealed .egg-pet{opacity:1;transform:none;filter:drop-shadow(0 0 9px rgba(var(--egg-rgb),.5))}
+#gacha-window #pet-summon-premium .summon-egg .egg-shell{opacity:1}
+#gacha-window #pet-summon-premium .summon-egg.revealed .egg-shell{opacity:0;transform:translateY(-4px) scale(1.03)}
+#gacha-window #pet-summon-premium .summon-egg .egg-halo{opacity:0!important}
+#gacha-window #pet-summon-premium .summon-egg .egg-flare{display:none!important}
+#gacha-window #pet-summon-premium .summon-egg b{font-size:12px}
+#gacha-window #pet-summon-premium .summon-egg small{font-size:10px}
+#gacha-window #pet-summon-premium .summon-eggs[data-count="1"] b{font-size:24px}
+#gacha-window #pet-summon-premium #pet-ritual-hint{left:5%;right:5%;bottom:2%;font-size:12px}
+#gacha-window #pet-summon-premium #pet-skip{top:10px;right:14px;background:transparent url('assets/gacha-banner199/button-jade.webp') center/100% 100% no-repeat!important;min-height:44px;z-index:10}
+#gacha-window #pet-summon-premium .summon-scene[data-phase=idle] #pet-ritual-hint{display:none}
+@media(prefers-reduced-motion:no-preference){
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) :is([data-phase=waiting],[data-phase=requesting]) .gacha-ritual-aura{animation:ritual-await201 1.6s ease-in-out infinite}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) [data-phase=channeling] .gacha-ritual-focus>img{animation:ritual-gather201 840ms cubic-bezier(.45,0,.55,1) both}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) [data-phase=channeling] .gacha-ritual-ring{animation:ritual-ring201 840ms cubic-bezier(.45,0,.55,1) both}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) [data-phase=channeling] .gacha-ritual-aura{animation:ritual-charge201 840ms cubic-bezier(.45,0,.55,1) both}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) [data-phase=opening] .gacha-ritual-focus>img{animation:ritual-hold201 300ms cubic-bezier(.7,0,1,1) both}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) [data-phase=opening] .gacha-ritual-aura{opacity:.9;transform:scale(1.08)}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) [data-phase=burst] .gacha-ritual-focus>img{animation:ritual-release201 260ms cubic-bezier(.22,1,.36,1) both}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) [data-phase=burst] .gacha-ritual-impact{animation:ritual-impact201 260ms cubic-bezier(.22,1,.36,1) both}
+ #gacha-window #amulet-gacha .amulet-ceremony[data-phase=arriving] .relic-prize{animation:ritual-arrive201 420ms calc(var(--i)*40ms) cubic-bezier(.22,1,.36,1) both}
+ #gacha-window #pet-summon-premium .summon-scene[data-phase=arriving] .summon-egg{animation:ritual-arrive201 420ms var(--arrival-delay,0ms) cubic-bezier(.22,1,.36,1) both}
+}
+@keyframes ritual-await201{50%{opacity:.6;transform:scale(1.02)}}
+@keyframes ritual-gather201{from{transform:translateY(0) scale(1)}to{transform:translateY(-8px) scale(1.025)}}
+@keyframes ritual-ring201{from{opacity:.22;transform:rotate(-16deg) scale(1.12)}to{opacity:.8;transform:rotate(38deg) scale(.94)}}
+@keyframes ritual-charge201{from{opacity:.35;transform:scale(.95)}to{opacity:.8;transform:scale(1.08)}}
+@keyframes ritual-hold201{from{transform:translateY(-8px) scale(1.025)}to{transform:translateY(-8px) scale(.985)}}
+@keyframes ritual-release201{from{opacity:1;transform:translateY(-8px) scale(.985)}to{opacity:0;transform:translateY(-9px) scale(1.045)}}
+@keyframes ritual-impact201{0%{opacity:0;transform:scale(.85)}25%{opacity:.65}100%{opacity:0;transform:scale(1.16)}}
+@keyframes ritual-arrive201{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@media(max-height:550px) and (orientation:landscape){
+ #gacha-window #amulet-gacha .relic-heading{padding:0 10px;min-height:44px;gap:8px}
+ #gacha-window #amulet-gacha .relic-heading h3{font-size:14px}
+ #gacha-window #amulet-gacha .relic-heading small{display:none}
+ #gacha-window #amulet-gacha .relic-footer{padding:5px 10px;min-height:54px}
+ #gacha-window #amulet-gacha .relic-invocation strong{font-size:11px}
+ #gacha-window #amulet-gacha .relic-invocation small{display:none}
+ #gacha-window #amulet-gacha .relic-grid{padding:8px;gap:4px}
+ #gacha-window #amulet-gacha .relic-grid[data-count="10"] .relic-prize{min-height:76px}
+ #gacha-window #amulet-gacha .relic-grid[data-count="10"] .relic-prize-art{width:55px;height:45px}
+ #gacha-window #amulet-gacha .relic-grid[data-count="1"] .relic-prize{min-height:125px;padding:4px!important}
+ #gacha-window #amulet-gacha .relic-grid[data-count="1"] .relic-prize-art{width:130px;height:100px}
+ #gacha-window #pet-summon-premium .summon-eggs{top:2%;bottom:11%;gap:4px 10px}
+ #gacha-window #pet-summon-premium .summon-egg b{font-size:9px}
+ #gacha-window #pet-summon-premium .summon-egg small{font-size:8px}
+ #gacha-window #pet-summon-premium .summon-eggs[data-count="1"] b{font-size:16px}
+ #gacha-window #pet-summon-premium #pet-ritual-hint{font-size:9px}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-focus{inset:1% 22% 12%}
+}
+@media(max-width:600px) and (orientation:portrait){
+ #gacha-window #pet-summon-premium .summon-eggs{left:5%;right:5%;top:8%;bottom:11%;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(5,minmax(68px,1fr));overflow:auto;overscroll-behavior:contain;gap:8px}
+ #gacha-window #pet-summon-premium .summon-eggs[data-count="1"]{top:12%;bottom:15%;left:12%;right:12%;grid-template-columns:1fr;grid-template-rows:1fr}
+ #gacha-window #pet-summon-premium .summon-eggs[data-count="10"] .summon-egg{display:grid;grid-template-columns:45% 55%;grid-template-rows:1fr 1fr;min-height:68px}
+ #gacha-window #pet-summon-premium .summon-eggs[data-count="10"] .egg-visual{grid-row:1/3;grid-column:1;height:100%}
+ #gacha-window #pet-summon-premium .summon-eggs[data-count="10"] .summon-egg b{align-self:end;font-size:9px}
+ #gacha-window #pet-summon-premium .summon-eggs[data-count="10"] .summon-egg small{align-self:start;font-size:8px}
+ #gacha-window #amulet-gacha .relic-grid{padding:10px;gap:6px}
+ #gacha-window #amulet-gacha .relic-grid[data-count="10"] .relic-prize{min-height:115px}
+ #gacha-window #amulet-gacha .relic-heading{padding:6px;gap:4px}
+ #gacha-window #amulet-gacha .relic-heading h3{font-size:14px}
+ #gacha-window #amulet-gacha .relic-heading small{display:none}
+ #gacha-window #amulet-gacha .relic-heading label{font-size:8px}
+ #gacha-window #amulet-gacha .relic-invocation strong{font-size:14px}
+}
+#gacha-window #amulet-gacha .amulet-ceremony[data-reduced=true] *,
+#gacha-window #pet-summon-premium[data-skip-animation=true] *,
+#gacha-window #pet-summon-premium .summon-scene[data-skip=true] *{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) .gacha-ritual-focus{visibility:hidden;opacity:0}
+ #gacha-window :is(#amulet-gacha,#pet-summon-premium) :is(.relic-prize,.summon-egg){animation:none!important;transition:none!important}
+}
+
+/* Keep the gather endpoint through anticipation; the rings must not snap backward. */
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) :is([data-phase=opening],[data-phase=burst]) .gacha-ritual-ring{opacity:.8;transform:rotate(38deg) scale(.94)}
+#gacha-window :is(#amulet-gacha,#pet-summon-premium) [data-phase=burst] .gacha-ritual-aura{opacity:.9;transform:scale(1.08)}

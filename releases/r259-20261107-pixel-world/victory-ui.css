@@ -1,0 +1,87 @@
+/* In-game boss art + shared matte-jade results panel. Portrait phones stack and scroll. */
+#victory-screen{position:fixed;inset:0;z-index:600;font-family:var(--font-game,Mali,Tahoma,system-ui,sans-serif);color:#fff0ce}
+#victory-screen[hidden]{display:none}
+#victory-screen .victory-backdrop{position:absolute;inset:0;background:radial-gradient(ellipse at 28% 58%,#354b2dcc,#07120fe8 70%);animation:victory-fade .35s ease-out}
+#victory-screen .victory-stage{position:relative;box-sizing:border-box;height:100%;max-width:1180px;margin:0 auto;padding:24px 28px;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);grid-template-rows:auto minmax(0,1fr);gap:8px 30px;align-items:start}
+#victory-screen .victory-crest{grid-column:1;position:relative;width:min(100%,460px);justify-self:center;margin:0;animation:victory-drop .5s cubic-bezier(.2,1.4,.4,1)}
+#victory-screen .victory-crest img{display:block;width:100%;aspect-ratio:2/1;filter:drop-shadow(0 6px 18px #000a)}
+#victory-screen .victory-emblem{position:relative;container-type:inline-size}
+/* The lettering belongs to the green inset in the artwork, not the header with its timer. */
+#victory-screen .victory-crest strong{position:absolute;left:28%;right:28%;top:53%;height:14%;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;font-weight:700;font-size:6cqw;line-height:1;color:#ffe9a8;text-shadow:0 1px 0 #6b4310}
+#victory-screen .victory-time{margin:-4px 0 0;text-align:center;font-size:14px;font-weight:500;color:#f6edd6;font-variant-numeric:tabular-nums}
+#victory-screen .victory-boss{grid-column:1;grid-row:2;position:relative;margin:12px auto 0;width:min(100%,420px);height:min(100%,460px);min-height:0;display:flex;flex-direction:column;align-items:center;justify-self:center;isolation:isolate}
+#victory-screen .victory-boss::before{content:'';position:absolute;z-index:-1;left:14%;right:14%;bottom:52px;height:38px;border-radius:50%;background:radial-gradient(ellipse,#020a07a0,transparent 70%)}
+#victory-screen .victory-boss img{display:block;width:100%;height:calc(100% - 64px);min-height:0;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px #0007)}
+#victory-screen .victory-boss[data-awakened="true"] img{filter:drop-shadow(0 0 15px #bd65cf99) drop-shadow(0 8px 12px #0007)}
+#victory-screen .victory-boss figcaption{margin:14px 0 0;text-align:center;font-weight:700;font-size:clamp(16px,2vw,23px);line-height:1.6;color:#ffe5a3;text-shadow:0 2px 5px #000b;overflow-wrap:anywhere}
+#victory-screen .victory-art-message{margin:auto;text-align:center;color:#e8ddbe;font-size:14px}
+#victory-screen .victory-panel{position:relative;grid-column:2;grid-row:1/3;align-self:center;width:100%;height:min(650px,100%);min-height:0;display:flex;flex-direction:column;box-sizing:border-box;animation:victory-fade .4s .15s both}
+#victory-screen .victory-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;padding:0 0 12px;border-bottom:1px solid #d9bd7566}
+#victory-screen .victory-panel-heading h2{margin:0;font-size:23px;line-height:1.5}
+#victory-screen .victory-tabs{display:flex;flex:none;gap:10px;padding:16px 0}
+#victory-screen .victory-tabs button{flex:1;min-width:0;min-height:44px;box-sizing:border-box;font:inherit;font-weight:700;font-size:15px;color:#f5e6bc;border:10px solid transparent;border-image:url('assets/premium-controls202/button-jade.webp') 28% 14% fill / 10px 26px / 0 stretch;background:none;padding:2px 15px;cursor:pointer;touch-action:manipulation}
+#victory-screen .victory-tabs button[aria-selected="true"]{color:#342a17;border-image-source:url('assets/premium-controls202/button-gold.webp')}
+#victory-screen button:focus-visible{outline:2px solid #f1d38c;outline-offset:2px}
+#victory-screen .victory-rewards,#victory-screen .victory-ranking.boss-result-table{flex:1;min-height:0;margin:0;max-height:none;overflow:auto;padding:4px 4px 8px;touch-action:pan-y;overscroll-behavior:contain;scrollbar-color:#c5a55b #173c30}
+#victory-screen [hidden]{display:none!important}
+#victory-screen .victory-mvp{display:flex;align-items:center;gap:18px;padding:16px 12px;border:1px solid #c6a16455;border-radius:12px;background:#102e25b3}
+#victory-screen .victory-face{position:relative;flex:0 0 72px;height:72px;margin-top:14px}
+#victory-screen .victory-face>img:first-child{width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid #e2bd68;background:#0d1d18}
+#victory-screen .victory-crown{position:absolute;left:50%;top:-30px;width:54px;transform:translateX(-50%) rotate(-8deg);filter:drop-shadow(0 2px 4px #000a)}
+#victory-screen .victory-mvp-text{min-width:0;display:grid;gap:2px}
+#victory-screen .victory-mvp-text small{font-size:11px;color:#e3bc68;font-weight:500}
+#victory-screen .victory-mvp-text strong{font-size:21px;font-weight:700;overflow-wrap:anywhere}
+#victory-screen .victory-mvp-text span{font-size:12px;color:#c4d1c2;font-variant-numeric:tabular-nums}
+#victory-screen h3{margin:16px 0 8px;font-size:14px;font-weight:700;color:#e3bc68}
+#victory-screen .victory-empty{margin:0;padding:14px;text-align:center;font-size:13px;color:#b6c3b5;border:1px dashed #c6a16455;border-radius:8px}
+#victory-screen .victory-drops{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+#victory-screen .victory-drop{display:flex;align-items:center;gap:16px;padding:12px 8px;border-bottom:1px solid #c6a16433;animation:victory-fade .4s var(--delay) both}
+#victory-screen .victory-icon{flex:0 0 52px;height:52px;display:block;filter:drop-shadow(0 0 6px var(--glow)) drop-shadow(0 0 2px var(--glow));animation:victory-glow 2s calc(var(--delay) + .4s) ease-in-out infinite}
+#victory-screen .victory-drop-text{min-width:0;display:grid;gap:1px}
+#victory-screen .victory-drop-text strong{font-size:13px;font-weight:700;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#victory-screen .victory-drop-text small{font-size:11px;color:#b6c8b9;overflow-wrap:anywhere}
+#victory-screen .victory-drop-text em{font-style:normal;font-size:10px;color:#f0c27a}
+#victory-screen .victory-drop[data-status="lost"]{opacity:.62}
+#victory-screen .victory-drop[data-status="lost"] .victory-icon{filter:grayscale(.8);animation:none}
+#victory-screen .victory-drop[data-status="lost"] em{color:#f08f7a}
+#victory-screen .victory-close{position:relative;cursor:pointer;z-index:2}
+@keyframes victory-fade{from{opacity:0}to{opacity:1}}
+@keyframes victory-drop{from{opacity:0;transform:translateY(-30px) scale(1.2)}to{opacity:1;transform:none}}
+@keyframes victory-glow{50%{filter:drop-shadow(0 0 11px var(--glow)) drop-shadow(0 0 3px var(--glow))}}
+/* landscape phones: everything smaller, panel scrolls inside */
+@media(max-height:550px) and (orientation:landscape){
+ #victory-screen .victory-stage{padding:8px 12px;gap:2px 12px;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr)}
+ #victory-screen .victory-crest{width:min(100%,220px)}
+ #victory-screen .victory-time{font-size:11px;margin:-6px 0 0}
+ #victory-screen .victory-boss{width:100%;height:100%;margin:0}
+ #victory-screen .victory-boss img{height:calc(100% - 38px)}
+ #victory-screen .victory-boss figcaption{font-size:13px;margin:5px 0 0}
+ #victory-screen .victory-boss::before{bottom:30px}
+ #victory-screen .victory-panel{height:100%;max-height:calc(100dvh - 16px)}
+ #victory-screen .victory-panel-heading{padding-bottom:6px}
+ #victory-screen .victory-panel-heading h2{font-size:18px}
+ #victory-screen .victory-tabs{padding:8px 0}
+ #victory-screen .victory-tabs button{min-height:40px;font-size:13px}
+ #victory-screen .victory-rewards,#victory-screen .victory-ranking.boss-result-table{padding:4px}
+ #victory-screen .victory-mvp{padding:6px 10px}
+ #victory-screen .victory-face{flex-basis:50px;height:50px;margin-top:10px}
+ #victory-screen .victory-crown{width:40px;top:-22px}
+ #victory-screen .victory-mvp-text strong{font-size:16px}
+ #victory-screen h3{margin:8px 0 4px;font-size:12px}
+ #victory-screen .victory-icon{flex-basis:36px;height:36px}
+}
+/* Portrait phones: boss art above the panel; the whole stage scrolls. */
+@media(max-width:700px) and (orientation:portrait){
+ #victory-screen .victory-stage{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 14px 24px;overflow-y:auto;overscroll-behavior:contain}
+ #victory-screen .victory-crest{width:min(86%,340px);flex:none}
+ #victory-screen .victory-boss{width:min(80%,300px);height:260px;flex:none;margin:6px auto 18px}
+ #victory-screen .victory-panel{width:100%;height:auto;flex:none;max-height:none}
+ #victory-screen .victory-rewards,#victory-screen .victory-ranking.boss-result-table{overflow:visible}
+ #victory-screen .victory-close{position:fixed;top:8px;right:8px}
+}
+@media(max-width:360px){
+ #victory-screen .victory-drops{grid-template-columns:minmax(0,1fr)}
+ #victory-screen .victory-mvp-text strong{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){#victory-screen *{animation:none!important}}
+body.victory-open #coach{display:none!important} /* the coach tip paints above everything else */

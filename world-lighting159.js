@@ -12,7 +12,7 @@ const PROFILES={
 };
 export function lightingProfile(map={}){
  const mood=map.instance?'cellar':map.procedural==='mill'?'night':Object.hasOwn(PROFILES,map.mood)?map.mood:'day';
- return {...PROFILES[mood],mood,finish:{blur:5,warmth:PROFILES[mood].warmth,vignette:.42,contrast:1.04,lift:-.012,saturation:1.14,bloom:.22,threshold:.82}};
+ return {...PROFILES[mood],mood,finish:{blur:3.4,warmth:PROFILES[mood].warmth,vignette:.42,contrast:1.04,lift:-.012,saturation:1.14,bloom:.22,threshold:.82}};
 }
 const RECEIVER=/^(Ground|Soil foundation|Cellar foundation|Water surface|Damp canal|Streets|Tracks|Courtyard|Feathered|Earthen rice|Dense low rice canopy|Forest floor|Terrain|Island meadow|Wetland islands|Raised flagstone|Spirit arena paved|Stone moss|Arena inlays)/i;
 function depthFor(material){

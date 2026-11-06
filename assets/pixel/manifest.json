@@ -1,0 +1,70 @@
+{
+ "columns": 6,
+ "rows": 4,
+ "actors": {
+  "novice-male": {
+   "cell": 82,
+   "height": 54
+  },
+  "novice-female": {
+   "cell": 78,
+   "height": 51
+  },
+  "swordsman-male": {
+   "cell": 82,
+   "height": 54
+  },
+  "swordsman-female": {
+   "cell": 85,
+   "height": 56
+  },
+  "lancer-male": {
+   "cell": 78,
+   "height": 51
+  },
+  "lancer-female": {
+   "cell": 76,
+   "height": 50
+  },
+  "hunter-male": {
+   "cell": 79,
+   "height": 52
+  },
+  "hunter-female": {
+   "cell": 78,
+   "height": 51
+  },
+  "boxer-male": {
+   "cell": 81,
+   "height": 53
+  },
+  "boxer-female": {
+   "cell": 76,
+   "height": 50
+  },
+  "rogue-male": {
+   "cell": 79,
+   "height": 52
+  },
+  "rogue-female": {
+   "cell": 76,
+   "height": 50
+  },
+  "shaman-male": {
+   "cell": 79,
+   "height": 52
+  },
+  "shaman-female": {
+   "cell": 78,
+   "height": 51
+  },
+  "acolyte-male": {
+   "cell": 76,
+   "height": 50
+  },
+  "acolyte-female": {
+   "cell": 76,
+   "height": 50
+  }
+ }
+}

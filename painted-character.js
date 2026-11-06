@@ -1,8 +1,9 @@
+import {isPixelClass,pixelCharacter,pixelStanding} from './pixel-art.js';
 import {paintedFrameCalibration,FRAME_SIZE,FRAME_FOOT} from './character-size.js?v=size228';
 import {customizeAtlas} from './character-appearance.js?v=41';
 import {normalizeEquipment,equipmentItem,equipmentAppearance} from './equipment.js?v=41';
 const cache=new Map();
-export function loadPaintedCharacter(classId,appearance={},equipment=null){
+export function loadPaintedCharacter(classId,appearance={},equipment=null){if(isPixelClass(classId))return pixelCharacter(classId);
  const gear=normalizeEquipment(equipment,classId),crafted=equipmentItem(gear.weapon).art==='crafted';
  appearance=equipmentAppearance(appearance,gear,classId);
  const directory=crafted?'equipment41':'animation37';
@@ -31,7 +32,7 @@ export function loadPaintedCharacter(classId,appearance={},equipment=null){
 // A leaderboard needs one standing frame, not forty animation canvases per player.
 // Keep a separate small cache so browsing the board does not evict live avatar animations.
 const standingCache=new Map();
-export function loadPaintedStanding(classId,gender='male',appearance={},equipment=null){
+export function loadPaintedStanding(classId,gender='male',appearance={},equipment=null){if(isPixelClass(classId))return pixelStanding(classId,gender);
  const gear=normalizeEquipment(equipment,classId),directory=equipmentItem(gear.weapon).art==='crafted'?'equipment41':'animation37';
  const styledAppearance=equipmentAppearance(appearance,gear,classId),sex=gender==='female'?'female':'male',key=JSON.stringify([classId,sex,directory,styledAppearance]);
  if(standingCache.has(key))return standingCache.get(key);

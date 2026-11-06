@@ -6,7 +6,7 @@ import {lightingProfile,applyWorldLighting,applyMeadowLighting,createActorLighti
 
 test('all maps select a usable mood while night, cave, cellar and summit keep their own light',()=>{
  const maps=JSON.parse(fs.readFileSync(new URL('../maps/world.json',import.meta.url))).maps;
- for(const map of maps){const p=lightingProfile(map);assert.ok(p.hemi[2]>0&&p.sun[1]>0);assert.equal(p.finish.blur,0);assert.equal(p.offset.length,3);}
+ for(const map of maps){const p=lightingProfile(map);assert.ok(p.hemi[2]>0&&p.sun[1]>0);assert.ok(p.finish.blur>=0);assert.equal(p.offset.length,3);}
  assert.equal(lightingProfile(maps.find(m=>m.id==='moonlit-mill')).mood,'night');assert.equal(lightingProfile(maps.find(m=>m.id==='naga-cave')).mood,'cave');assert.equal(lightingProfile(maps.find(m=>m.id==='kailash-peak')).mood,'summit');assert.equal(lightingProfile({instance:true}).mood,'cellar');
  assert.notEqual(lightingProfile({mood:'night'}).sky,lightingProfile({}).sky);
 });

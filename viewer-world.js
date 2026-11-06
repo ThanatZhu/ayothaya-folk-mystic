@@ -1,3 +1,4 @@
+import {createMeadowGrass} from './meadow-grass.js';
 import {createUpdateNotice} from './update-notice223.js';
 import {createMobileConsumables202} from './mobile-consumables202.js?v=surfaces222';
 import {storyNPCIdentity,storyNPCPlacement} from './npc-identity175.js';
@@ -145,6 +146,7 @@ try {
   }o.material=cache.get(cacheKey);
  }});scene.add(gltf.scene);
  const worldLight=applyWorldLighting({scene,model:gltf.scene,map,sun,hemi,renderer});
+ let grassClock=0;const fieldGrass=createMeadowGrass({renderer,scene,parent:gltf.scene,map,density:map.scene?{low:0,mid:.45,high:1}[readPerf().quality]:0}); // the graphics setting applies from the next map load
  // v2 scenes already contain their trees, props and ground detail: never layer the old procedural set on top.
  const idle={update(){}};if(!map.scene&&!map.pvpArena)createCapitalProps({scene,map});
  const landscapeDetails=map.scene||map.pvpArena?idle:createLandscapeDetails({scene,map});
@@ -270,7 +272,7 @@ try {
    }
    a.sprite.position.set(a.npc.x,a.ground+.06,a.npc.z);
   });
-  flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;followSun(game.world.player);
+  fieldGrass.update(Math.min(.05,t-grassClock),t,game.world.player);grassClock=t;flames.forEach((l,i)=>l.intensity=5.5+Math.sin(t*5+i*3)*.7);motes.position.y=Math.sin(t*.5)*.08;controls.update();$('angle').textContent=`มุมกล้อง ${Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()))}° · ซูม ${Math.round(camera.zoom*100)}%`;followSun(game.world.player);
   const viewDistance=camera.position.distanceTo(controls.target);scene.fog.near=viewDistance+14;scene.fog.far=viewDistance+102; // haze follows the camera (overview moves it 6x further)
   const shake=game.shakeOffset(shakeVector);camera.position.add(shake);actorLighting.update();softLook.render();camera.position.sub(shake);if(firstFrame){firstFrame=false;loading.finish();}
  });

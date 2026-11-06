@@ -1,3 +1,4 @@
+import {isPixelClass,pixelLifeArt} from './pixel-art.js';
 import {FRAME_SIZE,FRAME_FOOT} from './character-size.js?v=size1';
 import {validateAppearance} from './appearance-state.js';
 import {normalizeEquipment,equipmentAppearance} from './equipment.js?v=41';
@@ -74,7 +75,7 @@ export function lifeFrameAt(clip,time=0,reduced=false){
  let end=0;for(let i=0;i<durations.length;i++){end+=durations[i];if(t<end)return i;}
  return clip.frames.length-1;
 }
-export async function loadLifeArt(id,{classId=null,appearance={},equipment=null}={}){
+export async function loadLifeArt(id,{classId=null,appearance={},equipment=null}={}){if(isPixelClass(classId)&&(id===classId+'-male'||id===classId+'-female'))return pixelLifeArt(id,classId,id.endsWith('-female')?'female':'male');
  const reason=lifeAppearanceCompatibility(classId,appearance,equipment);
  if(reason)return {id,clips:{},unavailableReason:reason};
  const variant=lifeAssetVariant(classId,equipment),data=await catalog(variant),entry=data.actors[id];if(!entry)return null;

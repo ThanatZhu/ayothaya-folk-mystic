@@ -415,7 +415,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  for(const name of ['pointerup','pointercancel'])canvas.addEventListener(name,pointerEnd,true);
  canvas.addEventListener('lostpointercapture',e=>{touches.delete(e.pointerId);if(!touches.size)pinchDistance=0;});
- const defaultZoom=()=>innerWidth<700?1.6:1.05;
+ const defaultZoom=()=>innerWidth<700?1.9:1.6;
  camera.zoom=defaultZoom();camera.updateProjectionMatrix();
  const initialOffset=camera.position.clone().sub(controls.target);
  $('reset').onclick=()=>{cancelCameraTurn();controls.target.set(world.player.x,1,world.player.z);camera.position.copy(controls.target).add(initialOffset);camera.zoom=defaultZoom();camera.updateProjectionMatrix();controls.update();};

@@ -78,14 +78,15 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   if(resolved.transition){transitionFlip??=flip;flip=transitionFlip;}else transitionFlip=null;
   const clipDuration=clip?.frameDurations?.reduce((a,b)=>a+b,0)??(clip?.frames.length??0)/(clip?.fps??1);
   const clipTime=action==='attack'&&Number.isFinite(pose.actionPhase)?Math.min(.999999,Math.max(0,pose.actionPhase))*clipDuration:['run','walk'].includes(action)&&Number.isFinite(pose.phase)?(((pose.phase%1)+1)%1)*clipDuration:resolved.time;
-  const lifeIndex=pose.profileFrame?-1:lifeFrameAt(clip,clipTime,pose.reduced);
+  const pixel=!!life?.[loadedGender]?.pixel; // pixel sheets have a real skill row, so skills play the clip instead of a class pose
+  const lifeIndex=pose.profileFrame&&!pixel?-1:lifeFrameAt(clip,clipTime,pose.reduced);
   let frame=Math.max(0,Math.min(FRAME_COUNT-1,Math.round(pose.artFrame??0)));
   // Front/back walk only where that art exists; otherwise the side cycle (with its left/right flip).
   // A class without front/back art: walking falls back to the side cycle, standing to the original idle frame.
   const missing=frames&&frame>=frames[loadedGender].length;if(missing)frame=pose.stand?0:12+(frame-12)%8;
   if(frame>=20&&lifeIndex<0)flip=false; // front/back walk art is drawn facing the camera / away from it
   // 0.119 a skill with its own pose sheet draws it; until it loads, or for gear the sheet cannot show, the class frames play.
-  const skill=pose.skillArt,art=skill&&poseFit&&frames&&!mesh.userData.directional&&loadedClass===currentClass?poseTexture(skill.id,currentClass,currentGender,skill.frame):null;
+  const skill=pixel?null:pose.skillArt,art=skill&&poseFit&&frames&&!mesh.userData.directional&&loadedClass===currentClass?poseTexture(skill.id,currentClass,currentGender,skill.frame):null;
   const selected=!pose.profileFrame&&!resolved.transition&&!mesh.userData.directional&&activeGait()?gaitFrame220({mode:action,phase:pose.phase,time:resolved.time,direction:pose.viewDirection,reduced:pose.reduced}):null;
   const gaitTexture=selected?activeGait().clips[action]?.frames[selected.direction]?.[selected.index]:null;
   mesh.userData.paintedGait217=gaitTexture?selected:null;mesh.userData.paintedGait220=mesh.userData.paintedGait217;
@@ -102,7 +103,7 @@ export function createRiggedSprite(texture,{classId='novice',gender='male',appea
   const breath=pose.reduced?1:['idle','sit','sleep','rest'].includes(action)?1+Math.sin((pose.time??0)*Math.PI*2/(action==='sleep'?4.8:4.1))*.0025:1;
   positions.setXYZ(0,(flip?.5:-.5)*extent,foot*breath,0);positions.setXYZ(1,(flip?-.5:.5)*extent,foot*breath,0);
   positions.setXYZ(2,(flip?.5:-.5)*extent,(foot-extent)*breath,0);positions.setXYZ(3,(flip?-.5:.5)*extent,(foot-extent)*breath,0);// Cosmetic weight transfer follows facing, while combat position and hit range stay unchanged.
-  if(currentClass==='novice'&&!pose.reduced){const dx=(pose.paintOffsetX??0)*(flip?-1:1),dy=pose.paintOffsetY??0;for(let i=0;i<positions.count;i++)positions.setXYZ(i,positions.getX(i)+dx,positions.getY(i)+dy,0);}
+  if(currentClass==='novice'&&!pose.reduced&&!pixel){const dx=(pose.paintOffsetX??0)*(flip?-1:1),dy=pose.paintOffsetY??0;for(let i=0;i<positions.count;i++)positions.setXYZ(i,positions.getX(i)+dx,positions.getY(i)+dy,0);}
   positions.needsUpdate=true;
  };
  mesh.userData.dispose=()=>{if(disposed)return;disposed=true;version++;release();geometry.dispose();material.dispose();};

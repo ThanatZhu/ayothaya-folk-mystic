@@ -14,7 +14,7 @@ export const NOVICE={id:'novice',name:'ผู้ฝึกตน',icon:'✿',role
 export const isClass=id=>id==='novice'||CLASSES.some(c=>c.id===id);
 export function getClass(id='shaman'){const c=id==='novice'?NOVICE:CLASSES.find(c=>c.id===id);if(!c)throw new Error('invalid-class');return c;}
 export const className=(id,gender)=>id==='acolyte'?(gender==='female'?'แม่ชี':'พระ'):getClass(id).name;
-export const atlasPath=id=>'./assets/classes/'+getClass(id).id+(id==='novice'?'-18.png':'-09.png');
+export const atlasPath=id=>'./assets/pixel/'+getClass(id).id+'-atlas.png?v=1';
 // 0.101 Master skills (slots 10-14, skill-progress.js MASTER_FROM): a stronger cast of the strike, area, recover,
 // heavy strike and ultimate, opened when that skill reaches Lv 10. Same type, so motion, art and AUTO carry over.
 export const MASTER_NAMES={

@@ -3,7 +3,7 @@ import {groundHeight} from './combat-core.js?v=surfaces222';
 import {isWaterMaterial} from './water-surface158.js?v=158';
 
 const PROFILES={
- day:{sky:'#cbd1aa',fog:'#d6d7b1',hemi:['#fff5df','#67744f',1.18],sun:['#fff0d9',2.3],offset:[-20,23,14],gain:.52,warmth:.012},
+ day:{sky:'#cbd1aa',fog:'#d6d7b1',hemi:['#fff5df','#67744f',1.2],sun:['#ffe9cc',2.9],offset:[-24,27,14],gain:.52,warmth:.03},
  dusk:{sky:'#626d65',fog:'#748071',hemi:['#ffe3c3','#526052',.92],sun:['#ffd0a0',1.65],offset:[-20,18,14],gain:.65,warmth:.008},
  night:{sky:'#293d48',fog:'#3b5056',hemi:['#bed7e4','#354b46',.82],sun:['#c3ddf2',.95],offset:[-16,26,9],gain:.82,warmth:0},
  cellar:{sky:'#1e2e31',fog:'#283a3b',hemi:['#b2d9d2','#304b43',.95],sun:['#cde6df',.65],offset:[-12,25,10],gain:.9,warmth:0},
@@ -12,7 +12,7 @@ const PROFILES={
 };
 export function lightingProfile(map={}){
  const mood=map.instance?'cellar':map.procedural==='mill'?'night':Object.hasOwn(PROFILES,map.mood)?map.mood:'day';
- return {...PROFILES[mood],mood,finish:{blur:0,warmth:PROFILES[mood].warmth,vignette:.14,contrast:1,lift:0,saturation:.94,bloom:.12,threshold:1.1}};
+ return {...PROFILES[mood],mood,finish:{blur:5,warmth:PROFILES[mood].warmth,vignette:.42,contrast:1.04,lift:-.012,saturation:1.14,bloom:.22,threshold:.82}};
 }
 const RECEIVER=/^(Ground|Soil foundation|Cellar foundation|Water surface|Damp canal|Streets|Tracks|Courtyard|Feathered|Earthen rice|Dense low rice canopy|Forest floor|Terrain|Island meadow|Wetland islands|Raised flagstone|Spirit arena paved|Stone moss|Arena inlays)/i;
 function depthFor(material){

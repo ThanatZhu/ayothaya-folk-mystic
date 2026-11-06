@@ -1,8 +1,9 @@
+import {isPixelClass} from './pixel-art.js';
 import {validateAppearance} from './appearance-state.js';
 // Runtime layers keep the original illustrated sprite and are shared by lobby and game.
 export function customizeAtlas(image,input={},classId='shaman',layout=null){
  const a=validateAppearance(input),c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);c.appearance=a;
- if(Object.values(a).every(v=>v==='original'||v==='none'))return c;
+ if(isPixelClass(classId)||Object.values(a).every(v=>v==='original'||v==='none'))return c; // saved face and hair edits were drawn for the old art
  const anchors={novice:[[53,35],[51,35],[49,35],[54,34]],shaman:[[64,42],[57,42],[49,43],[51,44]],swordsman:[[57,41],[56,41],[51,42],[61,48]],lancer:[[52,44],[51,45],[48,47],[39,55]],hunter:[[57,38],[55,39],[50,40],[45,43]],boxer:[[55,40],[54,41],[51,42],[46,42]],rogue:[[53,42],[51,42],[49,42],[62,56]],acolyte:[[53,36],[51,36],[50,37],[49,39]]};
  const colors={indigo:[73,108,169],crimson:[165,59,68],ivory:[215,200,159],black:[38,34,39],brown:[100,65,45],silver:[163,174,178],green:[60,139,98],blue:[63,122,181]};
  const columns=layout?.columns??4,rows=layout?.rows??2,faceAnchors=layout?.anchors??anchors[classId];

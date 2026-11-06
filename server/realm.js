@@ -2,7 +2,7 @@ import{pvpDamage}from'../pvp223.js';
 import {rapidConsumable} from '../rapid-consumables202.js';
 import {isRankingExcluded} from './ranking-eligibility197.js';
 import {fieldAdventurers,adventurerAt,adventurerViews,adventurerContract,ADVENTURER_TIME} from '../field-adventurers177.js';
-import {prologueJoin,prologueMap,prologueStart,prologueKill,prologueTick,prologueCommand,prologueExit,prologueView,prologueRecord,trialStats} from './prologue-realm.js?v=1';
+import {prologueJoin,prologueMap,prologueStart,prologueKill,prologueTick,prologueCommand,prologueExit,prologueView,prologueRecord,trialStats,isTrialRow} from './prologue-realm.js?v=1';
 import {ARENA_MAP,arenaReservation,arenaView,arenaCommand,cleanArenaRooms,leaveArena,finishArena} from './arena-rooms166.js';
 import {checkWalk,startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} from './auto-walk.js';
 import {normalizeAutoTarget} from '../auto-targets.js';
@@ -745,9 +745,9 @@ export class RealmServer{
  }
  who(p){return {classId:p.character.classId,level:baseProgress(p.world).level,reborn:p.rebirth??0};}
  // Status + worn gear → combat numbers; cheap no-op unless level, class, stats or gear changed.
- // 0.72 leaderboard: best combat power per character (offline characters keep their last entry); top 200 kept.
+ // 0.72 leaderboard: best combat power per character (offline characters keep their last entry); top 200 kept. Never during the prologue: the lent body is not this character.
  rankingExcluded(serverId,key,row){return isRankingExcluded(row,this.leaders.get(serverId)?.[key]);}
- rank(p){const power=combatPower(p.derived,this.who(p).level),board=this.leaders.get(p.serverId)??{},old=board[p.key];
+ rank(p){if(p.trial)return;const power=combatPower(p.derived,this.who(p).level),board=this.leaders.get(p.serverId)??{},old=board[p.key];
   const look={name:p.character.name,classId:p.character.classId,gender:p.character.gender,jobId:p.character.jobId??'',appearance:copy(p.character.appearance??{}),equipment:normalizeEquipment(p.equipment,p.character.classId)};
   // Preserve the exclusion by character key after a rename or a server restart.
   const next={...look,level:this.who(p).level,power,...(isRankingExcluded(p.character,old)?{excludedFromRankings:true}:{})};
@@ -757,7 +757,7 @@ export class RealmServer{
  leaderboard(p){
   // Refresh online cosmetics too: changing clothes does not change combat power.
   for(const peer of this.peers.values())if(peer.serverId===p.serverId)this.rank(peer);
-  const rows=Object.entries(this.leaders.get(p.serverId)??{}).filter(([,v])=>!isRankingExcluded(v)).sort((a,b)=>b[1].power-a[1].power);
+  const rows=Object.entries(this.leaders.get(p.serverId)??{}).filter(([,v])=>!isRankingExcluded(v)&&!isTrialRow(v)).sort((a,b)=>b[1].power-a[1].power);
   const mine=rows.findIndex(([k])=>k===p.key);return {rows:rows.slice(0,10).map(([k,v],i)=>({rank:i+1,me:k===p.key,...v})),me:mine<0?null:{rank:mine+1,...rows[mine][1]},arena:this.arenaView(p)};}
 
  refreshStats(p){

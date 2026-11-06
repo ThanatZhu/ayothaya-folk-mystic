@@ -106,3 +106,12 @@ test('every lent class fights at its height (Lv.80, full boss set) and goes home
   assert.equal(p.trial,null);assert.ok(p.world.player.maxHp<400,'back to a Novice');assert.ok(p.world.player.hp<=p.world.player.maxHp);
  }
 });
+test('the lent body never reaches the power board, and rows it left behind stay hidden until the player returns',()=>{
+ const realm=realmOf(),{p}=join(realm,fresh(),'u-board'),board=()=>realm.leaders.get('server-1')??{};
+ killTraining(realm,p,PROLOGUE_KILLS);Object.assign(p.world.player,{x:teacher().x+1,z:teacher().z});say(realm,p,{action:'class',classId:'shaman'});
+ assert.equal(p.trial,'shaman');const real=board()[p.key]?.power??0;
+ realm.rank(p);realm.record(p,{state:initialSave()});realm.leaderboard(p);
+ assert.equal(board()[p.key]?.power??0,real,'saving or opening the board in the vision keeps the real number');assert.ok(real<5000);
+ realm.leaders.set('server-1',{...board(),left:{name:'Zecro',classId:'novice',level:5,power:15390},ไก่:{name:'ไก่ต้มม',classId:'novice',level:3,power:13698},real:{name:'Mzy',classId:'hunter',level:99,power:18514},farmer:{name:'Farmer',classId:'novice',level:9,power:1641}});
+ assert.deepEqual(realm.leaderboard(p).rows.filter(r=>r.power>1000).map(r=>r.name),['Mzy','Farmer']);
+});

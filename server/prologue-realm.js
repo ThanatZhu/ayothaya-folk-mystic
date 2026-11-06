@@ -51,6 +51,9 @@ function spawnBoss(room){
 export const STARTER_KIT={coins:1000,items:[...STARTER.map(id=>({id,count:1})),{id:'hp-small',count:15},{id:'mp-small',count:10}]};
 // 0.123 owner: the first farm map is Lv.10–22, so the vision ends at Base Lv.10 at least
 export const PROLOGUE_EXIT_LEVEL=10;
+// Rows saved from the lent body before rank() skipped it (Zecro: Lv.5, 15,390). Everyone left the vision at Lv.10+, a real Lv.9 tops out near 1,650 and the lent body starts above 13,000.
+// ponytail: hidden when read, not deleted; the row stays stored until that player returns and rank() overwrites it.
+export const isTrialRow=v=>v?.level<PROLOGUE_EXIT_LEVEL&&v?.power>=5000;
 function starterKit(realm,p){
  realm.grantLoot(p,STARTER_KIT);
  const short=levelStart(PROLOGUE_EXIT_LEVEL)-p.world.baseXp;if(short>0)p.world.emit('experience',awardExperience(p.world,short,0));

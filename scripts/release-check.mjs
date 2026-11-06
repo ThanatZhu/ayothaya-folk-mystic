@@ -29,7 +29,8 @@ ok('git','based on the newest frontend-live');
 
 const release=JSON.parse(readFileSync(path.join(root,'release.json'),'utf8'));
 try{await verifyReleases(root);}catch(e){stop('release',e.message);}
-if(git('rev-parse','HEAD')!==git('rev-parse',BASE)&&JSON.parse(git('show',BASE+':release.json')).id===release.id)stop('release',`${release.id} is already on frontend-live: choose a new id and freeze`);
+const players=git('diff','--name-only',BASE,'HEAD').split('\n').filter(f=>f&&!/^(server|tests|docs|scripts)\//.test(f)); // a server-only change sends players no new frontend, so it keeps the id
+if(players.length&&JSON.parse(git('show',BASE+':release.json')).id===release.id)stop('release',`${release.id} is already on frontend-live: choose a new id and freeze`);
 ok('release',release.id);
 
 const rules=runTests(['tests/game-rules-matrix.test.mjs','tests/gear-class-lock.test.mjs','tests/farm-card-warp254.test.mjs','tests/i18n.test.mjs']);

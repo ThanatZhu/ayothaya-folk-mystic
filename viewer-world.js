@@ -96,7 +96,7 @@ try {
  let worldUI=null,multiplayer=null,overview=false;
 
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}); // 0.80 ask for the dedicated GPU on dual-GPU laptops
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.domElement.style.imageRendering='pixelated'; // any lowered resolution stays crisp pixels instead of a blur
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NeutralToneMapping;renderer.toneMappingExposure=1.16;
  renderer.domElement.setAttribute('aria-label',map.name+' · ฉากเมืองหมุนกล้องได้ เดินด้วย WASD หรือจอยสัมผัส');document.getElementById('game-shell').prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color('#d3dcc4');scene.fog=new THREE.Fog('#d9dfcb',62,150); // soft haze toward the far (top) edge

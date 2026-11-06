@@ -8,7 +8,7 @@ export const QUALITY={
  // ratio = sharpest render scale, min = how far the automatic resolution may drop to hold the frame rate
  low:{label:'ต่ำ · ลื่นสุด',ratio:.8,min:.5,shadows:false,soft:false,meadow:'low',light:true},
  mid:{label:'กลาง',ratio:1,min:.6,shadows:true,soft:true,meadow:'low'},
- high:{label:'สูง · สวยสุด',ratio:1.5,min:.75,shadows:true,soft:true,meadow:'high'},
+ high:{label:'สูง · สวยสุด',ratio:1.5,min:1,shadows:true,soft:true,meadow:'high'},
 };
 const phone=()=>matchMedia('(pointer:coarse),(max-width:900px)').matches;
 export function readPerf(){
@@ -46,7 +46,7 @@ export function createPerfSettings({renderer,scene,sun,softLook,resize,onApply=(
  // Automatic resolution: every 2 s compare the drawn frame rate with the goal (28 under a 30 cap, else 55). Too slow:
  // render 10% fewer pixels per side, down to the level's floor. Comfortably fast again: creep back up 5%.
  function adapt(ms){
-  if(windowStart<0){windowStart=ms;drawn=0;return;}drawn++;if(ms-windowStart<2000)return;
+  if(globalThis.document?.hidden){windowStart=-1;return;}if(windowStart<0){windowStart=ms;drawn=0;return;}drawn++;if(ms-windowStart<2000)return;
   const fps=drawn*1000/(ms-windowStart),goal=state.fps===30?28:55,before=ratio();windowStart=ms;drawn=0;
   // Bloom adds thirteen full-screen passes. Drop it first after a slow window;
   // keep the selected lighting, colour grade and player preference unchanged.

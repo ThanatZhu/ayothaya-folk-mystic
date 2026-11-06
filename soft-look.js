@@ -10,11 +10,11 @@ import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 // signs and labels near the screen edges stay readable), lifted shadows,
 // slightly lower contrast, warm highlights and a light vignette.
 const SoftLookShader={
- uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(1,1)},focus:{value:.48},band:{value:.17},blur:{value:1.3},warmth:{value:.05},vignette:{value:.32},contrast:{value:.93},lift:{value:.04},saturation:{value:1},cell:{value:1}},
+ uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(1,1)},focus:{value:.48},band:{value:.32},blur:{value:1.3},warmth:{value:.05},vignette:{value:.32},contrast:{value:.93},lift:{value:.04},saturation:{value:1},cell:{value:1}},
  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
  fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 resolution;uniform float focus,band,blur,warmth,vignette,contrast,lift,saturation,cell;varying vec2 vUv;
  void main(){
-  vec2 uv=cell>1.?(floor(vUv*resolution/cell)+.5)*cell/resolution:vUv; // the world snaps to the same chunky pixels as the characters
+  vec2 uv=cell>1.?(floor(vUv*resolution/cell)*cell+.5)/resolution:vUv; // the world snaps to the same chunky pixels as the characters
   vec3 c=texture2D(tDiffuse,uv).rgb;
   float amount=smoothstep(band,band+.3,abs(vUv.y-focus))*blur;
   if(amount>.05){

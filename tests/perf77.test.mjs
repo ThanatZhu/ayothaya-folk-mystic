@@ -22,7 +22,7 @@ test('automatic resolution drops when frames are slow, never below the level flo
  store.set('ayothaya-perf',JSON.stringify({fps:60,quality:'high'}));const r=fake();let resized=0;
  const perf=createPerfSettings({renderer:r,scene:{traverse(){}},sun:{},softLook:{setEnabled(){}},resize(){resized++;}});assert.equal(r.ratio,1.5);
  let t=0;for(;t<20000;t+=50)perf.shouldDraw(t); // 20 FPS for 20 s
- assert.equal(r.ratio,.75);assert.ok(resized>1);
+ assert.equal(r.ratio,1);assert.ok(resized>1); // the high level keeps the screen's own resolution so pixel art stays sharp
  for(const end=t+60000;t<end;t+=1000/60)perf.shouldDraw(t); // smooth 60 FPS again
  assert.equal(perf.renderScale,1);assert.equal(r.ratio,1.5);
 });

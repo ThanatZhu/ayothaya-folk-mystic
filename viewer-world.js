@@ -129,7 +129,7 @@ try {
  function setView(id){
   const name=VIEWS[id]?id:'2.5D',view=VIEWS[name],radius=camera.position.distanceTo(controls.target);rotating=null;controls.enableRotate=!!view.free;
   controls.minPolarAngle=controls.maxPolarAngle=view.polar;camera.position.setFromSphericalCoords(radius,view.polar,view.free?controls.getAzimuthalAngle():HOME_AZIMUTH).add(controls.target);controls.update();
-  $('left').disabled=$('right').disabled=$('tilt').disabled=!view.free;const shown=$('view-switch');if(shown)shown.textContent=name;
+  $('left').disabled=$('right').disabled=$('tilt').disabled=!view.free;const shown=$('view-switch');if(shown){shown.textContent=name;shown.dataset.view=name;}
   try{localStorage.setItem(VIEW_KEY,name);}catch{}
  }
  function mountViewSwitch(){

@@ -101,5 +101,8 @@ body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #auto-a
 body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #attack{position:absolute!important;inset:auto!important;left:158px!important;top:132px!important;width:68px!important;height:68px!important}
 body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills .skill[data-mobile-away]{display:none!important}
 @media(orientation:landscape){body.actionbar-mobile.mobile-play.field-hud.hud63 #online-dock.collapsed{right:calc(var(--edge-r) + 252px)!important;max-width:560px!important}}
-#view-switch{width:70px;height:36px;min-height:36px;padding:0 4px;font:700 13px var(--font-game);font-variant-numeric:tabular-nums;color:#fff0ce;border:1px solid #c6a16488;border-radius:10px;background:linear-gradient(135deg,#24382bf4,#152925f0);cursor:pointer;align-self:flex-start;z-index:40}
-body:not(.actionbar-desktop) #view-switch{position:fixed;right:max(8px,env(safe-area-inset-right));top:50%}
+#view-switch{width:44px;height:44px;min-height:44px;margin:0 0 0 10px;padding:0;font-size:0;border:0;background:center/contain no-repeat;cursor:pointer;align-self:flex-start;z-index:40;filter:drop-shadow(0 1px 2px #0008)}
+#view-switch[data-view="2D"]{background-image:url(assets/ui-view/view-2d.png?v=1)}
+#view-switch[data-view="2.5D"]{background-image:url(assets/ui-view/view-2-5d.png?v=1)}
+#view-switch[data-view="3D"]{background-image:url(assets/ui-view/view-3d.png?v=1)}
+body:not(.actionbar-desktop) #view-switch{margin:0;position:fixed;right:max(8px,env(safe-area-inset-right));top:50%}

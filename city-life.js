@@ -5,6 +5,7 @@ import {groundHeight} from './combat-core.js?v=surfaces222';
 import {WORLD_BODY_HEIGHT} from './character-size.js?v=size1';
 import {citizenBodyHeight} from './npc-size.js?v=size1';
 import {lazyFrames} from './character-life-art.js?v=106.0';
+import {pixelNPCArt} from './pixel-npc.js';
 import {loadNPCLife,applyNPCLife,stationaryNPCAction,resetNPCLife,npcLifeFlip,npcLifePreservesGesture} from './npc-life-animation.js?v=chuk175';
 const tr=s=>globalThis.I18N?.t(s)??s;
 
@@ -44,7 +45,7 @@ export async function createCityLife({scene,map,shadow,paving}){
   sprite.userData.npc=n;if(n.citizen)sprite.userData.citizenId=n.id;
   const walk=n.citizen?createCitizenMotion(n,Date.now()/1000+n.offset):null;if(walk){n.x=walk.pose.x;n.z=walk.pose.z;}
   n.visualHeight=WORLD_BODY_HEIGHT;
-  const life=await loadNPCLife(`${n.sheet}-${n.row}`);
+  const art=pixelNPCArt(n),life=(art&&await loadNPCLife(art))||await loadNPCLife(`${n.sheet}-${n.row}`);
   return {n,frames,bodyHeight,sprite,walk,life,shadow:shadow(n.x,-n.z,.38),frame:-1,flip:false};
  }));
  // v2 scenes model their own sparring court; the painted floor only dresses the legacy capital.

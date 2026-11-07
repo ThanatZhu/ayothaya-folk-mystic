@@ -1,7 +1,8 @@
 import {createMeadowGrass} from './meadow-grass.js';
 import {createUpdateNotice} from './update-notice223.js';
 import {createMobileConsumables202} from './mobile-consumables202.js?v=surfaces222';
-import {storyNPCIdentity,storyNPCPlacement} from './npc-identity175.js';
+import {storyNPCIdentity,storyNPCPlacement,framePlacement} from './npc-identity175.js';
+import {pixelNPCArt} from './pixel-npc.js';
 import {createArenaStage} from './arena-stage166.js';
 import {createArenaUI} from './arena-ui166.js?v=profile171';
 import {createAnnouncementUI} from './announcement-ui.js?v=fit208';
@@ -199,11 +200,13 @@ try {
  };
 
  for(const n of map.npcs.filter(n=>!n.mentorId)){
-  const identity=storyNPCIdentity(n),life=await loadNPCLife(identity?.id??`people-${n.texture}`);
-  const tex=identity?(life?.clips.idle.frames[0]??await loader.loadAsync(identity.standing)):personTextures[n.texture];if(identity){tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;}
-  const p=storyNPCPlacement(n)??peoplePlacement(n.texture,tex.image.width,tex.image.height);
+  // A pixel strip wins; without one (or if it fails to load) the NPC keeps its older artwork.
+  const art=pixelNPCArt(n),pixel=art?await loadNPCLife(art):null;
+  const identity=pixel?null:storyNPCIdentity(n),life=pixel??await loadNPCLife(identity?.id??`people-${n.texture}`);
+  const tex=pixel?pixel.clips.idle.frames[0]:identity?(life?.clips.idle.frames[0]??await loader.loadAsync(identity.standing)):personTextures[n.texture];if(identity){tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;}
+  const p=pixel?framePlacement(pixel.worldScale):storyNPCPlacement(n)??peoplePlacement(n.texture,tex.image.width,tex.image.height);
   const ground=groundHeight(map.nav,n.x,n.z),actor=sprite(tex,n.x,-n.z,p.width,p.height,ground+.06);actor.center.set(p.centerX,p.centerY);
-  n.visualHeight=WORLD_BODY_HEIGHT*(identity?.worldScale??1);actor.userData.npc=n;
+  n.visualHeight=WORLD_BODY_HEIGHT*((pixel??identity)?.worldScale??1);actor.userData.npc=n;
   const shade=shadow(n.x,-n.z,.4);shade.position.y=ground+.072;
   characters.push({sprite:actor,shadow:shade,height:p.height,ground,npc:n,basePlacement:p,baseTexture:tex,life});
  }

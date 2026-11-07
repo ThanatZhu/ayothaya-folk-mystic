@@ -1,4 +1,5 @@
 import {dialogueFor,sameObjective,storyPortrait} from './story-dialogue.js?v=chuk175';
+import {pixelNPCArt,pixelNPCStanding} from './pixel-npc.js';
 
 // Reading/asking never mutates progress; only the explicit final response calls complete.
 export function createStoryDialogue({game,worldUI,objective,state,complete}){
@@ -30,6 +31,7 @@ export function createStoryDialogue({game,worldUI,objective,state,complete}){
    if(dialog.open)close();active={obj,data,n,index:{quest:state().quest,step:state().step}};page=0;sent=false;
    game.cancelWalk?.();game.clearInput();game.world.setAuto?.(false);
    const portrait=storyPortrait(n);$('portrait').hidden=false;$('npc').alt=portrait.alt;$('npc').onerror=()=>{$('portrait').hidden=true;};$('npc').src=portrait.src;
+   const pixelArt=pixelNPCArt(n);if(pixelArt)pixelNPCStanding(pixelArt).then(c=>{if($('npc').alt===portrait.alt)$('npc').src=c.toDataURL();}).catch(()=>{});
    const art=data.art;$('art').hidden=false;$('image').alt=art.alt;$('image').onerror=()=>{$('art').hidden=true;};if($('image').getAttribute('src')!==art.src)$('image').src=art.src;
    $('chapter').textContent=obj.quest.chapter??'บทที่ 1 · ประทีปที่ดับพร้อมกัน';$('name').textContent=n.name;$('title').textContent=obj.quest.title;
    render();dialog.showModal();$('next').focus();return true;

@@ -2,10 +2,13 @@
 import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE,CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
 export const CHAO_CHUK=Object.freeze({id:'chao-chuk175',name:'เจ้าจุก',worldScale:.78,standing:'./assets/npc175/chao-chuk-standing.png',portrait:'./assets/npc175/chao-chuk-portrait.webp',metadata:'./assets/npc175/chao-chuk.json'});
 export const storyNPCIdentity=n=>n?.name===CHAO_CHUK.name?CHAO_CHUK:null;
-export function storyNPCPlacement(n){
- const art=storyNPCIdentity(n);if(!art)return null;
- const size=FRAME_SIZE/LOGICAL_SIZE*CHARACTER_WORLD_SCALE*art.worldScale;
+// A square player-sized frame, feet on FRAME_FOOT (story identities and pixel townspeople).
+export function framePlacement(worldScale=1){
+ const size=FRAME_SIZE/LOGICAL_SIZE*CHARACTER_WORLD_SCALE*worldScale;
  return {width:size,height:size,centerX:.5,centerY:(FRAME_SIZE-FRAME_FOOT)/FRAME_SIZE};
+}
+export function storyNPCPlacement(n){
+ const art=storyNPCIdentity(n);return art?framePlacement(art.worldScale):null;
 }
 let pending;
 export function loadStoryNPCLife(id){

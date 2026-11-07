@@ -1,4 +1,5 @@
 import {loadStoryNPCLife} from './npc-identity175.js';
+import {isPixelNPCArt,pixelNPCLife} from './pixel-npc.js';
 import * as THREE from 'three';
 import {loadLifeArt,lifeFrameAt,mapFrames} from './character-life-art.js?v=106.0';
 import {FRAME_SIZE,FRAME_FOOT,LOGICAL_SIZE,CHARACTER_WORLD_SCALE} from './character-size.js?v=size1';
@@ -7,12 +8,12 @@ import {createPosturePlayback} from './character-action-state.js?v=106.0';
 const cache=new Map(),flipped=new WeakMap(),owned=new Set(),postures=new WeakMap();
 if(typeof addEventListener==='function')addEventListener('pagehide',()=>{owned.forEach(t=>t.dispose());owned.clear();cache.clear();});
 export function loadNPCLife(id){
- if(!cache.has(id))cache.set(id,(loadStoryNPCLife(id)??loadLifeArt(id)).then(art=>{
+ if(!cache.has(id))cache.set(id,(isPixelNPCArt(id)?pixelNPCLife(id):loadStoryNPCLife(id)??loadLifeArt(id)).then(art=>{
   if(!art)return null;
   const textures=new Map(),texture=canvas=>{
    if(!textures.has(canvas)){
     const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;
-    t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;textures.set(canvas,t);owned.add(t);
+    t.magFilter=t.minFilter=art.pixel?THREE.NearestFilter:THREE.LinearFilter;t.generateMipmaps=false;textures.set(canvas,t);owned.add(t);
    }
    return textures.get(canvas);
   };

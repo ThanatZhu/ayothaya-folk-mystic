@@ -1,16 +1,22 @@
-# blender -b -P scripts/build-pixel-monsters.py -- <sheets_dir> <out_dir>
+# blender -b -P scripts/build-pixel-monsters.py -- <sheets_dir> <out_dir> [npc]
 # Turns the 8-pose monster sheets (1536x1024, 4x2 cells of 384x512, magenta background) into one strip per monster:
 # drops the background, snaps every 4 px block to one colour, shares a small palette, stands every pose on the same line.
 import bpy, sys, os, json
 import numpy as np
 
-src, out = map(os.path.abspath, sys.argv[sys.argv.index('--') + 1:][:2])
+args = sys.argv[sys.argv.index('--') + 1:]
+src, out = map(os.path.abspath, args[:2])
+# NPC sheets (np-*.png) are people: each strip cell is the player frame (character-size.js), so a body is drawn
+# exactly as tall as a hero's and the game scales it like one. Monsters keep a tight cell and their own size.
+NPC = 'npc' in args[2:]
+BODY_HEIGHT, FRAME_SIZE, FRAME_FOOT = 210, 320, 276
 os.makedirs(out, exist_ok=True)
 COLUMNS, ROWS, BLOCK, CELL_W, CELL_H = 4, 2, 4, 96, 128    # a sheet cell is 96 x 128 logical pixels
 PALETTE, SPECK = 32, 6
 # Monster type id -> sheet. A type's world size stays in MONSTER_TYPES; the strip only says how tall its body is.
-TYPES = {'straw': 'pm-straw', 'rat': 'pm-rat', 'hopper': 'pm-hopper', 'rat-chief': 'pm-rat-chief',
-         'rat-chief-awakened': 'pm-rat-chief', 'rice-world-guardian': 'pm-rice-guardian'}
+# Variants share their base monster's sheet; the list lives next to this script.
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pixel-monster-types.json')) as f:
+    TYPES = json.load(f)
 
 
 def load(path):
@@ -97,6 +103,8 @@ def build(name):
     # Pinned by its centre of mass and its soles, so the walk does not jitter and the lunge still reaches.
     middles = [int(round(p[:, 1].mean())) for p in poses]
     feet = [p[:, 0].max() for p in poses]
+    if NPC:
+        return place(name, poses, middles, feet, colour)
     reach = max(max(p[:, 1].max() - m, m - p[:, 1].min()) for p, m in zip(poses, middles))
     tall = max(f - p[:, 0].min() for p, f in zip(poses, feet)) + 1
     cell = int(max(2 * reach + 2, tall))
@@ -108,6 +116,32 @@ def build(name):
     save(os.path.join(out, name + '.png'), strip.astype(np.float32))
     return {'cell': cell, 'body': int(feet[0] - poses[0][:, 0].min() + 1)}
 
+
+def place(name, poses, middles, feet, colour):
+    body = int(feet[0] - poses[0][:, 0].min() + 1)
+    cell = int(round(FRAME_SIZE * body / BODY_HEIGHT))
+    foot = int(round(FRAME_FOOT * cell / FRAME_SIZE))
+    strip = np.zeros((cell, cell * COLUMNS * ROWS, 4), np.uint8)
+    lost = 0
+    for i, (p, middle, f) in enumerate(zip(poses, middles, feet)):
+        for y, x in p:
+            ty, tx = y - f + foot - 1, x - middle + cell // 2
+            if 0 <= ty < cell and 0 <= tx < cell:
+                strip[ty, i * cell + tx] = (*colour[y, x], 255)
+            else:
+                lost += 1
+    if lost:
+        print('WARN', name, lost, 'pixels outside the frame')
+    save(os.path.join(out, name + '.png'), strip.astype(np.float32))
+    return {'cell': cell, 'body': body}
+
+
+if NPC:
+    names = sorted(f[:-4] for f in os.listdir(src) if f.startswith('np-') and f.endswith('.png'))
+    with open(os.path.join(out, 'npcs.json'), 'w') as f:
+        json.dump({name: build(name) for name in names}, f, indent=1)
+    print('DONE', len(names))
+    sys.exit(0)
 
 sheets = {name: build(name) for name in sorted(set(TYPES.values()))}
 with open(os.path.join(out, 'monsters.json'), 'w') as f:

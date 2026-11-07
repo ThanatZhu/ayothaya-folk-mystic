@@ -3,15 +3,16 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {CHAO_CHUK,storyNPCIdentity,storyNPCPlacement,loadStoryNPCLife} from '../npc-identity175.js';
 import {npcActorId} from '../npc-portrait155.js';
+import {pixelNPCArt} from '../pixel-npc.js';
 import {storyPortrait} from '../story-dialogue.js';
 import {FRAME_SIZE,FRAME_FOOT,CHARACTER_WORLD_SCALE,LOGICAL_SIZE} from '../character-size.js';
 const world=JSON.parse(await readFile(new URL('../maps/world.json',import.meta.url),'utf8'));
 const chuk=world.maps.find(m=>m.id==='ayutthaya').npcs.find(n=>n.name==='เจ้าจุก');
 
 test('Chao Chuk owns a child identity, without changing the shared merchant identity or quest coordinates',()=>{
- assert.deepEqual([chuk.x,chuk.z],[35.5,22]);assert.equal(storyNPCIdentity(chuk),CHAO_CHUK);assert.equal(npcActorId(chuk),CHAO_CHUK.id);
+ assert.deepEqual([chuk.x,chuk.z],[35.5,22]);assert.equal(storyNPCIdentity(chuk),CHAO_CHUK);assert.equal(npcActorId(chuk),'np-chao-chuk'); // the pixel strip wins; the identity stays as its fallback
  assert.equal(storyPortrait(chuk).src,CHAO_CHUK.portrait);
- for(const name of ['แม่บัว','จ้อย','ผู้ขายดอกไม้']){const n={name,texture:2};assert.equal(storyNPCIdentity(n),null);assert.equal(npcActorId(n),'people-2');assert.equal(storyPortrait(n).src,'./assets/story124/npc-2.webp');}
+ for(const name of ['แม่บัว','จ้อย','ผู้ขายดอกไม้']){const n={name,texture:2};assert.equal(storyNPCIdentity(n),null);assert.equal(npcActorId(n),pixelNPCArt(n)??'people-2');assert.equal(storyPortrait(n).src,'./assets/story124/npc-2.webp');}
  assert.equal(storyNPCPlacement({texture:2}),null);assert.equal(loadStoryNPCLife('people-2'),null);
 });
 

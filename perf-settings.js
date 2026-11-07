@@ -23,6 +23,14 @@ export function gpuName(gl){try{const d=gl.getExtension('WEBGL_debug_renderer_in
 const text=String(raw),parts=text.startsWith('ANGLE (')?text.slice(7,-1).split(', '):[text];
 return (parts[1]??parts[0]).replace(/\s*\(0x[0-9a-f]+\).*$/i,'').replace(/\s*Direct3D.*$/i,'').trim();}catch{return '';}}
 export const integratedGpu=name=>/intel|radeon\(tm\) graphics|radeon graphics|vega \d+ graphics/i.test(name)&&!/\barc\b/i.test(name);
+// 0.124 the cap keeps its own clock: resetting it to the draw time drew every 3rd frame of a 144 Hz screen (48 FPS)
+// and every 6th once a frame ran late (24). Stepping it by whole intervals averages the cap on any refresh rate.
+// Returns the cap's new clock when this frame should draw, else null.
+export function frameDue(ms,last,fps){
+ if(!fps)return ms;
+ const interval=1000/fps;if(ms-last<interval-1)return null;
+ return ms-last>interval*2?ms:last+interval; // far behind (a stall, a hidden tab): start over instead of rushing
+}
 export function createPerfSettings({renderer,scene,sun,softLook,resize,onApply=()=>{}}){
  const state=readPerf();let last=-Infinity,scale=1,windowStart=-1,drawn=0;
  const ratio=()=>{const q=QUALITY[state.quality],top=Math.min(devicePixelRatio,q.ratio);return Math.max(Math.min(q.min,top),top*scale);};
@@ -61,7 +69,7 @@ export function createPerfSettings({renderer,scene,sun,softLook,resize,onApply=(
   get fps(){return state.fps;},get quality(){return state.quality;},
   // Called with the animation-loop timestamp; false means skip this frame entirely. The 1 ms slack keeps a 60 Hz
   // screen at 60 when the cap is 60 (vsync timestamps jitter around 16.67 ms).
-  shouldDraw(ms){if(state.fps&&ms-last<1000/state.fps-1)return false;last=ms;adapt(ms);return true;},
+  shouldDraw(ms){const next=frameDue(ms,last,state.fps);if(next===null)return false;last=next;adapt(ms);return true;},
   get renderScale(){return scale;},
   mount(box){
    const wrap=document.createElement('div');wrap.className='perf-settings';

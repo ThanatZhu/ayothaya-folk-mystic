@@ -19,6 +19,7 @@ import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=farm212';
 import {jobProgress,migrateXp,XP_CURVE} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=icons117';
 import {presentationDelta,roleTiming} from './combat-timing.js';
+import {hitFeel,impactPush,deathFlight,KILL_STOP,KILL_KICK} from './hit-feel.js';
 import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS,ROLE_GROUND_KINDS,ROLE_GLOBAL_CD,skillInReach} from './role-combat.js';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,reconcileEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=106.0';
@@ -143,6 +144,15 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(e.type==='damage'&&typeof e.id==='string'){const id=e.id;return {key:id,pos:()=>{const f=world.foes?.().find(o=>o.id===id);const x=f?.x??e.x,z=f?.z??e.z;return {x,y:2.2+groundHeight(world.nav,x,z),z};}};}
   if(['playerHit','heal','dodge'].includes(e.type))return {key:'self',pos:()=>({x:world.player.x,y:2.2+hero.sprite.position.y,z:world.player.z})};
   return {key:'at'+Math.round(e.x)+':'+Math.round(e.z),pos:()=>({x:e.x,y:1.9+groundHeight(world.nav,e.x,e.z),z:e.z})};
+ }
+ // The blow lands: its number, then how hard it feels (hit-feel.js).
+ let hitStopUntil=0,lastStopAt=0;
+ function hitStop(seconds){if(motionPreference.matches||wall()-lastStopAt<.2)return;lastStopAt=wall();hitStopUntil=lastStopAt+seconds;}
+ function landHit(e){
+  popup(e);const m=Number.isInteger(e.id)?world.mobs[e.id]:null,v=mobViews[e.id],crit=!!e.crit||e.color==='#ffd27a';
+  const feel=hitFeel({amount:e.amount,crit,maxHp:m?.maxHp,armor:!!(m&&MONSTER_TYPES[m.type].boss)});if(!feel)return;
+  kick=Math.max(kick,feel.kick);hitStop(feel.stop);if(!v||!m)return;
+  const p=world.player,d=Math.hypot(m.x-p.x,m.z-p.z)||1;v.flashAt=world.time;v.flashFor=feel.flash;v.impact={at:world.time,push:feel.push,stop:feel.stop,x:(m.x-p.x)/d,z:(m.z-p.z)/d};if(feel.hurt)v.hurtUntil=world.time+.22;
  }
  function popup(e,positive=false,anchor=anchorOf(e)){
   const mob=Number.isInteger(e.id)?world.mobs[e.id]:null;
@@ -312,7 +322,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(e.type==='cast'){playCast(e);
   }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(e.source!=='spirit'&&!e.synced&&strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);
   }else if(e.type==='roleRelease'){if(!e.actor||e.actor===network?.id)retimeRoleAnimation(roleClip,e,roleEffects.time);roleEffects.hit(e);
-  }else if(e.type==='damage'){roleEffects.hit(e);const v=mobViews[e.id];if(e.source!=='spirit'&&!e.synced&&strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else{popup(e);if(v)v.flashAt=world.time;if(e.crit||e.color==='#ffd27a')kick=Math.max(kick,1);}}
+  }else if(e.type==='damage'){roleEffects.hit(e);const v=mobViews[e.id];if(e.source!=='spirit'&&!e.synced&&strikeAt>world.time){heldHits.push({at:strikeAt,e});if(v)v.holdUntil=strikeAt;}else landHit(e);}
   else if(e.type==='heal'){popup(e,true);}
   else if(e.type==='knock'){kick=Math.max(kick,1.4);if(network)world.knock={vx:e.vx,vz:e.vz,t:e.t};} // 0.111 boss slam: shake and slide back (online: mirror the server's slide)
   else if(e.type==='playerHit'){hitUntil=world.time+.28;hitStart=world.time;popup({...e,hurt:true});if(e.amount>=world.player.maxHp*.2)kick=Math.max(kick,.8);hero.sprite.material.color.set('#ff7a6a');hitTintUntil=world.time+.45;}
@@ -460,11 +470,11 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }else if(!paused||walker.active||arrivalPending)world.update(dt,steering);
   if(arrivalPending&&!document.hidden&&!isPaused()){const done=arrivalPending;arrivalPending=null;questAutoRun=false;done.opts.onArrive?.();}
   if(network&&world.auto&&!paused)predictAuto(dt);
-  roleUI.update();roleEffects.advance(visualDt);
+  const hanging=wall()<hitStopUntil;if(hanging)actionStart+=visualDt;roleUI.update();roleEffects.advance(hanging?0:visualDt);
   world.events.splice(0).forEach(e=>{e=ageQueuedCombatEvent(e,wall());effect(e);for(const fn of listeners)fn(e);});
   roleDecor.update(visualDt);
   const roleShake=roleEffects.update(0);
-  if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;popup(h.e);const v=mobViews[h.e.id];if(v&&h.e.amount!=='MISS')v.flashAt=now;if(h.e.crit||h.e.color==='#ffd27a')kick=Math.max(kick,1);return false;});}
+  if(heldHits.length){const now=world.time;heldHits=heldHits.filter(h=>{if(h.at>now+.6)h.at=now;if(h.at>now)return true;landHit(h.e);return false;});}
   const p=world.player,t=world.time,reduced=motionPreference.matches;
   if(p.moving||t<hitUntil||p.hp<=0)world.clearEmote();world.emote=activeEmote(world.emote,t);
   drawGroundAim(p);
@@ -513,19 +523,19 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   mobViews.forEach((v,i)=>{
    const m=world.mobs[i],type=MONSTER_TYPES[m.type];
    const held=v.holdUntil>t; // 1.10 still standing until the blow lands
-   if(m.hp<=0&&v.deathStart===null&&!held)v.deathStart=t;if(m.hp>0)v.deathStart=null;
+   if(m.hp<=0&&v.deathStart===null&&!held){v.deathStart=t;if(t-(v.impact?.at??-9)<1){kick=Math.max(kick,KILL_KICK);hitStop(KILL_STOP);}}if(m.hp>0)v.deathStart=null;
    const deadAge=v.deathStart===null?0:t-v.deathStart,visible=m.hp>0||held||deadAge<1.25;
    v.sprite.visible=v.shadow.visible=visible;v.label.hidden=m.hp<=0&&!held;v.warning.visible=m.hp>0&&m.windup>0;
    {const b=MONSTER_BEHAVIOUR[type.id],slam=m.slamming&&b?.slam,charge=Math.min(1,Math.max(0,1-(m.windup??0)/(slam?slam.windup:b?.windup??type.windup??.45))),aoe=!!b?.aoe||!!slam,grow=slam?slam.radius/(b.aoe??type.reach??1.35):1;v.warning.position.set(m.x,.09,m.z);v.warning.scale.setScalar(grow);v.warning.material.opacity=slam?.45+.45*charge:aoe?.3+.35*charge:.12+.25*charge;
     v.charge.visible=aoe&&v.warning.visible;v.charge.position.set(m.x,.092,m.z);v.charge.scale.setScalar(Math.max(.05,charge)*grow);v.charge.material.opacity=.1+.14*charge;} // 0.99.3 area bursts fill up until they land
    if(!visible)return;
-   const f=monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
-   const recoil=reduced?0:Math.sin(Math.PI*Math.min(1,m.hit/.34))*.18;
-   const mobFloor=groundHeight(world.nav,m.x,m.z);v.sprite.position.set(m.x+(m.recoil?.x??0)*recoil,mobFloor+.06,m.z+(m.recoil?.z??0)*recoil);v.shadow.position.set(m.x,mobFloor+.073,m.z);
+   const f=m.hp>0&&t<(v.hurtUntil??0)?5:monsterFrame(m,t);if(v.frames&&f!==v.frame){v.sprite.material.map=v.frames[f];v.sprite.material.map.needsUpdate=true;v.frame=f;}
+   const flight=reduced||!v.impact||v.deathStart===null?{back:0,lift:0}:deathFlight(deadAge,type.boss?.25:1),away=(reduced?0:impactPush(v.impact,t))+flight.back;
+   const mobFloor=groundHeight(world.nav,m.x,m.z),mobX=m.x+(v.impact?.x??0)*away,mobZ=m.z+(v.impact?.z??0)*away;v.sprite.position.set(mobX,mobFloor+.06+flight.lift,mobZ);v.shadow.position.set(mobX,mobFloor+.073,mobZ);
    v.sprite.scale.set(v.width,v.height,1);v.sprite.material.rotation=0;xray(v.sprite);
    v.sprite.material.transparent=m.hp<=0;v.sprite.material.opacity=m.hp<=0?Math.max(0,1-(deadAge-.5)/.75):1;
    // 0.74 hit flash: overbright tint (>1) burns the sprite near-white for ~0.12 s, then fades back.
-   const burn=reduced?0:Math.max(0,1-(t-v.flashAt)/.14);v.sprite.material.color.set(m.root>0?'#9ddacc':'#fff1da');if(burn>0)v.sprite.material.color.multiplyScalar(1+2.6*burn);
+   const burn=reduced?0:Math.max(0,1-(t-v.flashAt)/(v.flashFor??.14));v.sprite.material.color.set(m.root>0?'#9ddacc':'#fff1da');if(burn>0)v.sprite.material.color.multiplyScalar(1+2.6*burn);
    if(burn>0)v.sprite.scale.set(v.width*(1+.08*burn),v.height*(1-.06*burn),1);v.fill.style.width=`${m.hp/m.maxHp*100}%`;v.label.classList.toggle('selected',world.targetId===m.id);
    v.label.toggleAttribute('data-full-health',m.hp>=m.maxHp);
    if(m.aggro){const side=(p.x-m.x)*Math.cos(controls.getAzimuthalAngle())-(p.z-m.z)*Math.sin(controls.getAzimuthalAngle());v.sprite.material.map.repeat.x=side<0?-1:1;v.sprite.material.map.offset.x=side<0?1:0;}

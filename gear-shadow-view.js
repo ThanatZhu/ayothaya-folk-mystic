@@ -8,12 +8,12 @@ const vertexShader='varying vec2 vUv;varying vec2 vEdge;uniform vec3 middle;unif
 const fragmentShader=`varying vec2 vUv;varying vec2 vEdge;uniform sampler2D map;uniform vec3 tint;uniform float time,reach,seed,strength,rainbow;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),u.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),u.x),u.y);}
-float body(vec2 uv){float sum=0.;for(int i=0;i<24;i++){float a=float(i)*2.39996,r=sqrt((float(i)+.5)/24.)*reach;vec2 at=uv+vec2(cos(a),sin(a))*r;if(at.x>0.&&at.x<1.&&at.y>0.&&at.y<1.)sum+=step(.5,texture2D(map,at).a);}return sum/24.;}
+float body(vec2 uv){float sum=0.;for(int i=0;i<24;i++){float a=float(i)*2.39996,r=sqrt((float(i)+.5)/24.)*reach;vec2 at=uv+vec2(cos(a)*1.6,sin(a)*.75)*r;if(at.x>0.&&at.x<1.&&at.y>0.&&at.y<1.)sum+=step(.5,texture2D(map,at).a);}return sum/24.;}
 void main(){
  float rise=time*3.,low=noise(vec2(vUv.x*11.+seed,vUv.y*5.-rise)),high=noise(vec2(vUv.x*30.-seed,vUv.y*12.-rise*2.2));
  float flame=low*.68+high*.32;
  // Sample below this point so the shape licks upward, further the higher the flame.
- vec2 uv=vUv+vec2((low-.5)*.05,-.03-flame*flame*.42);
+ vec2 uv=vUv+vec2((low-.5)*.09,-.015-flame*flame*.2);
  float g=body(uv);if(g<.02)discard;
  float fade=smoothstep(0.,.14,vEdge.x)*smoothstep(1.,.86,vEdge.x)*smoothstep(1.,.72,vEdge.y)*smoothstep(0.,.1,vEdge.y);
  float a=smoothstep(.03,.4,g)*smoothstep(.3,.56,flame+g*.55)*strength*fade;

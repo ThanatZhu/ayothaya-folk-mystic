@@ -25,7 +25,7 @@ import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
 import {createSkillEffects,createFootDust} from './skill-effects.js?v=novice174';
 import {progression,jobFor} from './advancement.js?v=73';
 import * as THREE from 'three';
-import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius} from './combat-core.js?v=surfaces222';
+import {CombatWorld,MONSTER_TYPES,screenDirection,predictMove,groundHeight,bodyRadius,lineClear} from './combat-core.js?v=surfaces222';
 import {scaledSkill,upgradeSkill as levelUpSkill,normalizeSkills,availablePoints,NOVICE_SLOTS,SLOTS,BASE_SLOTS,isMaster,HOTBAR_KEYS} from './skill-progress.js?v=novice174';
 import {createRouteWalker} from './route-walk.js?v=surfaces222';
 
@@ -179,11 +179,13 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(ROLE_GROUND_KINDS.has(s.type)){const at=point??world.roleGround;return {s,at:at?{x:at.x,z:at.z}:null,ground:true};}
   // The locked party friend (or yourself when none is locked or they left), as the realm resolves it.
   if(ROLE_FRIEND_KINDS.has(s.type)){const id=world.supportTargetId,a=id&&id!==network?.id?world.supportRoster?.find(a=>a.id===id):null;return {s,at:a??p,self:!a};}
-  const m=Number.isInteger(world.targetId)?world.mobs[world.targetId]:null;return m&&m.hp>0?{s,at:m}:null;
+  const m=world.target;return m?{s,at:m}:null;
  }
  // A blocked path gives up once (with the usual notice) instead of retrying into the wall.
- const approachWalk=aim=>({radius:Math.max(.5,(aim.s.range??7)-.8),marker:false,onFail:()=>{approach=null;world.notice('ไปตรงนั้นไม่ได้');}});
- const inReach=(aim,p=world.player)=>skillInReach(aim.at,aim.s.range??7,p);
+ // With the view blocked, head for the target itself: the update below casts as soon as it comes into sight.
+ const sees=(a,b)=>lineClear(a,b,world.nav);
+ const approachWalk=aim=>({radius:sees(world.player,aim.at)?Math.max(.5,(aim.s.range??7)-.8):.5,marker:false,onFail:()=>{approach=null;world.notice('ไปตรงนั้นไม่ได้');}});
+ const inReach=(aim,p=world.player)=>skillInReach(aim.at,aim.s.range??7,p,sees);
  function useSkill(i,point=null){
   if(world.observer)return false;
   if(!Number.isInteger(i))return false;approach=null;const aim=roleAim(i,point);
@@ -232,6 +234,8 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   world.notice(compactEffects.matches?'แตะพื้นเพื่อวางสกิล · กดสกิลซ้ำเพื่อวางตรงวง':'คลิกพื้นเพื่อวางสกิล · กดสกิลซ้ำเพื่อวางตรงวง · Esc ยกเลิก');
  }
  function stopGroundAim(){groundAim=null;aimArea.visible=aimEdge.visible=aimReach.visible=false;}
+ // The action bar's press: a ground skill lands on the selected target in one press, without a target it opens the circle.
+ function pressSkill(i){const s=world.skills[i],m=ROLE_GROUND_KINDS.has(s?.type)?world.target:null;return useSkill(i,m?{x:m.x,z:m.z}:null);}
  function placeGround(at){const i=groundAim?.i;stopGroundAim();return Number.isInteger(i)?useSkill(i,{x:at.x,z:at.z}):false;}
  function drawGroundAim(p){
   if(!groundAim)return;if(p.hp<=0||isPaused()){stopGroundAim();return;}
@@ -466,7 +470,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   if(approach){const aim=roleAim(approach.i,approach.ground);if(!aim?.at||world.time>approach.until||p.hp<=0)approach=null;else if(inReach(aim)){const {i,ground}=approach;cancelWalk();useSkill(i,ground);}else{
    // The friend or monster moved on: follow them (a few times) instead of stopping where they stood.
    const a=approach,walking=walkJob||walker.active||serverWalkState?.status==='walking',goal={x:aim.at.x,z:aim.at.z};
-   if(Math.hypot(goal.x-a.goal.x,goal.z-a.goal.z)>1.5||!walking){if(a.tries<8&&walkTo(goal,approachWalk(aim)))approach={...a,goal,tries:a.tries+1};else approach=null;}}}
+   if(Math.hypot(goal.x-a.goal.x,goal.z-a.goal.z)>1.5||!walking){if(a.tries<8&&walkTo(goal,approachWalk(aim)))approach={...a,goal,tries:a.tries+1};else{approach=null;world.notice('เดินไปหาเป้าหมายไม่ได้');}}}}
   // A press the realm refused (no cast came back): drop the predicted body and effect.
   if(roleClip?.predicted&&wall()-roleClip.predicted>Math.min(1.2,.45+netLag*3)){roleEffects.cancel(roleClip.castId);roleClip=null;castUntil=t;}
   const roleActive=roleAnimationActive(roleClip,roleEffects.time);
@@ -574,5 +578,5 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  setTimeout(()=>roleEffects.prefetch(BASIC_COMBO_VFX[world.profession.id]??BASIC_COMBO_VFX.novice),120);
  setTimeout(()=>{const ids=world.skills.map((s,i)=>s.roleSkillId??'novice:'+i);roleEffects.prefetch([...ids,...(BASIC_COMBO_VFX[world.profession.id]??[])]);prefetchPoses(ids);},4000);
  addEventListener('pagehide',e=>{if(!e.persisted){roleEffects.dispose();roleDecor.dispose();roleUI.dispose();}});
- return {heroSprite:hero.sprite,set respawnInventory(value){respawnInventory=value;},set respawnTravel(fn){respawnTravel=fn;},roleEffects,roleDecor,get canUseActions(){return !isPaused();},ghost,selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
+ return {pressSkill,heroSprite:hero.sprite,set respawnInventory(value){respawnInventory=value;},set respawnTravel(fn){respawnTravel=fn;},roleEffects,roleDecor,get canUseActions(){return !isPaused();},ghost,selectAlly(id){world.supportTargetId=id;return network?.command('selectAlly',{target:id});},xray,set playerTap(f){playerTap=f;},set npcInteraction(value){npcInteraction=value;},set autoPicker(value){autoPicker=value;},popup:(e,anchor)=>popup(e,false,anchor),get hotbar(){return [...hotbar];},setHotbar,setAutoConfig,update,world,clearInput,setNetwork,applyNetworkSnapshot,shakeOffset,upgradeSkill,walkTo,cancelWalk,get walking(){return !!walkJob||walker.active||serverWalkState?.status==='walking';},onEvent:fn=>listeners.add(fn),get online(){return !!network;},expectNetwork(){networkExpected=true;},get networkExpected(){return networkExpected;},get networkStatus(){return network?.status??null;},supportsAction,refreshAnimationCapabilities,requestEmote,setRunning,get runningRequested(){return runToggled;}};
 }

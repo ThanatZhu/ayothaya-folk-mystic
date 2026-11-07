@@ -16,7 +16,14 @@ export const STEALTH_HIT=1.5;
 const selfKinds=new Set(['taunt','anchor','guard','counter','evade','stealth','clones','summon','greatSummon','spirit','greatSpirit','crow','smoke','ward','sanctuary','regen','lifeTree','yantra','groupHeal','lastStand','purify']);
 // The client's own reach check. While walking the server still sees us a little behind, so a press at the very edge
 // of the range was refused and stopped the walk; keep walking until well inside it.
-export function skillInReach(at,range,p){return Math.hypot(at.x-p.x,at.z-p.z)<=range+(p.moving?-.6:.3);}
+// The server sees a walker about this far behind, so a walking caster must be clear from there too.
+const LAG_STEP=.6;
+export function skillInReach(at,range,p,clear=()=>true){
+ if(Math.hypot(at.x-p.x,at.z-p.z)>range+(p.moving?-LAG_STEP:.3))return false;
+ if(!p.moving)return clear(p,at);
+ const f=p.face??{x:0,z:0},d=Math.hypot(f.x,f.z)||1;
+ return clear(p,at)&&clear({x:p.x-f.x/d*LAG_STEP,z:p.z-f.z/d*LAG_STEP},at);
+}
 export {groundKinds as ROLE_GROUND_KINDS,friends as ROLE_FRIEND_KINDS,selfKinds as ROLE_SELF_KINDS};
 // 0.119 owner: one second between skills. After a skill's last release every active skill waits at least this long.
 export const ROLE_GLOBAL_CD=1;

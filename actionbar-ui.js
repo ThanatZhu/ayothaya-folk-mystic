@@ -31,7 +31,7 @@ export function createActionbar({game,bagUI,account={}}){
  function activate(entry){
   if(blocked()||!entry)return;
   if(entry.kind==='item'){bagUI.activateShortcut(entry.id);return;}
-  const s=world.skills[entry.index];if(!s?.reserved&&!s?.passive)world.skill(entry.index);
+  const s=world.skills[entry.index];if(!s?.reserved&&!s?.passive)game.pressSkill(entry.index);
  }
  function render(){
   rows.replaceChildren();buttons=[];

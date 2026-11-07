@@ -1,3 +1,4 @@
+import {gearShadow} from './gear-shadow.js';
 import {bindStatHold} from './stat-hold.js';
 import {createStatResetUI} from './stat-reset-ui.js?v=surfaces222';
 // Allocation and combat totals only. Equipment actions are exposed through the bag.
@@ -13,6 +14,8 @@ import {statusMetrics} from './status-metrics238.js';
 const $=id=>document.getElementById(id);
 
 export function createStatusUI({game,account,bagUI}){
+ let shadowKey=null;
+ function showGearShadow(){const worn=view().gear,key=JSON.stringify(worn);if(key===shadowKey)return;shadowKey=key;game.heroSprite?.userData.setGearShadow?.(gearShadow(worn));}
  const world=game.world,key='ayothaya-status:'+(account?.serverId??'local')+':'+(account?.slotId??'guest');
  const classId=account?.character?.classId??world.profession.id;
  const path=statPath(account?.character??{classId});let local={stats:normalizeStats(null),gear:normalizeGear(null),path};
@@ -122,5 +125,5 @@ export function createStatusUI({game,account,bagUI}){
  // Refine window hooks (offline gear lives here).
  // 0.98 what the tutorial quests can see (offline; the realm builds the same online)
  const storyContext=()=>{const g=view().gear,worn=Object.values(g).filter(Boolean).map(id=>itemDef(id));return {level:who().level,weapon:!!g.weapon,refined:worn.some(d=>d?.refine>0),carded:worn.some(d=>d?.card),job:classId!=='novice',skilled:(world.skillLevels??[]).reduce((n,v)=>n+v,0)>2,auto:!!world.auto,guild:false};};
- return {storyContext,update(){applyOffline();render();hold.update();resetUI.update();cardPicker.update();},view,gear:()=>game.online?normalizeGear(world.gear):local.gear,setGear(g){local.gear=normalizeGear(g);save();applyOffline();render(true);},who};
+ return {storyContext,update(){applyOffline();render();showGearShadow();hold.update();resetUI.update();cardPicker.update();},view,gear:()=>game.online?normalizeGear(world.gear):local.gear,setGear(g){local.gear=normalizeGear(g);save();applyOffline();render(true);},who};
 }

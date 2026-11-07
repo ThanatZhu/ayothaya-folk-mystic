@@ -1,3 +1,4 @@
+import {attachGearShadow} from './gear-shadow-view.js';
 import {createRiggedSprite} from './rigged-sprite.js?v=life226';
 import {loadDirectionalArt} from './directional-sprite.js?v=size1';
 import {createDirectionalActor} from './directional-actor.js?v=size1';
@@ -16,7 +17,7 @@ export function directionalCompatibility(classId,appearance={},equipment=null){
 }
 
 export function createPaintedAvatar(texture,options={}){
- const mesh=createRiggedSprite(texture,options),base={pose:mesh.userData.pose,setRig:mesh.userData.setRig,
+ const mesh=attachGearShadow(createRiggedSprite(texture,options)),base={pose:mesh.userData.pose,setRig:mesh.userData.setRig,
   setEquipment:mesh.userData.setEquipment,setAppearance:mesh.userData.setAppearance,dispose:mesh.userData.dispose};
  let classId=options.classId??'novice',gender=options.gender??'male',appearance=options.appearance??{},equipment=options.equipment??null;
  const loadArt=options.directionalArtLoader??loadDirectionalArt;

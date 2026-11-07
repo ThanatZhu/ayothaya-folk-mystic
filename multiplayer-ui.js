@@ -310,6 +310,7 @@ export function createMultiplayer({scene,camera,controls,game,account,frame}){
   const guildTab=dock.querySelector('[data-channel=guild]');guildTab.disabled=!game.world.myGuild;if(guildTab.disabled&&dock.dataset.channel==='guild')setChannel('room');
   for(const v of views.values()){
    if(v.loading)continue;const state=v.state,p=state.player,old=v.sprite.position.clone(),f=1-Math.exp(-Math.min(.05,dt)*14);v.sprite.position.x+=(p.x-v.sprite.position.x)*f;v.sprite.position.z+=(p.z-v.sprite.position.z)*f;v.gait+=gaitStep(Math.hypot(v.sprite.position.x-old.x,v.sprite.position.z-old.z),Math.min(.05,dt),state.character.classId,p.running?'run':'walk');
+   const shadowKey=JSON.stringify(state.shadow??null);if(shadowKey!==v.shadowKey){v.shadowKey=shadowKey;v.sprite.userData.setGearShadow?.(state.shadow??{});}
    const equipmentKey=JSON.stringify(state.equipment);
    if(equipmentKey!==v.equipmentKey&&!v.equipmentLoading&&performance.now()>(v.equipmentRetryAt??0)){
     v.equipmentLoading=true;v.sprite.userData.setEquipment(state.equipment).then(changed=>{if(changed)v.equipmentKey=equipmentKey;}).catch(()=>{v.equipmentRetryAt=performance.now()+5000;}).finally(()=>{v.equipmentLoading=false;});

@@ -13,6 +13,7 @@ test('every class and gender has a complete pixel sheet',()=>{
   for(const [gender,tag] of [['male','m'],['female','f']]){
    const cell=manifest.actors[id+'-'+gender]?.cell,size=png('pc-'+id+'-'+tag+'.png');
    assert.ok(cell>0,id+gender);assert.deepEqual(size,{width:cell*manifest.columns,height:cell*manifest.rows});
+   const pose=manifest.actors[id+'-'+gender].emote;assert.ok(pose>0,id+gender);assert.deepEqual(png('pe-'+id+'-'+tag+'.png'),{width:pose*manifest.columns,height:pose*manifest.rows});
   }
   assert.deepEqual(png(id+'-atlas.png'),{width:1774,height:887});
   assert.match(atlasPath(id),/^\.\/assets\/pixel\/[a-z]+-atlas\.png/);

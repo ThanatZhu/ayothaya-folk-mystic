@@ -1,10 +1,10 @@
-# blender -b -P scripts/build-pixel-characters.py -- <sheets_dir> <out_dir>
+# blender -b -P scripts/build-pixel-characters.py -- <sheets_dir> <out_dir> <emote_sheets_dir>
 # Turns the 24-frame sheets (1536x1024, 6x4 cells, magenta background) into clean game atlases:
 # drops the background, snaps every 4 px block to one colour, shares a small palette, sizes all bodies the same.
 import bpy, sys, glob, os, json
 import numpy as np
 
-src, out = map(os.path.abspath, sys.argv[sys.argv.index('--') + 1:][:2])
+src, out, emotes = map(os.path.abspath, sys.argv[sys.argv.index('--') + 1:][:3])
 os.makedirs(out, exist_ok=True)
 COLUMNS, ROWS, BLOCK, GRID = 6, 4, 4, 64        # sheet cell is 256 px = 64 logical pixels
 BODY_HEIGHT, FRAME_SIZE, FRAME_FOOT = 210, 320, 276   # same frame the painted characters use (character-size.js)
@@ -75,24 +75,70 @@ def head_centre(mask, top, height):
     return xs.mean() if len(xs) else GRID / 2
 
 
-def build(name):
-    colour, solid = to_grid(load(os.path.join(src, name + '.png')))
+def parts(mask):
+    """Connected groups of solid pixels."""
+    h, w = mask.shape
+    seen = np.zeros_like(mask)
+    found = []
+    for start in zip(*np.nonzero(mask)):
+        if seen[start]:
+            continue
+        seen[start] = True
+        stack, part = [start], []
+        while stack:
+            y, x = stack.pop()
+            part.append((y, x))
+            for ny, nx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+                if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not seen[ny, nx]:
+                    seen[ny, nx] = True
+                    stack.append((ny, nx))
+        found.append(part)
+    return found
+
+
+def strip_projectile(mask):
+    """Hunter shots: the game flies the real arrow, so keep the archer and bow and drop what leaves the bow."""
+    out = np.zeros_like(mask)
+    for spot in max(parts(mask), key=len):
+        out[spot] = True
+    # The bow is the last tall column; an arrow still touching it is only a few pixels high.
+    tall = np.nonzero(out.sum(0) >= 10)[0]
+    out[:, tall[-1] + 1:] = False
+    return out
+
+
+def build(name, folder=src, stand=(0, 0)):
+    """stand is the cell of a plain standing pose: it sets the body size and the ground line for the whole sheet."""
+    emote = folder == emotes
+    colour, solid = to_grid(load(os.path.join(folder, name + '.png')))
     colour = quantize(colour, solid)
-    top, bottom = body_box(solid[:GRID, :GRID])
+    standing = solid[stand[0] * GRID:(stand[0] + 1) * GRID, stand[1] * GRID:(stand[1] + 1) * GRID]
+    top, bottom = body_box(standing)
     height = bottom - top + 1
     size = int(round(FRAME_SIZE * height / BODY_HEIGHT))
     foot = int(round(FRAME_FOOT * size / FRAME_SIZE))
     atlas = np.zeros((size * ROWS, size * COLUMNS, 4), np.uint8)
-    home = head_centre(solid[:GRID, :GRID], top, height)
+    home = head_centre(standing, top, height)
     for row in range(ROWS):
         for col in range(COLUMNS):
             y0, x0 = row * GRID, col * GRID
             mask, rgb = solid[y0:y0 + GRID, x0:x0 + GRID], colour[y0:y0 + GRID, x0:x0 + GRID]
+            if row >= 2 and name.startswith('pc-hunter'):
+                mask = strip_projectile(mask)
+            if emote:
+                # A prop laid past the cell's right edge leaves a sliver at the start of the next cell.
+                mask = mask.copy()
+                for part in parts(mask):
+                    if len(part) < 30 and max(x for _, x in part) < 5:
+                        for spot in part:
+                            mask[spot] = False
             ys = np.nonzero(mask.sum(1))[0]
             # Idle, walk and run loop: pin the head sideways and (for idle and walk) the soles, or they jitter.
             # Attack and skill keep their lunges and jumps.
-            shift_x = int(round(size / 2 - (head_centre(mask, ys[0], height) if row < 2 else home)))
-            shift_y = foot - 1 - (ys[-1] if row == 0 else bottom)
+            shift_x = int(round(size / 2 - (head_centre(mask, ys[0], height) if row < 2 and not emote else home)))
+            # Emote rows rest on the ground (sit, sleep, wai, guard); only the cheer in row 4 leaves it.
+            grounded = row < 3 or col >= 3 if emote else row == 0
+            shift_y = foot - 1 - (ys[-1] if grounded else bottom)
             for y, x in zip(*np.nonzero(mask)):
                 ty, tx = y + shift_y, x + shift_x
                 if 0 <= ty < size and 0 <= tx < size:
@@ -126,6 +172,7 @@ for class_id in ('novice', 'swordsman', 'lancer', 'hunter', 'boxer', 'rogue', 's
     for key, tag in (('male', 'm'), ('female', 'f')):
         meta, atlas = build('pc-%s-%s' % (class_id, tag))
         manifest[class_id + '-' + key] = meta
+        meta['emote'] = build('pe-%s-%s' % (class_id, tag), emotes, (2, 0))[0]['cell']
         made[key] = (meta, atlas)
         print('built', class_id, key, meta)
     portrait_atlas(class_id, made['male'], made['female'])

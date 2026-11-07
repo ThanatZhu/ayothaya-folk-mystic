@@ -106,3 +106,5 @@ body.actionbar-mobile.mobile-play.field-hud.hud63 .combat-controls.wheel #skills
 #view-switch[data-view="2.5D"]{background-image:url(assets/ui-view/view-2-5d.png?v=1)}
 #view-switch[data-view="3D"]{background-image:url(assets/ui-view/view-3d.png?v=1)}
 body:not(.actionbar-desktop) #view-switch{margin:0;position:fixed;right:max(8px,env(safe-area-inset-right));top:50%}
+#target-cursor{position:fixed;left:0;top:0;width:48px;height:48px;pointer-events:none;z-index:60;image-rendering:pixelated;filter:drop-shadow(0 1px 2px #000a)}
+#target-cursor[hidden]{display:none}

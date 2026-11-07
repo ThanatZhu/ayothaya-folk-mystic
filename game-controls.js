@@ -1,3 +1,4 @@
+import {createTargetCursor} from './target-cursor.js';
 import {cameraFocus} from './camera-bounds.js';
 import {createDamageFloats} from './damage-floats247.js';
 import {mobileHudMedia} from './hud-mode204.js';
@@ -33,6 +34,7 @@ import {rebirthRank} from './character-stats.js?v=107';
 import {normalizeAuto,pickAutoSkill} from './auto-play.js?v=auto202';
 
 export function createGame({scene,camera,controls,canvas,hero,monsterTextures,monsterArt={},sprite,shadow,cancelCameraTurn,config={},isPaused=()=>false,skillState={},mapBounds=null}){
+ let targetCursor=null;
  const world=new CombatWorld(config);world.spiritCompanion=true;const SKILLS=world.skills,$=id=>document.getElementById(id),keys=new Set();
  const skillEffects=createSkillEffects(scene),roleEffects=createLiveRoleVfx(scene,camera,world),roleDecor=createRoleWorldDecor(scene,world,camera),roleUI=createRolePlayUI({world,buyItem:async id=>{if(!network)throw Error('not-connected');const r=await network.request('revivalBuy',id);world.bag=r.bag;world.petCollection=r.petCollection;return r;},canBuy:()=>network?.status==='online',itemCount:()=>network?revivalCount(world.bag):respawnInventory?.count()??0,clear:()=>clearInput(),respawn:async destination=>{clearInput();cancelWalk();if(networkExpected&&!network)throw Error('not-connected');if(destination==='capital')return respawnTravel?.();if(network){await network.request('respawn',crypto.randomUUID(),{destination:'here'});return true;}return respawnInventory?.use()??false;}});let roleClip=null,basicCastId=null,castFace=null;let activeSkill=null,network=null,serverSelf=null,respawnTravel=null,respawnInventory=null;
  // Skill levels: the server owns them online; guests keep them in their local save.
@@ -379,6 +381,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  addEventListener('blur',()=>{spaceTalkHeld=false;clearInput();});document.addEventListener('visibilitychange',()=>{if(document.hidden){spaceTalkHeld=false;clearInput();}});
  // 0.99.15 another player under the tap opens their menu first (multiplayer-ui sets this)
  let playerTap=null,npcInteraction=null;
+ targetCursor=createTargetCursor({canvas,camera,sprites:()=>mobViews.map(v=>v.sprite),alive:i=>world.mobs[i]?.hp>0,pickNpc:(x,y)=>npcInteraction?.pick(x,y),busy:()=>!!(world.roleAim||groundAim||isPaused())});
  // The ground point under a screen position (raised floors re-aim at their own height).
  function groundAt(x,y){pointer.set(x/innerWidth*2-1,-y/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);let hit=null;groundPlane.constant=0;for(let i=0;i<4;i++){hit=raycaster.ray.intersectPlane(groundPlane,groundHit);if(!hit)break;groundPlane.constant=-groundHeight(world.nav,hit.x,hit.z);}return hit&&{x:hit.x,z:hit.z};}
  function selectAt(x,y,npc=null){
@@ -412,7 +415,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   else if(p.startX>innerWidth*.45&&p.moved){const offset=camera.position.clone().sub(controls.target),spherical=new THREE.Spherical().setFromVector3(offset);spherical.theta-=dx/innerWidth*Math.PI*2;camera.position.setFromSpherical(spherical).add(controls.target);controls.update();}
  },true);
  function pointerEnd(e){
-  if(e.pointerType!=='touch'){if(mouseStart&&Math.hypot(e.clientX-mouseStart.x,e.clientY-mouseStart.y)<7&&e.type==='pointerup')selectAt(e.clientX,e.clientY,mouseStart.npc);mouseStart=null;return;}
+  if(e.pointerType!=='touch'){if(mouseStart&&Math.hypot(e.clientX-mouseStart.x,e.clientY-mouseStart.y)<7&&e.type==='pointerup'){const at=targetCursor.aim(e.clientX,e.clientY);selectAt(at.x,at.y,mouseStart.npc);}mouseStart=null;return;}
   e.stopImmediatePropagation();const p=touches.get(e.pointerId);if(p&&!p.moved&&e.type==='pointerup')selectAt(e.clientX,e.clientY,p.npc);touches.delete(e.pointerId);pinchDistance=0;
  }
  for(const name of ['pointerup','pointercancel'])canvas.addEventListener(name,pointerEnd,true);
@@ -499,7 +502,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   hero.shadow.position.set(p.x,floor+.072,p.z);playerRing.position.set(p.x,floor+.081,p.z);shield.position.set(p.x,floor+.1,p.z);shield.visible=p.shield>0;hideHero(!!world.observer);
   // Camera follows the player while preserving user-controlled azimuth and zoom.
   const focus=cameraFocus(p.x,p.z,mapBounds,{halfWidth:camera.right/camera.zoom,halfDepth:camera.top/camera.zoom/Math.max(.25,Math.cos(controls.getPolarAngle())),azimuth:controls.getAzimuthalAngle()}),follow=new THREE.Vector3(focus.x,floor+1,focus.z).sub(controls.target).multiplyScalar(1-Math.exp(-dt*4));camera.position.add(follow);controls.target.add(follow);
-  controls.update();camera.updateMatrixWorld();
+  controls.update();camera.updateMatrixWorld();targetCursor.update(dt);
   const head=characterHead(hero.sprite,camera);project(playerLabel,head.x,head.y,head.z);
   if((world.rebirth??0)!==shownRank){shownRank=world.rebirth??0;const t=playerLabel.querySelector('.rank-title');t.hidden=!shownRank;t.textContent=shownRank?'✦ '+rebirthRank(shownRank)+' ✦':'';}
   mobViews.forEach((v,i)=>{

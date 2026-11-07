@@ -32,7 +32,7 @@ for(const r of live)$('profession').add(new Option(r.name,r.id));
 function hero(){const id=$('profession').value,g=$('gender').value;if(caster?.classId===id&&caster.gender===g)return;caster?.sprite.userData.dispose();if(caster)scene.remove(caster.sprite);caster=avatar(id,g);}
 function skills(){$('skill').replaceChildren(...live.find(r=>r.id===$('profession').value).skills.map(s=>new Option((s.ultimate?'★ ':'')+s.name+(s.branch?' · '+s.branch:''),s.id)));hero();info();}
 const pick=()=>live.find(r=>r.id===$('profession').value).skills.find(s=>s.id===$('skill').value);
-function info(){const s=pick(),e=VFX_SHEETS[s.id],p=POSE_SHEETS[s.id];$('info').textContent=`${s.id} · ${s.kind} → วาง ${vfxPlacement(s.kind)} · ชีต ${e?.effect??'ไม่มี'}${e?.ground?' + พื้น':''} · ท่า ${p?'pose-'+s.id+' ×'+p.scale[$('gender').value]:'ระบบเดิม'}`;}
+function info(){const s=pick(),e=VFX_SHEETS[s.id],p=POSE_SHEETS[s.id];$('info').textContent=`${s.id} · ${s.kind} → วาง ${vfxPlacement(s.kind,s.id)} · ชีต ${e?.effect??'ไม่มี'}${e?.ground?' + พื้น':''} · ท่า ${p?'pose-'+s.id+' ×'+p.scale[$('gender').value]:'ระบบเดิม'}`;}
 function layout(){const d=+$('distance').value,n=+$('targets').value;caster.sprite.position.set(-2,0,0);world.player={x:-2,z:0};
  targets.forEach((t,i)=>{t.visible=i<n;const a=(i-(n-1)/2)*.55;t.position.set(-2+d*Math.cos(a)+(i?Math.sin(i)*.6:0),0,d*Math.sin(a));});
  if($('crowd').checked&&!others.length){const ids=ROLES.map(r=>r.id);others=Array.from({length:6},(_,i)=>avatar(ids[i%ids.length],i%2?'female':'male'));}

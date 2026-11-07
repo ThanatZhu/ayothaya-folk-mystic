@@ -43,6 +43,8 @@ test('the peak frame sits on every real release beat; build-up before, fade afte
 test('art is placed by what the skill does',()=>{
  assert.equal(vfxPlacement('meteor'),'area');assert.equal(vfxPlacement('guard'),'self');assert.equal(vfxPlacement('cleave'),'around');
  assert.equal(vfxPlacement('holy'),'shot');assert.equal(vfxPlacement('line'),'line');assert.equal(vfxPlacement('execute'),'target');
+ assert.equal(vfxPlacement('break','hunt-shot'),'shot','an arrow leaves the bow');assert.equal(vfxPlacement('line','hunt-rama'),'shot');
+ assert.equal(vfxPlacement('break','sword-open'),'target','the same kind on a sword stays on the blow');assert.equal(vfxPlacement('line','war-drill'),'line');
 });
 test('one clip per cast, bounded pool, hits retime once, cancel and clear free everything',()=>{
  const scene=new THREE.Scene(),world={player:{x:0,z:0},nav:null,networkSelfId:'me'},vfx=createSheetVfx(scene,world,{tier:'sd'});

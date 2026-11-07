@@ -12,6 +12,8 @@ const SELF=new Set(['guard','riposte','evade','stealth','crow','anchor','counter
 const AREA=new Set(['zone','storm','meteor','rain','trap','mine','thorns','massBind','yantra','holyField','lifeTree','wall','phalanx']);
 const SHOT=new Set(['holy','retreatShot','ambush']);
 const LINE=new Set(['line','drill','chainLine','cone']);
+// These sheets are an arrow in flight, but their kind is shared with blows that land on the target or stay in a line.
+const ARROWS=new Set(['hunt-shot','hunt-rama']);
 // Novice basics are not role skills; their save slot is their identity (the hotbar may move them, the slot never does).
 const NOVICE_KIND={'novice:0':'jab','novice:4':'rest','novice:5':'guard'};
 export const BASIC_SHEETS=Object.freeze({
@@ -35,7 +37,7 @@ export const basicAttackVfxId=(classId,comboStep=0)=>{
  return seq[Math.max(0,comboStep)%seq.length];
 };
 const sheetEntry=id=>VFX_SHEETS[id]??BASIC_SHEETS[id];
-export const vfxPlacement=kind=>AROUND.has(kind)?'around':SELF.has(kind)?'self':AREA.has(kind)?'area':SHOT.has(kind)?'shot':LINE.has(kind)?'line':'target';
+export const vfxPlacement=(kind,id)=>ARROWS.has(id)?'shot':AROUND.has(kind)?'around':SELF.has(kind)?'self':AREA.has(kind)?'area':SHOT.has(kind)?'shot':LINE.has(kind)?'line':'target';
 export const hasSheet=id=>!!sheetEntry(id)?.effect;
 const skills=new Map(ALL_SKILLS.map(s=>[s.id,s]));
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
@@ -89,7 +91,7 @@ export function createSheetVfx(scene,world,{tier:forced=null,camera=null}={}){
   if(key&&clips.some(c=>c.key===key))return true; // the same cast delivered twice
   const p=world.player,direction=effectDirection(e.from,e.to,e.direction??(own?p:locate?.(actor))?.face);if(!own&&p&&Math.hypot(e.from.x-p.x,e.from.z-p.z)>32)return true; // too far to read
   const cap=caps().clips;while(clips.length>=cap)release(clips.find(c=>!c.own)??clips[0]);
-  const skill=skills.get(id),kind=e.basic?(entry.classId==='shaman'||entry.classId==='acolyte'||entry.classId==='hunter'?'holy':entry.classId==='lancer'&&id!=='basic:slash'?'line':'slash'):skill?.kind??BASIC_SHEETS[id]?.kind??NOVICE_KIND[id]??e.kind,place=vfxPlacement(kind),ultimate=!e.basic&&!!(skill?.ultimate??entry.ultimate);
+  const skill=skills.get(id),kind=e.basic?(entry.classId==='shaman'||entry.classId==='acolyte'||entry.classId==='hunter'?'holy':entry.classId==='lancer'&&id!=='basic:slash'?'line':'slash'):skill?.kind??BASIC_SHEETS[id]?.kind??NOVICE_KIND[id]??e.kind,place=vfxPlacement(kind,id),ultimate=!e.basic&&!!(skill?.ultimate??entry.ultimate);
   const impacts=e.timing?.impacts?.length?[...e.timing.impacts]:[skill?.windup??.36],radius=skill?.radius??2.8;
   const wide=place==='around'||place==='area',basicScale=e.basic?(e.comboStep===3?2.45:2.15):null;
   const clip={key,actor,own,id,entry:e.basic?{...entry,ground:null}:entry,place,ultimate,direction,from:{...e.from},to:{...e.to},start:clock-Math.max(0,e.lag??0),impacts,tail:sheetTail(e.timing,ultimate),hits:new Set(),holder:holder(),
@@ -108,7 +110,7 @@ export function createSheetVfx(scene,world,{tier:forced=null,camera=null}={}){
   const dx=clip.to.x-from.x,dz=clip.to.z-from.z,d=Math.hypot(dx,dz),ux=clip.direction.x,uz=clip.direction.z;
   if(clip.place==='self'||clip.place==='around')return {x:from.x,z:from.z,ux,uz};
   if(clip.place==='line'){const len=clamp(d,2.4,7);return {x:from.x+ux*len*.5,z:from.z+uz*len*.5,ux,uz,len};}
-  if(clip.place==='shot'){const first=clip.impacts[0],flight=Math.min(first*.7,.45),q=smooth((t-(first-flight))/Math.max(.01,flight));return {x:from.x+dx*q,z:from.z+dz*q,ux,uz};}
+  if(clip.place==='shot'){const first=clip.impacts[0],flight=Math.min(first*.7,.45),q=smooth((t-(first-flight))/Math.max(.01,flight));return {x:from.x+dx*q,z:from.z+dz*q,ux,uz,groundX:from.x+dx/2,groundZ:from.z+dz/2};}
   return {x:clip.to.x,z:clip.to.z,ux,uz};
  }
  function update(dt){
@@ -121,7 +123,7 @@ export function createSheetVfx(scene,world,{tier:forced=null,camera=null}={}){
    sprite.visible=!!(f&&fx);
    if(sprite.visible){const size=(clip.place==='line'?Math.max(clip.size,at.len*.9):clip.size)*(1+pulse*.1);const facing=sheetFacing(clip.id,camera,at,clip.direction,f.frame);smat.map=facing.mirror?cache.get(clip.entry.effect).mirrored[f.frame]:fx[f.frame];smat.rotation=facing.rotation;smat.opacity=f.alpha*fade;sprite.scale.set(size,size,1);sprite.position.set(at.x,y+(clip.place==='area'||clip.place==='around'?Math.max(1,size*.32):1),at.z);}
    ground.visible=!!(g&&gx);
-   if(ground.visible){const size=clip.place==='line'?Math.max(clip.ground*.6,at.len):clip.ground;gmat.map=gx[g.frame];gmat.opacity=g.alpha*fade;ground.scale.set(size,size,1);ground.position.set(at.x,y+.05,at.z);ground.rotation.set(-Math.PI/2,0,Math.atan2(-at.uz,at.ux));}
+   if(ground.visible){const size=clip.place==='line'?Math.max(clip.ground*.6,at.len):clip.ground;gmat.map=gx[g.frame];gmat.opacity=g.alpha*fade;ground.scale.set(size,size,1);ground.position.set(at.groundX??at.x,y+.05,at.groundZ??at.z);ground.rotation.set(-Math.PI/2,0,Math.atan2(-at.uz,at.ux));}
    if(clip.own&&clip.ultimate)shake=Math.max(shake,pulse*.07);
   }
   return reduced.matches?0:shake;

@@ -5,6 +5,7 @@ import {ROLES} from '../assets/skills-next/catalog.js';
 import {VFX_SHEETS,VFX_UNMATCHED} from '../assets/skills-next/vfx-2026-10/vfx-map.js';
 globalThis.matchMedia??=()=>({matches:false});
 const {sheetFrame,sheetTail,vfxPlacement,createSheetVfx,BASIC_SHEETS,BASIC_COMBO_VFX,basicAttackVfxId,hasSheet}=await import('../role-sheet-vfx.js');
+const {ROLE_SELF_KINDS,ROLE_FRIEND_KINDS}=await import('../role-combat.js');
 const dir=new URL('../assets/skills-next/vfx-2026-10/game/',import.meta.url);
 
 test('every class and Master active skill has its own painted sheet, on disk for desktop and mobile',()=>{
@@ -45,6 +46,17 @@ test('art is placed by what the skill does',()=>{
  assert.equal(vfxPlacement('holy'),'shot');assert.equal(vfxPlacement('line'),'line');assert.equal(vfxPlacement('execute'),'target');
  assert.equal(vfxPlacement('break','hunt-shot'),'shot','an arrow leaves the bow');assert.equal(vfxPlacement('line','hunt-rama'),'shot');
  assert.equal(vfxPlacement('break','sword-open'),'target','the same kind on a sword stays on the blow');assert.equal(vfxPlacement('line','war-drill'),'line');
+});
+test('every skill plays where its effect really lands',()=>{
+ const actives=ROLES.flatMap(r=>[...r.base,...r.branches.flatMap(b=>b.active)]);assert.equal(actives.length,98);
+ for(const s of actives){const place=vfxPlacement(s.kind,s.id);
+  if(ROLE_SELF_KINDS.has(s.kind))assert.ok(['self','around'].includes(place),s.id+' works around the caster, not on the aimed monster');
+  if(ROLE_FRIEND_KINDS.has(s.kind))assert.notEqual(place,'self',s.id+' goes to the chosen ally');
+ }
+ assert.equal(vfxPlacement('poison'),'target','poison goes on the victim');assert.equal(vfxPlacement('venom'),'target');
+ assert.equal(vfxPlacement('soulWave'),'area','these damage around the target');assert.equal(vfxPlacement('curseWave'),'area');
+ assert.equal(vfxPlacement('phalanx'),'around','the shield wall is around the caster');assert.equal(vfxPlacement('pull'),'line','a hook reaches out from the caster');
+ for(const id of ['lance-naga','box-knee-dash'])assert.equal(vfxPlacement('drill',id),'shot',id);
 });
 test('one clip per cast, bounded pool, hits retime once, cancel and clear free everything',()=>{
  const scene=new THREE.Scene(),world={player:{x:0,z:0},nav:null,networkSelfId:'me'},vfx=createSheetVfx(scene,world,{tier:'sd'});

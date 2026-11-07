@@ -7,13 +7,15 @@ import {effectDirection,sheetFacing,mirroredFrame} from './skill-effect-facing20
 // 0.119 painted skill sheets (4×2 frames, frame 3 = peak). One clip per cast, timed by the cast's own release beats
 // (event.timing.impacts) and nudged onto the real damage events, so it follows the authority, not a fixed speed.
 const BASE='./assets/skills-next/vfx-2026-10/game/';
-const AROUND=new Set(['taunt','cleave','push','sanctuary','ward','groupHeal','soulWave','curseWave','smoke']);
-const SELF=new Set(['guard','riposte','evade','stealth','crow','anchor','counter','reflect','clones','poison','venom','greatSummon','greatSpirit','rest','heal-self']);
-const AREA=new Set(['zone','storm','meteor','rain','trap','mine','thorns','massBind','yantra','holyField','lifeTree','wall','phalanx']);
+const AROUND=new Set(['taunt','cleave','push','sanctuary','ward','groupHeal','smoke','lifeTree','yantra','purify','phalanx']);
+const SELF=new Set(['guard','riposte','evade','stealth','crow','anchor','counter','clones','greatSummon','greatSpirit','rest','heal-self']);
+const AREA=new Set(['zone','storm','meteor','rain','trap','mine','thorns','massBind','holyField','wall','soulWave','curseWave']);
 const SHOT=new Set(['holy','retreatShot','ambush']);
-const LINE=new Set(['line','drill','chainLine','cone']);
-// These sheets are an arrow in flight, but their kind is shared with blows that land on the target or stay in a line.
-const ARROWS=new Set(['hunt-shot','hunt-rama']);
+const LINE=new Set(['line','drill','chainLine','cone','pull']);
+// These sheets travel from the caster, but their kind is shared with blows that land on the target or stay in a line.
+const FLYING=new Set(['hunt-shot','hunt-rama','lance-naga','box-knee-dash']);
+// These pierce the whole line, so the art keeps going past the target to the skill's full range.
+const PIERCING=new Set(['hunt-rama','lance-naga']);
 // Novice basics are not role skills; their save slot is their identity (the hotbar may move them, the slot never does).
 const NOVICE_KIND={'novice:0':'jab','novice:4':'rest','novice:5':'guard'};
 export const BASIC_SHEETS=Object.freeze({
@@ -37,7 +39,7 @@ export const basicAttackVfxId=(classId,comboStep=0)=>{
  return seq[Math.max(0,comboStep)%seq.length];
 };
 const sheetEntry=id=>VFX_SHEETS[id]??BASIC_SHEETS[id];
-export const vfxPlacement=(kind,id)=>ARROWS.has(id)?'shot':AROUND.has(kind)?'around':SELF.has(kind)?'self':AREA.has(kind)?'area':SHOT.has(kind)?'shot':LINE.has(kind)?'line':'target';
+export const vfxPlacement=(kind,id)=>FLYING.has(id)?'shot':AROUND.has(kind)?'around':SELF.has(kind)?'self':AREA.has(kind)?'area':SHOT.has(kind)?'shot':LINE.has(kind)?'line':'target';
 export const hasSheet=id=>!!sheetEntry(id)?.effect;
 const skills=new Map(ALL_SKILLS.map(s=>[s.id,s]));
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
@@ -94,7 +96,7 @@ export function createSheetVfx(scene,world,{tier:forced=null,camera=null}={}){
   const skill=skills.get(id),kind=e.basic?(entry.classId==='shaman'||entry.classId==='acolyte'||entry.classId==='hunter'?'holy':entry.classId==='lancer'&&id!=='basic:slash'?'line':'slash'):skill?.kind??BASIC_SHEETS[id]?.kind??NOVICE_KIND[id]??e.kind,place=vfxPlacement(kind,id),ultimate=!e.basic&&!!(skill?.ultimate??entry.ultimate);
   const impacts=e.timing?.impacts?.length?[...e.timing.impacts]:[skill?.windup??.36],radius=skill?.radius??2.8;
   const wide=place==='around'||place==='area',basicScale=e.basic?(e.comboStep===3?2.45:2.15):null;
-  const clip={key,actor,own,id,entry:e.basic?{...entry,ground:null}:entry,place,ultimate,direction,from:{...e.from},to:{...e.to},start:clock-Math.max(0,e.lag??0),impacts,tail:sheetTail(e.timing,ultimate),hits:new Set(),holder:holder(),
+  const clip={key,actor,own,id,entry:e.basic?{...entry,ground:null}:entry,place,ultimate,direction,from:{...e.from},to:PIERCING.has(id)?{x:e.from.x+direction.x*skill.range,z:e.from.z+direction.z*skill.range}:{...e.to},start:clock-Math.max(0,e.lag??0),impacts,tail:sheetTail(e.timing,ultimate),hits:new Set(),holder:holder(),
    size:basicScale??(wide?clamp(radius*1.9,2.6,ultimate?8:6.5):ultimate?3.4:place==='shot'?1.9:2.3),ground:clamp(radius*2.5,2.4,ultimate?9:7)};
   sheet(clip.entry.effect);if(clip.entry.ground)sheet(clip.entry.ground);clips.push(clip);return true;
  }
@@ -103,7 +105,7 @@ export function createSheetVfx(scene,world,{tier:forced=null,camera=null}={}){
   if(e.castId==null||!Number.isInteger(e.hitIndex))return;
   const clip=clips.find(c=>c.key===(e.actor??self())+'|'+e.castId);if(!clip||clip.hits.has(e.hitIndex))return;clip.hits.add(e.hitIndex);
   const drift=clock-Math.max(0,e.lag??0)-(clip.start+clip.impacts[Math.min(e.hitIndex,clip.impacts.length-1)]);if(Math.abs(drift)<.6)clip.start+=drift;
-  if(e.hitIndex===0&&Number.isFinite(e.x)&&Number.isFinite(e.z)&&['target','shot'].includes(clip.place))clip.to={x:e.x,z:e.z};
+  if(e.hitIndex===0&&Number.isFinite(e.x)&&Number.isFinite(e.z)&&['target','shot'].includes(clip.place)&&!PIERCING.has(clip.id))clip.to={x:e.x,z:e.z};
  }
  function where(clip,t){
   const caster=locate?.(clip.actor)??(clip.own?world.player:null)??clip.from,from=clip.place==='self'||clip.place==='around'?caster:clip.from;

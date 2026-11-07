@@ -2,7 +2,7 @@
 // over an NPC it becomes a speech bubble. Elsewhere the normal pointer stays.
 import * as THREE from './vendor/build/three.module.js';
 
-const REACH=64,PULL=26,SWORDS='assets/ui-view/cursor-swords.svg',TALK='assets/ui-view/cursor-talk.svg';
+const REACH=32,PULL=26,SWORDS='assets/ui-view/cursor-swords.svg',TALK='assets/ui-view/cursor-talk.svg';
 // The closest point within reach of the mouse, or null.
 export function nearestTarget(points,x,y,reach=REACH){
  let best=null,bestDistance=reach;

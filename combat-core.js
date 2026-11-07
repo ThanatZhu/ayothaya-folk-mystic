@@ -1,4 +1,5 @@
 import {normalizeAutoTarget,autoTargetAllows,autoRankAllows} from './auto-targets.js?v=auto202';
+import {SET_FX,bossRangeBonus} from './boss-set-effects.js';
 import {skillHit} from './skill-critical.js';
 import {skillDamageFormula,skillDamageBase} from './skill-damage244.js';
 import {startAttackOrder,stepAttackOrder} from './combat-attack-order221.js?v=surfaces222';
@@ -237,7 +238,7 @@ export class CombatWorld{
  }
  // 0.48 ailments: blind and curse weaken every hit; stun/sleep stop acting; silence stops skills.
  // One movement rule for authority and prediction; sprint is an explicit modifier and never changes default pace.
- walkSpeed(run=false){return movementSpeed(this.profession.speed*(1+(this.derived?.moveSpeed??0))*(this.status?.curse?.6:1)*(this.status?.slow?.5:1)*(this.safe?TOWN_PACE:1),run);}
+ walkSpeed(run=false){return movementSpeed(this.profession.speed*(1+(this.derived?.moveSpeed??0))*(this.status?.curse?.6:1)*(this.status?.slow?.5:1)*(this.status?.haste?1+SET_FX.rogueHasteBonus:1)*(this.safe?TOWN_PACE:1),run);}
  weakness(){return (this.status.blind?.7:1)*(this.status.curse?.75:1);}
  inflict(name){if(!name||!AILMENTS[name])return;const fresh=!this.status[name];this.status[name]=AILMENTS[name].time;if(fresh)this.notice(AILMENTS[name].name+'! · '+AILMENTS[name].text);}
  // One monster blow, shared by the offline world and the realm server: damage, ailment roll, or going down (+ death penalty).
@@ -274,7 +275,7 @@ export class CombatWorld{
   const id=MONSTER_TYPES[mob.type]?.id,a=affinityOf(id),card=1+(d?.vsSize?.[a.size]??0)+(d?.vsElement?.[a.element]??0);
   return affinityMultiplier({element,physical:basic||!magic,classId:cls},id)*card*this.weakness();}
  // 0.43 status/gear: max HP/MP and the multipliers above. null keeps the pre-0.43 numbers.
- applyDerived(d){this.derived=d;if(!d)return;const p=this.player;p.maxHp=Math.round(d.maxHp*(1+(this.roleCombat?.mods().maxHp??0)));p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
+ applyDerived(d){this.derived=d;if(!d)return;const p=this.player;this.profession.baseRange??=this.profession.range;this.profession.range=this.profession.baseRange+bossRangeBonus(d);p.maxHp=Math.round(d.maxHp*(1+(this.roleCombat?.mods().maxHp??0)));p.maxMp=d.maxMp;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp);}
  notice(text){this.emit('notice',{text});}
  select(id){const mob=this.foes().find(m=>m.id===id&&m.hp>0);if(!mob)return;this.targetId=id;this.path=[];this.pathTimer=0;this.emit('select',{id});}
  nearest(range=AUTO_RANGE){return this.foes().filter(m=>m.hp>0&&this.prey(m)&&distance(m,this.player)<=range&&(!this.auto||distance(m,this.anchor)<=AUTO_RANGE)).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]??null;}
@@ -286,7 +287,7 @@ export class CombatWorld{
  setAuto(on,hunt=null,target=null){const filter=normalizeAutoTarget(target);if(on&&filter?.kind==='entity'&&!this.foes().some(m=>m.id===filter.id&&m.hp>0)){this.notice('เป้าหมายนี้ไม่อยู่หรือไม่สามารถต่อสู้ได้');return false;}if(on&&filter?.kind==='type'&&!MONSTER_TYPES[filter.type]||on&&filter?.kind==='types'&&filter.types.some(t=>!MONSTER_TYPES[t]))return false;const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;this.autoTarget=this.auto?filter:null;if(this.auto&&filter?.kind==='entity')this.select(filter.id);return ok;}
  toggleAuto(){this.autoRotation=null;this.autoSkillReach=null;this.hunt=null;this.autoTarget=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0||mob.pvp||!this.autoDamageAllows(mob))return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);if(color==='#ffd27a')amuletCrit(this);
+  if(!mob||mob.hp<=0||mob.pvp||!this.autoDamageAllows(mob))return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);this.roleCombat?.setFx?.landed(mob,color==='#ffd27a');rallyPack(this.mobs,mob);if(color==='#ffd27a')amuletCrit(this);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a',...this.damageContext}); // Keep the hit's critical flag and cast identity.
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
@@ -306,10 +307,11 @@ export class CombatWorld{
  }
  basicHit(m,castId){
   const p=this.player;if(!m||m.hp<=0||p.hp<=0||held(this.status)||reachTo(p,m)>this.profession.range+.35||!lineClear(p,m,this.nav)){this.emit('castCancel',{castId});return;}
-  const d=this.derived,crit=!!d&&Math.random()<d.crit,magic=!!d?.magic,t=MONSTER_TYPES[m.type];
+  const d=this.derived,crit=!!d&&(Math.random()<d.crit||!!this.roleCombat?.setFx?.forceCrit(m)),magic=!!d?.magic,t=MONSTER_TYPES[m.type];
   this.damageContext={castId,hitIndex:0,source:'basic',crit,magic};
   try{if(d&&!magic&&!m.pvp&&d.hit!=null&&Math.random()>=hitChance(d.hit,monsterFlee(t))){this.emit('miss',{id:m.id,x:m.x,z:m.z});return;}
-   this.hurt(m,Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?d.critMult??CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),crit?'#ffd27a':magic?'#c9a8ff':undefined);
+   const amount=Math.max(1,Math.round((this.profession.damage+(d?.basicBonus??0))*(crit?d.critMult??CRIT_MULT:1)*this.affinity(m,!magic)*(crit?1:this.guardOf(m,magic)))),color=crit?'#ffd27a':magic?'#c9a8ff':undefined;
+   this.hurt(m,amount,color);this.roleCombat?.setFx?.basicHit(m,amount,(target,n)=>this.hurt(target,n,color));
   }finally{this.damageContext=null;}
  }
  skill(index){

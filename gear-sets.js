@@ -47,16 +47,18 @@ export const RAINBOW={name:'บอส',color:'rainbow'};
 // Random red grades only roll on boss drops. Weapon crafting chooses its explicit progression grade.
 export function rollGrade(rand=Math.random,boss=false){const r=rand();let acc=0;for(let g=GRADES.length-1;g>0;g--){if(g===4&&!boss)continue;acc+=GRADES[g].chance;if(r<acc)return g;}return 0;}
 
-// Boss sets (rainbow): Lv.80, base = red grade of tier 6, crafted from boss shards. Effects marked live:false need new
-// combat mechanics and are shown as "coming soon" until the server implements them.
+// Boss sets (rainbow): Lv.80, crafted from boss shards. Owner (8 Nov): the hardest set must beat a red tier 6 set, so
+// each piece carries 2% of its class's stat (red pieces carry 1%), four pieces give ATK/MATK +15% (red: +8%), and the
+// 3- and 5-piece effects are real mechanics (boss-set-effects.js). Effects: text shown in the bag; the rules live there.
+const BOSS4={atkPct:.15,matkPct:.15};
 export const BOSS_SETS={
- swordsman:{name:'ขุนศึกอโยธยา',bonus:{2:{defPct:.15}},soon:{3:'HP ต่ำกว่า 30% ได้โล่ 20% ของ HP (ทุก 60 วิ)',5:'โดนตีสะสม "แค้น" ครบ 10 ชั้น สกิลถัดไปแรง x2'}},
- lancer:{name:'ทวนพญาครุฑ',bonus:{},soon:{2:'ระยะโจมตี +0.5',3:'ตีศัตรูที่อยู่ไกลแรงขึ้น 15%',5:'ตีปกติครบ 5 ครั้ง ปล่อยคลื่นทวนแทงทะลุ'}},
- hunter:{name:'พรานหิมพานต์',bonus:{2:{hit:20}},soon:{3:'ยิงปกติมีโอกาส 15% ยิงเพิ่มอีก 1 ดอก',5:'ยิงเป้าเดิมติดกัน 5 ครั้ง ครั้งที่ 6 คริแน่นอน'}},
- boxer:{name:'ครูมวยหนุมาน',bonus:{2:{aspd:.10}},soon:{3:'ตีต่อเนื่อง ดาเมจ +3% ต่อชั้น (สูงสุด 10 ชั้น)',5:'ครบ 10 ชั้น สกิลถัดไปไม่ติดคูลดาวน์'}},
- rogue:{name:'เงาราตรี',bonus:{2:{crit:.08}},soon:{3:'ติดคริแล้วเดินเร็ว +20% นาน 3 วิ',5:'ตีเป้าที่ HP ต่ำกว่า 30% แรงขึ้น 40%'}},
- shaman:{name:'อาคมนวหรคุณ',bonus:{2:{matkPct:.10}},soon:{3:'สกิลวงทิ้งไฟเผาพื้นไว้ 3 วิ',5:'ใช้สกิลครบ 4 ครั้ง ปล่อยวิญญาณโจมตีฟรี 1 ครั้ง'}},
- acolyte:{name:'พุทธคุณ',bonus:{},soon:{2:'ฮีลแรงขึ้น 15%',3:'ฮีลเกินหลอด กลายเป็นโล่ (สูงสุด 15% ของ HP)',5:'เพื่อนรอบตัวโดนตีเจ็บน้อยลง 10% (ออร่า)'}},
+ swordsman:{name:'ขุนศึกอโยธยา',piece:{dmgReduce:.02},bonus:{2:{defPct:.15},4:BOSS4},effects:{3:'HP ต่ำกว่า 30% ได้โล่ 20% ของ HP (ทุก 60 วิ)',5:'โดนตีสะสม "แค้น" ครบ 10 ชั้น สกิลถัดไปแรง x2'}},
+ lancer:{name:'ทวนพญาครุฑ',piece:{armorPen:.02},bonus:{4:BOSS4},effects:{2:'ระยะโจมตี +0.5',3:'ตีศัตรูที่อยู่ไกลกว่า 4 เมตรแรงขึ้น 15%',5:'ตีปกติครบ 5 ครั้ง ปล่อยคลื่นทวนแทงทะลุ'}},
+ hunter:{name:'พรานหิมพานต์',piece:{crit:.02},bonus:{2:{hit:20},4:BOSS4},effects:{3:'ยิงปกติมีโอกาส 15% ยิงเพิ่มอีก 1 ดอก',5:'ยิงเป้าเดิมติดกัน 5 ครั้ง ครั้งที่ 6 คริแน่นอน'}},
+ boxer:{name:'ครูมวยหนุมาน',piece:{aspd:.02},bonus:{2:{aspd:.10},4:BOSS4},effects:{3:'ตีต่อเนื่อง ดาเมจ +3% ต่อชั้น (สูงสุด 10 ชั้น)',5:'ครบ 10 ชั้น สกิลถัดไปไม่ติดคูลดาวน์'}},
+ rogue:{name:'เงาราตรี',piece:{crit:.02},bonus:{2:{crit:.08},4:BOSS4},effects:{3:'ติดคริแล้วเดินเร็ว +20% นาน 3 วิ',5:'ตีเป้าที่ HP ต่ำกว่า 30% แรงขึ้น 40%'}},
+ shaman:{name:'อาคมนวหรคุณ',piece:{cdr:.02},bonus:{2:{matkPct:.10},4:BOSS4},effects:{3:'สกิลวงทิ้งไฟเผาพื้นไว้ 3 วิ',5:'ใช้สกิลครบ 4 ครั้ง ปล่อยวิญญาณโจมตีฟรี 1 ครั้ง'}},
+ acolyte:{name:'พุทธคุณ',piece:{cdr:.02},bonus:{4:BOSS4},effects:{2:'ฮีลแรงขึ้น 15%',3:'ฮีลเกินหลอด กลายเป็นโล่ (สูงสุด 15% ของ HP)',5:'เพื่อนรอบตัวโดนตีเจ็บน้อยลง 10% (ออร่า)'}},
 };
 export const SHARDS=[['shard-soul','เศษวิญญาณบอส','บอสต่ำกว่า Lv.60'],['shard-gem','เศษมณีบอส','บอส Lv.60–98'],['shard-divine','เศษเทพ','บอสร่างตื่น และยักษ์เมฆา Lv.99']];
 
@@ -97,11 +99,11 @@ export function buildGearItems(){
  for(const [look,lookName] of LOOKS){
   const cls=look==='monk'||look==='nun'?'acolyte':look,b=BOSS_SETS[cls];
   SET_SLOTS.forEach((slot,si)=>{const d=defStats(slot,85),it={image:img('boss-'+look,si+1),name:SLOT_WORD[slot]+b.name+' ('+lookName+')',kind:'gear',slot,level:80,
-   bossSet:cls,look,def:top(d.def),mdef:top(d.mdef),sell:20000,rainbow:true};
+   bossSet:cls,look,def:top(d.def),mdef:top(d.mdef),pct:{...b.piece},sell:20000,rainbow:true};
    if(slot!=='armor')it.slots=0;it.note='เซ็ทบอส'+b.name+' · Lv.80';it.text=gearText(it);out[bossId(slot,look)]=it;});
  }
  for(const [cls,word,stat,power,look] of WEAPON_CLASSES){const b=BOSS_SETS[cls],it={image:img('boss-'+look,0),name:word+b.name,kind:'gear',slot:'weapon',classes:[cls],
-  level:80,bossSet:cls,[stat]:top(Math.round(2*85*power)),sell:40000,rainbow:true};it.note='เซ็ทบอส'+b.name+' · Lv.80';it.text=gearText(it);out[bossId('weapon',cls)]=it;}
+  level:80,bossSet:cls,[stat]:top(Math.round(2*85*power)),pct:{...b.piece},sell:40000,rainbow:true};it.note='เซ็ทบอส'+b.name+' · Lv.80';it.text=gearText(it);out[bossId('weapon',cls)]=it;}
  // Novice starter kit (shop, Lv.1, no set): wraps are the Novice weapon, the rest fit everyone.
  const starter=[['ผ้าคาดหัวขาวม้า','head',{def:1},120],['เสื้อผ้าฝ้ายชาวบ้าน','armor',{def:3,mdef:1},150],['ผ้าขาวม้าพาดบ่า','garment',{def:1},150],
   ['รองเท้าแตะสานใบตาล','shoes',{def:1},150],['ผ้าพันหมัดผู้ฝึกตน','weapon',{atk:6},120]];
@@ -168,8 +170,8 @@ export function setLines(familyKey,tier,count){
 }
 export function bossLines(cls,count){
  const b=BOSS_SETS[cls],lines=[];
- for(const need of [2,3,5]){const live=b.bonus[need],text=live?Object.entries(live).map(([k,v])=>pct(k,v)).join(' · '):b.soon[need];
-  if(text)lines.push([need+' ชิ้น: '+text+(live?'':' (เร็วๆ นี้)'),count>=need]);}
+ for(const need of [2,3,4,5]){const text=[...Object.entries(b.bonus[need]??{}).map(([k,v])=>pct(k,v)),b.effects[need]].filter(Boolean).join(' · ');
+  if(text)lines.push([need+' ชิ้น: '+text,count>=need]);}
  return lines;
 }
 export const familyName=key=>FAMILIES.find(f=>f.key===key)?.name??key;

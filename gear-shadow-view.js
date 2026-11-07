@@ -22,7 +22,7 @@ void main(){
  gl_FragColor=vec4(mix(mix(tint,bands,rainbow),vec3(1.),core*.35)*1.35,a*.92);
 }`;
 export function attachGearShadow(sprite){
- const layers=new Map(),hide=key=>{const m=layers.get(key);if(m)m.visible=false;};
+ const layers=new Map(),hide=key=>{const m=layers.get(key);if(m)m.visible=false;};let pulseAt=-9;
  const still=globalThis.matchMedia?.('(prefers-reduced-motion:reduce)').matches;
  function layer(key){
   if(layers.has(key))return layers.get(key);
@@ -31,6 +31,8 @@ export function attachGearShadow(sprite){
   const mesh=new THREE.Mesh(sprite.geometry,material);mesh.frustumCulled=false;mesh.position.z=-.01;
   mesh.onBeforeRender=()=>{
    const u=material.uniforms,now=performance.now()/1000,p=sprite.geometry.attributes.position;u.map.value=sprite.material.map;u.middle.value.set((p.getX(0)+p.getX(3))/2,(p.getY(0)+p.getY(3))/2,0);if(!still)u.time.value=now%1000;
+   // A rainbow set effect firing: the aura flares wide and bright for a moment.
+   const flare=still?0:Math.max(0,1-(now-pulseAt)/.7);u.reach.value=look.reach*(1+.7*flare);u.strength.value=look.strength*(1+1.2*flare);
   };
   sprite.add(mesh);layers.set(key,mesh);return mesh;
  }
@@ -42,6 +44,7 @@ export function attachGearShadow(sprite){
    if(color!=='rainbow')mesh.material.uniforms.tint.value.set(color);
   }
  };
+ sprite.userData.pulseGearShadow=()=>{pulseAt=performance.now()/1000;};
  const dispose=sprite.userData.dispose;
  sprite.userData.dispose=()=>{for(const mesh of layers.values())mesh.material.dispose();dispose?.();};
  return sprite;

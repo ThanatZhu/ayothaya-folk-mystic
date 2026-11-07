@@ -318,6 +318,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
   }
   if(e.type==='petSkill'){const ids={fireBurst:'sky-spear',lotusCleanse:'cleanse',moonBarrier:'sanctuary',roarGuard:'guard',trueSight:'mark',flowerBind:'vine-trap',riceHeal:'heal',jadeShell:'sanctuary',waterMana:'regen',echoSlow:'hamstring'};roleEffects.spawn({roleSkillId:ids[e.kind],from:{x:e.x,z:e.z},to:e.to??{x:e.x+.5,z:e.z},lag:e.lag});if(!e.actor||e.actor===network?.id)toast(e.name);
   }else if(e.type==='castCancel'){if(roleClip?.castId===e.castId){roleClip=null;castUntil=world.time;}if(basicCastId===e.castId)castUntil=world.time;roleEffects.cancel(e.castId,e.actor??network?.id??'self');skillEffects.cancel(e.castId,e.actor??'self');
+  }else if(e.type==='setProc'){if(!e.actor||!network||e.actor===network.id){hero.sprite.userData.pulseGearShadow?.();kick=Math.max(kick,.35);popup({amount:'🌈 '+e.text,x:world.player.x,z:world.player.z},false,{key:'set-proc',pos:()=>({x:world.player.x,y:2.7+hero.sprite.position.y,z:world.player.z})});}
   }else if(e.type==='rolePassive'){roleEffects.spawn(e);
   }else if(e.type==='cast'){playCast(e);
   }else if(e.type==='miss'){const m={...e,type:'damage',amount:'MISS',color:'#d8d8d8'};if(e.source!=='spirit'&&!e.synced&&strikeAt>world.time)heldHits.push({at:strikeAt,e:m});else popup(m);

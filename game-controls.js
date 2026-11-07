@@ -18,7 +18,7 @@ import {monsterFrame,MONSTER_BEHAVIOUR} from './monster-catalog.js?v=farm212';
 import {jobProgress,migrateXp,XP_CURVE} from './experience.js?v=105.3';
 import {applySkillArt} from './skill-art.js?v=icons117';
 import {presentationDelta,roleTiming} from './combat-timing.js';
-import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS,ROLE_GROUND_KINDS,ROLE_GLOBAL_CD} from './role-combat.js';
+import {ROLE_FRIEND_KINDS,ROLE_SELF_KINDS,ROLE_GROUND_KINDS,ROLE_GLOBAL_CD,skillInReach} from './role-combat.js';
 import {characterMotion,attackDuration,gaitStep,walkView} from './character-motion.js?v=novice174';
 import {activeEmote,reconcileEmote,actionChoice,canonicalAction,CHARACTER_ACTIONS,EMOTE_ACTIONS,supportsCharacterAction,GAMEPLAY_RUN_ENABLED} from './character-action-state.js?v=106.0';
 import {skillTrack,skillPose} from './skill-choreography.js?v=novice174';
@@ -183,7 +183,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  }
  // A blocked path gives up once (with the usual notice) instead of retrying into the wall.
  const approachWalk=aim=>({radius:Math.max(.5,(aim.s.range??7)-.8),marker:false,onFail:()=>{approach=null;world.notice('ไปตรงนั้นไม่ได้');}});
- const inReach=(aim,p=world.player)=>Math.hypot(aim.at.x-p.x,aim.at.z-p.z)<=(aim.s.range??7)+.3;
+ const inReach=(aim,p=world.player)=>skillInReach(aim.at,aim.s.range??7,p);
  function useSkill(i,point=null){
   if(world.observer)return false;
   if(!Number.isInteger(i))return false;approach=null;const aim=roleAim(i,point);

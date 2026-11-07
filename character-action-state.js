@@ -58,6 +58,13 @@ export function activeEmote(emote,time=0){
  if(!EMOTE_ACTIONS.includes(name)||name==='idle')return null;
  return isPosture(name)||Math.max(0,time-emote.time)<EMOTE_SECONDS?{name,time:emote.time}:null;
 }
+// A press shows at once, but snapshots already on their way still carry the old state. Until the server agrees, or the
+// wait runs out, keep what the player chose instead of snapping back for a beat.
+export function reconcileEmote(current,served,pending,now){
+ if(pending&&now<pending.until&&(served?.name??'idle')!==pending.name)return {emote:current,pending};
+ // Same pose: stay on the local clock. The server's start is a moment later and would pull the clip backwards.
+ return {emote:current&&served?.name===current.name?current:served,pending:null};
+}
 export function actionChoice({moving=false,running=false,emote=null,time=0,hit=false,cast=false,attack=false,dead=false,guard=false}={}){
  if(dead)return 'idle';
  if(hit)return 'hit';

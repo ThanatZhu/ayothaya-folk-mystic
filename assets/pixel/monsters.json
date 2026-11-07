@@ -1,0 +1,32 @@
+{
+ "straw": {
+  "art": "pm-straw",
+  "cell": 78,
+  "body": 72
+ },
+ "rat": {
+  "art": "pm-rat",
+  "cell": 86,
+  "body": 62
+ },
+ "hopper": {
+  "art": "pm-hopper",
+  "cell": 80,
+  "body": 59
+ },
+ "rat-chief": {
+  "art": "pm-rat-chief",
+  "cell": 94,
+  "body": 84
+ },
+ "rat-chief-awakened": {
+  "art": "pm-rat-chief",
+  "cell": 94,
+  "body": 84
+ },
+ "rice-world-guardian": {
+  "art": "pm-rice-guardian",
+  "cell": 104,
+  "body": 83
+ }
+}

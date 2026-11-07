@@ -33,3 +33,12 @@ test('a per-player cooldown throttles repeated leaderboard reads',()=>{
  clock+=1000;r.receive(p.id,{type:'leaderboard',seq:4});
  assert.equal(calls,2,'allowed again after the 1 s cooldown');
 });
+
+test('a revival cannot skip the guild-war knockout timer',()=>{
+ const {r,join}=realm(),p=join('Faller',WAR.map);
+ r.warState('server-1').active=true;
+ p.world.player.hp=0;p.world.player.down=3;
+ assert.equal(r.receive(p.id,{type:'returnToSpawn',seq:2}),false,'blocked while still knocked out in war');
+ assert.ok(p.world.player.hp<=0,'still down, not revived');
+ assert.equal(r.receive(p.id,{type:'respawn',seq:3,id:'x',destination:'here'}),false,'respawn-here also blocked mid-knockout');
+});

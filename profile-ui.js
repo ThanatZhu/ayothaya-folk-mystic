@@ -28,9 +28,16 @@ export function createProfileUI({game,account,statusUI,equipmentUI}){
  ($('game-shell')??document.body).append(dialog);
  // The look / outfit button lives here now instead of in settings.
  const look=$('open-equipment');if(look){look.textContent='เปลี่ยนรูปลักษณ์ · ชุดและอาวุธ';dialog.querySelector('.profile-actions').append(look);}
+ // 0.121 inspect privacy: let the player hide their gear and power from other players' inspect.
+ let inspectHidden=false;
+ const privacy=document.createElement('button');privacy.type='button';privacy.id='profile-inspect-privacy';
+ const paintPrivacy=()=>{privacy.textContent=inspectHidden?'ซ่อนอุปกรณ์จากผู้เล่นอื่นอยู่':'ให้ผู้เล่นอื่นดูอุปกรณ์ได้';privacy.classList.toggle('on',inspectHidden);};
+ privacy.onclick=()=>{inspectHidden=!inspectHidden;paintPrivacy();world.market?.('inspectPrivacy',{hidden:inspectHidden});};
+ paintPrivacy();dialog.querySelector('.profile-actions').append(privacy);
+ game.onEvent(e=>{if(e.type==='inspectPrivacy'){inspectHidden=e.hidden===true;paintPrivacy();}});
  dialog.querySelector('#profile-close').onclick=()=>dialog.close();
  $('profile-raise').onclick=()=>{dialog.close();$('menu-status')?.click();};
- const open=()=>{game.clearInput();openHudPanel(dialog);render(true);};
+ const open=()=>{game.clearInput();openHudPanel(dialog);render(true);world.market?.('inspectPrivacy',{});};
  $('open-account').onclick=()=>dialog.open?dialog.close():open();
 
  const ctx=$('profile-hero').getContext('2d');let shown='';

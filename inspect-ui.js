@@ -19,6 +19,7 @@ export function createInspectUI({game}){
   $('inspect-name').textContent=v?v.name:'กำลังโหลด…';$('inspect-name').dataset.i18nSkip='';
   if(!v){$('inspect-class').textContent='';$('inspect-body').innerHTML='';return;}
   $('inspect-class').textContent=className(v.classId,v.gender)+' · Lv.'+v.level+(v.reborn?' · '+rebirthRank(v.reborn):'');
+  if(v.private){$('inspect-body').innerHTML=`<p class="inspect-meta">${v.guild?'กิลด์ '+esc(v.guild.name)+' · ':''}<span>ผู้เล่นนี้ปิดการดูอุปกรณ์และค่าพลัง</span></p>`;return;}
   const slot=([s,label])=>{const id=v.gear?.[s],it=id&&itemDef(id);
    return `<li class="${it?'r'+(it.rarity??0):'empty'}"><i class="item-icon" style="${it?iconStyle(id):''}" aria-hidden="true"></i><div><small>${label}</small><strong class="r${it?.rarity??0}">${it?esc(it.name):'ว่าง'}</strong></div></li>`;};
   $('inspect-body').innerHTML=`<p class="inspect-meta">${v.guild?'กิลด์ '+esc(v.guild.name)+' · ':''}<span>ค่าพลัง</span> <b>${Number(v.power||0).toLocaleString('th-TH')}</b></p><ol class="inspect-gear">${SLOTS.map(slot).join('')}</ol>`;

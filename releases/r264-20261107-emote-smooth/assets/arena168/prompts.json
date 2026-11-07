@@ -1,0 +1,30 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "useCase": "ui-mockup",
+  "assets": [
+    {
+      "name": "frame",
+      "path": "assets/arena168/frame.webp",
+      "source": "exec-fdf168ae-b86e-4b33-9864-2bb800b0a7b4.png",
+      "prompt": "A production-ready nine-slice UI WINDOW FRAME asset for an ornate Thai Ayutthaya fantasy MMORPG. Square canvas, perfectly front-facing flat interface artwork, not a perspective object. A complete continuous polished antique gold rectangular border with restrained sculpted Thai flame and lotus corner ornaments, tiny deep emerald jade inlays, rich warm highlights, graceful thin straight gold rails between four detailed corners. Border occupies exactly the outer 12 percent of the square, with the whole central 76 percent COMPLETELY TRANSPARENT, no opaque panel fill anywhere in the center. Straight edges suitable for nine-slice stretching, identical visual weight on all four edges. Small restrained ornaments fit inside the canvas, no protruding long spikes or top crest. Match hand-painted 2.5D Thai fantasy game inventory windows, luxurious readable craftsmanship. The asset is one clean empty frame only: no icons, no characters, no weapons, no lettering, no words, no watermark, no backdrop. Genuine transparent alpha outside and inside the frame."
+    },
+    {
+      "name": "button-primary",
+      "path": "assets/arena168/button-primary.webp",
+      "source": "exec-62977d29-081b-4e66-901c-d55333788c92.png",
+      "prompt": "One production-ready PRIMARY BUTTON background asset for a Thai Ayutthaya fantasy MMORPG interface. Wide horizontal rectangle, 4:1 aspect ratio, completely front-facing flat GUI art. Rich polished deep emerald jade central face, refined beveled antique gold rim, small matching Thai lotus/flame gold flourishes symmetrically at both ends, tasteful embossed gold corner details, luminous warm edge highlights and subtle tactile depth. The central 65 percent is calm dark green, blank and spacious for a separately rendered Thai text label. Match ornate hand-painted 2.5D jade and gold Thai MMORPG inventory UI. Fill most of canvas; outside the button shape is genuinely transparent. NO text or symbols inside, NO letters, NO icon, NO watermark, NO background scene, no perspective tilt, no drop-shadow rectangle. Just one beautiful complete clickable button face."
+    },
+    {
+      "name": "button-secondary",
+      "path": "assets/arena168/button-secondary.webp",
+      "source": "exec-77a5ec05-c3a3-4918-beeb-64109608902b.png",
+      "prompt": "One production-ready SECONDARY BUTTON background asset for a Thai Ayutthaya fantasy MMORPG interface, matched to emerald jade and antique gold Thai fantasy UI. Wide horizontal rectangle with 4:1 aspect ratio, completely front-facing flat GUI art. Dark forest-green lacquer face with restrained teal-jade shading, a slim double antique gold sculpted rim, tiny symmetrical Thai lotus accents at the two ends, modest bevel highlights, dignified quieter appearance than a primary button. Central 70 percent completely blank and calm for live Thai text rendered separately. Hand-painted 2.5D premium fantasy game UI with clean readable silhouette. Transparent alpha outside the button. No text, no letters, no icon, no watermark, no background scene, no perspective angle. One complete button background only."
+    },
+    {
+      "name": "button-close",
+      "path": "assets/arena168/button-close.webp",
+      "source": "exec-65c5c795-8bd9-4bf3-a118-70df1ab72555.png",
+      "prompt": "One isolated CLOSE BUTTON background for an ornate Thai Ayutthaya fantasy MMORPG GUI. A small perfectly circular dark emerald jade button with a sculpted double antique gold ring, four tiny symmetrical restrained Thai flame accents, polished gold bevel highlights and deep jade lacquer center. Completely front-facing flat UI art, hand-painted 2.5D premium Thai fantasy game style. Central green face is EMPTY, so a real UI close symbol can be drawn separately. Single circular object centered and filling 85 percent of square canvas. Real transparent alpha outside the round button, no square tile or backdrop, no text, no letters, no X symbol, no watermark, no other objects."
+    }
+  ]
+}

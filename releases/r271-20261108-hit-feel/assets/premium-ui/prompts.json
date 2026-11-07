@@ -1,0 +1,50 @@
+[
+  {
+    "id": "menu-gacha",
+    "prompt": "Production game UI art for Ayothaya Thai fantasy MMORPG. Hand-painted 2D style, deep emerald lacquer and warm aged gold, restrained Thai lotus and leaf ornament, crisp readable silhouette, coherent with a classic painted MMORPG HUD. No words, numbers, letters, logos or watermarks. Not a photograph or plastic 3D render. ONE square menu icon: a small open emerald-and-gold reliquary chest with a luminous jade spirit egg and a tiny ivory abstract amulet tablet rising together. Gold spark accents kept inside the icon, no sacred face or deity. Transparent alpha background, complete icon centered at 78% canvas with padding.",
+    "alpha": true,
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-aef17426-03ba-41f2-b5f3-418aee3a7723.png"
+  },
+  {
+    "id": "menu-store",
+    "prompt": "Production game UI art for Ayothaya Thai fantasy MMORPG. Hand-painted 2D style, deep emerald lacquer and warm aged gold, restrained Thai lotus and leaf ornament, crisp readable silhouette, coherent with a classic painted MMORPG HUD. No words, numbers, letters, logos or watermarks. Not a photograph or plastic 3D render. ONE square menu icon: a miniature elegant Thai merchant stall with emerald fabric awning edged in gold, a small stack of gold bars and a sealed premium parcel on its counter. No person, no text. Transparent alpha background, complete icon centered at 78% canvas with padding.",
+    "alpha": true,
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-8fc52b99-8342-4e9a-90ca-b2cf402689c3.png"
+  },
+  {
+    "id": "window-frame",
+    "prompt": "Production game UI art for Ayothaya Thai fantasy MMORPG. Hand-painted 2D style, deep emerald lacquer and warm aged gold, restrained Thai lotus and leaf ornament, crisp readable silhouette, coherent with a classic painted MMORPG HUD. No words, numbers, letters, logos or watermarks. Not a photograph or plastic 3D render. ONE square full window panel for NINE-SLICE scaling. A continuous narrow gold perimeter frame reaching the canvas edges, simple straight horizontal/vertical edges between compact ornate lotus corners, inner thin gold rule. OPAQUE perfectly uniform dark emerald green center covering the entire interior, NO content, NO title plate, NO buttons, NO shadows inside. Outer corner cutouts are truly transparent. Frame ornament contained within outer 12 percent on all four edges, outermost border about 2 percent canvas width. Center must be absolutely flat single dark green, no gradients/pictures/texture. Symmetric professional game menu frame, suitable for stretching the flat center and straight edges without distorting corners.",
+    "alpha": true,
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-bba3d796-3112-4931-9737-2b90c3258512.png"
+  },
+  {
+    "id": "button-jade",
+    "prompt": "Production game UI art for Ayothaya Thai fantasy MMORPG. Hand-painted 2D style, deep emerald lacquer and warm aged gold, restrained Thai lotus and leaf ornament, crisp readable silhouette, coherent with a classic painted MMORPG HUD. No words, numbers, letters, logos or watermarks. Not a photograph or plastic 3D render. ONE normal state horizontal UI BUTTON PLATE, 4:1 aspect ratio. Long rounded rectangular emerald lacquer center, slender gold rim, a small gold lotus cap at each end. No text or icon, center completely blank smooth emerald, ornament ONLY in outer 12 percent at left/right ends, straight middle edges for horizontal NINE-SLICE stretching. Transparent outside silhouette, button almost fills canvas with about 3 percent transparent padding.",
+    "alpha": true,
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-ed492a7a-0d49-4211-9d55-11fc292f7aaf.png"
+  },
+  {
+    "id": "button-gold",
+    "prompt": "Production game UI art for Ayothaya Thai fantasy MMORPG. Hand-painted 2D style, deep emerald lacquer and warm aged gold, restrained Thai lotus and leaf ornament, crisp readable silhouette, coherent with a classic painted MMORPG HUD. No words, numbers, letters, logos or watermarks. Not a photograph or plastic 3D render. ONE selected/primary state horizontal UI BUTTON PLATE, 4:1 aspect ratio. Long rounded rectangular warm light gold center, elegant darker gold rim, a small gold lotus cap at each end. No text or icon, center completely blank and smooth gold, ornament ONLY in outer 12 percent at left/right ends, straight middle edges for horizontal NINE-SLICE stretching. Transparent outside silhouette, button almost fills canvas with about 3 percent transparent padding. Designed for dark green text over center.",
+    "alpha": true,
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-ae658c18-e057-4060-aa51-7f6fc865b079.png"
+  },
+  {
+    "id": "close-button",
+    "prompt": "Production game UI art for Ayothaya Thai fantasy MMORPG. Hand-painted 2D style, deep emerald lacquer and warm aged gold, restrained Thai lotus and leaf ornament, crisp readable silhouette, coherent with a classic painted MMORPG HUD. No words, numbers, letters, logos or watermarks. Not a photograph or plastic 3D render. ONE square close icon for an ornate game window: circular emerald disk with a simple clear thick gold X at center, refined gold circular rim with four small lotus tips at cardinal directions. Center X is the only symbol. Fully transparent background outside the circular emblem, complete icon at 78 percent of canvas with comfortable transparent padding, crisp and readable at 40px.",
+    "alpha": true,
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-29dfde49-aa01-4440-aea8-acfdb64a2aa4.png"
+  },
+  {
+    "id": "gacha-banner",
+    "prompt": "Production game UI art for Ayothaya Thai fantasy MMORPG. Hand-painted 2D style, deep emerald lacquer and warm aged gold, restrained Thai lotus and leaf ornament, crisp readable silhouette, coherent with a classic painted MMORPG HUD. No words, numbers, letters, logos or watermarks. Not a photograph or plastic 3D render. ONE very wide cinematic header illustration, 3:1 landscape. Right half: an open emerald-and-gold reliquary chest, one luminous jade spirit egg and an ivory faceless abstract amulet tablet on folded green silk, tiny warm spark motes. Left half: quiet dark emerald atmospheric negative space for heading text added in code. Background: a softly lit old Thai palace treasury alcove with subtle wood and gold detail, lush emerald darkness. No Buddha faces, no human or deity figures, no text, no framing or UI controls. Edge-to-edge opaque artwork.",
+    "alpha": false,
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-d12f732f-1b60-4803-ba06-5ed6996baabd.png"
+  },
+  {
+    "id": "store-banner",
+    "prompt": "Production game UI art for Ayothaya Thai fantasy MMORPG. Hand-painted 2D style, deep emerald lacquer and warm aged gold, restrained Thai lotus and leaf ornament, crisp readable silhouette, coherent with a classic painted MMORPG HUD. No words, numbers, letters, logos or watermarks. Not a photograph or plastic 3D render. ONE very wide cinematic header illustration, 3:1 landscape. Right half: a beautiful Thai premium merchant shop counter, emerald-gold awning, neatly arranged gold bars, rolled blank tickets and silk-wrapped parcels with gold seals. Left half: quiet dark emerald negative space for heading text added in code. Background softly painted wood shelves and warm lantern light, luxurious but restrained. No people, deities, text, framing or UI controls. Edge-to-edge opaque artwork.",
+    "alpha": false,
+    "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-343af700-e0be-4106-839f-4e3582fac3a0.png"
+  }
+]

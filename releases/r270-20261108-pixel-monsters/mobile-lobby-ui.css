@@ -1,0 +1,53 @@
+/* Sole and floor are now painted together. CSS must never float the canvas. */
+.hero-art.rig-preview{animation:none!important;transform:none!important;filter:none!important}
+.character-stage:has(.rig-preview)>.pedestal{display:none!important}
+.mobile-viewport.keyboard-open body[data-screen=character] :is(.character-stage,#character-slots){display:none!important}
+.mobile-viewport.keyboard-open body[data-screen=character] .character-body{display:block!important}
+@media(any-pointer:coarse),(max-width:1000px),(max-height:600px){
+ html.mobile-viewport .lobby-layout{top:var(--lobby-top,56px)!important;height:var(--lobby-height,calc(100dvh - 60px))!important;max-height:none!important;transform:translateX(-50%)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;touch-action:pan-y;padding:8px 10px 16px!important;box-sizing:border-box;align-items:start!important}
+ .mobile-viewport body .lobby-card{box-sizing:border-box;max-height:none!important;width:100%!important;overflow:visible!important;padding:16px!important}
+ .mobile-viewport .lobby-header{box-sizing:border-box;min-height:52px!important;padding:6px max(10px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left))!important}
+ .mobile-viewport .lobby-header .top-actions{margin-right:72px;gap:6px}
+ .mobile-viewport .top-actions button{min-height:44px!important;min-width:44px!important;padding:6px 8px!important}
+ .mobile-viewport .wordmark{font-size:14px}.mobile-viewport .wordmark span{font-size:6px}
+ .mobile-viewport .lobby-card button:not(.text-button){min-height:44px!important;font-size:13px!important}
+ .mobile-viewport .lobby-card .text-button{min-height:44px!important;font-size:12px!important}
+ .mobile-viewport body[data-screen=character] .lobby-layout{display:block!important;max-width:1000px!important}
+ .mobile-viewport body[data-screen=character] .lobby-card{max-width:1000px!important;border-radius:14px!important}
+ .mobile-viewport body[data-screen=character] .character-body{display:grid!important;grid-template-columns:minmax(112px,23%) minmax(140px,1fr) minmax(180px,35%)!important;gap:12px!important;align-items:start!important}
+ .mobile-viewport body[data-screen=character] .character-stage{padding:6px!important;min-height:0!important;align-self:start!important}
+ .mobile-viewport body[data-screen=character] .hero-art{width:min(240px,100%)!important;height:auto!important;max-height:none!important;flex:none!important;aspect-ratio:1}
+ .mobile-viewport body[data-screen=character] #character-slots{gap:6px!important;max-height:280px;overflow-y:auto!important;touch-action:pan-y}
+ .mobile-viewport body[data-screen=character] button.character-slot{min-height:52px!important;height:auto!important;grid-template-columns:32px minmax(0,1fr)!important;padding:6px!important;font-size:12px!important}
+ .mobile-viewport body[data-screen=character] .slot-portrait{width:32px!important;height:32px!important}
+ .mobile-viewport body[data-screen=character] .character-slot strong{font-size:12px!important}
+ .mobile-viewport body[data-screen=character] .character-slot small{font-size:10px!important}
+ .mobile-viewport body[data-screen=character] .pose-controls{flex-wrap:wrap;justify-content:center;gap:4px}
+ .mobile-viewport body[data-screen=character] .pose-controls button{font-size:11px!important;padding:4px 8px!important;min-width:44px}
+ .mobile-viewport body[data-screen=character] .stage-name{font-size:14px!important;margin-top:-8px!important}
+ .mobile-viewport body[data-screen=character] .character-details{overflow:visible!important;padding:10px!important;gap:8px}
+ .mobile-viewport body[data-screen=character] #existing-name{font-size:18px!important;margin:0 0 8px}
+ .mobile-viewport body[data-screen=character] #existing-detail{font-size:12px!important;margin:0 0 12px}
+ .mobile-viewport body[data-screen=character] :is(#enter-world,#create-character){min-height:48px!important;height:auto!important;font-size:14px!important}
+ .mobile-viewport body[data-screen=character] #character-form:not([hidden]){display:flex!important;flex-direction:column!important}
+ .mobile-viewport body[data-screen=character] :is(#character-form,#profession-options,#existing-character)[hidden]{display:none!important}
+ .mobile-viewport body[data-screen=character] .class-summary{display:none!important}
+ .mobile-viewport body[data-screen=character] #hero-name{font-size:16px!important;min-height:44px!important;height:44px!important}
+ .mobile-viewport body[data-screen=character] #gender-options label{min-height:44px!important;font-size:13px!important}
+ .mobile-viewport body[data-screen=character] #progression-hint{font-size:11px!important;line-height:1.5;white-space:normal!important;border-radius:8px!important}
+ .mobile-viewport .steps{font-size:11px!important;margin-bottom:12px!important}
+ .mobile-viewport .screen h2{font-size:22px!important}
+ .mobile-viewport .muted{font-size:13px!important;line-height:1.6}
+ .mobile-viewport .small{font-size:11px!important;line-height:1.6}
+}
+@media(orientation:portrait) and (max-width:1000px){
+ .mobile-viewport .story{display:none!important}
+ .mobile-viewport .lobby-layout{display:block!important;max-width:560px!important}
+ .mobile-viewport body[data-screen=character] .character-body{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+ .mobile-viewport body[data-screen=character] .character-stage{grid-row:1;display:grid!important;justify-items:center;width:100%;box-sizing:border-box}
+ .mobile-viewport body[data-screen=character] .hero-art{width:190px!important}
+ .mobile-viewport body[data-screen=character] #character-slots{grid-row:2;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));max-height:174px!important}
+ .mobile-viewport body[data-screen=character] .character-details{grid-row:3}
+ .mobile-viewport .lobby-header .wordmark span{display:none}
+ .mobile-viewport .lobby-header .top-actions #identity{display:none}
+}

@@ -155,21 +155,23 @@ export class RealmServer{
  error(p,code){p.send({type:'error',code});return false;}
  receive(id,m){
   const p=this.peers.get(id);if(!p||p.suspended)return false;
+  // Charge the rate bucket before validation so malformed/stale/disallowed floods are metered too (not just valid in-world commands).
+  if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
   if(!m||typeof m!=='object'||Array.isArray(m)||!allowed.has(m.type)||!integer(m.seq,1,Number.MAX_SAFE_INTEGER))return this.error(p,'invalid-message');
   // an observer's other commands are dropped without a chat line, so a stream shows nothing of the mode
   if(p.observer&&!OBSERVER_OK.has(m.type))return false;
   if(m.type==='observer'){if(!p.canObserve)return this.error(p,'observer-not-allowed');this.setObserver(p,m.on===true);return true;}
   if(m.seq<=p.seq)return m.type==='input'?false:this.error(p,'stale-command');p.seq=m.seq;
-  if(p.bucket<1)return this.error(p,'rate-limit');p.bucket--;
   const w=p.world,now=this.now();
-  if(m.type==='arenaRooms'){try{p.send({type:'arenaChanged',id:m.id,...arenaCommand(this,p,m)});return true;}catch(e){p.send({type:'arenaError',id:m.id,code:e.message});return false;}}
+  if(m.type==='arenaRooms'){const read=!['queue','unqueue','create','join','ready','cancel'].includes(m.action);if(read&&now-(p.arenaAt??-Infinity)<300)return true;if(read)p.arenaAt=now;try{p.send({type:'arenaChanged',id:m.id,...arenaCommand(this,p,m)});return true;}catch(e){p.send({type:'arenaError',id:m.id,code:e.message});return false;}}
   if(m.type==='bossDirectory'){if(now-(p.bossDirectoryAt??-Infinity)<1000)return true;p.bossDirectoryAt=now;p.send({type:'events',events:[publicBossDirectory(this,p,MONSTER_TYPES)]});return true;}
   if(m.type==='ping'){p.send({type:'pong',stamp:typeof m.stamp==='number'?m.stamp:0});return true;}
   if(m.type==='pickupLoot'){const code=pickGroundLoot(this,p,m.dropId);if(code)w.notice(GROUND_PICKUP_ERRORS[code]);return !code;}
   if(m.type==='petSkill'){try{this.petCast(p);return true;}catch(e){return this.itemFail(p,e.message);}}
   if(m.type==='storyCheck'){this.storyCheck(p);return true;}
   if(m.type==='switchChannel'){
-   if(p.room.map.id===ARENA_MAP||p.room.map.instance||p.room.map.guildHall||p.duel)return false;
+   if(p.room.map.id===ARENA_MAP||p.room.map.instance||p.room.map.guildHall||p.duel||(this.wars.get(p.serverId)?.active&&p.room.map.id===WAR.map))return false;
+   if(now-(p.switchAt??-Infinity)<1000)return false;p.switchAt=now;
    const nextCh=normalizeChannel(m.channel);if(nextCh===(p.channel??1)&&p.room.channel===nextCh)return true;
    const nextId=`${p.serverId}:ch${nextCh}:${p.room.map.id}`;
    let nextRoom=this.rooms.get(nextId);if(nextRoom&&nextRoom.peers.size>=this.capacity)return this.error(p,'room-full');
@@ -269,7 +271,7 @@ export class RealmServer{
    let r;try{r=weeklyClaim(p.weekly,now,m.index);}catch(e){return this.itemFail(p,e.message);}
    p.weekly=r.state;this.grantLoot(p,{coins:r.reward.coins,items:r.reward.items.map(i=>({...i}))});p.saveNow=true;w.notice('รับรางวัลภารกิจรายสัปดาห์แล้ว');return true;
   }
-  if(m.type==='leaderboard'){w.emit('leaderboard',this.leaderboard(p));return true;}
+  if(m.type==='leaderboard'){if(now-(p.leaderboardAt??-Infinity)<1000)return true;p.leaderboardAt=now;w.emit('leaderboard',this.leaderboard(p));return true;}
   if(m.type==='bubble'){if(!Number.isInteger(m.id)||m.id<1||m.id>24)return this.error(p,'invalid-emote');if(now-p.bubbleAt<1000)return false;p.bubbleAt=now;p.room.events.push({type:'bubble',actor:p.id,id:m.id});return true;}
   if(m.type==='insertCard'){
    if(now-p.gearAt<300)return this.itemFail(p,'gear-rate');p.gearAt=now;
@@ -662,6 +664,9 @@ export class RealmServer{
  mine(p){return [...this.shops.values()].filter(s=>s.ownerKey===p.key).map(s=>({...publicShop(s),pouch:s.pouch,escrow:s.escrow,log:s.log}));}
  marketCommand(p,m){
   const w=p.world,perks=tradePerks(p.tradeXp),fail=c=>this.itemFail(p,c),now=this.now();
+  // The shop panel lists (mine / all) scan every open shop; throttle them per player so one socket can't pin a core.
+  // marketSearch is left to the token bucket because it is a search-as-you-type field (a hard cooldown would drop live queries).
+  if(m.type==='shopMine'||m.type==='shopList'){if(now-(p.marketReadAt??-Infinity)<500)return true;p.marketReadAt=now;}
   this.expireShops(now);for(const peer of this.peers.values())this.expireStall(peer,now);
   if(m.type==='marketSearch'){
    if(m.close===true){delete p.marketBrowse;delete p.marketBrowseSignature;return true;}

@@ -162,6 +162,9 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  realm.evidence=(p,type,detail)=>evidence?.add('players',playerEvent(p,type,detail));
  const requestIp=req=>String(req.headers['do-connecting-ip']||req.socket?.remoteAddress||'?');
  const allowedOrigin=origin=>origins.includes(origin);
+ // 0.117 consent writes are rare (the accepted version changes once per policy update): dedup unchanged versions
+ // and throttle version-churn per account so a POST loop can't burn the shared Firestore write budget for everyone.
+ const CONSENT_GAP=60000,consentAt=new Map();
  const server=http.createServer(async(req,res)=>{
   let mutationDone;try{
   const origin=req.headers.origin;if(origin&&allowedOrigin(origin))res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');
@@ -189,6 +192,10 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(req.method==='GET'){const c=await store.loadConsent(uid);reply(200,{version:c?.version??null,at:c?.at??null});return;}
     let data='';for await(const chunk of req){data+=chunk;if(data.length>500){reply(413,{error:'too-large'});return;}}
     const version=String(JSON.parse(data||'{}').version??'');if(!/^\d{4}-\d{2}-\d{2}$/.test(version)){reply(400,{error:'bad-version'});return;}
+    // Writes are the scarce shared quota: skip the write when the version is unchanged, then throttle version-churn per account.
+    const seen=consentAt.get(uid);if(seen?.version===version){reply(200,{version});return;}
+    if(seen&&Date.now()-seen.at<CONSENT_GAP){reply(429,{error:'rate'});return;}
+    consentAt.set(uid,{at:Date.now(),version});if(consentAt.size>5000)for(const [k,v] of consentAt)if(Date.now()-v.at>CONSENT_GAP)consentAt.delete(k);
     await store.saveConsent(uid,{version,at:Date.now(),email,agent:String(req.headers['user-agent']??'').slice(0,200)});console.log('consent',uid,version);evidence?.add('players',{type:'consent',uid,email,version,ip:requestIp(req)});reply(200,{version});
    }catch(e){console.error('consent',e.message);reply(e instanceof SyntaxError?400:502,{error:e instanceof SyntaxError?'invalid':'consent-failed'});}
    return;

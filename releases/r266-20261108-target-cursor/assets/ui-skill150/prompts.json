@@ -1,0 +1,26 @@
+{
+  "mode": "built-in image_gen",
+  "intent": "generate",
+  "useCase": "stylized-concept",
+  "assets": [
+    {
+      "file": "window.webp",
+      "prompt": "Use case: stylized-concept. Asset type: production transparent PNG UI frame for the skill-tree window of Ayothaya, a Thai fantasy RPG. Create ONE exquisitely painted landscape rectangular ornamental window BORDER ONLY, around a fully transparent empty interior. 1536 by 1024 composition, front-facing orthographic flat interface art, symmetrical. Rich antique gold carved Thai lai kranok flame foliage and delicate lotus curls, inset dark emerald jade and tiny turquoise gemstones, warm restrained highlights and very soft contained shadow. Elegant jewel-like top center lotus finial and small ornate corners; thin straight rails between corners so the entire center remains available for a readable skill tree. Place outer border between 1% and 5% of canvas edges; corner ornaments contained within outermost 8% of width and height; top-center finial entirely in outermost top 8%. At least 82% of interior is absolutely empty transparent. All four rails continuous and crisp. Same polished hand-painted gold-and-jade aesthetic as a classic Thai fantasy game inventory panel. No illustration in center, no texture in center, NO opaque panel fill, no words, no letters, no symbols for specific professions, no buttons, no UI mockup, no screenshots, no checkerboard painted into image, no background. Real alpha transparency both center and outside. This one shared frame will serve all seven professions and novice and their Master skill trees."
+    },
+    {
+      "file": "node.webp",
+      "prompt": "Use case: stylized-concept. Asset type: single production transparent PNG horizontal skill card border for a Thai fantasy RPG. Generate ONE blank horizontal rectangular frame, about 3:1 aspect ratio, 1536 by 512 canvas. Hand-painted exquisite polished antique gold Thai lai kranok corner flourishes, emerald jade narrow inner rail, tiny turquoise gemstones. Elegant fine ornamentation, crisp game UI asset, front facing orthographic. Thin rails continuous all four sides. Small symmetrical lotus leaf corner accents, no crown or crest at top center. Outer contour fills canvas with just 2% transparent margin. Decorative corners contained within left and right 12% of width and top and bottom 20% of height. The long central rectangle is completely clear and transparent with NO FILL, ample unobstructed space for later code-rendered text and a skill icon. True alpha transparency inside and outside the frame, no painted checkerboard, no background, no glow filling center, no text, no lettering, no icons, no buttons, no panel texture. Gold-and-jade jewel style compatible with Ayothaya RPG inventory and skill tree windows. This shared readable skill-node border must work for every profession and Master, use no class-specific symbol."
+    }
+  ],
+  "coverage": [
+    "novice",
+    "swordsman",
+    "lancer",
+    "hunter",
+    "boxer",
+    "rogue",
+    "shaman",
+    "acolyte"
+  ],
+  "notes": "Shared painted frame and skill-node border for base and Master tabs. Original alpha retained; proportional WebP exports."
+}

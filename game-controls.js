@@ -151,7 +151,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  function landHit(e){
   popup(e);const m=Number.isInteger(e.id)?world.mobs[e.id]:null,v=mobViews[e.id],crit=!!e.crit||e.color==='#ffd27a';
   const feel=hitFeel({amount:e.amount,crit,maxHp:m?.maxHp,armor:!!(m&&MONSTER_TYPES[m.type].boss)});if(!feel)return;
-  kick=Math.max(kick,feel.kick);hitStop(feel.stop);if(!v||!m)return;
+  kick=Math.max(kick,feel.kick);if(e.source!=='spirit')hitStop(feel.stop);if(!v||!m)return; // a spirit companion's hit must not freeze your own swing
   const p=world.player,d=Math.hypot(m.x-p.x,m.z-p.z)||1;v.flashAt=world.time;v.flashFor=feel.flash;v.impact={at:world.time,push:feel.push,stop:feel.stop,x:(m.x-p.x)/d,z:(m.z-p.z)/d};if(feel.hurt)v.hurtUntil=world.time+.22;
  }
  function popup(e,positive=false,anchor=anchorOf(e)){

@@ -33,7 +33,7 @@ test('red and orange have scaled flat stats only; all special effects are exclus
   const d=deriveStats({gear:{accessory:lower.id}});assert.equal(d.coinPct,0);assert.equal(d.dmgReduce,0);assert.equal(d.cdr,0);assert.equal(d.mpCut,0);assert.equal(d.moveSpeed,0);assert.equal(d.fleeBonus,0);
  }
  }
- assert.match(itemDef('amulet-sum-kor').text,/เบี้ยจากมอนสเตอร์ \+200%/);assert.match(itemDef('amulet-somdej').text,/HP สูงสุด \+100%/);
+ assert.match(itemDef('amulet-sum-kor').text,/เบี้ยจากมอนสเตอร์ \+50%/);assert.match(itemDef('amulet-somdej').text,/HP สูงสุด \+15%/);
  assert.throws(()=>amuletAtTier(AMULETS[0],'purple'),/bad-amulet-tier/);
 });
 test('pity, gold, inventory and receipts commit as one batch without mutating input',()=>{
@@ -62,11 +62,11 @@ test('pet draws and mail grants preserve independent amulet pity; public wallets
 test('equipping each amulet produces live stats; unequip removes bonuses and there is only one accessory slot',()=>{
  const base=deriveStats({level:50,classId:'swordsman'});
  for(const a of AMULETS){let worn=equipGear({items:{[a.id]:1}},null,a.id,{classId:'swordsman',level:1});const d=deriveStats({level:50,classId:'swordsman',gear:worn.gear});assert.ok(d.atk>base.atk||d.maxHp>base.maxHp||d.flee>base.flee,a.id);const off=unequipGear(worn.bag,worn.gear,'accessory');assert.deepEqual(deriveStats({level:50,classId:'swordsman',gear:off.gear}),base);}
- const rod=deriveStats({level:50,gear:{accessory:'amulet-phra-rod'}});assert.ok(rod.flee>deriveStats({level:50}).flee);assert.equal(rod.moveSpeed,.15);assert.equal(rod.fleeBonus,.35);
- const sum=deriveStats({gear:{accessory:'amulet-sum-kor'}});assert.equal(sum.coinPct,2);
- const somdej=deriveStats({gear:{accessory:'amulet-somdej'}});assert.equal(somdej.dmgReduce,.30);
- const phaya=deriveStats({classId:'shaman',gear:{accessory:'amulet-nang-phaya'}});assert.ok(phaya.matk>0);assert.equal(phaya.critMult,2.5);assert.equal(phaya.armorPen,.3);
- const supan=deriveStats({gear:{accessory:'amulet-phong-suphan'}});assert.equal(supan.mpCut,.4);assert.equal(supan.cdr,.4);
+ const rod=deriveStats({level:50,gear:{accessory:'amulet-phra-rod'}});assert.ok(rod.flee>deriveStats({level:50}).flee);assert.equal(rod.moveSpeed,.05);assert.equal(rod.fleeBonus,.1);
+ const sum=deriveStats({gear:{accessory:'amulet-sum-kor'}});assert.equal(sum.coinPct,.5);
+ const somdej=deriveStats({gear:{accessory:'amulet-somdej'}});assert.equal(somdej.dmgReduce,.07);
+ const phaya=deriveStats({classId:'shaman',gear:{accessory:'amulet-nang-phaya'}});assert.ok(phaya.matk>0);assert.equal(phaya.critMult,1.8);assert.equal(phaya.armorPen,.15);
+ const supan=deriveStats({gear:{accessory:'amulet-phong-suphan'}});assert.equal(supan.mpCut,.09);assert.equal(supan.cdr,.1);
  let worn=equipGear({items:{[AMULETS[0].id]:1,[AMULETS[1].id]:1}},null,AMULETS[0].id,{classId:'novice',level:1});worn=equipGear(worn.bag,worn.gear,AMULETS[1].id,{classId:'novice',level:1});assert.equal(worn.gear.accessory,AMULETS[1].id);assert.equal(worn.bag.items[AMULETS[0].id],1);
 });
 test('flat evasion from the rainbow Rod actually dodges monster attacks, beyond the FLEE comparison',()=>{

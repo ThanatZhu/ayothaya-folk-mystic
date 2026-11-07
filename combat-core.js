@@ -3,6 +3,7 @@ import {skillHit} from './skill-critical.js';
 import {skillDamageFormula,skillDamageBase} from './skill-damage244.js';
 import {startAttackOrder,stepAttackOrder} from './combat-attack-order221.js?v=surfaces222';
 import {tickPetEffects,petIncoming,petBlessing} from './pet-combat.js?v=petbuild220';
+import {amuletHit,amuletCrit,tickAmuletSkill} from './amulet-skills.js';
 import {createRoleCombat,stepRoleMonsters} from './role-combat.js?v=farm213';
 import {patch,monsterKey} from './balance.js';
 import {normalizeAuto,pickAutoSkill,advanceAutoSequence} from './auto-play.js?v=auto202';
@@ -249,7 +250,7 @@ export class CombatWorld{
  }
  knockStep(dt){const k=this.knock;if(!k)return false;moveBody(this.player,k.vx*Math.min(dt,k.t),k.vz*Math.min(dt,k.t),this.nav);if((k.t-=dt)<=0)this.knock=null;return true;}
  takeMonsterHit(type,raw=type.damage,source=null){
-  const p=this.player,baseDamage=monsterHit(this,raw,Math.random,type.id),damage=this.roleCombat?this.roleCombat.incoming(baseDamage,source):petIncoming(this,baseDamage);if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
+  const p=this.player,baseDamage=monsterHit(this,raw,Math.random,type.id),damage=amuletHit(this,this.roleCombat?this.roleCombat.incoming(baseDamage,source):petIncoming(this,baseDamage));if(!damage){this.emit('dodge',{x:p.x,z:p.z});return false;}
   p.hp=Math.max(0,p.hp-damage);this.calm=0;this.emit('playerHit',{x:p.x,z:p.z,amount:damage});delete this.status.sleep;
   if(p.hp>0){this.inflict(rollAilment(type.id));return true;}
   this.fall();return true;
@@ -285,7 +286,7 @@ export class CombatWorld{
  setAuto(on,hunt=null,target=null){const filter=normalizeAutoTarget(target);if(on&&filter?.kind==='entity'&&!this.foes().some(m=>m.id===filter.id&&m.hp>0)){this.notice('เป้าหมายนี้ไม่อยู่หรือไม่สามารถต่อสู้ได้');return false;}if(on&&filter?.kind==='type'&&!MONSTER_TYPES[filter.type]||on&&filter?.kind==='types'&&filter.types.some(t=>!MONSTER_TYPES[t]))return false;const ok=on===this.auto?true:this.toggleAuto();this.hunt=this.auto&&Number.isInteger(hunt)?hunt:null;this.autoTarget=this.auto?filter:null;if(this.auto&&filter?.kind==='entity')this.select(filter.id);return ok;}
  toggleAuto(){this.autoRotation=null;this.autoSkillReach=null;this.hunt=null;this.autoTarget=null;if(this.safe){this.notice('ทุกเมืองเป็นเขตปลอดภัย · ออกนอกเมืองเพื่อพบมอนสเตอร์');return false;}if(this.player.hp<=0){this.notice('รอกลับถึงลานก่อน');return false;}this.auto=!this.auto;this.anchor={x:this.player.x,z:this.player.z};this.path=[];this.pathTimer=0;this.notice(this.auto?'AUTO เปิด · เดินเองเพื่อหยุดไล่':'AUTO ปิด');return this.auto;}
  hurt(mob,damage,color='#fff0a6'){
-  if(!mob||mob.hp<=0||mob.pvp||!this.autoDamageAllows(mob))return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);
+  if(!mob||mob.hp<=0||mob.pvp||!this.autoDamageAllows(mob))return;this.calm=0;damage=Math.min(mob.hp,Math.round((this.roleCombat?.outgoing(mob,damage)??damage)*petBlessing(this)));mob.hp=Math.max(0,mob.hp-damage);markMonsterHit(mob,this.player);rallyPack(this.mobs,mob);if(color==='#ffd27a')amuletCrit(this);
   this.emit('damage',{id:mob.id,x:mob.x,z:mob.z,amount:damage,color,magic:!!this.derived?.magic,crit:color==='#ffd27a',...this.damageContext}); // Keep the hit's critical flag and cast identity.
   if(mob.hp===0){mob.dead=mobRespawn(mob);mob.aggro=false;this.kills++;const reward=MONSTER_TYPES[mob.type];const rate=(this.expRate??1)*mobXp(mob);this.emit('experience',awardExperience(this,Math.round(reward.baseXp*rate),Math.round(reward.jobXp*rate)));this.emit('defeat',{id:mob.id,x:mob.x,z:mob.z});if(this.targetId===mob.id){this.targetId=null;this.path=[];}}
  }
@@ -345,7 +346,7 @@ export class CombatWorld{
   }else{release();this.emit('cast',event);}return true;
  }
  update(dt,input={x:0,z:0,attack:false},{monsters=true}={}){
-  dt=Math.min(.05,Math.max(0,dt));this.time+=dt;tickPetEffects(this,dt);const p=this.player;
+  dt=Math.min(.05,Math.max(0,dt));this.time+=dt;tickPetEffects(this,dt);tickAmuletSkill(this,dt);const p=this.player;
   this.emote=activeEmote(this.emote,this.time);if(Math.hypot(input.x,input.z)>.08||input.attack||this.auto||p.hp<=0)this.clearEmote();
   p.attackCD=Math.max(0,p.attackCD-dt);if(p.attackCD<1e-8)p.attackCD=0;p.shield=Math.max(0,p.shield-dt);p.mp=Math.min(p.maxMp,p.mp+3.2*dt*(this.derived?.mpRegen??1));
   this.cooldowns=this.cooldowns.map(t=>Math.max(0,t-dt));this.manualGrace=Math.max(0,this.manualGrace-dt);this.pathTimer-=dt;

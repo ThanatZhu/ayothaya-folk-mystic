@@ -41,8 +41,8 @@ const debuffs=[
 ];
 export const STATUS_ICONS=[...buffs.map((row,index)=>({row,index,kind:'buff',rows:4,sheet:'buffs-v1.png'})),...debuffs.map((row,index)=>({row,index,kind:'debuff',rows:2,sheet:'debuffs-v1.png'}))].map(({row,...rest})=>({id:row[0],name:row[1],description:row[2],en:row[3],enDescription:row[4],...rest}));
 const byId=Object.fromEntries(STATUS_ICONS.map(s=>[s.id,s]));
-export const STATUS_ALIASES={stagger:'stun',taunt:'inspired',decoy:'stealth',casting:'focus',regeneration:'regen',lifeTree:'lifeTree',sanctuaryBuff:'sanctuary'};
-const aliasLabels={stagger:['เสียหลัก','Stagger'],taunt:['ถูกยั่ว','Taunted'],decoy:['ล่อเงา','Shadow decoy'],casting:['กำลังร่าย','Casting']};
+export const STATUS_ALIASES={stagger:'stun',taunt:'inspired',decoy:'stealth',casting:'focus',regeneration:'regen',lifeTree:'lifeTree',sanctuaryBuff:'sanctuary',undying:'shield',stoutSpirit:'blessing',baramee:'inspired'};
+const aliasLabels={stagger:['เสียหลัก','Stagger'],taunt:['ถูกยั่ว','Taunted'],decoy:['ล่อเงา','Shadow decoy'],casting:['กำลังร่าย','Casting'],undying:['อมตะ','Immortal'],stoutSpirit:['ขวัญมั่น','Steadfast spirit'],baramee:['บารมี','Prestige']};
 export function statusDefinition(id){const source=byId[id]??byId[STATUS_ALIASES[id]];if(!source)return null;const labels=aliasLabels[id];return labels?{...source,id,name:labels[0],en:labels[1],description:labels[0],enDescription:labels[1]}:source;}
 export function statusArtStyle(id){
  const s=statusDefinition(id);if(!s)return '';

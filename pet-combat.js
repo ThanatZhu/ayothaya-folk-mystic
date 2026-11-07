@@ -1,9 +1,10 @@
 export const PET_SKILL_ERRORS={'pet-cooldown':'สกิลสัตว์เลี้ยงยังไม่พร้อม','pet-not-equipped':'เลือกสัตว์เลี้ยงติดตามก่อน','pet-safe-zone':'ออกนอกเมืองก่อนใช้สกิลโจมตี','pet-no-target':'เลือกมอนสเตอร์ในระยะก่อน','pet-cannot-act':'ยังใช้สกิลไม่ได้ในขณะนี้'};
 import {skillHit} from './skill-critical.js';
+import {amuletDamage} from './amulet-skills.js';
 // Pet effects are separate from class shields and cannot erase a class skill's state.
 export function tickPetEffects(w,dt){const s=w.petEffects;if(!s)return;for(const k of ['shieldLeft','guardLeft','blessingLeft'])s[k]=Math.max(0,(s[k]??0)-dt);if(!s.shieldLeft)s.shield=0;if(w.player.hp<=0)w.petEffects=null;}
 export function petIncoming(w,amount){const s=w.petEffects;if(!s)return amount;let n=amount*(s.guardLeft>0?1-s.guard:1);if(s.shieldLeft>0){const absorb=Math.min(n,s.shield);s.shield-=absorb;n-=absorb;}return Math.max(0,Math.round(n));}
-export const petBlessing=w=>w.petEffects?.blessingLeft>0?1.08:1;
+export const petBlessing=w=>(w.petEffects?.blessingLeft>0?1.08:1)*amuletDamage(w);
 export function castPremiumPet(w,pet,{lineClear,types}={}){
  const p=w.player;if(p.hp<=0||w.emote||['stun','sleep','silence'].some(k=>w.status[k]>0))throw Error('pet-cannot-act');
  const s=pet.skill,offensive=['fireBurst','trueSight','flowerBind','echoSlow'].includes(s.kind),target=w.target;

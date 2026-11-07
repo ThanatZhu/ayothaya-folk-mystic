@@ -12,16 +12,16 @@ export const AMULET_MATERIALS=Object.freeze([
  {id:'shard-gem',count:1,rate:.10},
 ]);
 export const AMULETS=Object.freeze([
- {id:'amulet-somdej',art:'somdej',name:'พระสมเด็จวัดระฆัง',origin:'กรุงเทพมหานคร',theme:'คุ้มครอง',ability:'ร่มโพธิ์คุ้มกาย',
-  bonus:{vit:12,int:6},def:24,mdef:18,pct:{hpPct:1,defPct:.50,dmgReduce:.30}},
- {id:'amulet-phra-rod',art:'phra-rod',name:'พระรอดวัดมหาวัน',origin:'ลำพูน',theme:'แคล้วคลาด',ability:'ก้าวพ้นภยันตราย',
-  bonus:{agi:16,dex:10},def:16,mdef:16,pct:{moveSpeed:.15,dmgReduce:.20},effect:{flee:.35}},
- {id:'amulet-nang-phaya',art:'nang-phaya',name:'พระนางพญา',origin:'พิษณุโลก',theme:'บารมี',ability:'บารมีนางพญา',
-  bonus:{str:12,int:12},atk:25,matk:25,pct:{atkPct:.80,matkPct:.80,crit:.20,critDmg:1,armorPen:.30}},
- {id:'amulet-phong-suphan',art:'phong-suphan',name:'พระผงสุพรรณ',origin:'สุพรรณบุรี',theme:'เมตตาและคงกระพัน',ability:'ขวัญมั่นแห่งสุพรรณ',
-  bonus:{vit:10,int:12},atk:18,matk:18,def:20,mdef:20,pct:{hpPct:.50,mpCut:.40,cdr:.40}},
- {id:'amulet-sum-kor',art:'sum-kor',name:'พระกำแพงซุ้มกอ',origin:'กำแพงเพชร',theme:'โชคลาภ',ability:'ลาภผลแห่งทุ่งเศรษฐี',
-  bonus:{luk:20,dex:10},atk:15,matk:15,pct:{hpPct:.30,crit:.15},effect:{coinPct:2}},
+ {id:'amulet-somdej',art:'somdej',name:'พระสมเด็จวัดระฆัง',origin:'กรุงเทพมหานคร',theme:'คุ้มครอง',ability:'ร่มโพธิ์คุ้มกาย',skill:'เลือดต่ำกว่า 40% ได้เกราะ 25% ของเลือดสูงสุด นาน 6 วินาที · คูลดาวน์ 60 วินาที',
+  bonus:{vit:12,int:6},def:24,mdef:18,pct:{hpPct:.15,defPct:.15,dmgReduce:.07}},
+ {id:'amulet-phra-rod',art:'phra-rod',name:'พระรอดวัดมหาวัน',origin:'ลำพูน',theme:'แคล้วคลาด',ability:'ก้าวพ้นภยันตราย',skill:'โดนตีจนตาย จะเหลือเลือด 1 และอมตะ 3 วินาที · คูลดาวน์ 3 นาที (PvP 5 นาที)',
+  bonus:{agi:16,dex:10},def:16,mdef:16,pct:{moveSpeed:.05,dmgReduce:.05},effect:{flee:.10}},
+ {id:'amulet-nang-phaya',art:'nang-phaya',name:'พระนางพญา',origin:'พิษณุโลก',theme:'บารมี',ability:'บารมีนางพญา',skill:'ตีคริติคอลแล้ว ตัวเองและปาร์ตี้รอบตัว ทำดาเมจมอนสเตอร์แรงขึ้น 15% นาน 6 วินาที · คูลดาวน์ 30 วินาที',
+  bonus:{str:12,int:12},atk:25,matk:25,pct:{atkPct:.05,matkPct:.05,crit:.07,critDmg:.30,armorPen:.15}},
+ {id:'amulet-phong-suphan',art:'phong-suphan',name:'พระผงสุพรรณ',origin:'สุพรรณบุรี',theme:'เมตตาและคงกระพัน',ability:'ขวัญมั่นแห่งสุพรรณ',skill:'โดนมึน หลับ หรือตรึง จะหลุดทันที ฟื้นเลือด 15% และกันสถานะเหล่านี้ 3 วินาที · คูลดาวน์ 45 วินาที',
+  bonus:{vit:10,int:12},atk:18,matk:18,def:20,mdef:20,pct:{hpPct:.10,mpCut:.09,cdr:.10}},
+ {id:'amulet-sum-kor',art:'sum-kor',name:'พระกำแพงซุ้มกอ',origin:'กำแพงเพชร',theme:'โชคลาภ',ability:'ลาภผลแห่งทุ่งเศรษฐี',skill:'ฆ่ามอนสเตอร์ มีโอกาส 2% ได้เบี้ยจากตัวนั้น 10 เท่า',
+  bonus:{luk:20,dex:10},atk:15,matk:15,pct:{hpPct:.10,crit:.05},effect:{coinPct:.5}},
 ]);
 export const amuletArt=a=>'assets/amulets-rainbow/'+a.art+'.png';
 const rounded=n=>Math.round((n+Number.EPSILON)*10000)/10000;
@@ -42,7 +42,7 @@ export function amuletAtTier(amulet,tierId='rainbow'){
  const scale=values=>Object.fromEntries(Object.entries(values??{}).map(([k,v])=>[k,rounded(v*tier.power)]));
  const pct=tierId==='rainbow'?{...a.pct}:{},effect=tierId==='rainbow'?{...a.effect}:{};
  return {...a,id:tierId==='rainbow'?a.id:a.id+'-'+tierId,amuletBase:a.id,tier:tier.id,tierName:tier.name,bonus:scale(a.bonus),pct,effect,
-  ...Object.fromEntries(['atk','matk','def','mdef'].map(k=>[k,rounded((a[k]??0)*tier.power)])),effects:effectLines(pct,effect)};
+  ...Object.fromEntries(['atk','matk','def','mdef'].map(k=>[k,rounded((a[k]??0)*tier.power)])),effects:tierId==='rainbow'?['สกิลพิเศษ · '+a.skill,...effectLines(pct,effect)]:[]};
 }
 export const AMULET_REWARDS=Object.freeze([...AMULET_TIERS.flatMap(t=>AMULETS.map(a=>({id:amuletAtTier(a,t.id).id,count:1,tier:t.id,rate:t.rate/AMULETS.length}))),...AMULET_MATERIALS.map(r=>({...r,tier:'material'}))]);
 export function buildAmuletItems(){return Object.fromEntries(AMULET_TIERS.flatMap(t=>AMULETS.map(base=>{

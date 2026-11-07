@@ -2,6 +2,7 @@ import{pvpControlDuration}from'./pvp223.js';
 import {pickSequenceSkill} from './auto-play.js?v=auto202';
 import {roleTiming} from './combat-timing.js';
 import {skillHit} from './skill-critical.js';
+import {amuletHit} from './amulet-skills.js';
 import {applyPoison,poisonFor,takePoison,tickPoison} from './role-poison.js';
 import {petIncoming} from './pet-combat.js?v=skill-crit1';
 import {roleById} from './assets/skills-next/catalog.js';
@@ -158,7 +159,7 @@ export function createRoleCombat(world,{moveBody,lineClear,types}={}){
   const guard=state.meta.guard,facing=guard?.facing??p.face;if(st.guard&&(!source||(source.x-p.x)*facing.x+(source.z-p.z)*facing.z>=0))n*=.35;
   let protection=0;for(const ally of allies())for(const f of ally.world.roleCombat?.state.fields??[])if(['sanctuary','yantra'].includes(f.kind)&&dist(p,f)<=f.radius)protection=Math.max(protection,f.power/100);n*=1-clamp(protection,0,.7);
   if(m.zoneGuard&&state.fields.some(f=>['zone','wall'].includes(f.kind)&&dist(p,f)<=f.radius)){n*=1-m.zoneGuard;trigger('zoneGuard');}if(m.lowGuard&&p.hp/p.maxHp<.35){n*=1-m.lowGuard;trigger('lowGuard');}
-  if(st.link&&!source?.linked){const owner=allies().find(a=>a.id===state.meta.link?.owner);if(owner&&owner.player!==p&&owner.player.hp>0&&dist(owner.player,p)<10){const share=n*(state.meta.link.power??0)/100;n-=share;const taken=owner.world.roleCombat?.incoming(share,{...source,linked:true,secondary:true})??share;owner.player.hp=Math.max(0,owner.player.hp-taken);owner.world.emit('playerHit',{x:owner.player.x,z:owner.player.z,amount:Math.round(taken)});if(owner.player.hp<=0)owner.world.fall();}}
+  if(st.link&&!source?.linked){const owner=allies().find(a=>a.id===state.meta.link?.owner);if(owner&&owner.player!==p&&owner.player.hp>0&&dist(owner.player,p)<10){const share=n*(state.meta.link.power??0)/100;n-=share;const taken=owner.world.roleCombat?.incoming(share,{...source,linked:true,secondary:true})??share;owner.player.hp=Math.max(0,owner.player.hp-amuletHit(owner.world,taken));owner.world.emit('playerHit',{x:owner.player.x,z:owner.player.z,amount:Math.round(taken)});if(owner.player.hp<=0)owner.world.fall();}}
   if(!source?.secondary&&st.counter&&source?.hp>0){delete st.counter;n*=.3;damage(source,state.meta.counter?.power??90,'counter');if(m.counterRecovery){const i=w.skills.findIndex(s=>s.roleSkillId==='cleave');if(i>=0)w.cooldowns[i]=Math.max(0,w.cooldowns[i]-m.counterRecovery);trigger('counterRecovery',source);}}
   if(!source?.secondary&&source?.hp>0&&(st.reflect||m.reflect)){const reflection=(st.reflect?(state.meta.reflect?.power??0)/100:0)+(st.guard?m.reflect??0:0);if(reflection){damage(source,n*reflection,'reflection');trigger('reflect',source);}}
   if(st.shield){const absorbed=Math.min(n,state.shield);state.shield-=absorbed;n-=absorbed;if(state.shield<=0)delete st.shield;}

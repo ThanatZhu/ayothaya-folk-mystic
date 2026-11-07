@@ -5603,3 +5603,16 @@ Object.assign(globalThis.I18N_EN,{
  "เพิ่ม {9}": "Add {9}",
  "กำลังโหลดค่าพลังจากเซิร์ฟเวอร์…": "Loading stats from the server…"
 });
+Object.assign(globalThis.I18N_EN,{
+ "เลือดต่ำกว่า 40% ได้เกราะ 25% ของเลือดสูงสุด นาน 6 วินาที · คูลดาวน์ 60 วินาที": "Below 40% HP, gain a shield worth 25% of max HP for 6 seconds · 60 second cooldown",
+ "โดนตีจนตาย จะเหลือเลือด 1 และอมตะ 3 วินาที · คูลดาวน์ 3 นาที (PvP 5 นาที)": "A killing blow leaves you at 1 HP, immortal for 3 seconds · 3 minute cooldown (5 minutes in PvP)",
+ "ตีคริติคอลแล้ว ตัวเองและปาร์ตี้รอบตัว ทำดาเมจมอนสเตอร์แรงขึ้น 15% นาน 6 วินาที · คูลดาวน์ 30 วินาที": "A critical hit gives you and nearby party members 15% more damage to monsters for 6 seconds · 30 second cooldown",
+ "โดนมึน หลับ หรือตรึง จะหลุดทันที ฟื้นเลือด 15% และกันสถานะเหล่านี้ 3 วินาที · คูลดาวน์ 45 วินาที": "Breaks stun, sleep and root at once, heals 15% HP and blocks them for 3 seconds · 45 second cooldown",
+ "ฆ่ามอนสเตอร์ มีโอกาส 2% ได้เบี้ยจากตัวนั้น 10 เท่า": "Each monster kill has a 2% chance to pay ten times the cowries",
+ "สกิลพิเศษ ·": "Special skill ·",
+ "ก้าวพ้นภยันตราย · แคล้วคลาด อมตะ 3 วินาที": "Beyond Harm · Escaped death, immortal for 3 seconds",
+ "ร่มโพธิ์คุ้มกาย · ได้เกราะคุ้มกาย": "Shade of the Bodhi · Shield raised",
+ "บารมีนางพญา · ปาร์ตี้รอบตัวแรงขึ้น": "Queen's Prestige · Nearby party hits harder",
+ "ขวัญมั่นแห่งสุพรรณ · หลุดจากสถานะ": "Spirit of Suphan · Broke free",
+ "ลาภผลแห่งทุ่งเศรษฐี · เบี้ยจากตัวนี้ 10 เท่า": "Fortune of the Rich Fields · Ten times the cowries"
+});

@@ -1,4 +1,5 @@
 import {createFarmUtilityUI} from './farm-utility-ui221.js?v=surfaces222';
+import {amuletCoins} from './amulet-skills.js';
 import {bindItemHover} from './item-hover221.js?v=surfaces222';
 import {refineTierBadge} from './refine-tier-ui.js';
 // Bag (กระเป๋า · B), NPC shops, two quick-use slots (Q / E) and loot notices.
@@ -91,7 +92,7 @@ export function createBagUI({game,worldUI,map,account,equipmentUI=null}){
    if(e.type==='trade')world.notice((e.kind==='buy'?'ซื้อ ':'ขาย ')+itemLabel([{id:e.item,count:e.count}])+' · เหลือเบี้ย '+e.coins);
    return;
   }
-  if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const loot=rollLoot(id,Math.random,activeEvent(Date.now()),(mob.leader?LEADER.loot:1)*(surgeOn(Date.now(),map.id)?2:1),gearLook(account?.character?.classId??world.profession.id,account?.character?.gender));loot.coins=Math.round(loot.coins*(1+(world.derived?.coinPct??0)));world.spawnGroundLoot?.(loot,{x:e.x??mob.x,z:e.z??mob.z});}}
+  if(e.type==='defeat'){const mob=world.mobs.find(m=>m.id===e.id),id=mob&&MONSTER_TYPES[mob.type]?.id;if(id){const loot=rollLoot(id,Math.random,activeEvent(Date.now()),(mob.leader?LEADER.loot:1)*(surgeOn(Date.now(),map.id)?2:1),gearLook(account?.character?.classId??world.profession.id,account?.character?.gender));loot.coins=amuletCoins(world,Math.round(loot.coins*(1+(world.derived?.coinPct??0))));world.spawnGroundLoot?.(loot,{x:e.x??mob.x,z:e.z??mob.z});}}
   if(e.type==='reward')grantLocal(e);
   if(e.type==='experience'&&e.baseUp)for(const g of levelGifts(e.baseFrom,e.baseLevel)){world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);grantLocal({coins:g.coins,items:g.items.map(i=>({...i}))});} // 0.64 offline level gifts
  });

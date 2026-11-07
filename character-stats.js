@@ -103,6 +103,7 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
  const atk=Math.round((atkStat-1+Math.floor(atkStat/10)**2+Math.floor(sideStat/5)+Math.floor(S.luk/3)+weaponAtk)*(1+sum(e=>e.atkPct)+set('atkPct'))),matk=Math.round(((S.int-1)*1.5+Math.floor(S.int/7)**2+weaponMatk)*(1+set('matkPct')));
  const magic=MAGIC.has(classId);
  return {
+  amuletSkill:worn.find(it=>it.amulet&&it.amuletTier==='rainbow')?.amuletBase??null,
   total:S,rebirthBonus,magic,atk,matk,
   maxHp:Math.round((140+(level-1)*12)*(1+(S.vit-1)*.02)*(1+sum(e=>e.hpPct)+set('hpPct'))),
   maxMp:Math.round((100+(level-1)*5)*(1+(S.int-1)*.02)),

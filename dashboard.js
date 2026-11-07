@@ -212,7 +212,9 @@ async function pollServer(){
  const cleanUrl=serverUrl.trim().replace(/\/+$/,'');
  if(!cleanUrl)return;
  try{
-  const res=await fetch(cleanUrl+'/dashboard',{cache:'no-store'});
+  // /dashboard is admin-gated: send the signed-in admin's Google token (same as the back office). Not logged in → 401 → the public /health fallback below.
+  const headers={};try{const u=fbConn?.auth?.currentUser;if(u)headers.Authorization='Bearer '+await u.getIdToken();}catch{}
+  const res=await fetch(cleanUrl+'/dashboard',{cache:'no-store',headers});
   if(res.ok){
    const data=await res.json();
    $('srv-dot').dataset.state='online';

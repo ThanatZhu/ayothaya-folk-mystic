@@ -133,7 +133,7 @@ export class RealmServer{
   peer.key=uid+':'+slotId;peer.inspectHidden=record.inspectHidden===true;peer.tradeXp=Number.isSafeInteger(record.trade?.xp)&&record.trade.xp>0?record.trade.xp:0;if(map.id===MARKET_ZONE.mapId)peer.world.emit('shops',{list:this.shopList(serverId)});
   peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;if(peer.guildId)world.emit('guild',{guild:this.guildView(this.guilds.get(peer.guildId),peer.key)}); // 1.01 hall props + NPC know the guild at once
   peer.utilityReceipts=record.utilityReceipts??[];peer.daily=record.daily??null;peer.weekly=record.weekly??null;peer.rebirth=Math.min(REBIRTH_MAX,Math.max(0,record.rebirth|0));peer.rebirthStory=normalizeRebirthStory(record.rebirthStory,peer.rebirth);peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.dungeonChests=record.dungeonChests??null;peer.pet=null;peer.mailbox=normalizeMailbox(record.mailbox);peer.petCollection=normalizePetAccount(record.petCollection);peer.bounty=record.bounty??null;Object.assign(peer,normalizeAlbumState(record));
-  peer.dungeonReturn=dgBack?null:record.dungeonReturn??null;if(dgRun){dgRun.roomId=room.id;if(dgRun.state.text)world.emit('dungeonRun',dungeonRunView(dgRun));}
+  peer.dungeonReturn=dgBack?null:record.dungeonReturn??null;if(dgRun){dgRun.roomId=room.id;room.dungeonRun=dgRun.id;if(dgRun.state.text)world.emit('dungeonRun',dungeonRunView(dgRun));}
   if(party){party.pending.delete(uid);party.members.add(peer.id);peer.partyId=party.id;if(party.leaderPending===uid||!party.members.has(party.leader)){party.leader=peer.id;if(party.leaderPending===uid)party.leaderPending=null;}}
   peer.prologue=prologue;peer.storage=normalizeStorage(record.storage);peer.trade=null;peer.stall=null;peer.saveNow=false;
   peer.stats=normalizeStats(record.stats);peer.gear=normalizeGear(record.gear);peer.statSig='';peer.gearAt=-Infinity;this.refreshStats(peer);if(world.roleRespawn){world.player.hp=world.player.maxHp;world.player.mp=world.player.maxMp;}
@@ -1054,6 +1054,7 @@ export class RealmServer{
   if(destination?.minRebirth&&p.rebirth<destination.minRebirth)throw Error('rebirth-required');if(destination?.minRebirth&&this.who(p).level<(destination.minLevel??1))throw Error('rebirth-level-gate');
   const dgHome=dungeonReturnDestination(this,p,id);if(dgHome){this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();return dgHome;}
   if(destination?.dungeon)return dungeonEntryDestination(this,p,destination);
+  if(p.room.map.dungeon)throw Error('dungeon-use-exit');
   if(id===ARENA_MAP){const room=arenaReservation(this,p.key);if(!destination||!room||p.duel||p.trade||p.world.player.hp<=0)throw Error('arena-not-ready');return destination;}
   if(p.room.map.id===ARENA_MAP&&id===this.catalog.capital){if(p.duel)this.endDuel(this.peers.get(p.duel.foe),p,'ออกจากสนาม');return destination;}
   // 0.46 ธูปกลับเมือง: from any map straight to the capital, spending one incense.

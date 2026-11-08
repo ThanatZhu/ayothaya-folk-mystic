@@ -48,7 +48,7 @@ function reset(realm,run,room,peers,r){
  for(const p of peers)p.world.notice('ทีมล้ม · เริ่มห้องนี้ใหม่');
 }
 export function runScript(realm,room,dt){
- const run=[...(realm.dungeonRuns?.values()??[])].find(x=>x.roomId===room.id);if(!run||run.ended)return;
+ const run=realm.dungeonRuns?.get(room.dungeonRun);if(!run||run.ended||run.roomId!==room.id)return;
  const d=dungeonById(run.dungeon),r=d.rooms[run.roomIndex],scale=monsterScale(run.difficulty,run.size);
  const peers=[...room.peers].map(id=>realm.peers.get(id)).filter(p=>p&&run.keys.has(p.key)&&!run.left.has(p.key));
  const here=peers.filter(p=>!p.suspended);
@@ -86,7 +86,7 @@ function bossRoom(realm,run,room,r,s,scale,dt){
  const hell=run.difficulty==='hell';
  if(s.wait>0){s.wait-=dt;say(realm,run,room,r.name);if(s.wait<=0){s.boss=spawnInRoom(room,r.boss,r.center,scale).id;s.phase=1;}return;}
  let boss=room.mobs[s.boss];
- if(s.phase===1&&boss.hp>0&&boss.hp<=boss.maxHp*r.at){
+ if(s.phase===1&&boss.hp<=boss.maxHp*r.at){
   const at={x:boss.x,z:boss.z};despawn(boss);
   const head=spawnInRoom(room,r.phase2,at,scale);head.hp=head.maxHp=Math.max(1,Math.round(head.maxHp*.5));s.boss=head.id;s.phase=2;boss=head;
   for(const id of room.peers)realm.peers.get(id)?.world.notice('หัวของแม่กระสือหลุดลอยขึ้นกลางห้อง!');

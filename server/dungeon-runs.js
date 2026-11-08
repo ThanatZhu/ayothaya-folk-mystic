@@ -12,9 +12,9 @@ import {dungeonRunView} from './dungeon-script.js';
 const RUN_IDLE_MS=10*60e3;
 const runs=realm=>realm.dungeonRuns??=new Map();
 const checks=realm=>realm.dungeonChecks??=new Map();
-const peerByKey=(realm,key)=>[...realm.peers.values()].find(p=>p.key===key);
+const peerByKey=(realm,key)=>{for(const p of realm.peers.values())if(p.key===key)return p;return null;};
 export function dungeonReservation(realm,key){for(const run of runs(realm).values())if(run.keys.has(key)&&!run.left.has(key))return run;return null;}
-export const keepDungeonRoom=(realm,room)=>!!room.map.dungeon&&[...runs(realm).values()].some(run=>run.roomId===room.id);
+export const keepDungeonRoom=(realm,room)=>!!room.map.dungeon&&!!room.dungeonRun&&runs(realm).has(room.dungeonRun);
 
 function busy(realm,p){
  return !!(p.duel||p.trade||p.world.player.hp<=0||p.suspended||p.room.map.instance||p.room.map.guildHall||p.room.map.prologue||
@@ -38,6 +38,7 @@ export function startReadyCheck(realm,p,{dungeon:id,difficulty}){
  const dungeon=dungeonById(id);if(!DIFFICULTY[difficulty])throw Error('dungeon-difficulty');
  const party=p.partyId?realm.parties.get(p.partyId):null;
  if(party&&party.leader!==p.id)throw Error('dungeon-not-leader');
+ for(const c of checks(realm).values())if(c.leader===p.key)throw Error('dungeon-checking');
  checkEntry(realm,p,dungeon);
  if(!party)return startRun(realm,dungeon,difficulty,[p]);
  const members=[...party.members].map(id=>realm.peers.get(id)).filter(a=>a&&a.serverId===p.serverId&&!a.suspended).slice(0,MAX_PARTY);
@@ -68,6 +69,8 @@ export function leaveRun(realm,p){
 }
 export function endRun(realm,run,{cleared=false}={}){
  runs(realm).delete(run.id);run.ended=true;run.cleared=cleared;
+ // an abandoned run frees its room
+ const room=realm.rooms.get(run.roomId);if(room&&!room.peers.size)realm.rooms.delete(room.id);
  for(const key of run.keys){const a=peerByKey(realm,key);if(a&&a.room.id===run.roomId&&!run.left.has(key))a.world.emit('dungeonEnded',{cleared,mapId:a.dungeonReturn?.mapId??realm.catalog.capital});}
 }
 // The boss fell: everyone still in the run is paid, then the run ends.
@@ -75,7 +78,7 @@ export function finishRun(realm,run,room){run.cleared=true;grantRunRewards(realm
 // Shards every clear; the chest (one set piece, by party size and difficulty) only 3 times per dungeon per Thai day.
 export function grantRunRewards(realm,run){
  const d=dungeonById(run.dungeon),diff=DIFFICULTY[run.difficulty],rand=realm.dungeonRandom??Math.random,today=thaiDay(realm.now());
- for(const key of run.keys){if(run.left.has(key))continue;const p=peerByKey(realm,key);if(!p)continue;
+ for(const key of run.keys){if(run.left.has(key))continue;const p=peerByKey(realm,key);if(!p||p.room.id!==run.roomId)continue;
   if(p.dungeonChests?.day!==today)p.dungeonChests={day:today,counts:{}};
   const used=p.dungeonChests.counts[d.id]??0,chest=used<CHESTS_PER_DAY,items=[{id:d.shard,count:diff.shards}];let piece=null;
   if(chest){p.dungeonChests.counts[d.id]=used+1;
@@ -86,6 +89,8 @@ export function grantRunRewards(realm,run){
 // 500 shards of a dungeon buy its rainbow piece for one slot.
 export function exchangeShards(realm,p,{dungeon:id,slot}){
  const d=dungeonById(id);if(!d)throw Error('dungeon-unknown');if(!DUNGEON_SLOTS.includes(slot))throw Error('bad-slot');
+ // a mail/auction save writes the bag back afterwards and a trade holds it: never exchange during either
+ if(p.mailMutationBusy||p.trade)throw Error('dungeon-busy');
  if((p.bag.items[d.shard]??0)<SHARDS_PER_PIECE)throw Error('not-enough');
  const bag=normalizeBag(p.bag);bag.items[d.shard]-=SHARDS_PER_PIECE;if(!bag.items[d.shard])delete bag.items[d.shard];realm.setBag(p,bag);
  const out=dungeonRainbowId(d.set,slot);realm.grantLoot(p,{coins:0,items:[{id:out,count:1}]});p.saveNow=true;p.world.emit('dungeonExchanged',{item:out});return out;
@@ -105,8 +110,10 @@ export function dungeonEntryDestination(realm,p,map){
 export function tickDungeonRuns(realm){
  const now=realm.now();
  for(const c of [...checks(realm).values()])if(now>=c.deadline)settle(realm,c);
+ if(!runs(realm).size)return;
+ const online=new Set();for(const p of realm.peers.values())online.add(p.key);
  for(const run of [...runs(realm).values()]){
-  if([...run.keys].some(k=>!run.left.has(k)&&peerByKey(realm,k)))run.seenAt=now;
+  if([...run.keys].some(k=>!run.left.has(k)&&online.has(k)))run.seenAt=now;
   else if(now-run.seenAt>RUN_IDLE_MS)endRun(realm,run,{cleared:false});
  }
 }

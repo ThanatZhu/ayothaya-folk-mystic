@@ -10,7 +10,7 @@ const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className
 const SLOT_NAME={head:'หมวก',armor:'เสื้อ',garment:'ผ้าคลุม',shoes:'รองเท้า'};
 export function createDungeonUI({game,map,worldUI,bagUI}){
  const css=el('link');css.rel='stylesheet';css.href='dungeon-ui.css?v=1';document.head.append(css);
- const world=game.world,send=data=>game.world.market?.('dungeon',data);
+ const send=data=>game.world.market?.('dungeon',data);
  let selected=DUNGEONS[0].id,difficulty='normal',queue=null,info=null,ready=null,leaving=null,storySeen=new Set(),runView=null;
  // ---- HUD button
  const button=el('button');button.id='menu-dungeon';button.type='button';button.setAttribute('aria-label','เปิดหน้าดันเจี้ยนปาร์ตี้');
@@ -20,7 +20,7 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
  const dialog=el('dialog');dialog.id='dungeon-window';dialog.setAttribute('aria-labelledby','dungeon-title');
  dialog.innerHTML='<header class="dungeon-header"><h2 id="dungeon-title">ดันเจี้ยนปาร์ตี้</h2><button type="button" id="dungeon-close" aria-label="ปิดหน้าดันเจี้ยน">×</button></header><div class="dungeon-body"><nav class="dungeon-list" id="dungeon-list"></nav><section class="dungeon-detail" id="dungeon-detail"></section></div>';
  (document.getElementById('game-shell')??document.body).append(dialog);const $=id=>dialog.querySelector('#'+id);
- const level=()=>baseProgress(world).level,bag=()=>bagUI?.bag?.()??{items:{}},shards=d=>bag().items?.[d.shard]??0;
+ const level=()=>baseProgress(game.world).level,bag=()=>bagUI?.bag?.()??{items:{}},shards=d=>bag().items?.[d.shard]??0;
  function render(){
   const list=$('dungeon-list');list.replaceChildren();
   for(const d of DUNGEONS){const b=el('button','dungeon-card'+(d.id===selected?' on':'')+(level()<d.level?' locked':''));b.type='button';
@@ -55,20 +55,21 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
  out.onclick=()=>{if(leaving){worldUI.dungeonTravel?.(leaving);return;}if(confirm('ออกจากดันเจี้ยน? ออกแล้วกลับเข้ารอบนี้ไม่ได้'))send({action:'leave'});};
  tracker.append(goal,out);(document.getElementById('game-shell')??document.body).append(tracker);
  function story(kind){const d=dungeonByMap(map.id);if(!d||storySeen.has(kind))return;storySeen.add(kind);
-  dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:{id:'dungeon-'+d.id+'-'+kind,title:d.name,art:{src:d.cover},captions:d.story[kind]}}}));}
+  dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:{id:'dungeon-'+d.id+'-'+kind,title:d.name,art:{src:d.cover,panels:1,frames:d.story[kind].map(()=>[0,0,960,400])},captions:d.story[kind]}}}));}
  function goHome(mapId,delay){leaving=mapId;out.textContent='กลับทันที';setTimeout(()=>worldUI.dungeonTravel?.(mapId),delay);}
  game.onEvent(e=>{
   if(e.type==='dungeonInfo'){info=e;if(dialog.open)render();}
   else if(e.type==='dungeonQueue'){queue=e.state==='waiting'||e.state==='offer'?e:null;if(e.state==='offer')popUp('หาคนได้ '+e.size+' คนแล้ว · เข้าเลยไหม',[['เข้าเลย',()=>send({action:'accept'})],['รอต่อ',()=>{}]]);if(dialog.open)render();}
   else if(e.type==='dungeonReady'){ready=e;const d=DUNGEONS.find(x=>x.id===e.dungeon);popUp(e.leader+' ชวนเข้า '+(d?.name??'ดันเจี้ยน')+' · '+(DIFFICULTY[e.difficulty]?.name??''),[['พร้อม',()=>send({action:'ready',yes:true})],['ไม่พร้อม',()=>send({action:'ready',yes:false})]],e.seconds);}
-  else if(e.type==='dungeonEnter'){pop.hidden=true;if(dialog.open)dialog.close();world.notice('กำลังเข้าดันเจี้ยน…');worldUI.dungeonTravel?.(e.map);}
-  else if(e.type==='dungeonError')world.notice(errorText(e.reason));
+  else if(e.type==='dungeonEnter'){pop.hidden=true;if(dialog.open)dialog.close();game.world.notice('กำลังเข้าดันเจี้ยน…');worldUI.dungeonTravel?.(e.map);}
+  else if(e.type==='dungeonError')game.world.notice(errorText(e.reason));
   else if(e.type==='dungeonExit')goHome(e.mapId,300);
-  else if(e.type==='dungeonEnded'){world.notice(e.cleared?'เคลียร์ดันเจี้ยนแล้ว! · กลับอัตโนมัติใน 15 วินาที':'รอบนี้จบแล้ว · กำลังพากลับ');goHome(e.mapId,e.cleared?15000:2000);}
-  else if(e.type==='dungeonReward'){const piece=e.piece?itemDef(e.piece)?.name:null;world.notice('ได้เศษดัน '+e.shards+(piece?' · '+piece:'')+(e.chest?' · หีบวันนี้เหลือ '+e.chestsLeft:' · หีบวันนี้ครบแล้ว'));}
-  else if(e.type==='dungeonExchanged'){world.notice('แลกได้ '+(itemDef(e.item)?.name??'ชุดรุ้ง'));if(dialog.open)render();}
+  else if(e.type==='dungeonEnded'){game.world.notice(e.cleared?'เคลียร์ดันเจี้ยนแล้ว! · กลับอัตโนมัติใน 15 วินาที':'รอบนี้จบแล้ว · กำลังพากลับ');goHome(e.mapId,e.cleared?15000:2000);}
+  else if(e.type==='dungeonReward'){const piece=e.piece?itemDef(e.piece)?.name:null;game.world.notice('ได้เศษดัน '+e.shards+(piece?' · '+piece:'')+(e.chest?' · หีบวันนี้เหลือ '+e.chestsLeft:' · หีบวันนี้ครบแล้ว'));}
+  else if(e.type==='dungeonExchanged'){game.world.notice('แลกได้ '+(itemDef(e.item)?.name??'ชุดรุ้ง'));if(dialog.open)render();}
   else if(e.type==='dungeonRun'){runView=e;tracker.hidden=false;goal.textContent=e.name+(e.text&&e.text!==e.name?' · '+e.text:'');
    if(e.room===0)story('enter');if(e.kind==='boss')story('boss');}
  });
+ if(map.dungeon)setTimeout(()=>send({action:'info'}),1500);   // the room goal after a reload
  return {open:show};
 }

@@ -545,7 +545,7 @@ export class RealmServer{
   if(!mob||mob.hp<=0||p.room.map.safe)return;
   if(MONSTER_TYPES[mob.type]?.worldBoss&&!mob.summoned&&this.mapBosses.remaining(p.room)>0){mob.hp=0;mob.dead=this.mapBosses.remaining(p.room);return;}
   if(!Number.isFinite(damage)||damage<=0)return;
-  const amount=Math.min(mob.hp,Math.round(damage*petBlessing(p.world)));mob.hp-=amount;markMonsterHit(mob,p.world.player);p.world.roleCombat?.setFx?.landed(mob,color==='#ffd27a'); // rainbow set stacks and procsrallyPack(p.room.mobs,mob);if(color==='#ffd27a')amuletCrit(p.world);
+  const amount=Math.min(mob.hp,Math.round(damage*petBlessing(p.world)));mob.hp-=amount;markMonsterHit(mob,p.world.player);p.world.roleCombat?.setFx?.landed(mob,color==='#ffd27a');rallyPack(p.room.mobs,mob);if(color==='#ffd27a')amuletCrit(p.world); // rainbow set stacks and procs
   let contributors=p.room.contributors.get(mob.id);if(!contributors){contributors=new Set();p.room.contributors.set(mob.id,contributors);}contributors.add(p.id);
   if(MONSTER_TYPES[mob.type]?.boss){const party=this.parties.get(p.partyId);recordBossDamage(p.room,mob,p,amount,this.clock,party?{id:party.id,leaderName:this.peers.get(party.leader)?.character.name??p.character.name,members:[...party.members].map(id=>this.peers.get(id)).filter(a=>a&&!a.observer&&a.room===p.room)}:null);}
   if(mob.summoned){const all=(p.room.bossDamage??=new Map()),d=all.get(mob.id)??new Map();all.set(mob.id,d);d.set(p.id,(d.get(p.id)??0)+amount);} // each summoned boss keeps its own damage table

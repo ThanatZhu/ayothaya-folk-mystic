@@ -1,0 +1,63 @@
+/* Keep the game's Mali font and jade/gold palette; dialogue stays inside safe viewport bounds. */
+#story-scene{box-sizing:border-box;position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);margin:0;width:min(760px,calc(100vw - 32px));max-width:calc(100vw - 32px);height:auto;max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding:0;color:#f5e7bd;background:linear-gradient(135deg,#172b25,#0b1c18);border:1px solid #c6a460;border-radius:12px;box-shadow:0 22px 90px #0009;font-family:inherit;overflow:hidden;}
+#story-scene[open]{display:flex;flex-direction:column;}
+#story-scene::backdrop{background:#03100bd1;}
+#story-scene header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 26px 14px;border-bottom:1px solid #c6a46044;flex-shrink:0;}
+#story-scene h2{font-size:24px;margin:3px 0 0;color:#f4d78c;}
+#story-scene small{font-size:12px;color:#c1c9ab;}
+#story-scene button{font:inherit;color:#f1deb0;background:#1f352c;border:1px solid #b69a59;border-radius:7px;padding:10px 16px;min-height:44px;cursor:pointer;}
+#story-scene button:focus-visible{outline:3px solid #fff0b9;outline-offset:2px;}
+#story-scene #story-scene-close{font-size:24px;padding:2px;width:44px;height:44px;flex-shrink:0;}
+#story-scene .story-scene-scroll{padding:20px 26px;overflow:auto;overscroll-behavior:contain;min-height:0;}
+#story-scene h3{font-size:15px;font-weight:500;color:#ccb77e;margin:0 0 14px;}
+#story-scene-text{font-size:19px;line-height:1.95;white-space:pre-line;margin:0 0 22px;}
+#story-scene #story-scene-ask{background:transparent;text-align:left;border-color:#829f8666;font-size:14px;}
+#story-scene-answer{font-size:16px;line-height:1.85;color:#c4d8bf;border-left:2px solid #bd9e60;padding-left:14px;margin-bottom:0;}
+#story-scene-goal{font-size:14px;color:#e7cd83;margin:18px 0 0;}
+#story-scene footer{padding:14px 26px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #c6a46044;flex-shrink:0;}
+#story-scene footer div{display:flex;gap:10px;}
+#story-scene-page{color:#a6b8a6;font-size:13px;white-space:nowrap;}
+#story-scene #story-scene-next{background:linear-gradient(#f0d691,#cba254);color:#19241d;font-weight:700;}
+#story-scene button:disabled{opacity:.4;cursor:default;}
+.story-recap{line-height:1.9;padding:16px;background:#10271f;border-left:2px solid #d5b96e;margin-bottom:14px;}
+.story-recap h3{margin:0 0 10px;}.story-recap p{margin:8px 0;}.story-recap small{color:#bdcfae;}
+@media(max-width:600px),(max-height:480px){
+ #story-scene{width:calc(100vw - 24px);max-width:calc(100vw - 24px);max-height:calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));}
+ #story-scene header{padding:10px 16px;}#story-scene h2{font-size:19px;}#story-scene .story-scene-scroll{padding:12px 16px;}#story-scene-text{font-size:16px;line-height:1.8;margin-bottom:12px;}
+ #story-scene footer{padding:10px 16px;gap:8px;}#story-scene footer div{gap:6px;}#story-scene footer button{font-size:13px;padding:8px 10px;}#story-scene-answer{font-size:14px;}
+}
+
+
+/* MMORPG story frame: large illustration above, NPC portrait left of the dialogue underneath. */
+#story-scene{width:min(1080px,calc(100vw - 32px));}
+#story-scene header h3{margin:4px 0 0;color:#e4c985;font-size:17px;font-weight:700;}
+#story-scene .story-scene-body{display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+#story-scene-art{margin:0;flex:1 1 auto;height:clamp(150px,40dvh,420px);min-height:100px;background:#081518;overflow:hidden;}
+#story-scene-art[hidden]{display:none;}
+#story-scene-image{display:block;width:100%;height:100%;object-fit:cover;object-position:center 54%;}
+#story-scene .story-scene-dialogue{display:grid;grid-template-columns:150px minmax(0,1fr);flex:0 1 auto;min-height:0;max-height:32dvh;border-top:1px solid #c6a46066;background:linear-gradient(120deg,#192c25,#0b1a16);}
+#story-scene-portrait{margin:12px 0 0 18px;min-height:0;align-self:stretch;overflow:hidden;background:radial-gradient(ellipse at 50% 75%,#c4a85a26,transparent 72%);}
+#story-scene-npc{display:block;width:100%;height:100%;max-height:210px;object-fit:contain;object-position:center bottom;}
+#story-scene-portrait[hidden]{display:none;}
+#story-scene .story-scene-dialogue:has(#story-scene-portrait[hidden]){grid-template-columns:minmax(0,1fr);}
+#story-scene .story-scene-scroll{min-height:0;max-height:32dvh;padding:16px 24px;}
+#story-scene .story-scene-scroll h2{font-size:21px;margin:0 0 10px;}
+#story-scene-text{font-size:18px;line-height:1.85;margin-bottom:14px;}
+.story-recap-art{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;margin:10px 0 14px;border-radius:5px;}
+@media(max-width:600px) and (orientation:portrait){
+ #story-scene-art{height:30dvh;min-height:100px;}
+ #story-scene .story-scene-dialogue{grid-template-columns:94px minmax(0,1fr);max-height:36dvh;}
+ #story-scene-portrait{margin:12px 0 0 8px;}
+ #story-scene .story-scene-scroll{max-height:36dvh;padding:12px;}
+ #story-scene .story-scene-scroll h2{font-size:18px;}#story-scene-text{font-size:15px;}
+}
+@media(orientation:landscape) and (max-height:600px){
+ #story-scene{width:calc(100vw - 24px);}
+ #story-scene header{padding:7px 14px;}#story-scene header small{font-size:10px;}#story-scene header h3{font-size:13px;margin:2px 0 0;}
+ #story-scene-art{height:32dvh;min-height:72px;}
+ #story-scene .story-scene-dialogue{grid-template-columns:90px minmax(0,1fr);max-height:34dvh;}
+ #story-scene-portrait{margin:8px 0 0 10px;}#story-scene-npc{max-height:130px;}
+ #story-scene .story-scene-scroll{max-height:34dvh;padding:8px 14px;}
+ #story-scene .story-scene-scroll h2{font-size:16px;margin-bottom:5px;}#story-scene-text{font-size:14px;line-height:1.7;margin-bottom:8px;}
+ #story-scene footer{padding:8px 14px;}#story-scene footer button{min-height:40px;}
+}

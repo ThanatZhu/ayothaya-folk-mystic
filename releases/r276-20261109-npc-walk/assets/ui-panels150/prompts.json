@@ -1,0 +1,26 @@
+{
+  "mode": "builtin imagegen",
+  "assets": [
+    {
+      "key": "boss-frame",
+      "prompt": "Create a production game UI WINDOW BORDER asset, landscape 4:3 rectangle. Hand-painted 2D Thai Ayothaya fantasy MMORPG art matching antique gold lotus and deep jade-green old-school RPG menus. Four restrained gold lotus corner ornaments, fine carved twin gold rails along the four edges, one tiny crossed-sword jewel accent at the middle of the top edge. No title plate. Huge EMPTY fully TRANSPARENT inner opening, at least 85% of width and height. Outer background fully transparent too. Exactly one perfectly straight symmetrical rectangular frame, all four sides visible with comfortable outer padding, flat front view, crisp opaque gold edges, subtle painted highlights, no perspective. This will be sliced into stretchable corners and edges so keep long edge middles simple. No text, letters, numbers, icons inside the opening, scenic artwork, shadows outside, glow, photorealism or glossy 3D. Clean restrained painted game craftsmanship.",
+      "edit": "Edit this game UI border asset for production nine-slice scaling. Preserve the existing lotus CORNER ornaments, the top-left envelope if present, gold/jade palette and the transparent centre and outer background. REMOVE every ornament or emblem at the MIDDLE of every edge: remove the central crossed swords, central top diamond, bottom central diamond and left/right midpoint diamonds, replacing each with the same uninterrupted straight gold-and-jade rail as the adjoining edge. ONLY the four corners may contain decorative flourishes. Make the middle stretches of all four edges simple straight constant-width rails. Keep the original rectangle, front view, hand-painted quality, alpha transparency and empty centre. No text and no other changes.",
+      "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-7c0c0277-5c3d-4b16-a1c7-edc2a2da4130.png",
+      "asset": "boss-frame.webp"
+    },
+    {
+      "key": "mail-frame",
+      "prompt": "Create a production game UI WINDOW BORDER asset, landscape 4:3 rectangle. Hand-painted 2D Thai Ayothaya fantasy MMORPG art matching antique gold lotus and deep jade-green old-school RPG menus. Four restrained gold lotus corner ornaments, fine carved twin gold rails along the four edges, a tiny sealed parchment envelope accent integrated into the TOP LEFT corner only. No title plate. Huge EMPTY fully TRANSPARENT inner opening, at least 85% of width and height. Outer background fully transparent too. Exactly one perfectly straight symmetrical rectangular frame, all four sides visible with comfortable outer padding, flat front view, crisp opaque gold edges, subtle painted highlights, no perspective. This will be sliced into stretchable corners and edges so keep long edge middles simple. No text, letters, numbers, icons inside the opening, scenic artwork, shadows outside, glow, photorealism or glossy 3D. Clean restrained painted game craftsmanship.",
+      "edit": "Edit this game UI border asset for production nine-slice scaling. Preserve the existing lotus CORNER ornaments, the top-left envelope if present, gold/jade palette and the transparent centre and outer background. REMOVE every ornament or emblem at the MIDDLE of every edge: remove the central crossed swords, central top diamond, bottom central diamond and left/right midpoint diamonds, replacing each with the same uninterrupted straight gold-and-jade rail as the adjoining edge. ONLY the four corners may contain decorative flourishes. Make the middle stretches of all four edges simple straight constant-width rails. Keep the original rectangle, front view, hand-painted quality, alpha transparency and empty centre. No text and no other changes.",
+      "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-0a483d4c-8f3a-4ac3-b445-912fd0f3e20e.png",
+      "asset": "mail-frame.webp"
+    },
+    {
+      "key": "button",
+      "prompt": "Create one production game UI BUTTON asset, a wide horizontal rectangle about 4:1 aspect ratio, centered on a TRUE TRANSPARENT canvas. Hand-painted 2D Thai Ayothaya fantasy MMORPG menu style: rich deep jade green enamel inset, fine antique gold double rim, small sculpted gold lotus flourishes ONLY at left and right ends, elegantly rounded clipped corners. Strong clean readable silhouette, flat front view, crisp painted craftsmanship matching classic gold-and-jade RPG HUD. Large completely EMPTY jade center for code-rendered text. Entire button and its corners visible, tight transparent padding around. Made for nine-slice stretching: very simple straight middle top and bottom rails, all decoration at the ends. NO text, NO letters, no icons, no background scene, no glow, no glossy 3D, no extra buttons.",
+      "edit": null,
+      "source": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14e11-5749-71b2-a037-d1a49b0f8496\\exec-87bd13fb-f74c-43eb-8874-04d31d7c2c91.png",
+      "asset": "button.webp"
+    }
+  ]
+}

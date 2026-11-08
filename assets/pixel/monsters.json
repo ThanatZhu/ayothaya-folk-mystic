@@ -443,5 +443,35 @@
   "art": "pm-mill-keeper",
   "cell": 104,
   "body": 80
+ },
+ "dg35-krasue-wisp": {
+  "art": "pm-dg35-krasue-wisp",
+  "cell": 80,
+  "body": 60
+ },
+ "dg35-khamot": {
+  "art": "pm-dg35-khamot",
+  "cell": 78,
+  "body": 56
+ },
+ "dg35-krahang": {
+  "art": "pm-dg35-krahang",
+  "cell": 86,
+  "body": 77
+ },
+ "dg35-krahang-chief": {
+  "art": "pm-dg35-krahang-chief",
+  "cell": 98,
+  "body": 86
+ },
+ "dg35-mae-krasue": {
+  "art": "pm-dg35-mae-krasue",
+  "cell": 106,
+  "body": 106
+ },
+ "dg35-mae-krasue-head": {
+  "art": "pm-dg35-mae-krasue-head",
+  "cell": 110,
+  "body": 107
  }
 }

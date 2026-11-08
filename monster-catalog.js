@@ -43,7 +43,14 @@ export const MAP_VARIANTS=[
  {variantOf:'monkey-chief',id:'cellar-monkey-chief',name:'วานรใต้ถุน',level:40,hp:2052,damage:56,baseXp:611,jobXp:353},
  // the prologue's five tutorial kills keep the old Lv.1–2 field monsters
  {variantOf:'straw',id:'vision-straw',name:'หุ่นฟางหลง',level:2,hp:52,damage:5,baseXp:14,jobXp:9},
- {variantOf:'rat',id:'vision-rat',name:'หนูยุ้งข้าว',level:1,hp:38,damage:4,baseXp:11,jobXp:7}
+ {variantOf:'rat',id:'vision-rat',name:'หนูยุ้งข้าว',level:1,hp:38,damage:4,baseXp:11,jobXp:7},
+ // Party dungeon Lv.35 เรือนกระสือริมคลอง (dungeons.js). The room script spawns them; clearReward is cleared so mill-cellar rules never apply.
+ {variantOf:'lantern',id:'dg35-krasue-wisp',name:'กระสือน้อย',level:33,hp:860,damage:38,baseXp:150,jobXp:90,speed:1.6,height:1.4,clearReward:null},
+ {variantOf:'lantern',id:'dg35-khamot',name:'ผีโขมด',level:34,hp:900,damage:40,baseXp:158,jobXp:94,height:1.3,magic:true,clearReward:null},
+ {variantOf:'monkey',id:'dg35-krahang',name:'ผีกระหัง',level:35,hp:950,damage:42,baseXp:168,jobXp:100,speed:1.5,height:1.9,clearReward:null},
+ {variantOf:'monkey-chief',id:'dg35-krahang-chief',name:'ขุนกระหัง',level:38,hp:3600,damage:72,baseXp:830,jobXp:460,height:3,elite:true,clearReward:null},
+ {variantOf:'lantern-lord',id:'dg35-mae-krasue',name:'แม่กระสือราตรี',level:40,hp:9000,damage:78,baseXp:2300,jobXp:1340,height:3.6,boss:true,clearReward:null},
+ {variantOf:'lantern-lord',id:'dg35-mae-krasue-head',name:'แม่กระสือราตรี (ร่างกระสือ)',level:40,hp:9000,damage:82,baseXp:2300,jobXp:1340,height:3.4,boss:true,clearReward:null}
 ];
 for(const spec of REBIRTH_MONSTER_SPECS){const art=FRONTIER_MONSTERS.find(m=>m.id===spec.proxyId);if(!art)throw Error('Missing rebirth art proxy '+spec.proxyId);FRONTIER_MONSTERS.push({...spec,sheet:art.sheet,row:art.row,chapter2Art:art.chapter2Art,artProxy:spec.proxyId});}
 for(const v of MAP_VARIANTS)FRONTIER_MONSTERS.push({...FRONTIER_MONSTERS.find(m=>m.id===v.variantOf),...v});
@@ -77,6 +84,8 @@ export const BOSS_SIGHT=10,BOSS_GIVE_UP=25;
 Object.assign(MONSTER_BEHAVIOUR,CHAPTER2_BEHAVIOUR);
 for(const v of MAP_VARIANTS)if(MONSTER_BEHAVIOUR[v.variantOf])MONSTER_BEHAVIOUR[v.id]=MONSTER_BEHAVIOUR[v.variantOf];
 for(const m of REBIRTH_MONSTER_SPECS)MONSTER_BEHAVIOUR[m.id]=m.boss?{enrage:true,slam:slam(5,3,1.4,.08,9,8)}:m.elite?{enrage:true}:{};
+Object.assign(MONSTER_BEHAVIOUR,{'dg35-krasue-wisp':{leap:true},'dg35-khamot':{aoe:2.2,windup:.9,skirmish:1.4},'dg35-krahang':{skirmish:1.2},
+ 'dg35-krahang-chief':{enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'dg35-mae-krasue':{aoe:3,windup:1},'dg35-mae-krasue-head':{leap:true,aoe:2.6,windup:.8}});
 // 0.122 territory and strolling (owner-approved numbers): a monster 15+ levels above the player attacks anyone who
 // comes within 5 m of it while inside its 9 m leash; an idle ordinary monster strolls within 4 m of home at 40% speed,
 // resting 3–7 s between walks. `level` is the target player's base level (null: no territory check).

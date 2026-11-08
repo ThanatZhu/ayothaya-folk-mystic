@@ -87,5 +87,11 @@
  "cellar-monkey-chief": "pm-monkey-chief",
  "vision-straw": "pm-straw",
  "vision-rat": "pm-rat",
- "vision-straw-guardian": "pm-mill-keeper"
+ "vision-straw-guardian": "pm-mill-keeper",
+ "dg35-krasue-wisp": "pm-dg35-krasue-wisp",
+ "dg35-khamot": "pm-dg35-khamot",
+ "dg35-krahang": "pm-dg35-krahang",
+ "dg35-krahang-chief": "pm-dg35-krahang-chief",
+ "dg35-mae-krasue": "pm-dg35-mae-krasue",
+ "dg35-mae-krasue-head": "pm-dg35-mae-krasue-head"
 }

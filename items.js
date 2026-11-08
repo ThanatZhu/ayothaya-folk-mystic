@@ -214,6 +214,8 @@ for(const monster of FRONTIER_MONSTERS)if(DROPS[monster.id])DROPS[monster.id].it
 for(const monster of FRONTIER_MONSTERS)if(conquestBoss(monster)&&DROPS[monster.id])DROPS[monster.id].items.push([CONQUEST_SHARD,1,1]);
 // 0.117 set gear by monster level (`sets`, resolved per killer in rollLoot) and boss shards for the rainbow sets.
 for(const m of FRONTIER_MONSTERS){const d=DROPS[m.id];if(!d)continue;const rule=setDrops(m),shard=shardDrop(m);if(rule)d.sets=rule;if(shard)d.items.push(shard);}
+// Party dungeon monsters (dungeons.js) give a few cowries only: the dungeon pays out through its chest and shards.
+for(const m of FRONTIER_MONSTERS)if(m.dungeonOnly)DROPS[m.id]={coins:[m.level,m.level*3],items:[]};
 
 // Shops keyed by NPC name; the server also checks the player stands next to that NPC in that map.
 export const SHOPS={

@@ -26,7 +26,7 @@ test('rainbow visibility and server rules require a real class and only its boss
  const r=recipeFor('boss-weapon-swordsman'),bag={coins:r.coins,items:r.needs},copy=structuredClone(bag);for(const classId of ['novice','hunter','fake'])assert.throws(()=>craft(bag,r.out,1,Math.random,{classId}),/craft-locked/);assert.deepEqual(bag,copy);assert.equal(craft(bag,r.out,1,Math.random,{classId:'swordsman'}).made,1);
 });
 test('every monster drops the crafting fragment matching its actual level band',()=>{
- for(const m of FRONTIER_MONSTERS){const id=WEAPON_MATERIALS[weaponMaterialTier(m.level??1)-1][0];assert.ok(DROPS[m.id].items.some(([it,rate,count])=>it===id&&rate>0&&count>=1),m.id);assert.equal(ITEMS[id].kind,'loot');}
+ for(const m of FRONTIER_MONSTERS.filter(m=>!m.dungeonOnly)){const id=WEAPON_MATERIALS[weaponMaterialTier(m.level??1)-1][0];assert.ok(DROPS[m.id].items.some(([it,rate,count])=>it===id&&rate>0&&count>=1),m.id);assert.equal(ITEMS[id].kind,'loot');}
 });
 test('inserting the crafting lesson preserves every v3 objective and completed story without replaying rewards',()=>{
  const old=STORY.filter(q=>q.id!=='t17-craft');for(const [i,q]of old.entries()){const before={v:3,quest:i,step:q.steps.length-1,count:0},s=normalizeStory(before);assert.equal(s.v,STORY_VERSION);assert.equal(currentObjective(s).quest.id,q.id);assert.equal(s.step,q.steps.length-1);assert.deepEqual(normalizeStory(s),s);}

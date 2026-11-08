@@ -20,13 +20,13 @@ export const DUNGEONS=[{
   boss:['ห้องนอนบนเรือนเงียบผิดปกติ','แม่หญิงนั่งพัดอยู่กลางห้อง ดวงตาแดงก่ำ','"มาถึงที่นี่ ก็อย่าหวังว่าจะได้กลับ"'],
  },
  rooms:[
-  {kind:'waves',name:'ลานบ้าน',start:{x:-56,z:0},door:{x:-38,z:0,to:1},center:{x:-46,z:0},
+  {kind:'waves',name:'ลานบ้าน',start:{x:.5,z:56},door:{x:0,z:22,to:1},center:{x:0,z:32},
    waves:[[[W,4]],[[W,3],[K,2]],[[K,3],[W,3]]]},
-  {kind:'lanterns',name:'ใต้ถุนเรือน',start:{x:-27,z:0},door:{x:-12,z:0,to:2},center:{x:-20,z:0},
-   lanterns:[{x:-25,z:-5},{x:-25,z:5},{x:-15,z:-5},{x:-15,z:5}],hold:3,spawn:{type:H,every:8,max:4}},
-  {kind:'miniboss',name:'ครัวไฟ',start:{x:-1,z:0},door:{x:10,z:0,to:3},center:{x:4,z:0},
+  {kind:'lanterns',name:'ใต้ถุนเรือน',start:{x:0,z:14},door:{x:0,z:-25,to:2},center:{x:0,z:0},
+   lanterns:[{x:-31,z:2},{x:0,z:2},{x:30,z:2},{x:0,z:-10}],hold:3,spawn:{type:H,every:8,max:4}},
+  {kind:'miniboss',name:'ครัวไฟ',start:{x:-5,z:-40},door:{x:5,z:-30,to:3},center:{x:-10,z:-35},
    boss:'dg35-krahang-chief',summonAt:.5,summon:[H,2]},
-  {kind:'boss',name:'ห้องนอนบนเรือน',start:{x:21,z:0},center:{x:29,z:0},delay:3,
+  {kind:'boss',name:'ห้องนอนบนเรือน',start:{x:16,z:-34},center:{x:32,z:-32},delay:3,
    boss:'dg35-mae-krasue',phase2:'dg35-mae-krasue-head',at:.5,adds:{type:W,every:12,max:3},hellAdds:{type:K,every:10,max:2}},
  ],
 }];

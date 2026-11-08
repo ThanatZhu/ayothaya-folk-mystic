@@ -94,7 +94,7 @@ test('every boss has a card: 6 painted, 9 world-boss cards, 4 awakened auras; un
  // rat/monkey/marsh chiefs are elites (no report) but their awakened forms are bosses and reuse the painted card
  const painted=['mill-keeper','lantern-lord','straw-king','rat-chief','monkey-chief','marsh-ape'];
  // rebirth draft bosses (rb-*) have no card yet and show their sprite
- const all=MONSTER_TYPES.filter(t=>t.boss).map(t=>t.id),bosses=all.filter(id=>!id.startsWith('rb-')),cards=[...new Set([...painted,...bosses])].map(bossCard);
+ const all=MONSTER_TYPES.filter(t=>t.boss&&!t.dungeonOnly).map(t=>t.id),bosses=all.filter(id=>!id.startsWith('rb-')),cards=[...new Set([...painted,...bosses])].map(bossCard);
  assert.equal(bosses.length,16);for(const id of all.filter(id=>id.startsWith('rb-')))assert.equal(bossCard(id).src,null,id);
  assert.equal(cards.filter(c=>c.src?.startsWith('assets/victory/')&&!c.awakened).length,6);
  assert.equal(cards.filter(c=>c.src?.startsWith('assets/cards147/')).length,9);

@@ -58,7 +58,7 @@ test('every portal, spawn and warp leads somewhere real, and every open map can 
   for(const [,,n] of m.mobs??[])if(!MONSTER_TYPES[n])bad.push(m.id+' mob index '+n);
  }
  for(const m of open)if(m.id!==catalog.capital&&warpCost(catalog,catalog.capital,m.id)===null)bad.push('cannot reach '+m.id);
- for(const m of catalog.maps.filter(m=>m.levels))if(!(m.mobs??[]).length)bad.push(m.id+' is a farm map with no monsters');
+ for(const m of catalog.maps.filter(m=>m.levels&&!m.dungeon))if(!(m.mobs??[]).length)bad.push(m.id+' is a farm map with no monsters');
  problems(bad,'maps');
 });
 test('every monster that spawns has real numbers and something to drop',()=>{

@@ -8,7 +8,7 @@ import {warRound,warContribution,warRankings,finishWarRound} from '../guild-war-
 import {drainWarMailbox} from '../server/war-mail.js';
 import {deliverMail} from '../mailbox.js';
 test('rainbow recipes use 50000 shards for amulets and 100 for other gear; original materials and 1m fee remain atomic',()=>{
- const gear=Object.entries(ITEMS).filter(([,i])=>i.kind==='gear'&&i.rainbow);assert.equal(gear.length,44);
+ const gear=Object.entries(ITEMS).filter(([,i])=>i.kind==='gear'&&i.rainbow&&!i.dungeonSet);assert.equal(gear.length,44);
  for(const [id,it]of gear){const recipes=RECIPES.filter(r=>r.out===id);assert.equal(recipes.length,1,id);const old=it.bossSet?(it.slot==='weapon'?{'shard-soul':40,'shard-gem':25,'shard-divine':10}:{'shard-soul':20,'shard-gem':12,'shard-divine':5}):{};assert.deepEqual(recipes[0].needs,{...old,[CONQUEST_SHARD]:it.amulet?AMULET_CRAFT_SHARDS:100});assert.equal(recipes[0].coins,1000000);assert.equal(recipes[0].count,1);}
  const original={'iron-ore':12,'lek-lai':4};assert.deepEqual(rainbowRecipe('test',original).needs,{...original,[CONQUEST_SHARD]:100});assert.deepEqual(original,{'iron-ore':12,'lek-lai':4});
  const out=gear[0][0],needs=RECIPES.find(r=>r.out===out).needs,bag={coins:2000000,items:Object.fromEntries(Object.entries(needs).map(([id,n])=>[id,n*2]))},before=structuredClone(bag);

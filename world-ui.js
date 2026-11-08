@@ -118,7 +118,9 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  function talk(n,opts={}){
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
   if(world.player.hp<=0||traveling||n.unavailable)return;
-  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:opts.quest?'quest':'npc',npc:n.name,onArrive:()=>talk(n,opts),onFail:()=>world.notice('ไปหา '+n.name+' ไม่ได้')});return;}
+  // Wandering citizens only have a flavour line: walk to one once, say it on arrival even if they have drifted, and
+  // never nag when the chase can't finish (they move). Real NPCs keep chasing to reach and report a genuine block.
+  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3&&!(n.citizen&&opts.arrived)){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:opts.quest?'quest':'npc',npc:n.name,onArrive:()=>talk(n,{...opts,arrived:true}),onFail:()=>{if(!n.citizen)world.notice('ไปหา '+n.name+' ไม่ได้');}});return;}
   endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);api.onConversationOpened?.(n);return;}conversation=n;n.talking=true;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);api.onConversationOpened?.(n);
  }
  const npcSprites=[];scene.traverse(o=>{if(o.isSprite&&o.userData.npc)npcSprites.push(o);});

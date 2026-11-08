@@ -6,7 +6,7 @@ import {refineTierBadge} from './refine-tier-ui.js';
 // Online the realm server owns the bag (snapshots set world.bag); offline guests keep it in this browser.
 import {activeEvent,surgeOn} from './events.js?v=64';
 import {ATLAS_LAYOUTS} from './items.js?v=class-reward192';
-import {GRADES,gearLook,setLines,bossLines,familyName,BOSS_SETS,SET_SLOTS} from './gear-sets.js';
+import {GRADES,gearLook,setLines,bossLines,setTierLines,familyName,BOSS_SETS,SET_SLOTS} from './gear-sets.js';
 import {levelGifts} from './experience.js?v=105.3';
 import {consumeRevival,revivalCount} from './revival-item.js?v=revival180';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,bagStacks,itemRoom,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=class-reward192';
@@ -51,9 +51,9 @@ export const gradeTone=it=>it?.rainbow?' grb':it?.graded?' gr'+(it.grade??0):'';
 function setInfo(it,gear){
  const worn=Object.values(gear??{}).filter(Boolean).map(itemDef).filter(Boolean);
  if(it?.set){const same=worn.filter(w=>w.set?.family===it.set.family),tier=Math.min(it.set.tier,...same.map(w=>w.set.tier));
-  return `<ul class="set-lines"><li><b>ชุด${familyName(it.set.family)} ${same.length}/4</b></li>${setLines(it.set.family,tier,same.length).map(([t,on])=>`<li class="${on?'on':''}">${t}</li>`).join('')}</ul>`;}
- if(it?.bossSet){const n=worn.filter(w=>w.bossSet===it.bossSet).length;
-  return `<ul class="set-lines"><li><b>เซ็ทบอส${BOSS_SETS[it.bossSet].name} ${n}/5</b></li>${bossLines(it.bossSet,n).map(([t,on])=>`<li class="${on?'on':''}">${t}</li>`).join('')}</ul>`;}
+  return `<ul class="set-lines"><li><b>ชุด${familyName(it.set.family)} ${same.length}/4</b></li>${[...setLines(it.set.family,tier,same.length),...setTierLines('family',same.map(w=>w.refine),4)].map(([t,on])=>`<li class="${on?'on':''}">${t}</li>`).join('')}</ul>`;}
+  if(it?.bossSet){const mine=worn.filter(w=>w.bossSet===it.bossSet),n=mine.length;
+  return `<ul class="set-lines"><li><b>เซ็ทบอส${BOSS_SETS[it.bossSet].name} ${n}/5</b></li>${[...bossLines(it.bossSet,n),...setTierLines('boss',mine.map(w=>w.refine),5)].map(([t,on])=>`<li class="${on?'on':''}">${t}</li>`).join('')}</ul>`;}
  return '';
 }
 export function iconStyle(id){

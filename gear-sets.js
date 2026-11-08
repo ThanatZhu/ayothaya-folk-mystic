@@ -35,6 +35,9 @@ export const FAMILIES=[
   sets:['ปีกตั๊กแตน','ลมโรงสี','ค้างคาวราตรี','นกเปลวใบไม้','ธารบาดาล','ปักษาวายุ']},
 ];
 const ATK_PCT=[.03,.04,.05,.06,.07,.08]; // 4-piece ATK/MATK bonus per tier
+// Owner 9 Nov: a full set with every piece at +5 unlocks tier 1, every piece at +10 tier 2 (tier 2 replaces tier 1).
+export const SET_REFINE={family:{pvpDmg:[.03,.06]},boss:{pvpDmg:[.05,.10]}};
+export const setRefineTier=refines=>{const lo=Math.min(...refines.map(r=>r??0));return lo>=10?2:lo>=5?1:0;};
 export const STAT_NAME={armorPen:'เจาะเกราะ',crit:'คริ',critDmg:'ความแรงคริ',cdr:'ลดคูลดาวน์',mpCut:'ลด MP',hpPct:'HP',dmgReduce:'ลดดาเมจที่ได้รับ',
  aspd:'ความเร็วโจมตี',moveSpeed:'ความเร็วเดิน',atkPct:'ATK',matkPct:'MATK',defPct:'DEF',hit:'HIT',pveDmg:'ดาเมจ PVE',pvpDmg:'ดาเมจ PVP'};
 export const STAT_CAPS={armorPen:.5,crit:.5,cdr:.4,mpCut:.4,dmgReduce:.3,moveSpeed:.15,pveDmg:.15,pvpDmg:.15};
@@ -155,12 +158,15 @@ export function setBonuses(worn){
  for(const it of worn)for(const [k,n] of Object.entries(it.pct??{}))add(k,n);
  for(const f of FAMILIES){const pieces=worn.filter(it=>it.set?.family===f.key);if(pieces.length<2)continue;
   const t=Math.min(...pieces.map(it=>it.set.tier)),[mk,mv]=f.main;
-  if(pieces.length>=4){add(mk,mv[t-1]);if(f.second)add(f.second[0],f.second[1][t-1]);add('atkPct',ATK_PCT[t-1]);add('matkPct',ATK_PCT[t-1]);}
+  let refineTier=0;
+  if(pieces.length>=4){add(mk,mv[t-1]);if(f.second)add(f.second[0],f.second[1][t-1]);add('atkPct',ATK_PCT[t-1]);add('matkPct',ATK_PCT[t-1]);
+   refineTier=setRefineTier(pieces.map(it=>it.refine));if(refineTier)for(const [k,v] of Object.entries(SET_REFINE.family))add(k,v[refineTier-1]);}
   else add(mk,mv[t-1]*.4);
-  active.push({family:f.key,count:pieces.length,tier:t});}
- for(const [cls,b] of Object.entries(BOSS_SETS)){const n=worn.filter(it=>it.bossSet===cls).length;
+  active.push({family:f.key,count:pieces.length,tier:t,refineTier});}
+ for(const [cls,b] of Object.entries(BOSS_SETS)){const pieces=worn.filter(it=>it.bossSet===cls),n=pieces.length;
   for(const [need,bonus] of Object.entries(b.bonus))if(n>=+need)for(const [k,v] of Object.entries(bonus))add(k,v);
-  if(n)active.push({boss:cls,count:n});}
+  const refineTier=n>=5?setRefineTier(pieces.map(it=>it.refine)):0;if(refineTier)for(const [k,v] of Object.entries(SET_REFINE.boss))add(k,v[refineTier-1]);
+  if(n)active.push({boss:cls,count:n,refineTier});}
  return {total,active};
 }
 // Lines for the equipment window / tooltip: [text, reached].
@@ -174,5 +180,10 @@ export function bossLines(cls,count){
  for(const need of [2,3,4,5]){const text=[...Object.entries(b.bonus[need]??{}).map(([k,v])=>pct(k,v)),b.effects[need]].filter(Boolean).join(' · ');
   if(text)lines.push([need+' ชิ้น: '+text,count>=need]);}
  return lines;
+}
+// Refine tier lines: kind is a SET_REFINE key, refines the worn pieces' levels, full the piece count of the whole set.
+export function setTierLines(kind,refines,full){
+ const reached=refines.length>=full?setRefineTier(refines):0;
+ return [5,10].map((need,i)=>['ตีบวก +'+need+' ทั้งชุด: '+Object.entries(SET_REFINE[kind]).map(([k,v])=>pct(k,v[i])).join(' · '),reached===i+1]);
 }
 export const familyName=key=>FAMILIES.find(f=>f.key===key)?.name??key;

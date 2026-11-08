@@ -6,12 +6,13 @@ import {finishRun} from './dungeon-runs.js';
 
 const TYPE=new Map(MONSTER_TYPES.map((t,i)=>[t.id,i]));
 const near=(a,b,r)=>Math.hypot(a.x-b.x,a.z-b.z)<=r;
-const LANTERN_REACH=1.5,DOOR_REACH=1.6,EMPTY_RESET=60;
+const LANTERN_REACH=1.5,EMPTY_RESET=60;
+const inArea=(p,a)=>!!a&&p.x>=a.x&&p.x<=a.x+a.w&&p.z>=a.z&&p.z<=a.z+a.d;
 export function spawnInRoom(room,typeId,at,scale){
  const t=TYPE.get(typeId),type=MONSTER_TYPES[t];let spot={x:at.x,z:at.z};
  search:for(let r=0;r<=6;r+=.5)for(let a=0;a<12;a++){const x=at.x+Math.cos(a/6*Math.PI)*r,z=at.z+Math.sin(a/6*Math.PI)*r;if(walkable(x,z,.28,room.map.nav)){spot={x,z};break search;}if(!r)break;}
  const hp=Math.max(1,Math.round(type.hp*scale.hp));
- const m={id:room.mobs.length,type:t,pack:null,leader:false,x:spot.x,z:spot.z,home:{...spot},hp,maxHp:hp,attackCD:0,root:0,dead:0,hit:0,aggro:true,step:0,power:scale.damage};
+ const m={id:room.mobs.length,type:t,pack:null,leader:false,x:spot.x,z:spot.z,home:{...spot},hp,maxHp:hp,attackCD:0,root:0,dead:0,hit:0,aggro:true,step:0,power:scale.damage,rush:true};
  room.mobs.push(m);return m;
 }
 const despawn=m=>{if(m.hp>0){m.hp=0;m.dead=1e9;m.aggro=false;}};
@@ -24,14 +25,15 @@ const aliveOf=(room,ids)=>mobsOf(room,ids).filter(m=>m.hp>0);
 export function dungeonRunView(run){
  const d=dungeonById(run.dungeon),r=d.rooms[run.roomIndex],s=run.state;
  return {run:run.id,dungeon:d.id,difficulty:run.difficulty,room:run.roomIndex,rooms:d.rooms.length,name:r.name,kind:r.kind,text:s.text??r.name,
-  lanterns:r.kind==='lanterns'?(s.lit??[]).map(Boolean):null,phase:s.phase??null,door:s.open&&r.door?{x:r.door.x,z:r.door.z}:null};
+  lanterns:r.kind==='lanterns'?(s.lit??[]).map(Boolean):null,phase:s.phase??null,gate:r.gate??null};
 }
 function say(realm,run,room,text){
  if(run.state.text===text)return;run.state.text=text;const view=dungeonRunView(run);
  for(const id of room.peers)realm.peers.get(id)?.world.emit('dungeonRun',view);
 }
+// A section wakes (spawns its monsters) the first time a living member walks into its area.
 function setup(run,room,r,scale){
- const s={room:run.roomIndex,mobs:[],t:0};run.state=s;
+ const s={room:run.roomIndex,mobs:[],t:0,active:true};run.state=s;
  if(r.kind==='waves'){s.wave=0;spawnWave(room,r,0,scale,s);}
  if(r.kind==='lanterns'){s.lit=r.lanterns.map(()=>false);s.hold=r.lanterns.map(()=>0);s.spawnT=0;}
  if(r.kind==='miniboss'){s.boss=spawnInRoom(room,r.boss,r.center,scale).id;}
@@ -44,7 +46,7 @@ function spawnWave(room,r,i,scale,s){
 }
 function reset(realm,run,room,peers,r){
  for(const m of room.mobs)despawn(m);
- run.state={};for(const p of peers){revive(p);teleport(p,r.start);}
+ run.state={};for(const p of peers){revive(p);teleport(p,r.start);}   
  for(const p of peers)p.world.notice('ทีมล้ม · เริ่มห้องนี้ใหม่');
 }
 export function runScript(realm,room,dt){
@@ -54,16 +56,18 @@ export function runScript(realm,room,dt){
  const here=peers.filter(p=>!p.suspended);
  let s=run.state.room===run.roomIndex?run.state:null;
  if(!here.length){if(s){s.empty=(s.empty??0)+dt;if(s.empty>EMPTY_RESET)reset(realm,run,room,peers,r);}return;}
- if(!s)s=setup(run,room,r,scale);
- s.empty=0;s.t+=dt;
  if(here.every(p=>p.world.player.hp<=0)){reset(realm,run,room,peers,r);return;}
  const standing=here.filter(p=>p.world.player.hp>0);
+ // sections past the current one are sealed by their spirit gate: walking in sends you back
+ for(const p of standing)for(let j=run.roomIndex+1;j<d.rooms.length;j++)if(inArea(p.world.player,d.rooms[j].area)){teleport(p,r.hold??r.start);p.world.notice('ประตูวิญญาณยังปิดอยู่ · เคลียร์ส่วนนี้ก่อน');break;}
+ if(!s){if(!standing.some(p=>inArea(p.world.player,r.area))){say(realm,run,room,(run.roomIndex?'ประตูวิญญาณเปิดแล้ว · เดินต่อไปที่':'เดินไปที่')+r.name);return;}s=setup(run,room,r,scale);}
+ s.empty=0;s.t+=dt;
  if(!s.open){
   if(r.kind==='waves'){
    if(!aliveOf(room,s.mobs).length){if(s.wave+1<r.waves.length){s.wave++;spawnWave(room,r,s.wave,scale,s);}else s.open=true;}
    say(realm,run,room,s.open?'':'ระลอก '+(s.wave+1)+'/'+r.waves.length);
   }else if(r.kind==='lanterns'){
-   r.lanterns.forEach((l,i)=>{if(!s.lit[i]&&standing.some(p=>near(p.world.player,l,LANTERN_REACH))){s.hold[i]+=dt;if(s.hold[i]>=r.hold)s.lit[i]=true;}});
+   r.lanterns.forEach((l,i)=>{if(!s.lit[i]&&standing.some(p=>near(p.world.player,l,LANTERN_REACH))){s.hold[i]+=dt;if(s.hold[i]>=r.holdSeconds)s.lit[i]=true;}});
    s.spawnT+=dt;if(s.spawnT>=r.spawn.every){s.spawnT=0;if(aliveOf(room,s.mobs).length<r.spawn.max)s.mobs.push(spawnInRoom(room,r.spawn.type,ring(r.center,s.mobs.length,6,5),scale).id);}
    if(s.lit.every(Boolean)){for(const m of mobsOf(room,s.mobs))despawn(m);s.open=true;}
    say(realm,run,room,s.open?'':'จุดตะเกียง '+s.lit.filter(Boolean).length+'/'+r.lanterns.length);
@@ -74,12 +78,10 @@ export function runScript(realm,room,dt){
    say(realm,run,room,s.open?'':'ปราบ'+MONSTER_TYPES[chief.type].name);
   }else if(r.kind==='boss'){bossRoom(realm,run,room,r,s,scale,dt);if(run.ended)return;}
  }
- if(s.open&&r.door){
-  say(realm,run,room,'ประตูเปิดแล้ว · เดินไปที่ประตูเพื่อไปห้องถัดไป');
-  if(standing.some(p=>near(p.world.player,r.door,DOOR_REACH))){
-   run.roomIndex=r.door.to;run.state={};const next=d.rooms[run.roomIndex];
-   for(const p of peers){revive(p);teleport(p,next.start);}
-  }
+ // cleared: the gate opens at once, fallen members get up where they lie, and the next section waits for the team
+ if(s.open&&run.roomIndex+1<d.rooms.length){
+  for(const p of peers)revive(p);
+  run.roomIndex++;run.state={};say(realm,run,room,'ประตูวิญญาณเปิดแล้ว · เดินต่อไปที่'+d.rooms[run.roomIndex].name);
  }
 }
 function bossRoom(realm,run,room,r,s,scale,dt){

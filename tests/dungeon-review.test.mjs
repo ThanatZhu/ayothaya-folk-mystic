@@ -25,7 +25,7 @@ test('review: an abandoned run frees its room',()=>{
 });
 test('review: a one-hit kill on the phase-1 boss still brings out her krasue form',()=>{
  const w=dungeonWorld(),[a]=w.enter([w.join('เอ')]);const run=dungeonReservation(w.realm,a.key);
- run.roomIndex=3;run.state={};Object.assign(a.world.player,D.rooms[3].start,{maxHp:1e9,hp:1e9});w.run(3.3);
+ run.roomIndex=3;run.state={};Object.assign(a.world.player,D.rooms[3].center,{maxHp:1e9,hp:1e9});w.run(3.3);
  const boss=a.room.mobs.find(m=>m.hp>0);boss.hp=0;boss.dead=1e9;w.run(.1);
  assert.ok(a.room.mobs.some(m=>m.hp>0&&MONSTER_TYPES[m.type].id==='dg35-mae-krasue-head'));
 });

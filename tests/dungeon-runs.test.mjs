@@ -30,7 +30,7 @@ test('solo entry: a private room at the first room start, and the old spot is re
  cmd(a,{action:'enter',dungeon:'krasue',difficulty:'normal'});
  assert.equal(events(a,'dungeonEnter').length,1);
  const a2=move(a,D.map);assert.match(a2.room.id,/:dg:dg-krasue:/);
- assert.deepEqual({x:a2.world.player.x,z:a2.world.player.z},D.rooms[0].start);
+ assert.deepEqual({x:a2.world.player.x,z:a2.world.player.z},catalog.maps.find(m=>m.id===D.map).spawn,'arrives at the pier');
  assert.deepEqual(a2.dungeonReturn,{mapId:'rice-fields',position:{x:3,z:4}});
  const b=join('บี');cmd(b,{action:'enter',dungeon:'krasue',difficulty:'normal'});const b2=move(b,D.map);
  assert.notEqual(a2.room.id,b2.room.id,'two solo players get two rooms');

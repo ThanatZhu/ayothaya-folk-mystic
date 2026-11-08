@@ -43,7 +43,7 @@ test('500 shards buy one rainbow piece of the chosen slot',()=>{
 });
 test('the boss kill pays the rewards through finishRun',()=>{
  const w=dungeonWorld(),[a]=w.enter([w.join('เอ')]);const run=dungeonReservation(w.realm,a.key);w.realm.dungeonRandom=()=>.99;
- run.roomIndex=3;run.state={};Object.assign(a.world.player,D.rooms[3].start,{maxHp:1e9,hp:1e9});w.run(3.3);
+ run.roomIndex=3;run.state={};Object.assign(a.world.player,D.rooms[3].center,{maxHp:1e9,hp:1e9});w.run(3.3);
  const boss=a.room.mobs.find(m=>m.hp>0);boss.hp=Math.floor(boss.maxHp*.4);w.run(.1);
  const head=a.room.mobs.find(m=>m.hp>0);head.hp=1;w.realm.hurt(a,head,1e6);w.run(.1);
  assert.equal(a.bag.items[D.shard],1);

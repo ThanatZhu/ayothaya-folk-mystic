@@ -101,7 +101,9 @@ export function advanceMonster(m,target,type,dt,nav,{moveBody,lineClear,level=nu
  if(m.hp<=0){m.dead-=dt;if(m.dead<=0){Object.assign(m,{...m.home,hp:m.maxHp,aggro:false,root:0,hit:0,windup:0,strike:0,attackCD:1,slamming:false,pressure:0});return 'respawn';}return;}
  // 0.111.3 a boss is a boss: it picks a fight with anyone within BOSS_SIGHT, chases without the 9 m leash and only gives
  // up (walking home) once its target is past BOSS_GIVE_UP; other monsters keep the old wait-until-hit + leash rule.
- if(type.boss){if(!target)m.aggro=false;else{const td=Math.hypot(m.x-target.x,m.z-target.z);if(td<=BOSS_SIGHT)m.aggro=true;else if(td>BOSS_GIVE_UP)m.aggro=false;}}
+ // party dungeon monsters (m.rush) chase whoever is nearest with no leash, sight or territory rule
+ if(m.rush)m.aggro=!!target;
+ else if(type.boss){if(!target)m.aggro=false;else{const td=Math.hypot(m.x-target.x,m.z-target.z);if(td<=BOSS_SIGHT)m.aggro=true;else if(td>BOSS_GIVE_UP)m.aggro=false;}}
  else{
   if(!m.aggro&&target&&Number.isFinite(level)&&(type.level??1)-level>=TERRITORY.gap&&Math.hypot(m.x-target.x,m.z-target.z)<=TERRITORY.range&&Math.hypot(target.x-m.home.x,target.z-m.home.z)<=TERRITORY.leash)m.aggro=true;
   if(!target||Math.hypot(m.x-m.home.x,m.z-m.home.z)>(m.engaged>0?TERRITORY.chase:TERRITORY.leash))m.aggro=false;

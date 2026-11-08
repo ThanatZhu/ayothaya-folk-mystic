@@ -20,13 +20,14 @@ export const DUNGEONS=[{
   boss:['ห้องนอนบนเรือนเงียบผิดปกติ','แม่หญิงนั่งพัดอยู่กลางห้อง ดวงตาแดงก่ำ','"มาถึงที่นี่ ก็อย่าหวังว่าจะได้กลับ"'],
  },
  rooms:[
-  {kind:'waves',name:'ลานบ้าน',start:{x:.5,z:56},door:{x:0,z:22,to:1},center:{x:0,z:32},
+  // one path (owner 9 Nov): a section wakes when the team walks into its area; its spirit gate opens once it is cleared
+  {kind:'waves',name:'ลานบ้าน',start:{x:0,z:52},area:{x:-13,z:28,w:26,d:20},gate:{x:0,z:27.6},hold:{x:0,z:31},center:{x:0,z:38},
    waves:[[[W,4]],[[W,3],[K,2]],[[K,3],[W,3]]]},
-  {kind:'lanterns',name:'ใต้ถุนเรือน',start:{x:0,z:14},door:{x:0,z:-25,to:2},center:{x:0,z:0},
-   lanterns:[{x:-31,z:2},{x:0,z:2},{x:30,z:2},{x:0,z:-10}],hold:3,spawn:{type:H,every:8,max:4}},
-  {kind:'miniboss',name:'ครัวไฟ',start:{x:-5,z:-40},door:{x:5,z:-30,to:3},center:{x:-10,z:-35},
+  {kind:'lanterns',name:'ใต้ถุนเรือน',start:{x:0,z:25},area:{x:-7,z:-10,w:14,d:32},gate:{x:0,z:-10.6},hold:{x:0,z:-7},center:{x:0,z:6},
+   lanterns:[{x:-4,z:16},{x:4,z:10},{x:-4,z:2},{x:4,z:-5}],holdSeconds:3,spawn:{type:H,every:8,max:4}},
+  {kind:'miniboss',name:'ครัวไฟ',start:{x:-6,z:-20},area:{x:-27,z:-32,w:18,d:16},gate:{x:-18,z:-32.6},hold:{x:-18,z:-29},center:{x:-18,z:-24},
    boss:'dg35-krahang-chief',summonAt:.5,summon:[H,2]},
-  {kind:'boss',name:'ห้องนอนบนเรือน',start:{x:16,z:-34},center:{x:32,z:-32},delay:3,
+  {kind:'boss',name:'ห้องนอนบนเรือน',start:{x:-18,z:-36},area:{x:-31,z:-65,w:26,d:26},center:{x:-18,z:-52},delay:3,
    boss:'dg35-mae-krasue',phase2:'dg35-mae-krasue-head',at:.5,adds:{type:W,every:12,max:3},hellAdds:{type:K,every:10,max:2}},
  ],
 }];

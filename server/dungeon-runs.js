@@ -65,6 +65,8 @@ export function endRun(realm,run,{cleared=false}={}){
  runs(realm).delete(run.id);run.ended=true;run.cleared=cleared;
  for(const key of run.keys){const a=peerByKey(realm,key);if(a&&a.room.id===run.roomId&&!run.left.has(key))a.world.emit('dungeonEnded',{cleared,mapId:a.dungeonReturn?.mapId??realm.catalog.capital});}
 }
+// The boss fell: the run is cleared (rewards are granted here, Task 6).
+export function finishRun(realm,run,room){run.cleared=true;endRun(realm,run,{cleared:true});}
 // The way back: from a dungeon map, only to the remembered map, standing where you were.
 export function dungeonReturnDestination(realm,p,id){
  if(!p.room.map.dungeon||!p.dungeonReturn||p.dungeonReturn.mapId!==id)return null;

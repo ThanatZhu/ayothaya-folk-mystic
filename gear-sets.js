@@ -36,8 +36,8 @@ export const FAMILIES=[
 ];
 const ATK_PCT=[.03,.04,.05,.06,.07,.08]; // 4-piece ATK/MATK bonus per tier
 export const STAT_NAME={armorPen:'เจาะเกราะ',crit:'คริ',critDmg:'ความแรงคริ',cdr:'ลดคูลดาวน์',mpCut:'ลด MP',hpPct:'HP',dmgReduce:'ลดดาเมจที่ได้รับ',
- aspd:'ความเร็วโจมตี',moveSpeed:'ความเร็วเดิน',atkPct:'ATK',matkPct:'MATK',defPct:'DEF',hit:'HIT'};
-export const STAT_CAPS={armorPen:.5,crit:.5,cdr:.4,mpCut:.4,dmgReduce:.3,moveSpeed:.15};
+ aspd:'ความเร็วโจมตี',moveSpeed:'ความเร็วเดิน',atkPct:'ATK',matkPct:'MATK',defPct:'DEF',hit:'HIT',pveDmg:'ดาเมจ PVE',pvpDmg:'ดาเมจ PVP'};
+export const STAT_CAPS={armorPen:.5,crit:.5,cdr:.4,mpCut:.4,dmgReduce:.3,moveSpeed:.15,pveDmg:.15,pvpDmg:.15};
 const pct=(k,n)=>STAT_NAME[k]+' +'+(k==='hit'?n:+(n*100).toFixed(1)+'%');
 
 // Grades (frame colours). Index 0 has no id suffix; 1..4 travel as '^1'..'^4'. Set bonuses ignore the grade.
@@ -64,7 +64,7 @@ export const SHARDS=[['shard-soul','เศษวิญญาณบอส','บ�
 
 
 const L=t=>TIERS[t-1],price=(t,k)=>Math.max(100,Math.round(L(t)*L(t)*k/100)*100);
-const DEF_PER={head:.12,armor:.55,garment:.1,shoes:.1};
+const DEF_PER={head:.05,armor:.55,garment:.15,shoes:.12}; // owner 9 Nov: armour, garment, shoes carry DEF; the helmet gives damage
 const img=(sheet,cell)=>'assets/gear2/'+sheet+'-'+cell+'.webp';
 export const pieceId=(family,slot,look,tier)=>family+'-'+slot+'-'+look+'-'+TIER_WORDS[tier-1];
 export const weaponId=(cls,tier)=>'weapon-'+cls+'-'+TIER_WORDS[tier-1];
@@ -75,7 +75,8 @@ function defStats(slot,level){const def=Math.max(1,Math.round(DEF_PER[slot]*leve
 // Tooltip text = stat line (recomputed for each grade) + the item's note.
 export const gearText=it=>[statLine(it),it.note].filter(Boolean).join(' · ');
 // A graded copy: base ATK/MATK/DEF/MDEF and the sell price scale with the grade; the per-piece % and set bonus do not.
-export function gradeItem(it,g){const k=GRADES[g].mul,o={...it,grade:g,sell:Math.round(it.sell*k*k)};for(const s of ['atk','matk','def','mdef'])if(it[s])o[s]=Math.round(it[s]*k);o.text=gearText(o);return o;}
+export function gradeItem(it,g){const k=GRADES[g].mul,o={...it,grade:g,sell:Math.round(it.sell*k*k)};for(const s of ['atk','matk','def','mdef'])if(it[s])o[s]=Math.round(it[s]*k);
+ if(it.pct){o.pct={...it.pct};for(const s of ['pveDmg','pvpDmg'])if(it.pct[s])o.pct[s]=+(it.pct[s]*k).toFixed(4);}o.text=gearText(o);return o;}
 const statLine=it=>[...['atk','matk','def','mdef'].filter(k=>it[k]).map(k=>k.toUpperCase()+' +'+it[k]),...Object.entries(it.pct??{}).map(([k,n])=>pct(k,n))].join(' · ');
 
 // Builds every 0.117 gear item; items.js merges them into ITEMS.
@@ -83,13 +84,13 @@ export function buildGearItems(){
  const out={};
  FAMILIES.forEach((f,fi)=>LOOKS.forEach(([look,lookName])=>{for(let t=1;t<=6;t++)SET_SLOTS.forEach((slot,si)=>{
   const it={image:img(look+'-t'+t,fi*4+si),name:SLOT_WORD[slot]+f.sets[t-1]+' ('+lookName+')',kind:'gear',slot,level:L(t),
-   set:{family:f.key,tier:t},look,...defStats(slot,L(t)),pct:{...f.piece},sell:Math.round(price(t,slot==='armor'?4:2)/4),graded:true};
+   set:{family:f.key,tier:t},look,...defStats(slot,L(t)),pct:{...f.piece,...(slot==='head'?{pvpDmg:.005}:{})},sell:Math.round(price(t,slot==='armor'?4:2)/4),graded:true};
   if(slot!=='armor')it.slots=0;
   it.note='ชุด'+f.name+' ขั้น '+t+' · Lv.'+L(t);it.text=gearText(it);
   out[pieceId(f.key,slot,look,t)]=it;
  });}));
  for(const [cls,word,stat,power,look] of WEAPON_CLASSES)for(let t=1;t<=6;t++){
-  const it={image:img(look+'-t'+t,20),name:word+TIER_PLACE[t-1],kind:'gear',slot:'weapon',classes:[cls],level:L(t),tier:t,[stat]:Math.round(2*L(t)*power),
+  const it={image:img(look+'-t'+t,20),name:word+TIER_PLACE[t-1],kind:'gear',slot:'weapon',classes:[cls],level:L(t),tier:t,[stat]:Math.round(2*L(t)*power),pct:{pvpDmg:.01},
    sell:Math.round(price(t,5)/4),graded:true};
   it.note=CLASS_NAME[cls]+' · ขั้น '+t+' · Lv.'+L(t)+' · คราฟที่ครูแสนดาบ';it.text=gearText(it);
   out[weaponId(cls,t)]=it;
@@ -99,11 +100,11 @@ export function buildGearItems(){
  for(const [look,lookName] of LOOKS){
   const cls=look==='monk'||look==='nun'?'acolyte':look,b=BOSS_SETS[cls];
   SET_SLOTS.forEach((slot,si)=>{const d=defStats(slot,85),it={image:img('boss-'+look,si+1),name:SLOT_WORD[slot]+b.name+' ('+lookName+')',kind:'gear',slot,level:80,
-   bossSet:cls,look,def:top(d.def),mdef:top(d.mdef),pct:{...b.piece},sell:20000,rainbow:true};
+   bossSet:cls,look,def:top(d.def),mdef:top(d.mdef),pct:{...b.piece,...(slot==='head'?{pvpDmg:.015}:{})},sell:20000,rainbow:true};
    if(slot!=='armor')it.slots=0;it.note='เซ็ทบอส'+b.name+' · Lv.80';it.text=gearText(it);out[bossId(slot,look)]=it;});
  }
  for(const [cls,word,stat,power,look] of WEAPON_CLASSES){const b=BOSS_SETS[cls],it={image:img('boss-'+look,0),name:word+b.name,kind:'gear',slot:'weapon',classes:[cls],
-  level:80,bossSet:cls,[stat]:top(Math.round(2*85*power)),pct:{...b.piece},sell:40000,rainbow:true};it.note='เซ็ทบอส'+b.name+' · Lv.80';it.text=gearText(it);out[bossId('weapon',cls)]=it;}
+  level:80,bossSet:cls,[stat]:top(Math.round(2*85*power)),pct:{...b.piece,pvpDmg:.025},sell:40000,rainbow:true};it.note='เซ็ทบอส'+b.name+' · Lv.80';it.text=gearText(it);out[bossId('weapon',cls)]=it;}
  // Novice starter kit (shop, Lv.1, no set): wraps are the Novice weapon, the rest fit everyone.
  const starter=[['ผ้าคาดหัวขาวม้า','head',{def:1},120],['เสื้อผ้าฝ้ายชาวบ้าน','armor',{def:3,mdef:1},150],['ผ้าขาวม้าพาดบ่า','garment',{def:1},150],
   ['รองเท้าแตะสานใบตาล','shoes',{def:1},150],['ผ้าพันหมัดผู้ฝึกตน','weapon',{atk:6},120]];

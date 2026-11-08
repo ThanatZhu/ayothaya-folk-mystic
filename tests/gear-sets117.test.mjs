@@ -28,8 +28,9 @@ test('set bonus: 2 pieces give 40% of the main stat, 4 give it all plus the seco
  assert.ok(Math.abs(four.crit-(.04+.15))<1e-9);assert.equal(four.critDmg,.6);assert.equal(four.atkPct,.08);assert.equal(four.matkPct,.08);
  const mixed=setBonuses(w([pieceId('wall','head','lancer',6),pieceId('wall','armor','lancer',6),pieceId('wall','garment','lancer',6),pieceId('wall','shoes','lancer',1)])).total;
  assert.equal(mixed.hpPct,.08);assert.equal(mixed.dmgReduce,.04+.03);
- // grades never change the set bonus
- assert.deepEqual(setBonuses(w(['head','armor'].map(s=>pieceId('wind',s,'boxer',2)+'^4'))).total,setBonuses(w(['head','armor'].map(s=>pieceId('wind',s,'boxer',2)))).total);
+ // grades never change the set bonus (owner 9 Nov: only the helmet/weapon PVE/PVP damage scales with grade)
+ const noDmg=({pvpDmg,pveDmg,...rest})=>rest;
+ assert.deepEqual(noDmg(setBonuses(w(['head','armor'].map(s=>pieceId('wind',s,'boxer',2)+'^4'))).total),noDmg(setBonuses(w(['head','armor'].map(s=>pieceId('wind',s,'boxer',2)))).total));
 });
 
 test('derived stats apply the new stats with their caps',()=>{

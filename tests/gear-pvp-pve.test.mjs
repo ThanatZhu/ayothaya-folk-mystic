@@ -47,3 +47,22 @@ test('the bag shows both refine tiers and marks the reached one',()=>{
  assert.deepEqual(lines,[['ตีบวก +5 ทั้งชุด: ดาเมจ PVP +3%',true],['ตีบวก +10 ทั้งชุด: ดาเมจ PVP +6%',false]]);
  assert.deepEqual(setTierLines('boss',[10,10,10,10],5).map(l=>l[1]),[false,false]);
 });
+
+import {pvpDamage} from '../pvp223.js';
+import {RealmServer} from '../server/realm.js';
+import {initialSave} from '../realm-state.js';
+test('PVP damage raises player hits after the attacker bonus, before the target defence',()=>{
+ const target={derived:{def:0,mdef:0,flee:0},player:{shield:0},status:{}},never=()=>1;
+ assert.equal(pvpDamage({derived:{},damageContext:{}},target,100,1,never),100);
+ assert.equal(pvpDamage({derived:{pvpDmg:.1},damageContext:{}},target,100,1,never),110);
+ const armoured={...target,derived:{def:50,mdef:0,flee:0}};
+ assert.ok(pvpDamage({derived:{pvpDmg:.1},damageContext:{}},armoured,100,1,never)<110);
+ assert.equal(pvpDamage({derived:{pvpDmg:.1},damageContext:{}},{...target,derived:{def:0,flee:.9}},100,1,()=>0),0,'a dodge stays a dodge');
+});
+test('PVE damage raises monster hits on the server',()=>{
+ const map={id:'f',name:'ทุ่ง',safe:false,nav:{zones:[{x:-20,z:-20,w:40,d:40}],obstacles:[],props:[]},spawn:{x:0,z:0},mobs:[[4,0,1]]};
+ const realm=new RealmServer({catalog:{capital:'f',maps:[map]},now:()=>1e4}),state=initialSave();state.mapId='f';
+ const p=realm.join({uid:'u1',serverId:'server-1',slotId:'slot-1',record:{character:{name:'ผู้ทดสอบ',gender:'male',classId:'novice'},state,bag:{coins:5,items:{}}},send:()=>{}});
+ const [m]=p.room.mobs,hit=pve=>{m.hp=m.maxHp=10000;p.world.derived.pveDmg=pve;realm.hurt(p,m,100);return 10000-m.hp;};
+ const plain=hit(0);assert.equal(hit(.1),Math.round(plain*1.1));
+});

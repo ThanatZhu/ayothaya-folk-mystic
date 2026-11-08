@@ -13,7 +13,7 @@ test('known absent conditional bonuses show zero; an absent snapshot field stays
 });
 test('all real derived combat stats are displayed without modifying the snapshot',()=>{
  const d=deriveStats({level:30,classId:'hunter',stats:{str:10,agi:15,vit:10,int:10,dex:20,luk:10},reborn:2}),before=JSON.stringify(d),rows=flatten(d);
- for(const key of ['maxHp','maxMp','atk','matk','def','mdef','hit','fleeStat','flee','crit','critMult','armorPen','cdr','mpCut','mpRegen','dmgReduce','moveSpeed','coinPct','skillPower','weaponElement'])assert.notEqual(rows.get(key)?.value,'—',key);
+ for(const key of ['maxHp','maxMp','atk','matk','def','mdef','hit','fleeStat','flee','crit','critMult','armorPen','cdr','mpCut','mpRegen','dmgReduce','pveDmg','pvpDmg','moveSpeed','coinPct','skillPower','weaponElement'])assert.notEqual(rows.get(key)?.value,'—',key);
  for(const key of ['str','agi','vit','int','dex','luk'])assert.equal(rows.get('total-'+key).value,statNumber(d.total[key]));
- assert.equal(JSON.stringify(d),before);assert.equal(rows.size,45);assert.match(rows.get('flee').help,/เลเวลเดียวกัน/);
+ assert.equal(JSON.stringify(d),before);assert.equal(rows.size,47);assert.match(rows.get('flee').help,/เลเวลเดียวกัน/);
 });

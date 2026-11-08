@@ -33,6 +33,16 @@ test('talking freezes position and gait; closing a conversation resumes without 
  assert.ok(Math.abs(Math.hypot(resumed.x-before.x,resumed.z-before.z)-.016)<1e-8);
 });
 
+test('a tapped citizen waits for the hero, then walks on once the wait runs out',()=>{
+ const n=citizen(),state=createCitizenMotion(n,1);
+ stepCitizenMotion(state,n,.1,camera);
+ const before={...state.pose};n.waitUntil=Date.now()+60000;
+ for(let i=0;i<50;i++){const pose=stepCitizenMotion(state,n,.1,camera);assert.equal(pose.moving,false);assert.equal(pose.x,before.x);assert.equal(pose.frame,0);}
+ n.waitUntil=Date.now()-1;
+ const resumed=stepCitizenMotion(state,n,.1,camera);
+ assert.ok(Math.hypot(resumed.x-before.x,resumed.z-before.z)>0);
+});
+
 test('steps follow distance, not wall-clock time; hidden tabs and long frames cannot jump the route',()=>{
  const n=citizen(),state=createCitizenMotion(n,1),start={...state.pose};
  stepCitizenMotion(state,n,0,camera);assert.deepEqual(state.pose,start);

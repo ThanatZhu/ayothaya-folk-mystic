@@ -118,10 +118,11 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  function talk(n,opts={}){
   // Far away: walk over first (Ragnarok style), then open the conversation on arrival.
   if(world.player.hp<=0||traveling||n.unavailable)return;
-  // Wandering citizens only have a flavour line: walk to one once, say it on arrival even if they have drifted, and
-  // never nag when the chase can't finish (they move). Real NPCs keep chasing to reach and report a genuine block.
-  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3&&!(n.citizen&&opts.arrived)){game.clearInput();game.walkTo(()=>({x:n.x,z:n.z}),{radius:2.2,kind:opts.quest?'quest':'npc',npc:n.name,onArrive:()=>talk(n,{...opts,arrived:true}),onFail:()=>{if(!n.citizen)world.notice('ไปหา '+n.name+' ไม่ได้');}});return;}
-  endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);api.onConversationOpened?.(n);return;}conversation=n;n.talking=true;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);api.onConversationOpened?.(n);
+  // Wandering citizens live only on this screen (the server knows just the fixed NPCs), so a tapped one stops and
+  // waits up to 10 s while the hero walks to that spot by position, not by name. Real NPCs are chased by name.
+  if(Math.hypot(world.player.x-n.x,world.player.z-n.z)>3&&!(n.citizen&&opts.arrived)){game.clearInput();if(n.citizen)n.waitUntil=Date.now()+10000;
+   game.walkTo(n.citizen?{x:n.x,z:n.z}:()=>({x:n.x,z:n.z}),{radius:2.2,kind:opts.quest?'quest':'npc',...(n.citizen?{}:{npc:n.name}),onArrive:()=>talk(n,{...opts,arrived:true}),onFail:()=>{if(n.citizen)n.waitUntil=0;else world.notice('ไปหา '+n.name+' ไม่ได้');}});return;}
+  endTalk();game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);if(n.mentorId){mentors.open(n);api.onConversationOpened?.(n);return;}conversation=n;n.talking=true;n.waitUntil=0;const reply=api.onTalk?.(n);conversationUI.open(n,reply);api.afterTalk?.(n);api.onConversationOpened?.(n);
  }
  const npcSprites=[];scene.traverse(o=>{if(o.isSprite&&o.userData.npc)npcSprites.push(o);});
  const npcRay=new THREE.Raycaster(),npcPointer=new THREE.Vector2();

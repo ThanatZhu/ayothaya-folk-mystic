@@ -7,6 +7,7 @@ import {prologueJoin,prologueMap,prologueStart,prologueKill,prologueTick,prologu
 import {ARENA_MAP,arenaReservation,arenaView,arenaCommand,cleanArenaRooms,leaveArena,finishArena} from './arena-rooms166.js';
 import {dungeonReservation,dungeonCommand,keepDungeonRoom,tickDungeonRuns,dungeonReturnDestination,dungeonEntryDestination} from './dungeon-runs.js';
 import {runScript,dungeonRunView} from './dungeon-script.js';
+import {tickDungeonQueue,unqueue as dungeonUnqueue} from './dungeon-queue.js';
 import {checkWalk,startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} from './auto-walk.js';
 import {normalizeAutoTarget} from '../auto-targets.js';
 import {publicBossDirectory} from './boss-directory.js';
@@ -149,7 +150,7 @@ export class RealmServer{
  }
  leave(id,{travel=false}={}){
   const p=this.peers.get(id);if(!p)return;
-  leaveArena(this,p);this.endTrade(p,'อีกฝ่ายออกไปแล้ว');p.stall=null;if(!travel)logLeave(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id);
+  leaveArena(this,p);dungeonUnqueue(this,p);this.endTrade(p,'อีกฝ่ายออกไปแล้ว');p.stall=null;if(!travel)logLeave(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id);
   const party=travel&&this.parties.get(p.partyId);
   if(party){party.members.delete(id);(party.pending??=new Map()).set(p.uid,this.now()+60000);if(party.leader===id){party.leaderPending??=p.uid;if(party.members.size)party.leader=party.members.values().next().value;}p.partyId=null;}
   else this.leaveParty(p);this.peers.delete(id);p.room.peers.delete(id);
@@ -584,7 +585,7 @@ export class RealmServer{
   if(this.tickId%6000===0)for(const g of this.guildsDirty){this.guildsDirty.delete(g);if(this.guilds.get(g.id)===g)this.onGuild?.(g,false);} // 1.01 kill counts, every 5 min
   {const s=surge(this.now()); // 0.64 announce each field surge once, on every channel
    if(s.active&&this.surgeSlot!==s.slot){this.surgeSlot=s.slot;const name=this.catalog.maps.find(m=>m.id===s.map)?.name??s.map;for(const id of new Set([...this.peers.values()].map(p=>p.serverId)))this.announce(id,`🔥 ฝูงคลั่งที่ ${name}! · EXP ×2 และดรอป ×2 อีก 5 นาที`);}}
-  cleanArenaRooms(this);tickDungeonRuns(this);
+  cleanArenaRooms(this);tickDungeonRuns(this);tickDungeonQueue(this);
   for(const p of this.peers.values())if(p.suspended&&p.resumeUntil&&p.resumeUntil<this.now())this.leave(p.id);
   for(const [id,v] of this.invites)if(v.expires<this.now())this.invites.delete(id);
   for(const party of [...this.parties.values()])for(const [uid,until] of party.pending??[])if(until<this.now()){party.pending.delete(uid);if(party.members.size+party.pending.size<2){for(const id of party.members){const a=this.peers.get(id);a.partyId=null;this.social(a.room);}this.parties.delete(party.id);}}

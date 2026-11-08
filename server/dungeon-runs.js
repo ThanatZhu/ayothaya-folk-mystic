@@ -6,6 +6,7 @@ import {dungeonById,DIFFICULTY,canEnter,READY_SECONDS,MAX_PARTY,PIECE_CHANCE,CHE
 import {dungeonPieceId,dungeonRainbowId,DUNGEON_SLOTS,withGrade} from '../gear-sets.js';
 import {normalizeBag} from '../items.js';
 import {thaiDay} from '../daily.js';
+import {queueFor,unqueue,acceptOffer} from './dungeon-queue.js';
 
 const RUN_IDLE_MS=10*60e3;
 const runs=realm=>realm.dungeonRuns??=new Map();
@@ -18,7 +19,7 @@ function busy(realm,p){
  return !!(p.duel||p.trade||p.world.player.hp<=0||p.suspended||p.room.map.instance||p.room.map.guildHall||p.room.map.prologue||
   dungeonReservation(realm,p.key)||realm.arenaRooms&&[...realm.arenaRooms.values()].some(r=>r.members.some(m=>m.key===p.key)));
 }
-function check(realm,p,dungeon){
+export function checkEntry(realm,p,dungeon){
  if(!dungeon)throw Error('dungeon-unknown');
  if(!canEnter(dungeon,realm.who(p).level))throw Error('dungeon-level');
  if(busy(realm,p))throw Error('dungeon-busy');
@@ -36,7 +37,7 @@ export function startReadyCheck(realm,p,{dungeon:id,difficulty}){
  const dungeon=dungeonById(id);if(!DIFFICULTY[difficulty])throw Error('dungeon-difficulty');
  const party=p.partyId?realm.parties.get(p.partyId):null;
  if(party&&party.leader!==p.id)throw Error('dungeon-not-leader');
- check(realm,p,dungeon);
+ checkEntry(realm,p,dungeon);
  if(!party)return startRun(realm,dungeon,difficulty,[p]);
  const members=[...party.members].map(id=>realm.peers.get(id)).filter(a=>a&&a.serverId===p.serverId&&!a.suspended).slice(0,MAX_PARTY);
  const c={id:randomUUID(),dungeon:dungeon.id,difficulty,leader:p.key,answers:new Map(members.map(a=>[a.key,a===p?true:null])),deadline:realm.now()+READY_SECONDS*1000};
@@ -46,7 +47,7 @@ export function startReadyCheck(realm,p,{dungeon:id,difficulty}){
 }
 function settle(realm,c){
  checks(realm).delete(c.id);const dungeon=dungeonById(c.dungeon);
- const go=[...c.answers].filter(([,yes])=>yes).map(([key])=>peerByKey(realm,key)).filter(a=>{if(!a)return false;try{check(realm,a,dungeon);return true;}catch(e){a.world.emit('dungeonError',{reason:e.message});return false;}});
+ const go=[...c.answers].filter(([,yes])=>yes).map(([key])=>peerByKey(realm,key)).filter(a=>{if(!a)return false;try{checkEntry(realm,a,dungeon);return true;}catch(e){a.world.emit('dungeonError',{reason:e.message});return false;}});
  const leader=peerByKey(realm,c.leader);
  if(!go.length||!go.includes(leader)){for(const [key] of c.answers)peerByKey(realm,key)?.world.emit('dungeonError',{reason:'dungeon-cancelled'});return null;}
  return startRun(realm,dungeon,c.difficulty,go);
@@ -114,5 +115,8 @@ export function dungeonCommand(realm,p,m){
  if(action==='ready')return answerReady(realm,p,m.yes);
  if(action==='leave')return leaveRun(realm,p);
  if(action==='exchange')return exchangeShards(realm,p,{dungeon:m.dungeon,slot:m.slot});
+ if(action==='queue')return queueFor(realm,p,{dungeon:m.dungeon,difficulty:m.difficulty});
+ if(action==='unqueue')return unqueue(realm,p);
+ if(action==='accept')return acceptOffer(realm,p);
  throw Error('dungeon-action');
 }

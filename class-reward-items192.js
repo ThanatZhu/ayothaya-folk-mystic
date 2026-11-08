@@ -14,7 +14,7 @@ export function buildClassRewardItems(base){
    text:'เลือกเซ็ตสีแดง Lv.'+TIERS[tier-1]+' ตรงอาชีพตนเองครบ 5 ชิ้น · อาวุธ หมวก เสื้อ ผ้าคลุม รองเท้า · ทะลวง / เพชฌฆาต / มนตรา / กำแพงเพชร / วายุ'};
   for(const family of FAMILIES)for(const [classId,word] of WEAPON_CLASSES){
    const original=base[weaponId(classId,tier)];if(!original)throw Error('missing-reward-weapon');
-   const item={...original,name:word+family.sets[tier-1],set:{family:family.key,tier},pct:{...family.piece},classReward:true,
+   const item={...original,name:word+family.sets[tier-1],set:{family:family.key,tier},pct:{...original.pct,...family.piece},classReward:true,
     note:'อาวุธชุด'+family.name+' · Lv.'+TIERS[tier-1]+' · รางวัลเปลี่ยนอาชีพ · ร่วมโบนัสเซ็ตสายเดียวกัน'};
    item.text=gearText(item);out[familyWeaponId(family.key,classId,tier)]=item;
   }

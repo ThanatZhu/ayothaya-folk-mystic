@@ -66,3 +66,13 @@ test('PVE damage raises monster hits on the server',()=>{
  const [m]=p.room.mobs,hit=pve=>{m.hp=m.maxHp=10000;p.world.derived.pveDmg=pve;realm.hurt(p,m,100);return 10000-m.hp;};
  const plain=hit(0);assert.equal(hit(.1),Math.round(plain*1.1));
 });
+
+import {familySetItemIds} from '../class-reward-items192.js';
+test('review fix: the class-reward weapon carries PVP but never decides the refine tier',()=>{
+ const ids=familySetItemIds('pierce',{classId:'swordsman',gender:'male'});   // [weapon, head, armor, garment, shoes] all ^4
+ const at=(weaponRefine,armourRefine)=>ids.map((id,i)=>itemDef(id.replace('^4','')+'+'+(i?armourRefine:weaponRefine)+'^4'));
+ assert.equal(itemDef(ids[0]).pct.pvpDmg,.016);
+ const full=setBonuses(at(3,10));assert.equal(full.active.find(a=>a.family).refineTier,2,'a +3 weapon does not block a +10 armour set');
+ const three=ids.slice(0,4).map((id,i)=>itemDef(id.replace('^4','')+'+10^4'));
+ assert.equal(setBonuses(three).active.find(a=>a.family).refineTier,0,'weapon + 3 armour pieces is not a full set');
+});

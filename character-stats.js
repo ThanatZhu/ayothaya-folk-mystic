@@ -133,7 +133,7 @@ export function deriveStats({level=1,classId='novice',stats,gear,pet=null,food=n
   mpCut:roundGearStat(Math.min(STAT_CAPS.mpCut,set('mpCut'))),dmgReduce:roundGearStat(Math.min(STAT_CAPS.dmgReduce,set('dmgReduce'))),
   moveSpeed:roundGearStat(Math.min(STAT_CAPS.moveSpeed,set('moveSpeed'))),
   // owner 9 Nov: gear adds at most 15% PVE (monsters) and 15% PVP (players) damage; cards come on top later
-  pveDmg:roundGearStat(Math.min(STAT_CAPS.pveDmg,set('pveDmg'))),pvpDmg:roundGearStat(Math.min(STAT_CAPS.pvpDmg,set('pvpDmg'))),
+  pveDmg:+Math.min(STAT_CAPS.pveDmg,set('pveDmg')).toFixed(4),pvpDmg:+Math.min(STAT_CAPS.pvpDmg,set('pvpDmg')).toFixed(4),
   sets:sets.active,
  };
 }

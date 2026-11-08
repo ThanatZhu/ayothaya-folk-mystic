@@ -1,5 +1,6 @@
 import {weaponCraftRecipes,WEAPON_MATERIALS} from './weapon-crafting.js';
 import {rainbowRecipe} from './rainbow-crafting.js';
+import {DUNGEONS,SHARDS_PER_PIECE} from './dungeons.js';
 // 0.117 gear sets (docs/gear-sets-proposal.md, owner-approved draft numbers): replaces every pre-0.117 weapon/armor/head/
 // garment/shoes item. Accessories stay as they were. Pure data + rules, shared by the client and the realm server.
 // Art: assets/gear2/<sheet>-<cell>.webp, sliced from the 57 generated sheets (outputs/gear-sets/manifest.json).
@@ -36,7 +37,11 @@ export const FAMILIES=[
 ];
 const ATK_PCT=[.03,.04,.05,.06,.07,.08]; // 4-piece ATK/MATK bonus per tier
 // Owner 9 Nov: a full set with every piece at +5 unlocks tier 1, every piece at +10 tier 2 (tier 2 replaces tier 1).
-export const SET_REFINE={family:{pvpDmg:[.03,.06]},boss:{pvpDmg:[.05,.10]}};
+export const SET_REFINE={family:{pvpDmg:[.03,.06]},boss:{pvpDmg:[.05,.10]},dungeon:{pveDmg:[.05,.10]}};
+// Dungeon sets (owner 9 Nov): any class, colour = GRADES index (rainbow only from shards), 4 pieces ATK/MATK = base x colour.
+export const DUNGEON_GRADE_MUL=[1,1.1,1.25,1.4,1.6],DUNGEON_RAINBOW=1.8,DUNGEON_SLOTS=['head','armor','garment','shoes'];
+export const dungeonPieceId=(set,slot)=>'dg-'+set+'-'+slot,dungeonRainbowId=(set,slot)=>'dg-'+set+'-'+slot+'-r';
+const dungeonMul=grade=>grade>=5?DUNGEON_RAINBOW:DUNGEON_GRADE_MUL[grade??0];
 export const setRefineTier=refines=>{const lo=Math.min(...refines.map(r=>r??0));return lo>=10?2:lo>=5?1:0;};
 export const STAT_NAME={armorPen:'เจาะเกราะ',crit:'คริ',critDmg:'ความแรงคริ',cdr:'ลดคูลดาวน์',mpCut:'ลด MP',hpPct:'HP',dmgReduce:'ลดดาเมจที่ได้รับ',
  aspd:'ความเร็วโจมตี',moveSpeed:'ความเร็วเดิน',atkPct:'ATK',matkPct:'MATK',defPct:'DEF',hit:'HIT',pveDmg:'ดาเมจ PVE',pvpDmg:'ดาเมจ PVP'};
@@ -113,6 +118,12 @@ export function buildGearItems(){
   ['รองเท้าแตะสานใบตาล','shoes',{def:1},150],['ผ้าพันหมัดผู้ฝึกตน','weapon',{atk:6},120]];
  starter.forEach(([name,slot,stats,buy],i)=>{const it={image:img('starter',i),name,kind:'gear',slot,level:1,...stats,buy,sell:Math.round(buy/4),starter:true};
   if(slot==='weapon')it.classes=['novice'];if(slot!=='armor'&&slot!=='weapon')it.slots=0;it.note='ชุดเริ่มต้น'+(slot==='weapon'?' · ผู้ฝึกตน':'');it.text=gearText(it);out[STARTER[i]]=it;});
+ // Dungeon sets and their shards (dungeons.js): graded pieces drop from chests, the rainbow piece costs SHARDS_PER_PIECE shards.
+ for(const d of DUNGEONS){const art=n=>'assets/dungeon-'+d.set+'/gear-'+n+'.webp';
+  DUNGEON_SLOTS.forEach((slot,si)=>{const base={kind:'gear',slot,level:d.level,dungeonSet:d.set,image:art(si),...(slot!=='armor'?{slots:0}:{})};
+   const it={...base,name:SLOT_WORD[slot]+d.name,...defStats(slot,d.level),...(slot==='head'?{pct:{pveDmg:.01}}:{}),sell:Math.round(price(2,2)/4),graded:true,note:'ชุดดัน'+d.name+' · Lv.'+d.level+' · ทุกอาชีพ'};it.text=gearText(it);out[dungeonPieceId(d.set,slot)]=it;
+   const d0=defStats(slot,d.level),r={...base,name:SLOT_WORD[slot]+d.name+' (รุ้ง)',def:Math.round(d0.def*DUNGEON_RAINBOW),mdef:Math.round(d0.mdef*DUNGEON_RAINBOW),...(slot==='head'?{pct:{pveDmg:+(.01*DUNGEON_RAINBOW).toFixed(4)}}:{}),rainbow:true,sell:5000,note:'ชุดดัน'+d.name+' สีรุ้ง · แลกด้วยเศษ '+SHARDS_PER_PIECE};r.text=gearText(r);out[dungeonRainbowId(d.set,slot)]=r;});
+  out[d.shard]={image:art(5),icon:0,name:'เศษ'+d.name,kind:'loot',sell:50,text:'ได้ทุกครั้งที่เคลียร์ดัน'+d.name+' · ครบ '+SHARDS_PER_PIECE+' แลกชุดดันสีรุ้งได้ 1 ชิ้น'};}
  // Shard icons reuse loot cells (tinted) until painted art lands.
  SHARDS.forEach(([id,name,from],i)=>{out[id]={icon:[4,11,10][i],tint:['wind','gold','violet'][i],name,kind:'loot',sell:[200,600,2000][i],text:'ใช้คราฟเซ็ทบอสที่ครูแสนดาบ · ดรอปจาก'+from};});
  return out;
@@ -160,13 +171,20 @@ export function setBonuses(worn){
   const t=Math.min(...pieces.map(it=>it.set.tier)),[mk,mv]=f.main;
   let refineTier=0;
   if(pieces.length>=4){add(mk,mv[t-1]);if(f.second)add(f.second[0],f.second[1][t-1]);add('atkPct',ATK_PCT[t-1]);add('matkPct',ATK_PCT[t-1]);
-   refineTier=setRefineTier(pieces.map(it=>it.refine));if(refineTier)for(const [k,v] of Object.entries(SET_REFINE.family))add(k,v[refineTier-1]);}
+   const armour=pieces.filter(it=>it.slot!=='weapon');refineTier=armour.length>=4?setRefineTier(armour.map(it=>it.refine)):0;   // the 4 armour pieces decide; a class-reward weapon never does
+   if(refineTier)for(const [k,v] of Object.entries(SET_REFINE.family))add(k,v[refineTier-1]);}
   else add(mk,mv[t-1]*.4);
   active.push({family:f.key,count:pieces.length,tier:t,refineTier});}
  for(const [cls,b] of Object.entries(BOSS_SETS)){const pieces=worn.filter(it=>it.bossSet===cls),n=pieces.length;
   for(const [need,bonus] of Object.entries(b.bonus))if(n>=+need)for(const [k,v] of Object.entries(bonus))add(k,v);
   const refineTier=n>=5?setRefineTier(pieces.map(it=>it.refine)):0;if(refineTier)for(const [k,v] of Object.entries(SET_REFINE.boss))add(k,v[refineTier-1]);
   if(n)active.push({boss:cls,count:n,refineTier});}
+ for(const d of DUNGEONS){const pieces=worn.filter(it=>it.dungeonSet===d.set),n=pieces.length;if(!n)continue;
+  const grade=Math.min(...pieces.map(it=>it.rainbow?5:it.grade??0));let refineTier=0;
+  if(n>=2)add('hpPct',.05);
+  if(n>=4){const k=+(d.atkBase*dungeonMul(grade)).toFixed(4);add('atkPct',k);add('matkPct',k);
+   refineTier=setRefineTier(pieces.map(it=>it.refine));if(refineTier)for(const [key,v] of Object.entries(SET_REFINE.dungeon))add(key,v[refineTier-1]);}
+  active.push({dungeon:d.set,count:n,grade,refineTier});}
  return {total,active};
 }
 // Lines for the equipment window / tooltip: [text, reached].
@@ -180,6 +198,11 @@ export function bossLines(cls,count){
  for(const need of [2,3,4,5]){const text=[...Object.entries(b.bonus[need]??{}).map(([k,v])=>pct(k,v)),b.effects[need]].filter(Boolean).join(' · ');
   if(text)lines.push([need+' ชิ้น: '+text,count>=need]);}
  return lines;
+}
+// Dungeon set lines for the bag: [text, reached]; grade is the lowest worn colour (5 = rainbow).
+export function dungeonLines(set,count,grade){
+ const d=DUNGEONS.find(x=>x.set===set),k=+(d.atkBase*dungeonMul(grade)*100).toFixed(1);
+ return [['2 ชิ้น: '+pct('hpPct',.05),count>=2],['4 ชิ้น: ATK/MATK +'+k+'%',count>=4]];
 }
 // Refine tier lines: kind is a SET_REFINE key, refines the worn pieces' levels, full the piece count of the whole set.
 export function setTierLines(kind,refines,full){

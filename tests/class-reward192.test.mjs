@@ -9,7 +9,7 @@ import {classRewardBackfill} from '../server/class-reward-backfill192.js';
 const record=(classId='shaman')=>({serverId:'server-1',character:{name:'Reward Test',classId},bag:{coins:123,slots:100,items:{[CLASS_REWARD_BOX]:1}}});
 test('all 35 family weapons are red class weapons at Lv55 and (0.123) Lv25, and join the selected set',()=>{
  assert.equal(Object.values(ITEMS).filter(x=>x.classReward).length,70);
- for(const [tier,level] of [[4,55],[2,25]])for(const f of FAMILIES)for(const [cls] of WEAPON_CLASSES){const it=itemDef(familyWeaponId(f.key,cls,tier)+'^4');assert.equal(it.kind,'gear');assert.equal(it.level,level);assert.equal(it.grade,4);assert.deepEqual(it.classes,[cls]);assert.deepEqual(it.set,{family:f.key,tier});assert.deepEqual(it.pct,f.piece);assert.ok(it.image);}
+ for(const [tier,level] of [[4,55],[2,25]])for(const f of FAMILIES)for(const [cls] of WEAPON_CLASSES){const it=itemDef(familyWeaponId(f.key,cls,tier)+'^4');assert.equal(it.kind,'gear');assert.equal(it.level,level);assert.equal(it.grade,4);assert.deepEqual(it.classes,[cls]);assert.deepEqual(it.set,{family:f.key,tier});assert.deepEqual(it.pct,{...f.piece,pvpDmg:.016});assert.ok(it.image);}
 });
 test('reward weapon activates a four-piece family bonus with three armor pieces and requires Lv55',()=>{
  const id=familyWeaponId('mantra','shaman')+'^4',pieces=[id,...['head','armor','shoes'].map(slot=>pieceId('mantra',slot,'shaman',4))].map(itemDef);

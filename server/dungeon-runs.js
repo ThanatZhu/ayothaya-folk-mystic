@@ -115,6 +115,7 @@ export function dungeonCommand(realm,p,m){
  if(action==='ready')return answerReady(realm,p,m.yes);
  if(action==='leave')return leaveRun(realm,p);
  if(action==='exchange')return exchangeShards(realm,p,{dungeon:m.dungeon,slot:m.slot});
+ if(action==='info'){const today=thaiDay(realm.now()),used=p.dungeonChests?.day===today?p.dungeonChests.counts:{};p.world.emit('dungeonInfo',{used:{...used},chestsPerDay:CHESTS_PER_DAY,inRun:!!dungeonReservation(realm,p.key)});return null;}
  if(action==='queue')return queueFor(realm,p,{dungeon:m.dungeon,difficulty:m.difficulty});
  if(action==='unqueue')return unqueue(realm,p);
  if(action==='accept')return acceptOffer(realm,p);

@@ -9,7 +9,7 @@ import {createActivityDock} from './activity-dock.js?v=hud204';
 import {createMobilePlayUI} from './mobile-play-ui.js?v=fit208';
 // 0.123 owner: only the seven everyday buttons stay on top (สถานะ สกิล กระเป๋า ภารกิจ ร้านค้า จดหมาย + เมนู); the rest
 // open from the เมนู page (a framed grid, assets/ui63/frames/tooltip.png) on every screen.
-const PRIMARY=['menu-status','menu-skills','menu-bag','menu-quests','menu-premium-store','menu-mail'];
+const PRIMARY=['menu-status','menu-skills','menu-bag','menu-quests','menu-dungeon','menu-premium-store','menu-mail'];
 const SECONDARY=['menu-market','menu-rank','menu-social','menu-pet','menu-gacha','menu-boss-result','menu-party'];
 const HIDDEN=['menu-profile','menu-players','menu-chat'];
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch{}return null;};

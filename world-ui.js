@@ -35,9 +35,9 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
  if(map.safe){$('target-name').textContent='เขตปลอดภัย';$('target-hp').textContent='พักฟื้น · พูดคุย · เดินทาง';}
  $('district-name').textContent=map.name;$('district-description').textContent=map.subtitle;
  $('world-title').textContent=map.name;$('mini-title').textContent=map.name;document.body.dataset.map=map.id;document.body.dataset.safe=String(map.safe);
- async function travel(id,recall=false,warp=false,respawn=false){
+ async function travel(id,recall=false,warp=false,respawn=false,force=false){
   if(!rebirthAccess(lookup(id),world.rebirth??0,baseProgress(world).level)){world.notice('ต้องจุติและมีเลเวลถึงเกณฑ์ก่อนเดินทางข้ามภพ');return false;}
-  if(traveling||!(reachable.has(id)||recall||warp||respawn||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||(!respawn&&world.player.hp<=0))return false;
+  if(traveling||!(reachable.has(id)||recall||warp||respawn||game.online&&(id==='duel-arena'||map.id==='duel-arena'&&id===catalog.capital))||(!respawn&&!force&&world.player.hp<=0))return false;
   if(lookup(id)?.guildHall&&!game.online){world.notice('ทุ่งชุมพลของกิลด์ต้องเข้าโหมดออนไลน์');return false;}
   if(lookup(id)?.instance&&!game.online){world.notice('ดันเจี้ยนปาร์ตี้ต้องเข้าโหมดออนไลน์');return false;}
   traveling=true;game.clearInput();
@@ -194,6 +194,8 @@ export function createWorldUI({catalog,map,game,scene,camera,controls,account,re
    game.cancelWalk?.();game.clearInput();if(world.auto)world.setAuto?.(false);
    return travel(id,false,true);
   },
+  // party dungeons: the server already reserved the seat (or the way home); a downed player may still leave
+  dungeonTravel:id=>travel(id,true,false,false,true),
   guildHall:()=>{const hall=catalog.maps.find(m=>m.guildHall);if(hall&&hall.id!==map.id)travel(hall.id,true);}, // 1.01 the server checks membership
   // ธูปกลับเมือง (0.46): true when the trip starts; online the server spends the incense, offline the bag does.
   recall(){if(map.id===catalog.capital){world.notice('อยู่ในเมืองหลวงแล้ว');return false;}if(traveling||world.player.hp<=0)return false;travel(catalog.capital,true);return true;},

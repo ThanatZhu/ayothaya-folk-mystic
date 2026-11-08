@@ -6,6 +6,7 @@ import {fieldAdventurers,adventurerAt,adventurerViews,adventurerContract,ADVENTU
 import {prologueJoin,prologueMap,prologueStart,prologueKill,prologueTick,prologueCommand,prologueExit,prologueView,prologueRecord,trialStats,isTrialRow} from './prologue-realm.js?v=1';
 import {ARENA_MAP,arenaReservation,arenaView,arenaCommand,cleanArenaRooms,leaveArena,finishArena} from './arena-rooms166.js';
 import {dungeonReservation,dungeonCommand,keepDungeonRoom,tickDungeonRuns,dungeonReturnDestination,dungeonEntryDestination} from './dungeon-runs.js';
+import {runScript,dungeonRunView} from './dungeon-script.js';
 import {checkWalk,startWalk,setWalkPace,cancelWalk,walkInput,walkView,walkSave} from './auto-walk.js';
 import {normalizeAutoTarget} from '../auto-targets.js';
 import {publicBossDirectory} from './boss-directory.js';
@@ -131,7 +132,7 @@ export class RealmServer{
   peer.key=uid+':'+slotId;peer.inspectHidden=record.inspectHidden===true;peer.tradeXp=Number.isSafeInteger(record.trade?.xp)&&record.trade.xp>0?record.trade.xp:0;if(map.id===MARKET_ZONE.mapId)peer.world.emit('shops',{list:this.shopList(serverId)});
   peer.friends=normalizeFriends(record.friends);peer.guildId=[...this.guilds.values()].find(g=>g.serverId===serverId&&g.members.some(x=>x.key===peer.key))?.id??null;if(peer.guildId)world.emit('guild',{guild:this.guildView(this.guilds.get(peer.guildId),peer.key)}); // 1.01 hall props + NPC know the guild at once
   peer.utilityReceipts=record.utilityReceipts??[];peer.daily=record.daily??null;peer.weekly=record.weekly??null;peer.rebirth=Math.min(REBIRTH_MAX,Math.max(0,record.rebirth|0));peer.rebirthStory=normalizeRebirthStory(record.rebirthStory,peer.rebirth);peer.bubbleAt=-Infinity;peer.dungeonDay=record.dungeonDay??null;peer.pet=null;peer.mailbox=normalizeMailbox(record.mailbox);peer.petCollection=normalizePetAccount(record.petCollection);peer.bounty=record.bounty??null;Object.assign(peer,normalizeAlbumState(record));
-  peer.dungeonReturn=dgBack?null:record.dungeonReturn??null;if(dgRun)dgRun.roomId=room.id;
+  peer.dungeonReturn=dgBack?null:record.dungeonReturn??null;if(dgRun){dgRun.roomId=room.id;if(dgRun.state.text)world.emit('dungeonRun',dungeonRunView(dgRun));}
   if(party){party.pending.delete(uid);party.members.add(peer.id);peer.partyId=party.id;if(party.leaderPending===uid||!party.members.has(party.leader)){party.leader=peer.id;if(party.leaderPending===uid)party.leaderPending=null;}}
   peer.prologue=prologue;peer.storage=normalizeStorage(record.storage);peer.trade=null;peer.stall=null;peer.saveNow=false;
   peer.stats=normalizeStats(record.stats);peer.gear=normalizeGear(record.gear);peer.statSig='';peer.gearAt=-Infinity;this.refreshStats(peer);if(world.roleRespawn){world.player.hp=world.player.maxHp;world.player.mp=world.player.maxMp;}
@@ -357,6 +358,7 @@ export class RealmServer{
    // Client capability flags and hand-written input packets cannot unlock it.
    const distance=Math.hypot(m.x,m.z),n=Math.max(1,distance);if(distance>.08)cancelWalk(p);p.input={x:m.x/n,z:m.z/n,attack:m.attack&&!p.observer,run:this.runEnabled&&m.run===true&&distance>.08};p.inputAt=now;p.inputSeq=m.seq;if(distance>.08||m.attack)w.clearEmote();return true;
   }
+  if((m.type==='returnToSpawn'||m.type==='respawn')&&p.room.map.dungeon&&w.player.hp<=0){w.notice('ในดันเจี้ยน ต้องให้เพื่อนชุบ หรือรอเพื่อนเคลียร์ห้องนี้');return false;}
   if(m.type==='returnToSpawn'){if(w.player.hp<=0){if(this.wars.get(p.serverId)?.active&&p.room.map.id===WAR.map&&w.player.down>0)return false;let bag;try{bag=consumeRevival(p.bag,w.player);}catch{w.notice('ต้องมียันต์คืนขวัญ 1 ชิ้น');return false;}cancelWalk(p);p.input={x:0,z:0,attack:false,run:false};this.setBag(p,bag);w.respawn(false);p.saveNow=true;}return true;}
   if(m.type==='respawn'){
    if(typeof m.id!=='string'||m.id.length>50)return false;
@@ -593,6 +595,7 @@ export class RealmServer{
   if(this.tickId%1200===1)for(const id of SERVER_IDS)this.arena(id); // weekly rollover even when quiet
   for(const p of this.peers.values()){if(p.suspended)continue;p.bucket=Math.min(40,p.bucket+dt*25);if(this.now()-p.inputAt>350)p.input={x:0,z:0,attack:false};if(p.duel)this.duelTick(p);if(p.walkQueued&&this.now()>=p.walkAt)this.walkNow(p,p.walkQueued);p.world.update(dt,walkInput(p,dt),{monsters:false});p.appliedInputSeq=p.inputSeq??0;if(!p.mailMutationBusy)this.autoPotion(p);if(!p.petMutationBusy&&p.petCollection.auto&&p.world.auto){try{this.petCast(p,true);}catch{}}}
   for(const room of this.rooms.values()){
+   if(room.map.dungeon)runScript(this,room,dt);
    if(this.roleSkills)stepRoleMonsters(room.mobs,dt,id=>this.peers.get(id)?.room===room?this.peers.get(id).world:null);
    // 0.99.11 the living players of the room once per tick; each monster just takes the closest (no per-monster sort)
    const alive=[...room.peers].map(id=>this.peers.get(id)).filter(p=>!p.suspended&&!p.observer&&p.world.player.hp>0);
@@ -600,7 +603,9 @@ export class RealmServer{
    for(const m of room.mobs){
     m.petSlow=Math.max(0,(m.petSlow??0)-dt);if(m.petArmor)m.petArmor.left=Math.max(0,m.petArmor.left-dt);if(m.hp<=0){m.petSlow=0;delete m.petArmor;}
     let type=MONSTER_TYPES[m.type];
-    let target=null,near=Infinity;for(const p of alive){if(p.world.status?.stealth>0&&!type.boss)continue;const d=distance(p.world.player,m);if(d<near){near=d;target=p;}}   // 0.123 stealth hides you from normal monstersif(m.roleStatus?.slow||m.petSlow>0)type={...type,speed:type.speed*(type.boss?.8:.5)};
+    if(m.power&&m.power!==1)type={...type,damage:Math.round(type.damage*m.power)};
+    let target=null,near=Infinity;for(const p of alive){if(p.world.status?.stealth>0&&!type.boss)continue;const d=distance(p.world.player,m);if(d<near){near=d;target=p;}}   // 0.123 stealth hides you from normal monsters
+    if(m.roleStatus?.slow||m.petSlow>0)type={...type,speed:type.speed*(type.boss?.8:.5)};
     const taunter=this.peers.get(m.roleStatus?.taunt?.owner);if(taunter?.room===room&&taunter.world.player.hp>0&&distance(taunter.world.player,m)<15)target=taunter;
     if(type.mvp&&m.hp<=0&&!m.summoned)m.dead=(this.mvpState(room.serverId).nextAt-this.now())/1000; // wall-clock timer, shared by every room of the channel
     if(type.worldBoss&&!m.summoned){const left=this.mapBosses.remaining(room);if(left>0){m.hp=0;m.dead=left;room.contributors.delete(m.id);continue;}if(m.hp<=0)m.dead=0;}
@@ -1037,6 +1042,7 @@ export class RealmServer{
  travelDestination(p,id,{warp=false,respawn=false}={}){
   if(respawn){
    const destination=this.catalog.maps.find(m=>m.id===id);
+   if(p.room.map.dungeon)throw Error('dungeon-down');
    if(p.world.player.hp>0||id!==this.catalog.capital||!destination)throw Error('respawn-invalid');
    if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw Error('room-full');
    cancelWalk(p);this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();

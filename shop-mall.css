@@ -15,7 +15,7 @@
 :root #premium-store-window .mall-fit h3{margin:0;padding:8px;text-align:center;font-size:15px;font-weight:700;color:var(--mall-gold);border-bottom:1px solid var(--mall-line)}
 /* The painted room fits the stage height; its pedestal top sits at 62-68% of the picture, where the hero's feet go. */
 :root #premium-store-window .mall-stage{flex:1;position:relative;background:#2a1a10 url('assets/shop-mall282/fitting-room.webp') center/cover no-repeat}
-:root #premium-store-window .mall-stage canvas{position:absolute;left:50%;bottom:34%;width:min(78%,170px);aspect-ratio:1;transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(0 6px 4px #000a)}
+:root #premium-store-window .mall-stage canvas{position:absolute;left:50%;bottom:34%;width:min(78%,170px);height:auto;aspect-ratio:1;transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(0 6px 4px #000a)}
 :root #premium-store-window .mall-hero-name{position:absolute;left:8px;right:8px;bottom:10px;margin:0;padding:3px 6px;border-radius:4px;background:#0b211acc;text-align:center;font-size:14px;font-weight:700;color:var(--mall-cream)}
 :root #premium-store-window .mall-hero-name:empty{display:none}
 :root #premium-store-window .mall-fit-note{margin:0;padding:8px;font-size:11px;line-height:1.5;text-align:center;color:#c9d4b8;border-top:1px solid var(--mall-line)}

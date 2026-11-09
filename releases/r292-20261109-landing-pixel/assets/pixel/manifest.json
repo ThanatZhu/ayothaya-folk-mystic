@@ -1,0 +1,86 @@
+{
+ "columns": 6,
+ "rows": 4,
+ "actors": {
+  "novice-male": {
+   "cell": 82,
+   "height": 54,
+   "emote": 84
+  },
+  "novice-female": {
+   "cell": 78,
+   "height": 51,
+   "emote": 78
+  },
+  "swordsman-male": {
+   "cell": 82,
+   "height": 54,
+   "emote": 82
+  },
+  "swordsman-female": {
+   "cell": 85,
+   "height": 56,
+   "emote": 84
+  },
+  "lancer-male": {
+   "cell": 78,
+   "height": 51,
+   "emote": 76
+  },
+  "lancer-female": {
+   "cell": 76,
+   "height": 50,
+   "emote": 76
+  },
+  "hunter-male": {
+   "cell": 79,
+   "height": 52,
+   "emote": 78
+  },
+  "hunter-female": {
+   "cell": 78,
+   "height": 51,
+   "emote": 76
+  },
+  "boxer-male": {
+   "cell": 81,
+   "height": 53,
+   "emote": 79
+  },
+  "boxer-female": {
+   "cell": 76,
+   "height": 50,
+   "emote": 78
+  },
+  "rogue-male": {
+   "cell": 79,
+   "height": 52,
+   "emote": 79
+  },
+  "rogue-female": {
+   "cell": 76,
+   "height": 50,
+   "emote": 78
+  },
+  "shaman-male": {
+   "cell": 79,
+   "height": 52,
+   "emote": 79
+  },
+  "shaman-female": {
+   "cell": 78,
+   "height": 51,
+   "emote": 78
+  },
+  "acolyte-male": {
+   "cell": 76,
+   "height": 50,
+   "emote": 73
+  },
+  "acolyte-female": {
+   "cell": 76,
+   "height": 50,
+   "emote": 76
+  }
+ }
+}

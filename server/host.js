@@ -44,7 +44,7 @@ import {WorldReset} from './world-reset.js';
 import {createResetStore} from './world-reset-store.js';
 import {balanceText,commitBalance} from './github-balance.js';
 import {createLedger,GOLD_SOURCES,GOLD_SINKS} from './economy-ledger.js';
-import {goldOf,goldHoldings} from './gold-wipe.js';
+import {goldOf,goldHoldings,initialGoldWipeState,goldWipeBackfill} from './gold-wipe.js';
 import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 // 0.122 only a bad token or identity fails authentication (the client gives up); a store or authority hiccup during a
@@ -68,7 +68,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  let econReady=!store?.loadEconomy,econSavedAt=Date.now(),heldAt=0;
  let bossTimersReady=mode==='local'||!store?.loadMapBosses;
  const authoritative=()=>(mode!=='firebase'||Date.now()<=store.authorityUntil)&&resetReady&&bossTimersReady&&mailReady&&shopsReady;
- let renewing=false,authorityError='',classRewardState=null,classRewardTask=null;
+ let renewing=false,authorityError='',classRewardState=null,classRewardTask=null,goldWipeState=null,goldWipeTask=null,goldWipeAdmin=Promise.resolve();
  const renew=async()=>{
   if(mode!=='firebase'||renewing)return;renewing=true;
   if(!(Date.now()<=store.authorityUntil))shopsReady=!store?.loadShops;
@@ -76,7 +76,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    const held=Date.now()<=store.authorityUntil&&resetReady;if(!held)resetReady=false;
    await store.renewAuthority();
    if(!held){
-    classRewardState=null;
+    classRewardState=null;goldWipeState=null;
     if(reset){
      const previous=reset.job;reset.job=await repository.state();
      if(reset.job&&(reset.job.id!==previous?.id||(reset.job.status==='completed'&&previous?.status!=='completed'))){sessions.clear();await clearWorld();}
@@ -130,6 +130,26 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
    if(session)await persistMail(session,apply);
    else{if(account.length||joinPending.has(row.uid))throw Error('player-online');await store.giveOffline({uid:row.uid,slotId:row.slotId},apply);}
   }})).then(state=>{classRewardState=state;}).catch(e=>console.error('class-reward192',e.message)).finally(()=>{classRewardTask=null;});return classRewardTask;
+ };
+ // Gold wipe (admin, one-off): GET /admin/gold-report, then POST /admin/gold-wipe starts this drain, one page per 10 s tick.
+ // Same online/offline split as the class reward: a live session is changed through persistMail (books the wallet as
+ // gold sink 'wipe'); its lease record takes the run-once flag so the next autosave keeps it.
+ const goldWipeDeliver=async(row,wipe)=>{
+  const account=[...sessions.values()].filter(s=>s.peer.uid===row.uid),session=account.find(s=>s.peer.slotId===row.slotId);
+  let removed={wallet:0,mail:0};const apply=r=>{const x=wipe(r);removed=x.removed;return x.record;};
+  if(session){await persistMail(session,apply,()=>{session.lease.record={...session.lease.record,goldWipe:1};},'other','wipe');if(removed.wallet+removed.mail)realm.evidence(session.peer,'goldWipe',removed);return removed;}
+  if(account.length||joinPending.has(row.uid))throw Error('player-online');
+  const record=await store.giveOffline({uid:row.uid,slotId:row.slotId},apply);
+  try{realm.goldEcon.record(-removed.wallet,'wipe');}catch{}
+  if(removed.wallet+removed.mail)realm.evidence({uid:row.uid,slotId:row.slotId,serverId:record.serverId,character:record.character},'goldWipe',removed);return removed;
+ };
+ const drainGoldWipe=()=>{
+  if(goldWipeTask||closing||reset?.maintenance||!authoritative()||!store?.loadGoldWipeState||!store?.classRewardPage||!store?.giveOffline||(goldWipeState&&(!goldWipeState.startedAt||goldWipeState.completedAt)))return goldWipeTask;
+  const at=Date.now();
+  goldWipeTask=trackWrite(goldWipeBackfill({store,canWrite:()=>!closing&&!reset?.maintenance&&authoritative(),deliver:goldWipeDeliver})).then(state=>{
+   if(state.startedAt||!goldWipeState?.startedAt)goldWipeState=state; // a load from before the admin's start must not hide it
+   if(state.completedAt>=at){heldAt=0;saveEconomy();} // finished in this run: recount held gold now
+  }).catch(e=>console.error('gold-wipe',e.message)).finally(()=>{goldWipeTask=null;});return goldWipeTask;
  };
 // 0.119 observer e-mails saved from the back office (see /admin/observers); a peer keeps its verified e-mail so a
  // removed address loses the mode straight away
@@ -280,6 +300,24 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
      savedList.at=0;audit('admin-levels',who,{to:{peer:b.peer,name:adjustment.record.character.name},before:adjustment.before,after:adjustment.after,changed:adjustment.changed});
      reply(200,{ok:true,name:adjustment.record.character.name,...adjustment.after,changed:adjustment.changed});
     }catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
+   }
+   if((url.pathname==='/admin/gold-report'&&req.method==='GET')||(url.pathname==='/admin/gold-wipe'&&req.method==='POST')){
+    if(!authoritative()||!store?.loadGoldWipeState||!store?.listProfiles){reply(503,{error:'authority-unavailable'});return;}
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>4096){reply(413,{error:'too-large'});return;}}
+    // report and start run one at a time, and the report is only saved before the wipe starts (the drain owns the state after)
+    const job=goldWipeAdmin.catch(()=>{}).then(async()=>{
+     const state=await store.loadGoldWipeState()??initialGoldWipeState();
+     if(url.pathname==='/admin/gold-report'){
+      const holdings=goldHoldings(await store.listProfiles(),realm.mailAnnouncements??[]);
+      if(!state.startedAt){state.reportAt=Date.now();state.report={held:holdings.held,holders:holdings.holders,mailGold:holdings.mailGold,characters:holdings.characters};await store.saveGoldWipeState(state);}
+      audit('admin-gold-report',who,{held:holdings.held,holders:holdings.holders,mailGold:holdings.mailGold});return [200,{holdings,state}];
+     }
+     if(state.startedAt){goldWipeState=state;drainGoldWipe();return [200,{state}];}
+     if(!(Date.now()-state.reportAt<=600000))return [400,{error:'report-stale'}];
+     if(JSON.parse(data||'{}').confirm!=='ล้างทองแท่ง')return [400,{error:'bad-confirm'}];
+     state.startedAt=Date.now();await store.saveGoldWipeState(state);goldWipeState=state;audit('admin-gold-wipe',who,{report:state.report});drainGoldWipe();return [200,{state}];
+    });goldWipeAdmin=job;
+    try{const [code,body]=await job;reply(code,body);}catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
    }
    if(['/admin/pets','/admin/give','/admin/mail'].includes(url.pathname)&&req.method==='POST'){
     if(!authoritative()){reply(503,{error:'authority-unavailable'});return;}
@@ -616,7 +654,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
  const tick=setInterval(()=>{const now=performance.now();carry=Math.min(.25,carry+(now-lastTick)/1000);lastTick=now;if(reset?.maintenance){carry=0;return;}if(!authoritative()){carry=0;for(const s of sessions.values()){s.peer.suspended=true;s.closing=true;s.ws.close(4011,'authority-lost');}return;}while(carry>=.05){carry-=.05;realm.step(.05);}},50);
  // Waiting for authority: retry every 5 s (a read while another host holds it). Holding it: renew every 40 s, but
  // after a failed renewal retry in 5 s (0.114.2) - two 40 s misses used to outlive the lease and kick everyone.
- let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()&&!authorityError?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();drainClassRewards();
+ let authority=null;const scheduleRenew=()=>{authority=setTimeout(async()=>{await renew();if(!closing)scheduleRenew();},authoritative()&&!authorityError?AUTHORITY_RENEW:5000);};await renew();scheduleRenew();drainClassRewards();drainGoldWipe();
  // Save only what changed, at most once a minute; an idle player just keeps the lease alive (see storage.js budget).
  const dueForSave=s=>{if(s.peer.saveNow){s.peer.saveNow=false;return true;} // trades / stall sales save at once
   const age=Date.now()-(s.autoSavedAt??0);if(age<SAVE_MIN_GAP)return false;return age>=SAVE_MAX_GAP||JSON.stringify(realm.record(s.peer,s.lease.record))!==s.savedJson;};
@@ -631,7 +669,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
    if(store?.listProfiles&&Date.now()-heldAt>6*3600e3){heldAt=Date.now();store.listProfiles().then(rows=>{realm.econ.setHeld(rows.reduce((a,r)=>a+(Number(r.record?.bag?.coins)||0),0),rows.length);const g=goldHoldings(rows,realm.mailAnnouncements??[]);realm.goldEcon.setHeld(g.held,g.characters,g.mailGold);}).catch(e=>console.error('economy-held',e.message));}
    if(store?.saveEconomy&&econDirty()&&Date.now()-econSavedAt>300000){econSavedAt=Date.now();trackWrite(saveBooks()).catch(e=>console.error('economy-save',e.message));}
   }
-  const logSaver=setInterval(()=>{if(reset?.maintenance)return;saveEconomy();drainWarMail();drainClassRewards();for(const [serverId,book]of auctionBooks)if(book.lots.some(l=>l.status==='open'&&l.endsAt<=auctionNow()))trackWrite(readAuctions(serverId)).catch(e=>console.error('auction-expiry',e.message));if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount&&Date.now()-lastLogSaveAt>=300000){lastLogSaveCount=realm.logs.length;lastLogSaveAt=Date.now(); // dashboard logs: one write per 5 min, not per 10 s
+  const logSaver=setInterval(()=>{if(reset?.maintenance)return;saveEconomy();drainWarMail();drainClassRewards();drainGoldWipe();for(const [serverId,book]of auctionBooks)if(book.lots.some(l=>l.status==='open'&&l.endsAt<=auctionNow()))trackWrite(readAuctions(serverId)).catch(e=>console.error('auction-expiry',e.message));if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount&&Date.now()-lastLogSaveAt>=300000){lastLogSaveCount=realm.logs.length;lastLogSaveAt=Date.now(); // dashboard logs: one write per 5 min, not per 10 s
 trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
  return {server,realm,wss,evidence,async close(){closing=true;await auctionQueue;await evidence?.stop();clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
   // 0.114.2 a redeploy gives us ~9 s: players' progress first (all at once, 6 s cap), then shops, bosses, guild/leader/
@@ -640,7 +678,7 @@ trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
   await capped(Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);})),6000);
   const later=f=>Promise.resolve().then(f); // one failing save (even a synchronous throw) never stops the shutdown
   const dirty=[...[...realm.guildsDirty].filter(g=>realm.guilds.get(g.id)===g&&store?.saveGuild).map(g=>later(()=>store.saveGuild(g))),...[...realm.leadersDirty].filter(()=>store?.saveLeaders).map(id=>later(()=>saveLeader(id,realm.leaders.get(id)))),...[...realm.pricesDirty].filter(()=>store?.savePrices).map(id=>later(()=>store.savePrices(id,realm.prices.get(id)))),...(econReady&&authoritative()&&econDirty()&&store?.saveEconomy?[later(saveBooks)]:[])];
-  await capped(Promise.allSettled([classRewardTask,later(()=>realm.flushShops()),later(()=>realm.mapBosses.flush()).catch(e=>console.error('map-boss-save',e.message)),later(()=>store?.saveDashboardLogs?.(realm.logs)),...dirty]),1500);
+  await capped(Promise.allSettled([classRewardTask,goldWipeTask,later(()=>realm.flushShops()),later(()=>realm.mapBosses.flush()).catch(e=>console.error('map-boss-save',e.message)),later(()=>store?.saveDashboardLogs?.(realm.logs)),...dirty]),1500);
  }for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
 }
 export async function start(){

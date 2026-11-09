@@ -52,6 +52,8 @@ export class LocalStore{
  async classRewardPage({after=null,limit=100}={}){const rows=(await this.listProfiles()).sort((a,b)=>a.uid.localeCompare(b.uid)).filter(r=>after===null||r.uid.localeCompare(after)>0),page=rows.slice(0,limit);return {rows:page,after:page.at(-1)?.uid??after,done:rows.length<=limit};}
  async loadClassRewardState(){try{return JSON.parse(await readFile(path.join(this.directory,'class-reward192.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}}
  saveClassRewardState(state){const data=JSON.stringify(state);this.rewardQueue=(this.rewardQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'class-reward192.json');await writeFile(file+'.tmp',data,{mode:0o600});await rename(file+'.tmp',file);});return this.rewardQueue;}
+ async loadGoldWipeState(){try{return JSON.parse(await readFile(path.join(this.directory,'gold-wipe.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}}
+ saveGoldWipeState(state){const data=JSON.stringify(state);this.goldWipeQueue=(this.goldWipeQueue??Promise.resolve()).catch(()=>{}).then(async()=>{const file=path.join(this.directory,'gold-wipe.json');await writeFile(file+'.tmp',data,{mode:0o600});await rename(file+'.tmp',file);});return this.goldWipeQueue;}
  async characterPreviews(uid){const record=this.rows.get(uid);return record?[{slotId:'slot-1',record:copy(record)}]:[];}
  async deleteCharacter(identity){
   const row=this.rows.get(identity.uid);if(!row||identity.slotId!=='slot-1')throw new Error('character-not-found');
@@ -165,6 +167,8 @@ export class FirebaseStore{
  }
  async loadClassRewardState(){const s=await this.db.collection('multiplayerRuntime').doc('classReward192').get();return s.exists?s.data():null;}
  saveClassRewardState(state){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);tx.set(this.db.collection('multiplayerRuntime').doc('classReward192'),state);});}
+ async loadGoldWipeState(){const s=await this.db.collection('multiplayerRuntime').doc('goldWipe').get();return s.exists?s.data():null;}
+ saveGoldWipeState(state){return this.db.runTransaction(async tx=>{await this.checkAuthority(tx);tx.set(this.db.collection('multiplayerRuntime').doc('goldWipe'),state);});}
  // Same lease rule as acquire(): a live lease means the character is in a game, and the transaction re-runs if
  // the lease or the profile changes underneath it, so a login in between cannot be overwritten.
  async giveOffline(identity,apply){

@@ -30,8 +30,10 @@ export function createStoryDialogue({game,worldUI,objective,state,complete}){
   open(n){const obj=objective(),data=dialogueFor(obj);if(!data)return false;
    if(dialog.open)close();active={obj,data,n,index:{quest:state().quest,step:state().step}};page=0;sent=false;
    game.cancelWalk?.();game.clearInput();game.world.setAuto?.(false);
-   const portrait=storyPortrait(n);$('portrait').hidden=false;$('npc').alt=portrait.alt;$('npc').onerror=()=>{$('portrait').hidden=true;};$('npc').src=portrait.src;
-   const pixelArt=pixelNPCArt(n);if(pixelArt)pixelNPCStanding(pixelArt).then(c=>{if($('npc').alt===portrait.alt)$('npc').src=c.toDataURL();}).catch(()=>{});
+   // Pixel people never flash their old painted portrait: it is only the fallback when the strip fails to load.
+   const portrait=storyPortrait(n),pixelArt=pixelNPCArt(n);$('portrait').hidden=false;$('npc').alt=portrait.alt;$('npc').onerror=()=>{$('portrait').hidden=true;};
+   if(!pixelArt)$('npc').src=portrait.src;
+   else{$('npc').removeAttribute('src');pixelNPCStanding(pixelArt).then(c=>{if($('npc').alt===portrait.alt)$('npc').src=c.toDataURL();}).catch(()=>{if($('npc').alt===portrait.alt)$('npc').src=portrait.src;});}
    const art=data.art;$('art').hidden=false;$('image').alt=art.alt;$('image').onerror=()=>{$('art').hidden=true;};if($('image').getAttribute('src')!==art.src)$('image').src=art.src;
    $('chapter').textContent=obj.quest.chapter??'บทที่ 1 · ประทีปที่ดับพร้อมกัน';$('name').textContent=n.name;$('title').textContent=obj.quest.title;
    render();dialog.showModal();$('next').focus();return true;

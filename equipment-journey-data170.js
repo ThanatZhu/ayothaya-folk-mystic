@@ -6,6 +6,7 @@ import {STORY,STARTER_WEAPON} from './story-quests.js';
 import {WORLD_MAP_BOSSES} from './chapter2-monsters.js';
 import {REFINE_MAX,REFINE_TIERS} from './refine-tiers.js';
 import {AMULET_REWARDS,AMULET_PRICE,AMULET_PITY} from './amulets.js';
+import {DUNGEONS} from './dungeons.js';
 export {ITEMS,RECIPES,REFINE_MAX,REFINE_TIERS,WORLD_MAP_BOSSES};
 export const CLASSES=[{id:'novice',name:'ผู้ฝึกตน'},...WEAPON_CLASSES.map(([id])=>({id,name:{swordsman:'นักดาบ',lancer:'นักทวน',hunter:'นายพราน',boxer:'นักมวย',rogue:'จอมโจร',shaman:'หมอผี',acolyte:'พระ / แม่ชี'}[id]}))];
 export const SLOTS={weapon:'อาวุธ',armor:'เสื้อเกราะ',head:'หมวก',garment:'ผ้าคลุม',shoes:'รองเท้า',accessory:'เครื่องประดับ'};
@@ -52,7 +53,8 @@ export function createItemGuide(catalog){
   const shop=Object.entries(SHOPS).filter(([,s])=>s.stock.includes(id)).map(([npc,s])=>({npc,title:s.title,mapId:s.mapId,mapName:mapById.get(s.mapId)?.name??s.mapId,currency:s.currency??'coins',price:s.currency?ITEMS[id]?.tokens:ITEMS[id]?.buy}));
   const drop=Object.entries(DROPS).flatMap(([monster,def])=>def.items.filter(([item,chance])=>item===id&&chance>0).map(([,chance,count=1])=>({monster,name:monsterById.get(monster)?.name??monster,level:monsterById.get(monster)?.level??1,chance,count,maps:monsterMaps(monster),boss:!!(monsterById.get(monster)?.boss||monsterById.get(monster)?.elite),worldBoss:!!monsterById.get(monster)?.worldBoss,respawn:monsterById.get(monster)?.respawn??null}))).sort((a,b)=>Number(a.boss)-Number(b.boss)||a.level-b.level||b.chance-a.chance);
   const quest=STORY.flatMap(q=>(q.reward?.items??[]).filter(i=>i.id===id||(i.id==='@weapon'&&(q.id==='t1'?id===STARTER_WEAPON.novice:q.id==='t17'&&id!==STARTER_WEAPON.novice&&Object.values(STARTER_WEAPON).includes(id)))||(i.id==='@armor'&&ITEMS[id]?.slot==='armor'&&ITEMS[id].set?.family==='wall'&&ITEMS[id].set.tier===2)).map(i=>({id:q.id,title:q.title,count:i.count,steps:q.steps.map(s=>({npc:s.npc,mapId:s.mapId,mapName:mapById.get(s.mapId)?.name,action:s.action,level:s.level,hint:s.hint}))})));
-  const it=itemDef(id);if(it?.dungeonSet)quest.push({id:'dungeon-'+it.dungeonSet,title:'ดันเจี้ยนปาร์ตี้ · '+(it.rainbow?'แลกเศษดัน':'หีบหลังเคลียร์ดัน'),count:1,steps:[]});
+  const it=itemDef(id);if(it?.dungeonSet)quest.push({id:'dungeon-'+it.dungeonSet,title:'ดันเจี้ยนปาร์ตี้ · '+(it.rainbow?'คราฟจากเศษดัน':'หีบหลังเคลียร์ดัน'),count:1,steps:[]});
+  const shardOf=DUNGEONS.find(d=>d.shard===id);if(shardOf)quest.push({id:'dungeon-'+shardOf.set+'-shard',title:'ดันเจี้ยนปาร์ตี้ · ได้ทุกครั้งที่เคลียร์ดัน',count:1,steps:[]});
   if(it?.classReward)quest.push({id:'class-reward192',title:'เปลี่ยนอาชีพ · กล่องเลือกเซ็ตแดง Lv.'+it.level,count:1,steps:[]});
   if(it?.set&&!it.classReward)drop.push(...Object.entries(DROPS).filter(([,d])=>d.sets?.tier===it.set.tier&&(it.slot==='armor'?d.sets.armor:d.sets.piece)).map(([monster,d])=>({monster,name:monsterById.get(monster)?.name??monster,level:monsterById.get(monster)?.level??1,chance:it.slot==='armor'?d.sets.armor/5:d.sets.piece/15,count:1,maps:monsterMaps(monster),boss:!!(monsterById.get(monster)?.boss||monsterById.get(monster)?.elite),worldBoss:!!monsterById.get(monster)?.worldBoss,respawn:monsterById.get(monster)?.respawn??null})));
   const recipe=RECIPES.find(r=>r.out===id)??null;

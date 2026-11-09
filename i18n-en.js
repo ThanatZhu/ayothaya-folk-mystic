@@ -5748,5 +5748,7 @@ Object.assign(globalThis.I18N_EN,{
  "เติมเงิน": "Top-up"
 });
 Object.assign(globalThis.I18N_EN,{
- "เฉพาะเจ้าของเกมเท่านั้นที่สั่งล้างทองแท่งได้": "Only the game owner can start the gold bar wipe"
+ "เฉพาะเจ้าของเกมเท่านั้นที่สั่งล้างทองแท่งได้": "Only the game owner can start the gold bar wipe",
+ "มุมมอง": "View",
+ "· กดเพื่อสลับมุมมอง": "· Click to change view"
 });

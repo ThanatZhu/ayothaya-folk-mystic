@@ -9,9 +9,10 @@ const ART=new Set(['straw','rat','hopper','monkey','vine','lantern','rat-chief',
  'walking-bricks','stone-gate-guardian','abandoned-bell-curse','mist-cap','crystal-tusk-boar','leaf-flame-bird','vine-tiger','woodland-elephant',
  'cave-crystal-toad','jade-scale-hatchling','glowstone-crab','stream-serpent','underwater-naga-guardian','stone-mist-hare','wind-mountain-bird',
  'crystal-horn-goat','stone-garuda','cloud-peak-yaksha','lantern-lord']);
-// Each frame's transparent window, % of the card [left,right,top,bottom], measured from the frames and grown .6% under
-// the frame edge. The pictures are cropped to these shapes, so they fill the window exactly and never spill outside.
-export const CARD_WINDOW={normal:[6.3,6.2,8.6,15],orange:[7.7,7.7,11.1,15],red:[8.8,8.9,15,16.8],rainbow:[8.7,8.7,16,17.2]};
+// Each frame's transparent window, % of the card [left,right,top,bottom]: the widest opening measured along several lines
+// of each frame (not the centre, where the top finial hangs), grown 1.2% under the frame edge so no gap shows.
+// The pictures are cropped to these shapes, so they fill the window exactly and never spill outside.
+export const CARD_WINDOW={normal:[5.7,5.6,6.6,14.4],orange:[7.1,7.1,8.7,14.4],red:[8.2,8.3,13.3,16.2],rainbow:[8.1,8.1,13.3,13.8]};
 const base=id=>typeof id==='string'&&id.startsWith('card-')?id.slice(5):null;
 // ธรรมดา normal monsters and chiefs · ส้ม room bosses · แดง map world bosses and MVPs · รุ้ง awakened bosses
 export function cardTier(id){const t=TYPES.get(base(id));if(!t)return 'normal';return t.awakened?'rainbow':t.worldBoss||t.mvp?'red':t.boss?'orange':'normal';}
@@ -22,11 +23,11 @@ export function cardBackground(id){const a=cardArt(id);if(!a)return '';const [l,
  const w=(1-l-r)*k,h=1-t-b,x=(1-k)/2+l*k,y=t,pct=(off,size)=>+(off/(1-size)*100).toFixed(2)+'%',p=v=>+(v*100).toFixed(2)+'%';
  return `background-image:url(${a.frame}),url(${a.src});background-size:contain,${p(w)} ${p(h)};background-position:center,${pct(x,w)} ${pct(y,h)};background-repeat:no-repeat,no-repeat;background-color:transparent`;}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-// For larger views: picture, frame over it, and the name on the plaque.
+// For larger views: picture, frame over it, and the name on the plaque (owner: no "การ์ด" prefix, it is plainly a card).
 export function cardImageHTML(id,{name='',cls='',lazy=true}={}){
  const a=cardArt(id);if(!a)return '';const load=lazy?' loading="lazy"':'';
  const [l,r,t,b]=a.window;
- return `<span class="card-art card-art-${a.tier} ${esc(cls)}"><img class="card-art-picture" style="left:${l}%;top:${t}%;width:${+(100-l-r).toFixed(2)}%;height:${+(100-t-b).toFixed(2)}%" src="${a.src}" alt="${esc(name)}" width="384" height="576"${load} decoding="async"><img class="card-art-frame" src="${a.frame}" alt="" width="384" height="576"${load} decoding="async" aria-hidden="true">${name?`<span class="card-art-name">${esc(name)}</span>`:''}</span>`;
+ return `<span class="card-art card-art-${a.tier} ${esc(cls)}"><img class="card-art-picture" style="left:${l}%;top:${t}%;width:${+(100-l-r).toFixed(2)}%;height:${+(100-t-b).toFixed(2)}%" src="${a.src}" alt="${esc(name)}" width="384" height="576"${load} decoding="async"><img class="card-art-frame" src="${a.frame}" alt="" width="384" height="576"${load} decoding="async" aria-hidden="true">${name?`<span class="card-art-name">${esc(String(name).replace(/^การ์ด/,''))}</span>`:''}</span>`;
 }
 // Layout of the layered card, injected once in the browser (the server never loads this file for drawing).
 if(typeof document!=='undefined'&&!document.getElementById('card-art-style')){const st=document.createElement('style');st.id='card-art-style';

@@ -5784,3 +5784,7 @@ Object.assign(globalThis.I18N_EN,{
  "· เปลี่ยนล่าสุด": "· Last changed",
  "· ปุ่มนี้เปิดได้หลังล้างทองแท่งเสร็จแล้ว": "· Available after the Gold Bar wipe has finished"
 });
+Object.assign(globalThis.I18N_EN,{
+ "รับของคืน/ทองแท่ง": "Collect items/Gold Bars back",
+ "รับของ/ทองแท่ง": "Collect items/Gold Bars"
+});

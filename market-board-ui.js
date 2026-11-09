@@ -22,7 +22,7 @@ const MARKET_ERRORS={'gold-market-closed':'ตลาดทองแท่งย�
 const when=t=>t?new Date(t).toLocaleString(globalThis.I18N?.locale??'th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
 
 export function createMarketBoardUI({game,map,scene,camera,bagUI}){
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./market-board-layout.css?v=gold289',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./market-board-layout.css?v=gold290',import.meta.url).href;document.head.append(css);
  const world=game.world,cmd=(type,data)=>world.market?.(type,data),fail=c=>world.notice(MARKET_ERRORS[c]??ITEM_ERRORS[c]??c);
  let tab='search',results={query:'',rows:[],prices:{}},mine={shops:[],perks:tradePerks(0)},shops=[],kind='sell',shown='',goldMarket=false,shopCur='coins';
  let browse={currency:'all',query:'',kind:'sell',category:'all',sort:'newest',minPrice:'',maxPrice:'',page:1,pageSize:MARKET_PAGE_SIZE},requestId=0,pending=false,searchTimer=null,renderedBrowse='',filtersExpanded=false,demandExpanded=false;
@@ -71,13 +71,15 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
  game.onEvent(e=>{
   if(e.type==='shops'){shops=e.list.filter(s=>s.status!=='closed'&&shopHasListings(s));syncSigns();if(tab!=='open')render(true);} // never wipe a half-filled open-shop form
   if(e.type==='shopsClosed'){const ids=new Set(e.ids??[]);shops=shops.filter(s=>!ids.has(s.id));results={...results,rows:results.rows.filter(r=>!ids.has(r.shop))};syncSigns();if(tab!=='open')render(true);}
-  if(e.type==='shopMine'){mine={shops:e.shops,perks:e.perks};goldMarket=e.goldMarket===true;if(!goldMarket)shopCur='coins';if(tab!=='open')render(true);}
+  if(e.type==='shopMine'){mine={shops:e.shops,perks:e.perks};goldMarket=e.goldMarket===true;if(!goldMarket)shopCur='coins';if(tab!=='open')render(true);else syncCurrencyRow();}
   if(e.type==='marketResults'&&dialog.open&&tab==='search'&&(e.requestId==null||e.requestId===requestId)){results=e;goldMarket=e.goldMarket===true;pending=false;browse.page=e.page??1;render(true);}
  });
 
  const listRow=(id,r,btn,c='coins')=>`<li data-id="${esc(id)}">${icon(id)}<div><strong>${esc(itemDef(id)?.name)}</strong><small>${pay(r.price,c)} · เหลือ ${r.count}</small></div>${btn}</li>`;
  const qty=max=>`<span class="qty"><button type="button" data-q="-1" aria-label="ลด">−</button><output>1</output><button type="button" data-q="1" data-max="${max}" aria-label="เพิ่ม">+</button></span>`;
  const wireQty=body=>body.querySelectorAll('.qty').forEach(q=>{const out=q.querySelector('output'),max=+q.querySelector('[data-max]').dataset.max;q.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{out.value=String(Math.min(max,Math.max(1,+out.value+ +b.dataset.q)));});});
+ // The open-shop form is never redrawn mid-typing, so a switch flip only toggles the currency row.
+ function syncCurrencyRow(){const row=$('shop-currency-row');if(!row)return;row.hidden=!goldMarket;row.querySelectorAll('[data-shop-cur]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.shopCur===shopCur)));}
  function render(force=false){
   if(!dialog.open)return;const bag=bagUI.bag(),sig=JSON.stringify([tab,kind,results,mine,shops,counter,bag,pending,goldMarket,shopCur]);if(!force&&sig===shown)return;shown=sig;
   dialog.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
@@ -117,7 +119,7 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
    const here=inMarket(map.id,world.player.x,world.player.z),list=kind==='sell'?Object.entries(bag.items).filter(([id])=>TRADABLE(id)):[];
    body.innerHTML=`<p class="market-note">${tr('ร้านเปิดได้ 24 ชั่วโมง · ขายหมดหรือรับซื้อครบจะปิดอัตโนมัติ · ต้องตั้งร้านใหม่เพื่อขายต่อ')}</p><p class="market-note">ร้านค้างเปิดต่อแม้ออกจากเกม · ตั้งได้ที่${MARKET_ZONE.name} (${here?'คุณอยู่ในเขตตลาดแล้ว':'ยังไม่อยู่ในเขตตลาด'}) · ภาษีขาย ${Math.round(perks.tax*1000)/10}% · สูงสุด ${perks.slots} ชนิด · ${perks.shops} ร้าน</p>
     <div class="board-kind"><button type="button" data-kind="sell" aria-pressed="${kind==='sell'}">ร้านขายของ</button><button type="button" data-kind="buy" aria-pressed="${kind==='buy'}">ร้านรับซื้อ</button></div>
-    ${goldMarket?`<div class="board-kind board-shop-currency" role="group" aria-label="สกุลเงินของร้าน"><button type="button" data-shop-cur="coins" aria-pressed="${shopCur==='coins'}">เบี้ย</button><button type="button" data-shop-cur="gold" aria-pressed="${shopCur==='gold'}">ทองแท่ง</button></div>`:''}
+    <div class="board-kind board-shop-currency" id="shop-currency-row" ${goldMarket?'':'hidden'} role="group" aria-label="สกุลเงินของร้าน"><button type="button" data-shop-cur="coins" aria-pressed="${shopCur==='coins'}">เบี้ย</button><button type="button" data-shop-cur="gold" aria-pressed="${shopCur==='gold'}">ทองแท่ง</button></div>
     <label class="market-coin">ชื่อร้าน <input id="shop-title" maxlength="24" placeholder="${kind==='buy'?'รับซื้อของ':'ร้านค้าง'}"></label>
     ${kind==='sell'?`<div class="board-offer-columns" aria-hidden="true"><span>สินค้า</span><span>จำนวน</span><span>ราคาต่อชิ้น</span></div><ul class="market-list">${list.map(([id,n])=>`<li data-id="${esc(id)}"><input type="checkbox" aria-label="ขาย ${esc(itemDef(id)?.name)}">${icon(id)}<div><strong>${esc(itemDef(id)?.name)}</strong><small>มี ${n}${(()=>{const p=results.prices?.[priceKey(id,shopCur)];return p?' · ราคากลาง '+price(p.avg,shopCur):''})()}</small></div><input class="shop-count" type="number" min="1" max="${n}" value="${n}" aria-label="จำนวน"><input class="shop-price" type="number" min="1" value="10" aria-label="ราคาต่อชิ้น (${CURRENCY_LABEL[shopCur]})"></li>`).join('')||'<li class="empty">ไม่มีของที่ขายได้ในกระเป๋า</li>'}</ul>`
      :`<p class="market-note">${shopCur==='gold'?`ใส่ชื่อของที่อยากรับซื้อ จำนวน และราคาต่อชิ้น · ร้านจะกันทองแท่งไว้ตามยอดรวม · จ่ายจากทองแท่งที่มี ${normalizePetAccount(world.petCollection).balance.toLocaleString('th-TH')}`:`ใส่ชื่อของที่อยากรับซื้อ จำนวน และราคาต่อชิ้น · ร้านจะกันเบี้ยไว้ตามยอดรวม · จ่ายจากเบี้ยในกระเป๋า ${bag.coins.toLocaleString('th-TH')}`}</p><div class="board-want"><input id="want-item" placeholder="ชื่อของ เช่น ฟางมัดเรืองแสง" aria-label="ชื่อของที่รับซื้อ"><input id="want-count" type="number" min="1" value="10" aria-label="จำนวน"><input id="want-price" type="number" min="1" value="5" aria-label="ราคาต่อชิ้น"></div>`}
@@ -136,10 +138,10 @@ export function createMarketBoardUI({game,map,scene,camera,bagUI}){
   if(tab==='mine'){
    body.innerHTML=`<p class="market-note">ทักษะการค้า Lv.${perks.level} · ${money(perks.xp)}${perks.next?' / '+money(perks.next):''} · ร้านค้าง ${perks.shops} · ${perks.slots} ชนิด/ร้าน · ภาษี ${Math.round(perks.tax*1000)/10}% · ส่วนลดร้าน NPC ${Math.round(perks.npcDiscount*100)}%</p>`+
     (mine.shops.length?mine.shops.map(s=>`<section class="market-stall" data-shop="${esc(s.id)}" data-shop-status="${s.status==='closed'?'closed':'open'}"><h3>${s.kind==='buy'?tr('รับซื้อ · '):''}${esc(s.title)} <small>${s.kind==='buy'?(shopCurrency(s)==='gold'?'ทองแท่งที่กันไว้ ':'เบี้ยที่กันไว้ ')+pay(s.escrow,shopCurrency(s)):''}</small></h3><p class="market-note shop-deadline">${s.status==='closed'?tr(s.closedReason==='expired'?'ปิดอัตโนมัติ · ครบ 24 ชั่วโมง':s.closedReason==='filled'?'ปิดอัตโนมัติ · รับซื้อครบแล้ว':'ปิดอัตโนมัติ · ขายหมดแล้ว'):tr('หมดเวลาร้าน')+' '+when(s.expiresAt)}</p>
-     <ul class="market-list">${Object.entries(s.items).map(([id,r])=>listRow(id,r,'')).join('')||'<li class="empty">ขายหมดแล้ว</li>'}</ul>
+     <ul class="market-list">${Object.entries(s.items).map(([id,r])=>listRow(id,r,'',shopCurrency(s))).join('')||'<li class="empty">ขายหมดแล้ว</li>'}</ul>
      <p class="market-note">รอรับ: ${pay(s.pouch?.coins,'coins')}${s.pouch?.gold?' · '+pay(s.pouch.gold,'gold'):''}${Object.entries(s.pouch?.items??{}).map(([id,n])=>' · '+esc(itemDef(id)?.name)+' ×'+n).join('')}</p>
      <details><summary>ประวัติการขาย (${s.log?.length??0})</summary><ul class="board-log">${(s.log??[]).map(l=>`<li>${when(l.t)} · ${esc(l.who)} ${l.kind==='sold'?'ซื้อ':'ขายให้'} ${esc(itemDef(l.item)?.name)} ×${l.count} · ${l.gold!=null?pay(l.gold,'gold'):pay(l.coins,'coins')}</li>`).join('')||'<li>ยังไม่มี</li>'}</ul></details>
-     <div class="market-actions"><button type="button" data-a="shopCollect">${s.status==='closed'?tr('รับของคืน/เบี้ย'):tr('รับของ/เบี้ย')}</button>${s.status==='closed'?'':'<button type="button" data-a="shopClose">ปิดร้าน</button>'}</div></section>`).join(''):'<p class="market-note">ยังไม่มีร้านค้าง · ไปที่แท็บ "เปิดร้าน"</p>');
+     <div class="market-actions"><button type="button" data-a="shopCollect">${shopCurrency(s)==='gold'?(s.status==='closed'?tr('รับของคืน/ทองแท่ง'):tr('รับของ/ทองแท่ง')):s.status==='closed'?tr('รับของคืน/เบี้ย'):tr('รับของ/เบี้ย')}</button>${s.status==='closed'?'':'<button type="button" data-a="shopClose">ปิดร้าน</button>'}</div></section>`).join(''):'<p class="market-note">ยังไม่มีร้านค้าง · ไปที่แท็บ "เปิดร้าน"</p>');
    body.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>cmd(b.dataset.a,{shop:b.closest('[data-shop]').dataset.shop}));
   }
   if(tab==='shop'){

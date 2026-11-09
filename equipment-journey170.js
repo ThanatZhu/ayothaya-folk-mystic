@@ -1,6 +1,6 @@
 import {ITEMS,CLASSES,SLOTS,GRADES,FAMILIES,familyName,CHAPTERS,REFINE_MAX,REFINE_TIERS,WORLD_MAP_BOSSES,levelChapter,cardSlots,featuredGear,bossGear,chapterGear,itemEffects,createItemGuide,searchItems} from './equipment-journey-data170.js?v=surfaces222';
 import {itemDef,ATLASES,ITEM_ATLAS,ATLAS_LAYOUTS} from './items.js?v=tier167';
-import {cardArt} from './card-art.js?v=278';
+import {cardArt,cardBackground} from './card-art.js?v=278';
 const $=id=>document.getElementById(id),node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!=null)el.textContent=text;return el;};
 const params=new URLSearchParams(location.search),selected=CLASSES.find(c=>c.id===params.get('class'))?.id??'swordsman';
 let classId=selected,level=Math.max(1,Math.min(99,Number(params.get('level'))||1)),guide,visible=18,previousFocus=null;
@@ -10,7 +10,7 @@ const percent=n=>num(n*100)+'%';
 const tints={wind:'hue-rotate(95deg) saturate(1.5) brightness(1.15)',gold:'sepia(.55) saturate(2.4) hue-rotate(-10deg) brightness(1.12)',violet:'hue-rotate(215deg) saturate(1.7) brightness(1.05)'};
 function art(id){const it=itemDef(id),el=node('span','item-art');el.setAttribute('aria-hidden','true');if(!it)return el;
  const card=it.kind==='card'?cardArt(id):null;
- if(card){el.style.backgroundImage=`url("${card.frame}"),url("${card.src}")`;el.style.backgroundSize='contain';el.style.backgroundPosition='center';el.style.backgroundRepeat='no-repeat';return el;}
+ if(card){el.style.cssText+=';'+cardBackground(id);return el;}
  const direct=it.image??(it.monsterCard?'assets/cards147/'+id.slice(5)+'.webp':null);
  if(direct){el.style.backgroundImage=`url("${direct}")`;el.style.backgroundSize='contain';el.style.backgroundPosition='center';}
  else{const {columns=6,rows=4}=ATLAS_LAYOUTS[it.atlas]??{};el.style.backgroundImage=`url("${ATLASES[it.atlas]??ITEM_ATLAS}")`;el.style.backgroundSize=columns*100+'% '+rows*100+'%';el.style.backgroundPosition=(it.icon%columns)/(columns-1)*100+'% '+Math.floor(it.icon/columns)/(rows-1)*100+'%';}

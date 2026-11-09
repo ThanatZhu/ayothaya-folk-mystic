@@ -22,3 +22,7 @@ test('the frame sits on top of the picture in both CSS and HTML forms',()=>{
  assert.ok(html.indexOf('woodland-elephant.webp')<html.indexOf('frame-red.webp'),'picture first, frame over it');
  assert.match(html,/card-art-name">การ์ดคชสารพฤกษ์</);
 });
+test('the picture sits inside the frame window, never past the frame (owner 9 Nov)',()=>{
+ const html=cardImageHTML('card-woodland-elephant');assert.match(html,/card-art-picture" style="left:8.8%;top:15%;width:82.3%;height:68.2%/);
+ assert.match(cardBackground('card-vine-tiger'),/background-size:contain,58.33% 76.4%/);
+});

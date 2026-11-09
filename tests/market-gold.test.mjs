@@ -46,3 +46,9 @@ test('gold prices are recorded apart',()=>{
  assert.equal(priceKey('hp-large','gold'),'gold:hp-large');assert.equal(priceKey('hp-large'),'hp-large');
  const p=recordPrice({},'gold:hp-large',50,1000);assert.ok(p['gold:hp-large']);assert.equal(priceHint(p,'gold:hp-large',50),null);
 });
+test('browse gives gold rows the gold reference and searchMarket orders coins before gold',()=>{
+ const mk=(id,currency,price)=>({id,kind:'sell',currency,ownerKey:id,ownerName:id,title:id,x:1,z:1,items:{'hp-large':{count:1,price}},escrow:0,pouch:{coins:0,items:{}},createdAt:1,expiresAt:1e12,status:'open'});
+ const prices={'hp-large':{last:10,avg:10,n:5,t:1,days:[]},'gold:hp-large':{last:77,avg:77,n:3,t:1,days:[]}},shops=[mk('g','gold',5),mk('c','coins',500)];
+ const b=browseMarket(shops,[],{sort:'popular'},prices,5);assert.equal(b.prices['gold:hp-large'].avg,77);assert.equal(b.prices['hp-large'].avg,10);
+ assert.deepEqual(searchMarket(shops,[],'hp-large',5).map(x=>x.shop),['c','g']);
+});

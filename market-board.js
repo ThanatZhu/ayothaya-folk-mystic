@@ -119,7 +119,7 @@ export function searchMarket(shops,stalls,query,now=Date.now()){
  const rows=[];
  for(const s of shops.filter(s=>shopIsOpen(s,now)))for(const [id,r] of Object.entries(s.items))if(match(id))rows.push({kind:s.kind,shop:s.id,live:false,name:s.ownerName,title:s.title,item:id,price:r.price,count:r.count,currency:shopCurrency(s),x:s.x,z:s.z,mapId:MARKET_ZONE.mapId});
  for(const s of stalls)for(const [id,r] of Object.entries(s.items))if(match(id))rows.push({kind:'sell',owner:s.owner,live:true,name:s.name,title:s.title,item:id,price:r.price,count:r.count,currency:'coins',x:s.x,z:s.z,mapId:s.mapId});
- return rows.sort((a,b)=>a.kind===b.kind?(a.kind==='buy'?b.price-a.price:a.price-b.price):a.kind==='sell'?-1:1).slice(0,40);
+ return rows.sort((a,b)=>a.kind===b.kind?(a.currency==='gold')-(b.currency==='gold')||(a.kind==='buy'?b.price-a.price:a.price-b.price):a.kind==='sell'?-1:1).slice(0,40);
 }
 // What players see of a shop (no log or pouch of other people's shops).
 export const publicShop=s=>({id:s.id,kind:s.kind,currency:shopCurrency(s),title:s.title,ownerName:s.ownerName,x:s.x,z:s.z,items:s.items,createdAt:s.createdAt??0,expiresAt:shopDeadline(s),status:s.status??'open',...(s.closedReason?{closedReason:s.closedReason}:{})});
@@ -159,9 +159,9 @@ export function browseMarket(shops,stalls,input={},prices={},now=Date.now()){
  });
  const latest=(a,b)=>b.createdAt-a.createdAt||String(a.shop??a.owner).localeCompare(String(b.shop??b.owner))||a.item.localeCompare(b.item);
  const cur=(a,b)=>(a.currency==='gold')-(b.currency==='gold');
- filtered.sort((a,b)=>options.sort==='price-low'?cur(a,b)||a.price-b.price||latest(a,b):options.sort==='price-high'?cur(a,b)||b.price-a.price||latest(a,b):options.sort==='popular'?(units.get(priceKey(b.item))??0)-(units.get(priceKey(a.item))??0)||latest(a,b):latest(a,b));
+ filtered.sort((a,b)=>options.sort==='price-low'?cur(a,b)||a.price-b.price||latest(a,b):options.sort==='price-high'?cur(a,b)||b.price-a.price||latest(a,b):options.sort==='popular'?(units.get(priceKey(b.item,b.currency))??0)-(units.get(priceKey(a.item,a.currency))??0)||latest(a,b):latest(a,b));
  const total=filtered.length,pages=Math.max(1,Math.ceil(total/options.pageSize)),page=Math.min(options.page,pages),pageRows=filtered.slice((page-1)*options.pageSize,page*options.pageSize);
- const reference={};for(const r of pageRows){const key=priceKey(r.item),p=prices[key];if(p)reference[key]={last:p.last,avg:p.avg,n:p.n,t:p.t};}
+ const reference={};for(const r of pageRows){const key=priceKey(r.item,r.currency),p=prices[key];if(p)reference[key]={last:p.last,avg:p.avg,n:p.n,t:p.t};}
  const selling=rows.filter(r=>r.kind==='sell');
  return {...options,page,pages,total,rows:pageRows,prices:reference,trending:demand.slice(0,5),day:marketDay(now),
   stats:{listings:selling.length,sellers:new Set(selling.map(r=>r.shop?'shop:'+r.shop:'stall:'+r.owner)).size,unitsToday:demand.reduce((n,d)=>n+d.units,0)}};

@@ -13,8 +13,12 @@ function list(el,totals,labels,color){
   const bar=document.createElement('div');bar.className='econ-bar';bar.style.setProperty('--c',color);const fill=document.createElement('i');fill.style.width=pct.toFixed(1)+'%';bar.append(fill);
   r.append(name,val,bar);el.append(r);}
 }
+// Axis top rounded up to 10, 20, 50, 100…, so the half-way labels stay whole numbers (an empty day used to read 1,1,0,1,1).
+const niceMax=m=>{if(!(m>10))return 10;const p=10**Math.floor(Math.log10(m));return [1,2,5,10].map(f=>f*p).find(v=>v>=m);};
+const thaiDay=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok'}).format(new Date());
+const clock=t=>new Date(t).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour12:false});
 function chart(days){
- const W=Math.max(320,Math.min(760,$('econ-chart').clientWidth||760)),H=W<500?240:300,L=60,R=10,T=14,B=28,max=Math.max(1,...days.map(d=>Math.max(d.totalIn,d.totalOut))),pw=(W-L-R)/days.length,bw=Math.max(4,Math.min(26,pw*.34));
+ const W=Math.max(320,Math.min(760,$('econ-chart').clientWidth||760)),H=W<500?240:300,L=60,R=10,T=14,B=28,max=niceMax(Math.max(...days.map(d=>Math.max(d.totalIn,d.totalOut)))),pw=(W-L-R)/days.length,bw=Math.max(4,Math.min(26,pw*.34));
  const y0=T+(H-T-B)/2,sc=(H-T-B)/2/max,y=v=>y0-v*sc,ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('role','img');svg.setAttribute('aria-label','กราฟเบี้ยเข้า-ออกรายวัน');
  const el=(tag,a)=>{const e=document.createElementNS(ns,tag);for(const k in a)e.setAttribute(k,a[k]);svg.append(e);return e;};
  for(const v of [max,max/2,0,-max/2,-max]){el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),stroke:v===0?'#c6a16499':'#c6a16426','stroke-width':1});el('text',{x:L-8,y:y(v)+4,'text-anchor':'end'}).textContent=fmt(Math.abs(v));}
@@ -37,13 +41,15 @@ function render(){
  const days=data.days.slice(-range),today=data.days.at(-1);
  $('s-held').textContent=fmt(data.held);$('s-chars').textContent=fmt(data.characters);
  $('s-in').textContent=fmt(today?.totalIn??0);$('s-out').textContent=fmt(today?.totalOut??0);$('s-net').textContent=signed(today?.net??0);
- chart(days.length?days:[{day:'----------',totalIn:0,totalOut:0,net:0}]);
+ chart(days.length?days:[{day:thaiDay(),totalIn:0,totalOut:0,net:0}]);
  list($('econ-sources'),sumBy(days,'in'),data.sources,'var(--in)');list($('econ-sinks'),sumBy(days,'out'),data.sinks,'var(--out)');
 }
 document.querySelectorAll('[data-days]').forEach(b=>b.addEventListener('click',()=>{range=+b.dataset.days;document.querySelectorAll('[data-days]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));if(data)render();}));
+// Fresh numbers every 30 s while the tab is visible (the host may serve the same answer for up to a minute).
 async function load(){
+ if(document.hidden&&data)return;
  try{const r=await fetch(api,{cache:'no-store'});if(!r.ok)throw Error(r.status);data=await r.json();
-  $('econ-status').hidden=true;for(const id of ['econ-stats','econ-flow','econ-lists'])$(id).hidden=false;render();}
- catch{if(!data)$('econ-status').textContent='โหลดข้อมูลไม่ได้ ลองใหม่อีกครั้งภายหลัง';}
+  $('econ-status').textContent=`อัปเดตล่าสุด ${clock(data.updatedAt??Date.now())} · ดึงข้อมูลใหม่ทุก 30 วินาที`;for(const id of ['econ-stats','econ-flow','econ-lists'])$(id).hidden=false;render();}
+ catch{$('econ-status').textContent=data?`เชื่อมต่อไม่ได้ · แสดงข้อมูลเมื่อ ${clock(data.updatedAt??Date.now())}`:'โหลดข้อมูลไม่ได้ ลองใหม่อีกครั้งภายหลัง';}
 }
-load();setInterval(load,300000);let resized;addEventListener('resize',()=>{clearTimeout(resized);resized=setTimeout(()=>{if(data)render();},150);});
+load();setInterval(load,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)load();});let resized;addEventListener('resize',()=>{clearTimeout(resized);resized=setTimeout(()=>{if(data)render();},150);});

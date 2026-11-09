@@ -5662,3 +5662,7 @@ Object.assign(globalThis.I18N_EN,{
  "ไม่พบสินค้าที่ค้นหา": "No items found", "ในกระเป๋า:": "In bag:", "โปรด": "Favorite", "เลือกสินค้า ตรวจจำนวนและยอดทองแท่ง แล้วกดซื้อ": "Pick an item, check the amount and gold bars, then buy",
  "ได้รับ {0} · ใช้ {1} ทองแท่ง{2}": "Received {0} · spent {1} gold bars{2}"
 });
+Object.assign(globalThis.I18N_EN,{
+ "อัปเดตล่าสุด {0} · ดึงข้อมูลใหม่ทุก 30 วินาที": "Last updated {0} · refreshes every 30 seconds",
+ "เชื่อมต่อไม่ได้ · แสดงข้อมูลเมื่อ {0}": "Cannot connect · showing data from {0}"
+});

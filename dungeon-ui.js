@@ -7,7 +7,6 @@ import {DUNGEON_SLOTS,dungeonPieceId} from './gear-sets.js';
 import {itemDef} from './items.js?v=107';
 import {baseProgress} from './experience.js';
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;};
-const SLOT_NAME={head:'หมวก',armor:'เสื้อ',garment:'ผ้าคลุม',shoes:'รองเท้า'};
 export function createDungeonUI({game,map,worldUI,bagUI}){
  const css=el('link');css.rel='stylesheet';css.href='dungeon-ui.css?v=1';document.head.append(css);
  const send=data=>game.world.market?.('dungeon',data);
@@ -42,9 +41,8 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
    const quit=el('button','dungeon-find','ออกจากรอบนี้');quit.type='button';quit.onclick=()=>{if(confirm('ออกจากรอบดันนี้? ออกแล้วกลับเข้ารอบนี้ไม่ได้'))send({action:'leave'});};actions.append(enter,quit);}
   else actions.append(enter,find);if(acts.enter.reason)actions.append(el('small','dungeon-reason',acts.enter.reason));
   if(queue?.state==='waiting')actions.append(el('small','dungeon-reason','กำลังหาคน · '+DIFFICULTY[queue.difficulty]?.name));detail.append(actions);
-  const have=shards(d),ex=el('div','dungeon-exchange');ex.append(el('h4','','แลกชุดดันสีรุ้ง · มีเศษ '+have.toLocaleString()+'/'+SHARDS_PER_PIECE));
-  const row=el('div','dungeon-exchange-row');for(const slot of DUNGEON_SLOTS){const b=el('button','',SLOT_NAME[slot]);b.type='button';b.disabled=have<SHARDS_PER_PIECE||!game.online;b.onclick=()=>send({action:'exchange',dungeon:d.id,slot});row.append(b);}
-  ex.append(row);detail.append(ex);
+  // owner 9 Nov: no exchange here any more; the shards are crafted into the rainbow pieces from the bag
+  const hint=el('p','dungeon-shard-hint');hint.append(el('span','','มีเศษ'),' '+shards(d).toLocaleString()+' / '+SHARDS_PER_PIECE+' · ',el('span','','คราฟชุดดันสีรุ้งได้ที่ กระเป๋า → คราฟต์ → อุปกรณ์'));detail.append(hint);
  }
  function show(){game.clearInput();openHudPanel(dialog);send({action:'info'});render();}
  button.onclick=()=>dialog.open?dialog.close():show();
@@ -75,7 +73,6 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
   else if(e.type==='dungeonExit'){if(map.dungeon)goHome(e.mapId,300);else{game.world.notice('ออกจากรอบดันแล้ว');send({action:'info'});}}
   else if(e.type==='dungeonEnded'){game.world.notice(e.cleared?'เคลียร์ดันเจี้ยนแล้ว! · กลับอัตโนมัติใน 15 วินาที':'รอบนี้จบแล้ว · กำลังพากลับ');goHome(e.mapId,e.cleared?15000:2000);}
   else if(e.type==='dungeonReward'){const piece=e.piece?itemDef(e.piece)?.name:null;game.world.notice('ได้เศษดัน '+e.shards+(piece?' · '+piece:'')+(e.chest?' · หีบวันนี้เหลือ '+e.chestsLeft:' · หีบวันนี้ครบแล้ว'));}
-  else if(e.type==='dungeonExchanged'){game.world.notice('แลกได้ '+(itemDef(e.item)?.name??'ชุดรุ้ง'));if(dialog.open)render();}
   else if(e.type==='dungeonRun'){runView=e;tracker.hidden=false;goal.textContent=!e.text||e.text===e.name?e.name:e.text.includes(e.name)?e.text:e.name+' · '+e.text;
    if(e.room===0)story('enter');if(e.kind==='boss')story('boss');}
  });

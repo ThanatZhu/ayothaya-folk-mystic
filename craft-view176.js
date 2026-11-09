@@ -4,8 +4,19 @@ import {ITEMS,DROPS,SHOPS,normalizeBag,itemDef} from './items.js?v=amulet-craft1
 import {MONSTER_TYPES} from './combat-core.js?v=surfaces222';
 import {CONQUEST_SHARD} from './rainbow-crafting.js';
 import {recipeAllowed,WEAPON_COLOURS} from './weapon-crafting.js';
+import {DUNGEONS} from './dungeons.js';
 export const craftRecipeLabel=r=>itemDef(r.out).name+(r.weaponGrade!=null?' · '+WEAPON_COLOURS[r.weaponGrade]:'');
 const normalize=s=>String(s??'').normalize('NFKC').toLowerCase().trim();
+// owner 9 Nov: the equipment list folds into sections by where the gear comes from: field tiers, then dungeons, then rainbow sets.
+const FIELD_TIERS=[10,25,40,55,70,85];
+export function craftSection(r){
+ const it=itemDef(r.out);
+ if(it.dungeonSet)return {key:'dg-'+it.dungeonSet,label:'ดันเจี้ยน Lv.'+it.level+' · '+(DUNGEONS.find(d=>d.set===it.dungeonSet)?.name??''),order:1000+it.level};
+ if(it.amulet)return {key:'amulet',label:'เครื่องรางสีรุ้ง',order:3000};
+ if(it.rainbow)return {key:'boss-'+it.level,label:'ชุดบอสสีรุ้ง Lv.'+it.level,order:2000+it.level};
+ const tier=FIELD_TIERS.filter(t=>t<=(it.level??1)).at(-1)??FIELD_TIERS[0];
+ return {key:'field-'+tier,label:'ฟีลด์ Lv.'+tier,order:tier};
+}
 export function craftRecipes(bag,{classId,gender,group='potion',query='',readyOnly=false,translate=s=>s}={}){
  const search=normalize(query);
  return RECIPES.filter(r=>{const it=itemDef(r.out);return it&&!it.retired&&r.group===group&&recipeAllowed(it,{classId,gender})&&(!readyOnly||craftable(bag,r)>0)&&(!search||normalize([r.out,craftRecipeLabel(r),it.text,translate(it.name)].join(' ')).includes(search));});

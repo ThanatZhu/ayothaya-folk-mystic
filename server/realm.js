@@ -213,6 +213,8 @@ export class RealmServer{
    w.emit('stored',{storage:p.storage});return true;
   }
   if(m.type==='craft'){
+   // a mail/auction save writes the bag back afterwards and a trade holds it (dungeon review 9 Nov): no crafting during either
+   if(p.trade)return this.itemFail(p,'trade-busy');if(p.mailMutationBusy)return this.error(p,'server-busy');
    if(now-(p.craftAt??-Infinity)<300)return this.itemFail(p,'craft-rate');p.craftAt=now;
    let r;try{r=craft(p.bag,m.item,m.times,Math.random,p.character);}catch(e){return this.itemFail(p,e.message);}
    this.setBag(p,r.bag,'craft');w.emit('crafted',{item:m.item,count:r.made});this.storyProgress(p,{type:'do',action:'craft'});if(r.items.some(i=>{const it=itemDef(i.id);return it?.slot==='weapon'&&it.grade===0&&!it.rainbow&&it.classes?.includes(p.character.classId);}))this.storyProgress(p,{type:'do',action:'craftWeapon'});

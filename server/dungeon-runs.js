@@ -2,9 +2,8 @@
 // A run reserves one private room per team, like the arena (arena-rooms166.js). Players reach it through the normal
 // travel → join flow; the run remembers where each player stood before and sends them back there afterwards.
 import {randomUUID} from 'node:crypto';
-import {dungeonById,DIFFICULTY,canEnter,READY_SECONDS,MAX_PARTY,PIECE_CHANCE,CHESTS_PER_DAY,SHARDS_PER_PIECE,partyIndex,rollGradeFor,CLEAR_COINS_PER_LEVEL,CLEAR_STONES} from '../dungeons.js';
-import {dungeonPieceId,dungeonRainbowId,DUNGEON_SLOTS,withGrade} from '../gear-sets.js';
-import {normalizeBag} from '../items.js';
+import {dungeonById,DIFFICULTY,canEnter,READY_SECONDS,MAX_PARTY,PIECE_CHANCE,CHESTS_PER_DAY,partyIndex,rollGradeFor,CLEAR_COINS_PER_LEVEL,CLEAR_STONES} from '../dungeons.js';
+import {dungeonPieceId,DUNGEON_SLOTS,withGrade} from '../gear-sets.js';
 import {thaiDay} from '../daily.js';
 import {queueFor,unqueue,acceptOffer} from './dungeon-queue.js';
 import {dungeonRunView,lightLantern} from './dungeon-script.js';
@@ -88,15 +87,6 @@ export function grantRunRewards(realm,run,receipt=null){
   const coins=Math.round(d.level*CLEAR_COINS_PER_LEVEL*diff.mul);realm.grantLoot(p,{coins,items},null,receipt?{encounterId:receipt.encounterId}:null,'dungeon');p.saveNow=true;
   p.world.emit('dungeonReward',{dungeon:d.id,shard:d.shard,shards:diff.shards,piece,coins,stone,stones,chest,chestsLeft:CHESTS_PER_DAY-(p.dungeonChests.counts[d.id]??0)});}
 }
-// 500 shards of a dungeon buy its rainbow piece for one slot.
-export function exchangeShards(realm,p,{dungeon:id,slot}){
- const d=dungeonById(id);if(!d)throw Error('dungeon-unknown');if(!DUNGEON_SLOTS.includes(slot))throw Error('bad-slot');
- // a mail/auction save writes the bag back afterwards and a trade holds it: never exchange during either
- if(p.mailMutationBusy||p.trade)throw Error('dungeon-busy');
- if((p.bag.items[d.shard]??0)<SHARDS_PER_PIECE)throw Error('not-enough');
- const bag=normalizeBag(p.bag);bag.items[d.shard]-=SHARDS_PER_PIECE;if(!bag.items[d.shard])delete bag.items[d.shard];realm.setBag(p,bag);
- const out=dungeonRainbowId(d.set,slot);realm.grantLoot(p,{coins:0,items:[{id:out,count:1}]});p.saveNow=true;p.world.emit('dungeonExchanged',{item:out});return out;
-}
 // The way back: from a dungeon map, only to the remembered map, standing where you were.
 export function dungeonReturnDestination(realm,p,id){
  if(!p.room.map.dungeon||!p.dungeonReturn||p.dungeonReturn.mapId!==id)return null;
@@ -125,7 +115,6 @@ export function dungeonCommand(realm,p,m){
  if(action==='ready')return answerReady(realm,p,m.yes);
  if(action==='leave')return leaveRun(realm,p);
  if(action==='lantern')return lightLantern(realm,p,m.index);
- if(action==='exchange')return exchangeShards(realm,p,{dungeon:m.dungeon,slot:m.slot});
  if(action==='info'){const today=thaiDay(realm.now()),used=p.dungeonChests?.day===today?p.dungeonChests.counts:{},run=dungeonReservation(realm,p.key);p.world.emit('dungeonInfo',{used:{...used},chestsPerDay:CHESTS_PER_DAY,inRun:!!run});if(run?.state?.text)p.world.emit('dungeonRun',dungeonRunView(run));return null;}
  if(action==='queue')return queueFor(realm,p,{dungeon:m.dungeon,difficulty:m.difficulty});
  if(action==='unqueue')return unqueue(realm,p);

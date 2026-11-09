@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {dungeonWorld} from './helpers/dungeon.mjs';
-import {dungeonReservation,grantRunRewards,exchangeShards} from '../server/dungeon-runs.js';
+import {dungeonReservation,grantRunRewards} from '../server/dungeon-runs.js';
 import {dungeonById} from '../dungeons.js';
 import {itemDef} from '../items.js';
 
@@ -34,12 +34,14 @@ test('a full bag sends the piece to mail, never lost',()=>{
  grantRunRewards(w.realm,dungeonReservation(w.realm,p.key));
  assert.ok(pieces(p).length||(p.mailbox?.length??0)>before);
 });
-test('500 shards buy one rainbow piece of the chosen slot',()=>{
- const w=dungeonWorld(),a=w.join('เอ');a.bag.items[D.shard]=499;
- assert.throws(()=>exchangeShards(w.realm,a,{dungeon:'krasue',slot:'head'}),/not-enough/);
- a.bag.items[D.shard]=500;assert.throws(()=>exchangeShards(w.realm,a,{dungeon:'krasue',slot:'weapon'}),/bad-slot/);
- exchangeShards(w.realm,a,{dungeon:'krasue',slot:'head'});
+// owner 9 Nov: the dungeon window exchange is gone; the rainbow piece is crafted from the bag
+test('500 shards craft one rainbow piece of a slot; the dungeon window has no exchange',()=>{
+ const w=dungeonWorld(),a=w.join('เอ');a.bag.items[D.shard]=499;w.tick(400);
+ const craft=()=>w.realm.receive(a.id,{type:'craft',item:'dg-krasue-head-r',seq:a.seq+1,times:1});
+ craft();assert.ok(!a.bag.items['dg-krasue-head-r']);assert.equal(a.bag.items[D.shard],499);
+ a.bag.items[D.shard]=500;w.run(.4);craft();
  assert.equal(a.bag.items['dg-krasue-head-r'],1);assert.ok(!a.bag.items[D.shard]);
+ a.bag.items[D.shard]=500;w.cmd(a,{action:'exchange',dungeon:'krasue',slot:'armor'});assert.ok(!a.bag.items['dg-krasue-armor-r']);assert.equal(a.bag.items[D.shard],500);
 });
 test('the boss kill pays the rewards through finishRun',()=>{
  const w=dungeonWorld(),[a]=w.enter([w.join('เอ')]);const run=dungeonReservation(w.realm,a.key);w.realm.dungeonRandom=()=>.99;

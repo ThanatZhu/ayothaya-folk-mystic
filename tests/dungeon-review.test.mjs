@@ -1,14 +1,15 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {dungeonWorld} from './helpers/dungeon.mjs';
-import {dungeonReservation,grantRunRewards,exchangeShards} from '../server/dungeon-runs.js';
+import {dungeonReservation,grantRunRewards} from '../server/dungeon-runs.js';
 import {MONSTER_TYPES} from '../combat-core.js';
 import {dungeonById} from '../dungeons.js';
 
 const D=dungeonById('krasue');
-test('review: no shard exchange while a mail or auction save is in flight',()=>{
+test('review: no crafting while a mail or auction save is in flight or a trade is open',()=>{
  const w=dungeonWorld(),a=w.join('เอ');a.bag.items[D.shard]=500;a.mailMutationBusy=true;
- assert.throws(()=>exchangeShards(w.realm,a,{dungeon:'krasue',slot:'head'}),/dungeon-busy/);assert.equal(a.bag.items[D.shard],500);
- a.mailMutationBusy=false;a.trade={};assert.throws(()=>exchangeShards(w.realm,a,{dungeon:'krasue',slot:'head'}),/dungeon-busy/);
+ const craft=()=>w.realm.receive(a.id,{type:'craft',item:'dg-krasue-head-r',seq:a.seq+1,times:1});
+ craft();assert.equal(a.bag.items[D.shard],500);
+ a.mailMutationBusy=false;a.trade={};craft();assert.equal(a.bag.items[D.shard],500);
 });
 test('review: only members inside the run room are paid, and the only way out of a dungeon is home',()=>{
  const w=dungeonWorld(),a=w.join('เอ'),b=w.join('บี');w.party(a,b);

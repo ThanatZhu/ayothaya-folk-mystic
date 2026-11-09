@@ -1,7 +1,7 @@
 // Crafting authority stays with the realm; this window only previews and sends a request.
 import {ITEM_ERRORS,itemDef,normalizeBag} from './items.js?v=amulet-craft193';
 import {RECIPES,CRAFT_GROUPS,craftable,craft} from './crafting.js?v=amulet-craft193';
-import {craftRecipes,craftQuote,craftSources,craftRecipeLabel} from './craft-view176.js?v=surfaces222';
+import {craftRecipes,craftQuote,craftSources,craftRecipeLabel,craftSection} from './craft-view176.js?v=surfaces222';
 import {iconStyle} from './bag-ui.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
 import {recipeAllowed} from './weapon-crafting.js';
@@ -21,7 +21,7 @@ export function createCraftUI({game,bagUI,catalog,account}){
  <footer class="craft176-footer"><div class="craft176-quantity"><label for="craft-quantity">จำนวนครั้ง</label><div><button type="button" id="craft-minus" aria-label="ลดจำนวนคราฟต์">−</button><input id="craft-quantity" type="number" min="1" max="99" step="1" value="1" aria-label="จำนวนครั้งที่คราฟต์"><button type="button" id="craft-plus" aria-label="เพิ่มจำนวนคราฟต์">+</button><button type="button" id="craft-max">สูงสุด</button></div></div><div class="craft176-cost"><small>ค่าใช้จ่ายรวม</small><strong id="craft-total"></strong></div><div class="craft176-submit"><p id="craft-note" role="status" aria-live="polite"></p><button type="button" id="craft-make">คราฟต์</button></div></footer>`;
  (document.getElementById('game-shell')??document.body).append(dialog);
  const $=id=>dialog.querySelector('#'+id),list=$('craft-list'),input=$('craft-quantity');
- let group='potion',selected=null,query='',readyOnly=false,quantity=1,sourceId=null,shown='',listSig='',materialSig='',pending=null,lastSuccess=null;
+ let unfolded=new Set(),group='potion',selected=null,query='',readyOnly=false,quantity=1,sourceId=null,shown='',listSig='',materialSig='',pending=null,lastSuccess=null;
  const bagNow=()=>normalizeBag(bagUI.bag()),message=(text,error=false)=>{$('craft-note').textContent=text;dialog.dataset.error=String(error);};
  function receipt(out,count){
   const name=itemDef(out).name;lastSuccess={out,count};$('craft-success').textContent='คราฟต์สำเร็จ · '+name+' ×'+number(count);world.notice('คราฟต์สำเร็จ · '+name+' ×'+number(count));
@@ -45,13 +45,14 @@ export function createCraftUI({game,bagUI,catalog,account}){
   if(e.type==='crafted'&&pending&&e.item===pending.out&&e.count===pending.made){pending.ack=true;render(true);}
   else if(e.type==='notice'&&pending&&failures.has(e.text)){pending=null;message(e.text,true);render(true);}
  });
- function select(out){if(selected===out)return;selected=out;quantity=1;sourceId=null;lastSuccess=null;$('craft-success').textContent='';dialog.classList.remove('craft176-complete');if(!pending)message('');render(true);}
+ const sectionOf=out=>{const r=RECIPES.find(x=>x.out===out);return r?craftSection(r).key:null;};
+ function select(out){if(selected===out)return;selected=out;unfolded.add(sectionOf(out));quantity=1;sourceId=null;lastSuccess=null;$('craft-success').textContent='';dialog.classList.remove('craft176-complete');if(!pending)message('');render(true);}
  function chooseGroup(id){group=id;selected=null;quantity=1;sourceId=null;list.scrollTop=0;render(true);}
  $('craft-close').onclick=()=>dialog.close();$('craft-make').onclick=make;
  dialog.querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>chooseGroup(b.dataset.group));
  dialog.querySelector('.craft176-tabs').onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const tabs=[...dialog.querySelectorAll('[data-group]')],i=tabs.findIndex(b=>b.dataset.group===group),n=e.key==='Home'?0:e.key==='End'?tabs.length-1:(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;chooseGroup(tabs[n].dataset.group);tabs[n].focus();};
  $('craft-search').oninput=e=>{query=e.target.value;render(true);};$('craft-ready').onchange=e=>{readyOnly=e.target.checked;selected=null;render(true);};
- list.onclick=e=>{const b=e.target.closest('[data-recipe]');if(b)select(b.dataset.recipe);};
+ list.onclick=e=>{const h=e.target.closest('[data-section]');if(h){const k=h.dataset.section;if(unfolded.has(k))unfolded.delete(k);else unfolded.add(k);render(true);list.querySelector(`[data-section="${k}"]`)?.focus({preventScroll:true});return;}const b=e.target.closest('[data-recipe]');if(b)select(b.dataset.recipe);};
  list.onkeydown=e=>{if(!['ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();const choices=[...list.querySelectorAll('[data-recipe]')];if(!choices.length)return;const i=choices.findIndex(b=>b.dataset.recipe===selected),n=e.key==='Home'?0:e.key==='End'?choices.length-1:Math.max(0,Math.min(choices.length-1,i+(e.key==='ArrowDown'?1:-1)));select(choices[n].dataset.recipe);list.querySelector(`[data-recipe="${choices[n].dataset.recipe}"]`)?.focus();};
  function setQuantity(n){quantity=n;render(true);}
  input.onchange=()=>setQuantity(input.value);$('craft-minus').onclick=()=>setQuantity(quantity-1);$('craft-plus').onclick=()=>setQuantity(quantity+1);$('craft-max').onclick=()=>setQuantity(craftQuote(bagNow(),RECIPES.find(r=>r.out===selected),quantity,character())?.max??1);
@@ -70,16 +71,21 @@ export function createCraftUI({game,bagUI,catalog,account}){
   if(!dialog.open)return;const bag=bagNow(),bagSig=JSON.stringify(bag);
   if(pending){if(pending.ack&&bagSig!==pending.before){settle();return;}if(performance.now()-pending.at>12000){pending=null;message('ยังไม่ได้รับผล · ตรวจในกระเป๋าก่อนทำซ้ำ',true);}else if(game.networkStatus!=='online'){pending=null;message('การเชื่อมต่อขาด · ตรวจในกระเป๋าก่อนทำซ้ำ',true);}}
   const sig=JSON.stringify([bag,character(),group,query,readyOnly,selected,quantity,sourceId,!!pending]);if(!force&&sig===shown)return;shown=sig;
-  const rows=craftRecipes(bag,{classId:world.profession.id,gender:character().gender,group,query,readyOnly,translate:s=>globalThis.I18N?.t(s)??s});
+  const rows=craftRecipes(bag,{classId:world.profession.id,gender:character().gender,group,query,readyOnly,translate:s=>globalThis.I18N?.t(s)??s}),sectioned=group==='gear';
+  if(sectioned)rows.sort((a,b)=>craftSection(a).order-craftSection(b).order);
   // Keep the selected recipe even when crafting consumes its last materials under the ready filter.
   const current=RECIPES.find(r=>r.out===selected&&r.group===group),valid=current&&recipeAllowed(itemDef(current.out),character())&&(!query||rows.some(r=>r.out===selected));
   if(!valid){selected=rows[0]?.out??null;quantity=1;sourceId=null;lastSuccess=null;}
+  if(sectioned&&selected&&!unfolded.size)unfolded.add(sectionOf(selected));
   const r=RECIPES.find(r=>r.out===selected),q=craftQuote(bag,r,quantity,character());quantity=q?.times??1;
   $('craft-coins').innerHTML=icon('cowrie','small')+number(bag.coins)+' เบี้ย';
   dialog.querySelectorAll('[data-group]').forEach(b=>{const on=b.dataset.group===group;b.setAttribute('aria-selected',String(on));b.tabIndex=on?0:-1;});
   $('craft-found').textContent=number(rows.length)+' สูตร';$('craft-empty').hidden=rows.length>0;
-  const ls=JSON.stringify([rows.map(r=>[r.out,craftable(bag,r)]),selected]);
-  if(ls!==listSig){const scroll=list.scrollTop,focused=document.activeElement?.closest?.('[data-recipe]')?.dataset.recipe;listSig=ls;list.innerHTML=rows.map(r=>{const it=itemDef(r.out),ready=craftable(bag,r)>0,on=r.out===selected;return `<li role="presentation"><button type="button" role="option" aria-selected="${on}" tabindex="${on?0:-1}" data-recipe="${esc(r.out)}">${icon(r.out)}<span><strong>${esc(craftRecipeLabel(r))}</strong><small>${it.level?'Lv.'+it.level+' · ':''}${r.count>1?'ได้ '+r.count+' ชิ้นต่อครั้ง':'ได้ 1 ชิ้น'}</small></span><em class="${ready?'ok':'short'}" aria-label="${ready?'วัตถุดิบครบ':'ขาดวัตถุดิบ'}">${ready?'✓':'!'}</em></button></li>`;}).join('');list.scrollTop=scroll;if(focused)list.querySelector(`[data-recipe="${focused}"]`)?.focus({preventScroll:true});}
+  const ls=JSON.stringify([rows.map(r=>[r.out,craftable(bag,r)]),selected,sectioned&&[...unfolded],!!query]);
+  if(ls!==listSig){const scroll=list.scrollTop,focused=document.activeElement?.closest?.('[data-recipe]')?.dataset.recipe;listSig=ls;const item=r=>{const it=itemDef(r.out),ready=craftable(bag,r)>0,on=r.out===selected;return `<li role="presentation"><button type="button" role="option" aria-selected="${on}" tabindex="${on?0:-1}" data-recipe="${esc(r.out)}">${icon(r.out)}<span><strong>${esc(craftRecipeLabel(r))}</strong><small>${it.level?'Lv.'+it.level+' · ':''}${r.count>1?'ได้ '+r.count+' ชิ้นต่อครั้ง':'ได้ 1 ชิ้น'}</small></span><em class="${ready?'ok':'short'}" aria-label="${ready?'วัตถุดิบครบ':'ขาดวัตถุดิบ'}">${ready?'✓':'!'}</em></button></li>`;};
+   const sections=new Map();if(sectioned)for(const r of rows){const s=craftSection(r);if(!sections.has(s.key))sections.set(s.key,{...s,rows:[]});sections.get(s.key).rows.push(r);}
+   list.innerHTML=!sectioned?rows.map(item).join(''):[...sections.values()].map(s=>{const on=!!query||unfolded.has(s.key),ready=s.rows.filter(r=>craftable(bag,r)>0).length;return `<li role="presentation" class="craft176-section"><button type="button" class="craft176-section-head" data-section="${esc(s.key)}" aria-expanded="${on}"><span><strong>${esc(s.label)}</strong><small>${number(s.rows.length)} สูตร${ready?' · คราฟต์ได้ '+number(ready):''}</small></span><em aria-hidden="true">${on?'▾':'▸'}</em></button></li>`+(on?s.rows.map(item).join(''):'');}).join('');
+   list.scrollTop=scroll;if(focused)list.querySelector(`[data-recipe="${focused}"]`)?.focus({preventScroll:true});}
   $('craft-output').style.cssText=r?iconStyle(r.out):'';$('craft-output').hidden=!r;
   $('craft-item-name').textContent=r?craftRecipeLabel(r):'เลือกสูตรคราฟต์';$('craft-description').textContent=r?(itemDef(r.out).text??''):'';
   $('craft-item-name').style.color=r?.weaponGrade!=null?GRADES[r.weaponGrade].color:'';if(r?.weaponGrade!=null)$('craft-description').textContent+=' · ฟ้า → ม่วง → ส้ม → แดง · ใช้วัตถุดิบจากแมพช่วงเลเวลนี้'+(r.weaponGrade?' · ใช้อาวุธสีก่อนหน้าที่อยู่ในกระเป๋า ไม่ตีบวก ไม่ใส่การ์ด และไม่มีออปชันสุ่ม':' · คราฟต์เริ่มต้นได้สีฟ้าแน่นอน');

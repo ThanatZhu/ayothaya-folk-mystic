@@ -48,7 +48,8 @@ test('catalog search finds all 49 cards and all classes; class weapons top out a
 });
 test('all chapter artwork exists and the public page is reachable from both navigation surfaces',async()=>{
  for(const c of CHAPTERS)await access(new URL('../'+c.image,import.meta.url));
- for(const file of ['index.html','world-atlas.html'])assert.ok((await readFile(new URL('../'+file,import.meta.url),'utf8')).includes('equipment-journey.html'));
+ // owner 9 Nov 2026: no longer in the top bar; the handbook button and the world atlas still lead here
+ for(const file of ['guide.html','world-atlas.html'])assert.ok((await readFile(new URL('../'+file,import.meta.url),'utf8')).includes('equipment-journey.html'));
 });
 
 test('gacha gear sources match the real reward pool without claiming monster drops',()=>{for(const r of AMULET_REWARDS.filter(r=>r.tier!=='material')){const source=guide.sources(r.id);assert.equal(source.gacha.length,1);assert.equal(source.gacha[0].chance,r.rate);assert.equal(source.gacha[0].price,100);assert.equal(source.drop.length,0);}});

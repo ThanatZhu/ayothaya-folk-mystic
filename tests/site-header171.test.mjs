@@ -12,7 +12,8 @@ test('home section links resolve to the landing page from either handbook',()=>{
  for(const page of pages)for(const section of ['features','classes','world','events','news']){
   const link=links.find(h=>h.endsWith('#'+section));assert.ok(link);const target=new URL(link,'https://ayothayaonline.com/'+page);assert.equal(target.pathname,'/');assert.equal(target.hash,'#'+section);
  }
- for(const target of ['guide.html','equipment-journey.html','play.html'])assert.ok(links.includes(target));
+ // owner 9 Nov 2026: the money flow page took the equipment path's place in the top bar
+ for(const target of ['guide.html','database.html','explorer.html','play.html'])assert.ok(links.includes(target));
  assert.match(header,/aria-expanded="false" aria-controls="site-nav"/);assert.match(read('site-header.js'),/url.searchParams.set\('lang',next\)/);
 });
 test('luxury handbook theme retains real illustrations, shared Mali fonts and the source-specific tools',()=>{

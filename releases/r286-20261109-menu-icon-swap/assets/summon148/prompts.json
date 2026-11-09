@@ -1,0 +1,14 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "assets/summon147/flutist.webp",
+  "poses": [
+    {
+      "id": "flutist-rest",
+      "prompt": "Use case: identity-preserve. Edit the attached Thai fantasy musician character cutout for a matched animation pose. Preserve exactly the same young adult Thai male identity, face, dark tied-up hair and gold crown, white-and-jade silk clothing, amber sash, crossed bare legs, carved stone seat, tiny cyan fireflies, painterly rendering, proportions, 3/4 facing right camera and full-body framing. Keep his head, crossed legs and stone seat in the same positions in the canvas for animation alignment. Change only forearms, hands and instrument as specified. Full body on genuine transparent background, no frame, no floor, no text, no new scenery or objects, no multiple poses. Pose: relaxed resting musician before the summoning starts, mouth gently closed and away from the instrument. Both hands hold the same Thai pi woodwind lowered horizontally across his lap. Forearms lowered naturally. He is looking toward the viewer-right clearing with a calm welcoming expression. This must clearly read as NOT playing yet."
+    },
+    {
+      "id": "flutist-lift",
+      "prompt": "Use case: identity-preserve. Edit the attached Thai fantasy musician character cutout for a matched animation pose. Preserve exactly the same young adult Thai male identity, face, dark tied-up hair and gold crown, white-and-jade silk clothing, amber sash, crossed bare legs, carved stone seat, tiny cyan fireflies, painterly rendering, proportions, 3/4 facing right camera and full-body framing. Keep his head, crossed legs and stone seat in the same positions in the canvas for animation alignment. Change only forearms, hands and instrument as specified. Full body on genuine transparent background, no frame, no floor, no text, no new scenery or objects, no multiple poses. Pose: transitional anticipation pose. He is beginning to raise the same Thai pi woodwind from his lap toward his mouth with both hands, forearms halfway raised and instrument tilted diagonally upward. Mouth gently parted but reed is still several centimeters away from lips. Keep the expressive face identical. Distinct from the provided fully-playing pose and from a resting lap pose."
+    }
+  ]
+}

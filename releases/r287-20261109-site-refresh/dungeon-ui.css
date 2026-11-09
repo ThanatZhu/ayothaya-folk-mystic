@@ -1,0 +1,43 @@
+/* Party dungeon window: the frame and green panel come from unified-menu236; this only lays out the content. */
+#dungeon-window{width:min(860px,calc(100vw - 16px));max-height:calc(100dvh - 16px);font-family:var(--font-game);color:#fff0ce}
+#dungeon-window .dungeon-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#dungeon-window h2{font-weight:700;margin:0}
+.dungeon-body{display:grid;grid-template-columns:220px 1fr;gap:14px;overflow:auto}
+.dungeon-list{display:flex;flex-direction:column;gap:8px}
+.dungeon-card{display:grid;grid-template-columns:72px 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;padding:6px;border-radius:8px;border:1px solid #c6a16455;background:#0f201bcc;color:inherit;cursor:pointer}
+.dungeon-card img{grid-row:span 2;width:72px;height:40px;object-fit:cover;border-radius:4px}
+.dungeon-card strong{font-weight:700;font-size:14px}.dungeon-card small{font-variant-numeric:tabular-nums;opacity:.8}
+.dungeon-card.on{border-color:#e9c776;box-shadow:0 0 0 1px #e9c77666}.dungeon-card.locked{opacity:.55}
+.dungeon-cover{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:12/5;background:#0b1512}
+.dungeon-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.dungeon-cover h3,.dungeon-cover span{position:absolute;left:16px;margin:0;text-shadow:0 2px 6px #000c}
+.dungeon-cover h3{top:16px;font-weight:700;font-size:22px}.dungeon-cover span{top:50px;font-variant-numeric:tabular-nums}
+.dungeon-difficulty{display:flex;gap:8px;margin:12px 0}
+.dungeon-difficulty button,.dungeon-actions button,.dungeon-exchange-row button,.dungeon-pop button,.dungeon-leave{font-weight:700;border-radius:8px;border:1px solid #c6a16488;background:#1d3a2f;color:#fff0ce;padding:8px 14px;cursor:pointer}
+.dungeon-difficulty button.on{background:#7a5a21;border-color:#e9c776}
+button:disabled{opacity:.45;cursor:not-allowed}
+.dungeon-drops p{margin:4px 0}.dungeon-chests{font-variant-numeric:tabular-nums;color:#e9c776}
+.dungeon-icons{display:flex;gap:6px;margin-top:6px}.dungeon-icons img{width:40px;height:40px;object-fit:contain;background:#0b1512aa;border-radius:6px}
+.dungeon-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.dungeon-enter{background:#8a6420!important;border-color:#e9c776!important}
+.dungeon-reason{opacity:.8}
+.dungeon-exchange h4{margin:8px 0 6px;font-weight:700;font-variant-numeric:tabular-nums}
+.dungeon-exchange-row{display:flex;flex-wrap:wrap;gap:6px}
+.dungeon-menu-art{width:100%;height:100%;object-fit:contain}
+.dungeon-pop{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:60;min-width:min(340px,calc(100vw - 32px));padding:14px 16px;border-radius:12px;border:1px solid #c6a16488;
+ background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;font-family:var(--font-game);text-align:center;box-shadow:0 10px 30px #0009}
+.dungeon-pop p{margin:0 0 10px;font-weight:700}.dungeon-pop-row{display:flex;gap:8px;justify-content:center}.dungeon-pop-timer{display:block;margin-top:6px;font-variant-numeric:tabular-nums;opacity:.8}
+/* owner 9 Nov: the room goal is one banner at the top centre, under the menu bar, never over the quest card */
+.dungeon-tracker{position:fixed;left:50%;top:calc(max(10px,env(safe-area-inset-top)) + 78px);transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:10px;
+ max-width:max(340px,calc(100vw - 660px));padding:6px 8px 6px 14px;border-radius:999px;border:1px solid #c6a16488;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;font-family:var(--font-game);box-shadow:0 4px 14px #0007}
+.dungeon-tracker[hidden]{display:none}
+.dungeon-goal{margin:0;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dungeon-leave{padding:5px 10px;font-size:12px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.dungeon-light{font-weight:700;white-space:nowrap;flex-shrink:0;padding:6px 14px;border-radius:999px;border:1px solid #f0cf7a;background:linear-gradient(#e8c46a,#a8782c);color:#2a1a08;cursor:pointer;animation:dungeon-glow 1.4s ease-in-out infinite}
+.dungeon-light[hidden]{display:none}
+@keyframes dungeon-glow{50%{box-shadow:0 0 14px #ffd76a}}
+@media (prefers-reduced-motion:reduce){.dungeon-light{animation:none}}
+@media(max-width:700px),(max-height:550px){
+ .dungeon-body{grid-template-columns:1fr}.dungeon-list{flex-direction:row;overflow-x:auto}.dungeon-card{min-width:200px}
+ .dungeon-tracker{top:calc(max(6px,env(safe-area-inset-top)) + 64px);max-width:calc(100vw - 24px)}.dungeon-goal{font-size:12px}
+}

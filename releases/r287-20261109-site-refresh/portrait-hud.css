@@ -1,0 +1,35 @@
+/* 0.122 portrait phones (OPPO Reno8 Z tester): the landscape touch HUD squeezed into a tall screen put the event
+   icons, AUTO/run/emote and a 3-line chat box in the middle of the play area, over the quests. Same elements, new
+   places: shortcuts in a column under the minimap, event icons in the top band, quest cards on the left under them,
+   the middle left clear, chat as one line above the controls (tap to open), AUTO/run/emote above the joystick. */
+@media(orientation:portrait) and (max-width:600px){
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #menu-toggle{left:auto!important;right:8px!important;top:86px!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #mobile-bag-shortcut{left:auto!important;right:8px!important;top:138px!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #mobile-discord{left:auto!important;right:8px!important;top:190px!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #mobile-event-row{left:88px!important;right:auto!important;top:74px!important;transform:none!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #realm-announcement{left:88px!important;right:60px!important;width:auto!important;top:130px!important;transform:none!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #activity-dock{left:0!important;top:168px!important;width:212px!important;--activity-height:240px}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #notice{top:44%!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #emote-open,html body.mobile-play.field-hud.hud63.mobile-reference-ready #run-toggle{top:auto!important;bottom:calc(200px + env(safe-area-inset-bottom))!important;right:auto!important;transform:none!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #emote-open{left:12px!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #run-toggle{left:62px!important}
+ html body.actionbar-mobile.mobile-play.field-hud.hud63.mobile-reference-ready .combat-controls.wheel #auto-control{position:fixed!important;inset:auto!important;left:112px!important;bottom:calc(200px + env(safe-area-inset-bottom))!important;transform:none!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #online-dock.collapsed{left:8px!important;right:8px!important;width:auto!important;max-width:none!important;top:auto!important;bottom:calc(254px + env(safe-area-inset-bottom))!important;height:34px!important;min-height:0!important;transform:none!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #online-dock.collapsed .mobile-preview-line:not(:last-child),html body.mobile-play.field-hud.hud63.mobile-reference-ready #online-dock.collapsed #dock-preview{display:none!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #online-dock:not(.collapsed){left:0!important;right:0!important;width:auto!important;max-width:none!important;top:auto!important;bottom:0!important;height:min(56dvh,460px)!important;transform:none!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #interact{top:auto!important;bottom:calc(300px + env(safe-area-inset-bottom))!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important}
+}
+/* quest cards on a portrait phone: compact text so two cards show, the rest scroll */
+@media(orientation:portrait) and (max-width:600px){
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #activity-dock #quest-title{font-size:12px!important;line-height:1.35!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #activity-dock #quest-hint{font-size:11px!important;line-height:1.35!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #activity-dock #quest-distance{font-size:10px!important}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #activity-dock #training-journal{font-size:10px}
+}
+/* system lines (loot, rewards) as a short toast over the hero instead of filling the one-line chat */
+#loot-toast{display:none}
+@media(orientation:portrait) and (max-width:600px){
+ html body.mobile-play #loot-toast{display:block;position:fixed;left:50%;top:47%;z-index:30;max-width:80vw;padding:5px 14px;border:1px solid #c6a16488;border-radius:999px;background:#152925e6;color:#fff0ce;font:700 12px var(--font-game);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;opacity:0;transform:translate(-50%,6px);transition:opacity .25s,transform .25s}
+ html body.mobile-play #loot-toast.show{opacity:1;transform:translate(-50%,0)}
+ html body.mobile-play.field-hud.hud63.mobile-reference-ready #online-dock.collapsed .mobile-chat-lines:empty::before{content:'💬';opacity:.7}
+}

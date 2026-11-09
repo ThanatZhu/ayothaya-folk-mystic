@@ -123,12 +123,15 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
   }})).catch(e=>console.error('war-mail',e.message)).finally(()=>{warMailTask=null;});return warMailTask;
  };
  realm.onWarRewards=drainWarMail;
+ // A closed socket leaves its peer suspended in the realm for 20 s and a reconnect resumes that in-memory copy, whose
+ // autosave would write over an offline change: treat it as online until the reaper drops it (the row is retried later).
+ const suspendedPeer=uid=>[...realm.peers.values()].some(p=>p.uid===uid);
  const drainClassRewards=()=>{
   if(!classRewards||classRewardTask||closing||reset?.maintenance||!authoritative()||!store?.classRewardPage||!store?.saveClassRewardState||classRewardState?.completedAt)return classRewardTask;
   classRewardTask=trackWrite(classRewardBackfill({store,canWrite:()=>!closing&&!reset?.maintenance&&authoritative(),deliver:async(row,apply)=>{
    const account=[...sessions.values()].filter(s=>s.peer.uid===row.uid),session=account.find(s=>s.peer.slotId===row.slotId);
    if(session)await persistMail(session,apply);
-   else{if(account.length||joinPending.has(row.uid))throw Error('player-online');await store.giveOffline({uid:row.uid,slotId:row.slotId},apply);}
+   else{if(account.length||joinPending.has(row.uid)||suspendedPeer(row.uid))throw Error('player-online');await store.giveOffline({uid:row.uid,slotId:row.slotId},apply);}
   }})).then(state=>{classRewardState=state;}).catch(e=>console.error('class-reward192',e.message)).finally(()=>{classRewardTask=null;});return classRewardTask;
  };
  // Gold wipe (admin, one-off): GET /admin/gold-report, then POST /admin/gold-wipe starts this drain, one page per 10 s tick.
@@ -138,9 +141,9 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
   const account=[...sessions.values()].filter(s=>s.peer.uid===row.uid),session=account.find(s=>s.peer.slotId===row.slotId);
   let removed={wallet:0,mail:0};const apply=r=>{const x=wipe(r);removed=x.removed;return x.record;};
   if(session){await persistMail(session,apply,()=>{session.lease.record={...session.lease.record,goldWipe:1};},'other','wipe');if(removed.wallet+removed.mail)realm.evidence(session.peer,'goldWipe',removed);return removed;}
-  if(account.length||joinPending.has(row.uid))throw Error('player-online');
+  if(account.length||joinPending.has(row.uid)||suspendedPeer(row.uid))throw Error('player-online');
   const record=await store.giveOffline({uid:row.uid,slotId:row.slotId},apply);
-  try{realm.goldEcon.record(-removed.wallet,'wipe');}catch{}
+  try{realm.goldEcon.record(-removed.wallet,'wipe');}catch(e){console.error('gold-book',e.message);}
   if(removed.wallet+removed.mail)realm.evidence({uid:row.uid,slotId:row.slotId,serverId:record.serverId,character:record.character},'goldWipe',removed);return removed;
  };
  const drainGoldWipe=()=>{
@@ -303,6 +306,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
    }
    if((url.pathname==='/admin/gold-report'&&req.method==='GET')||(url.pathname==='/admin/gold-wipe'&&req.method==='POST')){
     if(!authoritative()||!store?.loadGoldWipeState||!store?.listProfiles){reply(503,{error:'authority-unavailable'});return;}
+    if(url.pathname==='/admin/gold-wipe'&&mode!=='local'&&!OWNER_EMAILS.includes(String(who).toLowerCase())){reply(403,{error:'owner-required'});return;} // report stays open to every admin
     let data='';for await(const chunk of req){data+=chunk;if(data.length>4096){reply(413,{error:'too-large'});return;}}
     // report and start run one at a time, and the report is only saved before the wipe starts (the drain owns the state after)
     const job=goldWipeAdmin.catch(()=>{}).then(async()=>{
@@ -474,7 +478,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
    const record=realm.record(s.peer,s.lease.record),gold0=goldOf(record);record.petCollection=result.state;
    let timer;try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('save-timeout')),15000);})]);}
    catch(error){s.closing=true;s.peer.suspended=true;s.released=true;realm.leave(s.peer.id);s.ws.close(4010,'save-failed');throw error;}finally{clearTimeout(timer);} // Reconnect reloads the durable receipt without writing the old collection over it.
-   try{realm.goldEcon.record(goldOf(record)-gold0,action.type==='petDraw'?'gacha':'other');}catch{}s.peer.petCollection=result.state;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return result;
+   try{realm.goldEcon.record(goldOf(record)-gold0,action.type==='petDraw'?'gacha':'other');}catch(e){console.error('gold-book',e.message);}s.peer.petCollection=result.state;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return result;
   });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;}
  }
  async function persistMail(s,apply,applyLive=()=>{},reason='other',goldReason='other'){
@@ -484,7 +488,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
    if(!spendWrite(s))throw Error('rate-limit');
    try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,no)=>{timer=setTimeout(()=>no(Error('save-timeout')),15000);})]);}
    catch(error){s.closing=true;s.released=true;realm.leave(s.peer.id);s.ws.close(4010,'save-failed');throw error;}finally{clearTimeout(timer);}
-   try{realm.goldEcon.record(goldOf(record)-gold0,goldReason);}catch{}
+   try{realm.goldEcon.record(goldOf(record)-gold0,goldReason);}catch(e){console.error('gold-book',e.message);}
    Object.assign(s.peer.character,record.character);s.peer.identityReceipts=record.identityReceipts??s.peer.identityReceipts;s.peer.mailbox=record.mailbox;realm.setBag(s.peer,record.bag,reason);s.peer.petCollection=record.petCollection??s.peer.petCollection;applyLive(record);realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return record;
   });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;s.peer.mailMutationBusy=false;if(!s.closing){for(const gift of s.peer.mailLootQueue??[])realm.grantLoot(s.peer,gift.loot,gift.at,gift.receipt??null,gift.reason);}s.peer.mailLootQueue=[];}
  }
@@ -608,6 +612,8 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
      try{if(recent||deferred)await session.queue;else await checkpoint(session);send({type:'saved',id:message.id});}catch{send({type:'error',code:'save-failed'});ws.close(4010,'save-failed');}return;}
     if(message.type==='travel'){
      if(typeof message.id!=='string'||message.id.length>50||typeof message.destination!=='string')return;
+     // a queued mail/pet write (e.g. the gold wipe) would land after travelRecord is built and be overwritten by it
+     if(session.trainingBusy||session.peer.mailMutationBusy){send({type:'travel-error',id:message.id,code:'server-busy'});return;}
      let destination;try{destination=realm.travelDestination(session.peer,message.destination,{warp:message.warp===true,respawn:message.respawn===true});}catch(e){send({type:'travel-error',id:message.id,code:e.message});return;}
      session.closing=true;session.explicitLeave=true;session.peer.suspended=true;
      const record=realm.record(session.peer,session.lease.record);record.state.mapId=destination.id;record.state.position={...destination.spawn};
@@ -666,7 +672,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
   lastLogSaveCount=realm.logs.length;
   function saveEconomy(){
    if(!econReady||closing||!authoritative())return;
-   if(store?.listProfiles&&Date.now()-heldAt>6*3600e3){heldAt=Date.now();store.listProfiles().then(rows=>{realm.econ.setHeld(rows.reduce((a,r)=>a+(Number(r.record?.bag?.coins)||0),0),rows.length);const g=goldHoldings(rows,realm.mailAnnouncements??[]);realm.goldEcon.setHeld(g.held,g.characters,g.mailGold);}).catch(e=>console.error('economy-held',e.message));}
+   if(store?.listProfiles&&Date.now()-heldAt>6*3600e3){heldAt=Date.now();store.listProfiles().then(rows=>{realm.econ.setHeld(rows.reduce((a,r)=>a+(Number(r.record?.bag?.coins)||0),0),rows.length);const g=goldHoldings(rows,realm.mailAnnouncements??[]);realm.goldEcon.setHeld(g.held,g.holders,g.mailGold);}).catch(e=>console.error('economy-held',e.message));}
    if(store?.saveEconomy&&econDirty()&&Date.now()-econSavedAt>300000){econSavedAt=Date.now();trackWrite(saveBooks()).catch(e=>console.error('economy-save',e.message));}
   }
   const logSaver=setInterval(()=>{if(reset?.maintenance)return;saveEconomy();drainWarMail();drainClassRewards();drainGoldWipe();for(const [serverId,book]of auctionBooks)if(book.lots.some(l=>l.status==='open'&&l.endsAt<=auctionNow()))trackWrite(readAuctions(serverId)).catch(e=>console.error('auction-expiry',e.message));if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount&&Date.now()-lastLogSaveAt>=300000){lastLogSaveCount=realm.logs.length;lastLogSaveAt=Date.now(); // dashboard logs: one write per 5 min, not per 10 s

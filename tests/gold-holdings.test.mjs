@@ -8,11 +8,11 @@ test('counts wallet and unclaimed mail gold',()=>{
  assert.equal(h.held,350);assert.equal(h.holders,2);assert.equal(h.mailGold,200);assert.equal(h.characters,3);
  assert.equal(goldOf(row('b',300).record),300);
 });
-test('announcement gold counts once per character who has not claimed it',()=>{
+test('announcement gold is not counted: announcements can never be claimed',()=>{
  const ann=[{...mail('announce1',100),serverId:'all'}];
  const rows=[row('a',0),row('b',0)];rows[1].record.mailbox.broadcastDeleted={announce1:5};
- assert.equal(mailGoldOf(rows[0].record,ann),100);assert.equal(mailGoldOf(rows[1].record,ann),0);
- assert.equal(goldHoldings(rows,ann).mailGold,100);
+ assert.equal(mailGoldOf(rows[0].record,ann),0);assert.equal(mailGoldOf(rows[1].record,ann),0);
+ assert.equal(goldHoldings(rows,ann).mailGold,0);
 });
 test('top list sorted by wallet+mail, capped at top',()=>{
  const h=goldHoldings([row('a',10),row('b',5,[mail('mail-003',100)]),row('c',50),row('d',1)],[],2);

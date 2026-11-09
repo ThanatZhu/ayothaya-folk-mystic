@@ -592,7 +592,7 @@ function formulaTab(){
 
 // Gold wipe (owner 9 Nov 2026): report first, then a typed confirmation within 10 minutes; the host drains one page per 10 s.
 const GOLD_WORD='ล้างทองแท่ง',goldView={report:null,state:null,msg:'',busy:false,confirm:'',timer:0};
-const GOLD_ERRORS={'report-stale':'ยอดตรวจเก่าเกิน 10 นาที · กดตรวจยอดใหม่ก่อน','bad-confirm':'พิมพ์คำยืนยันไม่ตรง','authority-unavailable':'เซิร์ฟเวอร์กำลังสลับเครื่อง · ลองใหม่อีกครั้ง'};
+const GOLD_ERRORS={'report-stale':'ยอดตรวจเก่าเกิน 10 นาที · กดตรวจยอดใหม่ก่อน','bad-confirm':'พิมพ์คำยืนยันไม่ตรง','owner-required':'เฉพาะเจ้าของเกมเท่านั้นที่สั่งล้างทองแท่งได้','authority-unavailable':'เซิร์ฟเวอร์กำลังสลับเครื่อง · ลองใหม่อีกครั้ง'};
 const goldRunning=()=>goldView.state?.startedAt&&!goldView.state.completedAt;
 function goldPoll(){clearTimeout(goldView.timer);if(tab!=='gold'||!goldRunning())return;goldView.timer=setTimeout(async()=>{try{goldView.state=(await adminFetch('/admin/gold-wipe',{})).state;}catch{}if(tab==='gold')goldTab();},10000);}
 async function goldCall(path,body){

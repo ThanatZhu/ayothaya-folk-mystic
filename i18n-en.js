@@ -5747,3 +5747,6 @@ Object.assign(globalThis.I18N_EN,{
  "แจกจากแอดมิน / จดหมาย": "Granted by admins / mail",
  "เติมเงิน": "Top-up"
 });
+Object.assign(globalThis.I18N_EN,{
+ "เฉพาะเจ้าของเกมเท่านั้นที่สั่งล้างทองแท่งได้": "Only the game owner can start the gold bar wipe"
+});

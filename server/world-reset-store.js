@@ -2,6 +2,7 @@ import {readFile,writeFile,rename,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 
+// multiplayerRuntime/goldMarket (gold-market.json) is deliberately NOT listed: the owner's gold shop switch survives a world reset.
 const RUNTIME=['mailAnnouncements','mapBossTimers','dashboardLogs'];
 const SHARED=['multiplayerAuctions','multiplayerGuilds','multiplayerShops','multiplayerLeaders','multiplayerPrices','multiplayerLeases'];
 const LOCAL_FILES={'guilds.json':[],'shops.json':[],'leaders.json':{},'prices.json':{},'mail-announcements.json':[],'map-bosses.json':[],'dashboard-logs.json':[]};

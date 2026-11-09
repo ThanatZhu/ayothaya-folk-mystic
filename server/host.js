@@ -77,6 +77,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    await store.renewAuthority();
    if(!held){
     classRewardState=null;goldWipeState=null;
+    await loadGoldMarket();
     if(reset){
      const previous=reset.job;reset.job=await repository.state();
      if(reset.job&&(reset.job.id!==previous?.id||(reset.job.status==='completed'&&previous?.status!=='completed'))){sessions.clear();await clearWorld();}
@@ -160,6 +161,9 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
  const loadObservers=async()=>{if(!store?.loadObservers)return;try{observerSaved=cleanObservers(await store.loadObservers());}catch(e){console.error('observers-load',e.message);}};
  const refreshObservers=()=>{if(mode==='local')return;const list=observerEmails(process.env,observerSaved);for(const p of realm.peers.values()){const ok=list.has(p.observerEmail??'');if(p.canObserve===ok)continue;p.canObserve=ok;if(!ok&&p.observer)realm.setObserver(p,false);}};
  await loadObservers();
+ // Owner switch for gold shops (/admin/gold-market): survives restarts and world resets, closed until the owner opens it.
+ const loadGoldMarket=async()=>{if(!store?.loadGoldMarket)return;try{realm.goldMarketOpen=(await store.loadGoldMarket())?.enabled===true;}catch(e){console.error('gold-market-load',e.message);}};
+ await loadGoldMarket();
  if(store?.loadGuilds){realm.guilds=new Map((await store.loadGuilds()).map(g=>[g.id,g]));store.realmGuilds=realm.guilds;realm.onGuild=(g,deleted)=>trackWrite(deleted?store.deleteGuild(g):store.saveGuild(g)).catch(e=>console.error('guild-save',e.message));}
   if(store?.loadDashboardLogs){try{const saved=await store.loadDashboardLogs();if(Array.isArray(saved)&&saved.length)realm.logs=saved;}catch(e){console.error('dashboard-logs-load',e.message);}}
  const repository=createResetStore(store);
@@ -314,7 +318,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
      if(url.pathname==='/admin/gold-report'){
       const holdings=goldHoldings(await store.listProfiles(),realm.mailAnnouncements??[]);
       if(!state.startedAt){state.reportAt=Date.now();state.report={held:holdings.held,holders:holdings.holders,mailGold:holdings.mailGold,characters:holdings.characters};await store.saveGoldWipeState(state);}
-      audit('admin-gold-report',who,{held:holdings.held,holders:holdings.holders,mailGold:holdings.mailGold});return [200,{holdings,state}];
+      audit('admin-gold-report',who,{held:holdings.held,holders:holdings.holders,mailGold:holdings.mailGold});return [200,{holdings,state,goldMarket:await store.loadGoldMarket?.()??null}];
      }
      if(state.startedAt){goldWipeState=state;drainGoldWipe();return [200,{state}];}
      if(!(Date.now()-state.reportAt<=600000))return [400,{error:'report-stale'}];
@@ -322,6 +326,15 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
      state.startedAt=Date.now();await store.saveGoldWipeState(state);goldWipeState=state;audit('admin-gold-wipe',who,{report:state.report});drainGoldWipe();return [200,{state}];
     });goldWipeAdmin=job;
     try{const [code,body]=await job;reply(code,body);}catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
+   }
+   if(url.pathname==='/admin/gold-market'&&req.method==='POST'){
+    if(!authoritative()||!store?.loadGoldWipeState||!store?.saveGoldMarket){reply(503,{error:'authority-unavailable'});return;}
+    if(mode!=='local'&&!OWNER_EMAILS.includes(String(who).toLowerCase())){reply(403,{error:'owner-required'});return;}
+    let data='';for await(const chunk of req){data+=chunk;if(data.length>4096){reply(413,{error:'too-large'});return;}}
+    try{const {enabled}=JSON.parse(data||'{}');if(typeof enabled!=='boolean'){reply(400,{error:'invalid'});return;}
+     if(enabled&&!(await store.loadGoldWipeState())?.completedAt){reply(409,{error:'wipe-not-finished'});return;}
+     const goldMarket={enabled,changedAt:Date.now(),by:String(who)};await store.saveGoldMarket(goldMarket);realm.goldMarketOpen=enabled;audit('admin-gold-market',who,{enabled});reply(200,{goldMarket});
+    }catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
    }
    if(['/admin/pets','/admin/give','/admin/mail'].includes(url.pathname)&&req.method==='POST'){
     if(!authoritative()){reply(503,{error:'authority-unavailable'});return;}

@@ -6,7 +6,7 @@ const fixture=()=>{let now=1000000;const realm=new RealmServer({catalog,now:()=>
  return {realm,evidence,join,send:(p,type,data={})=>realm.receive(p.id,{type,seq:p.seq+1,...data}),advance:ms=>now+=ms};};
 const sellShop=(item='rat-tooth',count=2,price=100,currency='gold')=>({title:'GoldShop',currency,items:{[item]:{count,price}}});
 const buyShop=(item='straw-bundle',count=5,price=40,currency='gold')=>({kind:'buy',title:'GoldBuy',currency,items:{[item]:{count,price}}});
-const noticed=(p,code)=>p.world.events.some(e=>e.type==='notice'&&e.text===code);
+import {ITEM_ERRORS} from '../items.js';const noticed=(p,code)=>p.world.events.some(e=>e.type==='notice'&&e.text===(ITEM_ERRORS[code]??code));
 const shopOf=(t,owner)=>[...t.realm.shops.values()].find(s=>s.ownerKey===owner.key);
 
 test('switch off refuses gold shops while coin shops still work',()=>{
@@ -16,7 +16,7 @@ test('switch off refuses gold shops while coin shops still work',()=>{
  t.realm.goldMarketOpen=true;a.world.player.x+=4;b.world.player.x+=8;assert.equal(t.send(a,'shopOpen',{shop:sellShop()}),true);assert.equal(t.send(b,'shopOpen',{shop:buyShop()}),true);assert.equal(b.petCollection.balance,800);
  t.realm.goldMarketOpen=false;buyer.world.player.x+=4;
  assert.equal(t.send(buyer,'shopBuy',{shop:shopOf(t,a).id,item:'rat-tooth',count:1}),false);buyer.world.player.x+=4;assert.equal(t.send(buyer,'shopSell',{shop:shopOf(t,b).id,item:'straw-bundle',count:5}),false);
- assert.equal(buyer.world.events.filter(e=>e.type==='notice'&&e.text==='gold-market-closed').length,2);assert.equal(buyer.petCollection.balance,1000);assert.equal(buyer.bag.items['straw-bundle'],5);
+ assert.equal(buyer.world.events.filter(e=>e.type==='notice'&&e.text===ITEM_ERRORS['gold-market-closed']).length,2);assert.equal(buyer.petCollection.balance,1000);assert.equal(buyer.bag.items['straw-bundle'],5);
  buyer.world.player.x-=8;assert.equal(t.send(buyer,'shopBuy',{shop:shopOf(t,c).id,item:'rat-tooth',count:1}),true,'coin shops still trade');
 });
 

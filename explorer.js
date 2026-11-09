@@ -45,7 +45,7 @@ function render(){
  chart(days.length?days:[{day:thaiDay(),totalIn:0,totalOut:0,net:0}]);
  list($('econ-sources'),sumBy(days,'in'),data.sources,'var(--in)');list($('econ-sinks'),sumBy(days,'out'),data.sinks,'var(--out)');
  const gs=goldStats(data);$('econ-gold').hidden=!gs;
- if(gs){const gd=data.gold.days.slice(-range);$('g-held').textContent=fmt(gs.held);$('g-chars').textContent=fmt(gs.holders);$('g-mail').textContent=fmt(gs.mailGold);$('g-in').textContent=fmt(gs.todayIn);$('g-out').textContent=fmt(gs.todayOut);
+ if(gs){const gd=data.gold.days.slice(-range);$('g-held').textContent=fmt(gs.held);$('g-chars').textContent=fmt(gs.holders);$('g-mail').textContent=fmt(gs.mailGold);$('g-shops-card').hidden=gs.shops==null;if(gs.shops!=null)$('g-shops').textContent=fmt(gs.shops);$('g-in').textContent=fmt(gs.todayIn);$('g-out').textContent=fmt(gs.todayOut);
   chart(gd.length?gd:[{day:thaiDay(),totalIn:0,totalOut:0,net:0}],'gold-chart','gold-tip',['ทองเข้า','ทองออก'],'กราฟทองแท่งเข้า-ออกรายวัน');
   list($('gold-sources'),sumBy(gd,'in'),data.gold.sources,'var(--in)');list($('gold-sinks'),sumBy(gd,'out'),data.gold.sinks,'var(--out)');}
 }

@@ -1,4 +1,4 @@
 import './jade-surfaces222.js?v=surfaces222';
 import {getLoadingScreen} from './loading-screen.js?v=228.0';
 const loading=getLoadingScreen();loading.show(new URLSearchParams(location.search).get('map')||'ayutthaya');
-import('./viewer-world.js?v=audio229').catch(error=>{console.error(error);loading.fail();});
+import('./viewer-world.js?v=gold289').catch(error=>{console.error(error);loading.fail();});

@@ -2,5 +2,5 @@
 export function goldStats(view){
  const g=view?.gold;if(!g||typeof g!=='object')return null;
  const t=g.days?.at(-1);
- return {held:g.held??0,holders:g.characters??0,mailGold:g.pending??0,todayIn:t?.totalIn??0,todayOut:t?.totalOut??0};
+ return {held:g.held??0,holders:g.characters??0,mailGold:g.pending??0,shops:Number.isFinite(g.shops)?g.shops:null,todayIn:t?.totalIn??0,todayOut:t?.totalOut??0};
 }

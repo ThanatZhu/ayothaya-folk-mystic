@@ -591,29 +591,38 @@ function formulaTab(){
 }
 
 // Gold wipe (owner 9 Nov 2026): report first, then a typed confirmation within 10 minutes; the host drains one page per 10 s.
-const GOLD_WORD='ล้างทองแท่ง',goldView={report:null,state:null,msg:'',busy:false,confirm:'',timer:0};
+const GOLD_WORD='ล้างทองแท่ง',goldView={report:null,state:null,market:undefined,msg:'',busy:false,confirm:'',timer:0};
 const GOLD_ERRORS={'report-stale':'ยอดตรวจเก่าเกิน 10 นาที · กดตรวจยอดใหม่ก่อน','bad-confirm':'พิมพ์คำยืนยันไม่ตรง','owner-required':'เฉพาะเจ้าของเกมเท่านั้นที่สั่งล้างทองแท่งได้','authority-unavailable':'เซิร์ฟเวอร์กำลังสลับเครื่อง · ลองใหม่อีกครั้ง'};
+const GOLD_MARKET_ERRORS={'owner-required':'เฉพาะเจ้าของเกมเท่านั้นที่เปิดหรือปิดตลาดทองแท่งได้','wipe-not-finished':'ต้องล้างทองแท่งให้เสร็จก่อนจึงจะเปิดตลาดทองแท่งได้'};
 const goldRunning=()=>goldView.state?.startedAt&&!goldView.state.completedAt;
 function goldPoll(){clearTimeout(goldView.timer);if(tab!=='gold'||!goldRunning())return;goldView.timer=setTimeout(async()=>{try{goldView.state=(await adminFetch('/admin/gold-wipe',{})).state;}catch{}if(tab==='gold')goldTab();},10000);}
 async function goldCall(path,body){
  if(goldView.busy)return;goldView.busy=true;goldView.msg='';goldTab();
- try{const r=await adminFetch(path,body);if(r.holdings)goldView.report=r.holdings;goldView.state=r.state;if(body)goldView.confirm='';}catch(e){goldView.msg=GOLD_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
+ try{const r=await adminFetch(path,body);if(r.holdings)goldView.report=r.holdings;if(r.holdings)goldView.market=r.goldMarket??null;goldView.state=r.state;if(body)goldView.confirm='';}catch(e){goldView.msg=GOLD_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
+ finally{goldView.busy=false;if(tab==='gold')goldTab();}
+}
+async function goldMarketCall(enabled){
+ if(goldView.busy)return;if(enabled&&!confirm('เปิดให้ผู้เล่นตั้งร้านขายและรับซื้อด้วยทองแท่งในตลาดกลาง · ยืนยันเปิดตลาดทองแท่ง?'))return;
+ goldView.busy=true;goldView.msg='';goldTab();
+ try{goldView.market=(await adminFetch('/admin/gold-market',{enabled})).goldMarket;goldView.msg=enabled?'เปิดตลาดทองแท่งแล้ว':'ปิดตลาดทองแท่งแล้ว';}catch(e){goldView.msg=GOLD_MARKET_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
  finally{goldView.busy=false;if(tab==='gold')goldTab();}
 }
 function goldTab(){
  warmFirebase();const g=goldView,r=g.report,st=g.state,fresh=st?.reportAt&&Date.now()-st.reportAt<=600000&&!st.startedAt;
  $('view').innerHTML=`<section class="admin-announcement admin-gold"><small>GOLD BARS</small><h2>ล้างทองแท่ง</h2><p>นับทองแท่งในกระเป๋าและทองที่แนบในจดหมายของทุกตัวละคร แล้วล้างให้เป็น 0 · ทำครั้งเดียว ย้อนกลับไม่ได้ · ต้องตรวจยอดก่อน และยอดตรวจใช้ได้ 10 นาที</p>
  <button type="button" class="primary" id="gold-check" ${g.busy||st?.startedAt?'disabled':''}>ตรวจยอดก่อนล้าง</button>
+ <div class="gold-market"><h3>ตลาดทองแท่ง</h3><label class="gold-switch"><input type="checkbox" id="gold-market" ${g.market?.enabled?'checked':''} ${g.busy||!st?.completedAt||g.market===undefined?'disabled':''}> เปิดทองแท่งในตลาด</label><p class="gold-note">${g.market===undefined?'กำลังโหลดสถานะ…':g.market?.enabled?'ตอนนี้: เปิดอยู่':'ตอนนี้: ปิดอยู่'}${g.market?.changedAt?' · เปลี่ยนล่าสุด '+new Date(g.market.changedAt).toLocaleString('th-TH'):''}${st?.completedAt?'':' · ปุ่มนี้เปิดได้หลังล้างทองแท่งเสร็จแล้ว'}</p></div>
  ${r?`<div class="gold-report"><dl><div><dt>ผู้ถือทองแท่ง</dt><dd>${num(r.holders)} จาก ${num(r.characters)} ตัวละคร</dd></div><div><dt>ทองในกระเป๋า</dt><dd>${num(r.held)}</dd></div><div><dt>ทองในจดหมาย</dt><dd>${num(r.mailGold)}</dd></div></dl>
  ${r.characters>=2000?'<p class="gold-warn">นับได้สูงสุด 2,000 ตัวละคร · ยอดนี้อาจไม่ครบ</p>':''}
  <h3>ผู้ถือมากสุด 20 อันดับ</h3><ol data-i18n-skip>${(r.top??[]).slice(0,20).map(t=>`<li><span>${esc(t.name??t.uid)}</span><b>${num(t.gold)}</b><em>+ จดหมาย ${num(t.mailGold)}</em></li>`).join('')||'<li>ไม่มีใครถือทองแท่ง</li>'}</ol></div>`:''}
  ${st?.startedAt?'':`<label>พิมพ์ ${GOLD_WORD} เพื่อยืนยัน<input id="gold-confirm" autocomplete="off" value="${esc(g.confirm)}" ${fresh?'':'disabled'}></label><button type="button" class="primary danger" id="gold-wipe" ${fresh&&g.confirm===GOLD_WORD&&!g.busy?'':'disabled'}>ล้างทองแท่ง</button>${fresh?'':'<p class="gold-note">ปุ่มนี้เปิดหลังตรวจยอดภายใน 10 นาที</p>'}`}
  ${st?.startedAt?`<div class="gold-progress"><h3>${st.completedAt?'ล้างเสร็จแล้ว':'กำลังล้าง · อัปเดตทุก 10 วินาที'}</h3><dl><div><dt>ตรวจแล้ว</dt><dd>${num(st.scanned)} ตัวละคร</dd></div><div><dt>ล้างแล้ว</dt><dd>${num(st.wiped)} ตัวละคร</dd></div><div><dt>ทองกระเป๋าที่ล้าง</dt><dd>${num(st.wallet)}</dd></div><div><dt>ทองจดหมายที่ล้าง</dt><dd>${num(st.mail)}</dd></div>${st.pending?.length?`<div><dt>รอลองใหม่</dt><dd>${num(st.pending.length)}</dd></div>`:''}</dl></div>`:''}
  <p role="status">${esc(g.msg)}</p></section>`;
+ $('gold-market').onchange=e=>{e.target.checked=!!g.market?.enabled;goldMarketCall(!g.market?.enabled);};
  $('gold-check').onclick=()=>goldCall('/admin/gold-report');
  const c=$('gold-confirm');if(c)c.oninput=()=>{g.confirm=c.value.trim();$('gold-wipe').disabled=!(fresh&&g.confirm===GOLD_WORD&&!g.busy);};
  const w=$('gold-wipe');if(w)w.onclick=()=>{if(g.confirm===GOLD_WORD)goldCall('/admin/gold-wipe',{confirm:GOLD_WORD});};
- goldPoll();
+ goldPoll();if(g.market===undefined&&!g.busy&&!g.msg)goldCall('/admin/gold-report');
 }
 function announcementTab(){
  warmFirebase();const d=announcementDraft;

@@ -151,3 +151,5 @@ html body.field-hud.hud63 #market-board[data-hud-panel][open]{width:min(460px,ca
  #market-board .board-product-owner{padding-top:4px;font-size:9px}#market-board .board-product-owner>small{display:none}
  #market-board .board-product>[data-go]{min-height:28px;padding:3px 8px;font-size:10px}
 }
+
+#market-board .gold-ico{width:20px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:4px}#market-board .board-categories .cur-chip{border-color:#d5b472aa}

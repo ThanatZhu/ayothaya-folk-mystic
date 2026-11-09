@@ -48,7 +48,7 @@ export function createMarketUI({game,map,account,bagUI}){
   if(e.type==='tradeState'){trade=e;ask=null;show('trade');}
   if(e.type==='tradeEnd'){trade=null;world.notice(e.reason);if(view==='trade')dialog.close();}
   if(e.type==='stalls'){stalls=e.list;render(true);}
-  if(e.type==='stallSold')world.notice(`${e.buyer} ซื้อ ${itemDef(e.item)?.name} ×${e.count} จากแผง · +${e.coins} เบี้ย`);
+  if(e.type==='stallSold')world.notice(e.currency==='gold'?`${e.buyer} ซื้อ ${itemDef(e.item)?.name} ×${e.count} จากแผง · +${e.coins} ทองแท่ง`:`${e.buyer} ซื้อ ${itemDef(e.item)?.name} ×${e.count} จากแผง · +${e.coins} เบี้ย`);
  });
 
  function move(type,id,count){

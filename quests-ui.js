@@ -1,4 +1,5 @@
 import {storyScene} from './quest-cinematic-data155.js?v=rebirth196';
+import {cardArt as newCardArt,cardImageHTML} from './card-art.js?v=278';
 import {normalizeAlbumState,depositAlbumCard,ALBUM_ERRORS} from './card-album.js?v=surfaces222';
 import {currentObjective,normalizeStory,storyForWorld,storyQuests,normalizeRebirthStory} from './story-quests.js?v=rebirth196';
 import {STORY_RECAP,storyArt} from './story-dialogue.js?v=chuk175';
@@ -16,6 +17,7 @@ const icon=(id,c='item-icon')=>`<i class="${c}" style="${iconStyle(id)}"></i>`;
 // Crop the atlas cell's transparent side gutters without stretching the painted card.
 function albumArt(id){
  const def=itemDef(id);
+ if(newCardArt(id))return cardImageHTML(id,{name:def.name,cls:'album-image'});
  if(def.monsterCard)return `<img class="album-image" src="assets/cards147/${id.slice(5)}.webp" alt="${def.name}" width="384" height="576" loading="lazy" decoding="async">`;
  const x=(def.icon%6)*256+32,y=Math.floor(def.icon/6)*256;
  return `<svg class="album-image${def.tint==='gold'?' album-awakened':''}" viewBox="${x} ${y} 192 256" aria-label="${def.name}" role="img"><image href="assets/cards45/cards.png" width="1536" height="1024"/></svg>`;

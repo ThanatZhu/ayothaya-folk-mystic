@@ -10,6 +10,7 @@ import {GRADES,gearLook,setLines,bossLines,setTierLines,dungeonLines,familyName,
 import {DUNGEONS} from './dungeons.js';
 import {levelGifts} from './experience.js?v=105.3';
 import {consumeRevival,revivalCount} from './revival-item.js?v=revival180';
+import {cardArt as newCardArt,cardBackground} from './card-art.js?v=278';
 import {ITEMS,ITEM_ATLAS,ATLASES,BAG_SLOTS,BAG_MAX,BAG_STEP,bagCap,bagStacks,itemRoom,expandCost,expandBag,MAX_STACK,SHOPS,ITEM_ERRORS,normalizeBag,addLoot,rollLoot,buy,sell,discard,useItem,itemLabel,itemDef} from './items.js?v=class-reward192';
 import {MONSTER_TYPES,LEADER,randomSpot} from './combat-core.js?v=surfaces222';
 import {openHudPanel} from './hud-panels.js?v=34';
@@ -61,6 +62,7 @@ function setInfo(it,gear){
 }
 export function iconStyle(id){
  const def=itemDef(id);if(!def)return '';
+ if(def.kind==='card'&&newCardArt(id))return cardBackground(id)+';border-radius:3px';
  if(def.image)return `background-image:url(${def.image});background-size:contain;background-position:center;background-repeat:no-repeat;background-color:transparent`+gradeFrame(def);
  if(def.monsterCard)return 'background-image:url(assets/cards147/'+id.slice(5)+'.webp);background-size:contain;background-position:center;background-color:transparent;border-radius:3px';
  const ph=def.ph&&!loaded[def.atlas],item=ph?{...def,...def.ph}:def;

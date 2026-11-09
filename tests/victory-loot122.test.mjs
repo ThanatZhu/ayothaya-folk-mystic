@@ -97,7 +97,7 @@ test('every boss has a card: 6 painted, 9 world-boss cards, 4 awakened auras; un
  const all=MONSTER_TYPES.filter(t=>t.boss&&!t.dungeonOnly).map(t=>t.id),bosses=all.filter(id=>!id.startsWith('rb-')),cards=[...new Set([...painted,...bosses])].map(bossCard);
  assert.equal(bosses.length,16);for(const id of all.filter(id=>id.startsWith('rb-')))assert.equal(bossCard(id).src,null,id);
  assert.equal(cards.filter(c=>c.src?.startsWith('assets/victory/')&&!c.awakened).length,6);
- assert.equal(cards.filter(c=>c.src?.startsWith('assets/cards147/')).length,9);
+ assert.equal(cards.filter(c=>c.src?.startsWith('assets/cards278/')).length,9); // owner's 9 Nov pixel cards
  assert.equal(cards.filter(c=>c.awakened&&c.src?.startsWith('assets/victory/')).length,4);
  for(const c of cards)assert.ok(existsSync(new URL('../'+c.src,import.meta.url)),c.src);
  assert.equal(bossCard('no-such-boss').src,null);

@@ -1,8 +1,10 @@
 import{CARD_REMOVAL_FEE}from'./farm-utility221.js';
 import {itemDef,ITEM_ERRORS} from './items.js?v=refine136';
+import {cardArt as newCardArt,cardImageHTML} from './card-art.js?v=278';
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Use the same authored card artwork and crop as the card album, at a consistent 3:4 size.
 export function cardArt(id){const d=itemDef(id);if(!d||d.kind!=='card')return '';
+ if(newCardArt(id))return cardImageHTML(id,{cls:'slot-card-art',lazy:false});
  if(d.monsterCard)return `<img class="slot-card-art" src="assets/cards147/${escape(id.slice(5))}.webp" alt="" width="192" height="256" decoding="async">`;
  const x=(d.icon%6)*256+32,y=Math.floor(d.icon/6)*256;return `<svg class="slot-card-art${d.tint==='gold'?' slot-card-gold':''}" viewBox="${x} ${y} 192 256" aria-hidden="true"><image href="assets/cards45/cards.png" width="1536" height="1024"/></svg>`;
 }

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {itemDef,ITEM_ATLAS,ATLASES,ATLAS_LAYOUTS} from './items.js';
+import {cardArt} from './card-art.js?v=278';
 import {contactShadowTexture} from './world-lighting159.js?v=surfaces222';
 
 // Physical, stationary cutouts on the terrain. Repeated items share an instanced
@@ -19,6 +20,7 @@ export function createGroundLootRenderer({scene}){
   const def=itemDef(id);if(!def)return null;
   const d=fallback&&def.ph?{...def,...def.ph}:def;
   if(d.image)return {url:d.image,columns:1,rows:1,cell:0,tint:d.tint,fallback:def.ph?()=>artSpec(id,true):null};
+  if(d.kind==='card'&&cardArt(id))return {url:cardArt(id).src,columns:1,rows:1,cell:0};
   if(d.monsterCard)return {url:'assets/cards147/'+id.slice(5)+'.webp',columns:1,rows:1,cell:0};
   const layout=ATLAS_LAYOUTS[d.atlas]??{columns:6,rows:4};
   return {url:ATLASES[d.atlas]??ITEM_ATLAS,...layout,cell:d.icon??0,tint:d.tint,fallback:!fallback&&def.ph?()=>artSpec(id,true):null};

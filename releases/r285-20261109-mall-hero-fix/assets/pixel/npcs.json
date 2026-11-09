@@ -1,0 +1,194 @@
+{
+ "np-cave-explorer": {
+  "cell": 131,
+  "body": 86
+ },
+ "np-chao-chuk": {
+  "cell": 114,
+  "body": 75
+ },
+ "np-citizen-boatman": {
+  "cell": 122,
+  "body": 80
+ },
+ "np-citizen-cook": {
+  "cell": 140,
+  "body": 92
+ },
+ "np-citizen-elder": {
+  "cell": 131,
+  "body": 86
+ },
+ "np-citizen-farmer": {
+  "cell": 145,
+  "body": 95
+ },
+ "np-citizen-florist": {
+  "cell": 149,
+  "body": 98
+ },
+ "np-citizen-porter": {
+  "cell": 131,
+  "body": 86
+ },
+ "np-citizen-seller": {
+  "cell": 145,
+  "body": 95
+ },
+ "np-citizen-weaver": {
+  "cell": 145,
+  "body": 95
+ },
+ "np-floating-seller": {
+  "cell": 128,
+  "body": 84
+ },
+ "np-forest-hermit": {
+  "cell": 139,
+  "body": 91
+ },
+ "np-forest-monk": {
+  "cell": 125,
+  "body": 82
+ },
+ "np-forest-ranger": {
+  "cell": 139,
+  "body": 91
+ },
+ "np-herb-doctor": {
+  "cell": 142,
+  "body": 93
+ },
+ "np-joi": {
+  "cell": 119,
+  "body": 78
+ },
+ "np-khru-saen-dap": {
+  "cell": 136,
+  "body": 89
+ },
+ "np-khun-in": {
+  "cell": 136,
+  "body": 89
+ },
+ "np-khunphon-chumphon": {
+  "cell": 149,
+  "body": 98
+ },
+ "np-kilen-hunter": {
+  "cell": 134,
+  "body": 88
+ },
+ "np-lablae-lord": {
+  "cell": 149,
+  "body": 98
+ },
+ "np-mae-bua": {
+  "cell": 143,
+  "body": 94
+ },
+ "np-malai": {
+  "cell": 151,
+  "body": 99
+ },
+ "np-master-smith": {
+  "cell": 134,
+  "body": 88
+ },
+ "np-master-trainer": {
+  "cell": 134,
+  "body": 88
+ },
+ "np-mentor-boxer": {
+  "cell": 131,
+  "body": 86
+ },
+ "np-mentor-hunter": {
+  "cell": 140,
+  "body": 92
+ },
+ "np-mentor-lancer": {
+  "cell": 148,
+  "body": 97
+ },
+ "np-mentor-monk": {
+  "cell": 137,
+  "body": 90
+ },
+ "np-mentor-nun": {
+  "cell": 130,
+  "body": 85
+ },
+ "np-mentor-rogue": {
+  "cell": 131,
+  "body": 86
+ },
+ "np-mentor-shaman": {
+  "cell": 137,
+  "body": 90
+ },
+ "np-mentor-swordsman": {
+  "cell": 146,
+  "body": 96
+ },
+ "np-mountain-deva": {
+  "cell": 163,
+  "body": 107
+ },
+ "np-naga-gatekeeper": {
+  "cell": 155,
+  "body": 102
+ },
+ "np-nang-chantra": {
+  "cell": 151,
+  "body": 99
+ },
+ "np-old-hermit": {
+  "cell": 145,
+  "body": 95
+ },
+ "np-pa-lamai": {
+  "cell": 134,
+  "body": 88
+ },
+ "np-phra-khru-chumphon": {
+  "cell": 139,
+  "body": 91
+ },
+ "np-phra-panya": {
+  "cell": 131,
+  "body": 86
+ },
+ "np-plasterer": {
+  "cell": 140,
+  "body": 92
+ },
+ "np-spirit-teacher": {
+  "cell": 148,
+  "body": 97
+ },
+ "np-thipsuwan": {
+  "cell": 154,
+  "body": 101
+ },
+ "np-uncle-rueang": {
+  "cell": 134,
+  "body": 88
+ },
+ "np-vault-keeper": {
+  "cell": 133,
+  "body": 87
+ },
+ "np-yai-buaphan": {
+  "cell": 136,
+  "body": 89
+ },
+ "np-yai-chan": {
+  "cell": 117,
+  "body": 77
+ },
+ "np-yai-sai": {
+  "cell": 123,
+  "body": 81
+ }
+}

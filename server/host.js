@@ -162,7 +162,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
  const refreshObservers=()=>{if(mode==='local')return;const list=observerEmails(process.env,observerSaved);for(const p of realm.peers.values()){const ok=list.has(p.observerEmail??'');if(p.canObserve===ok)continue;p.canObserve=ok;if(!ok&&p.observer)realm.setObserver(p,false);}};
  await loadObservers();
  // Owner switch for gold shops (/admin/gold-market): survives restarts and world resets, closed until the owner opens it.
- const loadGoldMarket=async()=>{if(!store?.loadGoldMarket)return;try{realm.goldMarketOpen=(await store.loadGoldMarket())?.enabled===true;}catch(e){console.error('gold-market-load',e.message);}};
+ const loadGoldMarket=async()=>{if(!store?.loadGoldMarket)return;try{realm.goldMarketOpen=(await store.loadGoldMarket())?.enabled===true;}catch(e){realm.goldMarketOpen=false;console.error('gold-market-load',e.message);}};
  await loadGoldMarket();
  if(store?.loadGuilds){realm.guilds=new Map((await store.loadGuilds()).map(g=>[g.id,g]));store.realmGuilds=realm.guilds;realm.onGuild=(g,deleted)=>trackWrite(deleted?store.deleteGuild(g):store.saveGuild(g)).catch(e=>console.error('guild-save',e.message));}
   if(store?.loadDashboardLogs){try{const saved=await store.loadDashboardLogs();if(Array.isArray(saved)&&saved.length)realm.logs=saved;}catch(e){console.error('dashboard-logs-load',e.message);}}
@@ -331,10 +331,12 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
     if(!authoritative()||!store?.loadGoldWipeState||!store?.saveGoldMarket){reply(503,{error:'authority-unavailable'});return;}
     if(mode!=='local'&&!OWNER_EMAILS.includes(String(who).toLowerCase())){reply(403,{error:'owner-required'});return;}
     let data='';for await(const chunk of req){data+=chunk;if(data.length>4096){reply(413,{error:'too-large'});return;}}
-    try{const {enabled}=JSON.parse(data||'{}');if(typeof enabled!=='boolean'){reply(400,{error:'invalid'});return;}
-     if(enabled&&!(await store.loadGoldWipeState())?.completedAt){reply(409,{error:'wipe-not-finished'});return;}
-     const goldMarket={enabled,changedAt:Date.now(),by:String(who)};await store.saveGoldMarket(goldMarket);realm.goldMarketOpen=enabled;audit('admin-gold-market',who,{enabled});reply(200,{goldMarket});
-    }catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
+    // same serial queue as the wipe report/start, so a save and the flag set never interleave
+    const job=goldWipeAdmin.catch(()=>{}).then(async()=>{const {enabled}=JSON.parse(data||'{}');if(typeof enabled!=='boolean')return [400,{error:'invalid'}];
+     if(enabled&&!(await store.loadGoldWipeState())?.completedAt)return [409,{error:'wipe-not-finished'}];
+     const goldMarket={enabled,changedAt:Date.now(),by:String(who)};await store.saveGoldMarket(goldMarket);realm.goldMarketOpen=enabled;audit('admin-gold-market',who,{enabled});return [200,{goldMarket}];
+    });goldWipeAdmin=job;
+    try{const [code,body]=await job;reply(code,body);}catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
    }
    if(['/admin/pets','/admin/give','/admin/mail'].includes(url.pathname)&&req.method==='POST'){
     if(!authoritative()){reply(503,{error:'authority-unavailable'});return;}

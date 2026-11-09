@@ -1,0 +1,7 @@
+/* One scale for small-screen HUD artwork, text and control groups. */
+html body.mobile-play[data-hud-fit208] [data-hud-scale208],html body.mobile-play[data-hud-fit208] dialog{zoom:var(--mobile-ui-scale208)}
+html body.mobile-play[data-hud-fit208] dialog{max-width:calc(100vw - 16px)!important;max-height:calc(100dvh / var(--mobile-ui-scale208) - 16px)!important}
+html body.mobile-play[data-hud-fit208] #activity-dock{overflow:hidden}
+html body.mobile-play.field-hud.hud63[data-hud-fit208] #online-dock:not(.collapsed){width:min(530px,calc(90vw / var(--mobile-ui-scale208)))!important;height:calc((var(--vv-h,100dvh) - 16px) / var(--mobile-ui-scale208))!important;max-height:calc((var(--vv-h,100dvh) - 16px) / var(--mobile-ui-scale208))!important}
+
+html body.mobile-play[data-hud-fit208] :is(.account-card,#mobile-hud-editor header){zoom:var(--mobile-ui-scale208)}

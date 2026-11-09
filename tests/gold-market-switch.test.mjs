@@ -28,3 +28,12 @@ test('gold market switch fails closed when its load throws, and concurrent POSTs
  assert.equal(a.host.realm.goldMarketOpen,false);
  assert.equal(JSON.parse(await (await import('node:fs/promises')).readFile(path.join(directory,'gold-market.json'),'utf8')).enabled,false);
 });
+test('GET /admin/gold-market reads the switch without touching the wipe state',async t=>{
+ const directory=await mkdtemp(path.join(os.tmpdir(),'ayothaya-goldmarket-')),store=await new LocalStore(directory).init();
+ await store.saveGoldWipeState({reportAt:123,report:{held:1}});
+ const a=await start(store);t.after(async()=>{await a.host.close();await rm(directory,{recursive:true,force:true});});
+ let r=await (await fetch(a.base+'/admin/gold-market',{headers})).json();assert.deepEqual(r,{goldMarket:null,wipeCompleted:false});
+ await store.saveGoldWipeState({reportAt:123,startedAt:1,completedAt:2});await store.saveGoldMarket({enabled:true,changedAt:5,by:'x'});
+ r=await (await fetch(a.base+'/admin/gold-market',{headers})).json();assert.equal(r.goldMarket.enabled,true);assert.equal(r.wipeCompleted,true);
+ assert.equal((await store.loadGoldWipeState()).reportAt,123);
+});

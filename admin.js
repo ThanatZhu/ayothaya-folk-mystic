@@ -601,6 +601,7 @@ async function goldCall(path,body){
  try{const r=await adminFetch(path,body);if(r.holdings)goldView.report=r.holdings;if(r.holdings)goldView.market=r.goldMarket??null;goldView.state=r.state;if(body)goldView.confirm='';}catch(e){goldView.msg=GOLD_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
  finally{goldView.busy=false;if(tab==='gold')goldTab();}
 }
+async function goldLoad(){goldView.busy=true;try{const r=await adminFetch('/admin/gold-market');goldView.market=r.goldMarket??null;if(r.wipeCompleted&&!goldView.state?.completedAt)goldView.state={...goldView.state,completedAt:goldView.state?.completedAt??1};}catch(e){goldView.msg=GOLD_MARKET_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}finally{goldView.busy=false;if(tab==='gold')goldTab();}}
 async function goldMarketCall(enabled){
  if(goldView.busy)return;if(enabled&&!confirm('เปิดให้ผู้เล่นตั้งร้านขายและรับซื้อด้วยทองแท่งในตลาดกลาง · ยืนยันเปิดตลาดทองแท่ง?'))return;
  goldView.busy=true;goldView.msg='';goldTab();
@@ -622,7 +623,7 @@ function goldTab(){
  $('gold-check').onclick=()=>goldCall('/admin/gold-report');
  const c=$('gold-confirm');if(c)c.oninput=()=>{g.confirm=c.value.trim();$('gold-wipe').disabled=!(fresh&&g.confirm===GOLD_WORD&&!g.busy);};
  const w=$('gold-wipe');if(w)w.onclick=()=>{if(g.confirm===GOLD_WORD)goldCall('/admin/gold-wipe',{confirm:GOLD_WORD});};
- goldPoll();if(g.market===undefined&&!g.busy&&!g.msg)goldCall('/admin/gold-report');
+ goldPoll();if(g.market===undefined&&!g.busy&&!g.msg)goldLoad();
 }
 function announcementTab(){
  warmFirebase();const d=announcementDraft;

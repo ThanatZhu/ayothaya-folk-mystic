@@ -327,6 +327,10 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
     });goldWipeAdmin=job;
     try{const [code,body]=await job;reply(code,body);}catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
    }
+   if(url.pathname==='/admin/gold-market'&&req.method==='GET'){ // cheap read for the admin tab: never touches the wipe state's reportAt
+    if(!authoritative()||!store?.loadGoldWipeState){reply(503,{error:'authority-unavailable'});return;}
+    try{reply(200,{goldMarket:await store.loadGoldMarket?.()??null,wipeCompleted:!!(await store.loadGoldWipeState())?.completedAt});}catch(e){reply(400,{error:e.message});}return;
+   }
    if(url.pathname==='/admin/gold-market'&&req.method==='POST'){
     if(!authoritative()||!store?.loadGoldWipeState||!store?.saveGoldMarket){reply(503,{error:'authority-unavailable'});return;}
     if(mode!=='local'&&!OWNER_EMAILS.includes(String(who).toLowerCase())){reply(403,{error:'owner-required'});return;}

@@ -13,8 +13,8 @@
 /* fitting room */
 :root #premium-store-window .mall-fit{display:flex;flex-direction:column;overflow:hidden}
 :root #premium-store-window .mall-fit h3{margin:0;padding:8px;text-align:center;font-size:15px;font-weight:700;color:var(--mall-gold);border-bottom:1px solid var(--mall-line)}
-:root #premium-store-window .mall-stage{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:14px;background:radial-gradient(ellipse 60% 14% at 50% 82%,#00000066,transparent 70%),radial-gradient(ellipse at 50% 35%,#f2d38e26,transparent 65%)}
-:root #premium-store-window .mall-stage canvas{width:min(100%,220px);aspect-ratio:1;image-rendering:pixelated}
+:root #premium-store-window .mall-stage{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:radial-gradient(ellipse at 50% 45%,#f2d38e26,transparent 65%)}
+:root #premium-store-window .mall-stage canvas{width:min(100%,190px);aspect-ratio:1;image-rendering:pixelated;filter:drop-shadow(0 8px 5px #0008)}
 :root #premium-store-window .mall-hero-name{margin:0;font-size:14px;font-weight:700;color:var(--mall-cream)}
 :root #premium-store-window .mall-fit-note{margin:0;padding:8px;font-size:11px;line-height:1.5;text-align:center;color:#c9d4b8;border-top:1px solid var(--mall-line)}
 /* categories */

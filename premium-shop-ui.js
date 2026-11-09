@@ -77,7 +77,12 @@ export function createPremiumShopPanel({game,dialog,account}){
  function drawHero(){
   const c=account?.character;if(!c?.classId)return;const key=[c.classId,c.gender,c.name].join('|');if(key===heroKey)return;heroKey=key;
   $('.mall-hero-name').textContent=c.name??'';
-  loadPaintedStanding(c.classId,c.gender==='female'?'female':'male',c.appearance??{}).then(art=>{const canvas=$('.mall-stage canvas'),ctx=canvas.getContext('2d');ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;ctx.drawImage(art,0,0,320,320);}).catch(()=>{heroKey='';});
+  loadPaintedStanding(c.classId,c.gender==='female'?'female':'male',c.appearance??{}).then(art=>{
+   // The standing frame leaves empty air above the head: crop to the drawn pixels so the hero fills the stage.
+   const w=art.width,h=art.height,px=art.getContext('2d').getImageData(0,0,w,h).data;let x0=w,y0=h,x1=-1,y1=-1;
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(px[(y*w+x)*4+3]>8){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+   if(x1<0)return;const bw=x1-x0+1,bh=y1-y0+1,s=Math.min(296/bh,296/bw),canvas=$('.mall-stage canvas'),ctx=canvas.getContext('2d');
+   ctx.clearRect(0,0,320,320);ctx.imageSmoothingEnabled=false;ctx.drawImage(art,x0,y0,bw,bh,Math.round(160-bw*s/2),Math.round(316-bh*s),Math.round(bw*s),Math.round(bh*s));}).catch(()=>{heroKey='';});
  }
  dialog.addEventListener('toggle',()=>{if(dialog.open)drawHero();});
  return {root,render:force=>{if(dialog.open||force)drawHero();render(force);}};

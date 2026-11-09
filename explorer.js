@@ -14,14 +14,14 @@ function list(el,totals,labels,color){
   r.append(name,val,bar);el.append(r);}
 }
 function chart(days){
- const W=760,H=300,L=60,R=10,T=14,B=28,max=Math.max(1,...days.map(d=>Math.max(d.totalIn,d.totalOut))),pw=(W-L-R)/days.length,bw=Math.max(4,Math.min(26,pw*.34));
+ const W=Math.max(320,Math.min(760,$('econ-chart').clientWidth||760)),H=W<500?240:300,L=60,R=10,T=14,B=28,max=Math.max(1,...days.map(d=>Math.max(d.totalIn,d.totalOut))),pw=(W-L-R)/days.length,bw=Math.max(4,Math.min(26,pw*.34));
  const y0=T+(H-T-B)/2,sc=(H-T-B)/2/max,y=v=>y0-v*sc,ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('role','img');svg.setAttribute('aria-label','กราฟเบี้ยเข้า-ออกรายวัน');
  const el=(tag,a)=>{const e=document.createElementNS(ns,tag);for(const k in a)e.setAttribute(k,a[k]);svg.append(e);return e;};
  for(const v of [max,max/2,0,-max/2,-max]){el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),stroke:v===0?'#c6a16499':'#c6a16426','stroke-width':1});el('text',{x:L-8,y:y(v)+4,'text-anchor':'end'}).textContent=fmt(Math.abs(v));}
  const bar=(x,v,up,c)=>{const h=v*sc;if(h<=0)return;const r=Math.min(4,bw/2,h),e=up?y0-h:y0+h,s=up?1:-1;
   el('path',{fill:c,d:`M${x} ${y0}V${e+s*r}Q${x} ${e} ${x+r} ${e}H${x+bw-r}Q${x+bw} ${e} ${x+bw} ${e+s*r}V${y0}Z`});};
  const pts=[];days.forEach((d,i)=>{const cx=L+pw*i+pw/2;bar(cx-bw/2,d.totalIn,true,'var(--in)');bar(cx-bw/2,d.totalOut,false,'var(--out)');pts.push([cx,y(d.net)]);
-  if(days.length<=14||i%3===0)el('text',{x:cx,y:H-8,'text-anchor':'middle'}).textContent=d.day.slice(8)+'/'+d.day.slice(5,7);});
+  if(days.length<=(W<500?7:14)||i%Math.ceil(days.length/(W<500?6:10))===0)el('text',{x:cx,y:H-8,'text-anchor':'middle'}).textContent=d.day.slice(8)+'/'+d.day.slice(5,7);});
  if(pts.length>1)el('polyline',{points:pts.map(p=>p.join(',')).join(' '),fill:'none',stroke:'var(--ink)','stroke-width':2,'stroke-linejoin':'round'});
  for(const p of pts)el('circle',{cx:p[0],cy:p[1],r:4,fill:'var(--ink)',stroke:'#1b3029','stroke-width':2});
  const tip=$('econ-tip'),box=$('econ-chart');
@@ -46,4 +46,4 @@ async function load(){
   $('econ-status').hidden=true;for(const id of ['econ-stats','econ-flow','econ-lists'])$(id).hidden=false;render();}
  catch{if(!data)$('econ-status').textContent='โหลดข้อมูลไม่ได้ ลองใหม่อีกครั้งภายหลัง';}
 }
-load();setInterval(load,300000);
+load();setInterval(load,300000);let resized;addEventListener('resize',()=>{clearTimeout(resized);resized=setTimeout(()=>{if(data)render();},150);});

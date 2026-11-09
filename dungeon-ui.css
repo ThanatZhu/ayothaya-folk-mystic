@@ -27,11 +27,17 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .dungeon-pop{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:60;min-width:min(340px,calc(100vw - 32px));padding:14px 16px;border-radius:12px;border:1px solid #c6a16488;
  background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;font-family:var(--font-game);text-align:center;box-shadow:0 10px 30px #0009}
 .dungeon-pop p{margin:0 0 10px;font-weight:700}.dungeon-pop-row{display:flex;gap:8px;justify-content:center}.dungeon-pop-timer{display:block;margin-top:6px;font-variant-numeric:tabular-nums;opacity:.8}
-.dungeon-tracker{position:fixed;left:12px;top:132px;z-index:20;max-width:min(300px,calc(100vw - 24px));padding:8px 10px;border-radius:10px;border:1px solid #c6a16488;
- background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;font-family:var(--font-game)}
-.dungeon-goal{margin:0 0 6px;font-weight:700;font-variant-numeric:tabular-nums}
-.dungeon-leave{padding:5px 10px;font-size:13px}
+/* owner 9 Nov: the room goal is one banner at the top centre, under the menu bar, never over the quest card */
+.dungeon-tracker{position:fixed;left:50%;top:calc(max(10px,env(safe-area-inset-top)) + 78px);transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:10px;
+ max-width:max(340px,calc(100vw - 660px));padding:6px 8px 6px 14px;border-radius:999px;border:1px solid #c6a16488;background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;font-family:var(--font-game);box-shadow:0 4px 14px #0007}
+.dungeon-tracker[hidden]{display:none}
+.dungeon-goal{margin:0;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dungeon-leave{padding:5px 10px;font-size:12px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.dungeon-light{font-weight:700;white-space:nowrap;flex-shrink:0;padding:6px 14px;border-radius:999px;border:1px solid #f0cf7a;background:linear-gradient(#e8c46a,#a8782c);color:#2a1a08;cursor:pointer;animation:dungeon-glow 1.4s ease-in-out infinite}
+.dungeon-light[hidden]{display:none}
+@keyframes dungeon-glow{50%{box-shadow:0 0 14px #ffd76a}}
+@media (prefers-reduced-motion:reduce){.dungeon-light{animation:none}}
 @media(max-width:700px),(max-height:550px){
  .dungeon-body{grid-template-columns:1fr}.dungeon-list{flex-direction:row;overflow-x:auto}.dungeon-card{min-width:200px}
- .dungeon-tracker{top:auto;bottom:150px}
+ .dungeon-tracker{top:calc(max(6px,env(safe-area-inset-top)) + 64px);max-width:calc(100vw - 24px)}.dungeon-goal{font-size:12px}
 }

@@ -2,11 +2,11 @@
 // Rooms are areas of one map; content spawns from the run's state and a door moves the whole team to the next room.
 import {MONSTER_TYPES,walkable} from '../combat-core.js';
 import {dungeonById,monsterScale} from '../dungeons.js';
-import {finishRun} from './dungeon-runs.js';
+import {finishRun,dungeonReservation} from './dungeon-runs.js';
 
 const TYPE=new Map(MONSTER_TYPES.map((t,i)=>[t.id,i]));
 const near=(a,b,r)=>Math.hypot(a.x-b.x,a.z-b.z)<=r;
-const LANTERN_REACH=1.5,EMPTY_RESET=60;
+const LANTERN_REACH=3,EMPTY_RESET=60;
 const inArea=(p,a)=>!!a&&p.x>=a.x&&p.x<=a.x+a.w&&p.z>=a.z&&p.z<=a.z+a.d;
 export function spawnInRoom(room,typeId,at,scale){
  const t=TYPE.get(typeId),type=MONSTER_TYPES[t];let spot={x:at.x,z:at.z};
@@ -35,7 +35,7 @@ function say(realm,run,room,text){
 function setup(run,room,r,scale){
  const s={room:run.roomIndex,mobs:[],t:0,active:true};run.state=s;
  if(r.kind==='waves'){s.wave=0;spawnWave(room,r,0,scale,s);}
- if(r.kind==='lanterns'){s.lit=r.lanterns.map(()=>false);s.hold=r.lanterns.map(()=>0);s.spawnT=0;}
+ if(r.kind==='lanterns'){s.lit=r.lanterns.map(()=>false);}
  if(r.kind==='miniboss'){s.boss=spawnInRoom(room,r.boss,r.center,scale).id;}
  if(r.kind==='boss'){s.wait=r.delay??0;s.addT=0;s.hellT=0;s.leaps=0;}
  return s;
@@ -67,10 +67,10 @@ export function runScript(realm,room,dt){
    if(!aliveOf(room,s.mobs).length){if(s.wave+1<r.waves.length){s.wave++;spawnWave(room,r,s.wave,scale,s);}else s.open=true;}
    say(realm,run,room,s.open?'':'ระลอก '+(s.wave+1)+'/'+r.waves.length);
   }else if(r.kind==='lanterns'){
-   r.lanterns.forEach((l,i)=>{if(!s.lit[i]&&standing.some(p=>near(p.world.player,l,LANTERN_REACH))){s.hold[i]+=dt;if(s.hold[i]>=r.holdSeconds)s.lit[i]=true;}});
-   s.spawnT+=dt;if(s.spawnT>=r.spawn.every){s.spawnT=0;if(aliveOf(room,s.mobs).length<r.spawn.max)s.mobs.push(spawnInRoom(room,r.spawn.type,ring(r.center,s.mobs.length,6,5),scale).id);}
-   if(s.lit.every(Boolean)){for(const m of mobsOf(room,s.mobs))despawn(m);s.open=true;}
-   say(realm,run,room,s.open?'':'จุดตะเกียง '+s.lit.filter(Boolean).length+'/'+r.lanterns.length);
+   // owner 9 Nov: a lantern is lit with a button beside it and calls one wave; the next lantern waits for that wave to fall
+   const lit=s.lit.filter(Boolean).length,wave=aliveOf(room,s.mobs).length>0;
+   if(lit===r.lanterns.length&&!wave)s.open=true;
+   say(realm,run,room,s.open?'':'จุดตะเกียง '+lit+'/'+r.lanterns.length+(wave?' · ปราบมอนระลอกนี้ก่อน':' · เดินไปที่ตะเกียงแล้วกดจุด'));
   }else if(r.kind==='miniboss'){
    const chief=room.mobs[s.boss];
    if(!s.summoned&&chief.hp>0&&chief.hp<=chief.maxHp*r.summonAt){s.summoned=true;const [type,n]=r.summon;for(let i=0;i<n;i++)s.mobs.push(spawnInRoom(room,type,ring(chief,i,n,2.5),scale).id);}
@@ -98,5 +98,19 @@ function bossRoom(realm,run,room,r,s,scale,dt){
   // hell: the krasue form charges twice in a row (the second leap comes .6 s after the first)
   if(s.phase===2){const fresh=boss.leapCD>3.9&&!(s.prevLeap>3.9);if(fresh&&++s.leaps%2===1)boss.leapCD=.6;s.prevLeap=boss.leapCD;}}
  say(realm,run,room,(s.phase===2?'ร่างกระสือ · ':'')+'ปราบ'+MONSTER_TYPES[room.mobs[s.boss].type].name.replace(/ \(.*\)$/,''));
- if(s.phase===2&&boss.hp<=0){for(const m of mobsOf(room,s.mobs))despawn(m);finishRun(realm,run,room);}
+ if(s.phase===2&&boss.hp<=0){for(const m of mobsOf(room,s.mobs))despawn(m);finishRun(realm,run,room,boss);}
+}
+// The lantern button (owner 9 Nov): a living member beside an unlit lantern, with no wave standing, lights it and calls the next wave.
+export function lightLantern(realm,p,index){
+ const run=dungeonReservation(realm,p.key);if(!run||run.roomId!==p.room.id)throw Error('dungeon-no-lantern');
+ const d=dungeonById(run.dungeon),r=d.rooms[run.roomIndex];if(r.kind!=='lanterns')throw Error('dungeon-no-lantern');
+ const i=Number(index);if(!Number.isInteger(i)||!r.lanterns[i])throw Error('dungeon-no-lantern');
+ if(p.world.player.hp<=0||!near(p.world.player,r.lanterns[i],LANTERN_REACH))throw Error('dungeon-far');
+ const room=p.room,scale=monsterScale(run.difficulty,run.size);let s=run.state.room===run.roomIndex?run.state:setup(run,room,r,scale);
+ if(s.lit[i])throw Error('dungeon-lit');
+ if(aliveOf(room,s.mobs).length)throw Error('dungeon-wave');
+ s.lit[i]=true;const list=r.lanternWaves[Math.min(r.lanternWaves.length-1,s.lit.filter(Boolean).length-1)].flatMap(([type,count])=>Array.from({length:count},()=>type));
+ s.mobs=list.map((type,k)=>spawnInRoom(room,type,ring(r.lanterns[i],k,list.length,3.5),scale).id);
+ for(const id of room.peers)realm.peers.get(id)?.world.notice('จุดตะเกียงแล้ว '+s.lit.filter(Boolean).length+'/'+r.lanterns.length+' · ผีกระหังโผล่มา!');
+ return true;
 }

@@ -4,7 +4,7 @@ const COLOUR=['ฟ้า','เขียว','ม่วง','ส้ม','แด�
 export const oddsText=difficulty=>(DIFFICULTY[difficulty]??DIFFICULTY.normal).grades.map(([g,p])=>COLOUR[g]+' '+Math.round(p*100)+'%').join(' · ');
 const ERRORS={'dungeon-level':'เลเวลไม่ถึง','dungeon-busy':'ตอนนี้เข้าดันไม่ได้ · กำลังดวล เทรด หมดแรง หรืออยู่ในแมพพิเศษ','dungeon-not-leader':'หัวหน้าปาร์ตี้เป็นคนกดเข้า',
  'dungeon-cancelled':'ยกเลิกการเข้าดันแล้ว','dungeon-queued':'กำลังหาคนอยู่แล้ว','dungeon-party-full':'ปาร์ตี้ครบ 5 คนแล้ว · กดเข้าดันได้เลย','not-enough':'เศษไม่พอ',
- 'dungeon-no-offer':'ข้อเสนอหมดเวลาแล้ว','dungeon-not-ready':'ยังเข้าดันไม่ได้'};
+ 'dungeon-no-offer':'ข้อเสนอหมดเวลาแล้ว','dungeon-far':'เข้าไปใกล้ตะเกียงก่อน','dungeon-wave':'ปราบมอนระลอกนี้ให้หมดก่อน','dungeon-lit':'ตะเกียงนี้จุดแล้ว','dungeon-no-lantern':'ตรงนี้ไม่มีตะเกียงให้จุด','dungeon-not-ready':'ยังเข้าดันไม่ได้'};
 export const errorText=code=>ERRORS[code]??'เข้าดันไม่สำเร็จ';
 export function dungeonActions({level=1,dungeon,party=null,selfId=null,online=true,queue=null,inRun=false}){
  const member=!!party?.members?.includes(selfId),leader=!member||party.leader===selfId,queued=queue?.state==='waiting'||queue?.state==='offer';

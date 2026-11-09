@@ -564,6 +564,7 @@ export class RealmServer{
   if(mob.hp>0)return;mob.dead=p.room.map.instance?1e9:mobRespawn(mob);mob.aggro=false;
   // 0.122 the boss report goes out after every grant of this kill, with the real receipts (Victory screen rewards)
   const report=MONSTER_TYPES[mob.type]?.boss?finishBossDamage(p.room,mob,MONSTER_TYPES[mob.type],this.clock):null,receipt=report?{encounterId:report.encounterId,rows:[]}:null;
+  if(report&&p.room.map.dungeon)mob.encounterId=report.encounterId;
   if(mob.summoned)this.summonDown(p.room,mob,receipt);else if(MONSTER_TYPES[mob.type].mvp)this.mvpDown(p.room,mob,receipt);
   if(MONSTER_TYPES[mob.type].worldBoss&&!mob.summoned){this.mapBosses.killed(p.room,mob,MONSTER_TYPES);const type=MONSTER_TYPES[mob.type];logMvp(this.logs,this.now(),type.name,p.room.channel??1,p.room.map.id,p.character.name);this.announce(p.serverId,'👑 '+type.name+' ถูกปราบที่ '+p.room.map.name+' · CH '+(p.room.channel??1)+' · เกิดใหม่อีก 60 นาที');}
   if(p.room.map.instance&&!p.room.map.dungeon&&!p.room.mobs.some(m=>m.hp>0))this.dungeonClear(p.room);   // 0.123 owner: no dungeon boss, the last monster clears it

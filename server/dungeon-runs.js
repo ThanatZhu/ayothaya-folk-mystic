@@ -2,12 +2,12 @@
 // A run reserves one private room per team, like the arena (arena-rooms166.js). Players reach it through the normal
 // travel → join flow; the run remembers where each player stood before and sends them back there afterwards.
 import {randomUUID} from 'node:crypto';
-import {dungeonById,DIFFICULTY,canEnter,READY_SECONDS,MAX_PARTY,PIECE_CHANCE,CHESTS_PER_DAY,SHARDS_PER_PIECE,partyIndex,rollGradeFor} from '../dungeons.js';
+import {dungeonById,DIFFICULTY,canEnter,READY_SECONDS,MAX_PARTY,PIECE_CHANCE,CHESTS_PER_DAY,SHARDS_PER_PIECE,partyIndex,rollGradeFor,CLEAR_COINS_PER_LEVEL,CLEAR_STONES} from '../dungeons.js';
 import {dungeonPieceId,dungeonRainbowId,DUNGEON_SLOTS,withGrade} from '../gear-sets.js';
 import {normalizeBag} from '../items.js';
 import {thaiDay} from '../daily.js';
 import {queueFor,unqueue,acceptOffer} from './dungeon-queue.js';
-import {dungeonRunView} from './dungeon-script.js';
+import {dungeonRunView,lightLantern} from './dungeon-script.js';
 
 const RUN_IDLE_MS=10*60e3;
 const runs=realm=>realm.dungeonRuns??=new Map();
@@ -74,17 +74,19 @@ export function endRun(realm,run,{cleared=false}={}){
  for(const key of run.keys){const a=peerByKey(realm,key);if(a&&a.room.id===run.roomId&&!run.left.has(key))a.world.emit('dungeonEnded',{cleared,mapId:a.dungeonReturn?.mapId??realm.catalog.capital});}
 }
 // The boss fell: everyone still in the run is paid, then the run ends.
-export function finishRun(realm,run,room){run.cleared=true;grantRunRewards(realm,run);endRun(realm,run,{cleared:true});}
+export function finishRun(realm,run,room,boss=null){run.cleared=true;grantRunRewards(realm,run,boss?.encounterId?{encounterId:boss.encounterId}:null);endRun(realm,run,{cleared:true});}
 // Shards every clear; the chest (one set piece, by party size and difficulty) only 3 times per dungeon per Thai day.
-export function grantRunRewards(realm,run){
+// receipt (the boss kill's encounter) puts the payout in the boss result panel as well.
+export function grantRunRewards(realm,run,receipt=null){
  const d=dungeonById(run.dungeon),diff=DIFFICULTY[run.difficulty],rand=realm.dungeonRandom??Math.random,today=thaiDay(realm.now());
  for(const key of run.keys){if(run.left.has(key))continue;const p=peerByKey(realm,key);if(!p||p.room.id!==run.roomId)continue;
   if(p.dungeonChests?.day!==today)p.dungeonChests={day:today,counts:{}};
   const used=p.dungeonChests.counts[d.id]??0,chest=used<CHESTS_PER_DAY,items=[{id:d.shard,count:diff.shards}];let piece=null;
   if(chest){p.dungeonChests.counts[d.id]=used+1;
    if(rand()<PIECE_CHANCE[partyIndex(run.size)]){const slot=DUNGEON_SLOTS[Math.floor(rand()*DUNGEON_SLOTS.length)%DUNGEON_SLOTS.length];piece=withGrade(dungeonPieceId(d.set,slot),rollGradeFor(run.difficulty,rand));items.push({id:piece,count:1});}}
-  const coins=chest?d.level*30:0;realm.grantLoot(p,{coins,items});p.saveNow=true;
-  p.world.emit('dungeonReward',{dungeon:d.id,shard:d.shard,shards:diff.shards,piece,coins,chest,chestsLeft:CHESTS_PER_DAY-(p.dungeonChests.counts[d.id]??0)});}
+  const stone=CLEAR_STONES[Math.min(CLEAR_STONES.length-1,Math.floor(rand()*CLEAR_STONES.length))],stones=1+Math.min(diff.shards,Math.floor(rand()*(diff.shards+1)));items.push({id:stone,count:stones});
+  const coins=Math.round(d.level*CLEAR_COINS_PER_LEVEL*diff.mul);realm.grantLoot(p,{coins,items},null,receipt?{encounterId:receipt.encounterId}:null);p.saveNow=true;
+  p.world.emit('dungeonReward',{dungeon:d.id,shard:d.shard,shards:diff.shards,piece,coins,stone,stones,chest,chestsLeft:CHESTS_PER_DAY-(p.dungeonChests.counts[d.id]??0)});}
 }
 // 500 shards of a dungeon buy its rainbow piece for one slot.
 export function exchangeShards(realm,p,{dungeon:id,slot}){
@@ -122,6 +124,7 @@ export function dungeonCommand(realm,p,m){
  if(action==='enter')return startReadyCheck(realm,p,{dungeon:m.dungeon,difficulty:m.difficulty});
  if(action==='ready')return answerReady(realm,p,m.yes);
  if(action==='leave')return leaveRun(realm,p);
+ if(action==='lantern')return lightLantern(realm,p,m.index);
  if(action==='exchange')return exchangeShards(realm,p,{dungeon:m.dungeon,slot:m.slot});
  if(action==='info'){const today=thaiDay(realm.now()),used=p.dungeonChests?.day===today?p.dungeonChests.counts:{},run=dungeonReservation(realm,p.key);p.world.emit('dungeonInfo',{used:{...used},chestsPerDay:CHESTS_PER_DAY,inRun:!!run});if(run?.state?.text)p.world.emit('dungeonRun',dungeonRunView(run));return null;}
  if(action==='queue')return queueFor(realm,p,{dungeon:m.dungeon,difficulty:m.difficulty});

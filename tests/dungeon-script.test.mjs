@@ -21,16 +21,7 @@ test('a section wakes when the team walks in; waves follow one another; clearing
  assert.equal(run.roomIndex,1);assert.match(w.events(a,'dungeonRun').at(-1).text,/ประตูวิญญาณ/);
  at(b,R[2].center);w.run(.1);assert.ok(Math.hypot(b.world.player.x-R[1].hold.x,b.world.player.z-R[1].hold.z)<1,'a sealed section sends you back');
 });
-test('a lantern lights after 3 seconds of standing beside it, and four open the door',()=>{
- const w=dungeonWorld(),[a]=w.enter([w.join('เอ')]);safe(a);const run=dungeonReservation(w.realm,a.key);
- run.roomIndex=1;run.state={};w.run(.1);
- at(a,R[1].lanterns[0]);w.run(2.8);assert.equal(run.state.lit[0],false);
- w.run(.4);assert.equal(run.state.lit[0],true);
- w.run(5);assert.ok(live(a).some(m=>idOf(m)==='dg35-krahang'),'krahang swoop in every 8 s while lanterns burn');
- for(const l of R[1].lanterns.slice(1)){at(a,l);w.run(3.2);}
- assert.equal(live(a).length,0,'the krahang vanish when the last lantern lights');
- w.run(.1);assert.equal(run.roomIndex,2,'four lanterns open the gate');
-});
+// the lantern room is covered by tests/dungeon-feedback.test.mjs (button press, one wave per lantern; owner 9 Nov)
 test('the krahang chief calls two helpers once at half HP',()=>{
  const w=dungeonWorld(),[a]=w.enter([w.join('เอ')]);safe(a);const run=dungeonReservation(w.realm,a.key);
  run.roomIndex=2;run.state={};at(a,R[2].center);w.run(.1);

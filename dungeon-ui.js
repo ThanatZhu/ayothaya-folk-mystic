@@ -56,7 +56,13 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
  // ---- tracker inside a dungeon
  const tracker=el('div','dungeon-tracker');tracker.hidden=!map.dungeon;const goal=el('p','dungeon-goal',dungeonByMap(map.id)?.name??'');const out=el('button','dungeon-leave','ออกจากดัน');out.type='button';
  out.onclick=()=>{if(leaving){worldUI.dungeonTravel?.(leaving);return;}if(confirm('ออกจากดันเจี้ยน? ออกแล้วกลับเข้ารอบนี้ไม่ได้'))send({action:'leave'});};
- tracker.append(goal,out);(document.getElementById('game-shell')??document.body).append(tracker);
+ // owner 9 Nov: lanterns are lit with a button; it shows while you stand beside a lantern that is still dark
+ const light=el('button','dungeon-light','🏮 จุดตะเกียง');light.type='button';light.hidden=true;
+ light.onclick=()=>{const i=light.dataset.index;if(i!=null)send({action:'lantern',index:+i});};
+ setInterval(()=>{const d=dungeonByMap(map.id),r=d&&runView?d.rooms[runView.room]:null,pl=game.world.player;let idx=-1;
+  if(r?.kind==='lanterns'&&pl&&pl.hp>0)r.lanterns.forEach((l,i)=>{if(idx<0&&!runView.lanterns?.[i]&&Math.hypot(pl.x-l.x,pl.z-l.z)<=3)idx=i;});
+  light.hidden=idx<0;if(idx>=0)light.dataset.index=idx;else delete light.dataset.index;},300);
+ tracker.append(goal,light,out);(document.getElementById('game-shell')??document.body).append(tracker);
  function story(kind){const d=dungeonByMap(map.id);if(!d||storySeen.has(kind))return;storySeen.add(kind);
   dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:{id:'dungeon-'+d.id+'-'+kind,title:d.name,art:{src:d.cover,panels:1,frames:d.story[kind].map(()=>[0,0,960,400])},captions:d.story[kind]}}}));}
  function goHome(mapId,delay){leaving=mapId;out.textContent='กลับทันที';setTimeout(()=>worldUI.dungeonTravel?.(mapId),delay);}
@@ -70,7 +76,7 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
   else if(e.type==='dungeonEnded'){game.world.notice(e.cleared?'เคลียร์ดันเจี้ยนแล้ว! · กลับอัตโนมัติใน 15 วินาที':'รอบนี้จบแล้ว · กำลังพากลับ');goHome(e.mapId,e.cleared?15000:2000);}
   else if(e.type==='dungeonReward'){const piece=e.piece?itemDef(e.piece)?.name:null;game.world.notice('ได้เศษดัน '+e.shards+(piece?' · '+piece:'')+(e.chest?' · หีบวันนี้เหลือ '+e.chestsLeft:' · หีบวันนี้ครบแล้ว'));}
   else if(e.type==='dungeonExchanged'){game.world.notice('แลกได้ '+(itemDef(e.item)?.name??'ชุดรุ้ง'));if(dialog.open)render();}
-  else if(e.type==='dungeonRun'){runView=e;tracker.hidden=false;goal.textContent=e.name+(e.text&&e.text!==e.name?' · '+e.text:'');
+  else if(e.type==='dungeonRun'){runView=e;tracker.hidden=false;goal.textContent=!e.text||e.text===e.name?e.name:e.text.includes(e.name)?e.text:e.name+' · '+e.text;
    if(e.room===0)story('enter');if(e.kind==='boss')story('boss');}
  });
  if(map.dungeon)setTimeout(()=>send({action:'info'}),1500);   // the room goal after a reload

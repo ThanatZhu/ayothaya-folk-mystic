@@ -37,7 +37,10 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
   const actions=el('div','dungeon-actions');
   const enter=el('button','dungeon-enter','เข้าดัน');enter.type='button';enter.disabled=!acts.enter.on;enter.title=acts.enter.reason??'';enter.onclick=()=>send({action:'enter',dungeon:d.id,difficulty});
   const find=el('button','dungeon-find',acts.queue.cancel?'ยกเลิกหาคน':'หาคน');find.type='button';find.disabled=!acts.queue.on;find.onclick=()=>send(acts.queue.cancel?{action:'unqueue'}:{action:'queue',dungeon:d.id,difficulty});
-  actions.append(enter,find);if(acts.enter.reason)actions.append(el('small','dungeon-reason',acts.enter.reason));
+  // a seat is reserved but you are not inside (the trip in failed or you were sent away): go back in, or give it up
+  if(info?.inRun&&!map.dungeon){enter.textContent='กลับเข้าดัน';enter.disabled=false;enter.title='';enter.onclick=()=>worldUI.dungeonTravel?.(d.map);
+   const quit=el('button','dungeon-find','ออกจากรอบนี้');quit.type='button';quit.onclick=()=>{if(confirm('ออกจากรอบดันนี้? ออกแล้วกลับเข้ารอบนี้ไม่ได้'))send({action:'leave'});};actions.append(enter,quit);}
+  else actions.append(enter,find);if(acts.enter.reason)actions.append(el('small','dungeon-reason',acts.enter.reason));
   if(queue?.state==='waiting')actions.append(el('small','dungeon-reason','กำลังหาคน · '+DIFFICULTY[queue.difficulty]?.name));detail.append(actions);
   const have=shards(d),ex=el('div','dungeon-exchange');ex.append(el('h4','','แลกชุดดันสีรุ้ง · มีเศษ '+have.toLocaleString()+'/'+SHARDS_PER_PIECE));
   const row=el('div','dungeon-exchange-row');for(const slot of DUNGEON_SLOTS){const b=el('button','',SLOT_NAME[slot]);b.type='button';b.disabled=have<SHARDS_PER_PIECE||!game.online;b.onclick=()=>send({action:'exchange',dungeon:d.id,slot});row.append(b);}
@@ -63,7 +66,7 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
   else if(e.type==='dungeonReady'){ready=e;const d=DUNGEONS.find(x=>x.id===e.dungeon);popUp(e.leader+' ชวนเข้า '+(d?.name??'ดันเจี้ยน')+' · '+(DIFFICULTY[e.difficulty]?.name??''),[['พร้อม',()=>send({action:'ready',yes:true})],['ไม่พร้อม',()=>send({action:'ready',yes:false})]],e.seconds);}
   else if(e.type==='dungeonEnter'){pop.hidden=true;if(dialog.open)dialog.close();game.world.notice('กำลังเข้าดันเจี้ยน…');worldUI.dungeonTravel?.(e.map);}
   else if(e.type==='dungeonError')game.world.notice(errorText(e.reason));
-  else if(e.type==='dungeonExit')goHome(e.mapId,300);
+  else if(e.type==='dungeonExit'){if(map.dungeon)goHome(e.mapId,300);else{game.world.notice('ออกจากรอบดันแล้ว');send({action:'info'});}}
   else if(e.type==='dungeonEnded'){game.world.notice(e.cleared?'เคลียร์ดันเจี้ยนแล้ว! · กลับอัตโนมัติใน 15 วินาที':'รอบนี้จบแล้ว · กำลังพากลับ');goHome(e.mapId,e.cleared?15000:2000);}
   else if(e.type==='dungeonReward'){const piece=e.piece?itemDef(e.piece)?.name:null;game.world.notice('ได้เศษดัน '+e.shards+(piece?' · '+piece:'')+(e.chest?' · หีบวันนี้เหลือ '+e.chestsLeft:' · หีบวันนี้ครบแล้ว'));}
   else if(e.type==='dungeonExchanged'){game.world.notice('แลกได้ '+(itemDef(e.item)?.name??'ชุดรุ้ง'));if(dialog.open)render();}

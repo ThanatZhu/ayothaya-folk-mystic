@@ -1,5 +1,5 @@
 import{pvpDamage}from'../pvp223.js';
-import {createLedger} from './economy-ledger.js';
+import {createLedger,GOLD_SOURCES,GOLD_SINKS} from './economy-ledger.js';
 import {rapidConsumable} from '../rapid-consumables202.js';
 import {isRankingExcluded} from './ranking-eligibility197.js';
 import {amuletHit,amuletCoins,amuletCrit,shieldPoints} from '../amulet-skills.js';
@@ -96,7 +96,7 @@ export class RealmServer{
   castPremiumPet(w,pet,{lineClear,types:MONSTER_TYPES});p.petCollection.readyAt=this.now()+pet.skill.cooldown*1000;p.saveNow=true;return true;
  }
  autoPotion(p){autoPotionFor(this,p);}
- constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false,roleSkills=false,spiritCompanions=false,prologue=false}={}){this.roleSkills=roleSkills===true;this.prologue=prologue===true;this.spiritCompanions=spiritCompanions===true;this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];this.mapBosses=new MapBossClock({now});this.econ=createLedger({now});}
+ constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false,roleSkills=false,spiritCompanions=false,prologue=false}={}){this.roleSkills=roleSkills===true;this.prologue=prologue===true;this.spiritCompanions=spiritCompanions===true;this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];this.mapBosses=new MapBossClock({now});this.econ=createLedger({now});this.goldEcon=createLedger({now,sources:GOLD_SOURCES,sinks:GOLD_SINKS});}
  channelCounts(mapId){return CHANNELS.map(c=>{let n=0;for(const p of this.peers.values())if((!p.suspended||(p.resumeUntil&&p.resumeUntil>this.now()))&&(p.channel??1)===c.id&&(!mapId||p.room?.map?.id===mapId)&&!p.observer)n++;return {channel:c.id,name:c.name,subtitle:c.subtitle,players:n};});}
  join({uid,serverId,slotId,channel,record,send,canObserve=false}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');

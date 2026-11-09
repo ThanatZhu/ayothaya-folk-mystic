@@ -76,7 +76,7 @@ function set(r,f,v){
 }
 // 0.101.2 side menu: what each page is for, in one line
 const PAGES={formula:['📐','สูตรดาเมจ','ลองค่าตัวละคร ดูดาเมจ ตีโดน และหลบได้ต่อมอนทุกตัว'],players:['👥','ผู้เล่น','ดูผู้เล่นทั้งออนไลน์และออฟไลน์ ส่งไอเท็มหรือเบี้ยให้'],classes:['⚔️','อาชีพ','ค่าพื้นฐานของแต่ละอาชีพ: พลังโจมตี ความเร็ว ระยะ'],skills:['✨','สกิล','ปรับพลัง MP คูลดาวน์ของสกิลทีละอาชีพ'],table:['📊','ตารางสกิล','เทียบความแรงสกิลทุกอาชีพ (ดูอย่างเดียว)'],items:['🎒','ไอเท็ม','ราคา ค่าพลัง ฟื้น HP/MP ของไอเท็ม'],monsters:['👹','มอนสเตอร์','HP พลัง EXP และเวลาเกิดใหม่ของมอน'],drops:['🎲','ดรอป','โอกาสดรอปไอเท็มของมอนแต่ละตัว (%)'],boss:['👑','บอสโลก','เสกบอสลงแผนที่ที่เลือก · คนตีแรงสุดได้รางวัล MVP'],observers:['👁','ผู้ชมล่องหน','อีเมลที่เปิดโหมดผู้ชมได้ (ล่องหน ไม่ตกเป็นเป้า ไว้ไลฟ์วอกิลด์)']};
-const NAV=[['ผู้เล่นและชุมชน',['players','mail','evidence','observers']],['โลกเกมตอนนี้',['boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
+const NAV=[['ผู้เล่นและชุมชน',['players','mail','gold','evidence','observers']],['โลกเกมตอนนี้',['boss','mapbosses']],['ปรับสมดุลเกม',['classes','skills','table','items','monsters','drops','formula']]];
 // 0.118 evidence log (player names and details are shown exactly as recorded: data-i18n-skip): search what players and admins did (server keeps players 90 days, admins 3 years) and export it.
 const bkkDay=(t=Date.now())=>new Date(t+7*3600e3).toISOString().slice(0,10);
 const ev={stream:'players',from:bkkDay(),to:bkkDay(),type:'',q:'',rows:null,total:0,truncated:false,loading:false,msg:''};
@@ -128,6 +128,7 @@ ${rows.length?`<div class="scroll ev-scroll"><table class="ev-table"><thead><tr>
 const announcementDraft={title:'',body:'',serverId:'all',pending:null,busy:false,message:''};
 function tabs(){
  PAGES.mail=['✉','จดหมายและประกาศ','ส่งประกาศเข้าจดหมายผู้เล่น · ของแจกส่งได้ที่หน้าผู้เล่น'];
+ PAGES.gold=['🪙','ทองแท่ง','ตรวจยอดทองแท่งทั้งเซิร์ฟ แล้วล้างทองแท่งของผู้เล่นทุกคนครั้งเดียว'];
  PAGES.evidence=['🧾','บันทึกหลักฐาน','ประวัติเข้าเกม แชต การแลกของ ตลาด และการกระทำของแอดมิน · ค้นหาและส่งออกเป็นไฟล์'];
  PAGES.mapbosses=['🏔️','บอสประจำแมพ','9 แมพ · HP ไล่ตามพื้นที่ · เกิดใหม่ 60 นาทีหลังตาย แยกตามเซิร์ฟ/CH'];
  // 0.115 grouped menu: one line per page; the page's one-line help shows in its header instead.
@@ -158,7 +159,7 @@ function filters(){
  $('search')&&($('search').oninput=e=>{query=e.target.value.trim().toLowerCase();render(false);});
 }
 function pageHead(){
- const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','boss','mapbosses','mail','evidence','observers'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
+ const [icon,name,help]=PAGES[tab],editable=!['players','table','formula','boss','mapbosses','mail','gold','evidence','observers'].includes(tab)&&!(tab==='skills'&&skillSet==='live');
  $('page-title').textContent=name;$('page-help').textContent=(tab==='skills'&&skillSet==='live'?'ชุดสกิลที่ใช้ในเกมปัจจุบัน · ดูรูป บทบาท และสาย Master':help)+(editable?' · แก้ตัวเลขในช่อง (สีทอง = แก้แล้ว) แล้วกด บันทึกเข้าเกม':'');
  $('save-actions').hidden=!editable;showCount();
 }
@@ -179,7 +180,7 @@ function render(withFilters=true){
  if(withFilters)filters();pageHead();
  if(tab==='skills'&&skillSet==='live'){currentSkills();return;}
  if(tab==='table'){$('view').innerHTML=skillTable();$('view').querySelectorAll('tbody[data-path]').forEach(t=>paintAdminSkills(t,tableView,liveRoleSkills(tableView,t.dataset.path)));return;}
- if(tab==='evidence'){evidenceTab();return;}if(tab==='mail'){announcementTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='observers'){observersTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
+ if(tab==='evidence'){evidenceTab();return;}if(tab==='mail'){announcementTab();return;}if(tab==='gold'){goldTab();return;}if(tab==='players'){playersTab();return;}if(tab==='formula'){formulaTab();return;}if(tab==='drops'){dropsTab();return;}if(tab==='observers'){observersTab();return;}if(tab==='boss'){bossTab();return;}if(tab==='mapbosses'){mapBossesTab();return;}
  const rows=rowsFor(),cols=columns(rows),cards=['skills','monsters'].includes(tab)&&viewMode==='cards';
  const undo=(r,i)=>`<button type="button" class="undo" data-undo="${i}" ${draft[r.group][r.key]?'':'hidden'} aria-label="คืนค่าเดิม ${esc(r.title)}">คืนค่า</button>`;
  const note=tab==='skills'?'<p class="admin-legacy-note">ชุดสกิลเดิมก่อนปรับระบบอาชีพ · ไม่ใช่ชุดสกิลปัจจุบันที่แสดงในเกม</p>':'';
@@ -589,6 +590,31 @@ function formulaTab(){
  $('view').querySelectorAll('[data-fx]').forEach(el=>el.onchange=()=>{const k=el.dataset.fx;fx[k]=k==='classId'?el.value:Math.max(+el.min||0,Math.min(+el.max||999,Math.floor(Number(el.value)||0)));keep();formulaTab();});
 }
 
+// Gold wipe (owner 9 Nov 2026): report first, then a typed confirmation within 10 minutes; the host drains one page per 10 s.
+const GOLD_WORD='ล้างทองแท่ง',goldView={report:null,state:null,msg:'',busy:false,confirm:'',timer:0};
+const GOLD_ERRORS={'report-stale':'ยอดตรวจเก่าเกิน 10 นาที · กดตรวจยอดใหม่ก่อน','bad-confirm':'พิมพ์คำยืนยันไม่ตรง','authority-unavailable':'เซิร์ฟเวอร์กำลังสลับเครื่อง · ลองใหม่อีกครั้ง'};
+const goldRunning=()=>goldView.state?.startedAt&&!goldView.state.completedAt;
+function goldPoll(){clearTimeout(goldView.timer);if(tab!=='gold'||!goldRunning())return;goldView.timer=setTimeout(async()=>{try{goldView.state=(await adminFetch('/admin/gold-wipe',{})).state;}catch{}if(tab==='gold')goldTab();},10000);}
+async function goldCall(path,body){
+ if(goldView.busy)return;goldView.busy=true;goldView.msg='';goldTab();
+ try{const r=await adminFetch(path,body);if(r.holdings)goldView.report=r.holdings;goldView.state=r.state;if(body)goldView.confirm='';}catch(e){goldView.msg=GOLD_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
+ finally{goldView.busy=false;if(tab==='gold')goldTab();}
+}
+function goldTab(){
+ warmFirebase();const g=goldView,r=g.report,st=g.state,fresh=st?.reportAt&&Date.now()-st.reportAt<=600000&&!st.startedAt;
+ $('view').innerHTML=`<section class="admin-announcement admin-gold"><small>GOLD BARS</small><h2>ล้างทองแท่ง</h2><p>นับทองแท่งในกระเป๋าและทองที่แนบในจดหมายของทุกตัวละคร แล้วล้างให้เป็น 0 · ทำครั้งเดียว ย้อนกลับไม่ได้ · ต้องตรวจยอดก่อน และยอดตรวจใช้ได้ 10 นาที</p>
+ <button type="button" class="primary" id="gold-check" ${g.busy||st?.startedAt?'disabled':''}>ตรวจยอดก่อนล้าง</button>
+ ${r?`<div class="gold-report"><dl><div><dt>ผู้ถือทองแท่ง</dt><dd>${num(r.holders)} จาก ${num(r.characters)} ตัวละคร</dd></div><div><dt>ทองในกระเป๋า</dt><dd>${num(r.held)}</dd></div><div><dt>ทองในจดหมาย</dt><dd>${num(r.mailGold)}</dd></div></dl>
+ ${r.characters>=2000?'<p class="gold-warn">นับได้สูงสุด 2,000 ตัวละคร · ยอดนี้อาจไม่ครบ</p>':''}
+ <h3>ผู้ถือมากสุด 20 อันดับ</h3><ol data-i18n-skip>${(r.top??[]).slice(0,20).map(t=>`<li><span>${esc(t.name??t.uid)}</span><b>${num(t.gold)}</b><em>+ จดหมาย ${num(t.mailGold)}</em></li>`).join('')||'<li>ไม่มีใครถือทองแท่ง</li>'}</ol></div>`:''}
+ ${st?.startedAt?'':`<label>พิมพ์ ${GOLD_WORD} เพื่อยืนยัน<input id="gold-confirm" autocomplete="off" value="${esc(g.confirm)}" ${fresh?'':'disabled'}></label><button type="button" class="primary danger" id="gold-wipe" ${fresh&&g.confirm===GOLD_WORD&&!g.busy?'':'disabled'}>ล้างทองแท่ง</button>${fresh?'':'<p class="gold-note">ปุ่มนี้เปิดหลังตรวจยอดภายใน 10 นาที</p>'}`}
+ ${st?.startedAt?`<div class="gold-progress"><h3>${st.completedAt?'ล้างเสร็จแล้ว':'กำลังล้าง · อัปเดตทุก 10 วินาที'}</h3><dl><div><dt>ตรวจแล้ว</dt><dd>${num(st.scanned)} ตัวละคร</dd></div><div><dt>ล้างแล้ว</dt><dd>${num(st.wiped)} ตัวละคร</dd></div><div><dt>ทองกระเป๋าที่ล้าง</dt><dd>${num(st.wallet)}</dd></div><div><dt>ทองจดหมายที่ล้าง</dt><dd>${num(st.mail)}</dd></div>${st.pending?.length?`<div><dt>รอลองใหม่</dt><dd>${num(st.pending.length)}</dd></div>`:''}</dl></div>`:''}
+ <p role="status">${esc(g.msg)}</p></section>`;
+ $('gold-check').onclick=()=>goldCall('/admin/gold-report');
+ const c=$('gold-confirm');if(c)c.oninput=()=>{g.confirm=c.value.trim();$('gold-wipe').disabled=!(fresh&&g.confirm===GOLD_WORD&&!g.busy);};
+ const w=$('gold-wipe');if(w)w.onclick=()=>{if(g.confirm===GOLD_WORD)goldCall('/admin/gold-wipe',{confirm:GOLD_WORD});};
+ goldPoll();
+}
 function announcementTab(){
  warmFirebase();const d=announcementDraft;
  $('view').innerHTML=`<section class="admin-announcement"><small>PLAYER MAIL</small><h2>ประกาศจากทีมงาน</h2><p>ส่งเข้าจดหมายของผู้เล่นทั้งออนไลน์และออฟไลน์ · ฉบับนี้ไม่มีของแนบ</p><form id="announcement-form"><label>ผู้รับ<select id="announcement-scope"><option value="all">ทุกเซิร์ฟเวอร์</option><option value="server-1">เซิร์ฟเวอร์ 1</option><option value="server-2">เซิร์ฟเวอร์ 2</option></select></label><label>หัวเรื่อง<input id="announcement-title" maxlength="100" required value="${esc(d.title)}"></label><label>ข้อความ<textarea id="announcement-body" maxlength="4000" rows="9" required>${esc(d.body)}</textarea></label><aside><small>ตัวอย่างจดหมาย · ทีมงานอโยธยา</small><h3 id="announcement-preview-title"></h3><p id="announcement-preview-body"></p></aside><button type="submit" class="primary" ${d.busy?'disabled':''}>${d.busy?'กำลังส่ง…':'ส่งประกาศเข้าจดหมาย'}</button><p role="status">${esc(d.message)}</p></form></section>`;

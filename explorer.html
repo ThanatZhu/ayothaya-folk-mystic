@@ -34,6 +34,7 @@
 .econ-row b{font-weight:700;font-variant-numeric:tabular-nums}.econ-row em{font-style:normal;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;margin-left:6px}
 .econ-bar{grid-column:1/-1;height:6px;border-radius:3px;background:#0e1f1b;overflow:hidden}.econ-bar i{display:block;height:100%;border-radius:3px;background:var(--c)}
 .econ-empty{color:var(--muted);padding:10px 0;margin:0}
+.econ-gold{--in:#d9b45a;--out:#9a6a1c;margin-top:28px}.econ-gold>h2{margin:0 0 4px;font-size:24px;font-weight:700}.econ-gold .econ-stats{margin:14px 0}.econ-gold .econ-panel{position:relative}
 .econ-note{color:var(--muted);font-size:13px;line-height:1.8;margin-top:18px}
 #econ-status{color:var(--muted);margin-top:16px}
 .skip{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.skip:focus{clip:auto;width:auto;height:auto;padding:10px;top:5px;left:5px;z-index:100;background:#102d25;color:#f6edd6}
@@ -57,6 +58,25 @@ body{background:#0f211c;margin:0}footer{border-top:1px solid #c6a16455;padding:3
  <section class="econ-lists" id="econ-lists" hidden>
   <div class="econ-panel econ-list"><h3>เบี้ยเข้ามาจากไหน</h3><p>เบี้ยที่เกิดใหม่ในช่วงที่เลือก</p><div id="econ-sources"></div></div>
   <div class="econ-panel econ-list"><h3>เบี้ยหายไปที่ไหน</h3><p>เบี้ยที่ออกจากเกมในช่วงที่เลือก</p><div id="econ-sinks"></div></div>
+ </section>
+ <section class="econ-gold" id="econ-gold" hidden>
+  <h2>ทองแท่ง</h2>
+  <div class="econ-stats">
+   <div class="econ-card"><span>ทองแท่งที่ผู้เล่นถือ</span><b id="g-held">-</b><i><span id="g-chars">-</span> <span>ตัวละคร</span></i></div>
+   <div class="econ-card"><span>ทองในจดหมายที่ยังไม่รับ</span><b id="g-mail">-</b></div>
+   <div class="econ-card"><span>ทองเข้าวันนี้</span><b id="g-in">-</b></div>
+   <div class="econ-card"><span>ทองออกวันนี้</span><b id="g-out">-</b></div>
+  </div>
+  <div class="econ-panel">
+   <div class="econ-head"><h2>ทองเข้า-ออกรายวัน</h2></div>
+   <div class="econ-legend"><span style="--c:var(--in)">ทองเข้า</span><span style="--c:var(--out)">ทองออก</span><span class="net" style="--c:var(--ink)">สุทธิ</span></div>
+   <div class="econ-chart" id="gold-chart"></div><div class="econ-tip" id="gold-tip"></div>
+  </div>
+  <div class="econ-lists" style="margin-top:14px">
+   <div class="econ-panel econ-list"><h3>ทองเข้ามาจากไหน</h3><p>ทองที่เกิดใหม่ในช่วงที่เลือก</p><div id="gold-sources"></div></div>
+   <div class="econ-panel econ-list"><h3>ทองหายไปที่ไหน</h3><p>ทองที่ออกจากเกมในช่วงที่เลือก</p><div id="gold-sinks"></div></div>
+  </div>
+  <p class="econ-note">ตลาดแลกเบี้ย ↔ ทองแท่งยังไม่เปิด</p>
  </section>
  <p class="econ-note">นับเฉพาะเบี้ยที่เกิดใหม่หรือหายไปจากเกม การซื้อขายระหว่างผู้เล่นไม่นับเพราะเบี้ยแค่ย้ายมือ ส่วนภาษีตลาดนับเป็นเบี้ยที่หายไป ข้อมูลอัปเดตทุก 5 นาที ยอดเบี้ยที่ถืออยู่อัปเดตทุก 6 ชั่วโมง</p>
 </main>

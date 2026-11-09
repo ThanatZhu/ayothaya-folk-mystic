@@ -91,6 +91,8 @@ export class LocalStore{
  saveObservers(emails){return writeFile(path.join(this.directory,'observers.json'),JSON.stringify(emails),{mode:0o600});}
  async loadPrices(){try{return JSON.parse(await readFile(path.join(this.directory,'prices.json'),'utf8'));}catch{return {};}}
  savePrices(serverId,prices){this.allPrices={...(this.allPrices??{}),[serverId]:prices};return writeFile(path.join(this.directory,'prices.json'),JSON.stringify(this.allPrices),{mode:0o600});}
+ async loadEconomy(){try{return JSON.parse(await readFile(path.join(this.directory,'economy.json'),'utf8'));}catch{return null;}}
+ saveEconomy(data){return writeFile(path.join(this.directory,'economy.json'),JSON.stringify(data),{mode:0o600});}
  deleteGuild(){return this.flushGuilds();}
  flushGuilds(){const data=JSON.stringify([...(this.realmGuilds?.values()??[])]);return writeFile(path.join(this.directory,'guilds.json'),data,{mode:0o600});}
  flush(){this.queue=this.queue.catch(()=>{}).then(()=>this.writeProfiles());return this.queue;}
@@ -133,6 +135,9 @@ export class FirebaseStore{
  saveObservers(emails){return this.db.collection('multiplayerRuntime').doc('observerEmails').set({emails,updatedAt:Date.now()});}
  async loadPrices(){const out={};for(const d of (await this.db.collection('multiplayerPrices').get()).docs)out[d.id]=d.data().prices??{};return out;}
  savePrices(serverId,prices){return this.db.collection('multiplayerPrices').doc(serverId).set({prices});}
+ // money explorer (9 Nov 2026): one small server-only doc with 30 days of coin totals
+ async loadEconomy(){const s=await this.db.collection('multiplayerRuntime').doc('economy').get();return s.exists?s.data():null;}
+ saveEconomy(data){return this.db.collection('multiplayerRuntime').doc('economy').set(data);}
  deleteGuild(g){return this.db.collection('multiplayerGuilds').doc(g.id).delete();}
  // 0.103 back office. The private profiles sit in multiplayerProfiles/{uid}/characters; the collection group also
  // matches the legacy players/{uid}/characters mirror, which is skipped. One read per document: the host caches it.

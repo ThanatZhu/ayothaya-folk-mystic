@@ -30,7 +30,7 @@ export function pickGroundLoot(realm,p,id,byPet=false){
  if(!position||distance(position,drop)>range+.001||!walkLineClear(position,drop,p.room.map.nav))return 'far';
  // Consume before granting; repeated commands and two pets can never collect this bundle twice.
  p.room.groundLoot.delete(drop.id);
- realm.grantLoot(p,drop.loot,drop,drop.receipt);
+ realm.grantLoot(p,drop.loot,drop,drop.receipt,drop.receipt?'boss':'monster');
  return null;
 }
 export function stepGroundLoot(realm,room,dt){

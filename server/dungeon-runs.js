@@ -85,7 +85,7 @@ export function grantRunRewards(realm,run,receipt=null){
   if(chest){p.dungeonChests.counts[d.id]=used+1;
    if(rand()<PIECE_CHANCE[partyIndex(run.size)]){const slot=DUNGEON_SLOTS[Math.floor(rand()*DUNGEON_SLOTS.length)%DUNGEON_SLOTS.length];piece=withGrade(dungeonPieceId(d.set,slot),rollGradeFor(run.difficulty,rand));items.push({id:piece,count:1});}}
   const stone=CLEAR_STONES[Math.min(CLEAR_STONES.length-1,Math.floor(rand()*CLEAR_STONES.length))],stones=1+Math.min(diff.shards,Math.floor(rand()*(diff.shards+1)));items.push({id:stone,count:stones});
-  const coins=Math.round(d.level*CLEAR_COINS_PER_LEVEL*diff.mul);realm.grantLoot(p,{coins,items},null,receipt?{encounterId:receipt.encounterId}:null);p.saveNow=true;
+  const coins=Math.round(d.level*CLEAR_COINS_PER_LEVEL*diff.mul);realm.grantLoot(p,{coins,items},null,receipt?{encounterId:receipt.encounterId}:null,'dungeon');p.saveNow=true;
   p.world.emit('dungeonReward',{dungeon:d.id,shard:d.shard,shards:diff.shards,piece,coins,stone,stones,chest,chestsLeft:CHESTS_PER_DAY-(p.dungeonChests.counts[d.id]??0)});}
 }
 // 500 shards of a dungeon buy its rainbow piece for one slot.

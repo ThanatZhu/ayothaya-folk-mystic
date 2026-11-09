@@ -54,7 +54,7 @@ function cleanGift({coins=0,items=[]}={}){
 export function adminGive(realm,{peer,...gift}={}){
  const p=realm.peers.get(peer);if(!p||p.suspended)throw new Error('player-offline');
  const {coins,items:clean}=cleanGift(gift);
- realm.grantLoot(p,{coins,items:clean});p.world.notice('ได้รับของจากทีมงานอโยธยา');p.saveNow=true;
+ realm.grantLoot(p,{coins,items:clean},null,null,'mail');p.world.notice('ได้รับของจากทีมงานอโยธยา');p.saveNow=true;
  return {ok:true,name:p.character.name,coins:p.bag.coins,items:{...p.bag.items}};
 }
 
@@ -65,5 +65,6 @@ export async function adminGiveOffline(realm,store,{peer,...gift}={}){
  if([...realm.peers.values()].some(p=>p.uid===uid))throw new Error('player-online');
  if(!store?.giveOffline)throw new Error('player-offline');
  const record=await store.giveOffline({uid,slotId},r=>{const x=addLoot(r.bag,loot);if(x.lost.length)throw new Error('bag-full');r.bag=x.bag;return r;});
+ realm.econRecord(loot.coins??0,'mail');
  return {ok:true,name:record.character?.name??'',coins:record.bag.coins,items:{...record.bag.items}};
 }

@@ -1,4 +1,5 @@
 import{pvpDamage}from'../pvp223.js';
+import {createLedger} from './economy-ledger.js';
 import {rapidConsumable} from '../rapid-consumables202.js';
 import {isRankingExcluded} from './ranking-eligibility197.js';
 import {amuletHit,amuletCoins,amuletCrit,shieldPoints} from '../amulet-skills.js';
@@ -95,7 +96,7 @@ export class RealmServer{
   castPremiumPet(w,pet,{lineClear,types:MONSTER_TYPES});p.petCollection.readyAt=this.now()+pet.skill.cooldown*1000;p.saveNow=true;return true;
  }
  autoPotion(p){autoPotionFor(this,p);}
- constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false,roleSkills=false,spiritCompanions=false,prologue=false}={}){this.roleSkills=roleSkills===true;this.prologue=prologue===true;this.spiritCompanions=spiritCompanions===true;this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];this.mapBosses=new MapBossClock({now});}
+ constructor({catalog,capacity=50,now=()=>Date.now(),warAlways=false,runEnabled=false,roleSkills=false,spiritCompanions=false,prologue=false}={}){this.roleSkills=roleSkills===true;this.prologue=prologue===true;this.spiritCompanions=spiritCompanions===true;this.wars=new Map();this.warAlways=warAlways;this.runEnabled=runEnabled===true;this.arenaPairs=new Map();this.onAnnounce=null;this.catalog=catalog;this.capacity=capacity;this.now=now;this.peers=new Map();this.rooms=new Map();this.parties=new Map();this.invites=new Map();this.guilds=new Map();this.guildsDirty=new Set();this.onGuild=null;this.leaders=new Map();this.onLeaders=null;this.leadersDirty=new Set();this.shops=new Map();this.onShop=null;this.prices=new Map();this.onPrices=null;this.pricesDirty=new Set();this.mvps=new Map();this.born=now();this.clock=0;this.tickId=0;this.logs=[];this.mapBosses=new MapBossClock({now});this.econ=createLedger({now});}
  channelCounts(mapId){return CHANNELS.map(c=>{let n=0;for(const p of this.peers.values())if((!p.suspended||(p.resumeUntil&&p.resumeUntil>this.now()))&&(p.channel??1)===c.id&&(!mapId||p.room?.map?.id===mapId)&&!p.observer)n++;return {channel:c.id,name:c.name,subtitle:c.subtitle,players:n};});}
  join({uid,serverId,slotId,channel,record,send,canObserve=false}){
   if(!uid||!isServer(serverId)||!isSlot(slotId))throw new Error('invalid-identity');
@@ -144,7 +145,7 @@ export class RealmServer{
   if(this.roleSkills&&!record.skills?.[ROLE_MARK]&&hero.classId!=='novice')world.notice('อัปเดตสกิลประจำอาชีพแล้ว · คืนแต้มสกิลเดิมให้จัดใหม่ที่เมนูสกิล');
   this.storyProgress(peer,{type:'enter',mapId:map.id});this.storyCheck(peer);this.arenaClaim(peer);
   // 0.48 daily login: first join of the Thai day grants the next reward of the 7-day cycle.
-  const daily=claimDaily(peer.daily,this.now());if(daily){peer.daily=daily.daily;this.grantLoot(peer,daily.reward);peer.saveNow=true;world.emit('daily',{streak:daily.streak,reward:daily.reward});}
+  const daily=claimDaily(peer.daily,this.now());if(daily){peer.daily=daily.daily;this.grantLoot(peer,daily.reward,null,null,'daily');peer.saveNow=true;world.emit('daily',{streak:daily.streak,reward:daily.reward});}
   logJoin(this.logs,this.now(),hero.name,ch,map.id);
   send({type:'welcome',id:peer.id,room:roomId,channel:ch,capacity:this.capacity,history:copy(room.history),snapshot:this.snapshot(peer)});this.social(room);return peer;
  }
@@ -198,7 +199,7 @@ export class RealmServer{
    if(!npc||!SHOPS[npc.name]?.refine||SHOPS[npc.name].mapId!==p.room.map.id||distance(npc,w.player)>3.6)return reject('refine-far');
    if(now-p.gearAt<600)return reject('gear-rate');p.gearAt=now;
    let r;try{r=refineGear(p.bag,p.gear,m.slot,{lekLai:m.lekLai===true,guard:m.guard===true});}catch(e){return reject(e.message);}
-   const item=p.gear[m.slot],before=itemDef(item)?.name;p.gear=r.gear;this.setBag(p,r.bag);this.refreshStats(p);
+   const item=p.gear[m.slot],before=itemDef(item)?.name;p.gear=r.gear;this.setBag(p,r.bag,'refine');this.refreshStats(p);
    const shout=refineAnnouncement(p.character.name,r,before,itemDef(r.gear[m.slot])?.name);if(shout)this.worldSay(p.serverId,{actor:null,name:'ประกาศ',text:shout});
    w.emit('refined',{attempt,item,upgradedItem:r.gear[m.slot],slot:m.slot,result:r.result,level:r.level,chance:r.chance});this.storyCheck(p);return true;
   }
@@ -207,14 +208,14 @@ export class RealmServer{
    if(!npc||m.npc!==STORAGE_NPC||distance(npc,w.player)>3.6)return this.itemFail(p,'storage-far');
    if(m.type==='storageOpen'){w.emit('stored',{storage:p.storage});return true;}
    const offer={coins:0,items:{[m.item]:m.count}};
-   try{if(m.type==='store'){const [b,s]=moveOffer(p.bag,p.storage,offer,{toCap:STORAGE_SLOTS});this.setBag(p,b);p.storage=s;}
-    else{const [s,b]=moveOffer(p.storage,p.bag,offer,{fromCap:STORAGE_SLOTS});p.storage=s;this.setBag(p,b);}}catch(e){return this.itemFail(p,e.message);}
+   try{if(m.type==='store'){const [b,s]=moveOffer(p.bag,p.storage,offer,{toCap:STORAGE_SLOTS});this.setBag(p,b,null);p.storage=s;}
+    else{const [s,b]=moveOffer(p.storage,p.bag,offer,{fromCap:STORAGE_SLOTS});p.storage=s;this.setBag(p,b,null);}}catch(e){return this.itemFail(p,e.message);}
    w.emit('stored',{storage:p.storage});return true;
   }
   if(m.type==='craft'){
    if(now-(p.craftAt??-Infinity)<300)return this.itemFail(p,'craft-rate');p.craftAt=now;
    let r;try{r=craft(p.bag,m.item,m.times,Math.random,p.character);}catch(e){return this.itemFail(p,e.message);}
-   this.setBag(p,r.bag);w.emit('crafted',{item:m.item,count:r.made});this.storyProgress(p,{type:'do',action:'craft'});if(r.items.some(i=>{const it=itemDef(i.id);return it?.slot==='weapon'&&it.grade===0&&!it.rainbow&&it.classes?.includes(p.character.classId);}))this.storyProgress(p,{type:'do',action:'craftWeapon'});
+   this.setBag(p,r.bag,'craft');w.emit('crafted',{item:m.item,count:r.made});this.storyProgress(p,{type:'do',action:'craft'});if(r.items.some(i=>{const it=itemDef(i.id);return it?.slot==='weapon'&&it.grade===0&&!it.rainbow&&it.classes?.includes(p.character.classId);}))this.storyProgress(p,{type:'do',action:'craftWeapon'});
    // 0.117 a rainbow boss-set piece is announced to the channel
    if(itemDef(m.item)?.rainbow)this.announce(p.serverId,`🌈 ${p.character.name} คราฟ ${itemDef(m.item).name} สำเร็จ`);return true;
   }
@@ -244,17 +245,17 @@ export class RealmServer{
     const def=fieldAdventurers(p.room.map).find(n=>n.id===m.adventurer);if(!def)return this.itemFail(p,'hire-unavailable');
     const npc=adventurerAt(def,now/1000);if(distance(npc,w.player)>3.6||!lineClear(w.player.x,w.player.z,npc.x,npc.z,w.nav))return this.itemFail(p,'hire-far');
     if(w.merc)return this.itemFail(p,'hire-active');if(p.bag.coins<def.cost)return this.itemFail(p,'no-coins');
-    const b=normalizeBag(p.bag);b.coins-=def.cost;this.setBag(p,b);w.hire(ADVENTURER_TIME,adventurerContract(def));w.emit('hired',{id:def.id});w.notice('จ้างนักผจญภัยแล้ว · 20 นาที · ช่วยเฉพาะแผนที่นี้');return true;
+    const b=normalizeBag(p.bag);b.coins-=def.cost;this.setBag(p,b,'hire');w.hire(ADVENTURER_TIME,adventurerContract(def));w.emit('hired',{id:def.id});w.notice('จ้างนักผจญภัยแล้ว · 20 นาที · ช่วยเฉพาะแผนที่นี้');return true;
    }
    const npc=p.room.map.npcs?.find(n=>n.name==='ครูแสนดาบ');if(!npc||distance(npc,w.player)>3.6)return this.itemFail(p,'hire-far');
    if(w.merc)return this.itemFail(p,'hire-active');if(p.bag.coins<MERC_COST)return this.itemFail(p,'no-coins');
-   const b=normalizeBag(p.bag);b.coins-=MERC_COST;this.setBag(p,b);w.hire(MERC_TIME);w.notice('จ้างทหารรับจ้างแล้ว · 20 นาที');return true;
+   const b=normalizeBag(p.bag);b.coins-=MERC_COST;this.setBag(p,b,'hire');w.hire(MERC_TIME);w.notice('จ้างทหารรับจ้างแล้ว · 20 นาที');return true;
   }
   if(m.type==='albumDeposit'){
    if(p.trade)return this.itemFail(p,'trade-busy');
    if(p.mailMutationBusy)return this.error(p,'server-busy');
    let r;try{r=depositAlbumCard(p,p.bag,m.card);}catch(e){return this.itemFail(p,e.message);}
-   Object.assign(p,r.state);this.setBag(p,r.bag);p.saveNow=true;
+   Object.assign(p,r.state);this.setBag(p,r.bag,'album');p.saveNow=true;
    w.notice('ฝากการ์ดแล้ว · '+itemDef(m.card).name);
    for(const milestone of r.milestones)w.emit('album',{count:milestone.count});
    if(r.reward.coins||r.reward.items.length)w.emit('loot',r.reward);
@@ -263,7 +264,7 @@ export class RealmServer{
   if(m.type==='bountyClaim'){
    if(!p.room.map.safe)return this.itemFail(p,'bounty-town');
    let r;try{r=bountyClaim(p.bounty,now,m.index);}catch(e){return this.itemFail(p,e.message);}
-   p.bounty=r.state;w.emit('experience',awardExperience(w,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins,items:[]});p.saveNow=true;w.notice('รับรางวัลค่าหัวแล้ว');return true;
+   p.bounty=r.state;w.emit('experience',awardExperience(w,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins,items:[]},null,null,'bounty');p.saveNow=true;w.notice('รับรางวัลค่าหัวแล้ว');return true;
   }
   // 0.102 weekly quests: claimed in a town like the daily bounties; rewards are cowries and items
   // 0.102 rebirth at Base Lv.99 in a town: Base level back to 1, stat points refunded (+40 for each rebirth),
@@ -279,7 +280,7 @@ export class RealmServer{
   if(m.type==='weeklyClaim'){
    if(!p.room.map.safe)return this.itemFail(p,'bounty-town');
    let r;try{r=weeklyClaim(p.weekly,now,m.index);}catch(e){return this.itemFail(p,e.message);}
-   p.weekly=r.state;this.grantLoot(p,{coins:r.reward.coins,items:r.reward.items.map(i=>({...i}))});p.saveNow=true;w.notice('รับรางวัลภารกิจรายสัปดาห์แล้ว');return true;
+   p.weekly=r.state;this.grantLoot(p,{coins:r.reward.coins,items:r.reward.items.map(i=>({...i}))},null,null,'bounty');p.saveNow=true;w.notice('รับรางวัลภารกิจรายสัปดาห์แล้ว');return true;
   }
   if(m.type==='leaderboard'){if(now-(p.leaderboardAt??-Infinity)<1000)return true;p.leaderboardAt=now;w.emit('leaderboard',this.leaderboard(p));return true;}
   if(m.type==='bubble'){if(!Number.isInteger(m.id)||m.id<1||m.id>24)return this.error(p,'invalid-emote');if(now-p.bubbleAt<1000)return false;p.bubbleAt=now;p.room.events.push({type:'bubble',actor:p.id,id:m.id});return true;}
@@ -323,7 +324,7 @@ export class RealmServer{
   if(m.type==='bagExpand'){
    const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null,shop=npc&&SHOPS[npc.name];
    if(!shop?.expand||shop.mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'shop-too-far');
-   try{this.setBag(p,expandBag(p.bag));}catch(e){return this.itemFail(p,e.message);}
+   try{this.setBag(p,expandBag(p.bag),'bag');}catch(e){return this.itemFail(p,e.message);}
    w.notice('ขยายกระเป๋าแล้ว · '+p.bag.slots+' ช่อง');this.storyProgress(p,{type:'do',action:'shop'});return true;
   }
   if(m.type==='buy'||m.type==='sell'){
@@ -331,7 +332,7 @@ export class RealmServer{
    const npc=typeof m.npc==='string'?p.room.map.npcs?.find(n=>n.name===m.npc):null,shop=npc&&SHOPS[npc.name];
    if(!shop||shop.mapId!==p.room.map.id||distance(npc,w.player)>3.6)return this.itemFail(p,'shop-too-far');
    const qty=m.count??1;
-   try{const before=p.bag.coins,next=m.type==='buy'?buy(p.bag,npc.name,m.item,qty):sell(p.bag,m.item,qty),spent=m.type==='buy'?before-next.coins:0,off=Math.floor(spent*tradePerks(p.tradeXp).npcDiscount);this.setBag(p,off?{...next,coins:next.coins+off}:next);}catch(e){return this.itemFail(p,e.message);}
+   try{const before=p.bag.coins,next=m.type==='buy'?buy(p.bag,npc.name,m.item,qty):sell(p.bag,m.item,qty),spent=m.type==='buy'?before-next.coins:0,off=Math.floor(spent*tradePerks(p.tradeXp).npcDiscount);this.setBag(p,off?{...next,coins:next.coins+off}:next,m.type==='buy'?'npcBuy':'npcSell');}catch(e){return this.itemFail(p,e.message);}
    w.emit('trade',{kind:m.type,item:m.item,count:qty,coins:p.bag.coins});this.storyProgress(p,{type:'do',action:'shop'});return true;
   }
   if(m.type==='prologue')return prologueCommand(this,p,m);
@@ -480,7 +481,7 @@ export class RealmServer{
   if(prev&&prev!==g){prev.castle=false;this.guildChanged(prev);}
   if(!g){this.herald(serverId,'🏯 กิลด์วอร์จบแล้ว · ไม่มีกิลด์ใดยึด'+WAR.name+'ได้');return;}
   g.castle=true;this.guildChanged(g);this.herald(serverId,`👑 กิลด์ ${g.name} ครอง${WAR.name}สัปดาห์นี้! · สงครามครั้งหน้า ${warLabel(this.now())}`);
-  for(const x of g.members){const o=this.online(x.key);if(o?.serverId===serverId){this.grantLoot(o,structuredClone(WAR.reward));o.saveNow=true;o.world.notice('👑 หีบสงครามของผู้ครองป้อม · ได้รับรางวัลแล้ว');}}
+  for(const x of g.members){const o=this.online(x.key);if(o?.serverId===serverId){this.grantLoot(o,structuredClone(WAR.reward),null,null,'event');o.saveNow=true;o.world.notice('👑 หีบสงครามของผู้ครองป้อม · ได้รับรางวัลแล้ว');}}
  }
  herald(serverId,text){this.announce(serverId,text);this.onAnnounce?.('**['+(SERVER_NAME[serverId]??serverId)+']** '+text);}
  // ---- 0.96 weekly duel tournament (arena.js), stored beside the power board as leaders['arena:'+serverId].
@@ -497,7 +498,7 @@ export class RealmServer{
  arenaClaim(p,a=this.arena(p.serverId)){
   const z=a.prizes?.[p.key];if(!z)return;delete a.prizes[p.key];this.leadersDirty.add('arena:'+p.serverId);
   if(isRankingExcluded(p.character)||this.rankingExcluded(p.serverId,p.key,a.rows?.[p.key]))return;
-  this.grantLoot(p,structuredClone(ARENA.prizes[z.place-1]));p.saveNow=true;p.world.notice('🏆 รางวัลทัวร์นาเมนต์ประลอง อันดับ '+z.place+' · ได้รับแล้ว');
+  this.grantLoot(p,structuredClone(ARENA.prizes[z.place-1]),null,null,'event');p.saveNow=true;p.world.notice('🏆 รางวัลทัวร์นาเมนต์ประลอง อันดับ '+z.place+' · ได้รับแล้ว');
  }
  arenaScore(w,l,draw,roundId){
   if(!w||!l||w.uid===l.uid)return;const room=arenaReservation(this,w.key);if(!room?.ranked||room!==arenaReservation(this,l.key)||room.roundId!==roundId||!roundId||room.scored||w.room.map.id!==ARENA_MAP||w.room!==l.room)return;room.scored=true;
@@ -622,7 +623,7 @@ export class RealmServer{
     }
    }
    stepGroundLoot(this,room,dt);
-   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock};if(['damage','playerHit','cast','petSkill'].includes(e.type))p.petBuildCombatAt=this.clock;if(e.type==='cast'&&e.skillIndex!=null&&p.room.map.id===WAR.map&&this.wars.get(p.serverId)?.active){warContribution(this.wars.get(p.serverId).round,p,this.guildOf(p));this.leadersDirty.add(warBoardKey(p.serverId));}if(e.type.startsWith('spirit'))for(const key of ['launchAt','impactAt','spawnedAt','endsAt'])if(Number.isFinite(e[key]))e[key]+=this.clock-p.world.time; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp&&!e.levelGiftsGranted)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))});p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','refineRejected','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopsClosed','shopMine','marketResults','friends','friendAsk','guild','guildAsk','guildDirectory','guildApplication','daily','mvp','dungeonClear','dungeonReady','dungeonEnter','dungeonError','dungeonExit','dungeonEnded','dungeonRun','dungeonReward','dungeonQueue','dungeonExchanged','dungeonInfo','tamed','album','crafted','hired'].includes(e.type)||p.observer)p.send({type:'events',events:[e]});else room.events.push(e);}}
+   for(const id of room.peers){const p=this.peers.get(id);for(const event of p.world.events.splice(0)){const e={...event,actor:id,at:this.clock};if(['damage','playerHit','cast','petSkill'].includes(e.type))p.petBuildCombatAt=this.clock;if(e.type==='cast'&&e.skillIndex!=null&&p.room.map.id===WAR.map&&this.wars.get(p.serverId)?.active){warContribution(this.wars.get(p.serverId).round,p,this.guildOf(p));this.leadersDirty.add(warBoardKey(p.serverId));}if(e.type.startsWith('spirit'))for(const key of ['launchAt','impactAt','spawnedAt','endsAt'])if(Number.isFinite(e[key]))e[key]+=this.clock-p.world.time; /* 1.10.2 server time of the event: clients place the swing on their timeline */if(e.type==='experience'){if(e.baseUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.baseLevel,'base');if(e.jobUp)logLevelUp(this.logs,this.now(),p.character.name,p.channel??1,p.room?.map?.id??'ayothaya',e.jobLevel,'job');}if(e.type==='experience'&&e.baseUp&&!e.levelGiftsGranted)for(const g of levelGifts(e.baseFrom,e.baseLevel)){p.world.notice(`ของขวัญ Lv.${g.level} · ${g.text}`);this.grantLoot(p,{coins:g.coins,items:g.items.map(i=>({...i}))},null,null,'level');p.saveNow=true;}if(['notice','experience','defeat','select','story','loot','used','trade','refined','refineRejected','carded','stored','tradeAsk','tradeState','tradeEnd','stalls','stallSold','leaderboard','shops','shopsClosed','shopMine','marketResults','friends','friendAsk','guild','guildAsk','guildDirectory','guildApplication','daily','mvp','dungeonClear','dungeonReady','dungeonEnter','dungeonError','dungeonExit','dungeonEnded','dungeonRun','dungeonReward','dungeonQueue','dungeonExchanged','dungeonInfo','tamed','album','crafted','hired'].includes(e.type)||p.observer)p.send({type:'events',events:[e]});else room.events.push(e);}}
    if(this.tickId%2===0){this.broadcasting=true;const events=copy(room.events);for(const id of room.peers){const p=this.peers.get(id);p.send({type:'snapshot',...this.snapshot(p,{delta:true}),events});}this.broadcasting=false;room.events=[];}
   }
  }
@@ -630,7 +631,7 @@ export class RealmServer{
   let changed=false;const tracks=event.campaign==='rebirth'?['rebirthStory']:event.campaign==='main'?['story']:['story',...(p.rebirth>=1?['rebirthStory']:[])];
   for(const key of tracks){if(key==='rebirthStory'&&!(p.rebirth>=1))continue;const r=storyEvent(p[key],event);if(!r.changed)continue;p[key]=r.state;changed=true;
    p.world.emit('story',{...(key==='rebirthStory'?{campaign:'rebirth'}:{}),npc:event.npc??null,say:r.say??null,completed:r.completed?.title??null,story:r.state});
-   if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:rewardItems(r.reward,p.character.classId,p.character.gender)});}p.saveNow=true;
+   if(r.reward){p.world.emit('experience',awardExperience(p.world,r.reward.baseXp,r.reward.jobXp));this.grantLoot(p,{coins:r.reward.coins??0,items:rewardItems(r.reward,p.character.classId,p.character.gender)},null,null,'quest');}p.saveNow=true;
   }return changed;
  }
  // 0.98 tutorial steps that are already true (wearing a weapon, a refined or carded piece, a class, a level, AUTO on,
@@ -695,13 +696,13 @@ export class RealmServer{
   if(m.type==='shopList'){w.emit('shops',{list:this.shopList(p.serverId)});return true;}
   if(m.type==='shopOpen'){
    let r;try{r=openShop({bag:p.bag,req:m.shop,perks,owner:{key:p.key,name:p.character.name,serverId:p.serverId},x:w.player.x,z:w.player.z,mapId:p.room.map.id,now,id:randomUUID(),existing:[...this.shops.values()].filter(s=>s.serverId===p.serverId)});}catch(e){return fail(e.message);}
-   this.setBag(p,r.bag);this.shops.set(r.shop.id,r.shop);p.saveNow=true;this.saveShop(r.shop);this.shopsChanged(p.serverId);
+   this.setBag(p,r.bag,null);this.shops.set(r.shop.id,r.shop);p.saveNow=true;this.saveShop(r.shop);this.shopsChanged(p.serverId);
    w.notice((r.shop.kind==='buy'?'เปิดร้านรับซื้อ ':'เปิดร้านค้าง ')+r.shop.title+' แล้ว · เปิดได้ 24 ชั่วโมงแม้ออกจากเกม');w.emit('shopMine',{shops:this.mine(p),perks});return true;}
   const shop=this.shops.get(m.shop);if(!shop||shop.serverId!==p.serverId)return fail('stall-none');
   if(m.type==='shopCollect'||m.type==='shopClose'){if(shop.ownerKey!==p.key)return fail('stall-none');
    let r;try{r=collectShop(shop,p.bag,{close:m.type==='shopClose'});}catch(e){return fail(e.message);}
    p.tradeXp=Math.min(1e9,(p.tradeXp??0)+(shop.xpOwed??0));if(r.shop)r.shop.xpOwed=0;
-   this.setBag(p,r.bag);p.saveNow=true;if(r.shop){this.shops.set(shop.id,r.shop);this.saveShop(r.shop);}else{this.shops.delete(shop.id);this.saveShop(shop,true);this.shopsChanged(p.serverId,[shop.id]);}
+   this.setBag(p,r.bag,null);p.saveNow=true;if(r.shop){this.shops.set(shop.id,r.shop);this.saveShop(r.shop);}else{this.shops.delete(shop.id);this.saveShop(shop,true);this.shopsChanged(p.serverId,[shop.id]);}
    w.notice((m.type==='shopClose'?'ปิดร้านแล้ว':'รับของจากร้านแล้ว')+(r.coins?' · เบี้ย +'+r.coins:''));w.emit('shopMine',{shops:this.mine(p),perks});return true;}
   if(p.room.map.id!==MARKET_ZONE.mapId||Math.hypot(w.player.x-shop.x,w.player.z-shop.z)>4.5)return fail('shop-far');
   if(shop.ownerKey===p.key)return fail('stall-self');
@@ -709,14 +710,16 @@ export class RealmServer{
   let r;try{r=m.type==='shopBuy'?buyFromShop(shop,p.bag,m.item,m.count,ownerPerks,{who:p.character.name,now}):m.type==='shopSell'?sellToShop(shop,p.bag,m.item,m.count,tradePerks(p.tradeXp),{who:p.character.name,now}):null;}catch(e){return fail(e.message);}
   if(!r)return false;
   r.shop.xpOwed=(shop.xpOwed??0)+(r.cost??r.pay); // the owner's trade experience is paid out when they collect
-  this.setBag(p,r.bag);p.saveNow=true;this.shops.set(shop.id,r.shop);this.saveShop(r.shop);this.traded(p.serverId,[p],m.item,r.cost??r.pay,m.count);
+  this.setBag(p,r.bag,null);this.econRecord(-(r.tax??0),'marketTax');p.saveNow=true;this.shops.set(shop.id,r.shop);this.saveShop(r.shop);this.traded(p.serverId,[p],m.item,r.cost??r.pay,m.count);
   this.evidence?.(p,m.type==='shopBuy'?'market-shop-buy':'market-shop-sell',{shop:{id:shop.id,owner:shop.ownerName},item:m.item,count:m.count,coins:r.cost??r.pay,tax:r.tax??0});
   owner?.world.emit('stallSold',{item:m.item,count:m.count,coins:(r.cost??r.pay)-r.tax,buyer:p.character.name});
   owner?.world.emit('shopMine',{shops:this.mine(owner),perks:tradePerks(owner.tradeXp)});
   w.notice((m.type==='shopBuy'?'ซื้อจากร้าน ':'ขายให้ร้าน ')+shop.ownerName+' แล้ว'+(r.tax?' · ภาษี '+r.tax+' เบี้ย':''));
   this.shopsChanged(p.serverId,r.shop.status==='closed'?[shop.id]:[]);return true;
  }
- setBag(p,bag){p.bag=bag;p.bagVersion++;if(p.stall){p.stall={...p.stall,...normalizeStall(p.stall,bag,tradePerks(p.tradeXp).slots)};this.expireStall(p);}}
+ // money books (owner 9 Nov): every coin change names its reason; player-to-player moves pass null and are not counted
+ econRecord(delta,reason){try{this.econ.record(delta,reason);}catch{this.econ.record(delta,'other');}}
+ setBag(p,bag,reason='other'){const delta=(bag?.coins??0)-(p.bag?.coins??0);if(delta&&reason)this.econRecord(delta,reason);p.bag=bag;p.bagVersion++;if(p.stall){p.stall={...p.stall,...normalizeStall(p.stall,bag,tradePerks(p.tradeXp).slots)};this.expireStall(p);}}
  // ---- 0.46 player trade: both lock, both confirm, then one atomic swap and an immediate save of both.
  partner(p){const o=p.trade&&this.peers.get(p.trade.with);return o&&o.trade?.with===p.id?o:null;}
  sendTrade(a,b){for(const [x,y] of [[a,b],[b,a]])x.world.emit('tradeState',{partner:{id:y.id,name:y.character.name},mine:x.trade.offer,theirs:y.trade.offer,myLock:x.trade.locked,theirLock:y.trade.locked,myOk:x.trade.ok,theirOk:y.trade.ok});}
@@ -739,7 +742,7 @@ export class RealmServer{
   if(m.type==='tradeConfirm'){if(!p.trade.locked||!o.trade.locked)return this.itemFail(p,'trade-wait');p.trade.ok=true;
    if(!o.trade.ok){this.sendTrade(p,o);return true;}
    let r;try{r=swapOffers(p.bag,p.trade.offer,o.bag,o.trade.offer);}catch(e){this.endTrade(p,'แลกไม่สำเร็จ · '+e.message);return false;}
-   this.setBag(p,r[0]);this.setBag(o,r[1]);p.saveNow=o.saveNow=true;
+   this.setBag(p,r[0],null);this.setBag(o,r[1],null);p.saveNow=o.saveNow=true;
    this.evidence?.(p,'trade',{with:{uid:o.uid,name:o.character.name,ip:o.ip??null},gave:p.trade.offer,got:o.trade.offer});
    logTrade(this.logs,this.now(),p.character.name,o.character.name,p.channel??1);
    for(const x of [p,o]){x.trade=null;x.world.emit('tradeEnd',{reason:'แลกของสำเร็จ',done:true});}return true;}
@@ -756,7 +759,7 @@ export class RealmServer{
   if(m.type==='stallBuy'){const o=this.peers.get(m.owner);if(!o?.stall||o.suspended||o.mailMutationBusy||o.room!==p.room)return this.itemFail(p,'stall-none');if(o===p)return this.itemFail(p,'stall-self');
    let r;try{r=buyFromStall(o.bag,o.stall,p.bag,m.item,m.count,tradePerks(o.tradeXp).slots);}catch(e){return this.itemFail(p,e.message);}
    {const tax=taxOf(r.cost,tradePerks(o.tradeXp));r.net=r.cost-tax;r.sellerBag={...r.sellerBag,coins:r.sellerBag.coins-tax};this.traded(p.serverId,[p,o],m.item,r.cost,m.count);}
-   const nextStall={...o.stall,...r.stall};this.setBag(o,r.sellerBag);this.setBag(p,r.buyerBag);o.stall=shopHasListings(nextStall)?nextStall:null;p.saveNow=o.saveNow=true;
+   const nextStall={...o.stall,...r.stall};this.setBag(o,r.sellerBag,null);this.setBag(p,r.buyerBag,null);this.econRecord(-(r.cost-r.net),'marketTax');o.stall=shopHasListings(nextStall)?nextStall:null;p.saveNow=o.saveNow=true;
    logMarket(this.logs,this.now(),p.character.name,o.character.name,m.item,m.count,r.cost);
    this.evidence?.(p,'market-stall',{seller:{uid:o.uid,name:o.character.name},item:m.item,count:m.count,coins:r.cost,tax:r.cost-r.net});
    o.world.emit('stallSold',{item:m.item,count:m.count,coins:r.net,buyer:p.character.name});w.notice('ซื้อจากแผง '+o.character.name+' แล้ว');
@@ -857,7 +860,7 @@ export class RealmServer{
    if(a.dungeonDay===today){a.world.notice('ล้างดันเจี้ยนสำเร็จ · วันนี้รับรางวัลไปแล้ว (รีเซ็ตเที่ยงคืน)');continue;}
    const look=gearLook(a.character.classId,a.character.gender),extra=MONSTER_TYPES.filter(t=>t.clearReward===room.map.id).map(t=>rollLoot(t.id,Math.random,null,1,look));   // 0.123 the old dungeon boss's table
    const reward={coins:DUNGEON_REWARD.coins+extra.reduce((n,r)=>n+r.coins,0),items:[...structuredClone(DUNGEON_REWARD.items),...extra.flatMap(r=>r.items)]};
-   a.dungeonDay=today;this.grantLoot(a,reward);a.saveNow=true;a.world.emit('dungeonClear',{reward,map:room.map.name});}
+   a.dungeonDay=today;this.grantLoot(a,reward,null,null,'dungeon');a.saveNow=true;a.world.emit('dungeonClear',{reward,map:room.map.name});}
  }
  // ---- 0.47 friends (mutual, kept in each private profile) and guilds (one shared doc each, persisted by the host via onGuild).
  online(key,serverId=null){for(const o of this.peers.values())if(o.key===key&&(!serverId||o.serverId===serverId)&&!o.suspended)return o;return null;}
@@ -940,7 +943,7 @@ export class RealmServer{
   if(m.type==='guildInfo'){w.emit('guild',{guild:this.guildView(g,p.key)});return true;}
   if(m.type==='guildCreate'){if(g)return fail('guild-already');const name=validGuildName(m.name);if(!name)return fail('guild-name');if(!validEmblem(m.emblem))return fail('bad-count');
    if([...this.guilds.values()].some(x=>x.serverId===p.serverId&&x.name.toLowerCase()===name.toLowerCase()))return fail('guild-taken');
-   if(p.bag.coins<GUILD_COST)return fail('no-coins');const b=normalizeBag(p.bag);b.coins-=GUILD_COST;this.setBag(p,b);p.saveNow=true;
+   if(p.bag.coins<GUILD_COST)return fail('no-coins');const b=normalizeBag(p.bag);b.coins-=GUILD_COST;this.setBag(p,b,'guild');p.saveNow=true;
    const ng={id:randomUUID(),serverId:p.serverId,name,emblem:m.emblem,leader:p.key,members:[{key:p.key,name:p.character.name}],created:this.now()};
    logGuild(this.logs,this.now(),p.character.name,name);
    this.clearGuildApplications(p.key,p.serverId);this.guilds.set(ng.id,ng);this.guildChanged(ng);w.notice('ก่อตั้งกิลด์ '+name+' แล้ว');return true;}
@@ -970,7 +973,7 @@ export class RealmServer{
    g.notice=cleanNotice(m.text);this.guildChanged(g);if(g.notice)this.guildChat(g,'📜 ประกาศใหม่: '+g.notice);return true;}
   // Donations: เบี้ย leave the bag for the treasury; 10 เบี้ย = 1 guild EXP and 1 contribution point.
   if(m.type==='guildDonate'){if(!g)return fail('guild-none');const n=m.coins;if(!Number.isSafeInteger(n)||n<DONATE_MIN||n>DONATE_MAX)return fail('bad-count');if(p.bag.coins<n)return fail('no-coins');
-   const b=normalizeBag(p.bag);b.coins-=n;this.setBag(p,b);p.saveNow=true;g.treasury=(g.treasury??0)+n;
+   const b=normalizeBag(p.bag);b.coins-=n;this.setBag(p,b,'guild');p.saveNow=true;g.treasury=(g.treasury??0)+n;
    this.guildGain(g,Math.floor(n/10),g.members.find(x=>x.key===p.key));this.guildChanged(g);this.guildChat(g,`${p.character.name} บริจาค ${n.toLocaleString('th-TH')} เบี้ยเข้าคลังกิลด์`);return true;}
   if(m.type==='guildUpgrade'){if(!g)return fail('guild-none');if(rank!=='leader')return fail('guild-leader');if(!Object.hasOwn(GUILD_UPGRADES,m.id))return fail('bad-count');const u=GUILD_UPGRADES[m.id];
    const tier=g.upgrades?.[m.id]??0;if(tier>=u.costs.length)return fail('guild-max');if(guildLevel(g.exp??0)<u.levels[tier])return fail('guild-level');if((g.treasury??0)<u.costs[tier])return fail('guild-treasury');
@@ -985,11 +988,11 @@ export class RealmServer{
  // 0.122 receipt (boss kills only): {encounterId, rows?}. During the kill its rows collect what really landed in the
  // bag (received) or did not fit (lost); a grant queued behind a mail action is listed as pending and, once the queue
  // drains (host.js), confirmed to the room with a bossLoot event carrying the same grantId.
- grantLoot(p,loot,at=null,receipt=null){
+ grantLoot(p,loot,at=null,receipt=null,reason='other'){
   if(receipt&&!receipt.grantId)receipt={...receipt,grantId:p.id+':'+(this.lootGrants=(this.lootGrants??0)+1)};
-  if(p.mailMutationBusy){(p.mailLootQueue??=[]).push({loot:copy(loot),at:at?copy(at):null,receipt:receipt&&{encounterId:receipt.encounterId,grantId:receipt.grantId}});receipt?.rows?.push(...bossLootRows(p,loot.items,'pending',receipt.grantId));return;}
+  if(p.mailMutationBusy){(p.mailLootQueue??=[]).push({loot:copy(loot),reason,at:at?copy(at):null,receipt:receipt&&{encounterId:receipt.encounterId,grantId:receipt.grantId}});receipt?.rows?.push(...bossLootRows(p,loot.items,'pending',receipt.grantId));return;}
   if(!loot.coins&&!loot.items.length)return;
-  const r=addLoot(p.bag,loot);this.setBag(p,r.bag);
+  const r=addLoot(p.bag,loot);this.setBag(p,r.bag,reason);
   // 0.122 what a full bag cannot take goes to the "bag full" mail; only what the mailbox cannot take is lost
   const mail=r.lost.length?mailOverflow(p.mailbox,r.lost,{id:OVERFLOW_PREFIX+randomUUID(),now:this.now(),serverId:['server-1','server-2'].includes(p.serverId)?p.serverId:'all'}):{mailed:[],left:[]};
   if(mail.mailed.length)p.mailbox=mail.mailbox;r.lost=mail.left;
@@ -1071,7 +1074,7 @@ export class RealmServer{
   if(warp&&p.bag.coins<fare)throw new Error('no-coins');
   if((!portal&&!recall&&!townHop&&!warp&&!hall&&!home)||!destination||p.world.player.hp<=0)throw new Error('travel-invalid');
   if((this.rooms.get(p.serverId+':'+id)?.peers.size??0)>=this.capacity)throw new Error('room-full');
-  if(warp){const b=normalizeBag(p.bag);b.coins-=fare;this.setBag(p,b);}
+  if(warp){const b=normalizeBag(p.bag);b.coins-=fare;this.setBag(p,b,'warp');}
   else if(recall&&!jobRecall){const b=normalizeBag(p.bag);b.items['return-incense']--;if(!b.items['return-incense'])delete b.items['return-incense'];this.setBag(p,b);}
   this.endTrade(p,'อีกฝ่ายเดินทางไปแล้ว');p.stall=null;p.world.clearEmote();p.world.player.running=false;
   return destination;

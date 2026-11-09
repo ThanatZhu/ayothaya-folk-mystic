@@ -55,7 +55,7 @@ export const PROLOGUE_EXIT_LEVEL=10;
 // ponytail: hidden when read, not deleted; the row stays stored until that player returns and rank() overwrites it.
 export const isTrialRow=v=>v?.level<PROLOGUE_EXIT_LEVEL&&v?.power>=5000;
 function starterKit(realm,p){
- realm.grantLoot(p,STARTER_KIT);
+ realm.grantLoot(p,STARTER_KIT,null,null,'starter');
  const short=levelStart(PROLOGUE_EXIT_LEVEL)-p.world.baseXp;if(short>0)p.world.emit('experience',awardExperience(p.world,short,0));
  for(const id of STARTER){try{const r=equipGear(p.bag,p.gear,id,realm.who(p));p.gear=r.gear;realm.setBag(p,r.bag);}catch{}}
  realm.refreshStats(p);p.world.notice('🎒 ได้รับชุดเริ่มต้น ยา และเบี้ย · สวมให้แล้ว · Lv.10 พร้อมออกฟาร์ม');

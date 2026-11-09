@@ -43,6 +43,7 @@ import {EvidenceLog,playerEvent} from './evidence.js';
 import {WorldReset} from './world-reset.js';
 import {createResetStore} from './world-reset-store.js';
 import {balanceText,commitBalance} from './github-balance.js';
+import {createLedger} from './economy-ledger.js';
 import {LocalStore,FirebaseStore,AUTHORITY_RENEW,SAVE_MIN_GAP,SAVE_MAX_GAP} from './storage.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 // 0.122 only a bad token or identity fails authentication (the client gives up); a store or authority hiccup during a
@@ -62,6 +63,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const trackWrite=p=>{const task=Promise.resolve(p);writes.add(task);task.finally(()=>writes.delete(task)).catch(()=>{});return task;};
  let mailReady=!store?.loadMailAnnouncements;
  let shopsReady=mode==='local'||!store?.loadShops,loadMarket=async()=>{};
+ // money explorer: the books load once this host holds authority (at boot in local mode) and save every 5 minutes
+ let econReady=!store?.loadEconomy,econSavedAt=Date.now(),heldAt=0;
  let bossTimersReady=mode==='local'||!store?.loadMapBosses;
  const authoritative=()=>(mode!=='firebase'||Date.now()<=store.authorityUntil)&&resetReady&&bossTimersReady&&mailReady&&shopsReady;
  let renewing=false,authorityError='',classRewardState=null,classRewardTask=null;
@@ -87,6 +90,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(!shopsReady){await loadMarket();shopsReady=true;}
    if(!bossTimersReady){realm.mapBosses.restore(await store.loadMapBosses());bossTimersReady=true;}
    if(!mailReady){realm.mailAnnouncements=await store.loadMailAnnouncements();mailReady=true;}
+   if(!econReady){realm.econ=createLedger({saved:await store.loadEconomy()});econReady=true;}
    if(authorityError){console.log('Multiplayer authority acquired');authorityError='';}
   }catch(e){if(e.message!==authorityError)console.error('Multiplayer authority unavailable: '+e.message);authorityError=e.message;}
   finally{renewing=false;}
@@ -95,6 +99,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  let savedList={at:0,rows:[]},lastLogSaveCount=0,lastLogSaveAt=0;
  const realm=new RealmServer({catalog,capacity,runEnabled:GAMEPLAY_RUN_ENABLED,roleSkills:process.env.ROLE_SKILLS!=='off',spiritCompanions:true,prologue,warAlways:mode==='local'&&process.env.WAR_ALWAYS==='1'}),sessions=new Map(),joinPending=new Set(),metrics={bytesSent:0,messagesSent:0,startedAt:Date.now()};let closing=false;
  if(mode==='local'&&store?.loadMailAnnouncements){realm.mailAnnouncements=await store.loadMailAnnouncements();mailReady=true;}
+ if(mode==='local'&&store?.loadEconomy){realm.econ=createLedger({saved:await store.loadEconomy()});econReady=true;}
  if(mode==='local'&&store?.loadMapBosses)realm.mapBosses.restore(await store.loadMapBosses());
  if(store?.saveMapBosses)realm.mapBosses.onChange=rows=>trackWrite(store.saveMapBosses(rows));
  const toDiscord=discordPoster();if(toDiscord)realm.onAnnounce=toDiscord; // 0.96 war + tournament news (DISCORD_WEBHOOK_URL)
@@ -171,6 +176,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
+  if(url.pathname==='/economy'&&req.method==='GET'){res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Cache-Control','public, max-age=60');reply(200,realm.econ.publicView());return;}
   if(url.pathname==='/game-status'&&req.method==='GET'){reply(200,{maintenance:!!reset?.maintenance,worldReset:1});return;}
   // Drain requests that started before the reset; no later HTTP mutation can enter the world.
   if(req.method==='POST'&&!url.pathname.startsWith('/admin/world-reset')){
@@ -430,15 +436,15 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    s.peer.petCollection=result.state;realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return result;
   });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;}
  }
- async function persistMail(s,apply,applyLive=()=>{}){
+ async function persistMail(s,apply,applyLive=()=>{},reason='other'){
   if(s.trainingBusy||s.closing||s.peer.trade)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;s.peer.mailMutationBusy=true;
   const job=s.queue.catch(()=>{}).then(async()=>{const before=realm.record(s.peer,s.lease.record),same=JSON.stringify(before);let record=apply(before);if(classRewards){try{record=grantClassReward(record);}catch(e){if(e.message!=='mailbox-full')throw e;}}let timer;
    if(JSON.stringify(record)===same)return record; // re-reading a read mail, deleting nothing: no write
    if(!spendWrite(s))throw Error('rate-limit');
    try{await Promise.race([store.checkpoint(s.lease,record),new Promise((_,no)=>{timer=setTimeout(()=>no(Error('save-timeout')),15000);})]);}
    catch(error){s.closing=true;s.released=true;realm.leave(s.peer.id);s.ws.close(4010,'save-failed');throw error;}finally{clearTimeout(timer);}
-   Object.assign(s.peer.character,record.character);s.peer.identityReceipts=record.identityReceipts??s.peer.identityReceipts;s.peer.mailbox=record.mailbox;realm.setBag(s.peer,record.bag);s.peer.petCollection=record.petCollection??s.peer.petCollection;applyLive(record);realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return record;
-  });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;s.peer.mailMutationBusy=false;if(!s.closing){for(const gift of s.peer.mailLootQueue??[])realm.grantLoot(s.peer,gift.loot,gift.at,gift.receipt??null);}s.peer.mailLootQueue=[];}
+   Object.assign(s.peer.character,record.character);s.peer.identityReceipts=record.identityReceipts??s.peer.identityReceipts;s.peer.mailbox=record.mailbox;realm.setBag(s.peer,record.bag,reason);s.peer.petCollection=record.petCollection??s.peer.petCollection;applyLive(record);realm.refreshStats(s.peer);s.autoSavedAt=Date.now();s.savedJson=null;return record;
+  });s.queue=job.catch(()=>{});try{return await job;}finally{s.trainingBusy=false;s.peer.petMutationBusy=false;s.peer.mailMutationBusy=false;if(!s.closing){for(const gift of s.peer.mailLootQueue??[])realm.grantLoot(s.peer,gift.loot,gift.at,gift.receipt??null,gift.reason);}s.peer.mailLootQueue=[];}
  }
  const auctionActor=p=>({uid:p.uid,slotId:p.slotId,serverId:p.serverId,name:p.character.name});
  const auctionSerial=fn=>{const task=auctionQueue.catch(()=>{}).then(fn);auctionQueue=task.catch(()=>{});return task;};
@@ -450,8 +456,8 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
    if(!spendWrite(s))throw Error('rate-limit');const before=realm.record(p,s.lease.record);
    let out;try{out=await store.auctionTransaction(s.lease,before,book=>auctionAction(book,before,m,auctionActor(p),auctionNow(),lotId));}
    catch(error){if(!AUCTION_ERRORS[error.message]&&!ITEM_ERRORS[error.message]&&!['rate-limit','no-item','no-coins','bag-full','coin-cap'].includes(error.message)){s.closing=true;s.released=true;p.suspended=true;realm.leave(p.id);s.ws.close(4010,'save-failed');}throw error;}
-   auctionBooks.set(p.serverId,out.book);realm.setBag(p,out.record.bag);s.autoSavedAt=Date.now();s.savedJson=null;realm.evidence(p,'auction',{action:m.type,request:m.id,lot:out.result.lotId??null,replayed:out.replayed});return out;
-  }));s.queue=task.catch(()=>{});try{return await task;}finally{s.trainingBusy=false;p.petMutationBusy=false;p.mailMutationBusy=false;if(!s.closing)for(const gift of p.mailLootQueue??[])realm.grantLoot(p,gift.loot,gift.at,gift.receipt??null);p.mailLootQueue=[];}
+   auctionBooks.set(p.serverId,out.book);realm.setBag(p,out.record.bag,null);s.autoSavedAt=Date.now();s.savedJson=null;realm.evidence(p,'auction',{action:m.type,request:m.id,lot:out.result.lotId??null,replayed:out.replayed});return out;
+  }));s.queue=task.catch(()=>{});try{return await task;}finally{s.trainingBusy=false;p.petMutationBusy=false;p.mailMutationBusy=false;if(!s.closing)for(const gift of p.mailLootQueue??[])realm.grantLoot(p,gift.loot,gift.at,gift.receipt??null,gift.reason);p.mailLootQueue=[];}
  }
  wss.on('connection',(ws,req)=>{
   let session=null,authenticating=false;ws.alive=true;
@@ -508,7 +514,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
     if(MAIL_ACTIONS.includes(message.type)){
      const p=session.peer,id=message.id;if(typeof id!=='string'||id.length>80||!Number.isSafeInteger(message.seq)||message.seq<=p.seq||p.bucket<1){send({type:'mailError',id,code:'rate-limit'});return;}p.seq=message.seq;p.bucket--;
      if(message.type!=='mailList')realm.evidence(p,'mail',{action:message.type,mail:typeof message.mailId==='string'?message.mailId.slice(0,80):null});
-     try{let bulk;if(message.type!=='mailList')await persistMail(session,r=>{if(['mailClaimAll','mailDeleteAll'].includes(message.type)){const result=mailboxBulkAction(r,message,realm.mailAnnouncements??[]);bulk=result.summary;return result.record;}return mailboxAction(r,message,realm.mailAnnouncements??[]);});send({type:'mailChanged',id,mails:publicInbox(p.mailbox,realm.mailAnnouncements??[],p.serverId),summary:inboxSummary(p.mailbox,realm.mailAnnouncements??[],p.serverId),petCollection:publicPetAccount(p.petCollection),bag:p.bag,...(bulk?{bulk}:{})});}
+     try{let bulk;if(message.type!=='mailList')await persistMail(session,r=>{if(['mailClaimAll','mailDeleteAll'].includes(message.type)){const result=mailboxBulkAction(r,message,realm.mailAnnouncements??[]);bulk=result.summary;return result.record;}return mailboxAction(r,message,realm.mailAnnouncements??[]);},undefined,'mail');send({type:'mailChanged',id,mails:publicInbox(p.mailbox,realm.mailAnnouncements??[],p.serverId),summary:inboxSummary(p.mailbox,realm.mailAnnouncements??[],p.serverId),petCollection:publicPetAccount(p.petCollection),bag:p.bag,...(bulk?{bulk}:{})});}
      catch(e){send({type:'mailError',id,code:e.message});}return;
     }
     if(UTILITY_MUTATIONS.includes(message.type)){
@@ -520,7 +526,7 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
       const out=utilityAction(r,message);result=out.result;replayed=out.replayed;
       if(!replayed&&message.type==='sellBatch'){const npc=p.room.map.npcs?.find(n=>n.name===message.npc),shop=npc&&SHOPS[npc.name];if(!shop||shop.mapId!==p.room.map.id||Math.hypot(npc.x-p.world.player.x,npc.z-p.world.player.z)>3.6)throw Error('shop-too-far');}
       return out.record;
-     },r=>{p.gear=normalizeGear(r.gear);p.utilityReceipts=r.utilityReceipts??[];});
+     },r=>{p.gear=normalizeGear(r.gear);p.utilityReceipts=r.utilityReceipts??[];},message.type==='cardRemove'?'card':message.type==='sellBatch'?'npcSell':'other');
      send({type:'utilityChanged',id,result,replayed,bag:p.bag,gear:p.gear});realm.evidence(p,'utility',{action:message.type,request:id});
      }catch(e){send({type:'utilityError',id,code:e.message});}return;
     }
@@ -616,7 +622,12 @@ export async function createHost({mode='firebase',store,catalog,origins=[],capac
  const backgroundWalks=setInterval(()=>{if(reset?.maintenance)return;for(const s of sessions.values())if(s.background&&!s.closing&&(!s.peer.routeWalker?.active||Date.now()>=s.backgroundUntil))finishBackground(s);},250);
  const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.alive){ws.terminate();continue;}ws.alive=false;ws.ping();}},15000);
   lastLogSaveCount=realm.logs.length;
-  const logSaver=setInterval(()=>{if(reset?.maintenance)return;drainWarMail();drainClassRewards();for(const [serverId,book]of auctionBooks)if(book.lots.some(l=>l.status==='open'&&l.endsAt<=auctionNow()))trackWrite(readAuctions(serverId)).catch(e=>console.error('auction-expiry',e.message));if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount&&Date.now()-lastLogSaveAt>=300000){lastLogSaveCount=realm.logs.length;lastLogSaveAt=Date.now(); // dashboard logs: one write per 5 min, not per 10 s
+  function saveEconomy(){
+   if(!econReady||closing||!authoritative())return;
+   if(store?.listProfiles&&Date.now()-heldAt>6*3600e3){heldAt=Date.now();store.listProfiles().then(rows=>realm.econ.setHeld(rows.reduce((a,r)=>a+(Number(r.record?.bag?.coins)||0),0),rows.length)).catch(e=>console.error('economy-held',e.message));}
+   if(store?.saveEconomy&&realm.econ.dirty&&Date.now()-econSavedAt>300000){econSavedAt=Date.now();realm.econ.markSaved();trackWrite(store.saveEconomy(realm.econ.toJSON())).catch(e=>console.error('economy-save',e.message));}
+  }
+  const logSaver=setInterval(()=>{if(reset?.maintenance)return;saveEconomy();drainWarMail();drainClassRewards();for(const [serverId,book]of auctionBooks)if(book.lots.some(l=>l.status==='open'&&l.endsAt<=auctionNow()))trackWrite(readAuctions(serverId)).catch(e=>console.error('auction-expiry',e.message));if(authoritative())realm.mapBosses.persist()?.catch(()=>{});if(realm.logs.length!==lastLogSaveCount&&Date.now()-lastLogSaveAt>=300000){lastLogSaveCount=realm.logs.length;lastLogSaveAt=Date.now(); // dashboard logs: one write per 5 min, not per 10 s
 trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
  return {server,realm,wss,evidence,async close(){closing=true;await auctionQueue;await evidence?.stop();clearInterval(tick);clearInterval(authority);clearInterval(autosave);clearInterval(heartbeat);clearInterval(backgroundWalks);clearInterval(logSaver);if(!reset?.maintenance){
   // 0.114.2 a redeploy gives us ~9 s: players' progress first (all at once, 6 s cap), then shops, bosses, guild/leader/
@@ -624,7 +635,7 @@ trackWrite(store?.saveDashboardLogs?.(realm.logs)).catch(()=>{});}},10000);
   const capped=(p,ms)=>{let t;return Promise.race([Promise.resolve(p).catch(()=>{}),new Promise(r=>{t=setTimeout(r,ms);})]).finally(()=>clearTimeout(t));};
   await capped(Promise.allSettled([...sessions.values()].map(s=>{s.closing=true;s.peer.suspended=true;return checkpoint(s,true);})),6000);
   const later=f=>Promise.resolve().then(f); // one failing save (even a synchronous throw) never stops the shutdown
-  const dirty=[...[...realm.guildsDirty].filter(g=>realm.guilds.get(g.id)===g&&store?.saveGuild).map(g=>later(()=>store.saveGuild(g))),...[...realm.leadersDirty].filter(()=>store?.saveLeaders).map(id=>later(()=>saveLeader(id,realm.leaders.get(id)))),...[...realm.pricesDirty].filter(()=>store?.savePrices).map(id=>later(()=>store.savePrices(id,realm.prices.get(id))))];
+  const dirty=[...[...realm.guildsDirty].filter(g=>realm.guilds.get(g.id)===g&&store?.saveGuild).map(g=>later(()=>store.saveGuild(g))),...[...realm.leadersDirty].filter(()=>store?.saveLeaders).map(id=>later(()=>saveLeader(id,realm.leaders.get(id)))),...[...realm.pricesDirty].filter(()=>store?.savePrices).map(id=>later(()=>store.savePrices(id,realm.prices.get(id)))),...(econReady&&authoritative()&&realm.econ.dirty&&store?.saveEconomy?[later(()=>store.saveEconomy(realm.econ.toJSON()))]:[])];
   await capped(Promise.allSettled([classRewardTask,later(()=>realm.flushShops()),later(()=>realm.mapBosses.flush()).catch(e=>console.error('map-boss-save',e.message)),later(()=>store?.saveDashboardLogs?.(realm.logs)),...dirty]),1500);
  }for(const ws of wss.clients)ws.close(1012,'restart');await new Promise(resolve=>wss.close(resolve));server.closeAllConnections?.();await new Promise(resolve=>server.close(resolve));if(mode==='firebase')await store.releaseAuthority().catch(()=>{});}};
 }

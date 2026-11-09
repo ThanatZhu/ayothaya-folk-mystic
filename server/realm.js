@@ -644,14 +644,16 @@ export class RealmServer{
    auto:!!p.world.auto,guild:!!this.guildOf(p)};}
  storyCheck(p){for(let i=0;i<30&&this.storyProgress(p,{type:'check',ctx:this.storyContext(p)});i++);}
  // ---- 0.70 central market: consignment shops (open while the owner is offline), buying stores, search, tax, prices.
- shopList(serverId){return [...this.shops.values()].filter(s=>s.serverId===serverId&&shopIsOpen(s,this.now())).map(publicShop);}
+ // switch off: gold shops leave the signs and the search (owners still see them in shopMine)
+ shopShown(s){return this.goldMarketOpen===true||shopCurrency(s)!=='gold';}
+ shopList(serverId){return [...this.shops.values()].filter(s=>s.serverId===serverId&&shopIsOpen(s,this.now())&&this.shopShown(s)).map(publicShop);}
  shopsChanged(serverId,closedIds=[]){this.marketChanged(serverId);const list=this.shopList(serverId);for(const p of this.peers.values())if(p.serverId===serverId&&!p.suspended){if(p.room.map.id===MARKET_ZONE.mapId)p.world.emit('shops',{list});if(closedIds.length)p.world.emit('shopsClosed',{ids:closedIds});}}
  marketChanged(serverId){(this.marketDirty??=new Set()).add(serverId);}
  marketStalls(serverId){return [...this.peers.values()].filter(o=>o.serverId===serverId&&o.stall&&!o.suspended).map(o=>({owner:o.id,name:o.character.name,...o.stall,mapId:o.room.map.id}));}
  sendMarketResults(p,input){
-  const data=browseMarket([...this.shops.values()].filter(s=>s.serverId===p.serverId),this.marketStalls(p.serverId),input,this.prices.get(p.serverId)??{},this.now());
+  const data=browseMarket([...this.shops.values()].filter(s=>s.serverId===p.serverId&&this.shopShown(s)),this.marketStalls(p.serverId),input,this.prices.get(p.serverId)??{},this.now());
   // Keep sell-form reference-price warnings for the owner's inventory without sending every historical item or day bucket.
-  const prices=this.prices.get(p.serverId)??{};for(const item of Object.keys(p.bag?.items??{})){const key=priceKey(item),r=prices[key];if(r)data.prices[key]={last:r.last,avg:r.avg,n:r.n,t:r.t};}
+  const prices=this.prices.get(p.serverId)??{};for(const item of Object.keys(p.bag?.items??{}))for(const key of [priceKey(item),priceKey(item,'gold')]){const r=prices[key];if(r)data.prices[key]={last:r.last,avg:r.avg,n:r.n,t:r.t};}
   if(p.marketBrowse===input)p.marketBrowse.page=data.page;
   if(Number.isSafeInteger(input.requestId))data.requestId=input.requestId;data.goldMarket=this.goldMarketOpen===true;
   const signature=JSON.stringify(data);if(signature===p.marketBrowseSignature)return;
@@ -683,11 +685,14 @@ export class RealmServer{
  }
  traded(serverId,peers,item,coins,count){for(const a of peers)if(a)a.tradeXp=Math.min(1e9,(a.tradeXp??0)+coins);const prices=this.prices.get(serverId)??{};this.prices.set(serverId,recordPrice(prices,item,Math.round(coins/count),this.now(),count));this.pricesDirty.add(serverId);this.marketChanged(serverId);}
  mine(p){return [...this.shops.values()].filter(s=>s.ownerKey===p.key).map(s=>({...publicShop(s),pouch:s.pouch,escrow:s.escrow,log:s.log}));}
+ setGoldMarket(open){this.goldMarketOpen=open===true;for(const id of new Set([...this.peers.values()].map(p=>p.serverId)))this.shopsChanged(id);this.flushMarketBrowsers();
+  for(const p of this.peers.values())if(!p.suspended)p.world.emit('shopMine',this.shopMineView(p));}
  shopMineView(p){return {shops:this.mine(p),perks:tradePerks(p.tradeXp),goldMarket:this.goldMarketOpen===true};}
  // Gold shops (ช่วง 3) move the live wallet p.petCollection.balance. A host gold save (persistMail/persistPets) writes the wallet
  // back from its own record when it finishes, so a market gold change is refused with server-busy while one is in flight.
  goldBalance(p){return normalizePetAccount(p.petCollection).balance;}
- setGold(p,value){p.petCollection={...normalizePetAccount(p.petCollection),balance:value};p.saveNow=true;}
+ // the shop doc is written at once, so the wallet is too (host checkpoint) instead of waiting ~10 s for the autosave
+ setGold(p,value){const moved=value!==this.goldBalance(p);p.petCollection={...normalizePetAccount(p.petCollection),balance:value};p.saveNow=true;if(moved)this.onGoldMove?.(p);}
  goldBusy(p){return p.mailMutationBusy===true||p.petMutationBusy===true;}
  goldInShops(){let n=0;for(const s of this.shops.values())n+=(s.pouch?.gold??0)+(shopCurrency(s)==='gold'&&s.kind==='buy'?s.escrow??0:0);return n;}
  marketCommand(p,m){

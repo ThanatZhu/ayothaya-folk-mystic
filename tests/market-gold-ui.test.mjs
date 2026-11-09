@@ -7,8 +7,7 @@ test('price writes coins and gold with their unit',()=>{
  assert.equal(price(5,'junk'),'5 เบี้ย');
 });
 test('shopCurrency defaults to coins',()=>{assert.equal(shopCurrency({currency:'gold'}),'gold');assert.equal(shopCurrency({}),'coins');assert.equal(shopCurrency(null),'coins');});
-test('currencyChips: gold chip only when the switch is on or gold rows exist',()=>{
- assert.deepEqual(currencyChips(false,[{currency:'coins'}]),['all','coins']);
- assert.deepEqual(currencyChips(true,[]),['all','coins','gold']);
- assert.deepEqual(currencyChips(false,[{currency:'gold'}]),['all','coins','gold']);
+test('currencyChips: gold chip only while the switch is on',()=>{
+ assert.deepEqual(currencyChips(false),['all','coins']);
+ assert.deepEqual(currencyChips(true),['all','coins','gold']);
 });

@@ -65,7 +65,7 @@ import {createLifeNPC} from './life-npc.js?v=surfaces222';
 import {createFeedback} from './feedback.js?v=audio229';
 import {createLeaderboardUI} from './leaderboard-ui.js?v=podium153';
 import {createCbtEventUI} from './cbt-event-ui.js?v=cbt172';
-import {createMarketBoardUI} from './market-board-ui.js?v=gold289';
+import {createMarketBoardUI} from './market-board-ui.js?v=gold294';
 import {createHud63} from './hud-63.js?v=farm212';
 import {bindRenderLifecycle} from './render-lifecycle.js';
 import {resolveMap} from './world-state.js?v=quest173';

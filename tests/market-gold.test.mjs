@@ -52,3 +52,8 @@ test('browse gives gold rows the gold reference and searchMarket orders coins be
  const b=browseMarket(shops,[],{sort:'popular'},prices,5);assert.equal(b.prices['gold:hp-large'].avg,77);assert.equal(b.prices['hp-large'].avg,10);
  assert.deepEqual(searchMarket(shops,[],'hp-large',5).map(x=>x.shop),['c','g']);
 });
+test('gold-cap: a sale that would overfill the shop pouch is refused instead of clamped',()=>{
+ const a=open(),full={...a.shop,pouch:{coins:0,gold:GOLD_MAX-100,items:{}}};
+ assert.throws(()=>buyFromShop(full,{coins:0,items:{}},'hp-large',2,perks,{now:101,gold:1000}),/gold-cap/);
+ assert.equal(buyFromShop(full,{coins:0,items:{}},'hp-large',1,perks,{now:101,gold:1000}).shop.pouch.gold,GOLD_MAX-100+97);
+});

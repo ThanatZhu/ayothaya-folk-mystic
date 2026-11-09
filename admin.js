@@ -598,21 +598,21 @@ const goldRunning=()=>goldView.state?.startedAt&&!goldView.state.completedAt;
 function goldPoll(){clearTimeout(goldView.timer);if(tab!=='gold'||!goldRunning())return;goldView.timer=setTimeout(async()=>{try{goldView.state=(await adminFetch('/admin/gold-wipe',{})).state;}catch{}if(tab==='gold')goldTab();},10000);}
 async function goldCall(path,body){
  if(goldView.busy)return;goldView.busy=true;goldView.msg='';goldTab();
- try{const r=await adminFetch(path,body);if(r.holdings)goldView.report=r.holdings;if(r.holdings)goldView.market=r.goldMarket??null;goldView.state=r.state;if(body)goldView.confirm='';}catch(e){goldView.msg=GOLD_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
+ try{const r=await adminFetch(path,body);if(r.holdings){goldView.report=r.holdings;goldView.market=r.goldMarket??null;goldView.live=r.live;}goldView.state=r.state;if(body)goldView.confirm='';}catch(e){goldView.msg=GOLD_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
  finally{goldView.busy=false;if(tab==='gold')goldTab();}
 }
-async function goldLoad(){goldView.busy=true;try{const r=await adminFetch('/admin/gold-market');goldView.market=r.goldMarket??null;if(r.wipeCompleted&&!goldView.state?.completedAt)goldView.state={...goldView.state,completedAt:goldView.state?.completedAt??1};}catch(e){goldView.msg=GOLD_MARKET_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}finally{goldView.busy=false;if(tab==='gold')goldTab();}}
+async function goldLoad(){goldView.busy=true;try{const r=await adminFetch('/admin/gold-market');goldView.market=r.goldMarket??null;goldView.live=r.live;goldView.state=r.state??null;}catch(e){goldView.msg=GOLD_MARKET_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}finally{goldView.busy=false;if(tab==='gold')goldTab();}}
 async function goldMarketCall(enabled){
  if(goldView.busy)return;if(enabled&&!confirm('เปิดให้ผู้เล่นตั้งร้านขายและรับซื้อด้วยทองแท่งในตลาดกลาง · ยืนยันเปิดตลาดทองแท่ง?'))return;
  goldView.busy=true;goldView.msg='';goldTab();
- try{goldView.market=(await adminFetch('/admin/gold-market',{enabled})).goldMarket;goldView.msg=enabled?'เปิดตลาดทองแท่งแล้ว':'ปิดตลาดทองแท่งแล้ว';}catch(e){goldView.msg=GOLD_MARKET_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
+ try{const r=await adminFetch('/admin/gold-market',{enabled});goldView.market=r.goldMarket;goldView.live=r.live;goldView.msg=enabled?'เปิดตลาดทองแท่งแล้ว':'ปิดตลาดทองแท่งแล้ว';}catch(e){goldView.msg=GOLD_MARKET_ERRORS[e.message]??ADMIN_ERRORS[e.message]??'ยังไม่สำเร็จ · '+e.message;}
  finally{goldView.busy=false;if(tab==='gold')goldTab();}
 }
 function goldTab(){
  warmFirebase();const g=goldView,r=g.report,st=g.state,fresh=st?.reportAt&&Date.now()-st.reportAt<=600000&&!st.startedAt;
  $('view').innerHTML=`<section class="admin-announcement admin-gold"><small>GOLD BARS</small><h2>ล้างทองแท่ง</h2><p>นับทองแท่งในกระเป๋าและทองที่แนบในจดหมายของทุกตัวละคร แล้วล้างให้เป็น 0 · ทำครั้งเดียว ย้อนกลับไม่ได้ · ต้องตรวจยอดก่อน และยอดตรวจใช้ได้ 10 นาที</p>
  <button type="button" class="primary" id="gold-check" ${g.busy||st?.startedAt?'disabled':''}>ตรวจยอดก่อนล้าง</button>
- <div class="gold-market"><h3>ตลาดทองแท่ง</h3><label class="gold-switch"><input type="checkbox" id="gold-market" ${g.market?.enabled?'checked':''} ${g.busy||!st?.completedAt||g.market===undefined?'disabled':''}> เปิดทองแท่งในตลาด</label><p class="gold-note">${g.market===undefined?'กำลังโหลดสถานะ…':g.market?.enabled?'ตอนนี้: เปิดอยู่':'ตอนนี้: ปิดอยู่'}${g.market?.changedAt?' · เปลี่ยนล่าสุด '+new Date(g.market.changedAt).toLocaleString('th-TH'):''}${st?.completedAt?'':' · ปุ่มนี้เปิดได้หลังล้างทองแท่งเสร็จแล้ว'}</p></div>
+ <div class="gold-market"><h3>ตลาดทองแท่ง</h3><label class="gold-switch"><input type="checkbox" id="gold-market" ${g.market?.enabled?'checked':''} ${g.busy||!st?.completedAt||g.market===undefined?'disabled':''}> เปิดทองแท่งในตลาด</label><p class="gold-note">${g.market===undefined?'กำลังโหลดสถานะ…':g.market?.enabled?'ตอนนี้: เปิดอยู่':'ตอนนี้: ปิดอยู่'}${g.market?.changedAt?' · เปลี่ยนล่าสุด '+new Date(g.market.changedAt).toLocaleString('th-TH'):''}${st?.completedAt?'':' · ปุ่มนี้เปิดได้หลังล้างทองแท่งเสร็จแล้ว'}</p>${typeof g.live==='boolean'&&g.market!==undefined&&(g.market?.enabled===true)!==g.live?`<p class="gold-warn">${g.live?'ค่าที่บันทึกไว้ไม่ตรงกับเซิร์ฟเวอร์ · เซิร์ฟเวอร์ยังเปิดตลาดทองแท่งอยู่ · กดสวิตช์อีกครั้ง':'ค่าที่บันทึกไว้ไม่ตรงกับเซิร์ฟเวอร์ · เซิร์ฟเวอร์ยังปิดตลาดทองแท่งอยู่ · กดสวิตช์อีกครั้ง'}</p>`:''}</div>
  ${r?`<div class="gold-report"><dl><div><dt>ผู้ถือทองแท่ง</dt><dd>${num(r.holders)} จาก ${num(r.characters)} ตัวละคร</dd></div><div><dt>ทองในกระเป๋า</dt><dd>${num(r.held)}</dd></div><div><dt>ทองในจดหมาย</dt><dd>${num(r.mailGold)}</dd></div></dl>
  ${r.characters>=2000?'<p class="gold-warn">นับได้สูงสุด 2,000 ตัวละคร · ยอดนี้อาจไม่ครบ</p>':''}
  <h3>ผู้ถือมากสุด 20 อันดับ</h3><ol data-i18n-skip>${(r.top??[]).slice(0,20).map(t=>`<li><span>${esc(t.name??t.uid)}</span><b>${num(t.gold)}</b><em>+ จดหมาย ${num(t.mailGold)}</em></li>`).join('')||'<li>ไม่มีใครถือทองแท่ง</li>'}</ol></div>`:''}

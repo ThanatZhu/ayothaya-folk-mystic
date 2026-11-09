@@ -318,7 +318,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
      if(url.pathname==='/admin/gold-report'){
       const holdings=goldHoldings(await store.listProfiles(),realm.mailAnnouncements??[]);
       if(!state.startedAt){state.reportAt=Date.now();state.report={held:holdings.held,holders:holdings.holders,mailGold:holdings.mailGold,characters:holdings.characters};await store.saveGoldWipeState(state);}
-      audit('admin-gold-report',who,{held:holdings.held,holders:holdings.holders,mailGold:holdings.mailGold});return [200,{holdings,state,goldMarket:await store.loadGoldMarket?.()??null}];
+      audit('admin-gold-report',who,{held:holdings.held,holders:holdings.holders,mailGold:holdings.mailGold});return [200,{holdings,state,goldMarket:await store.loadGoldMarket?.()??null,live:realm.goldMarketOpen===true}];
      }
      if(state.startedAt){goldWipeState=state;drainGoldWipe();return [200,{state}];}
      if(!(Date.now()-state.reportAt<=600000))return [400,{error:'report-stale'}];
@@ -329,7 +329,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
    }
    if(url.pathname==='/admin/gold-market'&&req.method==='GET'){ // cheap read for the admin tab: never touches the wipe state's reportAt
     if(!authoritative()||!store?.loadGoldWipeState){reply(503,{error:'authority-unavailable'});return;}
-    try{reply(200,{goldMarket:await store.loadGoldMarket?.()??null,wipeCompleted:!!(await store.loadGoldWipeState())?.completedAt});}catch(e){reply(400,{error:e.message});}return;
+    try{const state=await store.loadGoldWipeState()??null;reply(200,{goldMarket:await store.loadGoldMarket?.()??null,live:realm.goldMarketOpen===true,state,wipeCompleted:!!state?.completedAt});}catch(e){reply(400,{error:e.message});}return;
    }
    if(url.pathname==='/admin/gold-market'&&req.method==='POST'){
     if(!authoritative()||!store?.loadGoldWipeState||!store?.saveGoldMarket){reply(503,{error:'authority-unavailable'});return;}
@@ -338,7 +338,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
     // same serial queue as the wipe report/start, so a save and the flag set never interleave
     const job=goldWipeAdmin.catch(()=>{}).then(async()=>{const {enabled}=JSON.parse(data||'{}');if(typeof enabled!=='boolean')return [400,{error:'invalid'}];
      if(enabled&&!(await store.loadGoldWipeState())?.completedAt)return [409,{error:'wipe-not-finished'}];
-     const goldMarket={enabled,changedAt:Date.now(),by:String(who)};await store.saveGoldMarket(goldMarket);realm.goldMarketOpen=enabled;audit('admin-gold-market',who,{enabled});return [200,{goldMarket}];
+     const goldMarket={enabled,changedAt:Date.now(),by:String(who)};await store.saveGoldMarket(goldMarket);realm.setGoldMarket(enabled);audit('admin-gold-market',who,{enabled});return [200,{goldMarket,live:realm.goldMarketOpen===true}];
     });goldWipeAdmin=job;
     try{const [code,body]=await job;reply(code,body);}catch(e){reply(400,{error:e instanceof SyntaxError?'invalid':e.message});}return;
    }
@@ -488,6 +488,8 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
  // one back every 6 s. Player-triggered immediate saves spend it; the regular autosave does not.
  const WRITE_BURST=30,WRITE_REFILL=6000;
  const spendWrite=s=>{const now=Date.now();s.writeBudget=Math.min(WRITE_BURST,(s.writeBudget??WRITE_BURST)+(now-(s.writeBudgetAt??now))/WRITE_REFILL);s.writeBudgetAt=now;if(s.writeBudget<1)return false;s.writeBudget--;return true;};
+ // gold shop moves (realm.setGold) checkpoint the wallet at once, like the shop doc; out of budget falls back to the autosave (saveNow)
+ realm.onGoldMove=p=>{try{const s=sessions.get(p.id);if(!s||s.peer!==p||s.closing||s.released||!spendWrite(s))return;checkpoint(s).catch(e=>console.error('gold-save',e.message));}catch(e){console.error('gold-save',e.message);}};
  async function persistPets(s,action){
   if(s.trainingBusy||s.closing)throw Error('server-busy');s.trainingBusy=true;s.peer.petMutationBusy=true;
   const job=s.queue.catch(()=>{}).then(async()=>{

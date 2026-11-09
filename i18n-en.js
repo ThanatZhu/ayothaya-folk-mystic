@@ -5782,7 +5782,9 @@ Object.assign(globalThis.I18N_EN,{
  "ตอนนี้: เปิดอยู่": "Now: open",
  "ตอนนี้: ปิดอยู่": "Now: closed",
  "· เปลี่ยนล่าสุด": "· Last changed",
- "· ปุ่มนี้เปิดได้หลังล้างทองแท่งเสร็จแล้ว": "· Available after the Gold Bar wipe has finished"
+ "· ปุ่มนี้เปิดได้หลังล้างทองแท่งเสร็จแล้ว": "· Available after the Gold Bar wipe has finished",
+ "ค่าที่บันทึกไว้ไม่ตรงกับเซิร์ฟเวอร์ · เซิร์ฟเวอร์ยังเปิดตลาดทองแท่งอยู่ · กดสวิตช์อีกครั้ง": "Saved setting does not match the server · the server still has the Gold Bar market open · toggle the switch again",
+ "ค่าที่บันทึกไว้ไม่ตรงกับเซิร์ฟเวอร์ · เซิร์ฟเวอร์ยังปิดตลาดทองแท่งอยู่ · กดสวิตช์อีกครั้ง": "Saved setting does not match the server · the server still has the Gold Bar market closed · toggle the switch again"
 });
 Object.assign(globalThis.I18N_EN,{
  "รับของคืน/ทองแท่ง": "Collect items/Gold Bars back",

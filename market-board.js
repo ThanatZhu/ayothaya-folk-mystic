@@ -70,6 +70,7 @@ export function buyFromShop(shop,buyerBag,id,qty,perks,{who='',now=0,gold=0}={})
  const cost=row.price*qty,tax=taxOf(cost,perks);
  const currency=shopCurrency(shop),g=currency==='gold';
  if(g&&gold<cost)throw new Error('no-gold');
+ if(g&&(shop.pouch?.gold??0)+cost-tax>GOLD_MAX)throw new Error('gold-cap'); // the owner could never collect it
  const paid=g?buyerBag:moveOffer(buyerBag,{coins:0,items:{}},{coins:cost,items:{}},{toCap:Infinity})[0];
  const [,bag]=moveOffer({coins:0,items:{[id]:qty}},paid,{coins:0,items:{[id]:qty}},{fromCap:Infinity,toCap:bagCap(buyerBag)});
  const items={...shop.items,[id]:{...row,count:row.count-qty}};if(!items[id].count)delete items[id];

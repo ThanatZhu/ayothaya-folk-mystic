@@ -10,7 +10,7 @@ import {GACHA_BANNERS} from './gacha-banners199.js';
 const styleLoads=new Map();let artworkReady;
 function loadControlArtwork(){return artworkReady??=Promise.all(['assets/premium-controls202/button-jade.webp','assets/premium-controls202/button-gold.webp',matchMedia('(max-width:600px) and (orientation:portrait)').matches?'assets/gacha-banner199/sanctuary-mobile.webp':'assets/gacha-banner199/sanctuary.webp'].map(src=>new Promise(resolve=>{const image=new Image();image.onload=()=>resolve(true);image.onerror=()=>resolve(false);image.src=src;})));}
 export function loadPremiumStyles(){installJadeSurfaces();
- return Promise.all([loadControlArtwork(),...['pet-ui.css?v=premium1','pet-ritual148.css?v=premium1','premium-hub.css?v=surfaces222','gacha-banner199.css?v=surfaces222','pet-companion201.css?v=petbuild220','gacha-motion201.css?v=202','premium-controls202.css?v=1'].map(href=>{
+ return Promise.all([loadControlArtwork(),...['pet-ui.css?v=premium1','pet-ritual148.css?v=premium1','premium-hub.css?v=surfaces222','gacha-banner199.css?v=surfaces222','pet-companion201.css?v=petbuild220','gacha-motion201.css?v=202','premium-controls202.css?v=1','shop-mall.css?v=1'].map(href=>{
   if(styleLoads.has(href))return styleLoads.get(href);
   const existing=document.querySelector('link[href="'+href+'"]');
   if(existing?.sheet)return Promise.resolve(true);
@@ -26,7 +26,7 @@ export function premiumDialog(id,title){
  dialog.innerHTML='<header class="premium-window-heading"><div><small>AYOTHAYA · FOLK MYSTIC</small><h2 id="'+id+'-title">'+title+'</h2></div><button type="button" class="premium-close" aria-label="ปิดหน้าต่าง"></button></header>';
  (document.getElementById('game-shell')??document.body).append(dialog);dialog.querySelector('.premium-close').onclick=()=>dialog.close();return dialog;
 }
-export function createPremiumHub({game}){
+export function createPremiumHub({game,account}){
  loadPremiumStyles();
  const gacha=premiumDialog('gacha-window','อัญเชิญขวัญ'),shop=premiumDialog('premium-store-window','ร้านค้า · ทองแท่ง');
  gacha.dataset.gachaStyle='banner199';gacha.querySelector('header small').textContent='AYOTHAYA · GACHA';
@@ -37,7 +37,7 @@ export function createPremiumHub({game}){
  for(const definition of GACHA_BANNERS){const button=document.createElement('button');button.type='button';button.id='gacha-tab-'+definition.id;button.role='tab';button.setAttribute('aria-selected','false');button.setAttribute('aria-controls',definition.panelId);const image=document.createElement('img');image.src=definition.art;image.alt='';image.width=image.height=80;const label=document.createElement('span');label.textContent=definition.label;button.append(image,label);nav.append(button);}parent.append(nav);
  const factories={amulets:createAmuletGachaPanel,pets:createPetSummonPanel},panels=new Map();
  for(const definition of GACHA_BANNERS){const panel=factories[definition.id]({game,parent,dialog:gacha,ratesHelp:false,presentation:'banner'});panel.root.role='tabpanel';panel.root.setAttribute('aria-labelledby','gacha-tab-'+definition.id);panels.set(definition.id,panel);}
- const store=createPremiumShopPanel({game,dialog:shop});let category=GACHA_BANNERS[0].id,lastBalance;
+ const store=createPremiumShopPanel({game,dialog:shop,account});let category=GACHA_BANNERS[0].id,lastBalance;
  const rates=createGachaRatesHelp({dialog:gacha,game,getCategory:()=>category});const rateLabel=document.createElement('span');rateLabel.textContent='ดูเรท';rates.button.append(rateLabel);
  function setCategory(next){
   if(!panels.has(next))next=GACHA_BANNERS[0].id;category=next;gacha.dataset.category=next;

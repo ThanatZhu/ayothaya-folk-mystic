@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {buyPremiumItem} from '../premium-shop-action.js';
-import {PREMIUM_SHOP_PRODUCTS,PREMIUM_RENAME_PRICE} from '../premium-shop-catalog.js';
+import {PREMIUM_SHOP_PRODUCTS,PREMIUM_RENAME_PRICE,SHOP_CATEGORIES} from '../premium-shop-catalog.js';
 import {RENAME_PRICE,identityAction} from '../identity166.js';
 import {publicPetAccount,petAccountAction} from '../pet-account.js';
 import {drawAmulets} from '../amulet-gacha.js';
@@ -10,7 +10,7 @@ const buy=(record,sku='rename-card',quantity=1,id='premium-order-0001')=>buyPrem
 
 test('premium products grant real inventory items at server-owned prices; rename price stays compatible',()=>{
  assert.equal(RENAME_PRICE,PREMIUM_RENAME_PRICE);
- for(const p of PREMIUM_SHOP_PRODUCTS){assert.ok(itemDef(p.item));const before=fresh(),copy=structuredClone(before),r=buy(before,p.sku,3);assert.equal(r.record.bag.items[p.item],p.count*3);assert.equal(r.record.petCollection.balance,10000-p.price*3);assert.equal(r.purchase.total,p.price*3);assert.deepEqual(before,copy);assert.equal(r.record.bag.items['amulet-somdej'],undefined);}
+ for(const p of PREMIUM_SHOP_PRODUCTS){assert.ok(itemDef(p.item));const before=fresh(),copy=structuredClone(before),r=buy(before,p.sku,3);assert.ok(p.items.length);for(const i of p.items)assert.equal(r.record.bag.items[i.id],i.count*3,p.sku+' '+i.id);assert.deepEqual(r.purchase.items,p.items.map(i=>({id:i.id,count:i.count*3})));assert.equal(r.record.petCollection.balance,10000-p.price*3);assert.equal(r.purchase.total,p.price*3);assert.deepEqual(before,copy);assert.equal(r.record.bag.items['amulet-somdej'],undefined);}
 });
 test('purchase receipts survive reconnect normalization and forbid conflicting replays',()=>{
  const a=buy(fresh(),'lek-lai-pack',2),b=buy(a.record,'lek-lai-pack',2);assert.equal(b.replayed,true);assert.deepEqual(b.record,a.record);assert.throws(()=>buy(a.record,'lek-lai-pack',1),/request-conflict/);assert.throws(()=>buy(a.record,'break-guard',2),/request-conflict/);
@@ -24,4 +24,11 @@ test('invalid, unaffordable, full-bag and full-stack purchases never charge or p
  const poor=fresh();poor.petCollection.balance=99;assert.throws(()=>buy(poor,'break-guard'),/no-gems/);assert.equal(poor.petCollection.balance,99);
  const full=fresh();full.bag.items=Object.fromEntries(Object.keys(ITEMS).filter(k=>k!=='rename-card'&&['loot','potion','card'].includes(itemDef(k).kind)).slice(0,bagCap(full.bag)).map(k=>[k,1]));const copy=structuredClone(full);assert.throws(()=>buy(full),/bag-full/);assert.deepEqual(full,copy);
  const stack=fresh();stack.bag.items['lek-lai']=MAX_STACK*bagCap(stack.bag)-3;const before=structuredClone(stack);assert.throws(()=>buy(stack,'lek-lai-pack'),/bag-full/);assert.deepEqual(stack,before);
+});
+test('catalog: unique skus, known categories and badges, every bundle item exists and fits a bag',()=>{
+ const cats=new Set(SHOP_CATEGORIES.map(c=>c.id));assert.equal(new Set(PREMIUM_SHOP_PRODUCTS.map(p=>p.sku)).size,PREMIUM_SHOP_PRODUCTS.length);
+ for(const p of PREMIUM_SHOP_PRODUCTS){assert.ok(cats.has(p.category)&&!['featured','favorite'].includes(p.category),p.sku);assert.ok(!p.badge||['new','hot','value'].includes(p.badge));assert.ok(Number.isSafeInteger(p.price)&&p.price>0);for(const i of p.items){assert.ok(itemDef(i.id),i.id);assert.ok(i.count>0);}}
+ for(const sku of ['stat-reset-scroll','rename-card','lek-lai-pack','break-guard'])assert.ok(PREMIUM_SHOP_PRODUCTS.some(p=>p.sku===sku),'old receipt sku '+sku);
+ const full=fresh();full.bag.items=Object.fromEntries(Object.keys(ITEMS).filter(k=>!['hp-large','mp-large','fly-wing','return-incense'].includes(k)&&['loot','card'].includes(itemDef(k).kind)).slice(0,bagCap(full.bag)-2).map(k=>[k,1]));const copy=structuredClone(full);
+ assert.throws(()=>buy(full,'bundle-adventurer'),/bag-full/);assert.deepEqual(full,copy);
 });

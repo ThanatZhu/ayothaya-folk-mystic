@@ -11,11 +11,11 @@ export function buyPremiumItem(record,message){
  if(!Number.isSafeInteger(quantity)||quantity<1||quantity>20)throw Error('bad-quantity');
  const wallet=normalizePetAccount(record.petCollection),signature=JSON.stringify([sku,quantity]),old=wallet.premiumShop.receipts.find(r=>r.id===id);
  if(old){if(old.signature!==signature)throw Error('request-conflict');return {record,purchase:old.purchase,replayed:true};}
- const total=product.price*quantity,count=product.count*quantity;
+ const total=product.price*quantity,items=product.items.map(i=>({id:i.id,count:i.count*quantity}));
  if(wallet.balance<total)throw Error('no-gems');
- const loot=addLoot(normalizeBag(record.bag),{items:[{id:product.item,count}]});
+ const loot=addLoot(normalizeBag(record.bag),{items});
  if(loot.lost.length)throw Error('bag-full');
- const purchase={sku,item:product.item,count,quantity,total};
+ const purchase={sku,item:items[0].id,count:items[0].count,items,quantity,total};
  wallet.balance-=total;wallet.premiumShop.receipts=[...wallet.premiumShop.receipts,{id,signature,purchase}].slice(-64);
  return {record:{...record,bag:loot.bag,petCollection:wallet},purchase,replayed:false};
 }

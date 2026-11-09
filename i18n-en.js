@@ -5644,3 +5644,21 @@ Object.assign(globalThis.I18N_EN,{
  "🌈 ฮีลเกินเป็นโล่": "🌈 Overheal shield",
  "ตีศัตรูที่อยู่ไกลกว่า 4 เมตรแรงขึ้น 15%": "Hit enemies farther than 4 m 15% harder"
 });
+Object.assign(globalThis.I18N_EN,{
+ "แนะนำ": "Featured", "แพ็กคุ้มค่า": "Value packs", "อาหารบัฟ": "Buff food", "ของใช้เดินทาง": "Travel supplies", "รายการโปรด": "Favorites",
+ "ยันต์ EXP / ดรอป": "EXP / drop charms", "กรอบชื่อ": "Name frames", "ออร่า": "Auras", "ชุดแฟชั่น": "Fashion", "พาหนะ": "Mounts",
+ "· 5 ชิ้น": "· 5 pcs", "กินแล้ว {0} +4 นาน 10 นาที": "{0} +4 for 10 minutes",
+ "แพ็กนักผจญภัย": "Adventurer pack", "ยาสมุนไพรแดงขวดใหญ่ 20 · น้ำมนต์ทองคำ 10 · ปีกเหินลม 10 · ธูปกลับเมือง 3 · ถูกกว่าซื้อแยก": "20 large red potions · 10 golden holy water · 10 wind wings · 3 return incense · cheaper than buying separately",
+ "แพ็กมือใหม่": "Starter pack", "ยาสมุนไพรแดงขวดใหญ่ 10 · น้ำมนต์ทองคำ 5 · ปีกเหินลม 5 · ธูปกลับเมือง 2": "10 large red potions · 5 golden holy water · 5 wind wings · 2 return incense",
+ "แพ็กตีบวก": "Refining pack", "เหล็กไหล 10 · ยันต์กันแตก 2 · ถูกกว่าซื้อแยก": "10 Lek Lai · 2 break guards · cheaper than buying separately",
+ "แพ็กอาหารบัฟ": "Buff food pack", "ข้าวต้มมัด เมี่ยงคำ ข้าวหลาม บัวลอยใบเตย ตั๊กแตนทอดกรอบ อย่างละ 3": "3 each of khao tom mat, miang kham, khao lam, bua loi and fried grasshopper",
+ "แพ็กฮีโร่": "Hero pack", "ยันต์คืนวิถี 1 · ยันต์คืนขวัญ 2 · ยาสมุนไพรแดงขวดใหญ่ 20": "1 stat reset charm · 2 soul talismans · 20 large red potions",
+ "ยาสมุนไพรแดงขวดใหญ่ · 20 ขวด": "Large red potion · 20", "ฟื้น HP 180 ต่อขวด": "Restores 180 HP each", "น้ำมนต์ทองคำ · 10 ขวด": "Golden holy water · 10", "ฟื้น MP 120 ต่อขวด": "Restores 120 MP each",
+ "ยาเขียว · 10 ชิ้น": "Green herb · 10", "แก้พิษและอาการผิดปกติ": "Cures poison and ailments", "ปีกเหินลม · 10 ชิ้น": "Wind wing · 10", "วาร์ปไปจุดสุ่มในแผนที่นี้": "Warps to a random spot on this map",
+ "ธูปกลับเมือง · 5 ดอก": "Return incense · 5", "ฟื้นคืนชีพตรงจุดที่ล้ม": "Revive where you fell",
+ "ใหม่": "New", "ขายดี": "Hot", "คุ้ม": "Value", "ห้องลองชุด": "Fitting room", "ชุดแฟชั่นกำลังจะมา · ลองชุดได้ที่นี่": "Fashion is coming soon · try outfits on here",
+ "ราคาต่ำ → สูง": "Price: low → high", "ราคาสูง → ต่ำ": "Price: high → low", "♡ โปรด": "♡ Favorite", "ซื้อเลย": "Buy now", "เรียงสินค้า": "Sort items",
+ "ค้นหาสินค้า…": "Search items…", "ค้นหาสินค้า": "Search items", "เร็วๆ นี้": "Soon", "ยังไม่มีรายการโปรด · กด ♡ โปรด ที่สินค้าที่ชอบ": "No favorites yet · press ♡ Favorite on an item you like",
+ "ไม่พบสินค้าที่ค้นหา": "No items found", "ในกระเป๋า:": "In bag:", "โปรด": "Favorite", "เลือกสินค้า ตรวจจำนวนและยอดทองแท่ง แล้วกดซื้อ": "Pick an item, check the amount and gold bars, then buy",
+ "ได้รับ {0} · ใช้ {1} ทองแท่ง{2}": "Received {0} · spent {1} gold bars{2}"
+});

@@ -41,5 +41,5 @@ const CLASSES=[
  ['shaman','หมอผี','อาคมธาตุ ตีเป็นวง คุมฝูงมอน'],
  ['acolyte','พระ / แม่ชี','รักษา บัฟ และกันภัยให้ทั้งปาร์ตี้'],
 ];
-$('class-list').innerHTML=CLASSES.map(([id,name,text],i)=>`<li><span class="class-index">0${i+1}</span><button type="button" data-id="${id}" data-g="m" aria-label="${name} · แตะเพื่อสลับชาย/หญิง"><img src="assets/landing98/class-${id}-m.webp" width="240" height="240" alt="" loading="lazy"></button><h3>${name}</h3><p>${text}</p></li>`).join('');
-$('class-list').addEventListener('click',e=>{const b=e.target.closest('button[data-id]');if(!b)return;b.dataset.g=b.dataset.g==='m'?'f':'m';b.querySelector('img').src=`assets/landing98/class-${b.dataset.id}-${b.dataset.g}.webp`;});
+$('class-list').innerHTML=CLASSES.map(([id,name,text],i)=>`<li><span class="class-index">0${i+1}</span><button type="button" data-id="${id}" data-g="m" aria-label="${name} · แตะเพื่อสลับชาย/หญิง"><img src="assets/landing290/class-${id}-m.webp" width="240" height="240" alt="" loading="lazy"></button><h3>${name}</h3><p>${text}</p></li>`).join('');
+$('class-list').addEventListener('click',e=>{const b=e.target.closest('button[data-id]');if(!b)return;b.dataset.g=b.dataset.g==='m'?'f':'m';b.querySelector('img').src=`assets/landing290/class-${b.dataset.id}-${b.dataset.g}.webp`;});

@@ -6,7 +6,7 @@ import {applySkillArt} from './skill-art.js?v=icons117';
 
 export function createActionbar({game,bagUI,account={}}){
  const world=game.world,body=document.body,$=id=>document.getElementById(id),phone=mobileHudMedia();
- const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=overlay143';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./actionbar-ui.css?v=view287';document.head.append(css);
  const key='ayothaya-actionbar-v1:'+[(account.serverId??'local'),(account.slotId??'guest'),world.profession.id,world.jobId??'',world.roleCombat?'role':'legacy'].join(':');
  const fallback=defaultActionbar(world.skills,game.hotbar,bagUI.quickItems);
  let saved;try{saved=JSON.parse(localStorage.getItem(key));}catch{}
@@ -75,6 +75,7 @@ export function createActionbar({game,bagUI,account={}}){
  }
  function mode(){
   body.classList.toggle('actionbar-desktop',!phone.matches);body.classList.toggle('actionbar-mobile',phone.matches);root.hidden=phone.matches;battle.hidden=phone.matches;
+  const viewSwitch=$('view-switch');if(viewSwitch)(phone.matches?body:root.querySelector('.actionbar-tools')).append(viewSwitch);
   if(!phone.matches){attack.disabled=false;$('auto-attack').disabled=false;}
   for(const {node,home} of moves){if(phone.matches)home.after(node);else $(['emote-open','run-toggle'].includes(node.id)?'actionbar-life':'actionbar-combat').append(node);}
   render();

@@ -131,12 +131,13 @@ try {
  function setView(id){
   const name=VIEWS[id]?id:'2.5D',view=VIEWS[name],radius=camera.position.distanceTo(controls.target);rotating=null;controls.enableRotate=!!view.free;
   controls.minPolarAngle=controls.maxPolarAngle=view.polar;camera.position.setFromSphericalCoords(radius,view.polar,view.free?controls.getAzimuthalAngle():HOME_AZIMUTH).add(controls.target);controls.update();
-  $('left').disabled=$('right').disabled=$('tilt').disabled=!view.free;const shown=$('view-switch');if(shown){shown.textContent=name;shown.dataset.view=name;}
+  $('left').disabled=$('right').disabled=$('tilt').disabled=!view.free;const shown=$('view-switch');if(shown){shown.textContent=name;shown.dataset.view=name;shown.setAttribute('aria-label','มุมมอง '+name+' · กดเพื่อสลับมุมมอง');shown.title='มุมมอง '+name+' · 2D / 2.5D / 3D';}
   try{localStorage.setItem(VIEW_KEY,name);}catch{}
  }
  function mountViewSwitch(){
-  const button=document.createElement('button');button.id='view-switch';button.type='button';button.onclick=()=>{const names=Object.keys(VIEWS);setView(names[(names.indexOf(button.textContent)+1)%names.length]);};
-  (document.querySelector('.actionbar-tools')??document.body).prepend(button);
+  const button=document.createElement('button');button.id='view-switch';button.type='button';button.onclick=()=>{const names=Object.keys(VIEWS);setView(names[(names.indexOf(button.dataset.view)+1)%names.length]);};
+  (document.body.classList.contains('actionbar-desktop')?document.querySelector('.actionbar-tools')??document.body:document.body).append(button);
+  for(const file of ['view-2d','view-2-5d','view-3d']){const image=new Image();image.src='assets/ui-view287/'+file+'.png';}
   let saved=null;try{saved=localStorage.getItem(VIEW_KEY);}catch{}setView(saved);
  }
  function setTilt(value){const t=THREE.MathUtils.clamp(Math.round(value)||0,0,100);controls.minPolarAngle=controls.maxPolarAngle=BASE_POLAR+(LOW_POLAR-BASE_POLAR)*t/100;controls.update();$('tilt').value=String(t);$('tilt-value').textContent=t?t+'%':'เดิม';try{localStorage.setItem(TILT_KEY,String(t));}catch{}}

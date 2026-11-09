@@ -17,24 +17,26 @@ export const ECON_SINKS={
  marketFee:{th:'ค่าวางขายในตลาด',en:'Market listing fees'},marketTax:{th:'ภาษีตลาด',en:'Market sales tax'},guild:{th:'กิลด์',en:'Guilds'},
  rebirth:{th:'จุติ',en:'Rebirth'},other:{th:'อื่นๆ',en:'Other'},
 };
+export const GOLD_SOURCES={mail:{th:'แจกจากแอดมิน / จดหมาย',en:'Admin gifts / mail'},topup:{th:'เติมเงิน',en:'Top-ups'},other:{th:'อื่นๆ',en:'Other'}};
+export const GOLD_SINKS={gacha:{th:'กาชา',en:'Gacha'},shop:{th:'ร้านค้า',en:'Item mall'},wipe:{th:'ล้างทองแท่ง',en:'Gold wipe'},other:{th:'อื่นๆ',en:'Other'}};
 const KEEP_DAYS=30;
-export function createLedger({now=()=>Date.now(),saved=null}={}){
+export function createLedger({now=()=>Date.now(),saved=null,sources=ECON_SOURCES,sinks=ECON_SINKS}={}){
  let books=Array.isArray(saved?.days)?saved.days.filter(d=>typeof d?.day==='string').map(d=>({day:d.day,in:{...d.in},out:{...d.out}})):[];
- let held=Number.isFinite(saved?.held)?saved.held:null,characters=Number.isFinite(saved?.characters)?saved.characters:null,heldAt=saved?.heldAt??null;
+ let held=Number.isFinite(saved?.held)?saved.held:null,characters=Number.isFinite(saved?.characters)?saved.characters:null,heldAt=saved?.heldAt??null,pending=Number.isFinite(saved?.pending)?saved.pending:null;
  const ledger={dirty:false};
  function today(){const key=thaiDay(now());let d=books.at(-1);if(d?.day!==key){d={day:key,in:{},out:{}};books.push(d);books=books.slice(-KEEP_DAYS);}return d;}
  ledger.today=today;
  ledger.days=()=>books.map(d=>({day:d.day,in:{...d.in},out:{...d.out}}));
  ledger.record=(delta,reason)=>{
   const n=Math.round(Number(delta));if(!Number.isFinite(n)||n===0)return;
-  const side=n>0?'in':'out',list=n>0?ECON_SOURCES:ECON_SINKS;if(!list[reason])throw Error('econ-reason');
+  const side=n>0?'in':'out',list=n>0?sources:sinks;if(!list[reason])throw Error('econ-reason');
   const d=today();d[side][reason]=(d[side][reason]??0)+Math.abs(n);ledger.dirty=true;
  };
- ledger.setHeld=(coins,count)=>{if(Number.isFinite(coins))held=Math.round(coins);if(Number.isFinite(count))characters=count;heldAt=now();ledger.dirty=true;};
+ ledger.setHeld=(coins,count,pend=null)=>{if(Number.isFinite(coins))held=Math.round(coins);if(Number.isFinite(count))characters=count;if(Number.isFinite(pend))pending=Math.round(pend);heldAt=now();ledger.dirty=true;};
  ledger.markSaved=()=>{ledger.dirty=false;};
- ledger.toJSON=()=>({days:ledger.days(),held,characters,heldAt});
+ ledger.toJSON=()=>({days:ledger.days(),held,characters,heldAt,pending});
  const sum=o=>Object.values(o).reduce((a,b)=>a+b,0);
- ledger.publicView=()=>({updatedAt:now(),held,characters,heldAt,sources:ECON_SOURCES,sinks:ECON_SINKS,
+ ledger.publicView=()=>({updatedAt:now(),held,characters,heldAt,pending,sources,sinks,
   days:books.map(d=>{const i=sum(d.in),o=sum(d.out);return {day:d.day,in:{...d.in},out:{...d.out},totalIn:i,totalOut:o,net:i-o};})});
  return ledger;
 }

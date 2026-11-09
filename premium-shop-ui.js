@@ -6,18 +6,17 @@ import {loadPaintedStanding} from './painted-character.js?v=podium153';
 
 const errors={'no-gems':'ทองแท่งไม่พอ','bag-full':'กระเป๋าเต็ม · ยังไม่หักทอง กรุณาจัดช่องว่างก่อน','server-busy':'กำลังบันทึกรายการอื่น กรุณาลองใหม่','not-connected':'เชื่อมต่อเกมออนไลน์ก่อนซื้อสินค้า','rate-limit':'ส่งคำขอเร็วเกินไป รอสักครู่แล้วลองใหม่'};
 const BADGES={new:'ใหม่',hot:'ขายดี',value:'คุ้ม'};
-// Until the category and bundle art arrives, each category borrows one item icon from the game.
 const HEART='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.1C.9 8.6 3 5 6.6 5c2.1 0 3.6 1.2 5.4 3.1C13.8 6.2 15.3 5 17.4 5 21 5 23.1 8.6 21.6 11.9 19.5 16.4 12 21 12 21z"/></svg>';
-const CATEGORY_ICON={bundle:'treasure-chest',food:'khao-tom-mat',travel:'fly-wing',refine:'lek-lai',identity:'rename-card'},CATEGORY_GLYPH={featured:'★',favorite:HEART};
+const categoryIcon=id=>`<img src="assets/shop-mall282/cat-${id}.webp" alt="" width="32" height="32">`;
 const FAVORITES='ayothaya-shop-favorites';
-const productIcon=p=>iconStyle(p.items.length>1?'treasure-chest':p.item);
+const productIcon=p=>p.art?`background:url(${p.art}) center/contain no-repeat`:iconStyle(p.item);
 const loadFavorites=()=>{try{return new Set(JSON.parse(localStorage.getItem(FAVORITES))??[]);}catch{return new Set();}};
 
 export function createPremiumShopPanel({game,dialog,account}){
  const root=document.createElement('section');root.className='premium-store-body shop-mall';dialog.append(root);
  const wallet=document.createElement('div');wallet.className='mall-wallet';wallet.innerHTML='<img src="assets/summon147/gold-bars.webp" alt=""><b></b><span>ทองแท่ง</span>';dialog.querySelector('.premium-close')?.before(wallet);
  root.innerHTML=`<aside class="mall-fit" aria-label="ห้องลองชุด"><h3>ห้องลองชุด</h3><div class="mall-stage"><canvas width="320" height="320" aria-hidden="true"></canvas><p class="mall-hero-name"></p></div><p class="mall-fit-note">ชุดแฟชั่นกำลังจะมา · ลองชุดได้ที่นี่</p></aside>
- <nav class="mall-cats" aria-label="หมวดสินค้า">${SHOP_CATEGORIES.map(c=>`<button type="button" data-cat="${c.id}" aria-pressed="false"><i aria-hidden="true" style="${CATEGORY_ICON[c.id]?iconStyle(CATEGORY_ICON[c.id]):''}">${CATEGORY_GLYPH[c.id]??''}</i>${c.name}</button>`).join('')}<hr>${SHOP_COMING.map(name=>`<button type="button" class="mall-soon" disabled><i aria-hidden="true"></i>${name}<em>เร็วๆ นี้</em></button>`).join('')}</nav>
+ <nav class="mall-cats" aria-label="หมวดสินค้า">${SHOP_CATEGORIES.map(c=>`<button type="button" data-cat="${c.id}" aria-pressed="false"><i aria-hidden="true">${categoryIcon(c.id)}</i>${c.name}</button>`).join('')}<hr>${SHOP_COMING.map(s=>`<button type="button" class="mall-soon" disabled><i aria-hidden="true">${categoryIcon(s.id)}</i>${s.name}<em>เร็วๆ นี้</em></button>`).join('')}</nav>
  <div class="mall-main"><div class="mall-tools"><select aria-label="เรียงสินค้า"><option value="pick">แนะนำ</option><option value="low">ราคาต่ำ → สูง</option><option value="high">ราคาสูง → ต่ำ</option></select><input type="search" placeholder="ค้นหาสินค้า…" aria-label="ค้นหาสินค้า"></div>
  <div class="mall-grid" role="list"></div>
  <section class="mall-detail" aria-live="polite"><i class="mall-detail-icon" aria-hidden="true"></i><div class="mall-detail-copy"><h4></h4><p class="mall-detail-tip"></p><ul class="mall-contents"></ul><small class="mall-owned"></small></div>

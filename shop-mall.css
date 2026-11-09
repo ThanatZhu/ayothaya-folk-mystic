@@ -13,9 +13,11 @@
 /* fitting room */
 :root #premium-store-window .mall-fit{display:flex;flex-direction:column;overflow:hidden}
 :root #premium-store-window .mall-fit h3{margin:0;padding:8px;text-align:center;font-size:15px;font-weight:700;color:var(--mall-gold);border-bottom:1px solid var(--mall-line)}
-:root #premium-store-window .mall-stage{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:radial-gradient(ellipse at 50% 45%,#f2d38e26,transparent 65%)}
-:root #premium-store-window .mall-stage canvas{width:min(100%,190px);aspect-ratio:1;image-rendering:pixelated;filter:drop-shadow(0 8px 5px #0008)}
-:root #premium-store-window .mall-hero-name{margin:0;font-size:14px;font-weight:700;color:var(--mall-cream)}
+/* The painted room fits the stage height; its pedestal top sits at 62-68% of the picture, where the hero's feet go. */
+:root #premium-store-window .mall-stage{flex:1;position:relative;background:#2a1a10 url('assets/shop-mall282/fitting-room.webp') center/cover no-repeat}
+:root #premium-store-window .mall-stage canvas{position:absolute;left:50%;bottom:34%;width:min(78%,170px);aspect-ratio:1;transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(0 6px 4px #000a)}
+:root #premium-store-window .mall-hero-name{position:absolute;left:8px;right:8px;bottom:10px;margin:0;padding:3px 6px;border-radius:4px;background:#0b211acc;text-align:center;font-size:14px;font-weight:700;color:var(--mall-cream)}
+:root #premium-store-window .mall-hero-name:empty{display:none}
 :root #premium-store-window .mall-fit-note{margin:0;padding:8px;font-size:11px;line-height:1.5;text-align:center;color:#c9d4b8;border-top:1px solid var(--mall-line)}
 /* categories */
 :root #premium-store-window .mall-cats{display:flex;flex-direction:column;gap:2px;padding:6px;overflow:auto}
@@ -23,8 +25,10 @@
 :root #premium-store-window .mall-cats button{display:flex!important;align-items:center;gap:8px;min-height:40px!important;padding:4px 8px!important;border:0!important;border-image:none!important;border-radius:4px!important;background:none!important;color:#eadfbd!important;font-size:13px!important;font-weight:700!important;text-align:left;filter:none!important;opacity:1!important}
 :root #premium-store-window .mall-cats button[aria-pressed=true]{background:linear-gradient(90deg,#c6a16466,#c6a16414)!important;color:var(--mall-cream)!important;box-shadow:inset 3px 0 var(--mall-gold)!important}
 :root #premium-store-window .mall-cats button:hover:not(:disabled){background-color:#c6a16426!important}
-:root #premium-store-window .mall-cats i{flex:none;width:26px;height:26px;display:grid;place-items:center;font-style:normal;font-size:16px;color:var(--mall-gold);background-repeat:no-repeat}
-:root #premium-store-window .mall-cats .mall-soon{min-height:32px!important;gap:6px;font-size:12px!important;color:#9fb3a3!important;cursor:default}:root #premium-store-window .mall-cats .mall-soon i{display:none}
+:root #premium-store-window .mall-cats i{flex:none;width:30px;height:30px;display:block}
+:root #premium-store-window .mall-cats i img{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 2px #0008)}
+:root #premium-store-window .mall-cats .mall-soon{min-height:34px!important;gap:6px;font-size:12px!important;color:#9fb3a3!important;cursor:default}
+:root #premium-store-window .mall-cats .mall-soon i{width:24px;height:24px;opacity:.6;filter:saturate(.5)}
 :root #premium-store-window .mall-soon em{margin-left:auto;font-style:normal;font-size:9px;font-weight:500;white-space:nowrap;color:var(--mall-gold);border:1px solid var(--mall-line);border-radius:8px;padding:0 5px}
 /* products */
 :root #premium-store-window .mall-main{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -36,7 +40,7 @@
 :root #premium-store-window .mall-card:hover{border-color:var(--mall-gold)!important}
 :root #premium-store-window .mall-card[aria-current=true]{border-color:var(--mall-gold)!important;box-shadow:0 0 0 1px var(--mall-gold),0 0 14px #f2d38e55!important}
 :root #premium-store-window .mall-card .item-icon{display:block;flex:none;width:52px;height:52px;filter:drop-shadow(0 4px 6px #0009)}
-:root #premium-store-window .mall-card b{font-size:12px;line-height:1.3;font-weight:700;text-align:center;color:#f3e2b6}
+:root #premium-store-window .mall-card b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.3;font-weight:700;text-align:center;color:#f3e2b6}
 :root #premium-store-window .mall-price{align-self:stretch;display:flex;align-items:center;justify-content:center;gap:4px;padding:3px 0;background:#c6a16438;border-top:1px solid var(--mall-line);font-size:13px;font-weight:700;color:#ffe1a1;font-variant-numeric:tabular-nums}
 :root #premium-store-window .mall-price img{width:16px;height:16px;object-fit:contain}
 :root #premium-store-window .mall-badge{position:absolute;left:-24px;top:9px;width:84px;transform:rotate(-45deg);text-align:center;font-size:10px;font-weight:700;line-height:1.6;color:#fff;box-shadow:0 1px 3px #0008}
@@ -79,7 +83,8 @@
  :root #premium-store-window .mall-cats{flex-direction:row;overflow-x:auto;padding:4px}
  :root #premium-store-window .mall-cats hr,:root #premium-store-window .mall-cats .mall-soon{display:none!important}
  :root #premium-store-window .mall-cats button{flex:none;white-space:nowrap}
- :root #premium-store-window .mall-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ :root #premium-store-window .mall-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:128px}
+ :root #premium-store-window .mall-card b{font-size:11px}
  :root #premium-store-window .mall-detail{grid-template-columns:48px minmax(0,1fr)}
  :root #premium-store-window .mall-detail-icon{width:48px;height:48px}
  :root #premium-store-window .mall-buy{grid-column:1/-1}

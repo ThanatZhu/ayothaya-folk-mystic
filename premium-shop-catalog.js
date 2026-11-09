@@ -8,15 +8,16 @@ export const SHOP_CATEGORIES=Object.freeze([
  {id:'refine',name:'ตีบวก'},{id:'identity',name:'ตัวละคร'},{id:'favorite',name:'รายการโปรด'}
 ].map(Object.freeze));
 // Systems still to be built: listed in the sidebar so players see what is coming.
-export const SHOP_COMING=Object.freeze(['ยันต์ EXP / ดรอป','กรอบชื่อ','ออร่า','ชุดแฟชั่น','พาหนะ']);
+export const SHOP_COMING=Object.freeze([['exp','ยันต์ EXP / ดรอป'],['frame','กรอบชื่อ'],['aura','ออร่า'],['fashion','ชุดแฟชั่น'],['mount','พาหนะ']].map(([id,name])=>Object.freeze({id,name})));
+const ART='assets/shop-mall282/bundle-';
 const P=(sku,category,price,name,tip,{item,count=1,items=[{id:item,count}],...extra})=>Object.freeze({sku,category,price,name,tip,...extra,item:items[0].id,count:items[0].count,items:Object.freeze(items.map(i=>Object.freeze({...i})))});
 const food=(item,name,stat)=>P('food-'+item,'food',25,name+' · 5 ชิ้น',`กินแล้ว ${stat} +4 นาน 10 นาที`,{item,count:5});
 export const PREMIUM_SHOP_PRODUCTS=Object.freeze([
- P('bundle-adventurer','bundle',95,'แพ็กนักผจญภัย','ยาสมุนไพรแดงขวดใหญ่ 20 · น้ำมนต์ทองคำ 10 · ปีกเหินลม 10 · ธูปกลับเมือง 3 · ถูกกว่าซื้อแยก',{badge:'hot',featured:true,items:[{id:'hp-large',count:20},{id:'mp-large',count:10},{id:'fly-wing',count:10},{id:'return-incense',count:3}]}),
- P('bundle-starter','bundle',50,'แพ็กมือใหม่','ยาสมุนไพรแดงขวดใหญ่ 10 · น้ำมนต์ทองคำ 5 · ปีกเหินลม 5 · ธูปกลับเมือง 2',{badge:'new',featured:true,items:[{id:'hp-large',count:10},{id:'mp-large',count:5},{id:'fly-wing',count:5},{id:'return-incense',count:2}]}),
- P('bundle-refine','bundle',320,'แพ็กตีบวก','เหล็กไหล 10 · ยันต์กันแตก 2 · ถูกกว่าซื้อแยก',{badge:'value',featured:true,items:[{id:'lek-lai',count:10},{id:'break-guard',count:2}]}),
- P('bundle-feast','bundle',55,'แพ็กอาหารบัฟ','ข้าวต้มมัด เมี่ยงคำ ข้าวหลาม บัวลอยใบเตย ตั๊กแตนทอดกรอบ อย่างละ 3',{badge:'value',featured:true,items:['khao-tom-mat','miang-kham','khao-lam','bua-loi','fried-hopper'].map(id=>({id,count:3}))}),
- P('bundle-hero','bundle',420,'แพ็กฮีโร่','ยันต์คืนวิถี 1 · ยันต์คืนขวัญ 2 · ยาสมุนไพรแดงขวดใหญ่ 20',{items:[{id:STAT_RESET_ITEM,count:1},{id:REVIVAL_ITEM,count:2},{id:'hp-large',count:20}]}),
+ P('bundle-adventurer','bundle',95,'แพ็กนักผจญภัย','ยาสมุนไพรแดงขวดใหญ่ 20 · น้ำมนต์ทองคำ 10 · ปีกเหินลม 10 · ธูปกลับเมือง 3 · ถูกกว่าซื้อแยก',{art:ART+'adventurer.webp',badge:'hot',featured:true,items:[{id:'hp-large',count:20},{id:'mp-large',count:10},{id:'fly-wing',count:10},{id:'return-incense',count:3}]}),
+ P('bundle-starter','bundle',50,'แพ็กมือใหม่','ยาสมุนไพรแดงขวดใหญ่ 10 · น้ำมนต์ทองคำ 5 · ปีกเหินลม 5 · ธูปกลับเมือง 2',{art:ART+'starter.webp',badge:'new',featured:true,items:[{id:'hp-large',count:10},{id:'mp-large',count:5},{id:'fly-wing',count:5},{id:'return-incense',count:2}]}),
+ P('bundle-refine','bundle',320,'แพ็กตีบวก','เหล็กไหล 10 · ยันต์กันแตก 2 · ถูกกว่าซื้อแยก',{art:ART+'refine.webp',badge:'value',featured:true,items:[{id:'lek-lai',count:10},{id:'break-guard',count:2}]}),
+ P('bundle-feast','bundle',55,'แพ็กอาหารบัฟ','ข้าวต้มมัด เมี่ยงคำ ข้าวหลาม บัวลอยใบเตย ตั๊กแตนทอดกรอบ อย่างละ 3',{art:ART+'feast.webp',badge:'value',featured:true,items:['khao-tom-mat','miang-kham','khao-lam','bua-loi','fried-hopper'].map(id=>({id,count:3}))}),
+ P('bundle-hero','bundle',420,'แพ็กฮีโร่','ยันต์คืนวิถี 1 · ยันต์คืนขวัญ 2 · ยาสมุนไพรแดงขวดใหญ่ 20',{art:ART+'premium.webp',items:[{id:STAT_RESET_ITEM,count:1},{id:REVIVAL_ITEM,count:2},{id:'hp-large',count:20}]}),
  food('khao-tom-mat','ข้าวต้มมัด','STR'),food('miang-kham','เมี่ยงคำ','AGI'),food('khao-lam','ข้าวหลาม','VIT'),food('bua-loi','บัวลอยใบเตย','INT'),food('fried-hopper','ตั๊กแตนทอดกรอบ','DEX'),
  P('hp-large-pack','travel',40,'ยาสมุนไพรแดงขวดใหญ่ · 20 ขวด','ฟื้น HP 180 ต่อขวด',{featured:true,item:'hp-large',count:20}),
  P('mp-large-pack','travel',40,'น้ำมนต์ทองคำ · 10 ขวด','ฟื้น MP 120 ต่อขวด',{item:'mp-large',count:10}),

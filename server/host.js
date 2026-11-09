@@ -202,7 +202,7 @@ function loadBooks(saved){realm.econ=createLedger({saved});realm.goldEcon=create
   res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
   if(req.method==='OPTIONS'){if(!allowedOrigin(origin)){res.writeHead(403).end();return;}res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','POST, GET');res.writeHead(204).end();return;}
   const url=new URL(req.url,'http://localhost'),reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
-  if(url.pathname==='/economy'&&req.method==='GET'){res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Cache-Control','public, max-age=60');reply(200,{...realm.econ.publicView(),gold:realm.goldEcon.publicView()});return;}
+  if(url.pathname==='/economy'&&req.method==='GET'){res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Cache-Control','public, max-age=60');reply(200,{...realm.econ.publicView(),gold:{...realm.goldEcon.publicView(),shops:realm.goldInShops()}});return;}
   if(url.pathname==='/game-status'&&req.method==='GET'){reply(200,{maintenance:!!reset?.maintenance,worldReset:1});return;}
   // Drain requests that started before the reset; no later HTTP mutation can enter the world.
   if(req.method==='POST'&&!url.pathname.startsWith('/admin/world-reset')){

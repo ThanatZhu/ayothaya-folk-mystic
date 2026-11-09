@@ -2179,6 +2179,7 @@ globalThis.I18N_EN={"คราฟจากเศษดัน": "crafted from dun
 "ปิดร้านแล้ว":"Shop closed",
 "รับของจากร้านแล้ว":"Collected goods from shop",
 "· เบี้ย +":"· Bia +",
+"· ทองแท่ง +":"· Gold Bars +",
 "ซื้อจากร้าน":"Bought from shop",
 "ขายให้ร้าน":"Sold to shop",
 "· ภาษี":"· Tax",

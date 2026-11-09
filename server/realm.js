@@ -34,7 +34,7 @@ import {CombatWorld,monsterHit,MONSTER_TYPES,moveBody,lineClear,walkable,rallyPa
 import {awardExperience,baseProgress,levelGifts,migrateXp,XP_CURVE} from '../experience.js';
 import {refineGear} from '../refine.js';
 import {STORAGE_SLOTS,STORAGE_NPC,normalizeStorage,normalizeOffer,moveOffer,hasOffer,swapOffers,normalizeStall,buyFromStall} from '../market.js';
-import {MARKET_ZONE,SHOP_DURATION,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,browseMarket,marketOptions,marketDay,priceKey,publicShop,shopIsOpen,closeInactiveShop,shopHasClaims,shopHasListings} from '../market-board.js';
+import {MARKET_ZONE,SHOP_DURATION,inMarket,tradePerks,taxOf,openShop,buyFromShop,sellToShop,collectShop,recordPrice,browseMarket,marketOptions,marketDay,priceKey,publicShop,shopIsOpen,closeInactiveShop,shopHasClaims,shopHasListings,shopCurrency} from '../market-board.js';
 import {REBIRTH_MAX,rebirthStatBonus,normalizeStats,normalizeGear,raiseStat,equipGear,unequipGear,dropInvalidGear,deriveStats,statPoints,insertCard,combatPower} from '../character-stats.js';
 import {restoreTraveler,serializeTraveler,warpCost} from '../world-state.js';
 import {character,isServer,isSlot,CHANNELS,normalizeChannel} from '../realm-state.js';
@@ -653,7 +653,7 @@ export class RealmServer{
   // Keep sell-form reference-price warnings for the owner's inventory without sending every historical item or day bucket.
   const prices=this.prices.get(p.serverId)??{};for(const item of Object.keys(p.bag?.items??{})){const key=priceKey(item),r=prices[key];if(r)data.prices[key]={last:r.last,avg:r.avg,n:r.n,t:r.t};}
   if(p.marketBrowse===input)p.marketBrowse.page=data.page;
-  if(Number.isSafeInteger(input.requestId))data.requestId=input.requestId;
+  if(Number.isSafeInteger(input.requestId))data.requestId=input.requestId;data.goldMarket=this.goldMarketOpen===true;
   const signature=JSON.stringify(data);if(signature===p.marketBrowseSignature)return;
   p.marketBrowseSignature=signature;p.world.emit('marketResults',data);
  }
@@ -675,7 +675,7 @@ export class RealmServer{
    if(remove)this.shops.delete(id);else this.shops.set(id,next);this.saveShop(next,remove);if(!servers.has(s.serverId))servers.set(s.serverId,[]);servers.get(s.serverId).push(id);owners.add(s.ownerKey);
   }
   for(const [serverId,ids] of servers)this.shopsChanged(serverId,ids);
-  for(const p of this.peers.values())if(!p.suspended&&owners.has(p.key))p.world.emit('shopMine',{shops:this.mine(p),perks:tradePerks(p.tradeXp)});
+  for(const p of this.peers.values())if(!p.suspended&&owners.has(p.key))p.world.emit('shopMine',this.shopMineView(p));
  }
  expireStall(p,now=this.now()){
   if(!p.stall)return;const expired=Number.isFinite(p.stall.expiresAt)&&p.stall.expiresAt<=now;
@@ -683,6 +683,13 @@ export class RealmServer{
  }
  traded(serverId,peers,item,coins,count){for(const a of peers)if(a)a.tradeXp=Math.min(1e9,(a.tradeXp??0)+coins);const prices=this.prices.get(serverId)??{};this.prices.set(serverId,recordPrice(prices,item,Math.round(coins/count),this.now(),count));this.pricesDirty.add(serverId);this.marketChanged(serverId);}
  mine(p){return [...this.shops.values()].filter(s=>s.ownerKey===p.key).map(s=>({...publicShop(s),pouch:s.pouch,escrow:s.escrow,log:s.log}));}
+ shopMineView(p){return {shops:this.mine(p),perks:tradePerks(p.tradeXp),goldMarket:this.goldMarketOpen===true};}
+ // Gold shops (ช่วง 3) move the live wallet p.petCollection.balance. A host gold save (persistMail/persistPets) writes the wallet
+ // back from its own record when it finishes, so a market gold change is refused with server-busy while one is in flight.
+ goldBalance(p){return normalizePetAccount(p.petCollection).balance;}
+ setGold(p,value){p.petCollection={...normalizePetAccount(p.petCollection),balance:value};p.saveNow=true;}
+ goldBusy(p){return p.mailMutationBusy===true||p.petMutationBusy===true;}
+ goldInShops(){let n=0;for(const s of this.shops.values())n+=(s.pouch?.gold??0)+(shopCurrency(s)==='gold'&&s.kind==='buy'?s.escrow??0:0);return n;}
  marketCommand(p,m){
   const w=p.world,perks=tradePerks(p.tradeXp),fail=c=>this.itemFail(p,c),now=this.now();
   // The shop panel lists (mine / all) scan every open shop; throttle them per player so one socket can't pin a core.
@@ -694,29 +701,33 @@ export class RealmServer{
    const options={...marketOptions(m),...(Number.isSafeInteger(m.requestId)?{requestId:m.requestId}:{})};
    p.marketBrowse=m.watch===true?options:null;delete p.marketBrowseSignature;this.sendMarketResults(p,options);return true;
   }
-  if(m.type==='shopMine'){w.emit('shopMine',{shops:this.mine(p),perks});return true;}
+  if(m.type==='shopMine'){w.emit('shopMine',this.shopMineView(p));return true;}
   if(m.type==='shopList'){w.emit('shops',{list:this.shopList(p.serverId)});return true;}
-  if(m.type==='shopOpen'){
-   let r;try{r=openShop({bag:p.bag,req:m.shop,perks,owner:{key:p.key,name:p.character.name,serverId:p.serverId},x:w.player.x,z:w.player.z,mapId:p.room.map.id,now,id:randomUUID(),existing:[...this.shops.values()].filter(s=>s.serverId===p.serverId)});}catch(e){return fail(e.message);}
-   this.setBag(p,r.bag,null);this.shops.set(r.shop.id,r.shop);p.saveNow=true;this.saveShop(r.shop);this.shopsChanged(p.serverId);
-   w.notice((r.shop.kind==='buy'?'เปิดร้านรับซื้อ ':'เปิดร้านค้าง ')+r.shop.title+' แล้ว · เปิดได้ 24 ชั่วโมงแม้ออกจากเกม');w.emit('shopMine',{shops:this.mine(p),perks});return true;}
+  if(m.type==='shopOpen'){const g=m.shop?.currency==='gold';if(g&&this.goldMarketOpen!==true)return fail('gold-market-closed');if(g&&this.goldBusy(p))return this.error(p,'server-busy');
+   let r;try{r=openShop({bag:p.bag,gold:this.goldBalance(p),req:m.shop,perks,owner:{key:p.key,name:p.character.name,serverId:p.serverId},x:w.player.x,z:w.player.z,mapId:p.room.map.id,now,id:randomUUID(),existing:[...this.shops.values()].filter(s=>s.serverId===p.serverId)});}catch(e){return fail(e.message);}
+   this.setBag(p,r.bag,null);if(g)this.setGold(p,r.gold);this.shops.set(r.shop.id,r.shop);p.saveNow=true;this.saveShop(r.shop);this.shopsChanged(p.serverId);
+   w.notice((r.shop.kind==='buy'?'เปิดร้านรับซื้อ ':'เปิดร้านค้าง ')+r.shop.title+' แล้ว · เปิดได้ 24 ชั่วโมงแม้ออกจากเกม');w.emit('shopMine',this.shopMineView(p));return true;}
   const shop=this.shops.get(m.shop);if(!shop||shop.serverId!==p.serverId)return fail('stall-none');
-  if(m.type==='shopCollect'||m.type==='shopClose'){if(shop.ownerKey!==p.key)return fail('stall-none');
-   let r;try{r=collectShop(shop,p.bag,{close:m.type==='shopClose'});}catch(e){return fail(e.message);}
+  const g=shopCurrency(shop)==='gold'; // switch off still lets owners collect and close; the busy guard covers every gold move
+  if(m.type==='shopCollect'||m.type==='shopClose'){if(shop.ownerKey!==p.key)return fail('stall-none');if(g&&this.goldBusy(p))return this.error(p,'server-busy');
+   let r;try{r=collectShop(shop,p.bag,{close:m.type==='shopClose',gold:this.goldBalance(p)});}catch(e){return fail(e.message);}
    p.tradeXp=Math.min(1e9,(p.tradeXp??0)+(shop.xpOwed??0));if(r.shop)r.shop.xpOwed=0;
-   this.setBag(p,r.bag,null);p.saveNow=true;if(r.shop){this.shops.set(shop.id,r.shop);this.saveShop(r.shop);}else{this.shops.delete(shop.id);this.saveShop(shop,true);this.shopsChanged(p.serverId,[shop.id]);}
-   w.notice((m.type==='shopClose'?'ปิดร้านแล้ว':'รับของจากร้านแล้ว')+(r.coins?' · เบี้ย +'+r.coins:''));w.emit('shopMine',{shops:this.mine(p),perks});return true;}
+   this.setBag(p,r.bag,null);if(g)this.setGold(p,r.gold);p.saveNow=true;if(r.shop){this.shops.set(shop.id,r.shop);this.saveShop(r.shop);}else{this.shops.delete(shop.id);this.saveShop(shop,true);this.shopsChanged(p.serverId,[shop.id]);}
+   w.notice((m.type==='shopClose'?'ปิดร้านแล้ว':'รับของจากร้านแล้ว')+(r.coins?' · เบี้ย +'+r.coins:'')+(r.goldOut?' · ทองแท่ง +'+r.goldOut:''));w.emit('shopMine',this.shopMineView(p));return true;}
   if(p.room.map.id!==MARKET_ZONE.mapId||Math.hypot(w.player.x-shop.x,w.player.z-shop.z)>4.5)return fail('shop-far');
   if(shop.ownerKey===p.key)return fail('stall-self');
-  const owner=[...this.peers.values()].find(o=>o.key===shop.ownerKey&&!o.suspended),ownerPerks=tradePerks(owner?.tradeXp??0);
-  let r;try{r=m.type==='shopBuy'?buyFromShop(shop,p.bag,m.item,m.count,ownerPerks,{who:p.character.name,now}):m.type==='shopSell'?sellToShop(shop,p.bag,m.item,m.count,tradePerks(p.tradeXp),{who:p.character.name,now}):null;}catch(e){return fail(e.message);}
-  if(!r)return false;
-  r.shop.xpOwed=(shop.xpOwed??0)+(r.cost??r.pay); // the owner's trade experience is paid out when they collect
-  this.setBag(p,r.bag,null);this.econRecord(-(r.tax??0),'marketTax');p.saveNow=true;this.shops.set(shop.id,r.shop);this.saveShop(r.shop);this.traded(p.serverId,[p],m.item,r.cost??r.pay,m.count);
-  this.evidence?.(p,m.type==='shopBuy'?'market-shop-buy':'market-shop-sell',{shop:{id:shop.id,owner:shop.ownerName},item:m.item,count:m.count,coins:r.cost??r.pay,tax:r.tax??0});
-  owner?.world.emit('stallSold',{item:m.item,count:m.count,coins:(r.cost??r.pay)-r.tax,buyer:p.character.name});
-  owner?.world.emit('shopMine',{shops:this.mine(owner),perks:tradePerks(owner.tradeXp)});
-  w.notice((m.type==='shopBuy'?'ซื้อจากร้าน ':'ขายให้ร้าน ')+shop.ownerName+' แล้ว'+(r.tax?' · ภาษี '+r.tax+' เบี้ย':''));
+  if(g&&this.goldMarketOpen!==true)return fail('gold-market-closed');if(g&&this.goldBusy(p))return this.error(p,'server-busy');
+  const owner=[...this.peers.values()].find(o=>o.key===shop.ownerKey&&!o.suspended),ownerPerks=tradePerks(owner?.tradeXp??0),gold=this.goldBalance(p);
+  let r;try{r=m.type==='shopBuy'?buyFromShop(shop,p.bag,m.item,m.count,ownerPerks,{who:p.character.name,now,gold}):m.type==='shopSell'?sellToShop(shop,p.bag,m.item,m.count,tradePerks(p.tradeXp),{who:p.character.name,now,gold}):null;}catch(e){return fail(e.message);}
+  if(!r)return false;const amount=r.cost??r.pay;
+  if(!g)r.shop.xpOwed=(shop.xpOwed??0)+amount; // the owner's trade experience is paid out when they collect; gold trades give none
+  this.setBag(p,r.bag,null);p.saveNow=true;this.shops.set(shop.id,r.shop);this.saveShop(r.shop);
+  if(g){this.setGold(p,r.gold);this.goldEcon.record(-(r.tax??0),'marketTax');this.traded(p.serverId,[],priceKey(m.item,'gold'),amount,m.count);}
+  else{this.econRecord(-(r.tax??0),'marketTax');this.traded(p.serverId,[p],m.item,amount,m.count);}
+  this.evidence?.(p,m.type==='shopBuy'?'market-shop-buy':'market-shop-sell',{shop:{id:shop.id,owner:shop.ownerName},item:m.item,count:m.count,[g?'gold':'coins']:amount,tax:r.tax??0,currency:r.currency});
+  owner?.world.emit('stallSold',{item:m.item,count:m.count,coins:amount-r.tax,currency:r.currency,buyer:p.character.name});
+  owner?.world.emit('shopMine',this.shopMineView(owner));
+  w.notice((m.type==='shopBuy'?'ซื้อจากร้าน ':'ขายให้ร้าน ')+shop.ownerName+' แล้ว'+(r.tax?' · ภาษี '+r.tax+(g?' ทองแท่ง':' เบี้ย'):''));
   this.shopsChanged(p.serverId,r.shop.status==='closed'?[shop.id]:[]);return true;
  }
  // money books (owner 9 Nov): every coin change names its reason; player-to-player moves pass null and are not counted

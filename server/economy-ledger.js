@@ -18,7 +18,7 @@ export const ECON_SINKS={
  rebirth:{th:'จุติ',en:'Rebirth'},other:{th:'อื่นๆ',en:'Other'},
 };
 export const GOLD_SOURCES={mail:{th:'แจกจากแอดมิน / จดหมาย',en:'Admin gifts / mail'},topup:{th:'เติมเงิน',en:'Top-ups'},other:{th:'อื่นๆ',en:'Other'}};
-export const GOLD_SINKS={gacha:{th:'กาชา',en:'Gacha'},shop:{th:'ร้านค้า',en:'Item mall'},wipe:{th:'ล้างทองแท่ง',en:'Gold wipe'},other:{th:'อื่นๆ',en:'Other'}};
+export const GOLD_SINKS={gacha:{th:'กาชา',en:'Gacha'},shop:{th:'ร้านค้า',en:'Item mall'},wipe:{th:'ล้างทองแท่ง',en:'Gold wipe'},marketTax:{th:'ภาษีตลาด',en:'Market sales tax'},other:{th:'อื่นๆ',en:'Other'}};
 const KEEP_DAYS=30;
 export function createLedger({now=()=>Date.now(),saved=null,sources=ECON_SOURCES,sinks=ECON_SINKS}={}){
  let books=Array.isArray(saved?.days)?saved.days.filter(d=>typeof d?.day==='string').map(d=>({day:d.day,in:{...d.in},out:{...d.out}})):[];

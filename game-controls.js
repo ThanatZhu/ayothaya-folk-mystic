@@ -74,6 +74,9 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
  const walker=createRouteWalker(()=>world.nav),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),groundHit=new THREE.Vector3();
  const marker=new THREE.Mesh(new THREE.RingGeometry(.2,.3,32),new THREE.MeshBasicMaterial({color:'#f4cf7a',transparent:true,opacity:0,depthWrite:false,depthTest:false,side:THREE.DoubleSide}));
  marker.rotation.x=-Math.PI/2;marker.renderOrder=5;marker.visible=false;scene.add(marker);let markerAge=0;
+ // dungeon 80 hellfire (owner 10 Nov): a red disc grows during the warning, flashes when the burst lands, then fades
+ const hazards=[];
+ function hazardMark(e){const m=new THREE.Mesh(new THREE.CircleGeometry(e.r,40),new THREE.MeshBasicMaterial({color:'#ff4a1c',transparent:true,opacity:.3,depthWrite:false,depthTest:false,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;m.renderOrder=5;m.position.set(e.x,.15+groundHeight(world.nav,e.x,e.z),e.z);m.scale.setScalar(.2);scene.add(m);hazards.push({m,age:0,warn:e.warn});}
  let approach=null,walkJob=null,arrivalPending=null,serverWalkState=null,walkPaceSent=null,questAutoRun=false,walkPredictedArrival=false,networkExpected=false;
  function cancelWalk(){approach=null;questAutoRun=false;world.attackOrder=null;const id=walkJob?.id??(serverWalkState?.status==='walking'?serverWalkState.id:null);walker.cancel();arrivalPending=null;if(id&&network?.walkSchema===1)network.command('walkCancel',{id});walkJob=null;serverWalkState=null;walkPaceSent=null;walkPredictedArrival=false;marker.visible=false;}
  const wantsRun=()=>supportsAction('run')&&(runToggled||questAutoRun||keys.has('ShiftLeft')||keys.has('ShiftRight'));
@@ -312,6 +315,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    const effect=skillEffects.create(presentation,{...e,skillIndex:track?e.skillIndex:null,synced:true,from,to:{...to,y:groundHeight(world.nav,to.x,to.z)},direction:world.player.face,groundY:groundHeight(world.nav,from.x,from.z),reduced:motionPreference.matches,quality:compactEffects.matches?'low':'high'});effect.age=lag;
  }
  function effect(e){
+  if(e.type==='dungeonHazard'){hazardMark(e);return;}
   if(e.type.startsWith('spirit')){roleDecor.handleEvent(e);return;}
   if(e.type==='experience'){
    toast((e.baseUp?'Base Level Up! Lv. '+e.baseLevel+' · ':e.jobUp?'Job Level Up! Lv. '+e.jobLevel+' · ':'')+'+'+e.base+' Base EXP · +'+e.job+' Job EXP');
@@ -458,6 +462,7 @@ export function createGame({scene,camera,controls,canvas,hero,monsterTextures,mo
    if(network.command('walkPace',{id:routeId,run}))walkPaceSent={id:routeId,run};
   }
   const steering=paused&&!walker.active&&!walkJob&&!remoteRoute?{x:0,z:0,attack:false,run:false}:{...direction,attack:input.attack||keys.has('Space'),run:remoteRoute?network.walkRunSchema===1&&run:run};
+  for(let i=hazards.length-1;i>=0;i--){const h=hazards[i];h.age+=dt;const k=Math.min(1,h.age/h.warn);h.m.scale.setScalar(.2+.8*k);h.m.material.opacity=h.age<h.warn?.3+.35*k:Math.max(0,.95-(h.age-h.warn)*2.5);if(h.age>h.warn+.4){scene.remove(h.m);h.m.geometry.dispose();h.m.material.dispose();hazards.splice(i,1);}}
   if(marker.visible){markerAge+=dt;if(walker.active||walkJob){marker.material.opacity=.85;marker.scale.setScalar(1+.15*Math.sin(markerAge*7));}else{marker.material.opacity-=dt*3.5;if(marker.material.opacity<=0)marker.visible=false;}}
   if(network){
    network.setInput(remoteRoute?{...steering,x:0,z:0}:steering);world.time+=renderDt;

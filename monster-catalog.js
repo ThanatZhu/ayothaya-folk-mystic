@@ -50,7 +50,32 @@ export const MAP_VARIANTS=[
  {variantOf:'monkey',id:'dg35-krahang',name:'ผีกระหัง',level:35,hp:950,damage:42,baseXp:168,jobXp:100,speed:1.5,height:1.9,clearReward:null,dungeonOnly:true},
  {variantOf:'monkey-chief',id:'dg35-krahang-chief',name:'ขุนกระหัง',level:38,hp:3600,damage:72,baseXp:830,jobXp:460,height:3,elite:true,clearReward:null,dungeonOnly:true},
  {variantOf:'lantern-lord',id:'dg35-mae-krasue',name:'แม่กระสือราตรี',level:40,hp:9000,damage:78,baseXp:2300,jobXp:1340,height:3.6,boss:true,clearReward:null,dungeonOnly:true},
- {variantOf:'lantern-lord',id:'dg35-mae-krasue-head',name:'แม่กระสือราตรี (ร่างกระสือ)',level:40,hp:9000,damage:82,baseXp:2300,jobXp:1340,height:3.4,boss:true,clearReward:null,dungeonOnly:true}
+ {variantOf:'lantern-lord',id:'dg35-mae-krasue-head',name:'แม่กระสือราตรี (ร่างกระสือ)',level:40,hp:9000,damage:82,baseXp:2300,jobXp:1340,height:3.4,boss:true,clearReward:null,dungeonOnly:true},
+ // Party dungeons Lv.45/55/65/80 (owner 10 Nov): stats sit near field monsters of the same level, chief x3.8 HP, boss x10 HP.
+ {variantOf:'hopper',id:'dg45-leaf-phrai',name:'พรายใบไม้',level:43,hp:1400,damage:53,baseXp:229,jobXp:131,speed:1.6,height:1.4,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern',id:'dg45-phi-pong',name:'ผีโป่ง',level:44,hp:1480,damage:56,baseXp:238,jobXp:137,height:1.5,magic:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'vine',id:'dg45-root-ghoul',name:'ผีรากไม้',level:45,hp:1544,damage:58,baseXp:245,jobXp:143,height:1.7,clearReward:null,dungeonOnly:true},
+ {variantOf:'monkey-chief',id:'dg45-woodcutter',name:'พรานไม้ผีสิง',level:48,hp:5800,damage:104,baseXp:1200,jobXp:700,height:3,elite:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern-lord',id:'dg45-nang-takhian',name:'นางตะเคียนทอง',level:50,hp:15000,damage:118,baseXp:3500,jobXp:2050,height:3.6,boss:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern-lord',id:'dg45-takhian-tree',name:'นางตะเคียนทอง (ร่างต้นตะเคียน)',level:50,hp:15000,damage:124,baseXp:3500,jobXp:2050,height:3.8,boss:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'hopper',id:'dg55-ghost-mermaid',name:'เงือกผี',level:53,hp:2300,damage:68,baseXp:340,jobXp:212,speed:1.6,height:1.5,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern',id:'dg55-sea-phrai',name:'พรายน้ำ',level:54,hp:2380,damage:70,baseXp:350,jobXp:219,height:1.4,magic:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'rat',id:'dg55-shell-crab',name:'ปูผียักษ์',level:55,hp:2460,damage:72,baseXp:362,jobXp:226,height:1.6,clearReward:null,dungeonOnly:true},
+ {variantOf:'rat-chief',id:'dg55-ghost-captain',name:'นายเรือผี',level:58,hp:9300,damage:122,baseXp:1770,jobXp:1100,height:3,elite:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern-lord',id:'dg55-suea-samut',name:'ผีเสื้อสมุทร',level:60,hp:23500,damage:135,baseXp:4950,jobXp:3000,height:3.6,boss:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern-lord',id:'dg55-suea-samut-giant',name:'ผีเสื้อสมุทร (ร่างยักษ์)',level:60,hp:23500,damage:142,baseXp:4950,jobXp:3000,height:4,boss:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'straw',id:'dg65-straw-doll',name:'หุ่นฟางเข็มหมุด',level:63,hp:3080,damage:81,baseXp:480,jobXp:300,speed:1.6,height:1.6,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern',id:'dg65-phi-tai-hong',name:'ผีตายโหง',level:64,hp:3160,damage:83,baseXp:492,jobXp:307,height:1.7,magic:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'monkey',id:'dg65-pot-imp',name:'ภูตหม้อ',level:65,hp:2600,damage:80,baseXp:380,jobXp:240,height:1.4,clearReward:null,dungeonOnly:true},
+ {variantOf:'monkey-chief',id:'dg65-khwai-thanu',name:'ควายธนู',level:68,hp:12400,damage:145,baseXp:2450,jobXp:1500,height:3,elite:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern-lord',id:'dg65-mor-phi',name:'หมอผีขมังเวทย์',level:70,hp:31000,damage:160,baseXp:6600,jobXp:4000,height:3.6,boss:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'hopper',id:'dg65-kuman-thong',name:'กุมารทอง',level:70,hp:6000,damage:120,baseXp:900,jobXp:560,speed:1.7,height:1.5,elite:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'monkey',id:'dg80-hungry-pret',name:'เปรตหิวโหย',level:78,hp:4450,damage:101,baseXp:740,jobXp:462,height:2,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern',id:'dg80-fire-pret',name:'เปรตเพลิง',level:79,hp:4550,damage:103,baseXp:755,jobXp:470,height:1.7,magic:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'monkey',id:'dg80-chain-guard',name:'ผีคุมเพลิง',level:80,hp:4660,damage:104,baseXp:768,jobXp:480,height:1.9,clearReward:null,dungeonOnly:true},
+ {variantOf:'monkey-chief',id:'dg80-yommatut',name:'ยมทูต',level:83,hp:18000,damage:180,baseXp:3700,jobXp:2300,height:3.1,elite:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern-lord',id:'dg80-phaya-pret',name:'พญาเปรต',level:85,hp:45000,damage:196,baseXp:10500,jobXp:6400,height:3.8,boss:true,clearReward:null,dungeonOnly:true},
+ {variantOf:'lantern-lord',id:'dg80-phaya-pret-giant',name:'พญาเปรต (ร่างยักษ์)',level:85,hp:45000,damage:205,baseXp:10500,jobXp:6400,height:4.2,boss:true,clearReward:null,dungeonOnly:true}
 ];
 for(const spec of REBIRTH_MONSTER_SPECS){const art=FRONTIER_MONSTERS.find(m=>m.id===spec.proxyId);if(!art)throw Error('Missing rebirth art proxy '+spec.proxyId);FRONTIER_MONSTERS.push({...spec,sheet:art.sheet,row:art.row,chapter2Art:art.chapter2Art,artProxy:spec.proxyId});}
 for(const v of MAP_VARIANTS)FRONTIER_MONSTERS.push({...FRONTIER_MONSTERS.find(m=>m.id===v.variantOf),...v});
@@ -85,7 +110,8 @@ Object.assign(MONSTER_BEHAVIOUR,CHAPTER2_BEHAVIOUR);
 for(const v of MAP_VARIANTS)if(MONSTER_BEHAVIOUR[v.variantOf])MONSTER_BEHAVIOUR[v.id]=MONSTER_BEHAVIOUR[v.variantOf];
 for(const m of REBIRTH_MONSTER_SPECS)MONSTER_BEHAVIOUR[m.id]=m.boss?{enrage:true,slam:slam(5,3,1.4,.08,9,8)}:m.elite?{enrage:true}:{};
 Object.assign(MONSTER_BEHAVIOUR,{'dg35-krasue-wisp':{leap:true},'dg35-khamot':{aoe:2.2,windup:.9,skirmish:1.4},'dg35-krahang':{skirmish:1.2},
- 'dg35-krahang-chief':{enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'dg35-mae-krasue':{aoe:3,windup:1},'dg35-mae-krasue-head':{leap:true,aoe:2.6,windup:.8}});
+ 'dg35-krahang-chief':{enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'dg35-mae-krasue':{aoe:3,windup:1},'dg35-mae-krasue-head':{leap:true,aoe:2.6,windup:.8},
+ 'dg45-leaf-phrai':{leap:true},'dg45-phi-pong':{aoe:2.2,windup:.9,skirmish:1.4},'dg45-root-ghoul':{skirmish:1.2},'dg45-woodcutter':{enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'dg45-nang-takhian':{aoe:3,windup:1},'dg45-takhian-tree':{leap:true,aoe:2.6,windup:.8},'dg55-ghost-mermaid':{leap:true},'dg55-sea-phrai':{aoe:2.2,windup:.9,skirmish:1.4},'dg55-shell-crab':{skirmish:1.2},'dg55-ghost-captain':{enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'dg55-suea-samut':{aoe:3,windup:1},'dg55-suea-samut-giant':{leap:true,aoe:2.6,windup:.8},'dg65-straw-doll':{leap:true},'dg65-phi-tai-hong':{aoe:2.2,windup:.9,skirmish:1.4},'dg65-pot-imp':{skirmish:1.2},'dg65-khwai-thanu':{enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'dg65-mor-phi':{aoe:3,windup:1},'dg65-kuman-thong':{leap:true},'dg80-hungry-pret':{leap:true},'dg80-fire-pret':{aoe:2.2,windup:.9,skirmish:1.4},'dg80-chain-guard':{skirmish:1.2},'dg80-yommatut':{enrage:true,slam:slam(4.2,3.2,1.5,.08,9,7)},'dg80-phaya-pret':{aoe:3,windup:1},'dg80-phaya-pret-giant':{leap:true,aoe:2.6,windup:.8}});
 // 0.122 territory and strolling (owner-approved numbers): a monster 15+ levels above the player attacks anyone who
 // comes within 5 m of it while inside its 9 m leash; an idle ordinary monster strolls within 4 m of home at 40% speed,
 // resting 3–7 s between walks. `level` is the target player's base level (null: no territory check).

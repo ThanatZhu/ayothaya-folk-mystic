@@ -12,8 +12,8 @@ test('0.117 catalog: 960 set pieces, 42 tier weapons, 39 boss pieces, the 5-piec
  assert.equal(gear.filter(([,it])=>it.set).length,960);assert.equal(gear.filter(([,it])=>it.tier&&it.slot==='weapon').length,42);
  assert.equal(gear.filter(([,it])=>it.bossSet).length,39);assert.deepEqual(gear.filter(([,it])=>it.starter).map(([id])=>id).sort(),[...STARTER].sort());
  // dungeon sets (dungeons.js) add 4 graded pieces + 4 rainbow pieces per dungeon; a rainbow piece reuses its piece's icon
- const dungeon=gear.filter(([,it])=>it.dungeonSet);assert.equal(dungeon.length,8);
- assert.equal(gear.length,1046+8);const images=new Set(gear.filter(([,it])=>!it.dungeonSet).map(([,it])=>it.image));assert.equal(images.size,1046,'one icon per item');
+ const dungeon=gear.filter(([,it])=>it.dungeonSet);assert.equal(dungeon.length,8*5,'5 dungeons (Lv.35/45/55/65/80, owner 10 Nov)');
+ assert.equal(gear.length,1046+8*5);const images=new Set(gear.filter(([,it])=>!it.dungeonSet).map(([,it])=>it.image));assert.equal(images.size,1046,'one icon per item');
  for(const img of images)assert.ok(existsSync(new URL(img,root)),img);
  // the icon cell follows the sheet layout: row = family, column = slot, cell 20 = weapon; nun has no weapon of her own
  assert.equal(ITEMS[pieceId('wind','shoes','nun',3)].image,'assets/gear2/nun-t3-19.webp');

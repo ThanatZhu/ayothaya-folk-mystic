@@ -59,7 +59,7 @@ export function createDungeonUI({game,map,worldUI,bagUI}){
  light.onclick=()=>{const i=light.dataset.index;if(i!=null)send({action:'lantern',index:+i});};
  setInterval(()=>{const d=dungeonByMap(map.id),r=d&&runView?d.rooms[runView.room]:null,pl=game.world.player;let idx=-1;
   if(r?.kind==='lanterns'&&pl&&pl.hp>0)r.lanterns.forEach((l,i)=>{if(idx<0&&!runView.lanterns?.[i]&&Math.hypot(pl.x-l.x,pl.z-l.z)<=3)idx=i;});
-  light.hidden=idx<0;if(idx>=0)light.dataset.index=idx;else delete light.dataset.index;},300);
+  light.hidden=idx<0;if(idx>=0){light.dataset.index=idx;const o=runView.object??{verb:'จุด',name:'ตะเกียง'},label=({'ฟัน':'🪓 ','ทุบ':'🔨 '}[o.verb]??'🏮 ')+o.verb+o.name;if(light.textContent!==label)light.textContent=label;}else delete light.dataset.index;},300);
  tracker.append(goal,light,out);(document.getElementById('game-shell')??document.body).append(tracker);
  function story(kind){const d=dungeonByMap(map.id);if(!d||storySeen.has(kind))return;storySeen.add(kind);
   dispatchEvent(new CustomEvent('quest-cinematic-request',{detail:{scene:{id:'dungeon-'+d.id+'-'+kind,title:d.name,art:{src:d.cover,panels:1,frames:d.story[kind].map(()=>[0,0,960,400])},captions:d.story[kind]}}}));}

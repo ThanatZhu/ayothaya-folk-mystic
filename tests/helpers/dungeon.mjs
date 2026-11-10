@@ -20,6 +20,6 @@ export function dungeonWorld(){
  // run the realm for `seconds` in 50 ms steps
  const run=seconds=>{for(let t=0;t<seconds;t+=.05){time+=50;realm.step(.05);}};
  // enter solo or as a ready party, travel everyone in, return the peers inside
- const enter=(ps,difficulty='normal')=>{const [lead,...rest]=ps;if(rest.length)party(...ps);cmd(lead,{action:'enter',dungeon:'krasue',difficulty});for(const q of rest)cmd(q,{action:'ready',yes:true});return ps.map(q=>move(q,'dg-krasue'));};
+ const enter=(ps,difficulty='normal',dungeon='krasue')=>{const [lead,...rest]=ps;if(rest.length)party(...ps);cmd(lead,{action:'enter',dungeon,difficulty});for(const q of rest)cmd(q,{action:'ready',yes:true});return ps.map(q=>move(q,'dg-'+dungeon));};
  return {realm,join,move,relog,party,events,cmd,run,enter,tick:ms=>{time+=ms;realm.step(.05);},now:()=>time};
 }

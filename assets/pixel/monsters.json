@@ -473,5 +473,125 @@
   "art": "pm-dg35-mae-krasue-head",
   "cell": 110,
   "body": 107
+ },
+ "dg45-leaf-phrai": {
+  "art": "pm-dg45-leaf-phrai",
+  "cell": 90,
+  "body": 76
+ },
+ "dg45-phi-pong": {
+  "art": "pm-dg45-phi-pong",
+  "cell": 106,
+  "body": 68
+ },
+ "dg45-root-ghoul": {
+  "art": "pm-dg45-root-ghoul",
+  "cell": 90,
+  "body": 69
+ },
+ "dg45-woodcutter": {
+  "art": "pm-dg45-woodcutter",
+  "cell": 100,
+  "body": 89
+ },
+ "dg45-nang-takhian": {
+  "art": "pm-dg45-nang-takhian",
+  "cell": 108,
+  "body": 98
+ },
+ "dg45-takhian-tree": {
+  "art": "pm-dg45-takhian-tree",
+  "cell": 106,
+  "body": 101
+ },
+ "dg55-ghost-mermaid": {
+  "art": "pm-dg55-ghost-mermaid",
+  "cell": 100,
+  "body": 83
+ },
+ "dg55-sea-phrai": {
+  "art": "pm-dg55-sea-phrai",
+  "cell": 100,
+  "body": 75
+ },
+ "dg55-shell-crab": {
+  "art": "pm-dg55-shell-crab",
+  "cell": 94,
+  "body": 70
+ },
+ "dg55-ghost-captain": {
+  "art": "pm-dg55-ghost-captain",
+  "cell": 106,
+  "body": 86
+ },
+ "dg55-suea-samut": {
+  "art": "pm-dg55-suea-samut",
+  "cell": 116,
+  "body": 116
+ },
+ "dg55-suea-samut-giant": {
+  "art": "pm-dg55-suea-samut-giant",
+  "cell": 112,
+  "body": 104
+ },
+ "dg65-straw-doll": {
+  "art": "pm-dg65-straw-doll",
+  "cell": 94,
+  "body": 86
+ },
+ "dg65-phi-tai-hong": {
+  "art": "pm-dg65-phi-tai-hong",
+  "cell": 84,
+  "body": 82
+ },
+ "dg65-pot-imp": {
+  "art": "pm-dg65-pot-imp",
+  "cell": 88,
+  "body": 76
+ },
+ "dg65-khwai-thanu": {
+  "art": "pm-dg65-khwai-thanu",
+  "cell": 96,
+  "body": 72
+ },
+ "dg65-mor-phi": {
+  "art": "pm-dg65-mor-phi",
+  "cell": 110,
+  "body": 102
+ },
+ "dg65-kuman-thong": {
+  "art": "pm-dg65-kuman-thong",
+  "cell": 88,
+  "body": 81
+ },
+ "dg80-hungry-pret": {
+  "art": "pm-dg80-hungry-pret",
+  "cell": 110,
+  "body": 109
+ },
+ "dg80-fire-pret": {
+  "art": "pm-dg80-fire-pret",
+  "cell": 94,
+  "body": 94
+ },
+ "dg80-chain-guard": {
+  "art": "pm-dg80-chain-guard",
+  "cell": 114,
+  "body": 76
+ },
+ "dg80-yommatut": {
+  "art": "pm-dg80-yommatut",
+  "cell": 112,
+  "body": 111
+ },
+ "dg80-phaya-pret": {
+  "art": "pm-dg80-phaya-pret",
+  "cell": 122,
+  "body": 122
+ },
+ "dg80-phaya-pret-giant": {
+  "art": "pm-dg80-phaya-pret-giant",
+  "cell": 118,
+  "body": 117
  }
 }

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ตรวจรูปดันเจี้ยน · Ayothaya Folk Mystic</title>
+  <link rel="stylesheet" href="./typography.css">
+  <style>
+    :root{color:#fff0ce;background:#0f1d19;font-family:var(--font-game);font-weight:500}
+    *{box-sizing:border-box}body{margin:0}button,select{font:inherit}button{cursor:pointer}
+    .wrap{max-width:1400px;margin:auto;padding:0 16px}
+    header{padding:22px 0 12px;border-bottom:1px solid #c6a16488}
+    h1{font-size:24px;margin:0 0 6px;font-weight:700}header p{margin:0;font-size:13px;color:#d9ccb0;line-height:1.7}
+    .bar{position:sticky;top:0;z-index:3;background:#0f1d19f2;border-bottom:1px solid #c6a16444;padding:10px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px}
+    .bar button,.bar select{background:linear-gradient(135deg,#24382bf4,#152925f0);color:#fff0ce;border:1px solid #c6a16488;border-radius:8px;padding:7px 12px;font-weight:700}
+    .bar button[aria-pressed=true]{background:#c6a164;color:#152925}
+    #summary{margin-left:auto;font-variant-numeric:tabular-nums;color:#d9ccb0}
+    section{margin:22px 0 30px}
+    .cover{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:12/5;max-width:720px;border:1px solid #c6a16488}
+    .cover img{width:100%;height:100%;object-fit:cover;display:block}
+    .cover h2,.cover span{position:absolute;left:16px;margin:0;text-shadow:0 2px 6px #000c}.cover h2{top:14px;font-size:22px;font-weight:700}.cover span{top:48px}
+    .items{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+    .item{width:96px;text-align:center;font-size:11px;color:#d9ccb0}
+    .item img{width:96px;height:96px;display:block;border-radius:10px;border:1px solid #c6a16488;background:repeating-conic-gradient(#2a3d34 0 25%,#1b2c26 0 50%) 0 0/16px 16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+    .card{background:linear-gradient(135deg,#24382bf4,#152925f0);border:1px solid #c6a16488;border-radius:12px;padding:10px;min-width:0}
+    .card h3{margin:0 0 2px;font-size:15px;font-weight:700}.card .meta{font-size:11px;color:#d9ccb0;font-variant-numeric:tabular-nums;margin-bottom:6px}
+    .stage{width:100%;height:auto;aspect-ratio:3/2;display:block;border-radius:8px}
+    .frames{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:6px}
+    .frames figure{margin:0;text-align:center;font-size:10px;color:#d9ccb0}
+    .frames canvas{width:100%;height:auto;aspect-ratio:1;display:block;border-radius:4px;background:repeating-conic-gradient(#2a3d34 0 25%,#1b2c26 0 50%) 0 0/8px 8px}
+    .frames figure.on canvas{outline:2px solid #ffd27a}
+    .checks{font-size:11px;margin-top:6px;line-height:1.6}.ok{color:#9fe0a0}.bad{color:#ff9d7a;font-weight:700}
+    body.light .stage{background:#e9e2cc}
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <h1>ตรวจรูปดันเจี้ยน Lv.45–80</h1>
+    <p>มอน 24 ตัวจากชุดรูป 10 พ.ย. ขนาดเทียบตามที่เกมใช้จริง (ความสูงในโลกเกม) เส้นประทองคือแนวเท้า เงาสีเทาคือตัวละครผู้เล่น · แถวกระสือ Lv.35 คือชุดเดิมที่ผ่านแล้ว ไว้เทียบขนาด</p>
+  </header>
+  <div class="bar wrap">
+    <button type="button" data-mode="loop" aria-pressed="true">เล่นวนครบทุกท่า</button>
+    <button type="button" data-mode="walk" aria-pressed="false">เดิน</button>
+    <button type="button" data-mode="attack" aria-pressed="false">โจมตี</button>
+    <button type="button" data-mode="hurt" aria-pressed="false">เจ็บ / ตาย</button>
+    <select id="speed" aria-label="ความเร็ว"><option value="1">ความเร็วปกติ</option><option value="0.4">ช้า</option><option value="2">เร็ว</option></select>
+    <button type="button" id="bg" aria-pressed="false">พื้นสว่าง</button>
+    <span id="summary">กำลังโหลด…</span>
+  </div>
+  <main class="wrap" id="out"></main>
+  <script type="module" src="./dungeon-art-gallery.js"></script>
+</body>
+</html>

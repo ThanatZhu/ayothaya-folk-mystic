@@ -123,7 +123,7 @@ export function buildGearItems(){
   DUNGEON_SLOTS.forEach((slot,si)=>{const base={kind:'gear',slot,level:d.level,dungeonSet:d.set,image:art(si),...(slot!=='armor'?{slots:0}:{})};
    const it={...base,name:SLOT_WORD[slot]+d.name,...defStats(slot,d.level),...(slot==='head'?{pct:{pveDmg:.01}}:{}),sell:Math.round(price(2,2)/4),graded:true,note:'ชุดดัน'+d.name+' · Lv.'+d.level+' · ทุกอาชีพ'};it.text=gearText(it);out[dungeonPieceId(d.set,slot)]=it;
    const d0=defStats(slot,d.level),r={...base,name:SLOT_WORD[slot]+d.name+' (รุ้ง)',def:Math.round(d0.def*DUNGEON_RAINBOW),mdef:Math.round(d0.mdef*DUNGEON_RAINBOW),...(slot==='head'?{pct:{pveDmg:+(.01*DUNGEON_RAINBOW).toFixed(4)}}:{}),rainbow:true,sell:5000,note:'ชุดดัน'+d.name+' สีรุ้ง · คราฟด้วยเศษ '+SHARDS_PER_PIECE};r.text=gearText(r);out[dungeonRainbowId(d.set,slot)]=r;});
-  out[d.shard]={image:art(5),icon:0,name:'เศษ'+d.name,kind:'loot',sell:50,text:'ได้ทุกครั้งที่เคลียร์ดัน'+d.name+' · ครบ '+SHARDS_PER_PIECE+' คราฟชุดดันสีรุ้งได้ 1 ชิ้น ที่กระเป๋า → คราฟต์ → อุปกรณ์'};}
+  out[d.shard]={image:'assets/dungeon-'+d.set+'/shard.webp',icon:0,name:'เศษ'+d.name,kind:'loot',sell:50,text:'ได้ทุกครั้งที่เคลียร์ดัน'+d.name+' · ครบ '+SHARDS_PER_PIECE+' คราฟชุดดันสีรุ้งได้ 1 ชิ้น ที่กระเป๋า → คราฟต์ → อุปกรณ์'};}
  // Shard icons reuse loot cells (tinted) until painted art lands.
  SHARDS.forEach(([id,name,from],i)=>{out[id]={icon:[4,11,10][i],tint:['wind','gold','violet'][i],name,kind:'loot',sell:[200,600,2000][i],text:'ใช้คราฟเซ็ทบอสที่ครูแสนดาบ · ดรอปจาก'+from};});
  return out;

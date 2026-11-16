@@ -1,0 +1,20 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "default",
+  "purpose": "Loading illustrations; illustrative views, not gameplay screenshots",
+  "reusedCityImage": "../login-ayutthaya.png",
+  "prompts": [
+    {
+      "id": "rice-fields",
+      "prompt": "Use case: game loading-screen illustration. One full-bleed 16:9 landscape image, no text, no letters, no UI, no logo, no border. Ayothaya Folk Mystic Thai folklore RPG, lush detailed painterly pixel art with crisp small pixel clusters, sophisticated lighting, charming handcrafted fantasy environment, elevated three-quarter perspective, not photorealistic or low-poly. Strong scenic composition in center/right; quieter shadowed bottom quarter and left third for UI text added separately. Golden rice paddies outside old Ayutthaya at late afternoon, winding broad earthen footpath, weathered wooden bridge crossing a jade irrigation canal, rice granary on stilts, mango trees, distant orange-roof Thai houses, tiny straw scarecrow among rice, warm amber sunlight and soft cloud shadows, peaceful spacious countryside. Main focal point wooden granary and bridge on right half."
+    },
+    {
+      "id": "old-orchard",
+      "prompt": "Use case: game loading-screen illustration. One full-bleed 16:9 landscape image, no text, no letters, no UI, no logo, no border. Ayothaya Folk Mystic Thai folklore RPG, lush detailed painterly pixel art with crisp small pixel clusters, sophisticated lighting, charming handcrafted fantasy environment, elevated three-quarter perspective, not photorealistic or low-poly. Strong scenic composition in center/right; quieter shadowed bottom quarter and left third for UI text added separately. Old tropical areca and mango orchard beside a quiet canal in fantastical historical Thailand. Tall palms, heavy mango branches, ancient banyan with red prayer ribbons, small ornate spirit shrine glowing with incense on right, weathered wooden footbridge, mossy stones and fern-lined broad earth path. Dappled jade-green shade with golden shafts of sunlight, mysterious floating tiny teal lantern among leaves, inviting charming lush woodland, rich layered depth."
+    },
+    {
+      "id": "moonlit-mill",
+      "prompt": "Use case: game loading-screen illustration. One full-bleed 16:9 landscape image, no text, no letters, no UI, no logo, no border. Ayothaya Folk Mystic Thai folklore RPG, lush detailed painterly pixel art with crisp small pixel clusters, sophisticated lighting, charming handcrafted fantasy environment, elevated three-quarter perspective, not photorealistic or low-poly. Strong scenic composition in center/right; quieter shadowed bottom quarter and left third for UI text added separately. Abandoned elevated Thai teak rice mill with terracotta roof and huge old wooden waterwheel beside dark jade canal, full moon silver light in indigo sky, warm amber lantern inside mill and mystical teal fireflies, broad worn earthen approach, scattered woven baskets and rice sacks, rope-wrapped straw scarecrow silhouette near building. Mill focal point on right half, evocative mysterious gentle Thai folklore fantasy, readable shapes, blue-green moonlit palette with warm accents, no horror gore."
+    }
+  ]
+}

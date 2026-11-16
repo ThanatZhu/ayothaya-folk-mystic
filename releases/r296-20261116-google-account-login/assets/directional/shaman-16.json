@@ -1,0 +1,246 @@
+{
+  "version": 1,
+  "stage": "turnaround-pilot",
+  "cell": 192,
+  "anchor": [
+    96,
+    180
+  ],
+  "sources": {
+    "front": {
+      "path": "./assets/directional/shaman-front-16.png",
+      "size": [
+        1983,
+        793
+      ]
+    },
+    "rear": {
+      "path": "./assets/directional/shaman-rear-16.png",
+      "size": [
+        1263,
+        1245
+      ]
+    },
+    "left": {
+      "path": "./assets/directional/shaman-left-16.png",
+      "size": [
+        1536,
+        1024
+      ]
+    }
+  },
+  "frames": {
+    "male": {
+      "S": {
+        "source": "front",
+        "rect": [
+          62,
+          8,
+          253,
+          386
+        ],
+        "foot": [
+          158.0,
+          386
+        ]
+      },
+      "SE": {
+        "source": "front",
+        "rect": [
+          477,
+          9,
+          264,
+          385
+        ],
+        "foot": [
+          167.0,
+          385
+        ]
+      },
+      "E": {
+        "source": "front",
+        "rect": [
+          887,
+          8,
+          228,
+          388
+        ],
+        "foot": [
+          136.0,
+          388
+        ]
+      },
+      "N": {
+        "source": "rear",
+        "rect": [
+          180,
+          49,
+          371,
+          540
+        ],
+        "foot": [
+          128.5,
+          540
+        ]
+      },
+      "NE": {
+        "source": "rear",
+        "rect": [
+          772,
+          64,
+          386,
+          534
+        ],
+        "foot": [
+          178.0,
+          534
+        ]
+      },
+      "SW": {
+        "source": "left",
+        "rect": [
+          137,
+          15,
+          321,
+          488
+        ],
+        "foot": [
+          104.5,
+          488
+        ]
+      },
+      "W": {
+        "source": "left",
+        "rect": [
+          615,
+          15,
+          305,
+          489
+        ],
+        "foot": [
+          124.0,
+          489
+        ]
+      },
+      "NW": {
+        "source": "left",
+        "rect": [
+          1100,
+          15,
+          344,
+          488
+        ],
+        "foot": [
+          122.0,
+          488
+        ]
+      }
+    },
+    "female": {
+      "S": {
+        "source": "front",
+        "rect": [
+          62,
+          402,
+          261,
+          383
+        ],
+        "foot": [
+          161.0,
+          383
+        ]
+      },
+      "SE": {
+        "source": "front",
+        "rect": [
+          487,
+          402,
+          256,
+          384
+        ],
+        "foot": [
+          161.5,
+          384
+        ]
+      },
+      "E": {
+        "source": "front",
+        "rect": [
+          890,
+          402,
+          224,
+          384
+        ],
+        "foot": [
+          132.5,
+          384
+        ]
+      },
+      "N": {
+        "source": "rear",
+        "rect": [
+          180,
+          646,
+          372,
+          546
+        ],
+        "foot": [
+          128.5,
+          546
+        ]
+      },
+      "NE": {
+        "source": "rear",
+        "rect": [
+          772,
+          662,
+          390,
+          538
+        ],
+        "foot": [
+          178.5,
+          538
+        ]
+      },
+      "SW": {
+        "source": "left",
+        "rect": [
+          137,
+          520,
+          320,
+          482
+        ],
+        "foot": [
+          103.5,
+          482
+        ]
+      },
+      "W": {
+        "source": "left",
+        "rect": [
+          611,
+          520,
+          302,
+          478
+        ],
+        "foot": [
+          130.0,
+          478
+        ]
+      },
+      "NW": {
+        "source": "left",
+        "rect": [
+          1104,
+          521,
+          340,
+          475
+        ],
+        "foot": [
+          114.5,
+          475
+        ]
+      }
+    }
+  }
+}

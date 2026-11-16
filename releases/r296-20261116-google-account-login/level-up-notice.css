@@ -1,0 +1,9 @@
+#levelup-tip{position:fixed;z-index:19;left:calc(var(--edge,12px) + 52px);top:calc(var(--edge-t,12px) + var(--profile-height,84px) + var(--status-height,0px) + 16px);width:min(170px,calc(100vw - var(--edge,12px) - var(--edge-r,12px) - 100px));height:44px;padding:0 10px;border:1px solid #c9a763;border-radius:10px;background:#112b25eb;color:#ffe2a0;font:700 12px Mali,Tahoma,sans-serif;cursor:pointer;box-sizing:border-box}
+#levelup-tip[hidden]{display:none!important}#levelup-tip span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+body:not(.mobile-play) #levelup-tip{top:calc(var(--edge-t,12px) + var(--profile-height,84px) + var(--status-height,0px) + 60px)}
+body:is(.mobile-menu-open,.mobile-panel-open,.mobile-chat-open,.chat-typing) #levelup-tip{visibility:hidden;pointer-events:none}
+#levelup-details{position:fixed;inset:0;margin:auto;transform:none;translate:none;zoom:1;width:min(480px,calc(100vw - 24px));height:fit-content;max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;padding:0 16px 16px;background:#122b24;color:#fff0ce;border:1px solid #c9a763;border-radius:14px;font-family:Mali,Tahoma,sans-serif}
+#levelup-details::backdrop{background:#06140dbb}
+#levelup-details header{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#122b24;padding:10px 0;border-bottom:1px solid #ae8b4b88}
+#levelup-details h2{margin:0;font-size:18px}#levelup-details p,#levelup-details li{font-size:13px;line-height:1.7}#levelup-details button{width:44px;height:44px;flex-shrink:0;font:24px Mali,Tahoma,sans-serif;border:1px solid #be9b58;background:#243e30;color:#ffe5af;border-radius:9px}
+#levelup-details ul{padding-left:22px}#levelup-details li{padding:3px 0}

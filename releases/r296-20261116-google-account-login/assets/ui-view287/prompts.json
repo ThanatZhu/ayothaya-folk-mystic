@@ -1,0 +1,22 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "assets/ui-action141/emote.webp",
+  "basePrompt": "Create one square game HUD button asset matching the supplied emote button reference EXACTLY in overall frame style, rounded-square silhouette, antique bright gold Thai leaf corner ornaments, emerald green lacquer inset and upper-left lighting. Replace only the smiling face symbol with large, perfectly legible warm ivory-gold text '2D', centered on the green inset. No face, no book, no extra symbols, no other text. The outer gold frame occupies 94% of square image, equal tiny margins all sides, no cropping. This is a small 48px game control so keep lettering bold, simple, clean and readable. Transparent background outside the rounded frame; no background shadow. High quality painted game UI art. Square output.",
+  "variants": [
+    {
+      "file": "view-2d.png",
+      "source": "exec-eb2a874f-9ad4-42c6-903d-d5ab7db9768e.png"
+    },
+    {
+      "file": "view-2-5d.png",
+      "source": "exec-e8e20115-0900-4fb0-87ec-aa087811d808.png",
+      "edit": "Change only lettering to 2.5D; preserve frame, colors, silhouette and transparency."
+    },
+    {
+      "file": "view-3d.png",
+      "source": "exec-1bc53e11-75a0-42ac-ba6f-1e0142f767b7.png",
+      "edit": "Change only lettering to 3D; preserve frame, colors, silhouette and transparency."
+    }
+  ],
+  "processing": "PNG masters resized to 256x256 using System.Drawing high-quality bicubic, preserving alpha. HUD rendered at 48x48 CSS pixels."
+}

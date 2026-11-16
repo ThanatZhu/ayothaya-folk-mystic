@@ -1,0 +1,84 @@
+/* Ayothaya 0.20: generated artwork surrounds live HTML controls and text. */
+:root{--ink:#fff0ce;--gold:#dab775;--panel:#26392eea}
+#game-shell>canvas{image-rendering:auto}
+.player-panel,.mini-panel,.skills{backdrop-filter:none}
+.art-ready .player-panel{background:var(--art-status) center/100% 100% no-repeat;border:0;box-shadow:none;border-radius:0}
+.player-panel{width:296px;padding:20px 24px 18px 85px;min-height:130px;left:max(14px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top))}
+.player-heading{margin-bottom:8px}.player-heading>div:last-child{min-width:0}.player-heading strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}.player-heading small{font-size:9px;color:#e8d5ad;white-space:nowrap;max-width:177px;overflow:hidden;text-overflow:ellipsis}
+.portrait{position:absolute;left:14px;top:25px;width:59px;height:70px;isolation:isolate;animation:none}
+.portrait:after{content:'';position:absolute;inset:-7px -12px;background:var(--art-portrait) center/100% 100% no-repeat;pointer-events:none}
+.level-badge{top:4px;left:22px;right:auto;background:#37291f;border-color:#bf9652;font-size:10px;z-index:1}
+.meter{border-radius:8px;border-color:#bd995b80;height:16px;box-shadow:inset 0 1px 4px #0009;background:#1d211a;margin-top:5px}.meter span{font-size:10px;line-height:14px}#hp{background:linear-gradient(#d78461,#a84c35)}#mp{background:linear-gradient(#6eafb8,#326777)}.player-foot{font-size:8px;margin-top:5px}.player-foot span:last-child{display:none}
+.account-bar{top:146px;left:max(21px,env(safe-area-inset-left));max-width:280px;gap:8px}.account-bar button{min-width:116px;min-height:44px;font-size:11px}.account-bar small{display:block;font-size:9px;max-width:130px;background:#273d30d9;padding:4px 8px;border-radius:8px}
+.art-ready :is(.account-bar button,#skill-bank,#auto-attack,#interact,#close-npc){background:var(--art-button) center/100% 100% no-repeat;border:0;box-shadow:none;border-radius:0}
+.art-ready :is(.account-bar button,#skill-bank,#auto-attack,#interact,#close-npc):active{background-image:var(--art-pressed)}
+.mini-panel,.mobile-viewport .mini-panel{width:196px;padding:8px 10px 10px;right:max(16px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));border:1px solid #af884f;border-radius:15px;background:linear-gradient(135deg,#3c2d20f2,#1d3029ed);box-shadow:0 5px 16px #1c211a55,inset 0 0 0 3px #d1a75b22}
+.mini-heading strong{font-size:14px;text-shadow:0 2px #241d14}.mini-heading{margin-bottom:2px}#open-settings{width:44px;height:44px;background:#14291f66;border:1px solid #b4965e80;color:#f4d8a0;border-radius:50%;font-size:21px}
+#mini-open{position:relative;padding:14px 10px 13px;overflow:visible;border-radius:0;isolation:isolate}#mini-open:after{content:'';position:absolute;inset:0;background:var(--art-map) center/100% 100% no-repeat;pointer-events:none;z-index:2}#mini-open canvas{width:100%;height:139px;image-rendering:auto;border-radius:4px}.map-caption{display:none}#mini-area{color:#e4d6b6;text-align:center;font-size:10px;line-height:1.6;margin-top:7px}
+.city-guide{position:fixed;left:max(18px,env(safe-area-inset-left));top:201px;display:flex;align-items:center;width:246px;min-height:78px;background:#ecdbb8;color:#503720;border-radius:8px;padding:12px 14px 13px 57px;box-shadow:0 3px 10px #251a1333}.art-ready .city-guide{background:var(--art-parchment) center/100% 100% no-repeat;box-shadow:none;border-radius:0}.city-guide>button{background:none;border:0;color:inherit}#city-guide{text-align:left;flex:1;padding:0;min-height:44px}#city-guide strong{display:block;font-size:13px}#city-guide small{font-size:10px;display:block;margin-top:4px}#guide-toggle{width:44px;height:44px;padding:0;font-size:19px;flex:none}.city-guide.collapsed{width:199px;min-height:60px;padding-top:7px;padding-bottom:7px}.city-guide.collapsed small{display:none}.city-guide.collapsed #guide-toggle{transform:rotate(180deg)}
+.combat-controls{bottom:max(16px,env(safe-area-inset-bottom));gap:10px}.skills{gap:5px;padding:12px 14px;background:#322d21ed;border-color:#ba9459;border-radius:14px;box-shadow:0 4px 10px #17241955,inset 0 0 0 3px #76562e}.skill{width:54px;height:62px;border-radius:9px;border:1px solid #a38149;background:#243027}.art-ready .skill{background:var(--art-slot) center/100% 100% no-repeat;border:0;padding:8px 4px 3px}.skill strong{font-size:24px;line-height:26px}.skill span{font-size:8px;max-width:46px;overflow:hidden;text-overflow:ellipsis}.skill kbd{top:4px;left:7px;font-size:10px}.skill.cooling:after{inset:auto 5px 4px;width:calc(100% - 10px);border-radius:5px}.skill:focus-visible{outline:2px solid #b6eee1;outline-offset:2px}.art-ready .skill:not(.cooling):not(.no-mana):hover{background-image:var(--art-selected);box-shadow:none}
+.skills{grid-template-columns:repeat(10,54px)}#attack{width:80px;height:80px;font-size:14px;position:relative}.art-ready #attack{background:var(--art-attack) center/100% 100% no-repeat;border:0;box-shadow:none;padding-bottom:7px}#attack:before{content:'⚔';font-size:23px;line-height:23px;color:#f5df9f}#attack small{font-size:8px;margin:0}#auto-attack{width:71px;height:57px;font-size:11px;padding:9px 6px;gap:1px}.art-ready #auto-attack.active{background-image:var(--art-gold);color:#322819;animation:none}#auto-attack small{font-size:8px}#auto-state{font-size:9px}.control-hint{bottom:109px;font-size:10px;left:50%;transform:translateX(-50%);text-align:center;background:#1b302875;padding:4px 12px;border-radius:10px;max-width:none}
+.art-ready #npc-dialog{background:#24382ff5;border:25px solid transparent;border-image:var(--art-panel) 48 fill / 25px / 0 stretch;padding:12px 18px;box-shadow:0 10px 35px #10201666;backdrop-filter:none;border-radius:0}.art-ready #close-npc{min-width:115px;min-height:44px}
+#settings-panel,.account-card,.world-dialog{background:linear-gradient(135deg,#384c3c,#172d27);border:2px solid #b28c4d;box-shadow:0 16px 60px #0007,inset 0 0 0 3px #cfad6133}.world-dialog header{background:#304333}.world-card{border-color:#a4864e;background:#273d30}.world-card:hover{background:#475439}.world-card strong{color:#f1d59a}.world-dialog p{color:#d6dfca}.settings-heading h2{color:#f2d39a}
+.joystick{background:radial-gradient(#233b3250,#23372a90);border:2px solid #d1b77b99;box-shadow:inset 0 0 0 5px #c5a66920,0 4px 12px #14201630}.joystick #stick{background:radial-gradient(at 35% 30%,#dac694,#8f7a4d);border:2px solid #f2d9a3;box-shadow:0 3px 8px #0005}
+#interact{min-width:150px;min-height:48px;padding:9px 22px;bottom:131px}#notice{top:160px;background:#20372bec;border-color:#c6a164;color:#fff1d1}
+@media(max-width:900px),(pointer:coarse),(max-height:600px){
+ .player-panel{width:228px;min-height:90px;left:max(8px,env(safe-area-inset-left));top:max(6px,env(safe-area-inset-top));padding:14px 20px 13px 70px}.player-heading{margin-bottom:3px}.player-heading strong{font-size:11px;max-width:133px}.player-heading small{font-size:8px;max-width:133px}.portrait{width:40px;height:49px;left:18px;top:25px}.portrait:after{inset:-5px -8px}.level-badge{font-size:8px;left:19px;top:2px}.meter{height:12px;margin-top:3px}.meter span{font-size:9px;line-height:10px}.player-foot{display:none}
+ .account-bar{top:101px;left:max(15px,env(safe-area-inset-left));max-width:215px}.account-bar button{min-width:108px;min-height:44px;font-size:10px}.account-bar small{display:none}.city-guide{display:none}
+ .mini-panel,.mobile-viewport .mini-panel{display:block;width:128px;right:max(8px,env(safe-area-inset-right));top:max(6px,env(safe-area-inset-top));padding:3px 6px 6px}.mini-heading strong{font-size:11px}#open-settings{width:44px;height:44px;font-size:19px}#mini-open{padding:8px 7px 8px}#mini-open canvas{height:70px}#mini-area{font-size:8px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .combat-controls{left:auto;right:max(9px,env(safe-area-inset-right));bottom:max(9px,env(safe-area-inset-bottom));transform:none;gap:5px;flex-direction:column}.skills{grid-template-columns:repeat(5,47px);gap:3px;padding:6px 8px;border-radius:12px}.skill{width:47px;height:48px}.skill strong{font-size:21px;line-height:22px}.skill span{font-size:8px;max-width:40px;line-height:11px}.skill kbd{font-size:8px;top:3px;left:5px}#skill-bank{display:block;min-height:44px;min-width:106px;font-size:10px;padding:10px}#auto-attack{width:64px;height:48px}#attack{width:68px;height:68px;font-size:11px}#attack:before{font-size:22px}#auto-attack small,#attack small{display:none}.attack-controls{gap:6px;padding:0}.control-hint{display:none}
+ .joystick{width:106px;height:106px;left:max(22px,env(safe-area-inset-left));bottom:max(27px,env(safe-area-inset-bottom))}.joystick #stick{width:44px;height:44px}.joystick:before{font-size:10px;bottom:-17px}
+ #interact{left:42%;bottom:max(22px,env(safe-area-inset-bottom));min-width:110px;max-width:23vw;font-size:10px;padding:8px 15px}#notice{top:60px;max-width:35vw;font-size:10px}.art-ready #npc-dialog{bottom:14px;width:min(420px,72vw);padding:6px 10px;border-width:18px;border-image-width:18px}.target-panel{top:8px;width:144px}
+}
+@media(orientation:landscape) and (max-height:360px){
+ .player-panel{width:213px;padding-right:17px}.player-heading strong,.player-heading small{max-width:121px}.mini-panel,.mobile-viewport .mini-panel{width:114px}#mini-open canvas{height:43px}#mini-area{display:none}.joystick{width:92px;height:92px;bottom:24px}.skills{grid-template-columns:repeat(5,44px);padding:4px 6px}.skill{width:44px;height:44px}#attack{width:62px;height:62px}.account-bar{top:96px}#interact{min-width:100px;padding:6px 12px;left:40%}
+}
+@media(prefers-reduced-motion:reduce){.portrait,#auto-attack.active{animation:none}.meter i{transition:none}}
+
+/* 0.28 HUD layout: desktop combat cluster bottom-right; long menu bar across the top-right with the minimap below it. */
+:root{--menu-h:78px}
+@media (min-width:901px) and (pointer:fine){
+ .combat-controls{left:auto;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));transform:none;flex-direction:row;align-items:center;gap:10px}
+ .skills{grid-template-columns:repeat(5,54px)}
+ .attack-controls{flex-direction:column;align-items:center;gap:8px;padding:0}
+ #game-shell .control-hint{left:auto;right:max(16px,env(safe-area-inset-right));bottom:184px;transform:none}
+ #party-frame{top:calc(196px + var(--menu-h))}
+}
+.mini-panel,.mobile-viewport .mini-panel{top:calc(max(12px,env(safe-area-inset-top)) + var(--menu-h))}
+#game-menu{position:fixed;z-index:12;top:max(12px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));display:flex;gap:5px;padding:5px 6px;border:1px solid #af884f;border-radius:14px;background:linear-gradient(135deg,#3c2d20f2,#1d3029ed);box-shadow:0 5px 16px #1c211a55,inset 0 0 0 3px #d1a75b22}
+#game-menu button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:60px;min-height:52px;padding:4px 8px;border:1px solid transparent;border-radius:10px;background:none;color:#fff0ce;font:12px Mali,Tahoma,system-ui,sans-serif;cursor:pointer;text-shadow:0 1px #241d14}
+#game-menu button:hover{border-color:#e2c27e88;background:#ffffff12}
+#game-menu button:focus-visible{outline:3px solid #b6eee1;outline-offset:2px}
+#game-menu i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:radial-gradient(#5b4429,#2c2116);border:2px solid #dab775;font-style:normal;font-size:15px;line-height:1;color:#f5d58a}
+#game-menu [hidden]{display:none}
+@media (max-width:900px),(pointer:coarse){
+ :root{--menu-h:60px}
+ #game-menu{gap:2px;padding:3px 4px}
+ #game-menu button{min-width:46px;min-height:46px;padding:2px 4px;font-size:9px}
+ #game-menu i{width:24px;height:24px;font-size:13px}
+}
+@media (max-width:640px){#game-menu span{display:none}#game-menu button{min-width:44px;min-height:44px}}
+
+/* 0.31 skill levels: badge on each slot, skill window. */
+.skill{position:relative}
+.skill .skill-level{position:absolute;right:4px;top:3px;font:700 8px Mali,Tahoma,sans-serif;color:#ffe7a6;text-shadow:0 1px 2px #000}
+.skill.locked{filter:grayscale(1) brightness(.6)}
+#skill-window{width:min(560px,94vw);max-height:90dvh;padding:0;border:2px solid #b28c4d;border-radius:18px;background:linear-gradient(135deg,#3e2f21,#1c3029);color:#fff0ce;font:13px Mali,Tahoma,system-ui,sans-serif;box-shadow:0 16px 60px #0008,inset 0 0 0 3px #d1a75b22;overflow:hidden}
+#skill-window[open]{display:flex;flex-direction:column}
+#skill-window::backdrop{background:#071510aa}
+#skill-window>header{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;border-bottom:1px solid #af884f55}
+#skill-window header>div{flex:1}#skill-window header small{font-size:10px;letter-spacing:.18em;color:#dab775}#skill-window h2{margin:2px 0 0;font-size:20px}
+#skill-points{padding:6px 12px;border-radius:14px;background:#e6c78433;border:1px solid #dab77599;color:#ffe7b0;white-space:nowrap}
+#skill-window .mp-icon{width:44px;min-height:44px;border:1px solid #8c7350;border-radius:50%;background:#21392ee6;color:#fff0ce;font-size:22px;cursor:pointer}
+.skill-hint{margin:8px 18px 0;font-size:11px;color:#cfe6d4}
+#skill-list{list-style:none;margin:8px 0 0;padding:0 18px;overflow:auto;display:grid;gap:6px}
+#skill-list li{display:grid;grid-template-columns:40px 1fr auto 44px;align-items:center;gap:10px;padding:6px 8px;border:1px solid #6b5a3d88;border-radius:12px;background:#11231cb3}
+#skill-list li.locked{opacity:.55}
+.skill-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:radial-gradient(#4a3a26,#22190f);border:2px solid var(--skill-color,#dab775);font-size:20px}
+#skill-list strong{display:block;font-size:13px}#skill-list small{display:block;font-size:10px;color:#d9c8a2;margin-top:2px}
+#skill-list b{font-size:12px;color:#ffd98f;white-space:nowrap}
+#skill-list button{min-height:44px;border:1px solid #f2d99a;border-radius:10px;background:linear-gradient(#e6c784,#b98c45);color:#2d2114;font:700 20px Mali,Tahoma,sans-serif;cursor:pointer}
+#skill-list button:disabled{opacity:.35;cursor:not-allowed}
+#skill-list button:focus-visible{outline:3px solid #b6eee1;outline-offset:2px}
+#skill-note{margin:8px 18px 14px;min-height:1.4em;font-size:12px;color:#bfe9cf}
+@media(max-height:520px){#skill-window>header{padding:8px 14px 6px}#skill-window h2{font-size:16px}#skill-list{gap:4px}#skill-list li{padding:3px 6px}}

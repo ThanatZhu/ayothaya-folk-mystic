@@ -1,0 +1,7 @@
+const $=id=>document.getElementById(id),money=n=>n.toLocaleString('th-TH',{maximumFractionDigits:2});
+function update(){
+ const v={};for(const id of ['cost','active','conversion','spend','fee','flat']){const el=$(id),n=Number(el.value);if(!el.checkValidity()||!Number.isFinite(n)){$('results').textContent='กรอกตัวเลขให้อยู่ในช่วงที่กำหนด';return;}v[id]=n;}
+ const payers=v.active*v.conversion/100,gross=payers*v.spend,net=payers*(v.spend*(1-v.fee/100)-v.flat),margin=net-v.cost,perPayer=v.spend*(1-v.fee/100)-v.flat,needed=v.cost===0?0:perPayer>0?Math.ceil(v.cost/perPayer):null;
+ $('results').innerHTML=`<div>จำนวนคนเติมตามสมมติฐาน<b>${money(payers)} คน</b><small>ค่าเฉลี่ยคาดการณ์ อาจเป็นเศษคน</small></div><div>รายรับก่อนค่ารับชำระ<b>${money(gross)} บาท</b></div><div>ส่วนต่างหลังหักต้นทุนที่กรอก<b class="${margin<0?'bad':''}">${money(margin)} บาท</b></div><div>รายรับหลังค่ารับชำระ<b>${money(net)} บาท</b></div><div>คนเติมที่ต้องมีเพื่อครอบคลุมต้นทุน<b>${needed===null?'ยังคุ้มไม่ได้':money(needed)+' คน'}</b></div><div>ผู้เล่นรายเดือนที่ต้องมี ณ สัดส่วนคนเติมนี้<b>${needed===null||v.conversion===0?(needed===0?'0 คน':'ยังคำนวณไม่ได้'):money(Math.ceil(needed/(v.conversion/100)))+' คน'}</b></div>`;
+}
+$('planner').oninput=update;update();const e=(1-.97**80)/.03;$('odds').textContent='ที่เรต S รวม 3% และรีเซ็ตการันตีทุกครั้งที่ได้ S: เฉลี่ย '+e.toFixed(2)+' ครั้งต่อ S หนึ่งตัว หรือประมาณ '+Math.round(e*10)+' บาท ไม่ใช่จำนวนครั้งที่ทุกคนจะได้เท่ากัน';

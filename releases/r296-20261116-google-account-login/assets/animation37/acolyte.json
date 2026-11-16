@@ -1,0 +1,531 @@
+{
+  "version": 37,
+  "frames": {
+    "male": [
+      {
+        "rect": [
+          51,
+          21,
+          114,
+          219
+        ],
+        "anchor": 59,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          244,
+          21,
+          144,
+          220
+        ],
+        "anchor": 71,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          449,
+          20,
+          139,
+          222
+        ],
+        "anchor": 73,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          667,
+          21,
+          144,
+          220
+        ],
+        "anchor": 76,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          880,
+          21,
+          135,
+          221
+        ],
+        "anchor": 75,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          1059,
+          20,
+          147,
+          221
+        ],
+        "anchor": 84,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          43,
+          253,
+          146,
+          223
+        ],
+        "anchor": 71,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          228,
+          253,
+          196,
+          223
+        ],
+        "anchor": 96,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          452,
+          257,
+          167,
+          220
+        ],
+        "anchor": 80,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          660,
+          252,
+          167,
+          224
+        ],
+        "anchor": 77,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          867,
+          255,
+          176,
+          221
+        ],
+        "anchor": 98,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          1086,
+          252,
+          116,
+          225
+        ],
+        "anchor": 60,
+        "scale": 0.977778,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          51,
+          38,
+          203,
+          291
+        ],
+        "anchor": 102,
+        "scale": 0.738391,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          375,
+          40,
+          176,
+          305
+        ],
+        "anchor": 88,
+        "scale": 0.735853,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          666,
+          36,
+          205,
+          308
+        ],
+        "anchor": 103,
+        "scale": 0.738391,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          988,
+          33,
+          198,
+          312
+        ],
+        "anchor": 99,
+        "scale": 0.733333,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          57,
+          345,
+          191,
+          289
+        ],
+        "anchor": 96,
+        "scale": 0.743519,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          373,
+          332,
+          177,
+          304
+        ],
+        "anchor": 89,
+        "scale": 0.735853,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          687,
+          342,
+          190,
+          293
+        ],
+        "anchor": 95,
+        "scale": 0.738391,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          995,
+          341,
+          203,
+          294
+        ],
+        "anchor": 102,
+        "scale": 0.738391,
+        "source": "acolyte-walk.png"
+      }
+    ],
+    "female": [
+      {
+        "rect": [
+          50,
+          484,
+          117,
+          226
+        ],
+        "anchor": 62,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          245,
+          485,
+          143,
+          225
+        ],
+        "anchor": 77,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          449,
+          486,
+          140,
+          224
+        ],
+        "anchor": 73,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          668,
+          485,
+          143,
+          225
+        ],
+        "anchor": 75,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          881,
+          486,
+          133,
+          224
+        ],
+        "anchor": 75,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          1059,
+          484,
+          147,
+          226
+        ],
+        "anchor": 84,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          42,
+          722,
+          149,
+          224
+        ],
+        "anchor": 72,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          228,
+          719,
+          198,
+          227
+        ],
+        "anchor": 97,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          450,
+          725,
+          168,
+          221
+        ],
+        "anchor": 81,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          659,
+          719,
+          170,
+          227
+        ],
+        "anchor": 78,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          866,
+          725,
+          178,
+          221
+        ],
+        "anchor": 99,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          1085,
+          723,
+          118,
+          224
+        ],
+        "anchor": 61,
+        "scale": 0.969163,
+        "source": "acolyte.png"
+      },
+      {
+        "rect": [
+          50,
+          657,
+          202,
+          311
+        ],
+        "anchor": 101,
+        "scale": 0.742477,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          376,
+          659,
+          180,
+          310
+        ],
+        "anchor": 90,
+        "scale": 0.739969,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          672,
+          655,
+          200,
+          313
+        ],
+        "anchor": 100,
+        "scale": 0.742477,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          989,
+          653,
+          199,
+          316
+        ],
+        "anchor": 100,
+        "scale": 0.739969,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          57,
+          951,
+          194,
+          298
+        ],
+        "anchor": 97,
+        "scale": 0.773961,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          371,
+          955,
+          185,
+          296
+        ],
+        "anchor": 93,
+        "scale": 0.771235,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          687,
+          951,
+          196,
+          302
+        ],
+        "anchor": 98,
+        "scale": 0.768529,
+        "source": "acolyte-walk.png"
+      },
+      {
+        "rect": [
+          998,
+          950,
+          198,
+          300
+        ],
+        "anchor": 99,
+        "scale": 0.771235,
+        "source": "acolyte-walk.png"
+      }
+    ]
+  },
+  "parts": {
+    "male": {
+      "head": [
+        57,
+        969,
+        118,
+        125
+      ],
+      "torso": [
+        256,
+        961,
+        141,
+        133
+      ],
+      "armL": [
+        481,
+        961,
+        97,
+        132
+      ],
+      "armR": [
+        701,
+        961,
+        85,
+        125
+      ],
+      "legL": [
+        888,
+        960,
+        110,
+        134
+      ],
+      "legR": [
+        1106,
+        960,
+        112,
+        133
+      ]
+    },
+    "female": {
+      "head": [
+        56,
+        1108,
+        121,
+        129
+      ],
+      "torso": [
+        255,
+        1100,
+        141,
+        138
+      ],
+      "armL": [
+        481,
+        1101,
+        98,
+        136
+      ],
+      "armR": [
+        702,
+        1104,
+        81,
+        127
+      ],
+      "legL": [
+        888,
+        1104,
+        105,
+        135
+      ],
+      "legR": [
+        1106,
+        1104,
+        115,
+        135
+      ]
+    }
+  },
+  "scale": {
+    "male": 0.9777777777777777,
+    "female": 0.9691629955947136
+  }
+}

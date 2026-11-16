@@ -1,0 +1,55 @@
+{
+  "version": 220,
+  "classId": "novice",
+  "gender": "female",
+  "cell": 256,
+  "bodyHeight": 160,
+  "anchor": [
+    128,
+    240
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "clips": {
+    "walk": {
+      "image": "novice-female-walk.png",
+      "frames": 4,
+      "cycle_ms": 640
+    },
+    "run": {
+      "image": "novice-female-run.png",
+      "frames": 4,
+      "cycle_ms": 480
+    }
+  },
+  "tiers": {
+    "sd": {
+      "cell": 128,
+      "bodyHeight": 80.0,
+      "anchor": [
+        64,
+        120.0
+      ],
+      "clips": {
+        "walk": {
+          "image": "novice-female-walk-sd.png",
+          "frames": 4,
+          "cycle_ms": 640
+        },
+        "run": {
+          "image": "novice-female-run-sd.png",
+          "frames": 4,
+          "cycle_ms": 480
+        }
+      }
+    }
+  }
+}

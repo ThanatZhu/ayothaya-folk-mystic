@@ -1,0 +1,20 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "name": "button-jade.webp",
+      "source": "C:/Users/WIN 11 PRO/.codex/generated_images/01a14e11-5749-71b2-a037-d1a49b0f8496/exec-7c14c11b-bf4b-479b-92b1-34779a378397.png",
+      "prompt": "Generate ONE production-ready game UI button asset on a genuinely transparent RGBA background. AYOTHAYA Thai folklore MMORPG, luxurious dark emerald jade and antique gold. A wide HORIZONTAL CAPSULE / OVAL scroll-shaped button, aspect ratio about 3:1, centered with clear transparent padding on all sides. Rounded curved pill ends, elegant small Thai kanok gold leaf flourishes integrated at left and right, thin polished antique-gold continuous rim hugging the CURVED silhouette, smooth deep emerald jade center with very subtle luminous gradient and fine stone texture, generous empty center for live Thai label. Extremely clean refined game UI, crisp alpha edges. NO rectangle, NO squared corners, NO rectangular backing plate, NO rectangular shadow, NO surrounding card, NO hard outer box, NO text, NO letters, NO symbols, NO sparkles outside the contour, NO presentation background, NO checkerboard painted into image. Only this single emerald capsule button, flat front-facing orthographic UI artwork. Match a premium Thai green/gold fantasy game. Transparency outside silhouette must be completely clear. The button must still look rounded when displayed at 250 by 68 pixels."
+    },
+    {
+      "name": "button-gold.webp",
+      "source": "C:/Users/WIN 11 PRO/.codex/generated_images/01a14e11-5749-71b2-a037-d1a49b0f8496/exec-9dc9f67f-0cba-4483-8314-0b23a867cb36.png",
+      "prompt": "Edit this emerald capsule button into its GOLD PRIMARY-ACTION variant for the exact same AYOTHAYA UI kit. Keep the identical wide curved pill/capsule silhouette, fine gold kanok leaf tips, border geometry, alignment and completely clear outside alpha. Change ONLY the center emerald jade to warm luminous champagne gold with a gentle cream-gold center and rich amber at the rim, leaving enough quiet light center for live dark Thai text. Keep the same refined materials and detailed thin antique-gold decoration. No text or symbols. No rectangular plate, no hard corner, no background, no rectangular shadow. Preserve genuine transparency outside the button, including the four corners. One single empty front-facing gold capsule button. Input is the edit target; retain its silhouette exactly."
+    },
+    {
+      "name": "close.webp",
+      "source": "C:/Users/WIN 11 PRO/.codex/generated_images/01a14e11-5749-71b2-a037-d1a49b0f8496/exec-0f9a12bf-9b5a-4bd1-bd11-8d532691ab79.png",
+      "prompt": "Generate a single small circular close-button game UI asset on genuine transparent RGBA background, 512x512. Original AYOTHAYA Thai fantasy emerald-jade and antique-gold interface. A perfectly ROUND jade medallion with a slim elegant double gold rim and four very small integrated Thai kanok flourishes that preserve the overall circular silhouette. Clear simple gold X symbol in the center, thick enough to read when the button is 44 pixels wide. Refined understated luxurious material matching emerald jade and gold capsule action buttons. Generous clear transparent margin all around. No square backing card, no rectangle anywhere, no painted checkerboard, no panel, no text other than the X, no shadow box, no sparks, no extra icons. Flat front-facing, crisp clean alpha edges. Everything outside the round contour is transparent."
+    }
+  ]
+}

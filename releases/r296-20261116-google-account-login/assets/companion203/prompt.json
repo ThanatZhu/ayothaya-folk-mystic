@@ -1,0 +1,15 @@
+{
+  "mode": "built-in ImageGen generation",
+  "prompt": "Use case: stylized-concept. Asset: background illustration for a Thai fantasy MMORPG companion-management window, landscape 16:10. Paint a welcoming sacred Himmapan forest glade, soft morning sunlight through a graceful canopy, a clear turquoise lotus pond in the middle distance, mossy pale sandstone and a small grassy clearing around x=42%, y=65% where a separate large cute companion sprite will be overlaid. Deep emerald and sage foliage with warm antique-gold rim light, a few quiet lotus flowers and delicate fern silhouettes near the outer edges. Premium hand-painted fantasy game environment, charming and calm, softly modeled shapes, consistent with jewel-colored chibi Thai mythical animals. Composition is functional: leftmost 15% is softly shaded forest for a collection rail, center-left 25%-60% is open light/midtone space for the companion silhouette, rightmost 35% is a low-detail shaded teal-green grove for readable cream statistics. Keep the top and bottom calm for header and controls. Rich depth and atmosphere, visible environment, no flat black areas, no harsh vignette. NO characters, animals, eggs, people, architecture, temples, UI, buttons, borders, panels, labels, text, logos, sparkling particle clutter or watermark. This is one complete background painting, not a mockup.",
+  "source": "C:/Users/WIN 11 PRO/.codex/generated_images/01a14e11-5749-71b2-a037-d1a49b0f8496/exec-f2679b9e-d617-4f2e-b60e-e088408b2b9e.png",
+  "assets": [
+    {
+      "file": "assets/companion203/himmapan-glade.webp",
+      "bytes": 328068
+    },
+    {
+      "file": "assets/companion203/himmapan-glade-mobile.webp",
+      "bytes": 122512
+    }
+  ]
+}

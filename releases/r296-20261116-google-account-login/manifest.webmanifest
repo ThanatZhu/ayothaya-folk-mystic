@@ -1,0 +1,19 @@
+{
+  "name": "Ayothaya Folk Mystic",
+  "short_name": "Ayothaya",
+  "lang": "th",
+  "start_url": "./play.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#1b2823",
+  "theme_color": "#24362c",
+  "icons": [
+    {
+      "src": "assets/brand69/ayothaya-emblem.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

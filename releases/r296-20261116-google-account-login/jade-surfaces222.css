@@ -1,0 +1,3 @@
+:root{--jade-silk222:url('assets/ui-surfaces222/jade-silk.webp');--jade-paper222:url('assets/ui-surfaces222/jade-paper.webp')}
+:root .gacha-overlay-card,:root .gacha-rates-panel{background-image:var(--jade-silk222)!important;background-position:center!important;background-size:cover!important;background-color:#174b38!important;background-clip:padding-box!important;background-origin:padding-box!important}
+@media(max-width:700px),(max-height:550px){:root{--jade-silk222:url('assets/ui-surfaces222/jade-silk-mobile.webp');--jade-paper222:url('assets/ui-surfaces222/jade-paper-mobile.webp')}}

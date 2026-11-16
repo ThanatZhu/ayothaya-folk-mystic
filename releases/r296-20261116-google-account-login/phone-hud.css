@@ -1,0 +1,93 @@
+/* 0.39 phone landscape HUD: one owner for the bottom edge so nothing stacks.
+   Zones (left → right): joystick | XP strip with the chat bar above it | NPC/portal button | skill wheel.
+   The skill wheel box is laid out by mmo-hud.js (≈235px wide + 10px margin on short screens), so the middle zone
+   ends 255px from the right edge. Loaded last; scoped to short landscape screens (phones). */
+@media (orientation:landscape) and (max-height:520px){
+ body.field-hud{--phone-left:max(140px,calc(env(safe-area-inset-left) + 128px));--phone-right:max(256px,calc(env(safe-area-inset-right) + 248px))}
+ /* XP: a slim strip in the middle zone instead of the full width under the joystick and the wheel. */
+ body.field-hud .experience-bars{left:var(--phone-left);right:var(--phone-right);bottom:max(3px,env(safe-area-inset-bottom));gap:6px}
+ /* Chat bar: sits just above the XP strip, inside the same zone. */
+ body.field-hud #online-dock{left:var(--phone-left);bottom:max(18px,calc(env(safe-area-inset-bottom) + 15px));width:min(330px,calc(100vw - 140px - 256px - 8px))}
+ /* Collapsed chat: a slim one-line bar that is only as wide as its last message (a small "แชต ▲" pill when empty). */
+ body.field-hud #online-dock.collapsed{width:auto;min-width:96px;max-width:min(300px,calc(100vw - 140px - 256px - 8px))}
+ body.field-hud #online-dock.collapsed>header{padding:2px 4px 2px 6px;border-bottom:0}
+ body.field-hud #online-dock.collapsed .mp-dock-bar{min-height:28px}
+ body.field-hud #online-dock.collapsed .mp-dock-bar:has(#dock-preview:empty)::before{content:var(--chat-label,'แชต');margin-right:auto;color:var(--mp-soft)}
+ body.field-hud #online-dock.collapsed .mp-dock-bar:has(#dock-preview:empty)::before{content:var(--chat-label,'แชต');margin-right:auto;color:var(--mp-soft)}
+ /* Talk / travel button: right end of the middle zone, above the chat bar, never on top of it. */
+ body.field-hud #interact{left:auto;right:calc(var(--phone-right) + 6px);bottom:max(66px,calc(env(safe-area-inset-bottom) + 62px));max-width:170px;min-height:40px;padding:7px 14px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ /* Online chip: count only; ping/FPS/time/realm don't fit beside the profile card on a phone. */
+ body.mmo-hud #online-meta{display:none}
+ body.mmo-hud #online-button{max-width:212px}
+}
+/* 0.48.1: shared safe-area geometry for every landscape phone, including browser chrome. */
+@media (orientation:landscape) and (max-height:600px){
+ body.field-hud{--hud-left:max(8px,env(safe-area-inset-left));--hud-right:max(8px,env(safe-area-inset-right));--hud-top:max(6px,env(safe-area-inset-top));--hud-bottom:max(12px,calc(env(safe-area-inset-bottom) + 6px));--phone-left:calc(var(--hud-left) + 112px);--phone-right:calc(var(--hud-right) + var(--wheel-width,253px) + 8px)}
+ body.field-hud .player-panel{left:var(--hud-left);top:var(--hud-top);width:184px;min-height:74px;padding:8px 8px 7px 59px}
+ body.field-hud .portrait{width:44px;height:44px;left:9px;top:20px;aspect-ratio:1}
+ body.field-hud .level-badge{left:13px;top:2px;font-size:8px}
+ body.field-hud .player-heading{margin-bottom:3px}
+ body.field-hud .player-heading strong{font-size:11px;max-width:115px;line-height:1.3}
+ body.field-hud .player-heading small{font-size:8px;max-width:115px;line-height:1.3}
+ body.field-hud .meter{height:11px;margin-top:3px}
+ body.field-hud .meter span{font-size:8px;line-height:9px}
+ body.field-hud #online-button{left:var(--hud-left);top:calc(var(--hud-top) + 80px);max-width:184px;min-height:24px;font-size:9px;padding:2px 6px}
+ body.field-hud #online-meta{display:none}
+ body.field-hud #game-menu{top:var(--hud-top);right:calc(var(--hud-right) + 104px);gap:3px;padding:0}
+ body.field-hud #game-menu button{min-width:44px;width:44px;min-height:44px;height:44px;padding:2px;font-size:8px;gap:1px}
+ body.field-hud #game-menu i{width:23px;height:23px}
+ body.field-hud #game-menu svg{width:20px;height:20px}
+ body.field-hud #game-menu span{display:block;line-height:12px}
+ body.field-hud #game-menu #menu-profile{display:none} /* Portrait already opens the same profile. */
+ body.field-hud .menu-dot{width:8px;height:8px;right:4px;top:2px}
+ body.field-hud .mini-panel{right:var(--hud-right);top:var(--hud-top);width:96px;padding:3px}
+ body.field-hud .field-map-title{font-size:8px;line-height:12px;padding:0 0 2px}
+ body.field-hud #mini-open{padding:2px;width:100%}
+ body.field-hud #mini-open canvas{display:block;width:100%;height:65px;aspect-ratio:auto}
+ body.field-hud #mini-meta,body.field-hud #mini-area{display:none}
+ body.field-hud #quest-tracker{top:calc(var(--hud-top) + 51px);bottom:auto;right:calc(var(--hud-right) + 104px);width:min(240px,calc(100vw - var(--hud-left) - var(--hud-right) - 306px));padding:5px 7px;gap:2px 6px;min-height:44px}
+ body.field-hud #quest-tracker small{display:none}
+ body.field-hud #quest-tracker{grid-template-rows:auto auto}
+ body.field-hud #quest-tracker strong{grid-row:1;font-size:10px;line-height:1.4}
+ body.field-hud #quest-tracker span{grid-row:2;font-size:9px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+ body.field-hud #quest-go{grid-row:1/3;padding:5px 8px;min-height:36px;font-size:10px}
+ body.field-hud .target-panel{top:calc(var(--hud-top) + 111px);left:var(--hud-left);transform:none;width:172px;padding:5px 7px}
+ body.field-hud #party-frame{top:calc(var(--hud-top) + 110px);left:var(--hud-left);width:172px;max-height:72px;overflow:auto}
+ body.field-hud .joystick{display:flex;left:var(--hud-left);bottom:calc(var(--hud-bottom) + 6px);width:96px;height:96px}
+ body.field-hud .joystick:before{display:none}
+ body.field-hud .joystick #stick{width:44px;height:44px}
+ body.field-hud .combat-controls.wheel{right:var(--hud-right);bottom:var(--hud-bottom)}
+ body.field-hud .combat-controls.wheel #auto-attack{width:44px;height:44px;font-size:9px}
+ body.field-hud .combat-controls.wheel .skill kbd,body.field-hud .combat-controls.wheel .skill .skill-level,body.field-hud #attack small{display:none}
+ /* 0.51: XP along the very bottom edge, Base Lv | Job Lv exactly half the screen each. */
+ body.field-hud .experience-bars{left:0;right:0;bottom:0;gap:2px;padding:0;grid-template-columns:1fr 1fr} /* flush with the physical screen edge, ignoring notch/home-bar insets (owner request) */
+ body.field-hud .exp-track{border-radius:0;border-left:0;border-right:0;border-bottom:0}
+ /* 0.51.1 chat: centred at the bottom, smaller text. */
+ body.field-hud #online-dock{left:50%;translate:-50% 0;bottom:calc(var(--hud-bottom) + 8px);width:min(300px,calc(100vw - var(--phone-left) - var(--phone-right)));max-height:calc(var(--visible-height,100dvh) - 130px);font-size:9px}
+ body.field-hud #online-dock.collapsed{min-width:90px;max-width:min(240px,calc(100vw - var(--phone-left) - var(--phone-right) - 60px));width:auto}
+ /* 0.51.1 talking to an NPC: the dialog owns the bottom of the screen, so the controls step aside until it closes. */
+ body.field-hud:has(#online-dock:not(.collapsed):not([hidden])) #interact{bottom:calc(var(--hud-bottom) + 190px)} /* open chat: talk button rides above it */
+ body.field-hud:has(#npc-dialog:not([hidden])) :is(#joystick,.combat-controls,#quick-slots,#online-dock,#interact){visibility:hidden;pointer-events:none}
+ body.field-hud #online-dock.collapsed .mp-dock-bar{min-height:24px}
+ body.field-hud #online-dock .mp-tabs button{min-height:24px;padding:2px 8px;font-size:9px}
+ body.field-hud #online-dock #online-messages time{font-size:7px}
+ body.field-hud #online-dock #online-chat :is(input,button){min-height:28px;font-size:9px}
+ body.field-hud #quick-slots{left:var(--phone-left);bottom:calc(var(--hud-bottom) + 54px);margin-left:0;gap:6px}
+ body.field-hud #quick-slots button{width:44px;height:44px}
+ body.field-hud #quick-slots kbd{display:none}
+ body.field-hud #interact{left:auto;right:var(--phone-right);transform:none;bottom:calc(var(--hud-bottom) + 108px);min-width:0;max-width:min(170px,calc(100vw - var(--phone-left) - var(--phone-right)));min-height:44px;padding:7px 12px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ body.field-hud #notice{top:calc(var(--hud-top) + 106px);left:50%;transform:translateX(-50%);max-width:38vw;font-size:10px}
+ /* Utility panels scroll inside the screen; never squeeze into the narrow gap between controls. */
+ body.field-hud :is(#skill-window,#online-panel,#world-map,#bag-window,#shop-window,#status-window,#refine-window,#market-window,#social-window,#emote-window,#daily-window)[data-hud-panel],
+ body.field-hud #account-panel:not([data-blocking=true]){top:calc(var(--hud-top) + 48px);left:50%;right:auto;bottom:auto;transform:translateX(-50%);width:min(390px,calc(100vw - var(--hud-left) - var(--hud-right) - 16px));max-width:none;max-height:calc(var(--visible-height,100dvh) - var(--hud-top) - var(--hud-bottom) - 56px)}
+ body.field-hud #account-panel:not([data-blocking=true]) .account-card{max-height:calc(var(--visible-height,100dvh) - var(--hud-top) - var(--hud-bottom) - 56px);overflow-y:auto}
+ body.field-hud [data-hud-panel]>header{position:sticky;top:0;z-index:3;background:#243b30}
+ body.field-hud [data-hud-panel] header button{min-width:44px;min-height:44px;flex-shrink:0}
+ body.field-hud .bag-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+ body.field-hud :is(#emote-window,#daily-window)[data-hud-panel]{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+ body.field-hud .emote-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+ body.field-hud :is(.emote-poses,.daily-actions) button{min-height:44px}
+ body.field-hud #ailment-row{left:var(--hud-left);top:calc(var(--hud-top) + 108px);max-width:184px;flex-wrap:wrap}
+ body.field-hud #city-map-viewport{height:clamp(120px,calc(var(--visible-height,100dvh) - 150px),300px)}
+ body.field-hud #npc-dialog{left:50%;bottom:var(--hud-bottom);transform:translateX(-50%);width:min(390px,calc(100vw - 32px));max-height:calc(var(--visible-height,100dvh) - 80px)}
+}

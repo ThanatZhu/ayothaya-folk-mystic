@@ -2,7 +2,7 @@
 body[data-screen=login] { overflow-y: auto; }
 body[data-screen=login] #game-shell {
   display: block;
-  height: max(680px, 100svh);
+  height: max(760px, 100svh);
   overflow: visible;
 }
 body[data-screen=login] .scenery {
@@ -106,10 +106,27 @@ body[data-screen=login] :is(#login-google, #link-google) {
   border-color: #9b8050;
   background: #15382d url('assets/login295/login-jade.jpg') center / 100% 100% no-repeat;
 }
+body[data-screen=login] #login-quick { order: 2; }
+body[data-screen=login] #link-google { order: 3; }
+body[data-screen=login] .google-account-help {
+  order: 5;
+  margin: 0;
+  color: #fff1d2;
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: center;
+  text-shadow: 0 2px 4px #000, 0 1px 12px #000;
+}
+body[data-screen=login] #login-google { font-size: 14px; }
+.account-switch-dialog { width: min(480px, calc(100% - 32px)); padding: 24px; }
+.account-switch-dialog h2 { font-size: 22px; margin-bottom: 16px; }
+.account-switch-dialog p { line-height: 1.75; margin: 0 0 20px; }
+.account-switch-dialog .consent-actions { flex-wrap: wrap; }
+.account-switch-dialog button { min-height: 48px; }
 body[data-screen=login] :is(.google-g, .button-arrow) { display: none; }
 body[data-screen=login] .google > span:nth-child(2) { margin: 0; }
 body[data-screen=login] #login-guest {
-  order: 2;
+  order: 4;
   background: #0b211be8;
   color: #fff1d2;
 }

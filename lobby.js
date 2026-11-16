@@ -13,6 +13,7 @@ import {SERVERS,CHANNELS,CHANNEL_KEY,normalizeChannel,ENTRY_KEY,CHARACTER_SLOTS}
 import {createRealmStore} from './realm-store.js?v=surfaces222';
 import {multiplayerURL,wakeServer} from './multiplayer-config.js?v=28';
 import {ensureConsent} from './consent.js?v=1';
+import {inspectGoogleSwitch,signInExistingGoogle} from './account-login296.js?v=296';
 import {statPath,STATS,STAT_LABEL,STAT_HINT,statPoints,normalizeStats,normalizeGear,deriveStats} from './character-stats.js?v=tier167';
 import {statTip} from './stat-tips.js?v=tips210';
 wakeServer();
@@ -136,7 +137,7 @@ async function drawAtlas(){
  try{const img=await atlases.get(src);if(token===atlasToken)lobbyMotion.setSource(customizeAtlas(img,validateAppearance(record?.character.appearance),id),previewGender,id,characterPreviews.get(record?.slotId)?.equipment??record?.equipment);}catch{atlases.delete(src);}
 }
 function show(next){hideLobbyTip();screen=next;arrival.setScreen(next);document.body.dataset.screen=next;for(const s of ['login','servers','character'])$(s+'-screen').hidden=s!==next;document.querySelectorAll('[data-step]').forEach(el=>next===el.dataset.step?el.setAttribute('aria-current','step'):el.removeAttribute('aria-current'));$(next+'-screen').querySelector('h2').focus();say('');}
-function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#delete-character,.character-slot').forEach(b=>b.disabled=value);}
+function lock(value){busy=value;document.querySelectorAll('#profession-options input,[name=gender],.server,#create-character,#enter-world,#back-servers,#back-login,#login-google,#login-guest,#login-quick,#link-google,#identity-link,#switch-account,#continue-account,#change-class,#delete-character,.character-slot').forEach(b=>b.disabled=value);}
 function report(error){
  const code=error.code||error.message;
  const messages={'world-reset':'กำลังรีเซ็ตโลกก่อนเปิด CBT · กรุณารอแล้วลองอีกครั้ง','slots-full':'ครบ 5 ตัวละครแล้ว','class-locked':'ต้องให้ Job ผู้ฝึกตนตัน (Job 10) ก่อนเลือกอาชีพ','class-final':'เลือกอาชีพแล้ว ไม่สามารถเปลี่ยนสายได้','job-locked':'ต้องให้ Job อาชีพตัน (Job 40) ก่อนเป็น Master','job-final':'เลือกสาย Master แล้ว','save-conflict':'มีข้อมูลใหม่จากอีกหน้าต่าง กรุณาโหลดหน้าใหม่','player-online':'ตัวละครในบัญชีนี้ยังอยู่ในเกม ออกจากเกมแล้วรอสักครู่ค่อยลบ','character-not-found':'ไม่พบตัวละครนี้แล้ว ลองโหลดหน้าใหม่','bad-token':'การล็อกอินหมดอายุ กรุณาโหลดหน้าใหม่'};if(messages[code]){say(messages[code]);return;}
@@ -155,12 +156,13 @@ function showIdentity(){
 async function linkGoogle(){
  if(!connection||busy||!anon())return;const provider=new connection.sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});lock(true);
  try{const r=await connection.sdk.linkWithPopup(connection.auth.currentUser,provider);say('ผูกบัญชี Google แล้ว · '+(r.user.displayName||r.user.email||'')+' · ตัวละครทั้งหมดอยู่ครบ');showIdentity();setButtons();}
- catch(e){if(e.code==='auth/credential-already-in-use'||e.code==='auth/email-already-in-use')say('บัญชี Google นี้มีข้อมูลเกมของตัวเองอยู่แล้ว · เลือกบัญชี Google อื่นที่ยังไม่เคยเล่น');else report(e);}
+ catch(e){if(e.code==='auth/credential-already-in-use'||e.code==='auth/email-already-in-use')say('บัญชี Google นี้เคยใช้กับเกมแล้ว · กลับหน้าบัญชีแล้วกด เข้าสู่บัญชี Google เดิม เพื่อโหลดตัวละครของบัญชีนั้น');else report(e);}
  finally{lock(false);}
 }
 function setButtons(){
- const u=connection?.auth.currentUser;$('continue-account').hidden=!u;$('switch-account').hidden=!u;$('login-google').hidden=!!u;
+ const u=connection?.auth.currentUser;$('continue-account').hidden=!u;$('switch-account').hidden=!u||u.isAnonymous;$('login-google').hidden=!!u&&!u.isAnonymous;
  $('login-quick').hidden=!!u;$('link-google').hidden=!(u&&u.isAnonymous);
+ $('google-account-help').hidden=!!u&&!u.isAnonymous;
 }
 async function selectIdentity(id){
  // 0.117 online accounts (Google or quick play) accept the terms and privacy policy once per version
@@ -181,10 +183,38 @@ async function setup(){
  }catch(e){if(screen==='login'){report(e);$('retry-connection').hidden=false;}}
 }
 $('retry-connection').onclick=()=>location.reload();setup();
-$('login-google').onclick=async()=>{
- if(!connection||busy)return;const provider=new connection.sdk.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});lock(true);$('login-google').disabled=true;
- try{const result=await connection.sdk.signInWithPopup(connection.auth,provider);$('switch-account').hidden=false;await selectIdentity(result.user.uid);}catch(e){report(e);}finally{lock(false);$('login-google').disabled=false;}
-};
+async function enterExistingGoogle(approval){
+ if(!connection||busy)return;lock(true);
+ try{const result=await signInExistingGoogle(connection,approval);setButtons();await selectIdentity(result.user.uid);}
+ catch(e){if(e.message==='check-expired'||e.message==='account-changed')say('บัญชีมีการเปลี่ยนแปลงหรือผลตรวจหมดอายุ · กดเข้าสู่บัญชี Google เดิมอีกครั้ง');else report(e);}
+ finally{lock(false);setButtons();}
+}
+let googleApproval=null,googleCheck=0;
+const googleDialog=$('google-switch-dialog');
+function endGoogleCheck(){googleCheck++;googleApproval=null;lock(false);}
+googleDialog.addEventListener('cancel',endGoogleCheck);
+$('google-switch-cancel').onclick=()=>{endGoogleCheck();googleDialog.close();};
+$('google-switch-confirm').onclick=()=>{const approval=googleApproval;if(!approval?.allowed)return;endGoogleCheck();googleDialog.close();enterExistingGoogle(approval);};
+async function checkGoogleSwitch(){
+ const check=++googleCheck;googleApproval=null;lock(true);
+ $('google-switch-confirm').hidden=true;$('google-switch-retry').hidden=true;
+ $('google-switch-status').textContent='กำลังตรวจตัวละครของบัญชีชั่วคราว…';
+ try{
+  const approval=await inspectGoogleSwitch(connection);
+  if(check!==googleCheck||!googleDialog.open)return;
+  googleApproval=approval;
+  $('google-switch-status').textContent=approval.allowed
+   ?'บัญชีชั่วคราวนี้ยังไม่มีตัวละคร · เลือก Google ที่เคยเล่นเพื่อโหลดตัวละครเดิม หากยกเลิกจะยังอยู่บัญชีปัจจุบัน'
+   :'บัญชีชั่วคราวนี้มีตัวละครอยู่ · กรุณาผูก Google ที่ยังไม่เคยใช้กับเกมให้บัญชีนี้ก่อนสลับ เพื่อรักษาการเข้าถึงตัวละคร';
+  $('google-switch-confirm').hidden=!approval.allowed;
+ }catch{
+  if(check!==googleCheck||!googleDialog.open)return;
+  $('google-switch-status').textContent='ยังตรวจตัวละครไม่ได้ จึงยังไม่สลับบัญชี · ลองตรวจอีกครั้งหรือกลับไปเล่นบัญชีปัจจุบัน';
+  $('google-switch-retry').hidden=false;
+ }
+}
+$('google-switch-retry').onclick=checkGoogleSwitch;
+$('login-google').onclick=()=>{if(!connection||busy)return;if(!anon()){enterExistingGoogle();return;}googleDialog.showModal();checkGoogleSwitch();};
 $('continue-account').onclick=()=>selectIdentity(connection.auth.currentUser.uid);
 $('login-guest').onclick=()=>selectIdentity('guest');
 $('login-quick').onclick=async()=>{

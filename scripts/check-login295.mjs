@@ -46,7 +46,7 @@ try{
    });
    assert.equal(state.border,'0px');assert.equal(state.background,'rgba(0, 0, 0, 0)');assert.ok(Math.abs(state.center-width/2)<1);assert.equal(state.scroll,width);
    assert.equal(state.continueHidden,!['returning','signed'].includes(account));
-   assert.equal(state.buttons[0].id,['returning','signed'].includes(account)?'continue-account':'login-quick');
+   assert.equal(state.buttons[0].id,['returning','signed'].includes(account)?'continue-account':'login-google');
    for(let i=0;i<state.buttons.length;i++){const b=state.buttons[i];assert.ok(b.h>=52);assert.ok(b.x>=0&&b.x+b.w<=width+1);if(i)assert.ok(b.y>=state.buttons[i-1].y+state.buttons[i-1].h);}
    reports.push({account,width,height,passed:true});
    if((width===1366||width===390)&&account!=='signed')await page.screenshot({path:resolve(out,account+'-'+width+'.png'),fullPage:true});

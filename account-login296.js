@@ -5,7 +5,7 @@ export async function inspectGoogleSwitch(connection){
  const user=connection.auth.currentUser;
  if(!user?.isAnonymous)return {uid:user?.uid??null,allowed:true,checkedAt:Date.now()};
  const {sdk,db}=connection;
- const paths=[...CHARACTER_SLOTS.map(slot=>['characters',slot]),['saves','server-1'],['saves','server-2']];
+ const paths=[...CHARACTER_SLOTS.map(slot=>['characters',slot]),...['main','server-1','server-2'].map(slot=>['saves',slot])];
  const snapshots=await Promise.all(paths.map(parts=>sdk.getDocFromServer(sdk.doc(db,'players',user.uid,...parts))));
  if(connection.auth.currentUser?.uid!==user.uid)throw Error('account-changed');
  return {uid:user.uid,allowed:!snapshots.some(snapshot=>snapshot.exists()),checkedAt:Date.now()};

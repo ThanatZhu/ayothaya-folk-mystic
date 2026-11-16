@@ -23,12 +23,12 @@ function fixture({anonymous=true,characters=[],readError=false,popupError=false}
 }
 test('existing Google login preserves both account records and uses sign-in, not linking',async()=>{
  const f=fixture(),approval=await inspectGoogleSwitch(f.connection);
- assert.equal(approval.allowed,true);assert.equal(f.calls.filter(c=>c[0]==='read').length,7);
+ assert.equal(approval.allowed,true);assert.equal(f.calls.filter(c=>c[0]==='read').length,8);
  const result=await signInExistingGoogle(f.connection,approval);
  assert.equal(result.user.uid,f.google.uid);assert.deepEqual(f.saved,f.before);
  assert.deepEqual(f.calls.filter(c=>c[0]==='provider'),[['provider',{prompt:'select_account'}]]);
 });
-for(const slot of ['characters/slot-1','characters/slot-5','saves/server-1','saves/server-2'])test('keeps anonymous access when a character exists at '+slot,async()=>{
+for(const slot of ['characters/slot-1','characters/slot-5','saves/main','saves/server-1','saves/server-2'])test('keeps anonymous access when a character exists at '+slot,async()=>{
  const f=fixture({characters:[slot]}),approval=await inspectGoogleSwitch(f.connection);
  assert.equal(approval.allowed,false);
  await assert.rejects(signInExistingGoogle(f.connection,approval),/temporary-characters/);

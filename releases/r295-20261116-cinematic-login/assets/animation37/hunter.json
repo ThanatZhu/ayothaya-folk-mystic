@@ -1,0 +1,531 @@
+{
+  "version": 37,
+  "frames": {
+    "male": [
+      {
+        "rect": [
+          36,
+          12,
+          142,
+          219
+        ],
+        "anchor": 68,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          247,
+          11,
+          147,
+          220
+        ],
+        "anchor": 68,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          452,
+          11,
+          147,
+          221
+        ],
+        "anchor": 63,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          674,
+          12,
+          144,
+          219
+        ],
+        "anchor": 64,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          878,
+          12,
+          152,
+          220
+        ],
+        "anchor": 71,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          1093,
+          12,
+          141,
+          219
+        ],
+        "anchor": 62,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          16,
+          241,
+          193,
+          224
+        ],
+        "anchor": 73,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          230,
+          250,
+          182,
+          215
+        ],
+        "anchor": 70,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          440,
+          241,
+          174,
+          225
+        ],
+        "anchor": 76,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          659,
+          244,
+          173,
+          221
+        ],
+        "anchor": 70,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          877,
+          249,
+          156,
+          216
+        ],
+        "anchor": 64,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          1090,
+          247,
+          146,
+          219
+        ],
+        "anchor": 59,
+        "scale": 0.977778,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          14,
+          37,
+          214,
+          310
+        ],
+        "anchor": 107,
+        "scale": 0.728345,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          332,
+          39,
+          220,
+          292
+        ],
+        "anchor": 110,
+        "scale": 0.73083,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          667,
+          34,
+          213,
+          312
+        ],
+        "anchor": 107,
+        "scale": 0.725876,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          988,
+          33,
+          217,
+          313
+        ],
+        "anchor": 109,
+        "scale": 0.725876,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          20,
+          327,
+          213,
+          309
+        ],
+        "anchor": 107,
+        "scale": 0.73083,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          334,
+          351,
+          220,
+          285
+        ],
+        "anchor": 110,
+        "scale": 0.743519,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          661,
+          330,
+          222,
+          306
+        ],
+        "anchor": 111,
+        "scale": 0.73083,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          981,
+          342,
+          225,
+          294
+        ],
+        "anchor": 113,
+        "scale": 0.735853,
+        "source": "hunter-walk.png"
+      }
+    ],
+    "female": [
+      {
+        "rect": [
+          35,
+          480,
+          152,
+          226
+        ],
+        "anchor": 69,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          252,
+          480,
+          151,
+          227
+        ],
+        "anchor": 72,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          459,
+          479,
+          151,
+          228
+        ],
+        "anchor": 64,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          682,
+          481,
+          145,
+          226
+        ],
+        "anchor": 63,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          888,
+          480,
+          155,
+          226
+        ],
+        "anchor": 69,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          1093,
+          481,
+          149,
+          226
+        ],
+        "anchor": 64,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          22,
+          719,
+          196,
+          234
+        ],
+        "anchor": 70,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          244,
+          726,
+          174,
+          227
+        ],
+        "anchor": 65,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          444,
+          716,
+          170,
+          237
+        ],
+        "anchor": 78,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          649,
+          715,
+          184,
+          238
+        ],
+        "anchor": 80,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          868,
+          727,
+          161,
+          226
+        ],
+        "anchor": 67,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          1076,
+          726,
+          161,
+          227
+        ],
+        "anchor": 73,
+        "scale": 0.92437,
+        "source": "hunter.png"
+      },
+      {
+        "rect": [
+          25,
+          636,
+          207,
+          336
+        ],
+        "anchor": 104,
+        "scale": 0.684943,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          344,
+          655,
+          207,
+          318
+        ],
+        "anchor": 104,
+        "scale": 0.684943,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          672,
+          649,
+          213,
+          323
+        ],
+        "anchor": 107,
+        "scale": 0.684943,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          1000,
+          649,
+          213,
+          323
+        ],
+        "anchor": 107,
+        "scale": 0.684943,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          28,
+          951,
+          207,
+          300
+        ],
+        "anchor": 104,
+        "scale": 0.73559,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          346,
+          955,
+          213,
+          296
+        ],
+        "anchor": 107,
+        "scale": 0.73559,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          679,
+          952,
+          209,
+          299
+        ],
+        "anchor": 105,
+        "scale": 0.733009,
+        "source": "hunter-walk.png"
+      },
+      {
+        "rect": [
+          999,
+          952,
+          210,
+          299
+        ],
+        "anchor": 105,
+        "scale": 0.733009,
+        "source": "hunter-walk.png"
+      }
+    ]
+  },
+  "parts": {
+    "male": {
+      "head": [
+        49,
+        973,
+        126,
+        129
+      ],
+      "torso": [
+        248,
+        975,
+        150,
+        132
+      ],
+      "armL": [
+        478,
+        960,
+        114,
+        138
+      ],
+      "armR": [
+        672,
+        969,
+        113,
+        137
+      ],
+      "legL": [
+        898,
+        970,
+        91,
+        130
+      ],
+      "legR": [
+        1108,
+        970,
+        95,
+        129
+      ]
+    },
+    "female": {
+      "head": [
+        32,
+        1110,
+        145,
+        134
+      ],
+      "torso": [
+        244,
+        1121,
+        152,
+        121
+      ],
+      "armL": [
+        476,
+        1100,
+        114,
+        143
+      ],
+      "armR": [
+        684,
+        1115,
+        105,
+        127
+      ],
+      "legL": [
+        891,
+        1118,
+        108,
+        125
+      ],
+      "legR": [
+        1109,
+        1117,
+        91,
+        126
+      ]
+    }
+  },
+  "scale": {
+    "male": 0.9777777777777777,
+    "female": 0.9243697478991597
+  }
+}

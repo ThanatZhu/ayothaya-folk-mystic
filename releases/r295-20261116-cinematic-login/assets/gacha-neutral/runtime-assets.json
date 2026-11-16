@@ -1,0 +1,38 @@
+[
+  {
+    "source": "assets/gacha-neutral/sealed.png",
+    "runtime": "assets/gacha-neutral/sealed.webp",
+    "sha256": "76174e1ddd023bcdb395761816775ce75184cc6c27a0f1dd72935be289d3550c",
+    "sourceBytes": 1410531,
+    "bytes": 176880,
+    "width": 960,
+    "height": 960
+  },
+  {
+    "source": "assets/gacha-neutral/awakening.png",
+    "runtime": "assets/gacha-neutral/awakening.webp",
+    "sha256": "3608425f483b4c317bffa397e13c21c7e0ef43e164419c3520c67f6d20774501",
+    "sourceBytes": 1540208,
+    "bytes": 211026,
+    "width": 960,
+    "height": 960
+  },
+  {
+    "source": "assets/gacha-neutral/revealed.png",
+    "runtime": "assets/gacha-neutral/revealed.webp",
+    "sha256": "d7f74940d97eb1b9dd52ca36c1df0115b2ffc62ee09f5ff6a64f9de96b5551c4",
+    "sourceBytes": 1478516,
+    "bytes": 223040,
+    "width": 960,
+    "height": 960
+  },
+  {
+    "source": "assets/gacha-neutral/help-button.png",
+    "runtime": "assets/gacha-neutral/help-button.webp",
+    "sha256": "bc404331d4fcc1bc63a8fdedd5477cd1c3768e0714ac2c8a856b33f6819cbb20",
+    "sourceBytes": 2150719,
+    "bytes": 9228,
+    "width": 128,
+    "height": 128
+  }
+]

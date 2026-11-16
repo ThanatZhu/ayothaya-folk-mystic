@@ -1,0 +1,74 @@
+[
+  {
+    "source": "assets/premium-ui/menu-gacha.png",
+    "runtime": "assets/premium-ui/menu-gacha.webp",
+    "sha256": "3cf509894cdec08f47b96cdfa3aaa67d1e15604679c2948aa82dd3eb51758f77",
+    "sourceBytes": 1946312,
+    "bytes": 26046,
+    "width": 256,
+    "height": 256
+  },
+  {
+    "source": "assets/premium-ui/menu-store.png",
+    "runtime": "assets/premium-ui/menu-store.webp",
+    "sha256": "a07f244b8ce69ba6c00df6ebd16dac9344362cac293d1197a1edc591776d33af",
+    "sourceBytes": 1746228,
+    "bytes": 27348,
+    "width": 256,
+    "height": 256
+  },
+  {
+    "source": "assets/premium-ui/close-button.png",
+    "runtime": "assets/premium-ui/close-button.webp",
+    "sha256": "4f4436c3274b22fd88c7885d41d83df454dece9ddad169947eb13e878640a421",
+    "sourceBytes": 2158984,
+    "bytes": 8812,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "source": "assets/premium-ui/window-frame.png",
+    "runtime": "assets/premium-ui/window-frame.webp",
+    "sha256": "fdc35ab409e08f9424d9ae42fc35f2910440dc515dbd03741fe610f1a19e4548",
+    "sourceBytes": 1847153,
+    "bytes": 169750,
+    "width": 768,
+    "height": 768
+  },
+  {
+    "source": "assets/premium-ui/button-jade.png",
+    "runtime": "assets/premium-ui/button-jade.webp",
+    "sha256": "5839144444f129b35250ed6b2a4dbbe8b767555b2d95ddb7c53d91313f17c8d2",
+    "sourceBytes": 1378742,
+    "bytes": 43358,
+    "width": 960,
+    "height": 320
+  },
+  {
+    "source": "assets/premium-ui/button-gold.png",
+    "runtime": "assets/premium-ui/button-gold.webp",
+    "sha256": "77e6d4c1ffe0c702e0612596e79bb747d0bcf11978274dbcb1f1089553c99e20",
+    "sourceBytes": 1999459,
+    "bytes": 62026,
+    "width": 960,
+    "height": 320
+  },
+  {
+    "source": "assets/premium-ui/gacha-banner.png",
+    "runtime": "assets/premium-ui/gacha-banner.webp",
+    "sha256": "838840e78fa9935b6f9c72fb96fd681655a73d83b82699311c1d64bd0e17e0a6",
+    "sourceBytes": 2333104,
+    "bytes": 166336,
+    "width": 1440,
+    "height": 480
+  },
+  {
+    "source": "assets/premium-ui/store-banner.png",
+    "runtime": "assets/premium-ui/store-banner.webp",
+    "sha256": "63dc3db01be31b291555d33c8467835a0309f47333489d777ccaaff4d606dd29",
+    "sourceBytes": 2451632,
+    "bytes": 165438,
+    "width": 1440,
+    "height": 480
+  }
+]

@@ -1,0 +1,143 @@
+{
+  "tool": "built-in image_gen",
+  "layout": "5 columns x 2 rows; reading order keys 1..9,0",
+  "master": "Master classes inherit their base class ten skills and icons.",
+  "atlases": [
+    {
+      "id": "novice",
+      "file": "novice-21.png",
+      "subjects": [
+        "cloth-wrapped training fist",
+        "sweeping forearm wind arc",
+        "open palm stopping a fist",
+        "palm pushing outward",
+        "restful breathing silhouette",
+        "crossed defending forearms",
+        "determined fist with golden spark",
+        "sandaled foot evading",
+        "calm glowing focus orb between palms",
+        "resolute figure surrounded by warm light"
+      ],
+      "prompt": "Game asset sprite atlas: exactly TEN distinct RPG skill icons, strict FIVE COLUMNS and TWO ROWS, edge-to-edge 5:2 wide canvas. Every square cell has equal width and height. NO gutters, NO outer margin, NO frames, NO text, NO numbers, NO labels. Every cell is a dark desaturated jade background. Keep every icon's subject centered within its own cell with 16% safe padding, clearly isolated from neighboring cells. This is a usable skill-icon atlas for Ayothaya Folk Mystic Thai fantasy RPG. Style: beautiful crisp hand-painted fantasy item icons with subtle pixel-art influence, strong silhouettes, restrained glow, tactile material highlights, attractive at 40px size, high contrast on dark background. Original designs. No modern weapons, no Chinese motifs. Theme: Novice Thai trainee, muted ivory and indigo, humble training gear. Exactly these subjects in reading order LEFT TO RIGHT across top row then bottom row: 1: cloth-wrapped training fist; 2: sweeping forearm wind arc; 3: open palm stopping a fist; 4: palm pushing outward; 5: restful breathing silhouette; 6: crossed defending forearms; 7: determined fist with golden spark; 8: sandaled foot evading; 9: calm glowing focus orb between palms; 10: resolute figure surrounded by warm light. Fill the complete atlas with all 10 square cells, do not merge cells or add extra icons. Landscape 5:2 aspect."
+    },
+    {
+      "id": "swordsman",
+      "file": "swordsman-21.png",
+      "subjects": [
+        "single curved sword diagonal slash",
+        "curved sword wide sweeping arc",
+        "sword intercepting another blade",
+        "round Thai wooden shield bash",
+        "resting warrior breath",
+        "upright protective round shield",
+        "sword splitting an armor plate",
+        "warrior sword forward dash",
+        "two hands gripping sword with energy",
+        "circle of protective swords"
+      ],
+      "prompt": "Game asset sprite atlas: exactly TEN distinct RPG skill icons, strict FIVE COLUMNS and TWO ROWS, edge-to-edge 5:2 wide canvas. Every square cell has equal width and height. NO gutters, NO outer margin, NO frames, NO text, NO numbers, NO labels. Every cell is a dark desaturated jade background. Keep every icon's subject centered within its own cell with 16% safe padding, clearly isolated from neighboring cells. This is a usable skill-icon atlas for Ayothaya Folk Mystic Thai fantasy RPG. Style: beautiful crisp hand-painted fantasy item icons with subtle pixel-art influence, strong silhouettes, restrained glow, tactile material highlights, attractive at 40px size, high contrast on dark background. Original designs. No modern weapons, no Chinese motifs. Theme: Thai swordsman, amber brass and steel blue. Exactly these subjects in reading order LEFT TO RIGHT across top row then bottom row: 1: single curved sword diagonal slash; 2: curved sword wide sweeping arc; 3: sword intercepting another blade; 4: round Thai wooden shield bash; 5: resting warrior breath; 6: upright protective round shield; 7: sword splitting an armor plate; 8: warrior sword forward dash; 9: two hands gripping sword with energy; 10: circle of protective swords. Fill the complete atlas with all 10 square cells, do not merge cells or add extra icons. Landscape 5:2 aspect."
+    },
+    {
+      "id": "lancer",
+      "file": "lancer-21.png",
+      "subjects": [
+        "long spear forward thrust",
+        "spear sweeping horizontal arc",
+        "spear point pinning a shadow",
+        "spear pushing with wind burst",
+        "quiet breath and spear silhouette",
+        "crossed guarding spear shafts",
+        "piercing glowing spear tip",
+        "spear fighter long advancing stride",
+        "focused spirit flame over spear",
+        "spinning spear circular trail"
+      ],
+      "prompt": "Game asset sprite atlas: exactly TEN distinct RPG skill icons, strict FIVE COLUMNS and TWO ROWS, edge-to-edge 5:2 wide canvas. Every square cell has equal width and height. NO gutters, NO outer margin, NO frames, NO text, NO numbers, NO labels. Every cell is a dark desaturated jade background. Keep every icon's subject centered within its own cell with 16% safe padding, clearly isolated from neighboring cells. This is a usable skill-icon atlas for Ayothaya Folk Mystic Thai fantasy RPG. Style: beautiful crisp hand-painted fantasy item icons with subtle pixel-art influence, strong silhouettes, restrained glow, tactile material highlights, attractive at 40px size, high contrast on dark background. Original designs. No modern weapons, no Chinese motifs. Theme: Thai spear fighter, copper orange and steel. Exactly these subjects in reading order LEFT TO RIGHT across top row then bottom row: 1: long spear forward thrust; 2: spear sweeping horizontal arc; 3: spear point pinning a shadow; 4: spear pushing with wind burst; 5: quiet breath and spear silhouette; 6: crossed guarding spear shafts; 7: piercing glowing spear tip; 8: spear fighter long advancing stride; 9: focused spirit flame over spear; 10: spinning spear circular trail. Fill the complete atlas with all 10 square cells, do not merge cells or add extra icons. Landscape 5:2 aspect."
+    },
+    {
+      "id": "hunter",
+      "file": "hunter-21.png",
+      "subjects": [
+        "drawn bow with precise arrow",
+        "rain of arrows",
+        "rope snare trap",
+        "arrow with pushing wind",
+        "forest medicinal herb bundle",
+        "hunter silhouette under leaves",
+        "arrow piercing armor plate",
+        "footstep through forest leaves",
+        "calm archer breathing",
+        "ring of arrows and leaves"
+      ],
+      "prompt": "Game asset sprite atlas: exactly TEN distinct RPG skill icons, strict FIVE COLUMNS and TWO ROWS, edge-to-edge 5:2 wide canvas. Every square cell has equal width and height. NO gutters, NO outer margin, NO frames, NO text, NO numbers, NO labels. Every cell is a dark desaturated jade background. Keep every icon's subject centered within its own cell with 16% safe padding, clearly isolated from neighboring cells. This is a usable skill-icon atlas for Ayothaya Folk Mystic Thai fantasy RPG. Style: beautiful crisp hand-painted fantasy item icons with subtle pixel-art influence, strong silhouettes, restrained glow, tactile material highlights, attractive at 40px size, high contrast on dark background. Original designs. No modern weapons, no Chinese motifs. Theme: Thai forest hunter, moss green and warm leather. Exactly these subjects in reading order LEFT TO RIGHT across top row then bottom row: 1: drawn bow with precise arrow; 2: rain of arrows; 3: rope snare trap; 4: arrow with pushing wind; 5: forest medicinal herb bundle; 6: hunter silhouette under leaves; 7: arrow piercing armor plate; 8: footstep through forest leaves; 9: calm archer breathing; 10: ring of arrows and leaves. Fill the complete atlas with all 10 square cells, do not merge cells or add extra icons. Landscape 5:2 aspect."
+    },
+    {
+      "id": "boxer",
+      "file": "boxer-21.png",
+      "subjects": [
+        "cloth-wrapped straight punch",
+        "bent elbow strike",
+        "two hands grappling wrist",
+        "bare foot forward kick",
+        "resting boxer breathing",
+        "two wrapped fists defensive guard",
+        "powerful fist shattering stone",
+        "three fluid bare-foot stepping footprints",
+        "breath spiral at boxer chest",
+        "Muay Boran fighter knee-and-elbow heroic strike"
+      ],
+      "prompt": "Game asset sprite atlas: exactly TEN distinct RPG skill icons, strict FIVE COLUMNS and TWO ROWS, edge-to-edge 5:2 wide canvas. Every square cell has equal width and height. NO gutters, NO outer margin, NO frames, NO text, NO numbers, NO labels. Every cell is a dark desaturated jade background. Keep every icon's subject centered within its own cell with 16% safe padding, clearly isolated from neighboring cells. This is a usable skill-icon atlas for Ayothaya Folk Mystic Thai fantasy RPG. Style: beautiful crisp hand-painted fantasy item icons with subtle pixel-art influence, strong silhouettes, restrained glow, tactile material highlights, attractive at 40px size, high contrast on dark background. Original designs. No modern weapons, no Chinese motifs. Theme: Muay Boran Thai boxer, warm red orange and indigo cloth wraps. Exactly these subjects in reading order LEFT TO RIGHT across top row then bottom row: 1: cloth-wrapped straight punch; 2: bent elbow strike; 3: two hands grappling wrist; 4: bare foot forward kick; 5: resting boxer breathing; 6: two wrapped fists defensive guard; 7: powerful fist shattering stone; 8: three fluid bare-foot stepping footprints; 9: breath spiral at boxer chest; 10: Muay Boran fighter knee-and-elbow heroic strike. Fill the complete atlas with all 10 square cells, do not merge cells or add extra icons. Landscape 5:2 aspect."
+    },
+    {
+      "id": "rogue",
+      "file": "rogue-21.png",
+      "subjects": [
+        "two crossed curved daggers",
+        "dagger sweep arc",
+        "dagger pinning enemy shadow",
+        "backward kick dust burst",
+        "clean bandage wrapped forearm",
+        "protective cloak shadow",
+        "dagger precision strike at bright point",
+        "foot vanishing into purple shadow",
+        "still small violet focus flame",
+        "dancing spiral of twin daggers"
+      ],
+      "prompt": "Game asset sprite atlas: exactly TEN distinct RPG skill icons, strict FIVE COLUMNS and TWO ROWS, edge-to-edge 5:2 wide canvas. Every square cell has equal width and height. NO gutters, NO outer margin, NO frames, NO text, NO numbers, NO labels. Every cell is a dark desaturated jade background. Keep every icon's subject centered within its own cell with 16% safe padding, clearly isolated from neighboring cells. This is a usable skill-icon atlas for Ayothaya Folk Mystic Thai fantasy RPG. Style: beautiful crisp hand-painted fantasy item icons with subtle pixel-art influence, strong silhouettes, restrained glow, tactile material highlights, attractive at 40px size, high contrast on dark background. Original designs. No modern weapons, no Chinese motifs. Theme: Thai dual dagger rogue, plum violet and cool silver. Exactly these subjects in reading order LEFT TO RIGHT across top row then bottom row: 1: two crossed curved daggers; 2: dagger sweep arc; 3: dagger pinning enemy shadow; 4: backward kick dust burst; 5: clean bandage wrapped forearm; 6: protective cloak shadow; 7: dagger precision strike at bright point; 8: foot vanishing into purple shadow; 9: still small violet focus flame; 10: dancing spiral of twin daggers. Fill the complete atlas with all 10 square cells, do not merge cells or add extra icons. Landscape 5:2 aspect."
+    },
+    {
+      "id": "shaman",
+      "file": "shaman-21.png",
+      "subjects": [
+        "friendly turquoise spirit fireball",
+        "orange ritual flame",
+        "sacred white thread knot binding shadow",
+        "turquoise spirit pushing wind",
+        "green healing hands",
+        "golden yantra ward shield",
+        "hanging inscribed talisman scroll WITHOUT readable text",
+        "ghostly teal blink footsteps",
+        "concentrated blue spirit orb",
+        "circular protective lotus ritual seal"
+      ],
+      "prompt": "Game asset sprite atlas: exactly TEN distinct RPG skill icons, strict FIVE COLUMNS and TWO ROWS, edge-to-edge 5:2 wide canvas. Every square cell has equal width and height. NO gutters, NO outer margin, NO frames, NO text, NO numbers, NO labels. Every cell is a dark desaturated jade background. Keep every icon's subject centered within its own cell with 16% safe padding, clearly isolated from neighboring cells. This is a usable skill-icon atlas for Ayothaya Folk Mystic Thai fantasy RPG. Style: beautiful crisp hand-painted fantasy item icons with subtle pixel-art influence, strong silhouettes, restrained glow, tactile material highlights, attractive at 40px size, high contrast on dark background. Original designs. No modern weapons, no Chinese motifs. Theme: Thai folk shaman, turquoise spirit fire and parchment gold. Exactly these subjects in reading order LEFT TO RIGHT across top row then bottom row: 1: friendly turquoise spirit fireball; 2: orange ritual flame; 3: sacred white thread knot binding shadow; 4: turquoise spirit pushing wind; 5: green healing hands; 6: golden yantra ward shield; 7: hanging inscribed talisman scroll WITHOUT readable text; 8: ghostly teal blink footsteps; 9: concentrated blue spirit orb; 10: circular protective lotus ritual seal. Fill the complete atlas with all 10 square cells, do not merge cells or add extra icons. Landscape 5:2 aspect."
+    },
+    {
+      "id": "acolyte",
+      "file": "acolyte-21.png",
+      "subjects": [
+        "gentle golden ray from open palm",
+        "peaceful golden radiance",
+        "soft sacred thread binding dark cloud",
+        "palm light pushing shadow away",
+        "two healing palms with lotus light",
+        "sheltering golden dome",
+        "golden light dispelling mist spirit",
+        "quiet sandal footsteps in light",
+        "meditation silhouette with prayer beads",
+        "wide protective lotus halo"
+      ],
+      "prompt": "Game asset sprite atlas: exactly TEN distinct RPG skill icons, strict FIVE COLUMNS and TWO ROWS, edge-to-edge 5:2 wide canvas. Every square cell has equal width and height. NO gutters, NO outer margin, NO frames, NO text, NO numbers, NO labels. Every cell is a dark desaturated jade background. Keep every icon's subject centered within its own cell with 16% safe padding, clearly isolated from neighboring cells. This is a usable skill-icon atlas for Ayothaya Folk Mystic Thai fantasy RPG. Style: beautiful crisp hand-painted fantasy item icons with subtle pixel-art influence, strong silhouettes, restrained glow, tactile material highlights, attractive at 40px size, high contrast on dark background. Original designs. No modern weapons, no Chinese motifs. Theme: Thai monk or mae chi healer, ivory saffron and soft gold, respectful sacred imagery. Exactly these subjects in reading order LEFT TO RIGHT across top row then bottom row: 1: gentle golden ray from open palm; 2: peaceful golden radiance; 3: soft sacred thread binding dark cloud; 4: palm light pushing shadow away; 5: two healing palms with lotus light; 6: sheltering golden dome; 7: golden light dispelling mist spirit; 8: quiet sandal footsteps in light; 9: meditation silhouette with prayer beads; 10: wide protective lotus halo. Fill the complete atlas with all 10 square cells, do not merge cells or add extra icons. Landscape 5:2 aspect."
+    }
+  ]
+}

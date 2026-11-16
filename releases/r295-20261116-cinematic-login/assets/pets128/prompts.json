@@ -1,0 +1,56 @@
+{
+  "tool": "built-in image_gen",
+  "poses": [
+    {
+      "id": "garuda-dawn",
+      "prompt": "Dawn Garuda six pose sheet, 3x2, identity preserved; move wing up/mid/down; attack anticipate/strike/recover.",
+      "source": "exec-33a0db52-abc7-4e84-b906-d6babbb4c365.png"
+    },
+    {
+      "id": "lotus-naga",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: green jade serpent naga with gold Thai crown, lotus pink collar, cream belly, NO legs and NO wings. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: coil and tail sway left / upright floating coil / coil and tail sway right. Bottom row attack or spell cast: coil pulled back / head extends forward singing a spell / coil settles. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-ef996365-1a79-4de3-bf1a-afcba744ae3c.png"
+    },
+    {
+      "id": "moon-kirin",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: white four-legged kirin with powder-blue mane and tail, blue single horn and gold Thai jewelry. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: front-left and rear-right hooves forward / neutral standing / front-right and rear-left hooves forward. Bottom row attack or spell cast: crouch and horn lowered / front legs lifted and horn thrust forward / all hooves settle. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-a785482e-8d48-4948-b24a-7fa73cd699a5.png"
+    },
+    {
+      "id": "golden-singha",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: golden four-legged lion cub with green mane, gold Thai ornament. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: front-left and rear-right paws forward / neutral standing / front-right and rear-left paws forward. Bottom row attack or spell cast: crouches shoulders low / open-mouth roar with front paws braced / head returns after roaring. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-d40162cf-3ed0-43f1-80a2-d9cf23c082f6.png"
+    },
+    {
+      "id": "yantra-owl",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: purple and cream owl with gold Thai yantra feather marks. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: wings raised high / wings level out / wings low downstroke. Bottom row attack or spell cast: wings swept back / beak wide open casting with wings out / wings recover. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-77fe3bbe-ca22-415c-802a-00e4407ca1db.png"
+    },
+    {
+      "id": "blossom-fox",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: cream and pink four-legged fox with pink blossom on ear, fluffy pink tail. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: front-left and rear-right paws forward / neutral standing / front-right and rear-left paws forward. Bottom row attack or spell cast: crouches tail curled / front paw reaching out in magic attack / paw settles tail sweeps. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-a5946afc-ed66-4ac0-9a43-cae9a3a8ee0f.png"
+    },
+    {
+      "id": "rice-rabbit",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: cream rabbit with long floppy tan-tipped ears and green rice-grain necklace. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: hind legs tucked and front paws reaching / low ready crouch / hind legs extending in hop. Bottom row attack or spell cast: crouches ears back / both forepaws raised to cast healing / returns to ground. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-0ef5c121-2b6c-45c2-8f05-ae59f7703a5d.png"
+    },
+    {
+      "id": "jade-turtle",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: small green four-legged turtle with jade shell, gold Thai shell trim. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: front-left and rear-right feet forward / neutral standing / front-right and rear-left feet forward. Bottom row attack or spell cast: head tucks near shell / head extends and shell tilts casting / head settles. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-5ad0d99e-6b7c-461d-a510-a0466057e66b.png"
+    },
+    {
+      "id": "water-kingfisher",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: blue and orange kingfisher with gold Thai feather ornament, turquoise chest jewel. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: wings raised high / wings level out / wings low downstroke. Bottom row attack or spell cast: wings swept back / beak forward and wings spread casting / wings recover. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-2064e13c-49df-4e8e-9afe-3152f1a73b9a.png"
+    },
+    {
+      "id": "lantern-bat",
+      "prompt": "Use case: identity-preserve. Game sprite animation sheet of EXACT pet in reference. Preserve its face, proportions, colors, ornament and painterly chibi look. Subject: purple and cream bat with large ears, purple membrane wings with gold Thai ornament. 1536x1024 canvas, strict 3 columns x 2 rows, six cells of512x512. Exactly six full-body poses of SAME pet at the SAME scale, same right-facing three-quarter camera, generous empty padding; complete silhouettes never touch cell edge. Top row movement poses from left to right: wings raised high / wings level out / wings low downstroke. Bottom row attack or spell cast: wings swept back / open-mouth sonic attack with wings spread / wings recover. GENUINELY articulate legs/wings/tail between poses. Align torso center and feet baseline between cells, keep head sizes equal. Isolated on TRUE TRANSPARENT alpha background, no backdrop color or shadows, no VFX, text, labels or grid. Each cell contains ONE pet only.",
+      "source": "exec-9f0bfa40-a052-44d0-9c00-0507f61211f1.png"
+    }
+  ],
+  "processing": "Alpha connected-component crops, same per-sheet scale, common baseline; naga pose 3 mirrored to face right. No invented intermediate poses."
+}

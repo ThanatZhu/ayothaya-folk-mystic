@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "asset": "assets/directional/hunter-sw-63.png",
+  "tool": "image_gen.imagegen",
+  "mode": "built-in edit",
+  "transparent_background": true,
+  "prompt": "Use case: precise-object-edit / identity-preserve.\nAsset type: one transparent 2D game character sprite, Ayothaya Folk Mystic.\nInput image 1 (hunter-17.png) is the edit target. Select ONLY the MALE hunter in row 2, column 4 of this 4x4 atlas, the standing front-left / SW view. Extract that one exact character into a single full-body sprite. Input image 2 (animation37/hunter.png) is costume reference ONLY: its first two rows show the correct male costume.\nPrimary edit: change ONLY the incorrect white waist knot and white sash with orange-red trim on the selected SW male. Replace those pieces with the male hunter's muted dark blue-gray / moss-teal tied sash with subdued antique-gold woven edging and fringed ends, exactly matching the male hunter in row 1 of image 1 and the male in image 2. There must be no white or red patterned sash at his waist.\nPreserve invariants aggressively: retain the selected SW character's exact masculine face, eye shape, eyebrows, tan skin, expression, hair bun, olive wrapped headcloth, body proportions, head-to-body ratio, visible pose, camera direction, sandals, ivory ankle wraps and sleeves, dark green patterned wrap tunic, indigo trousers, brown-gold belt pouches, quiver with white-feathered arrows, and carved wooden bow. Preserve the selected SW view's screen arrangement (bow on image-left and quiver on image-right); do not mirror or rotate him. Keep the same compact painted chibi style, warm delicate texture, dark crisp outline, restrained highlights, and normal game-sprite detail. Do not reinterpret, beautify, change age, add ornaments, or use 3D rendering. The result must look like the same atlas cell with its sash corrected, not a newly designed character.\nComposition: ONE character only, full body including every hair strand, bow tip and both soles, centered with clear transparent padding on all sides. Neutral standing posture exactly as the target. No grid, no extra views, no floor, no cast shadow, no background color, no checkerboard pixels, no text, no watermark. Genuine alpha transparency. Preserve clean antialiased edges.",
+  "reference_images": [
+    {
+      "path": "assets/directional/hunter-17.png",
+      "role": "edit target, male SW, row 2 column 4",
+      "sha256": "1d0b2b7de844947a682d87d48fed26abcbab474f05151972815ff32404a9e4f1"
+    },
+    {
+      "path": "assets/animation37/hunter.png",
+      "role": "male costume reference only",
+      "sha256": "5f8d813deb5c7b8388673f9132b18cdc8cb3e48ee56da488d30692afe5a169cc"
+    }
+  ],
+  "original_generated_file": "C:\\Users\\WIN 11 PRO\\.codex\\generated_images\\01a14ec4-e175-7cb1-908d-1208d6f0abac\\exec-4d25e113-8866-4611-b77a-3f8add0f5e17.png",
+  "installation": {
+    "manifest": "assets/directional/hunter-17.json",
+    "source_key": "sw63",
+    "frame": "male.SW",
+    "source_size": [
+      1241,
+      1267
+    ],
+    "rect": [
+      253,
+      79,
+      757,
+      1115
+    ],
+    "foot": [
+      370.5,
+      1113
+    ],
+    "alpha_bounds_threshold_16": [
+      255,
+      81,
+      1007,
+      1191
+    ]
+  },
+  "qa": {
+    "identity": "Visually inspected against original animation37 and previous SW; face, headwrap, stance, bow, quiver and costume remain in the original painted chibi family.",
+    "change": "White/red female sash replaced with male muted blue-gray/moss sash and antique-gold trim.",
+    "raw_png_preserved": true,
+    "other_15_views_unchanged": true
+  },
+  "previous_frame": {
+    "source": "atlas",
+    "rect": [
+      990,
+      330,
+      204,
+      297
+    ],
+    "foot": [
+      98.0,
+      297
+    ]
+  },
+  "output_sha256": "a64f12f61602fcb4b78b9915d65dd2f742cb218e814558134c5f479bb671ac9a"
+}

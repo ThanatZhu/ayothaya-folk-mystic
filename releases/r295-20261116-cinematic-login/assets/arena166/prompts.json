@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "version": 166,
+  "assets": [
+    [
+      "arena",
+      "Create one premium Thai fantasy RPG inventory/menu icon, transparent background. Subject: two traditional Ayutthaya swords crossed over a small circular jade arena medallion with subtle Thai gold flame ornament. Hand-painted 2.5D game item illustration, warm polished antique gold, deep emerald jade, tiny restrained ruby accent, chunky readable silhouette and crisp sculpted edges, matching ornate Thai chibi MMORPG inventory icons. Single centered standalone object filling 80% of square canvas, soft cast shadow immediately behind the object only, no rectangular tile, no backdrop, no text, no letters, no watermark. This is the PvP dueling menu icon. Genuine transparent alpha outside the object.",
+      "exec-27b1b4e2-0804-4820-ad40-05a589e6152f.png"
+    ],
+    [
+      "pen",
+      "Create one isolated premium Thai fantasy RPG edit-name button icon on genuine transparent background. A single elegant diagonal writing quill/pen with a polished gold engraved nib, dark emerald jade barrel, subtle Thai flame carving, tiny turquoise jewel, poised as if writing. Match ornate hand-painted 2.5D Ayutthaya MMORPG item art: chunky readable silhouette, warm gold highlights, sculpted edges, tasteful soft shadow directly behind the pen. Square composition, object fills 80%, no tile, no circular button frame, no backdrop, no words or letters, no watermark. It must read immediately as a writing pen at 24 pixels.",
+      "exec-efff3606-9f1b-4463-8e99-86aa10f548ec.png"
+    ],
+    [
+      "rename-card",
+      "One premium Thai Ayutthaya fantasy MMORPG rename voucher inventory icon, isolated on genuine transparent background. A beautiful small ivory parchment certificate with rolled corners, thick polished antique gold border engraved with Thai flame ornaments, emerald jade royal wax seal bearing a simple elegant quill emblem, tiny ruby and tassel. Hand painted sculpted 2.5D game item, chunky readable silhouette matching gold and jade Thai fantasy inventory art, dramatic warm highlights and soft shadow directly behind object. Centered standalone object fills 80 percent of square canvas. No text, no letters, no watermark, no backdrop or rectangular background. Clearly reads as a valuable name change ticket.",
+      "exec-70459e93-3672-4e37-bbb9-86c3c2445f93.png"
+    ]
+  ]
+}

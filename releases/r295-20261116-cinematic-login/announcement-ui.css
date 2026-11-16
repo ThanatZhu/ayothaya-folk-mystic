@@ -1,0 +1,19 @@
+#realm-announcement{position:fixed;left:50%;top:clamp(112px,22vh,238px);transform:translateX(-50%);width:min(52vw,1000px);height:36px;background:linear-gradient(90deg,#0009,#0008 92%,#0005);border-radius:4px;z-index:30;pointer-events:none;color:#fff0c8;font:600 14px/36px Mali,Tahoma,sans-serif;text-shadow:0 1px 2px #000}
+#realm-announcement[hidden]{display:none}
+.announcement-owl{position:absolute;left:-18px;bottom:-7px;width:52px;height:52px;object-fit:contain;z-index:1}
+.announcement-window{position:absolute;inset:0 8px 0 39px;overflow:hidden}
+.announcement-text{position:absolute;left:0;top:0;width:max-content;white-space:nowrap;will-change:transform}
+.announcement-accessible{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+#realm-announcement.still{height:auto;min-height:36px}
+#realm-announcement.still .announcement-window{position:relative;inset:auto;margin:0 10px 0 39px;overflow:visible}
+#realm-announcement.still .announcement-text{position:static;display:block;width:auto;white-space:normal;line-height:1.65;padding:6px 0;will-change:auto;overflow-wrap:anywhere}
+/* Every line shares the character's centre, regardless of title or guild length. */
+#world-labels .hero-label,#world-labels .remote-player-label{text-align:center;width:max-content;max-width:none}
+#world-labels .hero-label>*,#world-labels .remote-player-label>*{text-align:center}
+.remote-player-label.party:before{position:absolute;right:100%;top:50%;transform:translateY(-50%)}
+@media(max-width:900px),(pointer:coarse){
+ #realm-announcement{top:clamp(86px,25vh,204px);width:50vw;height:28px;font-size:11px;line-height:28px}
+ .announcement-owl{width:40px;height:40px;left:-13px;bottom:-6px}
+ .announcement-window{left:30px}
+ #realm-announcement.still .announcement-window{margin-left:30px}
+}

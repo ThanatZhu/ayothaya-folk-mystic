@@ -1,0 +1,8 @@
+{
+ "tool": "built-in image_gen",
+ "use_case": "stylized-concept",
+ "asset": "chat.webp",
+ "source": "exec-da0e4274-4b26-400c-a320-0c46269a26c9.png",
+ "transparent_background": true,
+ "prompt": "Use case: stylized-concept. Asset type: single game HUD chat button icon for Ayothaya Folk Mystic, a Thai fantasy MMORPG. Generate one beautifully hand-painted small fantasy inventory icon: two overlapping ivory parchment speech bubbles with three large dark jade green dots in the front bubble, warm sculpted antique gold edging, subtle small Thai lotus tip flourishes, friendly readable silhouette, rich highlights and dark illustrated outline. Three-quarter painted 2.5D game item style, jewel-like craftsmanship, consistent with a jade-and-gold Thai fantasy game. Center the isolated icon, occupy about 80 percent of square canvas, generous transparent margins, clear at 48 px. Actual transparent background. No square tile, no circular button backing, no environment, no text, no letters, no watermark. Only the chat bubbles themselves, isolated with transparent alpha."
+}

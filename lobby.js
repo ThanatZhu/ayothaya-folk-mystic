@@ -17,6 +17,7 @@ import {statPath,STATS,STAT_LABEL,STAT_HINT,statPoints,normalizeStats,normalizeG
 import {statTip} from './stat-tips.js?v=tips210';
 wakeServer();
 const $=id=>document.getElementById(id);
+$('replay-login')?.addEventListener('click',()=>{document.body.classList.remove('login-new-player','login-replay');void $('login-screen').offsetWidth;document.body.classList.add('login-replay');});
 createLandscapeGuard({allowPortrait:true});
 let connection=null,catalog=null,owner=null,store=null,selected=null,record=null,busy=false,screen='login',selectedClass='novice',previewGender='male',previewTime=0;
 let roster=[],selectedChannel=normalizeChannel(typeof sessionStorage!=='undefined'?sessionStorage.getItem(CHANNEL_KEY):1);
@@ -174,6 +175,7 @@ async function setup(){
  try{
   connection=await deadline(connectFirebase());$('login-google').disabled=false;$('retry-connection').hidden=true;
   const user=connection.auth.currentUser;$('login-quick').disabled=false;setButtons();
+  document.body.classList.toggle('login-new-player',!user);
   if(screen==='login')say(user?(user.isAnonymous?'ยินดีต้อนรับกลับ · บัญชีนี้ยังไม่ผูก Google':'ยินดีต้อนรับกลับ '+(user.displayName||'นักเดินทาง')):'');
   connection.sdk.onAuthStateChanged(connection.auth,u=>{if(owner&&owner!=='guest'&&u?.uid!==owner)location.replace('./play.html');});
  }catch(e){if(screen==='login'){report(e);$('retry-connection').hidden=false;}}

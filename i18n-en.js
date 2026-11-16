@@ -5790,3 +5790,5 @@ Object.assign(globalThis.I18N_EN,{
  "รับของคืน/ทองแท่ง": "Collect items/Gold Bars back",
  "รับของ/ทองแท่ง": "Collect items/Gold Bars"
 });
+
+Object.assign(globalThis.I18N_EN,{"เริ่มเล่น":"Play Now","ดูฉากเปิด":"Replay Intro"});

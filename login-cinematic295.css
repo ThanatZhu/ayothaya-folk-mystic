@@ -1,0 +1,164 @@
+/* Approved frameless login. Character/server screens retain arrival186 ownership. */
+body[data-screen=login] { overflow-y: auto; }
+body[data-screen=login] #game-shell {
+  display: block;
+  height: max(680px, 100svh);
+  overflow: visible;
+}
+body[data-screen=login] .scenery {
+  position: fixed;
+  background: #101b25 url('assets/login295/battle-desktop.jpg') center / cover no-repeat;
+  animation: none;
+}
+body[data-screen=login] .shade {
+  position: fixed;
+  background: linear-gradient(180deg, #07101559, transparent 40%, transparent 72%, #070c13d9);
+}
+body[data-screen=login] #embers,
+body[data-screen=login] .story,
+body[data-screen=login] .lobby-card > nav,
+body[data-screen=login] .lobby-card::before,
+body[data-screen=login] .lobby-card::after,
+body[data-screen=login] .divider,
+body[data-screen=login] .account-note { display: none; }
+body[data-screen=login] .lobby-header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+}
+body[data-screen=login] .lobby-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  justify-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  padding: 80px 22px;
+}
+body[data-screen=login] .lobby-card {
+  grid-row: 2;
+  justify-self: center;
+  width: 340px;
+  max-width: 100%;
+  max-height: none;
+  padding: 17px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+body[data-screen=login] #login-screen { position: relative; animation: none; }
+.cinematic-logo { display: none; }
+body[data-screen=login] .cinematic-logo {
+  display: block;
+  position: absolute;
+  bottom: calc(100% + 33px);
+  left: 50%;
+  width: 260px;
+  max-width: 100%;
+  margin: 0;
+  transform: translateX(-50%);
+  line-height: 0;
+}
+.cinematic-logo img { width: 100%; height: auto; display: block; }
+body[data-screen=login] .login-intro {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+body[data-screen=login] .login-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+body[data-screen=login] .login-actions > button {
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: none;
+}
+body[data-screen=login] :is(#login-quick, #continue-account) {
+  order: 0;
+  color: #12281d;
+  border-color: #f5d98d;
+  background: #e2bb6e url('assets/login295/login-gold.jpg') center / 100% 100% no-repeat;
+}
+body[data-screen=login] :is(#login-google, #link-google) {
+  order: 1;
+  color: #fff1d2;
+  border-color: #9b8050;
+  background: #15382d url('assets/login295/login-jade.jpg') center / 100% 100% no-repeat;
+}
+body[data-screen=login] :is(.google-g, .button-arrow) { display: none; }
+body[data-screen=login] .google > span:nth-child(2) { margin: 0; }
+body[data-screen=login] #login-guest {
+  order: 2;
+  background: #0b211be8;
+  color: #fff1d2;
+}
+body[data-screen=login] .login-actions > button:hover:not(:disabled) { filter: brightness(1.12); }
+body[data-screen=login] .legal-links {
+  position: absolute;
+  top: calc(100% + 18px);
+  left: -10px;
+  width: calc(100% + 20px);
+  margin: 0;
+  color: #fff1d2;
+  font-size: 10px;
+  line-height: 1.7;
+  text-shadow: 0 2px 4px #000, 0 1px 12px #000;
+}
+body[data-screen=login] .legal-links a { color: #ffe3a4; }
+body[data-screen=login] .lobby-feedback {
+  position: absolute;
+  top: calc(100% + 60px);
+  left: 0;
+  width: 100%;
+  margin: 0;
+  text-shadow: 0 2px 4px #000, 0 1px 12px #000;
+}
+body[data-screen=login] :is(.lobby-status, #switch-account) { color: #fff1d2; font-size: 11px; }
+body[data-screen=login] .lobby-footer { position: absolute; inset: auto 0 0; }
+#replay-login { display: none; }
+body[data-screen=login] #replay-login { display: block; }
+@media (max-width: 700px) {
+  body[data-screen=login] .scenery { background-image: url('assets/login295/battle-mobile.jpg'); }
+  body[data-screen=login] .shade { background: linear-gradient(180deg, #060e1959, transparent 28%, transparent 62%, #070d19f0); }
+  body[data-screen=login] .lobby-card { width: 320px; padding: 14px; }
+  body[data-screen=login] .cinematic-logo { width: min(65vw, 250px); bottom: calc(100% + 26px); }
+  body[data-screen=login] .lobby-header { gap: 8px; padding: 14px; align-items: flex-start; }
+  body[data-screen=login] #identity { display: none; }
+  body[data-screen=login] .top-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  body[data-screen=login] .top-actions button { padding-inline: 8px; }
+  body[data-screen=login] .lobby-footer > span { display: none; }
+  body[data-screen=login] .lobby-footer { justify-content: center; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .login-new-player .cinematic-logo img { animation: login-logo-reveal 2.2s cubic-bezier(.35,.1,.25,1) both; }
+  .login-replay .cinematic-logo img { animation: login-logo-replay 2.2s cubic-bezier(.35,.1,.25,1) both; }
+}
+@keyframes login-logo-reveal {
+  0%,12% { opacity: .05; transform: translateY(24px) scale(.94); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes login-logo-replay {
+  0%,12% { opacity: .05; transform: translateY(24px) scale(.94); }
+  to { opacity: 1; transform: none; }
+}
